@@ -131,15 +131,24 @@ public class Cell extends AbstractCell {
 				numericValue = (BigDecimal) value;
 				return getValue();
 			}
-			case STRING: {
-				if (!getColumn().getValidationStrategy().matches((String) value)) {
-					return showError(msgValue + "превышает допустимую разрядность (" +
-                            ((StringColumn) getColumn()).getMaxLength() + ")!");
-				}
-				stringValue = (String) value;
-				return getValue();
-			}
-			case DATE: {
+            case STRING: {
+                if (value instanceof String) {
+                    String temp = (String) value;
+                    if (!getColumn().getValidationStrategy().matches(temp)) {
+                        return showError(msgValue + "превышает допустимую разрядность (" +
+                                ((StringColumn) getColumn()).getMaxLength() + ")!");
+                    }
+                    // Проверка на соответствие паттерну
+                    if (!temp.isEmpty() && !((StringColumn) getColumn()).matches(temp)) {
+                        return showError(msgValue + "не соответствует паттерну \'" +
+                                ((StringColumn) getColumn()).getFilter() + "\'!");
+                    }
+
+                    stringValue = temp;
+                    return getValue();
+                }
+            }
+            case DATE: {
                 Date date = (Date) value;
                 if (date.before(DATE_1900)) { // Сделано из-за ограничений Excel при работе с датами SBRFACCTAX-9982
                     return showError(msg + "Не может быть указана более ранняя дата, чем 01.01.1900!");

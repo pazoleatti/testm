@@ -122,7 +122,7 @@
         <name>Сумма доходов / расходов с начала года (тыс. руб.)</name>
         <order>11</order>
         <width>9</width>
-        <maxLength>15</maxLength>
+        <maxLength>12</maxLength>
         <precision>0</precision>
     </columns>
     <styles>
@@ -173,5 +173,19 @@
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>true</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Заголовок</alias>
+        <backColor>DARK_GREY</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
     </styles>
 </formTemplateContent>

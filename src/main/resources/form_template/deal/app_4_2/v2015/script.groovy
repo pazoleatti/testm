@@ -3,7 +3,6 @@ package form_template.deal.app_4_2.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -12,7 +11,6 @@ import groovy.transform.Field
  * formTemplateId=803
  *
  * TODO:
- *      - консолидация не полная, потому что не все макеты источников готовы
  *      - дополнить тесты
  */
 
@@ -336,7 +334,6 @@ void sortFormDataRows(def saveInDB = true) {
     }
 }
 
-// TODO (Ramil Timerbaev) мапа неполная, потому что не все макеты реализованы
 // мапа в которой хранится id формы - список алиасов ссылающихся на справочник "участники ТЦО"
 @Field
 def sourceRefbook520AliasMap = [
@@ -347,18 +344,16 @@ def sourceRefbook520AliasMap = [
         818 : ['name'], // РНУ-101
         820 : ['name'], // РНУ-102
         821 : ['name'], // РНУ-107
-                        // РНУ-108
         822 : ['name'], // РНУ-110
         808 : ['name'], // РНУ-111
         824 : ['name'], // РНУ-112
         829 : ['name'], // РНУ-114
-                        // РНУ-115
-                        // РНУ-116
+        842 : ['name'], // РНУ-115
+        844 : ['name'], // РНУ-116
         809 : ['name'], // РНУ-117
-                        // РНУ-120
-                        // РНУ-122
-                        // РНУ-123
-                        // РНУ-171
+        840 : ['name'], // РНУ-122
+        841 : ['name'], // РНУ-123
+        843 : ['name'], // РНУ-171
 
         // формы приложений 6
         816 : ['name'], // 6.1
@@ -806,18 +801,16 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
             818, // РНУ-101
             820, // РНУ-102
             821, // РНУ-107
-                 // РНУ-108
             822, // РНУ-110
             808, // РНУ-111
             824, // РНУ-112
             829, // РНУ-114
-                 // РНУ-115
-                 // РНУ-116
+            842, // РНУ-115
+            844, // РНУ-116
             809, // РНУ-117
-                 // РНУ-120
-                 // РНУ-122
-                 // РНУ-123
-                 // РНУ-171
+            840, // РНУ-122
+            841, // РНУ-123
+            843  // РНУ-171
     ]
     formTypeIds.each { formTypeId ->
         def rows = sourceAllDataRowsMap[formTypeId]
@@ -828,38 +821,55 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
                     case 822 : // РНУ-110
                     case 808 : // РНУ-111
                         if (isCalc10) {
-                            result += (row.sum3 ?: 0)
+                            result += (row.sum3?.abs() ?: 0)
                         }
                         break
                     case 820 : // РНУ-102
                     case 809 : // РНУ-117
                         if (!isCalc10) {
-                            result += (row.sum3 ?: 0)
+                            result += (row.sum3?.abs() ?: 0)
                         }
                         break
                     case 821 : // РНУ-107
                         if (isCalc10) {
-                            result += (row.sum4 ?: 0)
+                            result += (row.sum4?.abs() ?: 0)
                         }
                         break
                     case 824 : // РНУ-112
                         if (isCalc10) {
-                            result += (row.incomeCorrection ?: 0)
+                            result += (row.incomeCorrection?.abs() ?: 0)
                         }
                         break
                     case 829 : // РНУ-114
                         if (isCalc10) {
-                            result += (row.sum1 ?: 0)
+                            result += (row.sum1?.abs() ?: 0)
                         }
                         break
-                    // TODO (Ramil Timerbaev) пока не реализованы макеты
-                               // РНУ-108
-                               // РНУ-115
-                               // РНУ-116
-                               // РНУ-120
-                               // РНУ-122
-                               // РНУ-123
-                               // РНУ-171
+                    case 842 : // РНУ-115
+                    case 844 : // РНУ-116
+                        if (isCalc10) {
+                            result += (row.incomeDelta?.abs() ?: 0)
+                        } else {
+                            result += (row.outcomeDelta?.abs() ?: 0)
+                        }
+                        break
+                    case 840 : // РНУ-122
+                        if ((isCalc10 && "10345".equals(row.code)) ||
+                                (!isCalc10 && "10355".equals(row.code))) {
+                            result += (row.sum6?.abs() ?: 0)
+                        }
+                        break
+                    case 841 : // РНУ-123
+                        if (isCalc10) {
+                            result += (row.sum10?.abs() ?: 0)
+                        }
+                        break
+                    case 843 : // РНУ-171
+                        if ((isCalc10 && "10360".equals(row.code)) ||
+                                (!isCalc10 && "10361".equals(row.code))) {
+                            result += (row.incomeCorrection?.abs() ?: 0)
+                        }
+                        break
                 }
             }
         }

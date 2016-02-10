@@ -346,7 +346,7 @@ def getNewRow() {
 void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 5
-    int HEADER_ROW_COUNT = 8
+    int HEADER_ROW_COUNT = 2
     String TABLE_START_VALUE = '№'
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 0
@@ -498,23 +498,15 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     def headerMapping = [
             ([(headerRows[0][0]) : '№']),
             ([(headerRows[0][1]) : 'Наименования статей']),
-
-            ([(headerRows[0][2]) : 'Код организации -']),
-            ([(headerRows[1][2]) : 'участника группы']),
-            ([(headerRows[2][2]) : '(подразделения']),
-            ([(headerRows[3][2]) : 'ПАО "Сбербанк России"),']),
-            ([(headerRows[4][2]) : 'с которым']),
-            ([(headerRows[5][2]) : 'осуществляются']),
-            ([(headerRows[6][2]) : 'взаиморасчеты']),
-
-            ([(headerRows[0][3]) : 'Наименование организации - участника группы  (подразделения ПАО "Сбербанк России"), с которым осуществляются взаиморасчеты']),
+            ([(headerRows[0][2]) : 'Код организации - участника группы (подразделения ПАО Сбербанк)*, с которым осуществляются взаиморасчеты']),
+            ([(headerRows[0][3]) : 'Наименование организации - участника группы (подразделения ПАО Сбербанк)*, с которым осуществляются взаиморасчеты']),
             ([(headerRows[0][4]) : 'Суммы доходов/ расходов с начала года']),
 
-            ([(headerRows[7][0]) : '1']),
-            ([(headerRows[7][1]) : '2']),
-            ([(headerRows[7][2]) : '3.1']),
-            ([(headerRows[7][3]) : '3.2']),
-            ([(headerRows[7][4]) : '4'])
+            ([(headerRows[1][0]) : '1']),
+            ([(headerRows[1][1]) : '2']),
+            ([(headerRows[1][2]) : '3.1']),
+            ([(headerRows[1][3]) : '3.2']),
+            ([(headerRows[1][4]) : '4'])
     ]
     checkHeaderEquals(headerMapping, logger)
 }

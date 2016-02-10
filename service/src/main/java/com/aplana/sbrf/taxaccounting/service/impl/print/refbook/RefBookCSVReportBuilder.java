@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
+import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -95,7 +96,9 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
     @Override
     protected String flush() throws IOException {
         File file = File.createTempFile(FILE_NAME, ".csv");
-        csvWriter = new CSVWriter(new BufferedWriter(new FileWriter(file)), ';');
+        FileWriter fileWriter = new FileWriter(file);
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        csvWriter = new CSVWriter(bufferedWriter, ';');
         try {
             List<String> headersNames = new ArrayList<String>();
             for (RefBookAttribute attribute : refBookAttributeList) {
@@ -111,6 +114,8 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
             }
         } finally {
             csvWriter.close();
+            IOUtils.closeQuietly(bufferedWriter);
+            IOUtils.closeQuietly(fileWriter);
         }
 
         return file.getAbsolutePath();

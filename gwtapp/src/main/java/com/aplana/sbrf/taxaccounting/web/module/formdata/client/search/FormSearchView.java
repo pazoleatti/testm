@@ -99,7 +99,9 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 FormDataSearchResult selRow = selectionModel.getSelectedObject();
-                getUiHandlers().onClickFoundItem(selRow.getRowIndex());
+                if (selRow != null) {
+                    getUiHandlers().onClickFoundItem(selRow.getRowIndex());
+                }
             }
         });
 
@@ -266,5 +268,10 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     @Override
     public boolean isManual() {
         return manual;
+    }
+
+    @Override
+    public void clearSelection() {
+        selectionModel.clear();
     }
 }

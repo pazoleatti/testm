@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemXlsxR
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,6 +53,13 @@ public class LogSystemReportBuilderTest {
     @Test
     public void test() throws IOException {
         LogSystemXlsxReportBuilder builder = new LogSystemXlsxReportBuilder(items);
-        builder.createReport();
+        String reportPath = null;
+        try {
+            reportPath = builder.createReport();
+        } finally {
+            assert reportPath != null;
+            File file = new File(reportPath);
+            file.delete();
+        }
     }
 }

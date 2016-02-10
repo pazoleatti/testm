@@ -13,9 +13,9 @@
         <cell alias="dealRate" colSpan="1" rowSpan="2" value="Ставка сделки, % годовых"/>
         <cell alias="dealLeftSum" colSpan="1" rowSpan="2" value="Сумма остаточных обязательств (требований) контрагента по сделке"/>
         <cell alias="bondSum" colSpan="1" rowSpan="2" value="Сумма выплаты по ценным бумагам"/>
-        <cell alias="payDate" colSpan="1" rowSpan="2" value="Дата выплаты (гр. 10)"/>
-        <cell alias="accrStartDate" colSpan="2" rowSpan="1" value="Период начисления доходов на сумму остаточных обязательств контрагента (гр. 9)"/>
-        <cell alias="accrEndDate" colSpan="1" rowSpan="1" value="Период начисления доходов на сумму остаточных обязательств контрагента (гр. 9). Дата окончания начисления"/>
+        <cell alias="payDate" colSpan="1" rowSpan="2" value="Дата выплаты (гр. 12)"/>
+        <cell alias="accrStartDate" colSpan="2" rowSpan="1" value="Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11)"/>
+        <cell alias="accrEndDate" colSpan="1" rowSpan="1" value="Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата окончания начисления"/>
         <cell alias="yearBase" colSpan="1" rowSpan="2" value="База (360/365/366)"/>
         <cell alias="dealIncome" colSpan="1" rowSpan="2" value="Доходы по сделке"/>
         <cell alias="rateDiff" colSpan="1" rowSpan="2" value="Отклонение от рыночной процентной ставки для целей налогообложения"/>
@@ -35,7 +35,7 @@
         <cell alias="dealRate" colSpan="1" rowSpan="1" value="Ставка сделки, % годовых"/>
         <cell alias="dealLeftSum" colSpan="1" rowSpan="1" value="Сумма остаточных обязательств (требований) контрагента по сделке"/>
         <cell alias="bondSum" colSpan="1" rowSpan="1" value="Сумма выплаты по ценным бумагам"/>
-        <cell alias="payDate" colSpan="1" rowSpan="1" value="Дата выплаты (гр. 10)"/>
+        <cell alias="payDate" colSpan="1" rowSpan="1" value="Дата выплаты (гр. 12)"/>
         <cell alias="accrStartDate" colSpan="1" rowSpan="1" value="Дата начала начисления"/>
         <cell alias="accrEndDate" colSpan="1" rowSpan="1" value="Дата окончания начисления"/>
         <cell alias="yearBase" colSpan="1" rowSpan="1" value="База (360/365/366)"/>

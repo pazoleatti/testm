@@ -1,6 +1,7 @@
 package form_template.income.rnu_101.v2015
 
 import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -24,8 +25,8 @@ import groovy.transform.Field
 // transDoneDate        (5) -  Дата совершения операции
 // course 				(6) -  Курс валюты Банка России
 // incomeCode 			(7) -  Код классификации дохода
-// reasonNumber 		(8) -  номер
-// reasonDate   		(9) -  дата
+// reasonNumber 		(8) -  Номер
+// reasonDate   		(9) -  Дата
 // count 				(10) - Количество услуг/работ (ед./шт.)
 // dealPrice			(11) - Цена за оказанные услуги согласно условиям договора
 // taxPrice				(12) - Цена, признаваемая рыночной для целей налогообложения
@@ -176,9 +177,9 @@ void logicCheck() {
         checkDatePeriod(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка курса валюты
-        if (row.course != null && row.course < 0) {
+        if (row.course != null && row.course <= 0) {
             def msg = row.getCell('course').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // Проверка даты основания совершения операции
@@ -203,9 +204,9 @@ void logicCheck() {
         }
 
         // Проверка положительной цены для целей налогообложения
-        if (row.taxPrice != null && row.taxPrice < 0) {
+        if (row.taxPrice != null && row.taxPrice <= 0) {
             def msg = row.getCell('taxPrice').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         boolean noOne = (row.taxPrice == null && row.incomeRate == null)
@@ -339,7 +340,7 @@ def calc15(def row) {
     if (row.incomeRate != null && row.sum1 != null && row.sum1 > 0 && row.taxPrice == null) {
         return roundValue(row.sum1 * row.incomeRate, 2)
     }
-    if (row.incomeRate == null && row.sum1 != null && row.sum1 > 0 && row.taxPrice != null) {
+    if (row.incomeRate == null && row.taxPrice != null) {
         return roundValue(row.taxPrice * row.count * row.course, 2)
     }
     if (row.sum1 != null && row.sum1 == 0 && row.taxPrice != null) {
@@ -515,8 +516,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][5]): getColumnName(tmpRow, 'transDoneDate')]),
             ([(headerRows[1][6]): getColumnName(tmpRow, 'course')]),
             ([(headerRows[1][7]): getColumnName(tmpRow, 'incomeCode')]),
-            ([(headerRows[1][8]): 'номер']),
-            ([(headerRows[1][9]): 'дата']),
+            ([(headerRows[1][8]): 'Номер']),
+            ([(headerRows[1][9]): 'Дата']),
             ([(headerRows[1][10]): getColumnName(tmpRow, 'count')]),
             ([(headerRows[1][11]): getColumnName(tmpRow, 'dealPrice')]),
             ([(headerRows[1][12]): getColumnName(tmpRow, 'taxPrice')]),
@@ -652,7 +653,7 @@ def getSubTotalRows(def dataRows) {
 def calcSubTotalRows(def dataRows) {
     def tmpRows = dataRows.findAll { !it.getAlias() }
     // Добавление подитогов
-    addAllAliased(tmpRows, new CalcAliasRow() {
+    addAllAliased(tmpRows, new ScriptUtils.CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, rows)
@@ -719,12 +720,12 @@ void checkItog(def dataRows) {
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
     // все строки, кроме общего итога
     def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
-    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
         }
-    }, new CheckGroupSum() {
+    }, new ScriptUtils.CheckGroupSum() {
         @Override
         String check(DataRow<Cell> row1, DataRow<Cell> row2) {
             for (def column : totalColumns) {

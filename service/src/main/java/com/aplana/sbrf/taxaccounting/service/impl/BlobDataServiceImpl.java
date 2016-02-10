@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -25,10 +26,26 @@ public class BlobDataServiceImpl implements BlobDataService {
     @Autowired
     BlobDataDao blobDataDao;
 
+    @Autowired
+    private ReportDao reportDao;
+
     @Override
     public String create(InputStream is, String name) {
         BlobData blobData = initBlob("", is, name, null);
         return blobDataDao.create(blobData);
+    }
+
+    @Override
+    public String create(String path, String name) {
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(path);
+            return create(fileInputStream, name);
+        } catch (FileNotFoundException e) {
+            throw new ServiceException("", e);
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
+        }
     }
 
     @Override
@@ -99,6 +116,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public int clean() {
+        reportDao.clean();
         return blobDataDao.clean();
     }
 }

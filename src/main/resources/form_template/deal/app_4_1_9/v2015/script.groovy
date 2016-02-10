@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -15,7 +14,6 @@ import groovy.transform.Field
  * formTemplateId=802
  *
  * TODO:
- *      - консолидация не полная, потому что не все макеты источников готовы
  *      - дополнить тесты
  */
 
@@ -279,7 +277,6 @@ void sortFormDataRows(def saveInDB = true) {
     }
 }
 
-// TODO (Ramil Timerbaev) список неполный, потому что не все макеты реализованы
 // список id типов источников
 @Field
 def sourceFormTypeIds = [
@@ -287,18 +284,16 @@ def sourceFormTypeIds = [
         818, // РНУ-101
         820, // РНУ-102
         821, // РНУ-107
-             // РНУ-108
         822, // РНУ-110
         808, // РНУ-111
         824, // РНУ-112
         829, // РНУ-114
-             // РНУ-115
-             // РНУ-116
+        842, // РНУ-115
+        844, // РНУ-116
         809, // РНУ-117
-             // РНУ-120
-             // РНУ-122
-             // РНУ-123
-             // РНУ-171
+        840, // РНУ-122
+        841, // РНУ-123
+        843, // РНУ-171
         816, // 6.1
         804, // 6.2
         812, // 6.3
@@ -713,18 +708,16 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
             818, // РНУ-101
             820, // РНУ-102
             821, // РНУ-107
-                 // РНУ-108
             822, // РНУ-110
             808, // РНУ-111
             824, // РНУ-112
             829, // РНУ-114
-                 // РНУ-115
-                 // РНУ-116
+            842, // РНУ-115
+            844, // РНУ-116
             809, // РНУ-117
-                 // РНУ-120
-                 // РНУ-122
-                 // РНУ-123
-                 // РНУ-171
+            840, // РНУ-122
+            841, // РНУ-123
+            843  // РНУ-171
     ]
     formTypeIds.each { formTypeId ->
         def rows = sourceAllDataRowsMap[formTypeId]
@@ -735,38 +728,55 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
                     case 822 : // РНУ-110
                     case 808 : // РНУ-111
                         if (isCalc9) {
-                            result += (row.sum3 ?: 0)
+                            result += (row.sum3?.abs() ?: 0)
                         }
                         break
                     case 820 : // РНУ-102
                     case 809 : // РНУ-117
                         if (!isCalc9) {
-                            result += (row.sum3 ?: 0)
+                            result += (row.sum3?.abs() ?: 0)
                         }
                         break
                     case 821 : // РНУ-107
                         if (isCalc9) {
-                            result += (row.sum4 ?: 0)
+                            result += (row.sum4?.abs() ?: 0)
                         }
                         break
                     case 824 : // РНУ-112
                         if (isCalc9) {
-                            result += (row.incomeCorrection ?: 0)
+                            result += (row.incomeCorrection?.abs() ?: 0)
                         }
                         break
                     case 829 : // РНУ-114
                         if (isCalc9) {
-                            result += (row.sum1 ?: 0)
+                            result += (row.sum1?.abs() ?: 0)
                         }
                         break
-                    // TODO (Ramil Timerbaev) пока не реализованы макеты
-                              // РНУ-108
-                              // РНУ-115
-                              // РНУ-116
-                              // РНУ-120
-                              // РНУ-122
-                              // РНУ-123
-                              // РНУ-171
+                    case 842 : // РНУ-115
+                    case 844 : // РНУ-116
+                        if (isCalc9) {
+                            result += (row.incomeDelta?.abs() ?: 0)
+                        } else {
+                            result += (row.outcomeDelta?.abs() ?: 0)
+                        }
+                        break
+                    case 840 : // РНУ-122
+                        if ((isCalc9 && "10345".equals(row.code)) ||
+                                (!isCalc9 && "10355".equals(row.code))) {
+                            result += (row.sum6?.abs() ?: 0)
+                        }
+                        break
+                    case 841 : // РНУ-123
+                        if (isCalc9) {
+                            result += (row.sum10?.abs() ?: 0)
+                        }
+                        break
+                    case 843 : // РНУ-171
+                        if ((isCalc9 && "10360".equals(row.code)) ||
+                                (!isCalc9 && "10361".equals(row.code))) {
+                            result += (row.incomeCorrection?.abs() ?: 0)
+                        }
+                        break
                 }
             }
         }
@@ -936,7 +946,7 @@ def getRecords520() {
 // проверка принадлежности организации к ВЗЛ в отчетном периоде
 def isVZL(def start, def end, typeId) {
     if (start <= getReportPeriodEndDate() &&
-            (end == null || (end >= getReportPeriodStartDate() && end <= getReportPeriodEndDate())) &&
+            (end == null || end >= getReportPeriodStartDate()) &&
             getRefBookValue(525L, typeId)?.CODE?.value == "ВЗЛ") {
         return true
     }

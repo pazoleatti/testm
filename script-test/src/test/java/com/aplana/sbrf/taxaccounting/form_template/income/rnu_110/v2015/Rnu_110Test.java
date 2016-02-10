@@ -97,8 +97,8 @@ public class Rnu_110Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица (резидента оффшорной зоны)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения операции» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Код налогового учёта» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. номер» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. дата» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. Номер» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. Дата» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Арендная ставка» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Арендная ставка, признаваемая рыночной для целей налогообложения» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма фактически начисленной арендной платы» не заполнена!", entries.get(i++).getMessage());
@@ -121,8 +121,8 @@ public class Rnu_110Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals("Строка 1: Графа «Сумма доначисления арендной платы до рыночного уровня арендной ставки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата совершения операции","01.01.2014", "31.12.2014"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения операции» должно быть не меньше значения графы «Основание для совершения операции. дата»!", entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Основание для совершения операции. дата","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Дата совершения операции» должно быть не меньше значения графы «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Основание для совершения операции. Дата","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Арендная ставка» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Арендная ставка, признаваемая рыночной для целей налогообложения» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленной арендной платы» должно быть больше или равно «0»!", entries.get(i++).getMessage());

@@ -94,23 +94,21 @@ public class Rnu_123Test extends ScriptTestBase {
         int i = 0;
 
         Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица/резидента оффшорной зоны» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Код классификации дохода / расхода» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Номер» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Код классификации дохода» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Первичный документ. Номер» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Первичный документ. Дата» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма гарантии / аккредитива, (вал.)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Валюта» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Фактическое отражение в бухгалтерском учете» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «На дату фактического отражения в бухгалтерском учете» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата начала» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата окончания» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Дата операции. Фактическое отражение в бухгалтерском учете» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Курс Банка России (руб.). На дату фактического отражения в бухгалтерском учете» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Расчетный период. Для целей бухгалтерского учета (согласно условиям сделки). Дата начала» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Расчетный период. Для целей бухгалтерского учета (согласно условиям сделки). Дата окончания» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «База для расчета, кол. дней» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Плата по условиям сделки,% год./ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «По данным бухгалтерского учета» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Всего по данным налогового учета» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Рыночная Плата, % годовых / ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Всей сумме дохода, начисленного по данным налогового учета» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Рыночная Плата, % годовых / ед. вал.» должно соответствовать следующему формату: первые символы: (0-9), следующие символы («.» или «,»), следующие символы (0-9), последний символ (%) или пусто!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Рыночная Плата, % годовых / ед. вал.» должно соответствовать следующему формату: первые символы: (0-9), следующие символы («.» или «,»), следующие символы (0-9), последний символ (%) или пусто!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма фактического дохода, руб. По данным бухгалтерского учета» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма фактического дохода, руб. Всего по данным налогового учета» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Рыночная Плата, % годовых/ед. вал.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Рыночная сумма дохода (руб.), соответствующая: Всей сумме дохода, начисленного по данным налогового учета» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }

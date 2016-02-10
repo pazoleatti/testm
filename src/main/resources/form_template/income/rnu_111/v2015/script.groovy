@@ -20,8 +20,8 @@ import groovy.transform.Field
 // countryName  (3) - Страна местоположения Взаимозависимого лица (резидента оффшорной зоны)
 // iksr         (4) - Идентификационный номер
 // code         (5) - Код налогового учёта
-// reasonNumber (6) - номер
-// reasonDate   (7) - дата
+// reasonNumber (6) - Номер
+// reasonDate   (7) - Дата
 // base         (8) - База для расчёта процентного дохода (дней в году)
 // sum          (9) - Сумма кредита (ед. валюты)
 // currency     (10) - Валюта
@@ -462,8 +462,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][3]): getColumnName(tmpRow, 'countryName')]),
             ([(headerRows[1][4]): getColumnName(tmpRow, 'iksr')]),
             ([(headerRows[1][5]): getColumnName(tmpRow, 'code')]),
-            ([(headerRows[1][6]): 'номер']),
-            ([(headerRows[1][7]): 'дата']),
+            ([(headerRows[1][6]): 'Номер']),
+            ([(headerRows[1][7]): 'Дата']),
             ([(headerRows[1][8]): getColumnName(tmpRow, 'base')]),
             ([(headerRows[1][9]): getColumnName(tmpRow, 'sum')]),
             ([(headerRows[1][10]): getColumnName(tmpRow, 'currency')]),

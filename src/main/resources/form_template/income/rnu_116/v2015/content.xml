@@ -119,8 +119,8 @@
         <order>11</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>40</nameAttributeId>
-        <refBookAttributeId>40</refBookAttributeId>
+        <nameAttributeId>64</nameAttributeId>
+        <refBookAttributeId>64</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>reqVolume</alias>
@@ -140,8 +140,8 @@
         <order>13</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>40</nameAttributeId>
-        <refBookAttributeId>40</refBookAttributeId>
+        <nameAttributeId>64</nameAttributeId>
+        <refBookAttributeId>64</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>guarVolume</alias>
@@ -175,7 +175,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>guarCourse</alias>
         <checking>false</checking>
-        <name>Курс Банка России на дату исполнения (досрочного исполнения) сделки, руб.. В отношении обязательства</name>
+        <name>Курс Банка России на дату исполнения (досрочного исполнения) сделки, руб. В отношении обязательства</name>
         <order>17</order>
         <width>11</width>
         <maxLength>19</maxLength>

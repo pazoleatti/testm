@@ -1852,7 +1852,7 @@ public class FormDataServiceImpl implements FormDataService {
                 }
                 return cellCountSource;
             case IMPORT_FD:
-                return blobDataService.getLength(uuid) / 1024;
+                return (long)Math.ceil(blobDataService.getLength(uuid) / 1024.);
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }
@@ -2107,7 +2107,7 @@ public class FormDataServiceImpl implements FormDataService {
                 IOUtils.closeQuietly(outputStream);
             }
             stateLogger.updateState("Сохранение отчета в базе данных");
-            reportService.create(formData.getId(), blobDataService.create(new FileInputStream(reportFile), scriptSpecificReportHolder.getFileName()),
+            reportService.create(formData.getId(), blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName()),
                     new FormDataReportType(ReportType.SPECIFIC_REPORT, specificReportType), isShowChecked, formData.isManual(), saved);
 
         } catch (IOException e) {

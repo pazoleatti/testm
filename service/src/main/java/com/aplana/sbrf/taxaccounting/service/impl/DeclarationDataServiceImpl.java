@@ -417,18 +417,29 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         try {
             if (uuid != null) {
                 ObjectInputStream objectInputStream = null;
+                InputStream zipJasper = null;
                 try {
-                    objectInputStream = new ObjectInputStream(blobDataService.get(uuid).getInputStream());
-                    jasperPrint = (JasperPrint) objectInputStream.readObject();
+                    zipJasper =  blobDataService.get(uuid).getInputStream();
+                    ZipInputStream zipJasperIn = new ZipInputStream(zipJasper);
+                    try {
+                        zipJasperIn.getNextEntry();
+                        objectInputStream = new ObjectInputStream(zipJasperIn);
+                        jasperPrint = (JasperPrint) objectInputStream.readObject();
+                    } finally {
+                        IOUtils.closeQuietly(zipJasperIn);
+                    }
                 } catch (IOException e) {
                     throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
                 } catch (ClassNotFoundException e) {
                     throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
+                } finally {
+                    IOUtils.closeQuietly(zipJasper);
+                    IOUtils.closeQuietly(objectInputStream);
                 }
             } else {
                 LOG.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
                 stateLogger.updateState("Заполнение Jasper-макета");
-                jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
+                jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 4096, 1000);
                 jasperPrint = createJasperReport(declarationData, jrSwapFile, userInfo);
                 // для XLSX-отчета не сохраняем Jasper-отчет из-за возмжных проблем с паралельным формированием PDF-отчета
             }
@@ -450,30 +461,37 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
 	@Override
-	public byte[] getPdfData(long id, TAUserInfo userInfo) {
-		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
-        return getBytesFromInputstream(reportService.getDec(userInfo, id, ReportType.PDF_DEC));
-	}
+    public InputStream getPdfDataAsStream(long declarationId, TAUserInfo userInfo) {
+		declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL0);
+        String pdfUuid = reportService.getDec(userInfo, declarationId, ReportType.PDF_DEC);
+        if (pdfUuid == null) {
+            return null;
+        }
+        return blobDataService.get(pdfUuid).getInputStream();
+    }
 
     private JasperPrint createJasperReport(DeclarationData declarationData, JRSwapFile jrSwapFile, TAUserInfo userInfo) {
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
-        if (zipXml != null) {
-            try {
+        try {
+            if (zipXml != null) {
+                InputStream jasperTemplate = null;
                 ZipInputStream zipXmlIn = new ZipInputStream(zipXml);
-                zipXmlIn.getNextEntry();
                 try {
-                    return fillReport(zipXmlIn,
-                            declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()), jrSwapFile);
+                    zipXmlIn.getNextEntry();
+                    jasperTemplate = declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId());
+                    return fillReport(zipXmlIn, jasperTemplate, jrSwapFile);
+                } catch (IOException e) {
+                    throw new ServiceException(e.getLocalizedMessage(), e);
                 } finally {
-                    IOUtils.closeQuietly(zipXml);
                     IOUtils.closeQuietly(zipXmlIn);
+                    IOUtils.closeQuietly(jasperTemplate);
                 }
-            } catch (IOException e) {
-                throw new ServiceException(e.getLocalizedMessage(), e);
+            } else {
+                throw new ServiceException("Декларация не сформирована");
             }
-        } else {
-            throw new ServiceException("Декларация не сформирована");
+        } finally {
+            IOUtils.closeQuietly(zipXml);
         }
     }
     
@@ -485,28 +503,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         if (xmlUuid != null) {
             File pdfFile = null;
-            FileInputStream fileInputStream = null;
             JRSwapFile jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
             try {                
                 LOG.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
                 stateLogger.updateState("Заполнение Jasper-макета");
                 JasperPrint jasperPrint = createJasperReport(declarationData, jrSwapFile, userInfo);
-                
-                LOG.info(String.format("Сохранение PDF-файла в базе данных для декларации %s", declarationData.getId()));
-                stateLogger.updateState("Сохранение PDF-файла в базе данных");
 
+                LOG.info(String.format("Заполнение PDF-файла декларации %s", declarationData.getId()));
+                stateLogger.updateState("Заполнение PDF-файла");
                 pdfFile = File.createTempFile("report", ".pdf");
                 exportPDF(jasperPrint, pdfFile);
 
-                fileInputStream = new FileInputStream(pdfFile);
-                reportService.createDec(declarationData.getId(), blobDataService.create(fileInputStream, ""), ReportType.PDF_DEC);
-                LOG.info(String.format("Сохранение Jasper-макета в базе данных для декларации %s", declarationData.getId()));
-                stateLogger.updateState("Сохранение Jasper-макета в базе данных");
-                reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
+                LOG.info(String.format("Сохранение PDF-файла в базе данных для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Сохранение PDF-файла в базе данных");
+                reportService.createDec(declarationData.getId(), blobDataService.create(pdfFile.getPath(), ""), ReportType.PDF_DEC);
+
+                // не сохраняем jasper-отчет, если есть XLSX-отчет
+                if (reportService.getDec(userInfo, declarationData.getId(), ReportType.EXCEL_DEC) == null) {
+                    LOG.info(String.format("Сохранение Jasper-макета в базе данных для декларации %s", declarationData.getId()));
+                    stateLogger.updateState("Сохранение Jasper-макета в базе данных");
+                    reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
+                }
             } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
             } finally {
-                IOUtils.closeQuietly(fileInputStream);
                 if (pdfFile != null)
                     pdfFile.delete();
                 if (jrSwapFile != null)
@@ -520,7 +540,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void setXlsxDataBlobs(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
         File xlsxFile = null;
-        FileInputStream fileInputStream = null;
         try {
             xlsxFile = File.createTempFile("report", ".xlsx");
             getXlsxData(declarationData.getId(), xlsxFile, userInfo, stateLogger);
@@ -528,15 +547,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             LOG.info(String.format("Сохранение XLSX в базе данных для декларации %s", declarationData.getId()));
             stateLogger.updateState("Сохранение XLSX в базе данных");
 
-            fileInputStream = new FileInputStream(xlsxFile);
-            reportService.createDec(declarationData.getId(), blobDataService.create(fileInputStream, ""), ReportType.EXCEL_DEC);
+            reportService.createDec(declarationData.getId(), blobDataService.create(xlsxFile.getPath(), ""), ReportType.EXCEL_DEC);
+            String uuidJasper = reportService.getDec(userInfo, declarationData.getId(), ReportType.JASPER_DEC);
+            if (uuidJasper != null)
+                reportService.deleteDec(uuidJasper);
         } catch (IOException e) {
             throw new ServiceException("Ошибка при формировании временного файла для XLSX", e);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         } finally {
-            IOUtils.closeQuietly(fileInputStream);
             if (xlsxFile != null)
                 xlsxFile.delete();
         }
@@ -573,11 +593,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceException();
                 }
             } finally {
-                try {
-                    if (fileWriter != null) fileWriter.close();
-                } catch (IOException e) {
-                    LOG.warn("", e);
-                }
+                IOUtils.closeQuietly(fileWriter);
             }
 
             //Получение имени файла записанного в xml
@@ -593,43 +609,34 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (decDate == null)
                 decDate = docDate;
 
-            //Переименоввываем
-            File renameToFile = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "xml"));
-            if (xmlFile.renameTo(renameToFile)){
-                //validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE, renameToFile, stateLogger);
+            //Архивирование перед сохраннеием в базу
+            File zipOutFile = null;
+            try {
+                zipOutFile = File.createTempFile("xml", ".zip");
+                FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
+                ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
+                ZipEntry zipEntry = new ZipEntry(decName+".xml");
+                zos.putNextEntry(zipEntry);
+                FileInputStream fi = new FileInputStream(xmlFile);
 
-                //Архивирование перед сохраннеием в базу
-                File zipOutFile = null;
                 try {
-                    zipOutFile = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "zip"));
-					FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
-					ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
-					ZipEntry zipEntry = new ZipEntry(decName+".xml");
-					zos.putNextEntry(zipEntry);
-                    FileInputStream fi = new FileInputStream(renameToFile);
-
-                    try {
-                        IOUtils.copy(fi, zos);
-                    } finally {
-                        IOUtils.closeQuietly(fi);
-                        IOUtils.closeQuietly(zos);
-                        IOUtils.closeQuietly(fileOutputStream);
-                    }
-
-                    LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
-                    stateLogger.updateState("Сохранение XML-файла в базе данных");
-
-                    reportService.createDec(declarationData.getId(), blobDataService.create(zipOutFile, zipOutFile.getName(), decDate), ReportType.XML_DEC);
+                    IOUtils.copy(fi, zos);
                 } finally {
-                    if (zipOutFile != null && !zipOutFile.delete()) {
-                        LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
-                    }
-                    if (!renameToFile.delete()) {
-                        LOG.warn(String.format(FILE_NOT_DELETE, renameToFile.getAbsolutePath()));
-                    }
+                    IOUtils.closeQuietly(fi);
+                    IOUtils.closeQuietly(zos);
+                    IOUtils.closeQuietly(fileOutputStream);
                 }
-            } else {
-                throw new IOException(String.format("Преименование из %s в %s не прошло.", xmlFile.getName(), renameToFile.getName()));
+
+                LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Сохранение XML-файла в базе данных");
+
+                reportService.createDec(declarationData.getId(),
+                        blobDataService.create(zipOutFile, String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "zip"), decDate),
+                        ReportType.XML_DEC);
+            } finally {
+                if (zipOutFile != null && !zipOutFile.delete()) {
+                    LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                }
             }
         } catch (IOException e) {
             LOG.error("", e);
@@ -692,7 +699,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         try {
             Map<String, Object> params = new HashMap<String, Object>();
             params.put(JRXPathQueryExecuterFactory.XML_INPUT_STREAM, xml);
-            JRSwapFileVirtualizer virtualizer = new JRSwapFileVirtualizer(100, jrSwapFile);
+            final JRSwapFileVirtualizer virtualizer = new JRSwapFileVirtualizer(100, jrSwapFile);
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    virtualizer.cleanup();
+                }
+            });
             virtualizer.setReadOnly(false);
             params.put(JRParameter.REPORT_VIRTUALIZER, virtualizer);
 
@@ -723,6 +736,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     Boolean.FALSE);
 
             exporter.exportReport();
+            exporter.reset();
         } catch (Exception e) {
             throw new ServiceException(
                     "Невозможно экспортировать отчет в XLSX", e);
@@ -759,7 +773,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private String saveJPBlobData(JasperPrint jasperPrint) throws IOException {
         File jasperPrintFile = null;
-        FileInputStream fileInputStream = null;
         try {
             jasperPrintFile = File.createTempFile("jasperPrint",".dat");
             FileOutputStream fileOutputStream = null;
@@ -770,14 +783,35 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             } finally {
                 IOUtils.closeQuietly(fileOutputStream);
             }
-            fileInputStream = new FileInputStream(jasperPrintFile);
-            return blobDataService.create(fileInputStream, "");
+
+            //Архивирование перед сохраннеием в базу
+            File zipOutFile = null;
+            try {
+                zipOutFile = File.createTempFile("jasperPrint", ".zip");
+                fileOutputStream = new FileOutputStream(zipOutFile);
+                ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
+                ZipEntry zipEntry = new ZipEntry("jasperPrint.dat");
+                zos.putNextEntry(zipEntry);
+                FileInputStream fi = new FileInputStream(jasperPrintFile);
+
+                try {
+                    IOUtils.copy(fi, zos);
+                } finally {
+                    IOUtils.closeQuietly(fi);
+                    IOUtils.closeQuietly(zos);
+                    IOUtils.closeQuietly(fileOutputStream);
+                }
+
+                return blobDataService.create(zipOutFile.getPath(), "");
+            } finally {
+                if (zipOutFile != null && !zipOutFile.delete()) {
+                    LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                }
+            }
         } finally {
-            IOUtils.closeQuietly(fileInputStream);
             if (jasperPrintFile != null)
                 jasperPrintFile.delete();
         }
-
     }
 
     @Override
@@ -815,18 +849,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
         return !declarationIds.isEmpty();
-    }
-
-    private byte[] getBytesFromInputstream(String blobId){
-        if (blobId == null) return null;
-        BlobData blobData = blobDataService.get(blobId);
-        ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-        try {
-            IOUtils.copy(blobData.getInputStream(), arrayOutputStream);
-        } catch (IOException e) {
-            throw new ServiceException("Не удалось извлечь отчет.", e);
-        }
-        return arrayOutputStream.toByteArray();
     }
 
     @Override
@@ -1039,7 +1061,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case EXCEL_DEC:
                 String uuidXmlReport = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
                 if (uuidXmlReport != null) {
-                    return blobDataService.getLength(uuidXmlReport)/1024;
+                    return (long)Math.ceil(blobDataService.getLength(uuidXmlReport) / 1024.);
                 } else {
                     return null;
                 }
@@ -1047,7 +1069,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case CHECK_DEC:
                 String uuidXml = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
                 if (uuidXml != null) {
-                    return blobDataService.getLength(uuidXml)/1024;
+                    return (long)Math.ceil(blobDataService.getLength(uuidXml) / 1024.);
                 } else {
                     return null;
                 }

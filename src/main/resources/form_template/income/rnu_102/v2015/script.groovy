@@ -1,5 +1,7 @@
 package form_template.income.rnu_102.v2015
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -23,8 +25,8 @@ import groovy.transform.Field
 // transDoneDate        (5) -  Дата совершения операции
 // course 				(6) -  Курс валюты Банка России
 // outcomeCode 			(7) -  Код классификации расхода
-// reasonNumber 		(8) -  номер
-// reasonDate   		(9) -  дата
+// reasonNumber 		(8) -  Номер
+// reasonDate   		(9) -  Дата
 // count 				(10) - Количество услуг/работ (ед./шт.)
 // dealPrice			(11) - Цена за оказанные услуги согласно условиям договора
 // taxPrice				(12) - Цена, признаваемая рыночной для целей налогообложения
@@ -202,9 +204,9 @@ void logicCheck() {
         }
 
         // Проверка положительной цены для целей налогообложения
-        if (row.taxPrice != null && row.taxPrice < 0) {
+        if (row.taxPrice != null && row.taxPrice <= 0) {
             def msg = row.getCell('taxPrice').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         boolean noOne = (row.taxPrice == null && row.outcomeRate == null)
@@ -232,16 +234,11 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        // Проверка наличия коэффициента
-        if (row.sum1 != null && row.sum1 > 0 && row.outcomeRate == null) {
-            def msg = row.getCell('outcomeRate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть заполнено!")
-        }
-
         // Проверка коэффициента
         if (row.sum1 != null && row.sum1 == 0 && row.outcomeRate != null) {
-            def msg = row.getCell('outcomeRate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть не заполнено!")
+            def msg1 = row.getCell('outcomeRate').column.name
+            def msg2 = row.getCell('sum1').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не заполнено (т.к. значение графы «$msg2» равно «0»)!")
         }
 
         // Проверка положительной суммы дохода
@@ -259,12 +256,13 @@ void logicCheck() {
         String msg14 = row.getCell('outcomeRate').column.name
         String msg15 = row.getCell('sum2').column.name
         String msg16 = row.getCell('sum3').column.name
+
         if (row.sum2 != null) {
             if (row.outcomeRate != null && row.sum1 != null && row.sum1 > 0 && row.taxPrice == null) {
                 if (row.sum2 != calc15(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно произведению значений граф «$msg13» и «$msg14»!")
                 }
-            } else if (row.outcomeRate == null && row.sum1 != null && row.sum1 > 0 && row.taxPrice != null) {
+            } else if (row.outcomeRate == null && row.taxPrice != null && row.count != null && row.course != null) {
                 if (row.sum2 != calc15(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно произведению значений граф «$msg12», «$msg10» и «$msg6»!")
                 }
@@ -272,7 +270,7 @@ void logicCheck() {
                 if (row.sum2 != calc15(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно значению графы «$msg12»!")
                 }
-            } else if (row.sum2 != 0) {
+            } else if (row.sum2 != calc15(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg15» заполнено значением «0», т.к. не выполнен порядок заполнения графы!")
             }
         }
@@ -282,7 +280,7 @@ void logicCheck() {
             if (row.sum3 != calc16(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg16» должно быть равно значению графы «$msg12»!")
             }
-        } else if (row.sum3 != calc16(row)) {
+        } else if (row.sum1 != null && row.sum2 != null && row.sum3 != calc16(row)) {
             logger.error("Строка $rowNum: Значение графы «$msg16» должно быть равно разности значений граф «$msg15» и «$msg13»!")
         }
 
@@ -314,7 +312,9 @@ void calc() {
     }
 
     // Сортировка
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll {
+        groupColumns.contains(it.getAlias())
+    })
     sortRows(dataRows, groupColumns)
 
     // Добавление подитогов
@@ -333,25 +333,23 @@ void calc() {
 }
 
 def calc15(def row) {
-    if (row.outcomeRate != null && row.sum1 != null && row.sum1 > 0 && row.taxPrice == null) {
-        return roundValue(row.sum1 * row.outcomeRate, 2)
+    if (row.outcomeRate != null && row.sum1 > 0 && row.taxPrice == null) {
+        return roundValue((row.sum1 ?: 0) * (row.outcomeRate ?: 0), 2)
     }
-    if (row.outcomeRate == null && row.sum1 != null && row.sum1 > 0 && row.taxPrice != null) {
-        return roundValue(row.taxPrice * row.count * row.course, 2)
+    if (row.outcomeRate == null && row.taxPrice != null) {
+        return roundValue((row.taxPrice ?: 0) * (row.count ?: 0) * (row.course ?: 0), 2)
     }
-    if (row.sum1 != null && row.sum1 == 0 && row.taxPrice != null) {
+    if (row.sum1 == 0 && row.taxPrice != null) {
         return row.taxPrice
     }
     return 0
 }
 
 def calc16(def row) {
-    if (row.sum1 != null && row.sum1 == 0 && row.taxPrice != null) {
+    if (row.sum1 == 0 && row.taxPrice != null) {
         return row.taxPrice
-    } else if (row.sum1 != null && row.sum2 != null) {
-        return row.sum2 - row.sum1
     }
-    return null
+    return (row.sum2 ?: 0) - (row.sum1 ?: 0)
 }
 /**
  * Округляет число до требуемой точности.
@@ -512,8 +510,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][5]): getColumnName(tmpRow, 'transDoneDate')]),
             ([(headerRows[1][6]): getColumnName(tmpRow, 'course')]),
             ([(headerRows[1][7]): getColumnName(tmpRow, 'outcomeCode')]),
-            ([(headerRows[1][8]): 'номер']),
-            ([(headerRows[1][9]): 'дата']),
+            ([(headerRows[1][8]): 'Номер']),
+            ([(headerRows[1][9]): 'Дата']),
             ([(headerRows[1][10]): getColumnName(tmpRow, 'count')]),
             ([(headerRows[1][11]): getColumnName(tmpRow, 'dealPrice')]),
             ([(headerRows[1][12]): getColumnName(tmpRow, 'taxPrice')]),
@@ -648,7 +646,7 @@ def getSubTotalRows(def dataRows) {
 def calcSubTotalRows(def dataRows) {
     def tmpRows = dataRows.findAll { !it.getAlias() }
     // Добавление подитогов
-    addAllAliased(tmpRows, new CalcAliasRow() {
+    addAllAliased(tmpRows, new ScriptUtils.CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, rows)
@@ -715,12 +713,12 @@ void checkItog(def dataRows) {
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
     // все строки, кроме общего итога
     def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
-    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
         }
-    }, new CheckGroupSum() {
+    }, new ScriptUtils.CheckGroupSum() {
         @Override
         String check(DataRow<Cell> row1, DataRow<Cell> row2) {
             for (def column : totalColumns) {
