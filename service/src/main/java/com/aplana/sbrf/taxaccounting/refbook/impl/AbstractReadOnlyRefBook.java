@@ -192,8 +192,8 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
-    public Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        return refBookDao.getInactiveRecordsInPeriod(recordIds, new Date(), null);
+    public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
+        return refBookDao.getInactiveRecordsInPeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, recordIds, new Date(), null, false);
     }
 
     @Override

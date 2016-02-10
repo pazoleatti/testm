@@ -9,6 +9,8 @@ public class GetRefBookValuesResult implements Result {
     List<Map<String, TableCell>> tableValues;
     Map<String, TableCell> notTableValues;
     Long recordId;
+    private String uuid;
+    private String errorMsg;
 
     public List<Map<String, TableCell>> getTableValues() {
         return tableValues;
@@ -32,5 +34,21 @@ public class GetRefBookValuesResult implements Result {
 
     public void setRecordId(Long recordId) {
         this.recordId = recordId;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
     }
 }

@@ -19,6 +19,7 @@ public class GetDepartmentCombinedResult implements Result {
     private boolean isReportPeriodActive;
 
     private String uuid;
+    private String errorMsg;
 
     public String getUuid() {
         return uuid;
@@ -50,5 +51,13 @@ public class GetDepartmentCombinedResult implements Result {
 
     public void setReportPeriodActive(boolean reportPeriodActive) {
         isReportPeriodActive = reportPeriodActive;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
     }
 }

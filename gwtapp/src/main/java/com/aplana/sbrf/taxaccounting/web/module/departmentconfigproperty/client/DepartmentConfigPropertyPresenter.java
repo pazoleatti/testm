@@ -335,6 +335,10 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                         } else {
                             getView().clearTableData();
                         }
+                        if (result.getErrorMsg() != null) {
+                            Dialog.errorMessage(result.getErrorMsg());
+                            LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
+                        }
                     }
                 }, this));
     }
@@ -430,6 +434,9 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                 } else {
                                                     getData();
                                                     LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
+                                                    if (result.getErrorMsg() != null) {
+                                                        Dialog.errorMessage(result.getErrorMsg());
+                                                    }
                                                 }
                                             }
                                         }, DepartmentConfigPropertyPresenter.this));

@@ -196,6 +196,9 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                                 if (!result.isHasError()) {
                                                     getView().reloadDepartmentParams();
                                                 }
+                                                if (result.getErrorMsg() != null) {
+                                                    Dialog.errorMessage(result.getErrorMsg());
+                                                }
                                             }
                                         }, DepartmentConfigPresenter.this));
                             }
@@ -334,6 +337,10 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         getView().setReportPeriodActive(result.isReportPeriodActive());
                         getView().updateVisibleEditButton();
                         result.getRbTextValues();
+
+                        if (result.getErrorMsg() != null) {
+                            Dialog.errorMessage(result.getErrorMsg());
+                        }
                         if (result.getUuid() != null) {
                             LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
                         }

@@ -4,6 +4,16 @@ import com.gwtplatform.dispatch.shared.Result;
 
 
 public class SaveDepartmentRefBookValuesResult implements Result {
+    private String errorMsg;
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
     public enum ERROR_TYPE {
         NONE,
         HAS_DUPLICATES,

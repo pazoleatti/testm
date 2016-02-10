@@ -55,11 +55,11 @@ public class RefBookOracleTest {
 
     @Test
     public void getInactiveRecordsInPeriodTest() throws ParseException {
-        Map<Long, CheckResult> result = refBookDao.getInactiveRecordsInPeriod(Arrays.asList(18L, 19L, 20L, 22L, 24L, 25L, 28L),
-                sdf.parse("01.01.2016"), sdf.parse("31.12.2016"));
+        List<ReferenceCheckResult> result = refBookDao.getInactiveRecordsInPeriod("ref_book_record", Arrays.asList(18L, 19L, 20L, 22L, 24L, 25L, 28L),
+                sdf.parse("01.01.2016"), sdf.parse("31.12.2016"), false);
         assertNotNull(result);
-        assertTrue(!result.isEmpty());
-        assertEquals(null, result.get(18L));
+        assertTrue(result.isEmpty());
+        /*assertEquals(null, result.get(18L));
         assertEquals(CheckResult.NOT_CROSS, result.get(19L));
         assertEquals(CheckResult.NOT_CROSS, result.get(20L));
         assertEquals(null, result.get(22L));
@@ -72,7 +72,7 @@ public class RefBookOracleTest {
                 sdf.parse("01.01.2016"), sdf.parse("31.12.2016"));
         assertNotNull(result);
         assertTrue(!result.isEmpty());
-        assertEquals(CheckResult.NOT_EXISTS, result.get(12345L));
+        assertEquals(CheckResult.NOT_EXISTS, result.get(12345L));*/
     }
 
     @Test

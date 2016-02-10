@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
@@ -48,7 +47,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
     @Autowired
     SecurityService securityService;
     @Autowired
-    PeriodService reportService;
+    PeriodService periodService;
     @Autowired
     LogEntryService logEntryService;
     @Autowired
@@ -62,9 +61,14 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         logger.setTaUserInfo(securityService.currentUserInfo());
         SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
         RefBook slaveRefBook = rbFactory.get(action.getSlaveRefBookId());
+        ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
 
         /** Проверка существования справочных атрибутов */
-        checkReferenceValues(slaveRefBook, action.getRows(), logger);
+        checkReferenceValues(slaveRefBook, action.getRows(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
+        if (logger.getMainMsg() != null) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            result.setErrorMsg(logger.getMainMsg());
+        }
 
         /** Специфичные проверки для настроек подразделений */
         Pattern innPattern = Pattern.compile(RefBookUtils.INN_JUR_PATTERN);
@@ -189,10 +193,13 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
      * @param rows
      * @return возвращает true, если проверка пройдена
      */
-    private void checkReferenceValues(RefBook refBook, List<Map<String, TableCell>> rows, Logger logger) {
-        Map<RefBookDataProvider, List<Long>> references = new HashMap<RefBookDataProvider, List<Long>>();
+    private void checkReferenceValues(RefBook refBook, List<Map<String, TableCell>> rows, Date versionFrom, Date versionTo, Logger logger) {
+        Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<RefBookDataProvider, List<RefBookLinkModel>>();
+
         RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
         RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
+
+        int i = 1;
         for (Map<String, TableCell> row : rows) {
             for (Map.Entry<String, TableCell> e : row.entrySet()) {
                 TableCell cell = e.getValue();
@@ -201,45 +208,21 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                 }
                 if (cell.getType() == RefBookAttributeType.REFERENCE) {
                     if (cell.getRefValue() != null) {
+                        //Собираем ссылки на справочники и группируем их по провайдеру, обрабатывающему справочники
                         RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
-                        List<Long> links = (references.containsKey(linkProvider)) ?
-                                references.get(linkProvider) : new ArrayList<Long>();
-                        links.add(cell.getRefValue());
-                        references.put(linkProvider, links);
-                    }
-                }
-            }
-        }
-
-        boolean hasErrorLinks = false;
-        if (!references.isEmpty()) {
-            //получаем названия колонок
-            Map<String, String> aliases = new HashMap<String, String>();
-            for (RefBookAttribute attribute : refBook.getAttributes()) {
-                aliases.put(attribute.getAlias(), attribute.getName());
-            }
-
-            for (Map.Entry<RefBookDataProvider, List<Long>> entry : references.entrySet()) {
-                List<Long> notExists = entry.getKey().isRecordsExist(entry.getValue());
-                if (!notExists.isEmpty()) {
-                    hasErrorLinks = true;
-                    int i = 1;
-                    for (Map<String, TableCell> row : rows) {
-                        for (Map.Entry<String, TableCell> cell : row.entrySet()) {
-                            if (cell.getValue().getRefValue() != null && notExists.contains(cell.getValue().getRefValue())) {
-                                logger.error("Строка %s, графа \"%s\": Обнаружена некорректная ссылка на запись справочника.", i, aliases.get(cell.getKey()));
-                            }
+                        if (!references.containsKey(linkProvider)) {
+                            references.put(linkProvider, new ArrayList<RefBookLinkModel>());
                         }
-                        i++;
+                        //Сохраняем данные для отображения сообщений
+                        references.get(linkProvider).add(new RefBookLinkModel(i, e.getKey(), cell.getRefValue(), null, versionFrom, versionTo));
                     }
                 }
             }
+            i++;
         }
 
-        if (hasErrorLinks) {
-            throw new ServiceLoggerException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново",
-                    logEntryService.save(logger.getEntries()));
-        }
+        //Проверяем ссылки и выводим соообщения если надо
+        refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
     }
 
     private List<Map<String,RefBookValue>> convertRows(List<Map<String, TableCell>> rows) {

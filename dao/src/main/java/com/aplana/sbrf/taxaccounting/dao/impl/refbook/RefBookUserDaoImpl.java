@@ -7,10 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookUserDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -78,9 +75,9 @@ class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
     }
 
     @Override
-    public Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds) {
+    public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds) {
         String sql = String.format("select id from "+ TABLE_NAME +" where %s", SqlUtils.transformToSqlInStatement("id", recordIds));
-        Map<Long, CheckResult> result = new HashMap<Long, CheckResult>();
+        final List<ReferenceCheckResult> result = new ArrayList<ReferenceCheckResult>();
         List<Long> existRecords = new ArrayList<Long>();
         try {
             existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
@@ -92,7 +89,7 @@ class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
         } catch (EmptyResultDataAccessException ignored) {}
         for (Long recordId : recordIds) {
             if (!existRecords.contains(recordId)) {
-                result.put(recordId, CheckResult.NOT_EXISTS);
+                result.add(new ReferenceCheckResult(recordId, CheckResult.NOT_EXISTS));
             }
         }
         return result;

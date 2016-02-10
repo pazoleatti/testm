@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client
 
 import com.aplana.gwt.client.DoubleBox;
 import com.aplana.gwt.client.TextBox;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -719,7 +720,13 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @UiHandler("findButton")
     public void onFind(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onFind();
+
+            if (departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty() &&
+                    periodPickerPopup.getValue() != null && !periodPickerPopup.getValue().isEmpty()) {
+                getUiHandlers().onFind();
+            } else {
+                Dialog.errorMessage("Не заполнены обязательные поля", "Для поиска должно быть заполнено поле \"Подразделение\" и \"Период\"");
+            }
         }
     }
 

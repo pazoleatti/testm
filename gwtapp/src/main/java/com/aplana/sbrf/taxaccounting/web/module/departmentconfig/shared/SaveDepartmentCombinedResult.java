@@ -9,6 +9,7 @@ public class SaveDepartmentCombinedResult implements Result {
 
     private String uuid;
     private boolean hasError = false;
+    private String errorMsg;
 
     public String getUuid() {
         return uuid;
@@ -24,5 +25,13 @@ public class SaveDepartmentCombinedResult implements Result {
 
     public void setHasError(boolean hasError) {
         this.hasError = hasError;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
     }
 }

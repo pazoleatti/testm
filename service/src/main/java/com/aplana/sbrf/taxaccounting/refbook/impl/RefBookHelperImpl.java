@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
@@ -11,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,170 @@ public class RefBookHelperImpl implements RefBookHelper {
 	private ColumnDao columnDao;
     @Autowired
     private PeriodService periodService;
+    @Autowired
+    LogEntryService logEntryService;
+
+    private final static SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
+
+    @Override
+    public void checkReferenceValues(RefBook refBook, Map<RefBookDataProvider, List<RefBookLinkModel>> references,
+                                     CHECK_REFERENCES_MODE mode, Logger logger) {
+        if (!references.isEmpty()) {
+            /**
+             * id ссылок на справочники объединяются по провайдеру, который обрабатывает эти справочники +
+             * по входной дате окончания для каждой ссылки, которая может быть разной например для случая импорта справочников
+             */
+            Map<RefBookDataProvider, Map<Date, List<Long>>> idsByProvider = new HashMap<RefBookDataProvider, Map<Date, List<Long>>>();
+
+            //получаем названия колонок
+            Map<String, String> aliases = new HashMap<String, String>();
+            for (RefBookAttribute attribute : refBook.getAttributes()) {
+                aliases.put(attribute.getAlias(), attribute.getName());
+            }
+            //Собираем ссылки в кучу для каждого провайдера
+            for (Map.Entry<RefBookDataProvider, List<RefBookLinkModel>> entry : references.entrySet()) {
+                RefBookDataProvider provider = entry.getKey();
+                if (!idsByProvider.containsKey(provider)) {
+                    idsByProvider.put(provider, new HashMap<Date, List<Long>>());
+                }
+                for (RefBookLinkModel link : entry.getValue()) {
+                    Date versionTo = link.getVersionTo();
+                    if (!idsByProvider.get(provider).containsKey(versionTo)) {
+                        idsByProvider.get(provider).put(versionTo, new ArrayList<Long>());
+                    }
+                    idsByProvider.get(provider).get(versionTo).add(link.getReferenceValue());
+                }
+            }
+
+            int errorCount = 0;
+            boolean hasFatalError = false;
+
+            //Проверяем ссылки отдельно по каждому провайдеру
+            for (Map.Entry<RefBookDataProvider, List<RefBookLinkModel>> entry : references.entrySet()) {
+                RefBookDataProvider provider = entry.getKey();
+                Map<Date, List<Long>> idsByVersionEnd = idsByProvider.get(provider);
+                List<RefBookLinkModel> links = entry.getValue();
+                if (links != null && links.size() > 0 && idsByVersionEnd.size() > 0) {
+                    //Дата начала для проверки - можно взять у любой записи, т.к она всегда одинаковая у всех
+                    Date versionFrom = links.get(0).getVersionFrom();
+
+                    //Обрабатываем группы записей с одним и тем же провайдером и датой окончания
+                    for (Map.Entry<Date, List<Long>> ids : idsByVersionEnd.entrySet()) {
+                        Date versionTo = ids.getKey();
+                        List<ReferenceCheckResult> inactiveRecords = provider.getInactiveRecordsInPeriod(ids.getValue(), versionFrom, versionTo);
+                        errorCount = inactiveRecords.size();
+                        if (!inactiveRecords.isEmpty()) {
+                            for (ReferenceCheckResult inactiveRecord : inactiveRecords) {
+                                //ищем информацию по плохим записям и формируем сообщение по каждой
+                                for (RefBookLinkModel link : links) {
+                                    if (inactiveRecord.getRecordId().equals(link.getReferenceValue())) {
+                                        switch (inactiveRecord.getResult()) {
+                                            case NOT_EXISTS: {
+                                                String msg = buildMsg("Поле \"%s\": содержит ссылку на несуществующую версию записи справочника!", link);
+                                                if (mode == CHECK_REFERENCES_MODE.REFBOOK) {
+                                                    hasFatalError = true;
+                                                    logger.error(msg,
+                                                            link.getIndex() != null ? link.getIndex() :
+                                                                    link.getSpecialId() != null ? link.getSpecialId() : "",
+                                                            aliases.get(link.getAttributeAlias()));
+                                                } else {
+                                                    logger.info(msg,
+                                                            link.getIndex() != null ? link.getIndex() :
+                                                                    link.getSpecialId() != null ? link.getSpecialId() : "",
+                                                            aliases.get(link.getAttributeAlias()));
+                                                }
+                                                break;
+                                            }
+                                            case NOT_CROSS: {
+                                                String msg = buildMsg("Поле \"%s\" содержит ссылку на версию записи справочника, период которой (с %s по %s) не пересекается %s (с %s по %s)!", link);
+                                                if (mode == CHECK_REFERENCES_MODE.REFBOOK) {
+                                                    hasFatalError = true;
+                                                    logger.error(msg,
+                                                            link.getIndex() != null ? link.getIndex() :
+                                                                    link.getSpecialId() != null ? link.getSpecialId() : "",
+                                                            aliases.get(link.getAttributeAlias()),
+                                                            SDF.format(inactiveRecord.getVersionFrom()),
+                                                            inactiveRecord.getVersionTo() != null ? SDF.format(inactiveRecord.getVersionTo()) : "-",
+                                                            "с периодом актуальности версии",
+                                                            SDF.format(link.getVersionFrom()),
+                                                            link.getVersionTo() != null ? SDF.format(link.getVersionTo()) : "-"
+                                                    );
+                                                } else {
+                                                    logger.info(msg,
+                                                            link.getIndex() != null ? link.getIndex() :
+                                                                    link.getSpecialId() != null ? link.getSpecialId() : "",
+                                                            aliases.get(link.getAttributeAlias()),
+                                                            SDF.format(inactiveRecord.getVersionFrom()),
+                                                            inactiveRecord.getVersionTo() != null ? SDF.format(inactiveRecord.getVersionTo()) : "-",
+                                                            "с отчетным периодом настроек",
+                                                            SDF.format(link.getVersionFrom()),
+                                                            link.getVersionTo() != null ? SDF.format(link.getVersionTo()) : "-"
+                                                    );
+                                                }
+                                                break;
+                                            }
+                                            case NOT_LAST: {
+                                                String msg;
+                                                if (mode == CHECK_REFERENCES_MODE.REFBOOK) {
+                                                    msg = "\"%s\": Выбранная версия записи справочника не является последней действующей в периоде сохраняемой версии (с %s по %s)!";
+                                                    if (link.getSpecialId() != null) {
+                                                        //Если проверка выполняется для нескольких записей справочника (например при импорте справочника), то формируем специальное имя для каждой записи
+                                                        msg = "Запись \"%s\", " + msg;
+                                                    } else {
+                                                        msg = "%s" + msg;
+                                                    }
+                                                    logger.warn(msg,
+                                                            link.getSpecialId() != null ? link.getSpecialId() : "",
+                                                            aliases.get(link.getAttributeAlias()),
+                                                            SDF.format(versionFrom),
+                                                            versionTo != null ? SDF.format(versionTo) : "-"
+                                                    );
+                                                } else {
+                                                    msg = "Строка %s: Поле \"%s\" содержит ссылку на версию записи справочника, которая не является последней действующей в отчетном периоде настроек (с %s по %s)!";
+                                                    logger.warn(msg,
+                                                            link.getIndex(),
+                                                            aliases.get(link.getAttributeAlias()),
+                                                            SDF.format(versionFrom),
+                                                            versionTo != null ? SDF.format(versionTo) : "-"
+                                                    );
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (hasFatalError) {
+                //Исключение выбрасывается только для справочников и тут не важно что писать, т.к текст заменяется в вызывающем коде
+                throw new ServiceException("Поля содержат некорректные справочные ссылки!");
+            }
+
+            if (errorCount > 0) {
+                //Устанавливаем сообщение об ошибке для диалога в настройках подразделений
+                switch (mode) {
+                    case DEPARTMENT_CONFIG:
+                        logger.setMainMsg(String.format("Поля настроек содержат некорректные справочные ссылки (%d). Необходимо их актуализировать", errorCount));
+                }
+            }
+        }
+    }
+
+    private String buildMsg(String msg, RefBookLinkModel link) {
+        if (link.getIndex() != null) {
+            msg = "Строка %s, " + msg;
+        } else if (link.getSpecialId() != null) {
+            //Если проверка выполняется для нескольких записей справочника (например при импорте справочника), то формируем специальное имя для каждой записи
+            msg = "Запись \"%s\", " + msg;
+        } else {
+            msg = "%s" + msg;
+        }
+        return msg;
+    }
 
     @Override
     public void dataRowsCheck(Collection<DataRow<Cell>> dataRows, List<Column> columns) {
@@ -53,7 +219,7 @@ public class RefBookHelperImpl implements RefBookHelper {
                         Cell parentCell = dataRow.getCellByColumnId(column.getParentId());
                         value = parentCell.getValue();
                         if (value != null) {
-                            checkReferenceValue(providers, column, value);
+                            checkFormDataReferenceValues(providers, column, value);
                         }
                     }
                 }
@@ -64,8 +230,8 @@ public class RefBookHelperImpl implements RefBookHelper {
     }
 
 
-    private void checkReferenceValue (Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
-                                            ReferenceColumn referenceColumn, Object value){
+    private void checkFormDataReferenceValues(Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
+                                              ReferenceColumn referenceColumn, Object value){
         Long refAttributeId = referenceColumn.getRefBookAttributeId();
         Pair<RefBookDataProvider, RefBookAttribute> pair = providers.get(refAttributeId);
         if (pair == null) {
@@ -88,6 +254,7 @@ public class RefBookHelperImpl implements RefBookHelper {
             pair.getFirst().getRecordData(refBookValue.getReferenceValue());
         }
     }
+
 
     private void checkRefBookValue(Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
                                          Long refAttributeId, Object value) {

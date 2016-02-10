@@ -81,7 +81,7 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
     }
 
     @Override
-    public Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
+    public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
         throw new UnsupportedOperationException();
     }
 }

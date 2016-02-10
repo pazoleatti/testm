@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
@@ -11,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
@@ -39,7 +38,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
     @Autowired
-    private PeriodService reportService;
+    private PeriodService periodService;
     @Autowired
     private RefBookFactory rbFactory;
     @Autowired
@@ -50,6 +49,8 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     private SecurityService securityService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    private RefBookHelper refBookHelper;
 
     public SaveDepartmentCombinedHandler() {
         super(SaveDepartmentCombinedAction.class);
@@ -97,7 +98,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
             RefBook refBook = rbFactory.get(refBookId);
 
-            ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
+            ReportPeriod period = periodService.getReportPeriod(action.getReportPeriodId());
 
             Map<String, RefBookValue> paramsMap = new HashMap<String, RefBookValue>();
             // Id записи
@@ -151,7 +152,11 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
             Logger logger = new Logger();
             /** Проверка существования справочных атрибутов */
-            checkReferenceValues(provider, refBook, paramsMap, logger);
+            checkReferenceValues(provider, refBook, paramsMap, period.getCalendarStartDate(), period.getEndDate(), logger);
+            if (logger.getMainMsg() != null) {
+                result.setUuid(logEntryService.save(logger.getEntries()));
+                result.setErrorMsg(logger.getMainMsg());
+            }
 
             logger.setTaUserInfo(securityService.currentUserInfo());
             RefBookRecord record = new RefBookRecord();
@@ -247,52 +252,33 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
         return result;
     }
 
-
     /**
      * Проверка существования записей справочника на которые ссылаются атрибуты.
      * Считаем что все справочные атрибуты хранятся в универсальной структуре как и сами настройки
      * @param refBook
      * @param rows
      */
-    private void checkReferenceValues(RefBookDataProvider provider, RefBook refBook, Map<String, RefBookValue> rows, Logger logger) {
-        Map<RefBookDataProvider, List<Long>> references = new HashMap<RefBookDataProvider, List<Long>>();
+    private void checkReferenceValues(RefBookDataProvider provider, RefBook refBook, Map<String, RefBookValue> rows, Date versionFrom, Date versionTo, Logger logger) {
+        Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<RefBookDataProvider, List<RefBookLinkModel>>();
+
         RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
         for (Map.Entry<String, RefBookValue> e : rows.entrySet()) {
             if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE && !e.getKey().equals("DEPARTMENT_ID")) {
-                if (e.getValue().getReferenceValue() != null) {
+                Long link = e.getValue().getReferenceValue();
+                if (link != null) {
+                    //Собираем ссылки на справочники и группируем их по провайдеру, обрабатывающему справочники
                     RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
-                    List<Long> links = (references.containsKey(linkProvider)) ?
-                            references.get(linkProvider) : new ArrayList<Long>();
-                    links.add(e.getValue().getReferenceValue());
-                    references.put(linkProvider, links);
-                }
-            }
-        }
-
-        boolean hasErrorLinks = false;
-        if (!references.isEmpty()) {
-            //получаем названия колонок
-            Map<String, String> aliases = new HashMap<String, String>();
-            for (RefBookAttribute attribute : refBook.getAttributes()) {
-                aliases.put(attribute.getAlias(), attribute.getName());
-            }
-            for (Map.Entry<RefBookDataProvider, List<Long>> entry : references.entrySet()) {
-                List<Long> notExists = entry.getKey().isRecordsExist(entry.getValue());
-                if (!notExists.isEmpty()) {
-                    hasErrorLinks = true;
-                    for (Map.Entry<String, RefBookValue> row : rows.entrySet()) {
-                        if (row.getValue().getReferenceValue() != null && notExists.contains(row.getValue().getReferenceValue())) {
-                            logger.error("Атрибут \"%s\": Обнаружена некорректная ссылка на запись справочника.", aliases.get(row.getKey()));
-                        }
+                    if (!references.containsKey(linkProvider)) {
+                        references.put(linkProvider, new ArrayList<RefBookLinkModel>());
                     }
+                    //Сохраняем данные для отображения сообщений
+                    references.get(linkProvider).add(new RefBookLinkModel(null, e.getKey(), link, null, versionFrom, versionTo));
                 }
             }
         }
 
-        if (hasErrorLinks) {
-            throw new ServiceLoggerException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново",
-                    logEntryService.save(logger.getEntries()));
-        }
+        //Проверяем ссылки и выводим соообщения если надо
+        refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
     }
 
     @Override

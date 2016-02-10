@@ -507,7 +507,7 @@ public class RefBookDaoTest {
             record.setRecordId(null);
             records.add(record);
         }
-        refBookUtils.isReferenceValuesCorrect(null, REF_BOOK_RECORD_TABLE_NAME, getDate(1, 1, 2011), getDate(1, 1, 2014),refBook.getAttributes(), records);
+        refBookUtils.isRecordsExistsInPeriod(null, REF_BOOK_RECORD_TABLE_NAME, getDate(1, 1, 2011), getDate(1, 1, 2014),refBook.getAttributes(), records);
     }*/
 
     @Test

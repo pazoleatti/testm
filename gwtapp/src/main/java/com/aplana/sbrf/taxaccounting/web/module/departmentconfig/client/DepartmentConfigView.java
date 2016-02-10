@@ -329,8 +329,13 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@UiHandler("findButton")
 	public void onFind(ClickEvent event) {
-        reloadDepartmentParams();
-	}
+        if (departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty() &&
+                periodPickerPopup.getValue() != null && !periodPickerPopup.getValue().isEmpty()) {
+            reloadDepartmentParams();
+        } else {
+            Dialog.errorMessage("Не заполнены обязательные поля", "Для поиска должно быть заполнено поле \"Подразделение\" и \"Период\"");
+        }
+    }
 
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event) {
