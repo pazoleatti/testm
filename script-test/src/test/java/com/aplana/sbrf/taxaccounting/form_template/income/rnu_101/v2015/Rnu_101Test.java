@@ -102,8 +102,8 @@ public class Rnu_101Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Цена за оказанные услуги согласно условиям договора» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма фактически начисленного дохода (руб.)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма дохода, соответствующая рыночному уровню (руб.)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Должно быть не заполнено или только значение графы «Цена, признаваемая рыночной для целей налогообложения», или только значение графы «Коэффициент корректировки доходов»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода до рыночного уровня (руб.)» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Должна быть заполнена одна из граф: «Цена, признаваемая рыночной для целей налогообложения» или «Коэффициент корректировки доходов»!", entries.get(i++).getMessage());
         Assert.assertEquals("Группа «графа 7 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
 
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
