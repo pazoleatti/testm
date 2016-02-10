@@ -17,7 +17,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -37,7 +36,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	private static final Log LOG = LogFactory.getLog(DataRowMapper.class);
 
 	private static final char STYLE_SEPARATOR = ';';
-	static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.mm.dd");
+	static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 	private static final char DECIMAL_SEPARATOR = '.';
 	private static final char WRONG_DECIMAL_SEPARATOR = ',';
 	private static final DecimalFormat DECIMAL_FORMAT;
@@ -62,10 +61,6 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		this.formData = formData;
 	}
 
-	static boolean checkNew(long id) {
-		return id == 20500 || id == 329 || id == 3291 || id == 3292 || id == 330;
-	}
-
 	/**
 	 * Формирует sql-запрос для извлечения данных НФ
 	 *
@@ -73,8 +68,6 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @return пара "sql-запрос"-"параметры" для извлечения данных НФ
 	 */
 	public Pair<String, Map<String, Object>> createSql(DataRowRange range, DataRowType dataRowType) {
-		if (!checkNew(formData.getId())) return createSqlOld(range, dataRowType);
-
 		DataRowType isManual = formData.isManual() ? DataRowType.MANUAL : DataRowType.AUTO;
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formData.getId());
@@ -129,8 +122,6 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @return Map<columnId, [cNN, cNN_style]>
 	 */
 	static Map<Integer, String[]> getColumnNames(FormData formData) {
-		if (!checkNew(formData.getId())) return getColumnNamesOld(formData);
-
 		Map<Integer, String[]> columnNames = new HashMap<Integer, String[]>();
 		for (Column column : formData.getFormColumns()){
 			StringBuilder sb = new StringBuilder("c");
@@ -143,8 +134,6 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 	@Override
 	public DataRow<Cell> mapRow(ResultSet rs, int rowNum) throws SQLException {
-		if (!checkNew(formData.getId())) return mapRow(rs, rowNum);
-
 		List<Cell> cells = FormDataUtils.createCells(formData.getFormColumns(), formData.getFormStyles());
 		Integer previousRowNumber = formData.getPreviousRowNumber() != null ? formData.getPreviousRowNumber() : 0;
 		String alias = rs.getString("alias");
@@ -299,105 +288,6 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 				default:
 					return null;
 			}
-		}
-	}
-
-	@Deprecated
-	private Pair<String, Map<String, Object>> createSqlOld(DataRowRange range, DataRowType dataRowType) {
-		DataRowType isManual = formData.isManual() ? DataRowType.MANUAL : DataRowType.AUTO;
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", formData.getId());
-		params.put("temporary", dataRowType.getCode());
-		params.put("manual", isManual.getCode());
-
-		StringBuilder sql = new StringBuilder("SELECT id, ord, alias,\n");
-		// автонумерация (считаются все строки где нет алиасов, либо алиас = ALIASED_WITH_AUTO_NUMERATION_AFFIX)
-		sql.append("CASE WHEN (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') THEN\n")
-				.append("ROW_NUMBER() OVER (PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%")
-				.append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') THEN 1 ELSE 0 END ORDER BY ord)\n")
-				.append("ELSE NULL END ");
-		if (range != null) {
-			sql.append("+ (SELECT count(*) from form_data_").append(formData.getFormTemplateId())
-					.append(" WHERE (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') AND")
-					.append(" form_data_id = :formDataId AND temporary = :temporary AND manual = :manual")
-					.append(" AND ord < :from)");
-		}
-		sql.append(" numeration");
-		getColumnNamesString(formData, sql);
-		sql.append("\nFROM form_data_").append(formData.getFormTemplateId());
-		sql.append("\nWHERE form_data_id = :formDataId AND temporary = :temporary AND manual = :manual");
-		// пейджинг
-		if (range != null) {
-			sql.append(" AND ord BETWEEN :from AND :to");
-			params.put("from", range.getOffset());
-			params.put("to", range.getOffset() + range.getCount() - 1);
-		}
-		sql.append("\nORDER BY ord");
-
-		return new Pair<String, Map<String, Object>>(sql.toString(), params);
-	}
-
-	@Deprecated
-	private static Map<Integer, String[]> getColumnNamesOld(FormData formData) {
-		Map<Integer, String[]> columnNames = new HashMap<Integer, String[]>();
-		for (Column column : formData.getFormColumns()){
-			String id = ('c' + column.getId().toString()).intern();
-			columnNames.put(column.getId(), new String[]{
-					id,
-					(id + "_style_id").intern(),
-					(id + "_editable").intern(),
-					(id + "_colspan").intern(),
-					(id + "_rowspan").intern()});
-		}
-		return columnNames;
-	}
-
-	@Deprecated
-	private DataRow<Cell> mapRowOld(ResultSet rs, int rowNum) throws SQLException {
-		List<Cell> cells = FormDataUtils.createCells(formData.getFormColumns(), formData.getFormStyles());
-		Integer previousRowNumber = formData.getPreviousRowNumber() != null ? formData.getPreviousRowNumber() : 0;
-		String alias = rs.getString("alias");
-		for (Cell cell : cells) {
-			Integer columnId = cell.getColumn().getId();
-			// Values
-			if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) &&
-					(alias == null || alias.contains(ALIASED_WITH_AUTO_NUMERATION_AFFIX))) {
-				Long numeration = SqlUtils.getLong(rs, "numeration");
-				if (NumerationType.CROSS.equals(((AutoNumerationColumn) cell.getColumn()).getNumerationType())) {
-					cell.setValue(numeration + previousRowNumber, rowNum);
-				} else {
-					cell.setValue(numeration, rowNum);
-				}
-			} else {
-				cell.setValue(getCellValueOld(cell.getColumn(), rs), rowNum);
-			}
-			// Styles
-			BigDecimal styleId = rs.getBigDecimal(String.format("c%s_style_id", columnId));
-			cell.setStyleId(styleId != null ? styleId.intValueExact() : null);
-			// Editable
-			cell.setEditable(rs.getBoolean(String.format("c%s_editable", columnId)));
-			// Span Info
-			Integer colSpan = SqlUtils.getInteger(rs, String.format("c%s_colspan", columnId));
-			cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
-			Integer rowSpan = SqlUtils.getInteger(rs, String.format("c%s_rowspan", columnId));
-			cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
-		}
-		DataRow<Cell> dataRow = new DataRow<Cell>(alias, cells);
-		dataRow.setId(SqlUtils.getLong(rs, "id"));
-		dataRow.setIndex(SqlUtils.getInteger(rs,"ord"));
-		return dataRow;
-	}
-
-	@Deprecated
-	private Object getCellValueOld(Column column, ResultSet rs) throws SQLException {
-		String columnLabel = String.format("c%s", column.getId());
-		switch (column.getColumnType()) {
-			case STRING:
-				return rs.getString(columnLabel);
-			case DATE:
-				return rs.getDate(columnLabel);
-			default:
-				return rs.getBigDecimal(columnLabel);
 		}
 	}
 }

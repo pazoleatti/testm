@@ -18,9 +18,9 @@ import java.io.Serializable;
 public abstract class Column implements Ordered, Serializable {
 
 	/** Нижняя граница на индекс столбца в таблице данных. Включительно */
-	private static final int MIN_DATA_ORDER = 0;
+	public static final int MIN_DATA_ORDER = 0;
 	/** Верхняя граница на индекс столбца в таблице данных. Включительно */
-	private static final int MAX_DATA_ORDER = 99;
+	public static final int MAX_DATA_ORDER = 99;
 
 	public interface ValidationStrategy {
 		boolean matches(String valueToCheck);
@@ -183,6 +183,9 @@ public abstract class Column implements Ordered, Serializable {
 	}
 
 	public void setDataOrder(Integer dataOrder) {
+		if (dataOrder == null) {
+			throw new IllegalArgumentException("Field \"dataOrder\" must not be null");
+		}
 		if (dataOrder < MIN_DATA_ORDER || dataOrder > MAX_DATA_ORDER) {
 			throw new IllegalArgumentException(String.format("Value of field \"dataOrder\" must be in interval [%s; %s]", MIN_DATA_ORDER, MAX_DATA_ORDER));
 		}

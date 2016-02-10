@@ -25,11 +25,11 @@ class BDUtilsImpl extends AbstractDao implements BDUtils {
     @Override
     public List<Long> getNextIds(Sequence sequence, Long count) {
         if (isSupportOver())
-            return getJdbcTemplate().queryForList("select "+sequence.getName()+".nextval from dual connect by level<= ?", new Object[]{count}, java.lang.Long.class);
+            return getJdbcTemplate().queryForList("SELECT "+sequence.getName()+".NEXTVAL FROM DUAL CONNECT BY LEVEL<= ?", new Object[]{count}, java.lang.Long.class);
         else {
             ArrayList<Long> listIds = new ArrayList<Long>(count.intValue());
             for (Integer i = 0; i < count;i++)
-                listIds.add(getJdbcTemplate().queryForLong("select "+sequence.getName()+".nextval from dual"));
+                listIds.add(getJdbcTemplate().queryForObject("SELECT "+sequence.getName()+".NEXTVAL FROM DUAL", Long.class));
             return listIds;
         }
     }

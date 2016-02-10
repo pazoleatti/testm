@@ -154,7 +154,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
             //http://jira.aplana.com/browse/SBRFACCTAX-11384
             final Collection<Integer> removedStyleIds = formStyleDao.saveFormStyles(formTemplate);
-            final Map<ColumnKeyEnum, Collection<Long>> columns  = columnDao.updateFormColumns(formTemplate);
+            /*final Map<ColumnKeyEnum, Collection<Long>> columns  = columnDao.updateFormColumns(formTemplate);
 
             //Очистка полей содержащих значения удаленных стилей
             if (!removedStyleIds.isEmpty()){
@@ -178,7 +178,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     );
                     LOG.info("Number of updated styles " + num);
                 }
-            }
+            }*/
 
             return formTemplateId;
         } catch (DataAccessException e){

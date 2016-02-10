@@ -246,7 +246,7 @@ create table form_column (
   parent_column_id number(9),
   attribute_id2 number(18),
   numeration_row number(9),
-  data_ord number(2)
+  data_ord number(2) not null
 );
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
