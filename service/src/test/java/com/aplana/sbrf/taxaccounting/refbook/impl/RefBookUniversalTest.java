@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -70,6 +71,9 @@ public class RefBookUniversalTest {
 
         FormDataService formDataService = mock(FormDataService.class);
         ReflectionTestUtils.setField(provider, "formDataService", formDataService);
+
+        RefBookHelper refBookHelper = mock(RefBookHelper.class);
+        ReflectionTestUtils.setField(provider, "refBookHelper", refBookHelper);
 
         logger = new Logger();
         TAUserInfo taUserInfo = new TAUserInfo();
@@ -230,7 +234,7 @@ public class RefBookUniversalTest {
     public void createRecordVersionTest10() {
         //Дата окончания не указана и не изменилась
         Date dateFrom = getDate(1, 1, 2015);
-        provider.createRecordVersion(logger, dateFrom, null, Arrays.asList(refBookRecord));
+        provider.createRecordVersion(logger, dateFrom, null, Collections.singletonList(refBookRecord));
         verify(refBookDao).createRecordVersion(any(Long.class), eq(dateFrom), eq(VersionedObjectStatus.NORMAL), any(List.class));
         verify(refBookDao, never()).createFakeRecordVersion(any(Long.class), any(Long.class), any(Date.class));
     }
