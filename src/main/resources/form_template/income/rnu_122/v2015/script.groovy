@@ -223,12 +223,13 @@ void logicCheck() {
         }
 
         // Проверка корректности рыночной суммы дохода, Ед. вал.
-        if (row.sum4 != null && !calcFlag18(row) && row.sum4 != calc19(row)) {
+        if (calcFlag18(row) != null && !calcFlag18(row) && row.sum4 != null && row.sum4 != calc19(row)) {
             def msg1 = row.getCell('tradePay').column.name
             def msg2 = row.getCell('sum4').column.name
             logger.error("Строка $rowNum: Значение графы «$msg2» должно быть равно значению графы «%s»!", msg1)
         }
-        if (row.sum4 != null && calcFlag18(row) && row.sum4 != calc19(row)) {
+        if (calcFlag18(row) != null && calcFlag18(row) && row.sum1 != null && row.startDate != null
+                && row.endDate != null && row.sum4 != null && row.sum4 != calc19(row)) {
             def msg8 = row.getCell('sum1').column.name
             def msg12 = row.getCell('startDate').column.name
             def msg13 = row.getCell('endDate').column.name
@@ -237,13 +238,16 @@ void logicCheck() {
             def msg19 = row.getCell('sum4').column.name
             logger.error("Строка $rowNum: Значение графы «$msg19» должно быть равно значению выражения «$msg8»*«%s»*(«$msg13»-«$msg12»+1)/«$msg14»", msg18)
         }
+        if (row.tradePay == null && row.sum4 != null && row.sum4 != 0) {
+            def msg19 = row.getCell('sum4').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg19» должно быть равно «0»!")
+        }
 
         // Проверка корректности суммы доначисления  дохода (корректировки расхода) до рыночного уровня
         if (row.sum3 != null && row.sum5 != null && row.sum6 != null && row.sum6 != calc21(row)) {
             def msg17 = row.getCell('sum3').column.name
             def msg20 = row.getCell('sum5').column.name
             def msg21 = row.getCell('sum6').column.name
-            def qqq = calc21(row)
             logger.error("Строка $rowNum: Значение графы «$msg21» должно быть равно модулю разности значений графы «$msg20» и «$msg17»!")
         }
 
@@ -307,8 +311,11 @@ void calc() {
 }
 
 def calcFlag18(def row) {
-    String col18 = row.tradePay?.trim()
-    return (col18[-1] != "%") ? false : true
+    if (row.tradePay != null) {
+        String col18 = row.tradePay.trim()
+        return (col18[-1] != "%") ? false : true
+    }
+    return null
 }
 
 def calc19(def row) {
@@ -318,7 +325,7 @@ def calc19(def row) {
         def msg = row.getCell('tradePay').column.name
         logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
                 " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
-    } else if (row.tradePay != null) {
+    } else if (row.tradePay != null && row.tradePay ==~ pattern) {
         String col18 = row.tradePay.trim().replaceAll(",", ".")
         def flag18 = calcFlag18(row)
         def calcCol18 = flag18 ? roundValue(new BigDecimal(col18[0..-2]) / 100, 2) :
@@ -336,7 +343,7 @@ def calc19(def row) {
         }
     }
 
-    return null
+    return 0
 }
 
 def calc21(def row) {

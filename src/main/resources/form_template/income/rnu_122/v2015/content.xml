@@ -73,7 +73,7 @@
         <alias>docNumber</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Номер</name>
+        <name>Первичный документ. Номер</name>
         <order>7</order>
         <width>10</width>
         <maxLength>128</maxLength>
@@ -83,7 +83,7 @@
         <alias>docDate</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
-        <name>Дата</name>
+        <name>Первичный документ. Дата</name>
         <order>8</order>
         <width>6</width>
         <formatId>0</formatId>
@@ -123,7 +123,7 @@
         <checking>false</checking>
         <name>Курс Банка России на дату фактического отражения в бухгалтерском учёте (руб.)</name>
         <order>12</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>19</maxLength>
         <precision>4</precision>
     </columns>
@@ -131,7 +131,7 @@
         <alias>startDate</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
-        <name>Дата начала</name>
+        <name>Расчетный период (согласно условиям сделки). Дата начала</name>
         <order>13</order>
         <width>6</width>
         <formatId>0</formatId>
@@ -140,7 +140,7 @@
         <alias>endDate</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
-        <name>Дата окончания</name>
+        <name>Расчетный период (согласно условиям сделки). Дата окончания</name>
         <order>14</order>
         <width>6</width>
         <formatId>0</formatId>

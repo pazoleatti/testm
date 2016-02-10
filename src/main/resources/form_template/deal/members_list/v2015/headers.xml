@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Полное наименование юридического лица с указанием ОПФ"/>
+        <cell alias="address" colSpan="1" rowSpan="1"
+              value="Место нахождения (юридический адрес) юридического лица (из устава)"/>
+        <cell alias="orgCode" colSpan="1" rowSpan="1" value="Код организации"/>
+        <cell alias="countryCode" colSpan="1" rowSpan="1" value="Код страны по ОКСМ"/>
+        <cell alias="inn" colSpan="1" rowSpan="1" value="ИНН (заполняется для резидентов, некредитных организаций)"/>
+        <cell alias="kpp" colSpan="1" rowSpan="1" value="КПП (заполняется для резидентов, некредитных организаций)"/>
+        <cell alias="swift" colSpan="1" rowSpan="1"
+              value="Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)"/>
+        <cell alias="regNum" colSpan="1" rowSpan="1"
+              value="Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)"/>
+        <cell alias="startData" colSpan="1" rowSpan="1" value="Дата наступления основания для включения в список"/>
+        <cell alias="endData" colSpan="1" rowSpan="1" value="Дата наступления основания для исключения из списка"/>
+        <cell alias="category" colSpan="1" rowSpan="1"
+              value="Категория юридического лица по системе &quot;светофор&quot;"/>
+        <cell alias="vatStatus" colSpan="1" rowSpan="1" value="Статус по НДС"/>
+        <cell alias="taxStatus" colSpan="1" rowSpan="1" value="Специальный налоговый статус"/>
+        <cell alias="depCriterion" colSpan="1" rowSpan="1" value="Критерий взаимозависимости"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="address" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="orgCode" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="countryCode" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="inn" colSpan="1" rowSpan="1" value="6,1"/>
+        <cell alias="kpp" colSpan="1" rowSpan="1" value="6,2"/>
+        <cell alias="swift" colSpan="1" rowSpan="1" value="6,3"/>
+        <cell alias="regNum" colSpan="1" rowSpan="1" value="6,4"/>
+        <cell alias="startData" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="endData" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="category" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="vatStatus" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="taxStatus" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="depCriterion" colSpan="1" rowSpan="1" value="12"/>
+    </row>
+</rows>

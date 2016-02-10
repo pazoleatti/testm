@@ -200,14 +200,15 @@ void logicCheck() {
         }
         boolean flag = true
         // Проверка суммы требований
-        if (row.reqSum && row.reqSum < 0) {
+        if (row.reqSum != null && row.reqSum < 0) {
             flag = false
             def msg = row.getCell('reqSum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // Проверка корректности суммы требований
-        if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) && row.reqSum != (row.reqVolume * row.reqCourse).abs()) {
+        if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) &&
+                row.reqSum != roundValue(row.reqVolume * row.reqCourse, row.getCell('reqSum').getColumn().precision).abs()) {
             flag = false
             def msg1 = row.getCell('reqSum').column.name
             def msg2 = row.getCell('reqVolume').column.name
@@ -216,40 +217,33 @@ void logicCheck() {
         }
 
         // Проверка суммы обязательств
-        if (row.guarSum && row.guarSum < 0) {
+        if (row.guarSum != null && row.guarSum < 0) {
             flag = false
             def msg = row.getCell('guarSum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // Проверка корректности суммы обязательств
-        if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) && row.guarSum != (row.guarVolume * row.guarCourse).abs()) {
+        if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) &&
+                row.guarSum != roundValue(row.guarVolume * row.guarCourse, row.getCell('guarSum').getColumn().precision).abs()) {
             flag = false
             def msg1 = row.getCell('guarSum').column.name
             def msg2 = row.getCell('guarVolume').column.name
             def msg3 = row.getCell('guarCourse').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно равняться модулю произведения «$msg2» и «$msg3»!")
         }
-        def msg11 = row.getCell('reqVolume').column.name
-        def msg13 = row.getCell('guarVolume').column.name
-        def msg14 = row.getCell('price').column.name
-        def msg15 = row.getCell('reqCourse').column.name
-        def msg16 = row.getCell('guarCourse').column.name
-        def msg17 = row.getCell('reqSum').column.name
-        def msg18 = row.getCell('guarSum').column.name
-        def msg19 = row.getCell('incomeSum').column.name
-        def msg20 = row.getCell('outcomeSum').column.name
-        def msg21 = row.getCell('marketPrice').column.name
-        def msg22 = row.getCell('incomeDelta').column.name
-        def msg23 = row.getCell('outcomeDelta').column.name
 
         // Проверка доходов учитываемых в целях налога на прибыль по сделке
         if (row.reqSum != null && row.guarSum != null) {
+            def msg17 = row.getCell('reqSum').column.name
+            def msg18 = row.getCell('guarSum').column.name
+            def msg19 = row.getCell('incomeSum').column.name
+            def msg20 = row.getCell('outcomeSum').column.name
             def diff = row.reqSum - row.guarSum
             if (flag && diff > 0 && row.incomeSum != diff) {
                 flag2 = false
                 logger.error("Строка $rowNum: Значение графы «$msg19» должно быть равно разности значений граф «$msg17» и «$msg18»!")
-            } else if (flag && row.incomeSum != 0) {
+            } else if (flag && diff <= 0 && row.incomeSum != 0) {
                 flag2 = false
                 logger.error("Строка $rowNum: Значение графы «$msg19» должно быть равно нулю!")
             }
@@ -258,7 +252,7 @@ void logicCheck() {
             if (flag && diff < 0 && row.outcomeSum != diff) {
                 flag2 = false
                 logger.error("Строка $rowNum: Значение графы «$msg20» должно быть равно разности значений граф «$msg17» и «$msg18»!")
-            } else if (flag && row.outcomeSum != 0) {
+            } else if (flag && diff >= 0 && row.outcomeSum != 0) {
                 flag2 = false
                 logger.error("Строка $rowNum: Значение графы «$msg20» должно быть равно нулю!")
             }
@@ -270,68 +264,92 @@ void logicCheck() {
             }
         }
 
+        def msg11 = row.getCell('reqVolume').column.name
+        def msg13 = row.getCell('guarVolume').column.name
+        def msg14 = row.getCell('price').column.name
+        def msg15 = row.getCell('reqCourse').column.name
+        def msg16 = row.getCell('guarCourse').column.name
+        def msg21 = row.getCell('marketPrice').column.name
+
         // Проверка отклонений по доходам
         if (flag2 && row.incomeDelta != null) {
+            def msg22 = row.getCell('incomeDelta').column.name
             if (row.incomeSum == 0 && row.incomeDelta != calc22(row)) {
+                //a
                 logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно нулю!")
-            } else {
+            } else if (row.incomeSum != 0) {
                 if (row.dealType == dealType1 || row.dealType == dealType2) {
-                    if (row.dealFocus != direction2 && row.price >= row.marketPrice && row.incomeDelta != calc22(row)) {
+                    if (row.dealFocus == direction2 && row.price >= row.marketPrice && row.incomeDelta != calc22(row)) {
+                        //b
                         logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно нулю!")
                     }
-                    if (row.dealFocus != direction2 && row.price < row.marketPrice && row.incomeDelta != calc22(row)) {
+                    if (row.dealFocus == direction2 && row.price < row.marketPrice && row.incomeDelta != calc22(row)) {
+                        // c
                         logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно значению следующего выражения:" +
                                 " «$msg13»*(«$msg21» - «$msg14»)*«$msg15»!")
                     }
-                    if (row.dealFocus != direction1 && row.price <= row.marketPrice && row.incomeDelta != calc22(row)) {
+                    if (row.dealFocus == direction1 && row.price <= row.marketPrice && row.incomeDelta != calc22(row)) {
+                        // d
                         logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно нулю!")
                     }
-                    if (row.dealFocus != direction1 && row.price > row.marketPrice && row.incomeDelta != calc22(row)) {
+                    if (row.dealFocus == direction1 && row.price > row.marketPrice && row.incomeDelta != calc22(row)) {
+                        // e
                         logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно значению следующего выражения:" +
                                 " «$msg11»*(«$msg14» - «$msg21»)*«$msg16»!")
                     }
-                } else {
+                } else if (row.dealType == dealType3) {
                     if (row.incomeSum > 0 && row.price > row.marketPrice && row.incomeDelta != calc22(row)) {
+                        // f
                         logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно нулю!")
                     } else if (row.incomeSum > 0 && row.price < row.marketPrice && row.incomeDelta != calc22(row)) {
+                        // g
                         logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно значению следующего выражения:" +
                                 "(«$msg21» - «$msg14»)*«$msg15»!")
                     } else if (row.incomeDelta != calc22(row)) {
+                        // h
                         logger.error("Строка $rowNum: Значение графы «$msg22» должно быть заполнено значением «0», т.к. не выполнен " +
                                 "порядок заполнения графы!")
                     }
                 }
-
             }
         }
 
         // Проверка отклонений по расходам
         if (flag2 && row.outcomeDelta != null) {
+            def msg23 = row.getCell('outcomeDelta').column.name
             if (row.outcomeSum == 0 && row.outcomeDelta != calc23(row)) {
+                // a
                 logger.error("Строка $rowNum: Значение графы «$msg23» должно быть равно нулю!")
-            } else {
+            } else if (row.outcomeSum != 0) {
                 if (row.dealType == dealType1 || row.dealType == dealType2) {
-                    if (row.dealFocus != direction1 && row.price <= row.marketPrice && row.outcomeDelta != calc23(row)) {
+                    if (row.dealFocus == direction1 && row.price <= row.marketPrice && row.outcomeDelta != calc23(row)) {
+                        // b
                         logger.error("Строка $rowNum: Значение графы «$msg23» должно быть равно нулю!")
                     }
-                    if (row.dealFocus != direction1 && row.price > row.marketPrice && row.outcomeDelta != calc23(row)) {
+                    if (row.dealFocus == direction1 && row.price > row.marketPrice && row.outcomeDelta != calc23(row)) {
+                        // c
                         logger.error("Строка $rowNum: Значение графы «$msg23» должно быть равно значению следующего выражения:" +
                                 " «$msg11»*(«$msg14» - «$msg21»)*«$msg16»!")
                     }
-                    if (row.dealFocus != direction2 && row.price >= row.marketPrice && row.outcomeDelta != calc23(row)) {
+                    if (row.dealFocus == direction2 && row.price >= row.marketPrice && row.outcomeDelta != calc23(row)) {
+                        // d
                         logger.error("Строка $rowNum: Значение графы «$msg23» должно быть равно нулю!")
                     }
-                    if (row.dealFocus != direction2 && row.price < row.marketPrice && row.outcomeDelta != calc23(row)) {
+                    if (row.dealFocus == direction2 && row.price < row.marketPrice && row.outcomeDelta != calc23(row)) {
+                        // e
                         logger.error("Строка $rowNum: Значение графы «$msg23» должно быть равно значению следующего выражения:" +
                                 " «$msg13»*(«$msg21» - «$msg14»)*«$msg15»!")
                     }
-                } else {
+                } else if (row.dealType == dealType3) {
                     if (row.outcomeSum < 0 && row.price < row.marketPrice && row.outcomeDelta != calc23(row)) {
+                        // f
                         logger.error("Строка $rowNum: Значение графы «$msg23» должно быть равно нулю!")
                     } else if (row.outcomeSum < 0 && row.price > row.marketPrice && row.outcomeDelta != calc23(row)) {
+                        // g
                         logger.error("Строка $rowNum: Значение графы «$msg23» должно быть равно значению следующего выражения:" +
                                 "(«$msg21» - «$msg14»)*«$msg16»!")
                     } else if (row.outcomeDelta != calc23(row)) {
+                        // h
                         logger.error("Строка $rowNum: Значение графы «$msg23» должно быть заполнено значением «0», т.к. не выполнен " +
                                 "порядок заполнения графы!")
                     }
@@ -371,14 +389,9 @@ void calc() {
             continue
         }
         // 19, 20
-        row.incomeSum = 0
-        row.outcomeSum = 0
-        def diff = row.reqSum - row.guarSum
-        if (diff > 0) {
-            row.incomeSum = diff
-        } else {
-            row.outcomeSum = diff
-        }
+        def diff = (row.reqSum ?: 0) - (row.guarSum ?: 0)
+        row.incomeSum = diff > 0 ? diff : 0
+        row.outcomeSum = diff < 0 ? diff : 0
 
         // 22, 23
         row.incomeDelta = calc22(row)
@@ -415,14 +428,16 @@ def BigDecimal calc22(def row) {
         if (row.dealFocus == direction1 && row.price > row.marketPrice) {
             return roundValue(row.reqVolume * (row.price - row.marketPrice) * row.guarCourse, 2)
         }
-    } else {
+    } else if (row.dealType == dealType3) {
         if (row.incomeSum > 0 && row.price > row.marketPrice) {
             return 0
         }
         if (row.incomeSum > 0 && row.price < row.marketPrice) {
             return roundValue((row.marketPrice - row.price) * row.reqCourse, 2)
         }
+
         return 0
+
     }
 
 }
@@ -433,7 +448,7 @@ def BigDecimal calc23(def row) {
     dealType3 = getRecordId(92, 'NAME', 'Премия по опциону')
     direction1 = getRecordId(20, 'DIRECTION', 'покупка')
     direction2 = getRecordId(20, 'DIRECTION', 'продажа')
-    if (row.incomeSum == 0) {
+    if (row.outcomeSum == 0) {
         return 0
     }
     if (row.dealType == dealType1 || row.dealType == dealType2) {
@@ -441,13 +456,13 @@ def BigDecimal calc23(def row) {
             return 0
         }
         if (row.dealFocus == direction1 && row.price > row.marketPrice) {
-            return roundValue(row.reqVolume * (row.price - row.marketPrice) * row.guarCourse, 2)
+            return roundValue(-1 * row.reqVolume * (row.price - row.marketPrice) * row.guarCourse, 2)
         }
         if (row.dealFocus == direction2 && row.price >= row.marketPrice) {
             return 0
         }
         if (row.dealFocus == direction2 && row.price < row.marketPrice) {
-            return roundValue(row.guarVolume * (row.marketPrice - row.price) * row.reqCourse, 2)
+            return roundValue(-1 * row.guarVolume * (row.marketPrice - row.price) * row.reqCourse, 2)
         }
     } else {
         if (row.outcomeSum < 0 && row.price < row.marketPrice) {

@@ -27,8 +27,8 @@
         <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна местоположения Взаимозависимого лица (резидента оффшорной зоны)"/>
         <cell alias="iksr" colSpan="1" rowSpan="1" value="Идентификационный номер"/>
         <cell alias="code" colSpan="1" rowSpan="1" value="Код налогового учёта"/>
-        <cell alias="reasonNumber" colSpan="1" rowSpan="1" value="номер"/>
-        <cell alias="reasonDate" colSpan="1" rowSpan="1" value="дата"/>
+        <cell alias="reasonNumber" colSpan="1" rowSpan="1" value="Номер"/>
+        <cell alias="reasonDate" colSpan="1" rowSpan="1" value="Дата"/>
         <cell alias="base" colSpan="1" rowSpan="1" value="База для расчёта процентного дохода (дней в году)"/>
         <cell alias="sum" colSpan="1" rowSpan="1" value="Сумма кредита (ед. валюты)"/>
         <cell alias="currency" colSpan="1" rowSpan="1" value="Валюта"/>

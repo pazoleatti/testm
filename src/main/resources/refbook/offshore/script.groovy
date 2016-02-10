@@ -16,6 +16,7 @@ import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.ss.usermodel.WorkbookFactory
+import org.apache.poi.ss.util.AreaReference
 import org.springframework.util.ClassUtils
 
 /**
@@ -204,6 +205,7 @@ Workbook workBook = null
 @Field
 Sheet sheet = null
 
+// Краткий список ОЗ (XLSM)
 void createSpecificReportShortListXLSM() {
     def version = scriptSpecificReportHolder.version
 
@@ -272,6 +274,10 @@ void createSpecificReportShortListXLSM() {
         addNewRowInXlsm(rowIndex, values)
         values.clear()
     }
+
+    // область печати
+    setPrintSetup(rowIndex, widths.size())
+
     workBook.write(scriptSpecificReportHolder.getFileOutputStream())
 
     // название файла
@@ -288,10 +294,10 @@ void createSpecificReportShortListXLSM() {
  * @param rowIndex номер строк (0..n)
  * @param values список строковых значении
  */
-void addNewRowInXlsm(int rowIndex, def values, def isHeader = false) {
+Row addNewRowInXlsm(int rowIndex, def values, def isHeader = false) {
     Row newRow = sheet.createRow(rowIndex)
     def cellIndex = 0
-    for (String value : values) {
+    for (def value : values) {
         Cell cell = newRow.createCell(cellIndex)
         cell.setCellValue(value)
 
@@ -300,6 +306,7 @@ void addNewRowInXlsm(int rowIndex, def values, def isHeader = false) {
         cell.setCellStyle(cellStyle)
         cellIndex++
     }
+    return newRow
 }
 
 /** Очистить шаблон, т.к в нем есть значения, поименованные ячейки, стили и т.д. */
@@ -349,6 +356,25 @@ void clearSheet() {
     cellNames.each { name ->
         workBook.removeName(name)
     }
+
+    // сместить XlsxReportMetadata.RANGE_POSITION в начало листа, что бы макрос не смещал границы страницы в конце таблицы
+    AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula())
+    def startRow = ar.getFirstCell().getRow()
+    sheet.shiftRows(startRow, startRow + 1, -startRow)
+}
+
+/**
+ * Задать область печати.
+ *
+ * @param rowCount количество строк для области печти (количество используемых строк)
+ * @param columnCount количество столбцов для области печти (количество используемых столбцов)
+ */
+void setPrintSetup(def rowCount, def columnCount) {
+    workBook.setPrintArea(0, 0, columnCount, 0, rowCount)
+    sheet.setFitToPage(true)
+    sheet.setAutobreaks(true)
+    sheet.getPrintSetup().setFitHeight((short) 0)
+    sheet.getPrintSetup().setFitWidth((short) 1)
 }
 
 @Field
