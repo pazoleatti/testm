@@ -496,21 +496,7 @@ void importTransportData() {
 
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['sum': 5]
-
-        // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = totalRow.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
+        checkTFSum(totalRow, totalTF, totalColumns, fileRowIndex, logger, false)
         // задать итоговой строке нф значения из итоговой строки тф
         totalColumns.each { alias ->
             totalRow[alias] = totalTF[alias]
