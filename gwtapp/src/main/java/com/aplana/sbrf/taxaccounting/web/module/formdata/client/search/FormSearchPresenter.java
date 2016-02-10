@@ -35,6 +35,7 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         boolean isCaseSensitive();
         boolean isReadOnlyMode();
         boolean isManual();
+        void clearSelection();
     }
 
     private final DispatchAsync dispatcher;
@@ -68,6 +69,7 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         getView().setReadOnlyMode(readOnlyMode);
         getView().setManual(manual);
         getView().clearTableData();
+        getView().clearSelection();
     }
 
     @Override
