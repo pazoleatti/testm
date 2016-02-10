@@ -172,7 +172,7 @@ void logicCheck() {
 
         // 7. Проверка на отсутствие в списке не ВЗЛ ОРН
         def isVZL = records520?.find { it?.record_id?.value == row.name }
-        if (records520 && !isVZL) {
+        if (row.name && records520 && !isVZL) {
             def value2 = getRefBookValue(520L, row.name)?.NAME?.value
             logger.error(useCode ? "Строка %s: Организация «%s» не является взаимозависимым лицом с общим режимом налогообложения в данном отчетном периоде!" : "Строка %s: Организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, value2)
         }
@@ -194,7 +194,7 @@ def getRecords520(boolean useCode) {
     // получить id записи с кодом "2" из справочника "Специальный налоговый статус"
     def provider
     def records
-    def filter = ""
+    def filter = null
     if (useCode) {
         provider = formDataService.getRefBookProvider(refBookFactory, 511L, providerCache)
         filter = "CODE = 2"

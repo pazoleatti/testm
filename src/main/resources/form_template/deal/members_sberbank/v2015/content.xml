@@ -38,17 +38,15 @@
         <maxLength>256</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>statReportId</alias>
         <checking>false</checking>
-        <columnType>REFBOOK</columnType>
+        <columnType>REFERENCE</columnType>
         <name>Код участника в соответствие с классификатором АС «Статотчетность»</name>
         <order>4</order>
         <width>10</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>5201</nameAttributeId>
+        <parentAlias>name</parentAlias>
         <refBookAttributeId>5216</refBookAttributeId>
-        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>code</alias>
