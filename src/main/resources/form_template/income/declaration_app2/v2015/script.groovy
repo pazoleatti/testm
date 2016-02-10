@@ -158,7 +158,7 @@ void generateXML() {
 
             Прибыль() {
                 // берем первые 500 строк (по 2 листа декларации на строку источника)
-                if (dataRowsApp2.size() >= 500) {
+                if (dataRowsApp2 != null && dataRowsApp2.size() >= 500) {
                     dataRowsApp2 = dataRowsApp2[0..499]
                 }
                 // Приложение №2
