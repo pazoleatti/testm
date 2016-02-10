@@ -11,6 +11,8 @@ import groovy.transform.Field
  *
  * formTemplateId=841
  */
+// TODO после измененеия ЧТЗ и дополнения calc() условиями (например http://jira.aplana.com/browse/SBRFACCTAX-14583) -
+// TODO в logicCheck() делать расчет calc24, calc25 итд единственным образом. текущая реализация оставлена для уменьшения количества багов.
 
 // fix
 // rowNumber    		(1) -  № пп
@@ -228,7 +230,9 @@ void logicCheck() {
             if (dataRows.get(i).getIndex() != row.getIndex()) {
                 boolean flag = true
                 ['name', 'iksr', 'code', 'docNumber', 'docDate', 'course'].each {
-                    flag = flag && (dataRows.get(i)[it] == row[it])
+                    if (dataRows.get(i)[it] != row[it]) {
+                        flag = false
+                    }
                 }
                 if (flag) {
                     matchRowNum.add(dataRows.get(i).getIndex())
@@ -616,7 +620,9 @@ def calcPrev25(def row, def form) {
         for (dataRow in dataRows) {
             boolean flag = true
             ['name', 'iksr', 'code', 'docNumber', 'docDate', 'course'].each {
-                flag = flag && (dataRow[it] == row[it])
+                if (dataRow[it] != row[it]) {
+                    flag = false
+                }
             }
             if (flag) {
                 cnt++
@@ -701,7 +707,9 @@ def calcPrev28(def row, def form) {
         for (dataRow in dataRows) {
             boolean flag = true
             ['name', 'iksr', 'code', 'docNumber', 'docDate', 'course'].each {
-                flag = flag && (dataRow[it] == row[it])
+                if (dataRow[it] != row[it]) {
+                    flag = false
+                }
             }
             if (flag) {
                 cnt++
