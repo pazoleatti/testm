@@ -91,6 +91,11 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
             result.setUuid(logEntryService.save(logger.getEntries()));
             result.setErrorMsg(logger.getMainMsg());
         }
+
+        // Заполняем период действия настроек
+        RefBookRecordVersion version = providerMaster.getRecordVersionInfo(result.getRecordId());
+        result.setConfigStartDate(version.getVersionStart());
+        result.setConfigEndDate(version.getVersionEnd());
         return result;
     }
 

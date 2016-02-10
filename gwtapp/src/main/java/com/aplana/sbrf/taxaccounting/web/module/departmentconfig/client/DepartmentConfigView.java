@@ -24,6 +24,7 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -34,7 +35,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
 import java.util.*;
 
 /**
@@ -183,6 +183,12 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @Ignore
     LabelSeparator reorgLabel;
 
+    @UiField
+    @Ignore
+    Label configPeriodLabel;
+
+    private final static DateTimeFormat SDF = DateTimeFormat.getFormat("dd.MM.yyyy");
+
     @Inject
 	@UiConstructor
 	public DepartmentConfigView(final Binder uiBinder) {
@@ -292,6 +298,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         oktmo.setDereferenceValue(null);
         okvedCode.setDereferenceValue(null);
         type.setDereferenceValue(null);
+        configPeriodLabel.setText("");
 
         driver.edit(new DepartmentCombined());
     }
@@ -586,6 +593,14 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         oktmo.setPeriodDates(startDate, endDate);
         okvedCode.setPeriodDates(startDate, endDate);
         type.setPeriodDates(startDate, endDate);
+    }
+
+    @Override
+    public void setConfigPeriod(Date configStartDate, Date configEndDate) {
+        configPeriodLabel.setText("Период действия настроек с " +
+                SDF.format(configStartDate) + " по " +
+                (configEndDate != null ? SDF.format(configEndDate)  : "-")
+        );
     }
 
     private void addResizeHandler() {

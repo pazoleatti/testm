@@ -106,6 +106,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
         TaxType getTaxType();
 
+        void setConfigPeriod(Date configStartDate, Date configEndDate);
+
         DepartmentConfigPropertyView.TableHeader[] getCurrentTableHeaders();
 
         void setEditMode(boolean isEditable);
@@ -339,6 +341,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                             Dialog.errorMessage(result.getErrorMsg());
                             LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
                         }
+                        getView().setConfigPeriod(result.getConfigStartDate(), result.getConfigEndDate());
                     }
                 }, this));
     }

@@ -154,6 +154,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * @param endDate
          */
         void setRefBookPeriod(Date startDate, Date endDate);
+
+        void setConfigPeriod(Date configStartDate, Date configEndDate);
     }
 
     @Inject
@@ -336,6 +338,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         getView().setDereferenceValue(result.getRbTextValues());
                         getView().setReportPeriodActive(result.isReportPeriodActive());
                         getView().updateVisibleEditButton();
+                        getView().setConfigPeriod(result.getConfigStartDate(), result.getConfigEndDate());
                         result.getRbTextValues();
 
                         if (result.getErrorMsg() != null) {

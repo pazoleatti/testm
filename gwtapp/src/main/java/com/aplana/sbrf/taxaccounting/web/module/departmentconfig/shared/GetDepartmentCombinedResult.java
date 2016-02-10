@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared;
 
 import com.gwtplatform.dispatch.shared.Result;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -20,6 +21,24 @@ public class GetDepartmentCombinedResult implements Result {
 
     private String uuid;
     private String errorMsg;
+    private Date configStartDate;
+    private Date configEndDate;
+
+    public Date getConfigEndDate() {
+        return configEndDate;
+    }
+
+    public void setConfigEndDate(Date configEndDate) {
+        this.configEndDate = configEndDate;
+    }
+
+    public Date getConfigStartDate() {
+        return configStartDate;
+    }
+
+    public void setConfigStartDate(Date configStartDate) {
+        this.configStartDate = configStartDate;
+    }
 
     public String getUuid() {
         return uuid;

@@ -6,10 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookLinkModel;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -244,6 +241,10 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             result.setUuid(logEntryService.save(logger.getEntries()));
         }
 
+        // Заполняем период действия настроек
+        RefBookRecordVersion version = provider.getRecordVersionInfo(depCombined.getRecordId());
+        result.setConfigStartDate(version.getVersionStart());
+        result.setConfigEndDate(version.getVersionEnd());
         return result;
     }
 
