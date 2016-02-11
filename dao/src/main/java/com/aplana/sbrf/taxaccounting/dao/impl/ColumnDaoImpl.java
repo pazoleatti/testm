@@ -128,12 +128,20 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 	@Override
 	public void updateFormColumns(final FormTemplate formTemplate) {
 		// получаем "старые" столбцы до обновления макета, потом в этом списке останутся столбцы на удаление
-		final Set<String> prevColumns = new HashSet<String>(getJdbcTemplate().queryForList(
-			"SELECT alias FROM form_column WHERE form_template_id = ?",
-			new Object[] { formTemplate.getId() },
-			new int[] { Types.NUMERIC },
-			String.class
-		));
+		final Map<String, Character> prevColumns = new HashMap<String, Character>();
+		getNamedParameterJdbcTemplate().query(
+				"SELECT alias, type FROM form_column WHERE form_template_id = :form_template_id ORDER BY ord",
+				new HashMap<String, Integer>() {{
+					put("form_template_id", formTemplate.getId());
+				}},
+				new RowCallbackHandler() {
+					@Override
+					public void processRow(ResultSet rs) throws SQLException {
+						prevColumns.put(rs.getString("alias"), rs.getString("type").charAt(0));
+					}
+				}
+		);
+
 		// определяем какие столбцы надо добавить, удалить или обновить
 		List<Column> columns = formTemplate.getColumns();
 		List<Column> insertColumns =  new ArrayList<Column>();
@@ -141,7 +149,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		int order = 0;
 		for (Column column: columns) {
 			column.setOrder(++order);
-			if (!prevColumns.contains(column.getAlias())) {
+			if (!prevColumns.containsKey(column.getAlias())) {
 				insertColumns.add(column);
 			} else {
 				updateColumns.add(column);
@@ -151,7 +159,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		// выставляем актуальные значения для поля dataOrder
 		calculateNewDataOrder(insertColumns, updateColumns);
 		// удаляем столбцы в БД
-        deleteFormColumns(prevColumns, formTemplate);
+        deleteFormColumns(prevColumns.keySet(), formTemplate);
 		// вставляем новые столбцы
 		createFormColumns(insertColumns, formTemplate);
 		// обновляем "старые"
@@ -299,6 +307,11 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		deleteColumnData(formTemplate, dataOrders);
     }
 
+	/**
+	 * Выставляет parentId для новых зависимых граф
+	 * @param formTemplate
+	 * @param columns
+	 */
     void setReferenceParentId(FormTemplate formTemplate, List<Column> columns){
         for (Column column : columns) {
             if (ColumnType.REFERENCE.equals(column.getColumnType())) {
@@ -315,12 +328,12 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
      * Удаляем столбцы
      * @return возвращаем идентификаторы колонок удаленных
      */
-    void deleteFormColumns(final Set<String> removedColumns, FormTemplate formTemplate) {
-		if (removedColumns.isEmpty()) {
+    void deleteFormColumns(final Collection<String> removeColumns, FormTemplate formTemplate) {
+		if (removeColumns.isEmpty()) {
 			return;
 		}
         try {
-			String aliasClause = SqlUtils.transformToSqlInStatementForString("alias", removedColumns);
+			String aliasClause = SqlUtils.transformToSqlInStatementForString("alias", removeColumns);
 			// получаем сведения о том, какие столбцы необходимо почистить в FORM_DATA_ROW
 			StringBuilder sb = new StringBuilder("SELECT data_ord FROM form_column WHERE form_template_id = ");
 			sb.append(formTemplate.getId());
@@ -333,13 +346,13 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			sb.append(" AND ");
 			sb.append(aliasClause);
 			int count = getJdbcTemplate().update(sb.toString());
-			if (count != removedColumns.size()) {
+			if (count != removeColumns.size()) {
 				throw new IllegalArgumentException("Column aliases are missing in the specified formtemplate");
 			}
 			// удаление данных из таблицы FORM_DATA_ROW
 			deleteColumnData(formTemplate, dataOrders);
         } catch (DataIntegrityViolationException e){
-			LOG.error("", e);
+			LOG.error("Невозможно удалить графы", e);
             throw new DaoException("Невозможно удалить графы", e);
         }
     }
@@ -351,6 +364,11 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 	void deleteColumnData(FormTemplate formTemplate, List<Integer> dataOrders) {
 		if (dataOrders.isEmpty()) {
 			return;
+		}
+		for (int i = 0; i < dataOrders.size(); i++) {
+			if (dataOrders.get(i) == null) {
+				throw new IllegalArgumentException("Argument \"dataOrders\" does not must contain \"null\" value");
+			}
 		}
 		// удаление данных из таблицы FORM_DATA_ROW
 		StringBuilder sb = new StringBuilder("UPDATE form_data_row SET ");

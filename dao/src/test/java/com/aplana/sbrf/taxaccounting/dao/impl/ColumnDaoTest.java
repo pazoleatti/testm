@@ -40,12 +40,7 @@ public class ColumnDaoTest {
 
     @Test
     public void getFormColumnsTest() {
-        //Given FORM_ID_FOR_TEST, NUMBER_OF_STYLES
-
-        //When
         List<Column> listOfColumnsInDb = columnDao.getFormColumns(FORM_ID_FOR_TEST);
-
-        //Then
         assertEquals(NUMBER_OF_COLUMNS, listOfColumnsInDb.size());
 
         assertEquals(Integer.valueOf(1), listOfColumnsInDb.get(FIRST_COLUMN).getId());
@@ -67,7 +62,6 @@ public class ColumnDaoTest {
 		assertEquals(2, listOfColumnsInDb.get(THIRD_COLUMN).getDataOrder().intValue());
 		assertEquals("dateColumn", listOfColumnsInDb.get(THIRD_COLUMN).getAlias());
         assertEquals(false, listOfColumnsInDb.get(SECOND_COLUMN).isChecking());
-
 
         assertEquals(Integer.valueOf(4), listOfColumnsInDb.get(FOURTH_COLUMN).getId());
         assertEquals("Автонумеруемая графа", listOfColumnsInDb.get(FOURTH_COLUMN).getName());
@@ -169,12 +163,139 @@ public class ColumnDaoTest {
 		assertEquals("stringColumn2", columnList.get(columnCount + 1).getAlias());
 	}
 
-	//setReferenceParentId
-	//deleteFormColumns
-	//deleteColumnData
-	//updateFormColumns
-	//clearTypeChangedColumns
-	//updateFormColumns
+	@Test
+	public void setReferenceParentIdTest() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<Column> newColumns = new ArrayList<Column>();
+
+		NumericColumn numericColumn = new NumericColumn();
+		numericColumn.setName("число");
+		numericColumn.setMaxLength(10);
+		numericColumn.setPrecision(2);
+		numericColumn.setOrder(5);
+		numericColumn.setAlias("numericColumn2");
+		newColumns.add(numericColumn);
+
+		ReferenceColumn referenceColumn = new ReferenceColumn();
+		referenceColumn.setName("зависимая");
+		referenceColumn.setParentAlias("stringColumn");
+		referenceColumn.setRefBookAttributeId(5);
+		referenceColumn.setAlias("referenceColumn2");
+		referenceColumn.setName("Зависимая графа");
+		referenceColumn.setOrder(6);
+		referenceColumn.setDataOrder(referenceColumn.getOrder() - 1);
+		referenceColumn.setChecking(false);
+		newColumns.add(referenceColumn);
+
+		((ColumnDaoImpl) columnDao).setReferenceParentId(formTemplate, newColumns);
+		assertEquals(1, ((ReferenceColumn) newColumns.get(1)).getParentId());
+	}
+
+	@Test
+	public void deleteFormColumnsTest() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<String> removeColumns = new ArrayList<String>();
+		removeColumns.add(formTemplate.getColumn("numericColumn").getAlias());
+		removeColumns.add(formTemplate.getColumn("dateColumn").getAlias());
+
+		((ColumnDaoImpl) columnDao).deleteFormColumns(removeColumns, formTemplate);
+
+		List<Column> columns = columnDao.getFormColumns(formTemplate.getId());
+		assertEquals(2, columns.size());
+		assertEquals("stringColumn", columns.get(0).getAlias());
+		assertEquals("autoNumerationColumn", columns.get(1).getAlias());
+
+		//TODO form_data_row
+	}
+
+	@Test
+	public void clearTypeChangedColumnsTest() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<Column> columns = formTemplate.getColumns();
+		// меняем тип графы
+		columns.remove(formTemplate.getColumn("stringColumn"));
+		NumericColumn numericColumn = new NumericColumn();
+		numericColumn.setName("число");
+		numericColumn.setMaxLength(10);
+		numericColumn.setPrecision(2);
+		numericColumn.setOrder(5);
+		numericColumn.setDataOrder(4);
+		numericColumn.setAlias("stringColumn");
+		columns.add(numericColumn);
+
+		((ColumnDaoImpl) columnDao).clearTypeChangedColumns(formTemplate);
+
+		//TODO form_data_row
+	}
+
+	@Test
+	public void deleteColumnDataTest() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<Integer> dataOrders = new ArrayList<Integer>();
+		dataOrders.add(0);
+		dataOrders.add(3);
+		((ColumnDaoImpl) columnDao).deleteColumnData(formTemplate, dataOrders);
+
+		//TODO form_data_row
+	}
+
+	@Test
+	public void updateFormColumnsTest() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<Column> oldColumns = new ArrayList<Column>();
+		// меняем тип графы
+		NumericColumn numericColumn = new NumericColumn();
+		numericColumn.setId(12312);
+		numericColumn.setName("число");
+		numericColumn.setMaxLength(10);
+		numericColumn.setPrecision(2);
+		numericColumn.setOrder(1);
+		numericColumn.setDataOrder(0);
+		numericColumn.setAlias("numericColumn");
+		oldColumns.add(numericColumn);
+
+		oldColumns.add(formTemplate.getColumn("stringColumn"));
+		((StringColumn) oldColumns.get(1)).setMaxLength(100);
+
+		((ColumnDaoImpl) columnDao).updateFormColumns(oldColumns, formTemplate);
+
+		List<Column> columns = columnDao.getFormColumns(formTemplate.getId());
+		assertEquals(ColumnType.NUMBER, columns.get(0).getColumnType());
+		assertEquals("numericColumn", columns.get(0).getAlias());
+		assertEquals(100, ((StringColumn) columns.get(1)).getMaxLength());
+		assertEquals("stringColumn", columns.get(1).getAlias());
+
+		//TODO form_data_row
+	}
+
+	@Test
+	public void updateFormColumnsTest2() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<Column> columns = formTemplate.getColumns();
+		// меняем тип графы
+		columns.remove(formTemplate.getColumn("stringColumn"));
+		NumericColumn numericColumn = new NumericColumn();
+		numericColumn.setId(43623);
+		numericColumn.setName("число");
+		numericColumn.setMaxLength(10);
+		numericColumn.setPrecision(2);
+		numericColumn.setOrder(1);
+		numericColumn.setDataOrder(0);
+		numericColumn.setAlias("stringColumn");
+		columns.add(numericColumn);
+
+		((NumericColumn) formTemplate.getColumn("numericColumn")).setMaxLength(20);
+
+		columnDao.updateFormColumns(formTemplate);
+
+		columns = columnDao.getFormColumns(formTemplate.getId());
+		assertEquals(ColumnType.NUMBER, columns.get(0).getColumnType());
+		assertEquals("numericColumn", columns.get(0).getAlias());
+		assertEquals(1, ((DateColumn) columns.get(1)).getFormatId().intValue());
+		assertEquals("dateColumn", columns.get(1).getAlias());
+
+		//TODO form_data_row
+	}
 
 	//@Test
     public void saveFormColumns1Test() {

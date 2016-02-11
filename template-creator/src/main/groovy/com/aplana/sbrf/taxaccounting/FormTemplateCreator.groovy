@@ -111,6 +111,7 @@ static void main(String[] args) {
             sb.append("        formColumn.setOrder(${column.order})\n")
             sb.append("        formColumn.setName('${column.name.replaceAll(/"/, /\"/).replaceAll(/\n/, ' ').replaceAll(/ +/, ' ')}')\n")
             sb.append("        formColumn.setAlias('${column.alias}')\n")
+            // TODO метод "setColumnType" удален, так как выставление типа графы осуществляется в её конструкторе
             sb.append("        formColumn.setColumnType(ColumnType.find{ it.title.equals('${column.columnType.title}')})\n")
             sb.append("        formColumn.setWidth(${column.getWidth()})\n")
             sb.append("        formColumn.setChecking(${column.checking})\n")

@@ -10,7 +10,7 @@ public class AutoNumerationColumn extends Column {
 	private NumerationType numerationType;
 
     public AutoNumerationColumn() {
-		setColumnType(ColumnType.AUTO);
+		columnType = ColumnType.AUTO;
         setNumerationType(NumerationType.SERIAL);
     }
 

@@ -22,7 +22,7 @@ public class StringColumn extends Column  implements Serializable {
     private int prevLength;
 
 	public StringColumn() {
-		setColumnType(ColumnType.STRING);
+		columnType = ColumnType.STRING;
 	}
 
 	/**
