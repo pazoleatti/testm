@@ -186,7 +186,7 @@ void consolidation() {
 def calcItog(def dataRows) {
     def itogValues = [:]
     totalColumns.each {alias ->
-        itogValues[alias] = roundValue(0)
+        itogValues[alias] = BigDecimal.ZERO
     }
     for (def row in dataRows) {
         if (row.getAlias() == 'itog') {
@@ -257,33 +257,14 @@ void importTransportData() {
         reader.close()
     }
 
-    // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
-        // мапа с алиасами граф и номерами колонок в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = [ 'realizeCost' : 4, 'obtainCost' : 5 ]
-
-        // задать итоговой строке значения из итоговой строки тф
-        def totalRow = getDataRow(dataRows, 'itog')
-        totalColumnsIndexMap.keySet().asList().each { alias ->
-            totalRow[alias] = totalTF[alias]
-        }
-
-        // подсчет итогов
-        def itogValues = calcItog(dataRows)
-
-        // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = itogValues[alias]
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
+    def totalRow = getDataRow(dataRows, 'itog')
+    // подсчет итогов
+    def itogValues = calcItog(dataRows)
+    itogValues.each { key, value ->
+        totalRow[key] = value
     }
+    // сравнение итогов
+    checkAndSetTFSum(totalRow, totalTF, totalColumns, totalTF?.getImportIndex(), logger, false)
     showMessages(dataRows, logger)
 }
 
