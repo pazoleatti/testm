@@ -637,19 +637,7 @@ void importTransportData() {
     showMessages(newRows, logger)
 
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
-        checkTFSum(totalRow, totalTF, totalColumns, fileRowIndex, logger, false)
-        // задать итоговой строке нф значения из итоговой строки тф
-        totalColumns.each { alias ->
-            totalRow[alias] = totalTF[alias]
-        }
-    } else {
-        logger.warn("В транспортном файле не найдена итоговая строка")
-        // очистить итоги
-        totalColumns.each { alias ->
-            totalRow[alias] = null
-        }
-    }
+    checkAndSetTFSum(totalRow, totalTF, totalColumns, totalTF?.getImportIndex(), logger, false)
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(newRows)

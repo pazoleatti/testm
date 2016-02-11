@@ -430,40 +430,12 @@ void importTransportData() {
     }
 
     // сравнение итогов
-    if (totalTF) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['sum': 4, 'sum2': 6]
-
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // итоговая строка для сверки сумм
         def totalTmp = formData.createStoreMessagingDataRow()
-        totalColumnsIndexMap.keySet().asList().each { alias ->
-            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-        }
-
-        // подсчет итогов
-        for (def row : newRows) {
-            if (row.getAlias()) {
-                continue
-            }
-            totalColumnsIndexMap.keySet().asList().each { alias ->
-                def value1 = totalTmp.getCell(alias).value
-                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-                totalTmp.getCell(alias).setValue(value1 + value2, null)
-            }
-        }
-
-        // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = totalTmp.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
+        calcTotalSum(newRows, totalTmp, totalColumns)
+        checkTFSum(totalTmp, totalTF, totalColumns, fileRowIndex, logger, false)
+        // итог в файле не должен совпадать с итогами в НФ
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }

@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.SignService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import org.junit.Assert;
@@ -23,8 +24,7 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Dmitriy Levykin
@@ -34,17 +34,29 @@ public class ConfigurationServiceTest {
     private final static ConfigurationService service = new ConfigurationServiceImpl();
     private final static Department testDepartment1 = new Department();
     private final static Department testDepartment2 = new Department();
+    private final static ConfigurationParamModel model = new ConfigurationParamModel();
+    private final static AuditService auditService = mock(AuditService.class);
+
     static {
         testDepartment1.setId(1);
         testDepartment1.setName("Подразделение один");
         testDepartment2.setId(2);
         testDepartment2.setName("Подразделение два");
+
+        List<String> newUrl = new ArrayList<String>();
+        newUrl.add("keyFileUrl");
+        newUrl.add("keyFileUrl2");
+
+        Map<Integer, List<String>> newKey = new HashMap<Integer, List<String>>();
+        newKey.put(0, newUrl);
+        model.put(ConfigurationParam.KEY_FILE, newKey);
     }
 
     @BeforeClass
     public static void init() {
         ConfigurationDao configurationDao = mock(ConfigurationDao.class);
         ReflectionTestUtils.setField(service, "configurationDao", configurationDao);
+        when(configurationDao.getAll()).thenReturn(model);
 
         DepartmentDao departmentDao = mock(DepartmentDao.class);
         when(departmentDao.getDepartment(eq(1))).thenReturn(testDepartment1);
@@ -56,6 +68,8 @@ public class ConfigurationServiceTest {
         when(refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG)).thenReturn(provider);
         when(refBookFactory.getDataProvider(RefBook.ASYNC_CONFIG)).thenReturn(provider);
         ReflectionTestUtils.setField(service, "refBookFactory", refBookFactory);
+
+        ReflectionTestUtils.setField(service, "auditService", auditService);
     }
 
     // Нет прав на сохранение
@@ -351,11 +365,48 @@ public class ConfigurationServiceTest {
     }
 
     /**
+     * Не пишем в ЖА когда путь к БОК не менялся
+     */
+    @Test
+    public void saveTest() {
+        TAUserInfo userInfo = getUser();
+        ((ConfigurationServiceImpl) service).saveAndLog(model, userInfo);
+
+        verify(auditService, never()).add(FormDataEvent.SETTINGS_CHANGE_KEY_FILE_URL, userInfo,
+                userInfo.getUser().getDepartmentId(), null, null, null, null, "keyFileUrl", null);
+    }
+
+    /**
+     * Пишем в ЖА когда путь к БОК изменился
+     */
+    @Test
+    public void saveTestWhenKeyFileUrlUpdated() {
+        ReflectionTestUtils.setField(service, "auditService", auditService);
+
+        ConfigurationParamModel newModel = new ConfigurationParamModel();
+        List<String> newUrl = new ArrayList<String>();
+        newUrl.add("newKeyFileUrl");
+        Map<Integer, List<String>> newKey = new HashMap<Integer, List<String>>();
+        newKey.put(0, newUrl);
+        newModel.put(ConfigurationParam.KEY_FILE, newKey);
+
+        // Сохраняем изменения
+        TAUserInfo userInfo = getUser();
+        ((ConfigurationServiceImpl) service).saveAndLog(newModel, userInfo);
+        // Проверяем, записали ли в ЖА
+        verify(auditService).add(FormDataEvent.SETTINGS_CHANGE_KEY_FILE_URL, userInfo,
+                userInfo.getUser().getDepartmentId(), null, null, null, null,
+                "'keyFileUrl;keyFileUrl2' -> 'newKeyFileUrl'", null);
+    }
+
+
+    /**
      * Пользователь с необходимыми полномочиями
      */
     private TAUserInfo getUser() {
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
+        user.setDepartmentId(1);
         userInfo.setUser(user);
         TARole role = new TARole();
         role.setAlias(TARole.ROLE_ADMIN);
