@@ -7,11 +7,11 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -49,6 +49,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Autowired
     private RefBookFactory refBookFactory;
+
+    @Autowired
+    private AuditService auditService;
 
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
@@ -200,7 +203,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            configurationDao.save(model);
+            saveAndLog(model, userInfo);
 
             //Сохранение настроек почты
             RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG);
@@ -320,10 +323,44 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
     }
 
+    /**
+     * Сохранить новые конфигурационные параметры и записать в ЖА
+     *
+     * @param model    модель с конфигурационными параметрами
+     * @param userInfo информация о пользователе
+     */
+    void saveAndLog(ConfigurationParamModel model, TAUserInfo userInfo) {
+        ConfigurationParamModel oldModel = configurationDao.getAll();
+        configurationDao.save(model);
+        String keyFileUrlDiff = getKeyFileUrlDiff(oldModel, model);
+        if (keyFileUrlDiff != null) {
+            auditService.add(FormDataEvent.SETTINGS_CHANGE_KEY_FILE_URL, userInfo,
+                    userInfo.getUser().getDepartmentId(), null, null, null, null, keyFileUrlDiff, null);
+        }
+    }
+
     // Проверка значения параметра "Проверять ЭЦП"
     private void signCheck(String value, Logger logger) {
         if (!"0".equals(value) && !"1".equals(value)) {
             logger.error(SIGN_CHECK_ERROR, value);
         }
+    }
+
+    /**
+     * Изменился ли путь к БОК
+     *
+     * @param oldModel модель со старыми данными
+     * @param newModel модель с новыми данными
+     * @return если изменился путь, то возвращает и старый и новый пути
+     */
+    private String getKeyFileUrlDiff(ConfigurationParamModel oldModel, ConfigurationParamModel newModel) {
+        String oldModelFullStringValue = oldModel.getFullStringValue(ConfigurationParam.KEY_FILE, 0);
+        String newModelFullStringValue = newModel.getFullStringValue(ConfigurationParam.KEY_FILE, 0);
+
+        if (oldModelFullStringValue != null && newModelFullStringValue != null
+                && !oldModelFullStringValue.equals(newModelFullStringValue)) {
+            return "'" + oldModelFullStringValue + "' -> '" + newModelFullStringValue + "'";
+        }
+        return null;
     }
 }
