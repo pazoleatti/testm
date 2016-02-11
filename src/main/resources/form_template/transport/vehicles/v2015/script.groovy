@@ -133,6 +133,10 @@ def nonEmptyColumns = [/*'rowNumber',*/ 'codeOKATO', /*'regionName',*/ 'tsTypeCo
 @Field
 def autoFillColumns = ['rowNumber', 'averageCost']
 
+//
+@Field
+def totalColumns = ['costOnPeriodBegin', 'costOnPeriodEnd']
+
 // дата начала отчетного периода
 @Field
 def start = null
@@ -896,43 +900,29 @@ void importTransportData() {
         return
     }
 
-    // сравнение итогов
-    if (totalTF) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
-        def totalColumnsIndexMap = ['costOnPeriodBegin': 19, 'costOnPeriodEnd': 20]
+    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
+    def totalColumnsIndexMap = ['costOnPeriodBegin': 19, 'costOnPeriodEnd': 20]
 
-        // итоговая строка для сверки сумм
-        def totalTmp = formData.createDataRow()
-        totalColumnsIndexMap.keySet().asList().each { alias ->
-            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-        }
-
-        // подсчет итогов
-        for (def row : newRows) {
-            if (row.getAlias()) {
-                continue
-            }
-            totalColumnsIndexMap.keySet().asList().each { alias ->
-                def value1 = totalTmp.getCell(alias).value
-                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-                totalTmp.getCell(alias).setValue(value1 + value2, null)
-            }
-        }
-
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = totalTmp.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
-    } else {
-        logger.warn("В транспортном файле не найдена итоговая строка")
+    // итоговая строка для сверки сумм
+    def totalTmp = formData.createDataRow()
+    totalColumnsIndexMap.keySet().asList().each { alias ->
+        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
     }
+
+    // подсчет итогов
+    for (def row : newRows) {
+        if (row.getAlias()) {
+            continue
+        }
+        totalColumnsIndexMap.keySet().asList().each { alias ->
+            def value1 = totalTmp.getCell(alias).value
+            def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
+            totalTmp.getCell(alias).setValue(value1 + value2, null)
+        }
+    }
+
+    // сравнение итогов
+    checkAndSetTFSum(totalTmp, totalTF, totalColumns, totalTF?.getImportIndex(), logger, false)
 
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
