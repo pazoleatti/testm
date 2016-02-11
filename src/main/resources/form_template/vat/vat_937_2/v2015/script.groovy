@@ -107,7 +107,7 @@ def autoFillColumns = allColumns - editableColumns
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа )
 @Field
-def totalSumColumns = ['saleCostB18', 'saleCostB10', 'saleCostB0', 'vatSum18', 'vatSum10', 'bonifSalesSum']
+def totalColumns = ['saleCostB18', 'saleCostB10', 'saleCostB0', 'vatSum18', 'vatSum10', 'bonifSalesSum']
 
 // Сортируемые атрибуты (графа 3, 2, 4..19)
 @Field
@@ -177,7 +177,7 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def totalRow = getDataRow(dataRows, 'total')
-    calcTotalSum(dataRows, totalRow, totalSumColumns)
+    calcTotalSum(dataRows, totalRow, totalColumns)
 }
 
 void changeDateFormat(def row){
@@ -315,7 +315,7 @@ void logicCheck() {
         }
     }
 
-    checkTotalSum(dataRows, totalSumColumns, logger, false)
+    checkTotalSum(dataRows, totalColumns, logger, false)
 }
 
 // получить кусок текста
@@ -343,7 +343,7 @@ void consolidation() {
             def final childDataRows = childData.all
             rows.addAll(childDataRows.findAll { it.getAlias() == null })
             def subTotalRow = getFixedRow("Всего по ${department.name}", "total_${department.id}")
-            calcTotalSum(childDataRows, subTotalRow, totalSumColumns)
+            calcTotalSum(childDataRows, subTotalRow, totalColumns)
             rows.add(subTotalRow)
         }
     }
@@ -506,32 +506,10 @@ void importTransportData() {
     // подсчет итогов
     def totalRow = getFixedRow('Всего', 'total')
     newRows.add(totalRow)
+    calcTotalSum(newRows, totalRow, totalColumns)
 
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
-        calcTotalSum(newRows, totalRow, totalSumColumns)
-
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['saleCostB18' : 15, 'saleCostB10' : 16, 'saleCostB0' : 17, 'vatSum18' : 18, 'vatSum10' : 19, 'bonifSalesSum' : 20]
-
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = totalRow.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
-        // задать итоговой строке нф значения из итоговой строки тф
-        totalSumColumns.each { alias ->
-            totalRow[alias] = totalTF[alias]
-        }
-    } else {
-        logger.warn("В транспортном файле не найдена итоговая строка")
-    }
+    checkAndSetTFSum(totalRow, totalTF, totalColumns, totalTF?.getImportIndex(), logger, false)
 
     updateIndexes(newRows)
     showMessages(newRows, logger)
@@ -666,7 +644,7 @@ void importData() {
     rows.add(totalRow)
     updateIndexes(rows)
     // сравнение итогов
-    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalSumColumns, formData, logger, false)
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
