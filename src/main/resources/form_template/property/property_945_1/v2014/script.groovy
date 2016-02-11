@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormType
 import com.aplana.sbrf.taxaccounting.model.Relation
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -1056,7 +1057,7 @@ def getSources() {
                 departmentFormType.formTypeId = departmentFormType945_5.formTypeId
                 departmentFormType.departmentId = departmentFormType945_5.departmentId
                 departmentFormType.kind = departmentFormType945_5.kind
-                departmentFormType.performerId = departmentFormType945_5.performerId
+                departmentFormType.performers = departmentFormType945_5.performers
 
                 formDestinations.add(departmentFormType)
             }
@@ -1173,7 +1174,7 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
     DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(tmpFormData?.departmentReportPeriodId) as DepartmentReportPeriod
     DepartmentReportPeriod comparativePeriod = getDepartmentReportPeriodById(tmpFormData?.comparativePeriodId) as DepartmentReportPeriod
     FormType formType = getFormTypeById(departmentFormType.formTypeId) as FormType
-    Department performer = getDepartmentById(departmentFormType.performerId) as Department
+    def performers = departmentFormType.performers?.collect { getDepartmentById(it) as Department }
 
     // boolean light - заполняются только текстовые данные для GUI и сообщений
     if (light) {
@@ -1197,7 +1198,7 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
         /** Год периода сравнения */
         relation.comparativePeriodYear = comparativePeriod?.reportPeriod?.taxPeriod?.year
         /** название подразделения-исполнителя */
-        relation.performerName = performer?.name
+        relation.performerNames = performers?.collect { it?.name }?.findAll { it }
     }
     /**************  Общие параметры ***************/
     /** подразделение */
@@ -1216,6 +1217,8 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
     } catch (DaoException e) {
         relation.status = false
     }
+    /** Налог */
+    relation.taxType = TaxType.PROPERTY
 
     /**************  Параметры НФ ***************/
     /** Идентификатор созданной формы */
@@ -1225,7 +1228,7 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
     /** Тип НФ */
     relation.formDataKind = departmentFormType.kind
     /** подразделение-исполнитель*/
-    relation.performer = performer
+    relation.performers = performers
     /** Период сравнения. Может быть null */
     relation.comparativePeriod = comparativePeriod
     /** Номер месяца */

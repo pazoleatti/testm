@@ -3,6 +3,142 @@ alter table log_system add server varchar2(200);
 comment on column log_system.server is 'Сервер'; 
 
 ----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-14423: Реализовать справочник "История изменения категории ВЗЛ"
+
+insert into ref_book (id, name, visible, type, read_only, region_attribute_id, is_versioned) values (521, 'История изменения категории ВЗЛ', 0, 0, 0, null, 0);
+                                                                                                
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5230, 521, 'ВЗЛ',            'JUR_PERSON',    4,  1,  520,  5201,  1,  null,  10,  1,  0,  null,  null,  0,  null);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5231, 521, 'Категория ВЗЛ',        'CATEGORY',      4,  2,  506,  5061,  1,  null,  10,  1,  0,  null,  null,  0,  null);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5232, 521, 'Код формы',           'FORM_DATA_ID',   2,   3,   null,   null,   1,   0,     10, 1,   0,   null,   null,   0,   18);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5233, 521, 'Дата изменения',        'CHANGE_DATE',    3,  4,  null,  null,  1,  null,  10,  1,  0,  null,  1,    0,  null);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5234, 521, 'Код состояния',         'STATE',       2,   5,   null,   null,   1,   0,     10, 1,   0,   null,   null,   0,   9);
+
+--http://jira.aplana.com/browse/SBRFACCTAX-14644: Создать отдельную таблицу для справочника "История ВЗЛ"
+create table ref_book_vzl_history
+(
+id number(18) not null,
+jur_person number(18) not null,
+category number(18) not null,
+form_data_id number(18) not null,
+change_date date not null,
+state number(9) not null
+);
+
+create sequence seq_ref_book_vzl_history start with 1;
+
+comment on table ref_book_vzl_history is 'История изменения категории ВЗЛ';
+comment on column ref_book_vzl_history.id is 'Идентификатор записи';
+comment on column ref_book_vzl_history.jur_person is 'ВЗЛ';
+comment on column ref_book_vzl_history.category is 'Категория ВЗЛ';
+comment on column ref_book_vzl_history.form_data_id is 'Код формы';
+comment on column ref_book_vzl_history.change_date is 'Дата изменения';
+comment on column ref_book_vzl_history.state is 'Код состояния';
+
+alter table ref_book_vzl_history add constraint ref_book_vzl_hist_pk primary key (id);
+alter table ref_book_vzl_history add constraint ref_book_vzl_hist_fk_form_data foreign key (form_data_id) references form_data(id) on delete cascade;
+alter table ref_book_vzl_history add constraint ref_book_vzl_hist_fk_ref_jur foreign key (jur_person) references ref_book_record(id);
+alter table ref_book_vzl_history add constraint ref_book_vzl_hist_fk_ref_cat foreign key (category) references ref_book_record(id);
+
+update ref_book set table_name = upper('ref_book_vzl_history') where id = 521;
+
+insert into ref_book_vzl_history (id, jur_person, category, form_data_id, change_date, state)
+select seq_ref_book_vzl_history.nextval, v1.reference_value as JUR_PERSON, v2.reference_value as CATEGORY, v3.number_value as FORM_DATA_ID, v4.date_value as CHANGE_DATE, v5.number_value as STATE from ref_book_record r
+left join ref_book_value v1 on r.id = v1.record_id and v1.attribute_id = 5230
+left join ref_book_value v2 on r.id = v2.record_id and v2.attribute_id = 5231
+left join ref_book_value v3 on r.id = v3.record_id and v3.attribute_id = 5232
+left join ref_book_value v4 on r.id = v4.record_id and v4.attribute_id = 5233
+left join ref_book_value v5 on r.id = v5.record_id and v5.attribute_id = 5234
+where ref_book_id = 521 and exists (select 1 from form_data fd where fd.id = v3.number_value);
+
+delete from ref_book_record where ref_book_id = 521;
+commit;
+
+----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-14602: Заархивировать JasperPrint-отчеты декларации
+set serveroutput on size 1000000;
+
+create or replace and compile java source named "ZipBlob" as
+import oracle.sql.BLOB;
+import java.io.EOFException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+public class ZipBlob {
+  public static BLOB compress(BLOB blob, String fileName)
+    throws Exception {
+    Connection con = DriverManager.getConnection("jdbc:default:connection:");
+    BLOB result = BLOB.createTemporary(con, true, BLOB.DURATION_SESSION);
+    ZipOutputStream out = new ZipOutputStream(result.getBinaryOutputStream());
+    InputStream in = null;
+    try {
+      in = blob.getBinaryStream();
+      out.putNextEntry(new ZipEntry(fileName));
+      byte[] b = new byte[blob.getChunkSize()];
+      int iCount;
+      do {
+        iCount = in.read(b);
+        if (iCount != -1) {
+          out.write(b, 0, iCount);
+        }
+      } while (iCount != -1);
+    } catch (EOFException e) {
+    } finally {
+      if (in != null) {in.close();}
+    }
+    out.close();
+    return result;
+  }
+}
+/
+
+create or replace package pck_zip as
+ function blob_compress(
+     p_source_blob blob
+   , p_source_file_name varchar2
+ ) return blob as language java name
+   'ZipBlob.compress(oracle.sql.BLOB, java.lang.String) return oracle.sql.BLOB';
+end;
+/
+
+declare
+   err_msg VARCHAR2(200);
+   b_temp_file BLOB;
+   b_compressed_file BLOB;
+   v_filename varchar2(256) := 'report.jasper';
+   cursor data_to_compress is
+        select dd.id as declaration_data_id, dt.name as template_name, d.name as department_name, rp.name as report_period_name, tp.year, jasper.blob_data_id as jasper_blob_data_id, bd_jasper.data as bd_jasper_data, excel.blob_data_id as excel_blob_data_id, rawtohex(DBMS_LOB.SUBSTR(BLOB_TO_CLOB(bd_jasper.data), 4, 1))
+        from declaration_report jasper
+        join declaration_data dd on dd.id = jasper.declaration_data_id
+        join declaration_template dt on dt.id = dd.declaration_template_id
+        join department_report_period drp on drp.id = dd.department_report_period_id
+        join department d on d.id = drp.department_id
+        join report_period rp on rp.id = drp.report_period_id
+        join tax_period tp on tp.id = rp.tax_period_id
+        join blob_data bd_jasper on bd_jasper.id = jasper.blob_data_id
+        left join declaration_report excel on jasper.declaration_data_id = excel.declaration_data_id and excel.type = 0
+        where jasper.type = 3 and rawtohex(DBMS_LOB.SUBSTR(BLOB_TO_CLOB(bd_jasper.data), 4, 1)) <> '504B0304'
+        order by excel.blob_data_id nulls last;
+ begin
+   for x in data_to_compress loop
+   
+		if (x.excel_blob_data_id is not null) then
+			delete from blob_data where id = x.jasper_blob_data_id;
+			dbms_output.put_line('Deleted : '||x.declaration_data_id||' // '||x.template_name ||' ('||x.department_name||' // '||x.report_period_name || ' ' || x.year||')');
+		else 
+			b_compressed_file := pck_zip.blob_compress(x.bd_jasper_data, v_filename);
+			update blob_data bd set bd.data = b_compressed_file where bd.id = x.jasper_blob_data_id;
+			dbms_output.put_line('Compressed : '||x.declaration_data_id||' // '||x.template_name ||' ('||x.department_name||' // '||x.report_period_name || ' ' || x.year||')');
+		end if;
+   end loop;        
+ end;
+/
+commit;
+
+drop package pck_zip;
+drop java source "ZipBlob";
+----------------------------------------------------------------------------------------------------------------
 create or replace package FORM_DATA_PCKG is
   -- Запросы получения источников-приемников для налоговых форм
   -- Источники - возвращаемый результат

@@ -20,6 +20,16 @@ public class Logger {
 	private List<LogEntry> entries = new ArrayList<LogEntry>();
     //Добавили пока на пробу, поскольку необходимо логгирование в справочнике Подразделений
     private TAUserInfo taUserInfo;
+    //Основное сообщение об ошибке, которое выводится в диалог а не в лог панель
+    private String mainMsg;
+
+    public String getMainMsg() {
+        return mainMsg;
+    }
+
+    public void setMainMsg(String mainMsg) {
+        this.mainMsg = mainMsg;
+    }
 
     public TAUserInfo getTaUserInfo() {
         return taUserInfo;

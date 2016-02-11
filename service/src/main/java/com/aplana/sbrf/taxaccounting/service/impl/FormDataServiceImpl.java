@@ -15,8 +15,8 @@ import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -921,8 +921,9 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void checkReferenceValues(Logger logger, FormData formData, boolean needCheckTemp) {
-        Map<Long, List<Long>> recordsToCheck = new HashMap<Long, List<Long>>();
+        Map<RefBookDataProvider, List<Long>> references = new HashMap<RefBookDataProvider, List<Long>>();
         Map<Long, List<ReferenceInfo>> referenceInfoMap = new HashMap<Long, List<ReferenceInfo>>();
+        Map<String, RefBookDataProvider> providers = new HashMap<String, RefBookDataProvider>();
         List<DataRow<Cell>> rows;
         rows = dataRowDao.getRows(formData, null);
         if (!rows.isEmpty()) {
@@ -933,14 +934,16 @@ public class FormDataServiceImpl implements FormDataService {
                         RefBook refBook = refBookDao.getByAttribute(attributeId);
                         for (DataRow<Cell> row : rows) {
                             if (row.getCell(column.getAlias()).getNumericValue() != null) {
-                                //Если у справочника нет своей таблицы, значит он универсальный и провайдер для него один и тот же
-                                long refBookId = refBook.getTableName() != null
-                                        ? refBook.getId() : RefBook.UNIVERSAL_REF_BOOK_ID;
-                                if (!recordsToCheck.containsKey(refBookId)) {
-                                    recordsToCheck.put(refBookId, new ArrayList<Long>());
+                                RefBookDataProvider provider;
+                                if (!providers.containsKey(refBook.getTableName())) {
+                                    provider = refBookFactory.getDataProvider(refBook.getId());
+                                    providers.put(refBook.getTableName(), provider);
+                                    references.put(provider, new ArrayList<Long>());
+                                } else {
+                                    provider = providers.get(refBook.getTableName());
                                 }
-                                //Раскладываем значения ссылок по справочникам, на которые они ссылаются. Делим на группы - универсальные и особенные (типа REF_BOOK_OKTMO)
-                                recordsToCheck.get(refBookId).add(row.getCell(column.getAlias()).getNumericValue().longValue());
+                                //Раскладываем значения ссылок по справочникам, на которые они ссылаются
+                                references.get(provider).add(row.getCell(column.getAlias()).getNumericValue().longValue());
 
                                 //Сохраняем информацию о местоположении ссылки
                                 long uniqueRecordId = row.getCell(column.getAlias()).getNumericValue().longValue();
@@ -956,15 +959,13 @@ public class FormDataServiceImpl implements FormDataService {
 
             ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
             boolean error = false;
-            for (Map.Entry<Long, List<Long>> referencesToCheck : recordsToCheck.entrySet()) {
-                RefBookDataProvider provider = refBookFactory.getDataProvider(referencesToCheck.getKey());
-                Map<Long, CheckResult> inactiveRecords = provider.getInactiveRecordsInPeriod(referencesToCheck.getValue(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+            for (Map.Entry<RefBookDataProvider, List<Long>> referencesToCheck : references.entrySet()) {
+                RefBookDataProvider provider = referencesToCheck.getKey();
+                List<ReferenceCheckResult> inactiveRecords = provider.getInactiveRecordsInPeriod(referencesToCheck.getValue(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
                 if (!inactiveRecords.isEmpty()) {
-                    for (Map.Entry<Long, CheckResult> inactiveRecord : inactiveRecords.entrySet()) {
-                        Long id = inactiveRecord.getKey();
-                        CheckResult checkResult = inactiveRecord.getValue();
-                        for (ReferenceInfo referenceInfo : referenceInfoMap.get(id)) {
-                            switch (checkResult) {
+                    for (ReferenceCheckResult inactiveRecord : inactiveRecords) {
+                        for (ReferenceInfo referenceInfo : referenceInfoMap.get(inactiveRecord.getRecordId())) {
+                            switch (inactiveRecord.getResult()) {
                                 case NOT_EXISTS:
                                     logger.error(String.format(REF_BOOK_LINK, referenceInfo.getRownum(),
                                             ": значение графы", referenceInfo.getColumnName(),

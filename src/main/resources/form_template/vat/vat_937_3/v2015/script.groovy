@@ -99,7 +99,7 @@ def editableColumns = allColumns - ['fix', 'rowNumber']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 14..19)
 @Field
-def totalSumColumns = ['cost', 'vatSum', 'diffDec', 'diffInc', 'diffVatDec', 'diffVatInc']
+def totalColumns = ['cost', 'vatSum', 'diffDec', 'diffInc', 'diffVatDec', 'diffVatInc']
 
 // список алиасов подразделов
 @Field
@@ -338,7 +338,7 @@ void logicCheck() {
     for (def section : sections) {
         def firstRow = getDataRow(dataRows, 'part_' + section)
         def lastRow = getDataRow(dataRows, 'total_' + section)
-        for (def alias : totalSumColumns) {
+        for (def alias : totalColumns) {
             def value = roundValue(lastRow.getCell(alias).value ?: 0)
             def sum = roundValue(getSum(dataRows, alias, firstRow, lastRow))
             if (sum != value) {
@@ -547,7 +547,7 @@ void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def to
     updateIndexes(destinationDataRows)
 
     def subTotalRow = getFixedRow("Всего по ${department.name}", "sub_total_${department.id}")
-    calcTotalSum(copyRows, subTotalRow, totalSumColumns)
+    calcTotalSum(copyRows, subTotalRow, totalColumns)
     destinationDataRows.add(getDataRow(destinationDataRows, toAlias).getIndex() - 1, subTotalRow)
     updateIndexes(destinationDataRows)
 }
@@ -565,7 +565,7 @@ void calcTotal(def dataRows) {
     for (def section : sections) {
         def firstRow = getDataRow(dataRows, 'part_' + section)
         def lastRow = getDataRow(dataRows, 'total_' + section)
-        totalSumColumns.each { alias ->
+        totalColumns.each { alias ->
             def sum = roundValue(getSum(dataRows, alias, firstRow, lastRow))
             lastRow.getCell(alias).setValue(sum, null)
         }
@@ -669,7 +669,7 @@ void importTransportData() {
     String[] rowCells
     int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
-    def total = null		// итоговая строка со значениями из тф для добавления
+    def totalTF = null		// итоговая строка со значениями из тф для добавления
     def mapRows = [:]
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
@@ -694,7 +694,7 @@ void importTransportData() {
                 // итоговая строка тф
                 rowCells = reader.readNext()
                 if (rowCells != null) {
-                    total = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
                 }
                 break
             }
@@ -711,44 +711,28 @@ void importTransportData() {
         reader.close()
     }
 
-    int rowCount = 0
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && total) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['cost' : 14, 'vatSum' : 15, 'diffDec' : 16, 'diffInc' : 17, 'diffVatDec' : 18, 'diffVatInc' : 19]
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // итоговая строка для сверки сумм
         def totalTmp = formData.createStoreMessagingDataRow()
-        totalColumnsIndexMap.keySet().asList().each { alias ->
-            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+        totalColumns.each { alias ->
+            totalTmp[alias] = BigDecimal.ZERO
         }
 
         // подсчет итогов
         mapRows.each { sectionIndex, dataRows ->
-            rowCount += dataRows.size()
             for (def row : dataRows) {
                 if (row.getAlias()) {
                     continue
                 }
-                totalColumnsIndexMap.keySet().asList().each { alias ->
-                    def value1 = totalTmp.getCell(alias).value
-                    def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-                    totalTmp.getCell(alias).setValue(value1 + value2, null)
+                totalColumns.each { alias ->
+                    totalTmp[alias] = totalTmp[alias] + (row[alias] ?: BigDecimal.ZERO)
                 }
             }
         }
 
-        // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = total.getCell(alias).value
-            def v2 = totalTmp.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
+        checkTFSum(totalTmp, totalTF, totalColumns, fileRowIndex, logger, false)
+        // итог в файле не должен совпадать с итогами в НФ
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
@@ -765,7 +749,7 @@ void importTransportData() {
 
         // посчитать итоги по разделам
         def rows = (mapRows[section] ?: [])
-        calcTotalSum(rows, lastRow, totalSumColumns)
+        calcTotalSum(rows, lastRow, totalColumns)
 
         newRows.add(firstRow)
         newRows.addAll(rows)
@@ -944,7 +928,7 @@ void importData() {
         mapRows.each { section, sectionRows ->
             def totalRowFromFile = totalRowFromFileMap["part_$section"]
             def totalRow = getDataRow(templateRows, "total_$section")
-            compareSimpleTotalValues(totalRow, totalRowFromFile, sectionRows, totalSumColumns, formData, logger, false)
+            compareSimpleTotalValues(totalRow, totalRowFromFile, sectionRows, totalColumns, formData, logger, false)
         }
     }
 

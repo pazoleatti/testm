@@ -44,7 +44,7 @@
         .scrolPanelStyle {
             background-color: white;
             position: absolute !important;
-            top: 45px;
+            top: 65px;
             bottom: 35px;
             left: 0;
             right: 0;
@@ -86,6 +86,17 @@
 
         .marginRight5{
             margin-right: 5px;
+        }
+
+
+        .periodPanelStyle {
+            background-color: white;
+            border-bottom: 1px solid #aeaeac;
+            width: 100%;
+        }
+        .toRight {
+            text-align: right;
+            padding-right: 20px;
         }
 
     </ui:style>
@@ -141,6 +152,12 @@
                         </g:HorizontalPanel>
                     </g:cell>
 
+                </g:HorizontalPanel>
+
+                <g:HorizontalPanel spacing="5" height="44px" addStyleNames="{style.periodPanelStyle}">
+                    <g:cell width="100%">
+                        <g:Label ui:field="configPeriodLabel" addStyleNames="{style.toRight}"/>
+                    </g:cell>
                 </g:HorizontalPanel>
 
                 <g:ScrollPanel addStyleNames="{style.scrolPanelStyle}">

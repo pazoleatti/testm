@@ -312,12 +312,13 @@ public interface RefBookDataProvider {
 
     /**
      * Проверяет действуют ли записи справочника в указанном периоде
+     * http://conf.aplana.com/pages/viewpage.action?pageId=23245326
      * @param recordIds уникальные идентификаторы записей справочника
      * @param periodFrom начало периода
      * @param periodTo окончание периода
      * @return идентификаторы записей, которые не действуют в указанном периоде + результат проверки
      */
-    Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
+    List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
 
     /**
      * Создает новые записи в справочнике без учета версионирования

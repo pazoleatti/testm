@@ -30,6 +30,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
@@ -1073,68 +1074,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         } catch (Exception ex) {
             throw new DaoException("Не удалось обновить значения справочника", ex);
         }
-    }
-
-    @Override
-    public boolean isVersionsExist(Long refBookId, List<Long> recordIds, Date version) {
-        String sql = "select count(*) from ref_book_record where ref_book_id = ? and %s and version = trunc(?, 'DD') and status != -1";
-        return getJdbcTemplate().queryForInt(String.format(sql, transformToSqlInStatement("record_id", recordIds)), refBookId, version) != 0;
-    }
-
-    private static final String GET_INACTIVE_RECORDS_IN_PERIOD = "select id, \n" +
-            "        case when status = -1 then 0\n" +
-            "             when nvl(next_version, to_date('31.12.9999', 'DD.MM.YYYY')) <= nvl(:periodTo, to_date('31.12.9999', 'DD.MM.YYYY')) then 2 --дата окончания ограничивающего периода\n" +
-            "             when ((end_version is not null and end_version < :periodFrom) or (:periodTo is not null and start_version > :periodTo)) then 1 end state                    \n" +
-            "from   (\n" +
-            "       select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by input.id order by rbr.version) - interval '1' DAY end_version, case when input.status = 0 then lead (rbr.version) over (partition by input.id, rbr.status order by rbr.version) end next_version \n" +
-            "       from ref_book_record input\n" +
-            "       join ref_book_record rbr on input.record_id = rbr.record_id and input.ref_book_id = rbr.ref_book_id and rbr.status != -1 \n" +
-            "       where %s \n" +
-            "       ) a where input_id = id";
-
-    @Override
-    public Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
-        //Исключаем несуществующие записи
-        String sql = String.format("select id from ref_book_record where %s and status != -1", SqlUtils.transformToSqlInStatement("id", recordIds));
-        final Map<Long, CheckResult> result = new HashMap<Long, CheckResult>();
-        recordIds = new LinkedList<Long>(recordIds);
-        List<Long> existRecords = new ArrayList<Long>();
-        try {
-            //Получаем список существующих записей среди входного набора
-            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
-                @Override
-                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return rs.getLong("id");
-                }
-            });
-        } catch (EmptyResultDataAccessException ignored) {}
-        for (Iterator<Long> it = recordIds.iterator(); it.hasNext();) {
-            Long recordId = it.next();
-            //Если запись не найдена среди существующих, то проставляем статус и удаляем ее из списка для остальных проверок
-            if (!existRecords.contains(recordId)) {
-                result.put(recordId, CheckResult.NOT_EXISTS);
-                it.remove();
-            }
-        }
-        if (!recordIds.isEmpty()) {
-            //Проверяем оставшиеся записи
-            sql = String.format(GET_INACTIVE_RECORDS_IN_PERIOD, transformToSqlInStatement("input.id", recordIds));
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("periodFrom", periodFrom);
-            params.put("periodTo", periodTo);
-            try {
-                getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
-                    @Override
-                    public void processRow(ResultSet rs) throws SQLException {
-                        Integer resultCode = SqlUtils.getInteger(rs, "state");
-                        if (resultCode != null) {
-                            result.put(SqlUtils.getLong(rs, "id"), CheckResult.getByCode(resultCode));
-                        }
-                    }
-                });
-            } catch (EmptyResultDataAccessException ignored) {}
-        }
-        return result;
     }
 
     private static final String CHECK_REF_BOOK_RECORD_UNIQUE_SQL = "select id from ref_book_record " +
@@ -2896,60 +2835,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private final static String CHECK_REFERENCE_VERSIONS_START = "select id from %s where VERSION < ? and %s";
 
-    private final static String CHECK_REFERENCE_VERSIONS_IN_PERIOD = "select id, versionStart, versionEnd from (\n" +
-            "  select r.id, r.version as versionStart, (select min(version) - interval '1' day from %s rn where rn.ref_book_id = r.ref_book_id and rn.record_id = r.record_id and rn.version > r.version) as versionEnd \n" +
-            "  from %s r\n" +
-            "  where %s\n" +
-            ") where (:versionTo is not null and :versionTo < versionStart) or (versionEnd is not null and versionEnd < :versionFrom)";
-
-    @Override
-    public void isReferenceValuesCorrect(final Logger logger, String tableName, @NotNull Date versionFrom,
-                                         @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records, final boolean isConfig) {
-        if (!attributes.isEmpty()) {
-            final Map<Long, String> attributeIds = new HashMap<Long, String>();
-            List<Long> allIn = new ArrayList<Long>();
-            for (RefBookRecord record : records) {
-                List<Long> in = new ArrayList<Long>();
-                Map<String, RefBookValue> values = record.getValues();
-                for (RefBookAttribute attribute : attributes) {
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE) &&
-                            values.get(attribute.getAlias()) != null && !values.get(attribute.getAlias()).isEmpty() &&
-                            !attribute.getAlias().equals("DEPARTMENT_ID")) {       //Подразделения не версионируются и их нет смысла проверять
-                        Long id = values.get(attribute.getAlias()).getReferenceValue();
-                        attributeIds.put(id, attribute.getName());
-                        in.add(id);
-                    }
-                }
-                allIn.addAll(in);
-
-                if (!in.isEmpty()) {
-                    /** Проверяем пересекаются ли периоды ссылочных атрибутов с периодом текущей записи справочника */
-                    String sql = String.format(CHECK_REFERENCE_VERSIONS_IN_PERIOD, tableName, tableName, transformToSqlInStatement("id", in));
-                    Map<String, Object> params = new HashMap<String, Object>();
-                    params.put("versionFrom", versionFrom);
-                    params.put("versionTo", record.getVersionTo());
-                    getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
-                        @Override
-                        public void processRow(ResultSet rs) throws SQLException {
-                            Long id = rs.getLong("id");
-                            Date versionStart = rs.getDate("versionStart");
-                            Date versionEnd = rs.getDate("versionEnd");
-                            logger.error("Период элемента, указанного в поле \"%s\" составляет %s - %s и не пересекается %s",
-                                    attributeIds.get(id),
-                                    sdf.format(versionStart),
-                                    versionEnd != null ? sdf.format(versionEnd) : "\"-\"",
-                                    (isConfig ? "с отчетным периодом!" : "с периодом актуальности версии!"));
-                        }
-                    });
-                }
-            }
-
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceException("Обнаружено некорректное значение атрибута");
-            }
-        }
-    }
-
     @Override
     public Map<String, RefBookValue> getRecordData(final Long refBookId, final String tableName, final Long recordId) {
         RefBook refBook = get(refBookId);
@@ -3092,10 +2977,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	}
 
     @Override
-    public List<Long> isRecordsExist(Set<Long> uniqueRecordIds) {
+    public List<Long> isRecordsExist(String tablename, Set<Long> uniqueRecordIds) {
         //Исключаем несуществующие записи
-        String sql = String.format("select id from ref_book_record where %s and status != -1", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
-        List<Long> recordIds = new LinkedList<Long>(uniqueRecordIds);
+        String sql = String.format("select id from %s where %s and status != -1", tablename, SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
+        Set<Long> recordIds = new HashSet<Long>(uniqueRecordIds);
         List<Long> existRecords = new ArrayList<Long>();
         try {
             //Получаем список существующих записей среди входного набора
@@ -3109,16 +2994,91 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         for (Iterator<Long> it = recordIds.iterator(); it.hasNext();) {
             Long recordId = it.next();
-            //Если запись не найдена среди существующих, то проставляем статус и удаляем ее из списка для остальных проверок
+            //Если запись не найдена среди существующих, то удаляем ее из списка для остальных проверок
             if (existRecords.contains(recordId)) {
                 it.remove();
             }
         }
-        return recordIds;
+        return new ArrayList<Long>(recordIds);
     }
 
     @Override
     public boolean isRefBookExist(long refBookId) {
         return getJdbcTemplate().queryForObject("select count(*) from ref_book where id = ?", new Object[]{refBookId}, Integer.class) > 0;
+    }
+
+    @Override
+    public boolean isVersionsExist(Long refBookId, List<Long> recordIds, Date version) {
+        String sql = "select count(*) from ref_book_record where ref_book_id = ? and %s and version = trunc(?, 'DD') and status != -1";
+        return getJdbcTemplate().queryForInt(String.format(sql, transformToSqlInStatement("record_id", recordIds)), refBookId, version) != 0;
+    }
+
+    private static final String GET_INACTIVE_RECORDS_IN_PERIOD = "select id, start_version as versionFrom, end_version as versionTo, \n" +
+            "        case when status = -1 then 0\n" +
+            "             when ((next_version < :periodTo and :periodTo is not null and next_version is not null) or (:periodTo is null and next_version is null)) then 2 --дата окончания ограничивающего периода\n" +
+            "             when ((end_version is not null and end_version < :periodFrom) or (:periodTo is not null and start_version > :periodTo)) then 1 end state                    \n" +
+            "from   (\n" +
+            "       select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by input.id order by rbr.version) - interval '1' DAY end_version, case when input.status = 0 then lead (rbr.version) over (partition by input.id, rbr.status order by rbr.version) end next_version \n" +
+            "       from %s input\n" +
+            "       join %s rbr on input.record_id = rbr.record_id %s and rbr.status != -1 \n" +
+            "       where %s \n" +
+            "       ) a where input_id = id";
+
+    @Override
+    public List<ReferenceCheckResult> getInactiveRecordsInPeriod(String tableName, @NotNull List<Long> uniqueRecordIds, @NotNull Date periodFrom, @NotNull Date periodTo, boolean onlyExistence) {
+        final List<ReferenceCheckResult> result = new ArrayList<ReferenceCheckResult>();
+        Set<Long> recordIds = new HashSet<Long>(uniqueRecordIds);
+        List<Long> existRecords = new ArrayList<Long>();
+
+        //Исключаем несуществующие записи
+        String sql = String.format("select id from %s where %s and status != -1", tableName, SqlUtils.transformToSqlInStatement("id", recordIds));
+        try {
+            //Получаем список существующих записей среди входного набора
+            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("id");
+                }
+            });
+        } catch (EmptyResultDataAccessException ignored) {}
+        for (Iterator<Long> it = recordIds.iterator(); it.hasNext();) {
+            Long recordId = it.next();
+            //Если запись не найдена среди существующих, то проставляем статус и удаляем ее из списка для остальных проверок
+            if (!existRecords.contains(recordId)) {
+                result.add(new ReferenceCheckResult(recordId, CheckResult.NOT_EXISTS));
+                it.remove();
+            }
+        }
+
+        if (!onlyExistence) {
+            if (!recordIds.isEmpty()) {
+                //Проверяем оставшиеся записи
+                sql = String.format(GET_INACTIVE_RECORDS_IN_PERIOD,
+                        tableName, tableName,
+                        tableName.equals(RefBook.REF_BOOK_RECORD_TABLE_NAME) ? "and input.ref_book_id = rbr.ref_book_id " : "",
+                        transformToSqlInStatement("input.id", recordIds));
+                MapSqlParameterSource params = new MapSqlParameterSource();
+                params.addValue("periodFrom", periodFrom);
+                params.addValue("periodTo", periodTo);
+                try {
+                    getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
+                        @Override
+                        public void processRow(ResultSet rs) throws SQLException {
+                            Integer resultCode = SqlUtils.getInteger(rs, "state");
+                            if (resultCode != null) {
+                                result.add(new ReferenceCheckResult(
+                                        SqlUtils.getLong(rs, "id"),
+                                        rs.getDate("versionFrom"),
+                                        rs.getDate("versionTo"),
+                                        CheckResult.getByCode(resultCode)
+                                ));
+                            }
+                        }
+                    });
+                } catch (EmptyResultDataAccessException ignored) {}
+            }
+        }
+
+        return result;
     }
 }

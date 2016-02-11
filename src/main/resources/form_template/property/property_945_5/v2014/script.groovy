@@ -1431,7 +1431,7 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
     DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(tmpFormData?.departmentReportPeriodId) as DepartmentReportPeriod
     DepartmentReportPeriod comparativePeriod = getDepartmentReportPeriodById(tmpFormData?.comparativePeriodId) as DepartmentReportPeriod
     FormType formType = getFormTypeById(departmentFormType.formTypeId) as FormType
-    Department performer = getDepartmentById(departmentFormType.performerId) as Department
+    def performers = departmentFormType.performers?.collect { getDepartmentById(it) as Department }
 
     // boolean light - заполняются только текстовые данные для GUI и сообщений
     if (light) {
@@ -1455,7 +1455,7 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
         /** Год периода сравнения */
         relation.comparativePeriodYear = comparativePeriod?.reportPeriod?.taxPeriod?.year
         /** название подразделения-исполнителя */
-        relation.performerName = performer?.name
+        relation.performerNames = performers?.collect { it?.name }?.findAll { it }
     }
     /**************  Общие параметры ***************/
     /** подразделение */
@@ -1474,6 +1474,8 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
     } catch (DaoException e) {
         relation.status = false
     }
+    /** Налог */
+    relation.taxType = TaxType.PROPERTY
 
     /**************  Параметры НФ ***************/
     /** Идентификатор созданной формы */
@@ -1483,7 +1485,7 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
     /** Тип НФ */
     relation.formDataKind = departmentFormType.kind
     /** подразделение-исполнитель*/
-    relation.performer = performer
+    relation.performers = performers
     /** Период сравнения. Может быть null */
     relation.comparativePeriod = comparativePeriod
     /** Номер месяца */

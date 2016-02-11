@@ -92,7 +92,7 @@ def nonEmptyColumns = ['typeCode', 'invoice', 'cost', 'nds']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа )
 @Field
-def totalSumColumns = ['nds']
+def totalColumns = ['nds']
 
 // Сортируемые атрибуты (графа 8, 3, 2, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16)
 @Field
@@ -145,7 +145,7 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def totalRow = getDataRow(dataRows, 'total')
-    calcTotalSum(dataRows, totalRow, totalSumColumns)
+    calcTotalSum(dataRows, totalRow, totalColumns)
 }
 
 void logicCheck() {
@@ -243,7 +243,7 @@ void logicCheck() {
         }
     }
 
-    checkTotalSum(dataRows, totalSumColumns, logger, !isBalancePeriod())
+    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
 }
 
 /** Получить новую строку с заданными стилями. */
@@ -347,7 +347,7 @@ void consolidation() {
                 // добавить только нефиксированные строки
                 rows.addAll(childDataRows.findAll { row -> row.getAlias() == null || row.getAlias() == '' })
                 def subTotalRow = getFixedRow("Всего по ${department.name}", "total_${department.id}", true)
-                calcTotalSum(childDataRows, subTotalRow, totalSumColumns)
+                calcTotalSum(childDataRows, subTotalRow, totalColumns)
                 rows.add(subTotalRow)
             }
         }
@@ -436,32 +436,10 @@ void importTransportData() {
     // подсчет итогов
     def totalRow = getFixedRow('Всего', 'total', true)
     newRows.add(totalRow)
+    calcTotalSum(newRows, totalRow, totalColumns)
 
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
-        calcTotalSum(newRows, totalRow, totalSumColumns)
-
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['nds' : 16]
-
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = totalRow.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
-        // задать итоговой строке нф значения из итоговой строки тф
-        totalSumColumns.each { alias ->
-            totalRow[alias] = totalTF[alias]
-        }
-    } else {
-        logger.warn("В транспортном файле не найдена итоговая строка")
-    }
+    checkAndSetTFSum(totalRow, totalTF, totalColumns, totalTF?.getImportIndex(), logger, false)
 
     updateIndexes(newRows)
     showMessages(newRows, logger)
@@ -592,7 +570,7 @@ void importData() {
     rows.add(totalRow)
     updateIndexes(rows)
     // сравнение итогов
-    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalSumColumns, formData, logger, false)
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {

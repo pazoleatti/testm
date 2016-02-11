@@ -1,13 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
@@ -74,6 +74,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private DeclarationDataSearchService declarationDataSearchService;
     @Autowired
     private TAUserService taUserService;
+    @Autowired
+    private DeclarationTypeDao declarationTypeDao;
 
     @Override
     public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
@@ -219,5 +221,15 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
         return sourceService.getDeclarationSourcesInfo(declaration, light, excludeIfNotExist, stateRestriction, userInfo, logger);
+    }
+
+    @Override
+    public List<Integer> getDeclarationTypeIds(TaxType taxType) {
+        if (taxType == null) {
+            return new ArrayList<Integer>();
+        }
+        TemplateFilter filter = new TemplateFilter();
+        filter.setTaxType(taxType);
+        return declarationTypeDao.getByFilter(filter);
     }
 }

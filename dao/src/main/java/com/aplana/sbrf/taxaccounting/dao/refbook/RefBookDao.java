@@ -200,9 +200,10 @@ public interface RefBookDao {
      * @param recordIds уникальные идентификаторы записей справочника
      * @param periodFrom начало периода
      * @param periodTo окончание периода
+     * @param onlyExistence выполняется только проверка существования
      * @return список id записей при проверке которых были обнаружены ошибки + код ошибки
      */
-    Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
+    List<ReferenceCheckResult> getInactiveRecordsInPeriod(String tableName, @NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo, boolean onlyExistence);
 
     /**
      * Проверка и поиск Id записи по:
@@ -613,17 +614,6 @@ public interface RefBookDao {
      */
     void updateVersionRelevancePeriod(String tableName, Long uniqueRecordId, Date version);
 
-    /**
-     * Проверка ссылочных атрибутов. Их дата начала актуальности должна быть больше либо равна дате актуальности новой версии
-     *
-     * @param versionFrom дата актуальности новой версии
-     * @param attributes  атрибуты справочника
-     * @param records     новые значения полей элемента справочника
-     * @param isConfig    признак того, что проверка выполняется для настроек подразделений
-     */
-    void isReferenceValuesCorrect(Logger logger, String tableName, @NotNull Date versionFrom,
-                                  @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records, boolean isConfig);
-
     Map<String, RefBookValue> getRecordData(Long refBookId, String tableName, Long recordId);
 
     /**
@@ -661,10 +651,11 @@ public interface RefBookDao {
 
     /**
      * Проверяет, существуют ли указанные версии элемента справочника
+     * @param tableName   название таблицы, в которой хранится справочник, т.к метод общий для нескольких справочников
      * @param uniqueRecordIds список уникальных идентификаторов версий записей справочника
      * @return список записей, которые не существуют
      */
-    List<Long> isRecordsExist(Set<Long> uniqueRecordIds);
+    List<Long> isRecordsExist(String tableName, Set<Long> uniqueRecordIds);
 
     /**
      * Проверяет, существует ли указанный справочник
@@ -672,5 +663,4 @@ public interface RefBookDao {
      * @return все записи существуют?
      */
     boolean isRefBookExist(long refBookId);
-
 }

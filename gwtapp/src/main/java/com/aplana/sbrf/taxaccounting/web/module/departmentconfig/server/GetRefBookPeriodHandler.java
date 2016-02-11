@@ -23,37 +23,14 @@ public class GetRefBookPeriodHandler extends AbstractActionHandler<GetRefBookPer
     }
 
     @Autowired
-    private RefBookFactory rbFactory;
-    @Autowired
     private PeriodService reportService;
 
     @Override
     public GetRefBookPeriodResult execute(GetRefBookPeriodAction action, ExecutionContext context) throws ActionException {
         GetRefBookPeriodResult result = new GetRefBookPeriodResult();
-        Long refBookId = null;
-        switch (action.getTaxType()) {
-            case INCOME:
-                refBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
-                break;
-            case TRANSPORT:
-                refBookId = RefBook.DEPARTMENT_CONFIG_TRANSPORT;
-                break;
-            case DEAL:
-                refBookId = RefBook.DEPARTMENT_CONFIG_DEAL;
-                break;
-            case VAT:
-                refBookId = RefBook.DEPARTMENT_CONFIG_VAT;
-                break;
-            case PROPERTY:
-                refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
-                break;
-        }
-        RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
         ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
-        String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
         result.setStartDate(period.getCalendarStartDate());
-        //Дата окончания = дате начала следующей версии
-        result.setEndDate(provider.getNextVersion(period.getCalendarStartDate(), filter));
+        result.setEndDate(period.getEndDate());
         return result;
     }
 

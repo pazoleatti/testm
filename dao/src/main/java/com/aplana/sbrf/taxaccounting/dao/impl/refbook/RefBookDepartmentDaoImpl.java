@@ -257,27 +257,6 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         return result;
     }
 
-    @Override
-    public Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        String sql = String.format("select id from "+ TABLE_NAME +" where %s", SqlUtils.transformToSqlInStatement("id", recordIds));
-        Map<Long, CheckResult> result = new HashMap<Long, CheckResult>();
-        List<Long> existRecords = new ArrayList<Long>();
-        try {
-            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
-                @Override
-                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return rs.getLong("id");
-                }
-            });
-        } catch (EmptyResultDataAccessException ignored) {}
-        for (Long recordId : recordIds) {
-            if (!existRecords.contains(recordId)) {
-                result.put(recordId, CheckResult.NOT_EXISTS);
-            }
-        }
-        return result;
-    }
-
     private static final String CHECK_USAGES_IN_REFBOOK =
             "WITH\n" +
                     "    recordsByVersion AS (SELECT\n" +
