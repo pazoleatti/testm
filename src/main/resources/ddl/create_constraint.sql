@@ -163,6 +163,11 @@ alter table form_data add constraint form_data_chk_accruing check (accruing in (
 alter table form_data add constraint form_data_chk_edited check (edited in (0, 1));
 alter table form_data add constraint form_data_chk_sorted_backup check (sorted_backup in (0, 1));
 
+alter table ref_book_vzl_history add constraint ref_book_vzl_hist_pk primary key (id);
+alter table ref_book_vzl_history add constraint ref_book_vzl_hist_fk_form_data foreign key (form_data_id) references form_data(id) on delete cascade;
+alter table ref_book_vzl_history add constraint ref_book_vzl_hist_fk_ref_jur foreign key (jur_person) references ref_book_record(id);
+alter table ref_book_vzl_history add constraint ref_book_vzl_hist_fk_ref_cat foreign key (category) references ref_book_record(id);
+
 alter table form_data_file add constraint form_data_file_pk primary key (blob_data_id, form_data_id);
 alter table form_data_file add constraint form_data_file_fk_form_data foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table form_data_file add constraint form_data_file_fk_blob_data foreign key (blob_data_id) references blob_data(id);

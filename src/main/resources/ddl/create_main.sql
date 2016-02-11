@@ -1000,3 +1000,23 @@ comment on table department_form_type_performer is 'Назначения нес�
 comment on column department_form_type_performer.department_form_type_id is 'Идентификатор связи подразделения с формой';
 comment on column department_form_type_performer.performer_dep_id is 'Исполнитель'; 
 --------------------------------------------------------------------------------------------------------
+create table ref_book_vzl_history
+(
+id number(18) not null,
+jur_person number(18) not null,
+category number(18) not null,
+form_data_id number(18) not null,
+change_date date not null,
+state number(9) not null
+);
+
+comment on table ref_book_vzl_history is 'История изменения категории ВЗЛ';
+comment on column ref_book_vzl_history.id is 'Идентификатор записи';
+comment on column ref_book_vzl_history.jur_person is 'ВЗЛ';
+comment on column ref_book_vzl_history.category is 'Категория ВЗЛ';
+comment on column ref_book_vzl_history.form_data_id is 'Код формы';
+comment on column ref_book_vzl_history.change_date is 'Дата изменения';
+comment on column ref_book_vzl_history.state is 'Код состояния';
+
+create sequence seq_ref_book_vzl_history start with 1;
+--------------------------------------------------------------------------------------------------------
