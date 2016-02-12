@@ -329,8 +329,9 @@ void importTransportData() {
     }
 
     // подсчет итогов
+    def totalRow = formData.createStoreMessagingDataRow()
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    calcTotalSum(dataRows, totalTmp, totalColumns)
+    calcTotalSum(dataRows, totalRow, totalColumns)
 
     showMessages(newRows, logger)
 
