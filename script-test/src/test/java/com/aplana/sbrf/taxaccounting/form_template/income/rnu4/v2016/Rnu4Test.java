@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
@@ -201,8 +202,15 @@ public class Rnu4Test extends ScriptTestBase {
     public void importTransportFileTest() {
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
-        checkLoadData(testHelper.getDataRowHelper().getAll());
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        Assert.assertEquals(5, dataRows.size());
+        checkLoadData(dataRows);
+
+        // итоги загрузились из тф, а не рассчитались
+        Assert.assertEquals(2130, dataRows.get(4).getCell("sum").getNumericValue().intValue());
+        // ошибка о несоответсвии итогов из тф и расчетных итогов
+        Assert.assertEquals(String.format(ScriptUtils.TRANSPORT_FILE_SUM_ERROR_1, 8,"Сумма дохода за отчётный квартал","2130.00", "1000.00"),
+                testHelper.getLogger().getEntries().get(0).getMessage());
     }
 
     @Test

@@ -2012,7 +2012,7 @@ public final class ScriptUtils {
      * @param logger логгер
      * @param isFatal фатальность - ошибка / предупреждение
      */
-    public static void checkAndSetTFSum(DataRow<Cell> totalRow, DataRow<Cell> totalRowTF, List<String> columns, int rowIndex, Logger logger, boolean isFatal) {
+    public static void checkAndSetTFSum(DataRow<Cell> totalRow, DataRow<Cell> totalRowTF, List<String> columns, Integer rowIndex, Logger logger, boolean isFatal) {
         if (!logger.containsLevel(LogLevel.ERROR) && totalRowTF != null) {
             // сравнение контрольных сумм
             checkTFSum(totalRow, totalRowTF, columns, rowIndex, logger, isFatal);
@@ -2041,7 +2041,7 @@ public final class ScriptUtils {
      * @param logger логгер
      * @param isFatal фатальность - ошибка / предупреждение
      */
-    public static void checkTFSum(DataRow<Cell> totalRow, DataRow<Cell> totalRowTF, List<String> columns, int rowIndex, Logger logger, boolean isFatal) {
+    public static void checkTFSum(DataRow<Cell> totalRow, DataRow<Cell> totalRowTF, List<String> columns, Integer rowIndex, Logger logger, boolean isFatal) {
         for (String alias : columns) {
             BigDecimal v1 = totalRowTF.getCell(alias).getNumericValue();
             BigDecimal v2 = totalRow.getCell(alias).getNumericValue();
