@@ -538,7 +538,7 @@ void importData() {
             continue
         } else if (rowValues[INDEX_FOR_SKIP] == "Общий итог") {
             rowIndex++
-            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
 
             allValues.remove(rowValues)
             rowValues.clear()
@@ -629,13 +629,23 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
     editableColumns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+
+    // итог грузится только для проверки
+    if (isTotal) {
+        // графа 10
+        newRow.cadastrePriceJanuary = parseNumber(values[10], fileRowIndex, 10 + colOffset, logger, true)
+        // графа 11
+        newRow.cadastrePriceTaxFree = parseNumber(values[11], fileRowIndex, 11 + colOffset, logger, true)
+
+        return newRow
     }
 
     // графа 1
@@ -841,6 +851,16 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     def int colOffset = 1
 
+    // итог грузится только для проверки
+    if (isTotal) {
+        // графа 10
+        newRow.cadastrePriceJanuary = parseNumber(pure(rowCells[10]), fileRowIndex, 10 + colOffset, logger, true)
+        // графа 11
+        newRow.cadastrePriceTaxFree = parseNumber(pure(rowCells[11]), fileRowIndex, 11 + colOffset, logger, true)
+
+        return newRow
+    }
+
     // графа 1  rowCells[0]
     // графа fix rowCells[1]
     // графа 2 rowCells[2]
@@ -892,7 +912,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     return newRow
 }
 def calcTotalRow(def dataRows) {
-    def totalRow = getTotalRow('total', 'Итого')
+    def totalRow = getTotalRow('total', 'Общий итог')
     calcTotalSum(dataRows, totalRow, totalColumns)
 
     return totalRow
@@ -920,35 +940,3 @@ def getTotalRow(def alias, def title) {
     }
     return newRow
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
