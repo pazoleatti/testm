@@ -173,7 +173,7 @@ void consolidation() {
                 logger.error("Форма «%s» находится в статусе, отличном от «Принята»!", source2.formType.name)
                 return
             }
-            sourceRows2 = formDataService.getDataRowHelper(source1)?.allSaved
+            sourceRows2 = formDataService.getDataRowHelper(source2)?.allSaved
             if (sourceRows2.isEmpty()) {
                 // лп4
                 logger.error("Данные на форме «%s» за отчетный период %s отсутствуют!", source2.formType.name, getPeriod())
@@ -274,8 +274,8 @@ void logicCheck() {
             def isVZL = records520?.find { it?.record_id?.value == row.name }
             if (records520 && !isVZL) {
                 def value2 = getRefBookValue(520L, row.name)?.NAME?.value
-                logger.error(useCode ? "Строка %s: Организация «%s» не является взаимозависимым лицом с общим режимом налогообложения в данном отчетном периоде!" :
-                        "Строка %s: Организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, value2)
+                logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом %sв данном отчетном периоде!",
+                        rowNum, value2, useCode ? "с общим режимом налогообложения " :"")
             }
         }
     }
@@ -296,7 +296,7 @@ def getRecords520(boolean useCode) {
     // получить id записи с кодом "2" из справочника "Специальный налоговый статус"
     def provider
     def records
-    def filter = ""
+    def filter = null
     if (useCode) {
         provider = formDataService.getRefBookProvider(refBookFactory, 511L, providerCache)
         filter = "CODE = 2"
