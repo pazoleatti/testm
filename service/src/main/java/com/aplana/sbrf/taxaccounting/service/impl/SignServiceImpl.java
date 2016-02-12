@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SignService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
@@ -19,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Service
@@ -36,18 +35,49 @@ public class SignServiceImpl implements SignService {
 	/** Максимальное количество попыток создания временной директории */
 	private static final int TEMP_DIR_ATTEMPT_MAX_COUNT = 9;
 
+    private static final String USER_ID_MSG = "ЭП файла «%s» проверена и подпись пользователя «%s» принята.";
+    private static final String ERR_NO_SIGN_MSG = "В проверяемом файле «%s» отсутствует ЭП.";
+    private static final String ERR_SIGN_NO_REG_MSG = "Идентификатор ЭП файла «%s» не зарегистрирован в БОК.";
+    private static final String ERR_OTHER_MSG = "ЭП файла «%s» не принята. Код ошибки «%s».";
+
+    private static final String pattern = "(ERROR:)(.+?)(, )(\\d+ )(.*)(, )(.*)";
+
+
 	@Autowired
 	private ConfigurationDao configurationDao;
 	@Autowired
 	private DepartmentService departmentService;
 
-    private final class ProcessRunner implements Runnable{
-        private String[] params;
-        private Logger logger;
+    class Status {
+        private boolean check;
+        private String msg;
 
-        private ProcessRunner(String[] params, Logger logger) {
+        public boolean isCheck() {
+            return check;
+        }
+
+        public void setCheck(boolean check) {
+            this.check = check;
+        }
+
+        public String getMsg() {
+            return msg;
+        }
+
+        public void setMsg(String msg) {
+            this.msg = msg;
+        }
+    }
+
+    private final class ProcessRunner implements Runnable{
+        private String fileName;
+        private String[] params;
+        private Status status;
+
+        private ProcessRunner(String[] params, String fileName, Status status) {
             this.params = params;
-            this.logger = logger;
+            this.fileName = fileName;
+            this.status = status;
         }
 
         @Override
@@ -60,13 +90,23 @@ public class SignServiceImpl implements SignService {
                 try {
                     String s = reader.readLine();
                     if (s != null && s.startsWith("Result: " + SUCCESS_FLAG)) {
+                        status.setCheck(true);
                         LOG.info("Проверка ЭП завершена успешно.");
                     }
                     do {
                         if (s.startsWith("UserId: ")) {
-                            logger.info(s);
+                            status.setMsg(String.format(USER_ID_MSG, fileName, s.substring(8)));
                         } else if (!s.startsWith("Result:") && !s.startsWith("Execution time:")) {
-                            logger.errorIfNotExist(s);
+                            status.setCheck(false);
+                            String code = s.replaceAll(pattern, "$5");
+                            if (code.equals("ERR_NO_SIGN")) {
+                                status.setMsg(String.format(ERR_NO_SIGN_MSG, fileName));
+                            } else if (code.equals("ERR_SIGN_NO_REG")) {
+                                status.setMsg(String.format(ERR_SIGN_NO_REG_MSG, fileName));
+                            } else {
+                                //String text = s.replaceAll(pattern, "$7");
+                                status.setMsg(String.format(ERR_OTHER_MSG, fileName, code));
+                            }
                         }
                     } while ((s = reader.readLine()) != null);
                 } finally {
@@ -83,8 +123,8 @@ public class SignServiceImpl implements SignService {
         }
     }
 
-    boolean check(String[] params, Logger logger) {
-        ProcessRunner runner = new ProcessRunner(params, logger);
+    boolean check(String[] params, String fileName, Status status) {
+        ProcessRunner runner = new ProcessRunner(params, fileName, status);
         Thread threadRunner = new Thread(runner);
         threadRunner.start();
         long startTime = new Date().getTime();
@@ -97,17 +137,17 @@ public class SignServiceImpl implements SignService {
             if (Math.abs(new Date().getTime() - startTime) > VALIDATION_TIMEOUT) {
                 threadRunner.interrupt();
                 LOG.warn(String.format("Истекло время выполнения проверки ЭП. Проверка ЭП длилась более %d мс.", VALIDATION_TIMEOUT));
-                logger.error("Истекло время выполнения проверки ЭП. Проверка ЭП длилась более %d мс.", VALIDATION_TIMEOUT);
+                status.setMsg(String.format("Истекло время выполнения проверки ЭП. Проверка ЭП длилась более %d мс.", VALIDATION_TIMEOUT));
                 return false;
             }
             if (!threadRunner.isAlive()) {
-                return !logger.containsLevel(LogLevel.ERROR);
+                return status.isCheck();
             }
         }
     }
 
     @Override
-    public boolean checkSign(String pathToSignFile, int delFlag, Logger logger) {
+    public Pair<Boolean, Set<String>> checkSign(String fileName, String pathToSignFile, int delFlag, Logger logger) {
         String[] params = new String[4];
         int rootDepartmentId = departmentService.getBankDepartment().getId();
         // путь к библиотеке для проверки ЭП
@@ -128,6 +168,7 @@ public class SignServiceImpl implements SignService {
         InputStream inputStream;
         File keyFile;
         List<File> keyFiles = new ArrayList<File>();
+        Set<String> msgs = new TreeSet<String>();
         try {
             //Копируем необходимые файлы во временную директорию
             try {
@@ -177,12 +218,12 @@ public class SignServiceImpl implements SignService {
                     throw new ServiceException("Необходимо указать директорию с библиотекой ЭП");
                 String[] listFiles = resourceDir.list();
                 assert listFiles != null;
-                for (String fileName : listFiles) {
-                    if (!DLL_PATTERN.matcher(fileName).matches())
+                for (String dllFileName : listFiles) {
+                    if (!DLL_PATTERN.matcher(dllFileName).matches())
                         continue;
-                    File dllFile = new File(encryptTempDir.getPath()+ "/" + fileName);
+                    File dllFile = new File(encryptTempDir.getPath()+ "/" + dllFileName);
                     if (dllFile.createNewFile()) {
-                        FileWrapper resourceFile = ResourceUtils.getSharedResource(encryptParams.get(0) + "/" + fileName);
+                        FileWrapper resourceFile = ResourceUtils.getSharedResource(encryptParams.get(0) + "/" + dllFileName);
                         inputStream = resourceFile.getInputStream();
                         outputStream = new FileOutputStream(dllFile);
                         try {
@@ -213,24 +254,16 @@ public class SignServiceImpl implements SignService {
             params[3] = pathToSignFile;
 
             String[] keyTempFiles = keyTempDir.list();
-            Logger localLogger = new Logger();
-            for (String fileName: keyTempFiles) {
-                params[1] = keyTempDir.getAbsolutePath()+ "\\" + fileName;
-                Logger checkLogger = new Logger();
-                if (check(params, checkLogger)) {
-                    logger.getEntries().addAll(checkLogger.getEntries());
-                    return true;
+            for (String keyFileName: keyTempFiles) {
+                params[1] = keyTempDir.getAbsolutePath()+ "\\" + keyFileName;
+                final Status status = new Status();
+                if (check(params, fileName, status)) {
+                    return new Pair<Boolean, Set<String>>(true, new HashSet<String>(){{add(status.getMsg());}});
                 } else {
-                    for(LogEntry log: checkLogger.getEntries()) {
-                        if (!localLogger.getEntries().contains(log)) {
-                            localLogger.getEntries().add(log);
-                        }
-                    }
+                    msgs.add(status.getMsg());
                 }
             }
-            logger.error("Обнаружена ошибка(и) при использовании библиотеки для проверки ЭП:");
-            logger.getEntries().addAll(localLogger.getEntries());
-            return false;
+            return new Pair<Boolean, Set<String>>(false, msgs);
         } finally {
             try {
                 if (keyTempDir != null) FileUtils.deleteDirectory(keyTempDir);
