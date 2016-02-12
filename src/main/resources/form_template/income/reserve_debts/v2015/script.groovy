@@ -667,21 +667,8 @@ void importTransportData() {
         calcTotalSum(rows, totalAll, totalColumnsAll)
 
         // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = totalAll.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
-        // задать кварталаьной итоговой строке нф значения из итоговой строки тф
-        totalColumnsAll.each { alias ->
-            totalAll[alias] = totalTF[alias]
-        }
+        checkTFSum(totalAll, totalTF, totalColumnsIndexMap.keySet().asList(), totalTF?.getImportIndex(), logger, false)
+
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
         // очистить итоги

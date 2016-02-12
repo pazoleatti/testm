@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.form_template.income.output5.v2014;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -57,6 +58,7 @@ public class Output5Test extends ScriptTestBase {
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        testHelper.getLogger().clear();
     }
 
     @Test
@@ -74,9 +76,15 @@ public class Output5Test extends ScriptTestBase {
         int expected = testHelper.getDataRowHelper().getAll().size();
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-        checkLoadData(testHelper.getDataRowHelper().getAll());
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        Assert.assertEquals(5, dataRows.size());
+        checkLoadData(dataRows);
         checkLogger();
+
+        // ошибка о несоответсвии итогов из тф и расчетных итогов
+        Assert.assertEquals(String.format(ScriptUtils.TRANSPORT_FILE_SUM_ERROR_1, 8,"Отчётный квартал. Сумма","1", "61476"),
+                testHelper.getLogger().getEntries().get(0).getMessage());
+        testHelper.getLogger().clear();
     }
 
     /** Проверить загруженные данные. */

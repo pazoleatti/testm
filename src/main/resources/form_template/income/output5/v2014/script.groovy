@@ -270,24 +270,14 @@ void importTransportData() {
         def itogValues = calcItog(dataRows)
 
         // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = itogValues[alias]
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
+        checkTFSum(itogValues, totalTF, totalColumnsIndexMap.keySet().asList(), totalTF?.getImportIndex(), logger, false)
     }
     showMessages(dataRows, logger)
 }
 
 def calcItog(def dataRows) {
     def totalColumns = ['sum']
-    def itogValues = [:]
+    def itogValues = formData.createDataRow()
     totalColumns.each {alias ->
         itogValues[alias] = BigDecimal.ZERO
     }

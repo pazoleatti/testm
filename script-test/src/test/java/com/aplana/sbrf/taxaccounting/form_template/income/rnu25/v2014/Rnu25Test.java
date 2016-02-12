@@ -11,9 +11,9 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.util.*;
+import java.util.List;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -125,21 +125,18 @@ public class Rnu25Test extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev)
-    // @Test
+    // TODO в логе должна быть ошибка о неверной итоговой строке
+    @Test
     public void importTransportFileTest() {
-        int expected = 2; // в файле 2 строки
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev)
-    // @Test
+    @Test
     public void importExcelTest() {
-        int expected = 2; // в файле 2 строки
+        int expected = 4; // в файле 4 строки
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
@@ -157,6 +154,6 @@ public class Rnu25Test extends ScriptTestBase {
 
     /** Проверить загруженные данные. */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
-        // TODO (Ramil Timerbaev)
+        Assert.assertEquals(150000, dataRows.get(0).getCell("lotSizePrev").getNumericValue().doubleValue(), 0.0);
     }
 }

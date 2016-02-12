@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * РНУ-14 - Регистр налогового учёта нормируемых расходов.
@@ -68,24 +68,18 @@ public class Rnu14Test extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev)
-    // @Test
+    @Test
     public void importTransportFileTest() {
-        int expected = 2; // в файле 2 строки
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev)
-    // @Test
+    @Test
     public void importExcelTest() {
-        int expected = 2; // в файле 2 строки
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }
@@ -97,8 +91,10 @@ public class Rnu14Test extends ScriptTestBase {
         Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
-    /** Проверить загруженные данные. */
+    /**
+     * Проверить загруженные данные.
+     */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
-        // TODO (Ramil Timerbaev)
+        Assert.assertEquals(100500.00, dataRows.get(4).getCell("normBase").getNumericValue().doubleValue(), 0.0);
     }
 }

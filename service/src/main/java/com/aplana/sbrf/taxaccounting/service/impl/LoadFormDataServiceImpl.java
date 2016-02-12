@@ -302,19 +302,23 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // ЭЦП
                 List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
                 if (signList != null && !signList.isEmpty() && SignService.SIGN_CHECK.equals(signList.get(0))) {
-                    boolean check = false;
+                    Pair<Boolean, Set<String>> check = new Pair<Boolean, Set<String>>(false, new HashSet<String>());
                     try {
-                        check = signService.checkSign(currentFile.getPath(), 0, logger);
+                        check = signService.checkSign(fileName, currentFile.getPath(), 0, logger);
                     } catch (Exception e) {
                         log(userInfo, LogData.L36, logger, lockId, e.getMessage());
                     }
-                    if (!check) {
+                    if (!check.getFirst()) {
+                        for(String msg: check.getSecond())
+                            log(userInfo, LogData.L0_ERROR, logger, lockId, msg);
                         log(userInfo, LogData.L16, logger, lockId, fileName);
                         moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
                                 Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L16.getText(), lockId, fileName))), logger, lockId);
                         fail++;
                         continue;
                     }
+                    for(String msg: check.getSecond())
+                        log(userInfo, LogData.L0_INFO, logger, lockId, msg);
                     log(userInfo, LogData.L15, logger, lockId, fileName);
                 } else {
                     log(userInfo, LogData.L15_1, logger, lockId, fileName);

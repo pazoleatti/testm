@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class RefBookValueMapper implements RowMapper<Map<String, RefBookValue>> 
                     }
                     break;
                     case DATE: {
-                        value = rs.getTimestamp(alias);
+                        value = new Date(rs.getTimestamp(alias).getTime());
                     }
                     break;
                     case REFERENCE: {

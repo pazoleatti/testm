@@ -133,6 +133,9 @@ def nonEmptyColumns = ['emitentName', 'emitentInn', 'decisionNumber',
 def sortColumns = ['decisionNumber', 'decisionDate']
 
 @Field
+def totalColumns = ['all', 'rateZero', 'distributionSum', 'allSum', 'dividends', 'sum', 'withheldSum']
+
+@Field
 def endDate = null
 
 def getReportPeriodEndDate() {
@@ -325,47 +328,15 @@ void importTransportData() {
         reader.close()
     }
 
+    // подсчет итогов
+    def totalRow = formData.createStoreMessagingDataRow()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    calcTotalSum(dataRows, totalRow, totalColumns)
+
     showMessages(newRows, logger)
 
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = [
-                'all'             : 4,
-                'rateZero'        : 5,
-                'distributionSum' : 6,
-                'allSum'          : 12,
-                'dividends'       : 23,
-                'sum'             : 24,
-                'withheldSum'     : 27
-        ]
-
-        // итоговая строка для сверки сумм
-        def totalTmp = formData.createStoreMessagingDataRow()
-        def totalColumns = totalColumnsIndexMap.keySet().asList()
-        totalColumns.each { alias ->
-            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-        }
-
-        // подсчет итогов
-        def dataRows = formDataService.getDataRowHelper(formData).allCached
-        calcTotalSum(dataRows, totalTmp, totalColumns)
-
-        // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumns) {
-            def v1 = totalTF[alias]
-            def v2 = totalTmp[alias]
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
-    } else {
-        logger.warn("В транспортном файле не найдена итоговая строка")
-    }
+    checkAndSetTFSum(totalRow, totalTF, totalColumns, totalTF?.getImportIndex(), logger, false)
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(newRows)

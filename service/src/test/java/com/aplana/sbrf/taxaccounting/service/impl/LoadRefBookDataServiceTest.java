@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
@@ -127,7 +128,7 @@ public class LoadRefBookDataServiceTest {
 
     private void mockSignService() {
         SignService signService = mock(SignService.class);
-        when(signService.checkSign(anyString(), anyInt(), any(Logger.class))).thenReturn(true);
+        when(signService.checkSign(anyString(), anyString(), anyInt(), any(Logger.class))).thenReturn(new Pair<Boolean, Set<String>>(true, new HashSet<String>()));
         ReflectionTestUtils.setField(service, "signService", signService);
 
         LockDataService lockService = mock(LockDataService.class);

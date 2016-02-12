@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+
+import java.util.Set;
 
 /**
  * Сервис для проверки ЭЦП
@@ -19,7 +22,9 @@ public interface SignService {
      * @param delFlag если равен 1, то в случае, если подпись есть (контрольная сумма совпала), она будет удалена из файла
      * если равен 0, подпись не удаляется. При N равным 2 и более будут удалены все подписи от 1 до N.
      * После удаления подписи и последующих вызовах функции для проверки одного и того же файла N необходимо снова устанавливать равным 1
-     * @return успешность выполненной проверки
+     * @return статус проверки:
+     *          первое значение - успешность выполненной проверки;
+     *          второе - при успешном завершение - userId, иначе список кодов ошибок.
 	 * */
-	boolean checkSign(String pathToSignFile, int delFlag, Logger logger);
+    Pair<Boolean, Set<String>> checkSign(String fileName, String pathToSignFile, int delFlag, Logger logger);
 }

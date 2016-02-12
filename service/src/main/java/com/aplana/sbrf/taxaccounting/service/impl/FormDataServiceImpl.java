@@ -209,31 +209,40 @@ public class FormDataServiceImpl implements FormDataService {
 
             // Проверка ЭП
             // Если флаг проверки отсутствует или не равен «1», то файл считается проверенным
-            boolean check = false;
+            Pair<Boolean, Set<String>> check = new Pair<Boolean, Set<String>>(false, new HashSet<String>());
             // исключить проверку ЭП для файлов эксель
             if (!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT) && !ext.equals(XLSM_EXT)) {
                 List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
                 if (signList != null && !signList.isEmpty() && SignService.SIGN_CHECK.equals(signList.get(0))) {
 					try {
 						LOG.info(String.format("Проверка ЭП: %s", key));
-						check = signService.checkSign(dataFile.getAbsolutePath(), 0, logger);
+						check = signService.checkSign(fileName, dataFile.getAbsolutePath(), 0, logger);
+                        if (check.getFirst()) {
+                            for(String msg: check.getSecond()) {
+                                logger.error(msg);
+                            }
+                        } else {
+                            for(String msg: check.getSecond()) {
+                                logger.error(msg);
+                            }
+                        }
 					} catch (Exception e) {
 						logger.error("Ошибка при проверке ЭП: " + e.getMessage());
 					}
-					if (!check) {
+					if (!check.getFirst()) {
 						logger.error("Ошибка проверки цифровой подписи");
 					}
                 } else {
-                    check = true;
+                    check.setFirst(true);
                 }
             } else {
-                check = true;
+                check.setFirst(true);
             }
 
             FormData fd = formDataDao.get(formDataId, isManual);
             ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
 
-            if (check) {
+            if (check.getFirst()) {
 				InputStream dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
 				try {
 					Map<String, Object> additionalParameters = new HashMap<String, Object>();
