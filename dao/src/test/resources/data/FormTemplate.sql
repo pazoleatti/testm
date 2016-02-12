@@ -36,5 +36,4 @@ insert into form_style (id, alias, form_template_id, font_color, back_color, ita
 insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (3, 'alias3', 1, 1, 1, 1, 1);
 
 --insert into form_script (id, form_template_id, name, ord, body, condition, per_row) values (1, 1, 'scriptName1', 1, '', '', 0);
-
 --insert into event_script (event_code, script_id, ord) values (1, 1, 0);

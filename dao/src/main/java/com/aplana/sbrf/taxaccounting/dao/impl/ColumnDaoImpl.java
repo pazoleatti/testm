@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.AutoNumerationColumn;
 import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.ColumnKeyEnum;
 import com.aplana.sbrf.taxaccounting.model.ColumnType;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
@@ -38,7 +37,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Repository
 public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
@@ -326,7 +324,6 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
     /**
      * Удаляем столбцы
-     * @return возвращаем идентификаторы колонок удаленных
      */
     void deleteFormColumns(final Collection<String> removeColumns, FormTemplate formTemplate) {
 		if (removeColumns.isEmpty()) {
@@ -388,9 +385,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		if (oldColumns.isEmpty()) {
 			return;
 		}
-        setReferenceParentId(formTemplate, oldColumns);
-		final HashSet<Long> ids = new HashSet<Long>();
+		clearTypeChangedColumns(formTemplate);
 
+		setReferenceParentId(formTemplate, oldColumns);
+		final HashSet<Long> ids = new HashSet<Long>();
         getJdbcTemplate().batchUpdate(
                 "UPDATE form_column SET name = ?, alias = ?, type = ?, width = ?, precision = ?, ord = ?, " +
                         "max_length = ?, checking = ?, format = ?, attribute_id = ?, filter = ?, " +
@@ -502,17 +500,16 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                     }
                 }
         );
-		clearTypeChangedColumns(formTemplate);
     }
 
 	/**
 	 * Для изменивших свой тип граф чистим таблицу с данными
-	 * @param formTemplate
+	 * @param formTemplate макет НФ
 	 */
 	void clearTypeChangedColumns(final FormTemplate formTemplate) {
 		final List<Integer> dataOrders = new ArrayList<Integer>();
 		getNamedParameterJdbcTemplate().query(
-			"SELECT alias, type FROM form_column WHERE form_template_id = :form_template_id",
+			"SELECT alias, type, data_ord FROM form_column WHERE form_template_id = :form_template_id ORDER BY ord",
 			new HashMap<String, Integer>() {{
 				put("form_template_id", formTemplate.getId());
 			}},
@@ -521,9 +518,11 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 				public void processRow(ResultSet rs) throws SQLException {
 					String alias = rs.getString("alias");
 					char type = rs.getString("type").charAt(0);
+					Integer dataOrder = rs.getInt("data_ord");
 					Column column = formTemplate.getColumn(alias);
 					if (column.getColumnType().getCode() != type) {
-						dataOrders.add(column.getDataOrder());
+						column.setDataOrder(dataOrder);
+						dataOrders.add(dataOrder);
 					}
 				}
 			}

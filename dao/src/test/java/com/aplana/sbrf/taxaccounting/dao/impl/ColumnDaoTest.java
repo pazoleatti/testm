@@ -21,7 +21,7 @@ import java.util.List;
 @ContextConfiguration({"ColumnDaoTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class ColumnDaoTest {
+public class ColumnDaoTest extends AbstractDao {
 
     @Autowired
     private ColumnDao columnDao;
@@ -157,10 +157,14 @@ public class ColumnDaoTest {
 		assertEquals(5, numericColumn.getDataOrder().intValue());
 		assertEquals(6, referenceColumn.getDataOrder().intValue());
 
+		assertEquals(":)", getJdbcTemplate().queryForObject("SELECT c4 FROM form_data_row WHERE id = 5", String.class));
+
 		((ColumnDaoImpl) columnDao).createFormColumns(newColumns, formTemplate);
 		List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
 		assertEquals("numericColumn2", columnList.get(columnCount).getAlias());
 		assertEquals("stringColumn2", columnList.get(columnCount + 1).getAlias());
+
+		assertNull(getJdbcTemplate().queryForObject("SELECT c4 FROM form_data_row WHERE id = 5", String.class));
 	}
 
 	@Test
@@ -198,6 +202,8 @@ public class ColumnDaoTest {
 		removeColumns.add(formTemplate.getColumn("numericColumn").getAlias());
 		removeColumns.add(formTemplate.getColumn("dateColumn").getAlias());
 
+		assertEquals("50", getJdbcTemplate().queryForObject("SELECT c1 FROM form_data_row WHERE id = 5", String.class));
+
 		((ColumnDaoImpl) columnDao).deleteFormColumns(removeColumns, formTemplate);
 
 		List<Column> columns = columnDao.getFormColumns(formTemplate.getId());
@@ -205,7 +211,8 @@ public class ColumnDaoTest {
 		assertEquals("stringColumn", columns.get(0).getAlias());
 		assertEquals("autoNumerationColumn", columns.get(1).getAlias());
 
-		//TODO form_data_row
+		assertNull(getJdbcTemplate().queryForObject("SELECT c1 FROM form_data_row WHERE id = 5", String.class));
+		assertNull(getJdbcTemplate().queryForObject("SELECT c2 FROM form_data_row WHERE id = 5", String.class));
 	}
 
 	@Test
@@ -213,19 +220,23 @@ public class ColumnDaoTest {
 		FormTemplate formTemplate = getFormTemplate();
 		List<Column> columns = formTemplate.getColumns();
 		// меняем тип графы
-		columns.remove(formTemplate.getColumn("stringColumn"));
+		String alias = "stringColumn";
+		columns.remove(formTemplate.getColumn(alias));
 		NumericColumn numericColumn = new NumericColumn();
 		numericColumn.setName("число");
 		numericColumn.setMaxLength(10);
 		numericColumn.setPrecision(2);
 		numericColumn.setOrder(5);
 		numericColumn.setDataOrder(4);
-		numericColumn.setAlias("stringColumn");
+		numericColumn.setAlias(alias);
 		columns.add(numericColumn);
 
+		assertEquals("qwerty", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertEquals(4, formTemplate.getColumn(alias).getDataOrder().intValue());
 		((ColumnDaoImpl) columnDao).clearTypeChangedColumns(formTemplate);
-
-		//TODO form_data_row
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		// dataOrder должно поменяться на то значение, которые было в удаляемой графе с таким же алиасом
+		assertEquals(0, formTemplate.getColumn(alias).getDataOrder().intValue());
 	}
 
 	@Test
@@ -234,9 +245,12 @@ public class ColumnDaoTest {
 		List<Integer> dataOrders = new ArrayList<Integer>();
 		dataOrders.add(0);
 		dataOrders.add(3);
-		((ColumnDaoImpl) columnDao).deleteColumnData(formTemplate, dataOrders);
 
-		//TODO form_data_row
+		assertEquals("qwerty", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertEquals("sum", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
+		((ColumnDaoImpl) columnDao).deleteColumnData(formTemplate, dataOrders);
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
 	}
 
 	@Test
@@ -251,21 +265,28 @@ public class ColumnDaoTest {
 		numericColumn.setPrecision(2);
 		numericColumn.setOrder(1);
 		numericColumn.setDataOrder(0);
-		numericColumn.setAlias("numericColumn");
+		numericColumn.setAlias("stringColumn");
 		oldColumns.add(numericColumn);
 
-		oldColumns.add(formTemplate.getColumn("stringColumn"));
-		((StringColumn) oldColumns.get(1)).setMaxLength(100);
+		List<Column> columns = formTemplate.getColumns();
+		columns.remove(formTemplate.getColumn("stringColumn"));
+		columns.add(numericColumn);
+		oldColumns.add(formTemplate.getColumn("numericColumn"));
+		((NumericColumn) oldColumns.get(1)).setMaxLength(15);
+
+		assertEquals("qwerty", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertEquals("sum", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
 
 		((ColumnDaoImpl) columnDao).updateFormColumns(oldColumns, formTemplate);
 
-		List<Column> columns = columnDao.getFormColumns(formTemplate.getId());
+		columns = columnDao.getFormColumns(formTemplate.getId());
+		assertEquals("stringColumn", columns.get(0).getAlias());
 		assertEquals(ColumnType.NUMBER, columns.get(0).getColumnType());
-		assertEquals("numericColumn", columns.get(0).getAlias());
-		assertEquals(100, ((StringColumn) columns.get(1)).getMaxLength());
-		assertEquals("stringColumn", columns.get(1).getAlias());
+		assertEquals("numericColumn", columns.get(1).getAlias());
+		assertEquals(15, ((NumericColumn) columns.get(1)).getMaxLength());
 
-		//TODO form_data_row
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
 	}
 
 	@Test
@@ -284,7 +305,10 @@ public class ColumnDaoTest {
 		numericColumn.setAlias("stringColumn");
 		columns.add(numericColumn);
 
-		((NumericColumn) formTemplate.getColumn("numericColumn")).setMaxLength(20);
+		((NumericColumn) formTemplate.getColumn("numericColumn")).setMaxLength(15);
+
+		assertEquals("qwerty", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertEquals("sum", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
 
 		columnDao.updateFormColumns(formTemplate);
 
@@ -294,7 +318,8 @@ public class ColumnDaoTest {
 		assertEquals(1, ((DateColumn) columns.get(1)).getFormatId().intValue());
 		assertEquals("dateColumn", columns.get(1).getAlias());
 
-		//TODO form_data_row
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
 	}
 
 	//@Test
