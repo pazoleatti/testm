@@ -45,6 +45,7 @@ switch (formDataEvent) {
         consolidation()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
+        break
 }
 
 //// Кэши и константы
@@ -134,20 +135,25 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
     // Взаимозависимые лица
     def sourceFormTypeId1 = 800
     // Участники группы ПАО Сбербанк
     def sourceFormTypeId2 = 845
 
+    def source1 = null
+    def source2 = null
     def sourceRows1 = [:]
     def sourceRows2 = [:]
+    //TODO  получение источников изменить после доработки ЧТЗ
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         // 1
         if (it.formTypeId == sourceFormTypeId1) {
-            def source1 = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
+            source1 = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (source1 == null) {
                 // лп1
+                //TODO  source1.formType.name - беру имя у несуществующией формы
                 logger.error("Не найдена форма «%s»: Тип: %s, Период: %s, Подразделение: %s!",
                         source1.formType.name, source1.kind, getPeriod(), departmentService.get(source1.departmentId))
                 return
@@ -161,7 +167,7 @@ void consolidation() {
         }
         // 2
         if (it.formTypeId == sourceFormTypeId2) {
-            def source2 = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
+            source2 = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (source2 == null) {
                 // лп3
                 logger.error("Не найдена форма «%s»: Тип: %s, Период: %s, Подразделение: %s!",
@@ -182,7 +188,7 @@ void consolidation() {
         }
     }
     def samples = []
-    def dataRows = []
+    def tmpDataRows = []
     // 3
     if (getPeriodOrder() == 4) {
         for (row in sourceRows1) {
@@ -197,7 +203,10 @@ void consolidation() {
         def orgCode = getRecordId(513, 'CODE', '1')
         def taxStatus = getRecordId(511, 'CODE', '2')
         for (row in sourceRows1) {
-            if (row.orgCode == orgCode && row.taxStatus == taxStatus && row.endData == null || row.endData > getReportPeriodEndDate()) {
+            //TODO очень много запросов к справочнику. уточнить.
+            def RefOrgCode = getRefBookValue(520L, row.name).ORG_CODE?.value
+            def RefTaxStatus = getRefBookValue(520L, row.name).TAX_STATUS?.value
+            if (RefOrgCode == orgCode && RefTaxStatus == taxStatus && (row.endData == null || row.endData > getReportPeriodEndDate())) {
                 samples.add(row)
             }
         }
@@ -208,14 +217,23 @@ void consolidation() {
     for (sample in samples) {
         boolean flag = sample.name in useTcoIds2
         if (!flag) {
-            dataRows.add(sample)
+            tmpDataRows.add(sample)
         } else {
             for (row in sourceRows2) {
                 if (sample.name == row.name && row.sign == 0) {
-                    dataRows.add(sample)
+                    tmpDataRows.add(sample)
                 }
             }
         }
+    }
+
+    // заполняем, так как не получается напрямую
+    for (row in tmpDataRows) {
+        def newRow = formData.createDataRow()
+        allColumns.each { column ->
+            newRow[column] = row[column]
+        }
+        dataRows.add(newRow)
     }
 
     // 5.1
@@ -268,14 +286,14 @@ void logicCheck() {
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
         // 2. Проверка ВЗЛ ОРН
-        if(getPeriodOrder() == 3 || getPeriodOrder() == 4){
+        if (getPeriodOrder() == 3 || getPeriodOrder() == 4) {
             def useCode = getPeriodOrder() == 3
             def records520 = getRecords520(useCode)
             def isVZL = records520?.find { it?.record_id?.value == row.name }
             if (records520 && !isVZL) {
                 def value2 = getRefBookValue(520L, row.name)?.NAME?.value
                 logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом %sв данном отчетном периоде!",
-                        rowNum, value2, useCode ? "с общим режимом налогообложения " :"")
+                        rowNum, value2, useCode ? "с общим режимом налогообложения " : "")
             }
         }
     }
@@ -305,7 +323,7 @@ def getRecords520(boolean useCode) {
         if (records && records.size() == 1) {
             taxStatusId = records.get(0)?.record_id?.value
         } else {
-            records520 =[]
+            records520 = []
             return records520
         }
         filter = "TAX_STATUS = $taxStatusId"
