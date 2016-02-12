@@ -66,9 +66,6 @@ public class RefBookUniversalTest {
         lockService = mock(LockDataService.class);
         ReflectionTestUtils.setField(provider, "lockService", lockService);
 
-        ReportService reportService = mock(ReportService.class);
-        ReflectionTestUtils.setField(provider, "reportService", reportService);
-
         FormDataService formDataService = mock(FormDataService.class);
         ReflectionTestUtils.setField(provider, "formDataService", formDataService);
 
