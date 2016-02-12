@@ -194,8 +194,8 @@ void consolidation() {
 
     // 4
     if (getPeriodOrder() == 3) {
-        def orgCode = getRecordId(513, 'CODE', 1)
-        def taxStatus = getRecordId(511, 'CODE', 2)
+        def orgCode = getRecordId(513, 'CODE', '1')
+        def taxStatus = getRecordId(511, 'CODE', '2')
         for (row in sourceRows1) {
             if (row.orgCode == orgCode && row.taxStatus == taxStatus && row.endData == null || row.endData > getReportPeriodEndDate()) {
                 samples.add(row)
