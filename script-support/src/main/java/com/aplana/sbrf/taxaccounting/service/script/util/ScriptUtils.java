@@ -1404,8 +1404,8 @@ public final class ScriptUtils {
      */
     @SuppressWarnings("unused")
     public static void checkFixedValue(DataRow<Cell> row, String value, String valueExpected, int indexRow, String alias, Logger logger, boolean required) {
-        if (value != null && valueExpected != null && !value.equals(valueExpected) ||
-                valueExpected != null && !"".equals(valueExpected) && !valueExpected.equals(value) ||
+        if (value != null && valueExpected != null && !value.equalsIgnoreCase(valueExpected) ||
+                valueExpected != null && !"".equals(valueExpected) && !valueExpected.equalsIgnoreCase(value) ||
                 value != null && !"".equals(value) && valueExpected == null) {
             String msg;
             if (valueExpected != null && !valueExpected.trim().isEmpty() && value != null && !value.trim().isEmpty()) {
