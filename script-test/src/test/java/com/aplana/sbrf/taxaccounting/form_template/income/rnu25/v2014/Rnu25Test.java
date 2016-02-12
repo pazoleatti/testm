@@ -133,7 +133,7 @@ public class Rnu25Test extends ScriptTestBase {
         checkLogger();
     }
 
-    //@Test
+    @Test
     public void importExcelTest() {
         int expected = 4; // в файле 4 строки
         testHelper.setImportFileInputStream(getImportXlsInputStream());
