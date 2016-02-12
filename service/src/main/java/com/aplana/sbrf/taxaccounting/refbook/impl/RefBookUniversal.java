@@ -51,8 +51,6 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Autowired
     private LockDataService lockService;
     @Autowired
-    private ReportService reportService;
-    @Autowired
     private FormDataService formDataService;
     @Autowired
     private RefBookHelper refBookHelper;
