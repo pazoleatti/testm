@@ -11,9 +11,9 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.util.*;
+import java.util.List;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -125,7 +125,6 @@ public class Rnu26Test extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev)
     // @Test
     public void importTransportFileTest() {
         int expected = 2; // в файле 2 строки
@@ -136,8 +135,7 @@ public class Rnu26Test extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev)
-    // @Test
+    @Test
     public void importExcelTest() {
         int expected = 2; // в файле 2 строки
         testHelper.setImportFileInputStream(getImportXlsInputStream());
@@ -157,6 +155,6 @@ public class Rnu26Test extends ScriptTestBase {
 
     /** Проверить загруженные данные. */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
-        // TODO (Ramil Timerbaev)
+        Assert.assertEquals("12", dataRows.get(0).getCell("tradeNumber").getStringValue());
     }
 }
