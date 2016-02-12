@@ -103,7 +103,7 @@ public class IncomeAgent1Test extends ScriptTestBase {
     @Test
     public void check1Test() throws ParseException {
         FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("D:\\workspace\\sbrfacctax\\//src/main//resources//form_template//income//income_agent_1//v2015//"));
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//income_agent_1//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
