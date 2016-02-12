@@ -5,18 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
-import java.util.*;
-
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import java.util.List;
 
 /**
  * (РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям.
@@ -71,7 +63,7 @@ public class Rnu31Test extends ScriptTestBase {
         Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
-    // TODO (Ramil Timerbaev)
+    // TODO ERROR Ошибка исполнения [212]: Cannot get property 'rows' on null object
     // @Test
     public void importTransportFileTest() {
         int expected = 2; // в файле 2 строки
@@ -82,7 +74,7 @@ public class Rnu31Test extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev)
+    // TODO  ERROR Ошибка исполнения [300]: Cannot get property 'rows' on null object
     // @Test
     public void importExcelTest() {
         int expected = 2; // в файле 2 строки
@@ -103,6 +95,6 @@ public class Rnu31Test extends ScriptTestBase {
 
     /** Проверить загруженные данные. */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
-        // TODO (Ramil Timerbaev)
+        Assert.assertEquals(1, dataRows.get(0).getCell("ofz").getStringValue());
     }
 }

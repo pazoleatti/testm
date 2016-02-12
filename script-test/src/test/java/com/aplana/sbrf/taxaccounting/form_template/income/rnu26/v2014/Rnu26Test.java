@@ -125,7 +125,8 @@ public class Rnu26Test extends ScriptTestBase {
         checkLogger();
     }
 
-    // @Test
+    // TODO в логе должна быть ошибка о неверной итоговой строке
+    @Test
     public void importTransportFileTest() {
         int expected = 2; // в файле 2 строки
         testHelper.setImportFileInputStream(getImportRnuInputStream());
