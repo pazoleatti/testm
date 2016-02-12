@@ -774,7 +774,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private String saveJPBlobData(JasperPrint jasperPrint) throws IOException {
         File jasperPrintFile = null;
         try {
-            jasperPrintFile = File.createTempFile("jasperPrint",".dat");
+            jasperPrintFile = File.createTempFile("report",".jasper");
             FileOutputStream fileOutputStream = null;
             try {
                 fileOutputStream = new FileOutputStream(jasperPrintFile);
@@ -787,10 +787,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             //Архивирование перед сохраннеием в базу
             File zipOutFile = null;
             try {
-                zipOutFile = File.createTempFile("jasperPrint", ".zip");
+                zipOutFile = File.createTempFile("report", ".zip");
                 fileOutputStream = new FileOutputStream(zipOutFile);
                 ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
-                ZipEntry zipEntry = new ZipEntry("jasperPrint.dat");
+                ZipEntry zipEntry = new ZipEntry("report.jasper");
                 zos.putNextEntry(zipEntry);
                 FileInputStream fi = new FileInputStream(jasperPrintFile);
 
