@@ -167,14 +167,8 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // 2. Проверка даты совершения операции
-        if (row.transDoneDate && row.reasonDate && row.reasonDate > row.transDoneDate) {
-            def msg1 = row.getCell('transDoneDate').column.name
-            def msg2 = row.getCell('reasonDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
-        }
-
-        // 2. Проверка даты совершения операции
-        checkDatePeriod(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
+        def date = (row.reasonDate != null && row.reasonDate >= getReportPeriodStartDate() && row.reasonDate < getReportPeriodEndDate()) ? row.reasonDate : getReportPeriodStartDate()
+        checkDatePeriod(logger, row, 'transDoneDate', date as Date, getReportPeriodEndDate(), true)
 
         // 3. Проверка курса валюты
         if (row.course != null && row.course <= 0) {
