@@ -295,6 +295,11 @@ alter table log_system_report add constraint log_system_report_fk_sec_user forei
 alter table log_system_report add constraint log_system_report_chk_type check (type in (0, 1));
 alter table log_system_report add constraint log_system_report_unq_sec_user unique(sec_user_id);
 
+ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_pk PRIMARY KEY (id);
+ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_fk_form_data FOREIGN KEY(form_data_id) REFERENCES form_data(id) ON DELETE CASCADE;
+ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_unq UNIQUE (form_data_id, temporary, manual, ord);
+ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_chk_temp CHECK (temporary IN (0, 1));
+ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_chk_manual CHECK (manual IN (0, 1));
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);

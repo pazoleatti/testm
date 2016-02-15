@@ -1128,6 +1128,4 @@ CREATE TABLE form_data_row (
   c99 VARCHAR2(2000 char), c99_style VARCHAR2(50 char)
 );
 CREATE SEQUENCE seq_form_data_row START WITH 10000;
-ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_pk PRIMARY KEY (id);
-CREATE UNIQUE INDEX i_form_data_row_id ON form_data_row (form_data_id, temporary, manual, ord);
 --------------------------------------------------------------------------------------------------------
