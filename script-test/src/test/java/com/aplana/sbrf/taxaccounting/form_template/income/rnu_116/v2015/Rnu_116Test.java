@@ -121,7 +121,7 @@ public class Rnu_116Test extends ScriptTestBase {
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        /// Расчетные проверки
+        // Проверка расчётных граф
         i = 0;
         row.getCell("name").setValue(1L, null);
         row.getCell("dealNum").setValue("1", null);

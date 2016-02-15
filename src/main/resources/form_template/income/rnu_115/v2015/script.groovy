@@ -3,6 +3,7 @@ package form_template.income.rnu_115.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -208,7 +209,7 @@ void logicCheck() {
 
         // Проверка корректности суммы требований
         if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) &&
-                row.reqSum != roundValue(row.reqVolume * row.reqCourse, row.getCell('reqSum').getColumn().precision).abs()) {
+                row.reqSum != ScriptUtils.round(row.reqVolume * row.reqCourse, row.getCell('reqSum').getColumn().precision).abs()) {
             def msg1 = row.getCell('reqSum').column.name
             def msg2 = row.getCell('reqVolume').column.name
             def msg3 = row.getCell('reqCourse').column.name
@@ -223,7 +224,7 @@ void logicCheck() {
 
         // Проверка корректности суммы обязательств
         if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) &&
-                row.guarSum != roundValue(row.guarVolume * row.guarCourse, row.getCell('guarSum').getColumn().precision).abs()) {
+                row.guarSum != ScriptUtils.round(row.guarVolume * row.guarCourse, row.getCell('guarSum').getColumn().precision).abs()) {
             flag = false
             def msg1 = row.getCell('guarSum').column.name
             def msg2 = row.getCell('guarVolume').column.name
@@ -231,10 +232,7 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg1» должно равняться модулю произведения «$msg2» и «$msg3»!")
         }
 
-        // Проверка доходов учитываемых в целях налога на прибыль по сделке
-        // Проверка расходов учитываемых в целях налога на прибыль по сделке
-        // Проверка отклонений по доходам
-        // Проверка отклонений по расходам
+        // Проверка расчётных граф
         def needValue = formData.createDataRow()
         needValue.incomeSum = calc19(row)
         needValue.outcomeSum = calc20(row)
@@ -247,16 +245,6 @@ void logicCheck() {
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
-}
-/**
- * Округляет число до требуемой точности.
- *
- * @param value округляемое число
- * @param precision точность округления, знаки после запятой
- * @return округленное число
- */
-def roundValue(BigDecimal value, def precision) {
-    value.setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
 // Алгоритмы заполнения полей формы
@@ -321,7 +309,7 @@ def BigDecimal calc22(def row) {
                     }
                     if (row.dealFocus == direction2 && row.price < row.marketPrice) {
                         if (row.guarVolume != null && row.reqCourse != null) {
-                            return roundValue(row.guarVolume * (row.marketPrice - row.price) * row.reqCourse, 2)
+                            return ScriptUtils.round(row.guarVolume * (row.marketPrice - row.price) * row.reqCourse, 2)
                         }
                     }
                     if (row.dealFocus == direction1 && row.price <= row.marketPrice) {
@@ -329,7 +317,7 @@ def BigDecimal calc22(def row) {
                     }
                     if (row.dealFocus == direction1 && row.price > row.marketPrice) {
                         if (row.reqVolume != null && row.guarCourse != null) {
-                            return roundValue(row.reqVolume * (row.price - row.marketPrice) * row.guarCourse, 2)
+                            return ScriptUtils.round(row.reqVolume * (row.price - row.marketPrice) * row.guarCourse, 2)
                         }
                     }
                 }
@@ -340,7 +328,7 @@ def BigDecimal calc22(def row) {
                     }
                     if (row.price < row.marketPrice) {
                         if (row.reqCourse != null) {
-                            return roundValue((row.marketPrice - row.price) * row.reqCourse, 2)
+                            return ScriptUtils.round((row.marketPrice - row.price) * row.reqCourse, 2)
                         }
                     }
                     if (row.price == row.marketPrice) {
@@ -371,7 +359,7 @@ def BigDecimal calc23(def row) {
                     }
                     if (row.dealFocus == direction1 && row.price > row.marketPrice) {
                         if (row.reqVolume != null && row.guarCourse != null) {
-                            return roundValue(row.reqVolume * (row.price - row.marketPrice) * row.guarCourse, 2)
+                            return ScriptUtils.round(row.reqVolume * (row.price - row.marketPrice) * row.guarCourse, 2)
                         }
                     }
                     if (row.dealFocus == direction2 && row.price >= row.marketPrice) {
@@ -379,7 +367,7 @@ def BigDecimal calc23(def row) {
                     }
                     if (row.dealFocus == direction2 && row.price < row.marketPrice) {
                         if (row.guarVolume != null && row.reqCourse != null) {
-                            return roundValue(row.guarVolume * (row.marketPrice - row.price) * row.reqCourse, 2)
+                            return ScriptUtils.round(row.guarVolume * (row.marketPrice - row.price) * row.reqCourse, 2)
                         }
                     }
                 }
@@ -390,7 +378,7 @@ def BigDecimal calc23(def row) {
                     }
                     if (row.price > row.marketPrice) {
                         if (row.guarCourse != null) {
-                            return roundValue((row.marketPrice - row.price) * row.guarCourse, 2)
+                            return ScriptUtils.round((row.marketPrice - row.price) * row.guarCourse, 2)
                         }
                     }
                     if (row.price == row.marketPrice) {

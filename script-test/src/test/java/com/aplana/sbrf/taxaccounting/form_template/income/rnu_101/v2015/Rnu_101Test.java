@@ -103,13 +103,12 @@ public class Rnu_101Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Сумма фактически начисленного дохода (руб.)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма дохода, соответствующая рыночному уровню (руб.)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода до рыночного уровня (руб.)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Должна быть заполнена одна из граф: «Цена, признаваемая рыночной для целей налогообложения» или «Коэффициент корректировки доходов»!", entries.get(i++).getMessage());
         Assert.assertEquals("Группа «графа 7 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
 
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        //2. Для прохождения всех ЛП
+        // Проверка расчётных граф
         i = 0;
         row.getCell("name").setValue(1L, null);
         row.getCell("transDoneDate").setValue(sdf.parse("11.11.2014"), null);
@@ -121,8 +120,13 @@ public class Rnu_101Test extends ScriptTestBase {
         row.getCell("dealPrice").setValue(1L, null);
         row.getCell("sum1").setValue(1L, null);
         row.getCell("incomeRate").setValue(1L, null);
-        row.getCell("sum2").setValue(1L, null);
-        row.getCell("sum3").setValue(1L, null);
+        row.getCell("sum2").setValue(11L, null);
+        row.getCell("sum3").setValue(12L, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        Assert.assertEquals(String.format("Строка %d: Неверное значение граф: %s!", 1, "«Сумма дохода, соответствующая рыночному уровню (руб.)», «Сумма доначисления дохода до рыночного уровня (руб.)»"), entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «1» не имеет строки подитога!", entries.get(i++).getMessage());
+
+        // Для прохождения всех ЛП после расчета
         testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -215,9 +219,10 @@ public class Rnu_101Test extends ScriptTestBase {
 
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(1, dataRows.get(0).getCell("sum2").getNumericValue().doubleValue(), 0);
+
         Assert.assertEquals(0, dataRows.get(0).getCell("sum3").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(0, dataRows.get(1).getCell("sum3").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(0, dataRows.get(2).getCell("sum3").getNumericValue().doubleValue(), 0);
     }
 }
-

@@ -109,6 +109,9 @@ def totalColumns = ['sum3']
 @Field
 def groupColumns = ['incomeCode']
 
+@Field
+def calcColumns = ['sum2', 'sum3']
+
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -197,31 +200,13 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
-        // 8. Проверка заполнения цены и коэффициента
-        boolean noOne = (row.taxPrice == null && row.incomeRate == null)
-        boolean both = (row.taxPrice != null && row.incomeRate != null)
-        String taxPrice = getColumnName(row, 'taxPrice')
-        String incomeRate = getColumnName(row, 'incomeRate')
-        if (both) {
-            // a
-            logger.error("Строка $rowNum: Должна быть заполнена только одна из граф: «$taxPrice» или «$incomeRate»!")
-        } else if (noOne) {
-            // b
-            logger.error("Строка $rowNum: Должна быть заполнена одна из граф: «$taxPrice» или «$incomeRate»!")
+        // 8. Проверка суммы фактически начисленного дохода
+        if (row.sum1 != null && row.sum1 <= 0) {
+            def msg = row.getCell('sum1').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        // 9. Проверка суммы фактически начисленного дохода
-        if (row.sum1 != null && row.sum1 <= 0 && row.incomeRate != null) {
-            // a
-            def msg13 = row.getCell('sum1').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg13» должно быть больше «0»!")
-        } else if (row.sum1 != null && row.incomeRate == null && row.sum1 < 0) {
-            // b
-            def msg13 = row.getCell('sum1').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg13» должно быть больше или равно «0»!")
-        }
-
-        // 10. Проверка коэффициента
+        // 9. Проверка коэффициента
         if (row.sum1 != null && row.sum1 == 0 && row.incomeRate != null) {
             // a
             def msg1 = row.getCell('incomeRate').column.name
@@ -229,65 +214,30 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не заполнено (т.к. значение графы «$msg2» равно «0»)!")
         } else if (row.incomeRate != null && row.incomeRate < 0) {
             // b
-            def msg1 = row.getCell('incomeRate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть больше или равно «0»!")
+            def msg = row.getCell('incomeRate').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        // 11. Проверка суммы дохода
+        // 10. Проверка суммы дохода
         if (row.sum1 != null && row.sum2 != null && row.sum2 < row.sum1) {
             def msg1 = row.getCell('sum1').column.name
             def msg2 = row.getCell('sum2').column.name
             logger.error("Строка $rowNum: Значение графы «$msg2» должно быть не меньше значения графы «$msg1»!")
         }
 
-        // 12. Проверка корректности суммы дохода
-        String msg6 = row.getCell('course').column.name
-        String msg10 = row.getCell('count').column.name
-        String msg12 = row.getCell('taxPrice').column.name
-        String msg13 = row.getCell('sum1').column.name
-        String msg14 = row.getCell('incomeRate').column.name
-        String msg15 = row.getCell('sum2').column.name
-        String msg16 = row.getCell('sum3').column.name
-        if (row.sum2 != null) {
-            if (row.incomeRate != null && row.sum1 > 0 && row.taxPrice == null) {
-                // a
-                if (row.sum2 != calc15(row, false)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно произведению значений граф «$msg13» и «$msg14»!")
-                }
-            } else if (row.incomeRate == null && row.sum1 > 0 && row.taxPrice != null) {
-                // b
-                if (row.sum2 != calc15(row, false)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно произведению значений граф «$msg12», «$msg10» и «$msg6»!")
-                }
-            } else if (row.sum1 == 0 && row.taxPrice != null && row.incomeRate == null) {
-                // c
-                if (row.sum2 != calc15(row, false)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно значению графы «$msg12»!")
-                }
-            } else if (row.sum2 != calc15(row, false)) {
-                // d
-                logger.error("Строка $rowNum: Значение графы «$msg15» заполнено значением «0», т.к. не выполнен порядок заполнения графы!")
-            }
-        }
-
-        // 13. Проверка корректности суммы доначисления дохода
-        if (row.sum1 == 0 && row.taxPrice != null) {
-            if (row.sum3 != calc16(row)) {
-                // a
-                logger.error("Строка $rowNum: Значение графы «$msg16» должно быть равно значению графы «$msg12»!")
-            }
-        } else if (row.sum1 != null && row.sum1 != 0 && row.sum2 != null && row.sum3 != calc16(row)) {
-            // b
-            logger.error("Строка $rowNum: Значение графы «$msg16» должно быть равно разности значений граф «$msg15» и «$msg13»!")
-        }
+        // 11. Проверка расчётных граф
+        def needValue = formData.createDataRow()
+        needValue.sum2 = calc15(row)
+        needValue.sum3 = calc16(row)
+        checkCalc(row, calcColumns, needValue, logger, true)
     }
 
-    // 14. Проверка наличия всех фиксированных строк
-    // 15. Проверка отсутствия лишних фиксированных строк
-    // 16. Проверка итоговых значений по фиксированным строкам
+    // 12. Проверка наличия всех фиксированных строк
+    // 13. Проверка отсутствия лишних фиксированных строк
+    // 14. Проверка итоговых значений по фиксированным строкам
     checkItog(dataRows)
 
-    // 17. Проверка итоговых значений пофиксированной строке «Итого»
+    // 15. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
@@ -326,39 +276,21 @@ void calc() {
     updateIndexes(dataRows)
 }
 
-def calc15(def row, def needShowMsg = true) {
-    if (row.incomeRate != null && row.sum1 > 0 && row.taxPrice == null) {
-        return roundValue(row.sum1 * row.incomeRate, 2)
+def calc15(def row) {
+    if (row.incomeRate != null && row.sum1 != null) {
+        return ScriptUtils.round(row.sum1 * row.incomeRate, 2)
     }
-    if (row.incomeRate == null && row.sum1 > 0 && row.taxPrice != null) {
-        return roundValue(row.taxPrice * row.count * row.course, 2)
-    }
-    if (row.incomeRate == null && row.sum1 == 0 && row.taxPrice != null) {
-        return row.taxPrice
-    }
-    if (needShowMsg) {
-        logger.warn('Строка %d: Графа 15 заполнена значением "0", т.к. не выполнен порядок заполнения графы!', row.getIndex())
-    }
-    return 0
-}
-
-def calc16(def row) {
-    if (row.sum1 != null && row.sum1 == 0 && row.taxPrice != null) {
-        return row.taxPrice
-    } else if (row.sum1 != null && row.sum2 != null) {
-        return row.sum2 - row.sum1
+    if (row.incomeRate == null && row.taxPrice != null && row.count != null && row.course != null) {
+        return ScriptUtils.round(row.taxPrice * row.count * row.course, 2)
     }
     return null
 }
-/**
- * Округляет число до требуемой точности.
- *
- * @param value округляемое число
- * @param precision точность округления, знаки после запятой
- * @return округленное число
- */
-def roundValue(BigDecimal value, def precision) {
-    value.setScale(precision, BigDecimal.ROUND_HALF_UP)
+
+def calc16(def row) {
+    if (row.sum2 != null && row.sum1 != null) {
+        return row.sum2 - row.sum1
+    }
+    return null
 }
 
 def calcTotalRow(def dataRows) {
