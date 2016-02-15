@@ -96,8 +96,8 @@ def getPeriodOrder() {
     return periodOrder
 }
 
-def getPeriod(def formdata) {
-    def period = reportPeriodService.get(formdata.reportPeriodId)
+def getPeriod() {
+    def period = reportPeriodService.get(formData.reportPeriodId)
     return period.name + " " + period.taxPeriod.year
 }
 
@@ -197,7 +197,6 @@ void consolidation() {
             }
         }
     }
-
     // 4
     if (getPeriodOrder() == 3) {
         def orgCode = getRecordId(513, 'CODE', '1')
@@ -208,12 +207,13 @@ void consolidation() {
             def RefTaxStatus = getRefBookValue(520L, row.name).TAX_STATUS?.value
             if (RefOrgCode == orgCode && RefTaxStatus == taxStatus && (row.endData == null || row.endData > getReportPeriodEndDate())) {
                 samples.add(row)
+                if (getRefBookValue(520L, row.name).NAME == '"3D" ЗАО') logger.info('"3D" ЗАО')
             }
         }
     }
 
     // 5
-    def useTcoIds2 = getNamesFromSources2(sourceRows2)
+    def useTcoIds2 = getNamesFromSources(sourceRows2)
     for (sample in samples) {
         boolean flag = sample.name in useTcoIds2
         if (!flag) {
@@ -227,7 +227,6 @@ void consolidation() {
         }
     }
 
-    // заполняем, так как не получается напрямую
     for (row in tmpDataRows) {
         def newRow = formData.createDataRow()
         allColumns.each { column ->
@@ -237,12 +236,12 @@ void consolidation() {
     }
 
     // 5.1
-    def useTcoIds1 = getNamesFromSources1(sourceRows1)
+    def useTcoIds1 = getNamesFromSources(sourceRows1)
     for (row in sourceRows2) {
         if (!(row.name in useTcoIds1)) {
             def name = getRefBookValue(520, row.name)?.NAME?.stringValue
             // лп6
-            logger.warn("Строка %s: Организация «%s» не найдена на форме «Взаимозависимые лица» за период год!", row.getIndex(), name)
+            logger.warn("Строка %s: Организация «%s» не найдена на форме «Взаимозависимые лица» за период %s!", row.getIndex(), name, getPeriod())
         }
     }
 
@@ -254,19 +253,7 @@ void consolidation() {
  * Получить список идентификаторов с формы Участники группы ПАО Сбербанк.
  *
  */
-def getNamesFromSources1(def sourceRows) {
-    def list = []
-    for (def row : sourceRows) {
-        list.add(row.name)
-    }
-    return list.unique()
-}
-
-/**
- * Получить список идентификаторов с формы Участники группы ПАО Сбербанк.
- *
- */
-def getNamesFromSources2(def sourceRows) {
+def getNamesFromSources(def sourceRows) {
     def list = []
     for (def row : sourceRows) {
         list.add(row.name)
