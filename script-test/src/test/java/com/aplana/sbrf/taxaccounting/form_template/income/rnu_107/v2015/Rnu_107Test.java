@@ -117,8 +117,8 @@ public class Rnu_107Test extends ScriptTestBase {
         row.getCell("reasonNumber").setValue("string", null);
         row.getCell("reasonDate").setValue(sdf.parse("11.11.2015"), null);
         row.getCell("sum1").setValue(-1, null);
-        row.getCell("dealTariff").setValue(-1, null);
-        row.getCell("taxTariff").setValue(-1, null);
+        row.getCell("dealTariff").setValue("-1", null);
+        row.getCell("taxTariff").setValue("-1", null);
         row.getCell("sum2").setValue(-1, null);
         row.getCell("sum3").setValue(-1, null);
         row.getCell("sum4").setValue(-1, null);
@@ -126,9 +126,8 @@ public class Rnu_107Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата совершения операции","01.01.2014", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения операции» должно быть не меньше значения графы «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Основание для совершения операции. Дата","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Тариф за оказание услуги»/«Тариф, признаваемый рыночным для целей налогообложения» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного дохода» должно быть больше или равно «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Сумма дохода, соответствующая рыночному уровню тарифа» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Неверное значение граф: «Сумма доначисления дохода до рыночного уровня тарифа»!", entries.get(i++).getMessage());
         Assert.assertEquals("Группа «1» не имеет строки подитога!", entries.get(i++).getMessage());
         testHelper.getLogger().clear();
 
@@ -140,9 +139,10 @@ public class Rnu_107Test extends ScriptTestBase {
         row.getCell("reasonNumber").setValue("string", null);
         row.getCell("reasonDate").setValue(sdf.parse("11.11.2014"), null);
         row.getCell("sum1").setValue(2L, null);
-        row.getCell("dealTariff").setValue(1L, null);
-        row.getCell("taxTariff").setValue(2L, null);
+        row.getCell("dealTariff").setValue("1", null);
+        row.getCell("taxTariff").setValue("2", null);
         row.getCell("sum2").setValue(3L, null);
+        row.getCell("sum3").setValue(3L, null);
         testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
