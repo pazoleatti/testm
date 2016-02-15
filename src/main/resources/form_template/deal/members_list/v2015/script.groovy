@@ -207,7 +207,6 @@ void consolidation() {
             def RefTaxStatus = getRefBookValue(520L, row.name).TAX_STATUS?.value
             if (RefOrgCode == orgCode && RefTaxStatus == taxStatus && (row.endData == null || row.endData > getReportPeriodEndDate())) {
                 samples.add(row)
-                if (getRefBookValue(520L, row.name).NAME == '"3D" ЗАО') logger.info('"3D" ЗАО')
             }
         }
     }
@@ -250,7 +249,7 @@ void consolidation() {
     dataRowHelper.allCached = dataRows
 }
 /**
- * Получить список идентификаторов с формы Участники группы ПАО Сбербанк.
+ * Получить список идентификаторов с формы Участники группы ПАО Сбербанк или ВЗЛ.
  *
  */
 def getNamesFromSources(def sourceRows) {
