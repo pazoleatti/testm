@@ -121,7 +121,7 @@ public class Rnu_116Test extends ScriptTestBase {
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        //2. Для прохождения всех ЛП
+        /// Расчетные проверки
         i = 0;
         row.getCell("name").setValue(1L, null);
         row.getCell("dealNum").setValue("1", null);
@@ -138,11 +138,15 @@ public class Rnu_116Test extends ScriptTestBase {
         row.getCell("guarCourse").setValue(1, null);
         row.getCell("reqSum").setValue(1L, null);
         row.getCell("guarSum").setValue(1L, null);
-        row.getCell("incomeSum").setValue(1L, null);
-        row.getCell("outcomeSum").setValue(1L, null);
+        row.getCell("incomeSum").setValue(11L, null);
+        row.getCell("outcomeSum").setValue(12L, null);
         row.getCell("marketPrice").setValue(1L, null);
-        row.getCell("incomeDelta").setValue(1L, null);
-        row.getCell("outcomeDelta").setValue(1L, null);
+        row.getCell("incomeDelta").setValue(13L, null);
+        row.getCell("outcomeDelta").setValue(14L, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        Assert.assertEquals(String.format("Строка %d: Неверное значение граф: %s!",1, "«Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб. Доходы», «Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб. Расходы», «Отклонения по доходам, в руб.», «Отклонения по расходам, в руб.»"), entries.get(i++).getMessage());
+
+        // Для прохождения всех ЛП после расчета
         testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -232,8 +236,10 @@ public class Rnu_116Test extends ScriptTestBase {
 
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(0, dataRows.get(0).getCell("incomeSum").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(2, dataRows.get(0).getCell("incomeSum").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(0, dataRows.get(0).getCell("outcomeSum").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0, dataRows.get(0).getCell("incomeDelta").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0, dataRows.get(0).getCell("outcomeDelta").getNumericValue().doubleValue(), 0);
     }
 }
 
