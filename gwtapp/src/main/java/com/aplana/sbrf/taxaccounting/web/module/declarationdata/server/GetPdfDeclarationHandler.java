@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -52,7 +49,7 @@ public class GetPdfDeclarationHandler extends AbstractActionHandler<GetPdfAction
     public GetPdfResult execute(GetPdfAction action, ExecutionContext executionContext) throws ActionException {
         GetPdfResult result = new GetPdfResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        if (reportService.getDec(userInfo, action.getDeclarationDataId(), ReportType.PDF_DEC) != null) {
+        if (reportService.getDec(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.PDF_DEC) != null) {
             result.setPdf(generatePdfViewerModel(action.getDeclarationDataId(), userInfo));
         }
         return result;

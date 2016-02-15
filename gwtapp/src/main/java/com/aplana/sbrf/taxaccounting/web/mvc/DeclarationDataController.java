@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -53,7 +54,7 @@ public class DeclarationDataController {
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\""
                 + fileName + "\"");
-        String uuid = reportService.getDec(userInfo, id, ReportType.EXCEL_DEC);
+        String uuid = reportService.getDec(userInfo, id, DeclarationDataReportType.EXCEL_DEC);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
             DataInputStream in = new DataInputStream(blobData.getInputStream());

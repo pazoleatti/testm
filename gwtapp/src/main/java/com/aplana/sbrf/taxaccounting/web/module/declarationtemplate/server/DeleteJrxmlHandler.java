@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
@@ -39,10 +40,10 @@ public class DeleteJrxmlHandler extends AbstractActionHandler<DeleteJrxmlAction,
         //Система удаляет все найденные pdf и xlsx отчеты.
         declarationDataService.cleanBlobs(
                 declarationTemplateService.getDataIdsThatUseJrxml(action.getDtId(), securityService.currentUserInfo()),
-                Arrays.asList(ReportType.EXCEL_DEC, ReportType.PDF_DEC, ReportType.JASPER_DEC));
+                Arrays.asList(DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
         for (Long id : declarationTemplateService.getLockDataIdsThatUseJrxml(action.getDtId())){
-            String keyPDF = declarationDataService.generateAsyncTaskKey(id, ReportType.PDF_DEC);
-            String keyEXCEL = declarationDataService.generateAsyncTaskKey(id, ReportType.EXCEL_DEC);
+            String keyPDF = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.PDF_DEC);
+            String keyEXCEL = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.EXCEL_DEC);
             LockData pdfLock = lockDataService.getLock(keyPDF);
             LockData excelLock = lockDataService.getLock(keyEXCEL);
             lockDataService.interruptTask(pdfLock, securityService.currentUserInfo().getUser().getId(), false, "Выполнена замена jrxml файла макета декларации");

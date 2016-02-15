@@ -68,7 +68,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         blobDataXml.setInputStream(inputStreamXml);
         blobDataXml.setName(ZIP_XML_1);
         String uuidXml = UUID.randomUUID().toString();
-        when(reportService.getDec(any(TAUserInfo.class), eq(3l), eq(ReportType.XML_DEC))).thenReturn(uuidXml);
+        when(reportService.getDec(any(TAUserInfo.class), eq(3l), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml);
 
         when(blobDataService.get(uuidXsd1)).thenReturn(blobDataXsd);
         when(blobDataService.get(uuidXml)).thenReturn(blobDataXml);
@@ -96,7 +96,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         blobDataXml.setInputStream(inputStreamXml);
         blobDataXml.setName(ZIP_XML_1);
         String uuidXml = UUID.randomUUID().toString();
-        when(reportService.getDec(any(TAUserInfo.class), eq(3l), eq(ReportType.XML_DEC))).thenReturn(uuidXml);
+        when(reportService.getDec(any(TAUserInfo.class), eq(3l), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml);
 
         when(blobDataService.get(uuidXsd1)).thenReturn(blobDataXsd);
         when(blobDataService.get(uuidXml)).thenReturn(blobDataXml);
@@ -128,7 +128,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
                         File.separator + "validate" + File.separator + ZIP_XML_1);
         blobDataXml2.setInputStream(inputStreamXml2);
         blobDataXml2.setName(ZIP_XML_1);
-        when(reportService.getDec(any(TAUserInfo.class), eq(5l), eq(ReportType.XML_DEC))).thenReturn(uuidXml2);
+        when(reportService.getDec(any(TAUserInfo.class), eq(5l), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml2);
 
         when(blobDataService.get(uuidXsd2)).thenReturn(blobDataXsd2);
         when(blobDataService.get(uuidXml2)).thenReturn(blobDataXml2);
@@ -175,7 +175,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
                         File.separator + "validate" + File.separator + ZIP_XML_2);
         blobDataXml2.setInputStream(inputStreamXml2);
         blobDataXml2.setName(ZIP_XML_2);
-        when(reportService.getDec(any(TAUserInfo.class), eq(5l), eq(ReportType.XML_DEC))).thenReturn(uuidXml2);
+        when(reportService.getDec(any(TAUserInfo.class), eq(5l), eq(DeclarationDataReportType.XML_DEC))).thenReturn(uuidXml2);
 
         when(blobDataService.get(uuidXsd2)).thenReturn(blobDataXsd2);
         when(blobDataService.get(uuidXml2)).thenReturn(blobDataXml2);

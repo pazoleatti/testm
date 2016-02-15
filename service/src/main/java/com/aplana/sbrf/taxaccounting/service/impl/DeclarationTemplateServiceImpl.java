@@ -342,14 +342,14 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
             DeclarationData data = declarationDataService.get(dataId, currUser);
-            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, ReportType.PDF_DEC);
-            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, ReportType.EXCEL_DEC);
+            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
+            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
             ReportPeriod rp = periodService.getReportPeriod(data.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.get(data.getDepartmentReportPeriodId());
             if (
-                    reportService.getDec(currUser, dataId, ReportType.PDF_DEC) != null
+                    reportService.getDec(currUser, dataId, DeclarationDataReportType.PDF_DEC) != null
                             ||
-                            reportService.getDec(currUser, dataId, ReportType.EXCEL_DEC) != null) {
+                            reportService.getDec(currUser, dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
                 existDec.add(String.format(
                         DEC_DATA_EXIST_IN_TASK,
                         template.getName(),
@@ -400,9 +400,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         HashSet<Long> dataIds = new HashSet<Long>();
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
-            if(reportService.getDec(userInfo, dataId, ReportType.PDF_DEC) != null
+            if(reportService.getDec(userInfo, dataId, DeclarationDataReportType.PDF_DEC) != null
                     ||
-                    reportService.getDec(userInfo, dataId, ReportType.EXCEL_DEC) != null){
+                    reportService.getDec(userInfo, dataId, DeclarationDataReportType.EXCEL_DEC) != null){
                 dataIds.add(dataId);
             }
         }
@@ -415,8 +415,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         HashSet<Long> lockDataIds = new HashSet<Long>();
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
-            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, ReportType.PDF_DEC);
-            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, ReportType.EXCEL_DEC);
+            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
+            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
             if (lockDataService.isLockExists(decKeyPDF, false) || lockDataService.isLockExists(decKeyXLSM, false)) {
                 lockDataIds.add(dataId);
             }

@@ -107,7 +107,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
                 if (declarationTypeList.contains(declarationTemplate.getType().getId())) {
                     declarationTypeList.remove(Integer.valueOf(declarationTemplate.getType().getId()));
                 }
-                if (reportService.getDec(userService.getSystemUserInfo(), declarationData.getId(), ReportType.EXCEL_DEC) == null) {
+                if (reportService.getDec(userService.getSystemUserInfo(), declarationData.getId(), DeclarationDataReportType.EXCEL_DEC) == null) {
                     notReportDeclarationDataList.add(declarationData);
                 }
             }
@@ -189,7 +189,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
             stateLogger.updateState("Добавление деклараций в архив");
             for(DeclarationData declarationData: declarationDataList) {
                 DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-                String uuid = reportService.getDec(userService.getSystemUserInfo(), declarationData.getId(), ReportType.EXCEL_DEC);
+                String uuid = reportService.getDec(userService.getSystemUserInfo(), declarationData.getId(), DeclarationDataReportType.EXCEL_DEC);
                 BlobData blobData = blobDataService.get(uuid);
                 String name = String.format("%s_%s_%s.xlsx", declarationTemplate.getType().getIfrsName(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
                 ze = new ZipArchiveEntry(name);

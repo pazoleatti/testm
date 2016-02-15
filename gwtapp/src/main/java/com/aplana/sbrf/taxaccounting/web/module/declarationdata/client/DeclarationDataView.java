@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
@@ -98,7 +98,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(ReportType.EXCEL_DEC, true);
+                    getUiHandlers().onTimerReport(DeclarationDataReportType.EXCEL_DEC.getReportName(), true);
                 } catch (Exception e) {
                     //Nothing
                 }
@@ -109,7 +109,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(ReportType.XML_DEC, true);
+                    getUiHandlers().onTimerReport(DeclarationDataReportType.XML_DEC.getReportName(), true);
                 } catch (Exception e) {
                     //Nothing
                 }
@@ -120,7 +120,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(ReportType.PDF_DEC, true);
+                    getUiHandlers().onTimerReport(DeclarationDataReportType.PDF_DEC.getReportName(), true);
                 } catch (Exception e) {
                 }
             }
@@ -130,7 +130,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(ReportType.ACCEPT_DEC, true);
+                    getUiHandlers().onTimerReport(DeclarationDataReportType.ACCEPT_DEC.getReportName(), true);
                 } catch (Exception e) {
                 }
             }
@@ -301,13 +301,13 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     @UiHandler("viewPdf")
     public void onViewPdfButton(ClickEvent event){
-        getUiHandlers().viewReport(false, ReportType.PDF_DEC);
+        getUiHandlers().viewReport(false, DeclarationDataReportType.PDF_DEC.getReportName());
         //getUiHandlers().viewPdf(false);
     }
 
 	@UiHandler("downloadExcelButton")
 	public void onDownloadExcelButton(ClickEvent event){
-        getUiHandlers().viewReport(false, ReportType.EXCEL_DEC);
+        getUiHandlers().viewReport(false, DeclarationDataReportType.EXCEL_DEC.getReportName());
 		//getUiHandlers().downloadExcel();
 	}
 
@@ -328,15 +328,15 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void updatePrintReportButtonName(ReportType reportType, boolean isLoad) {
-        if (ReportType.EXCEL_DEC.equals(reportType)) {
+    public void updatePrintReportButtonName(String type, boolean isLoad) {
+        if (DeclarationDataReportType.EXCEL_DEC.getReportName().equals(type)) {
             if (isLoad) {
                 downloadExcelButton.setText("Выгрузить в xlsx");
                 timerExcel.cancel();
             } else {
                 downloadExcelButton.setText("Сформировать xlsx");
             }
-        } else if (ReportType.XML_DEC.equals(reportType)) {
+        } else if (DeclarationDataReportType.XML_DEC.getReportName().equals(type)) {
             downloadExcelButton.setVisible(false);
             if (isLoad) {
                 downloadExcelButton.setVisible(true);
@@ -347,14 +347,14 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 downloadXmlButton.setVisible(false);
                 downloadExcelButton.setVisible(false);
             }
-        } else if (ReportType.PDF_DEC.equals(reportType)) {
+        } else if (DeclarationDataReportType.PDF_DEC.getReportName().equals(type)) {
             if (isLoad) {
                 viewPdf.setVisible(false);
                 timerPDF.cancel();
             } else {
                 viewPdf.setVisible(true);
             }
-        } else if (ReportType.ACCEPT_DEC.equals(reportType)) {
+        } else if (DeclarationDataReportType.ACCEPT_DEC.getReportName().equals(type)) {
             if (isLoad) {
                 getUiHandlers().revealPlaceRequest();
                 timerAccept.cancel();
@@ -365,31 +365,31 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void startTimerReport(ReportType reportType) {
-        if (ReportType.EXCEL_DEC.equals(reportType)) {
+    public void startTimerReport(String type) {
+        if (DeclarationDataReportType.EXCEL_DEC.getReportName().equals(type)) {
             timerExcel.scheduleRepeating(10000);
             timerExcel.run();
-        } else if (ReportType.XML_DEC.equals(reportType)) {
+        } else if (DeclarationDataReportType.XML_DEC.getReportName().equals(type)) {
             timerXML.scheduleRepeating(10000);
             timerXML.run();
-        } else if (ReportType.PDF_DEC.equals(reportType)) {
+        } else if (DeclarationDataReportType.PDF_DEC.getReportName().equals(type)) {
             timerPDF.scheduleRepeating(10000);
             timerPDF.run();
-        } else if (ReportType.ACCEPT_DEC.equals(reportType)) {
+        } else if (DeclarationDataReportType.ACCEPT_DEC.getReportName().equals(type)) {
             timerAccept.scheduleRepeating(10000);
             timerAccept.run();
         }
     }
 
     @Override
-    public void stopTimerReport(ReportType reportType) {
-        if (ReportType.EXCEL_DEC.equals(reportType)) {
+    public void stopTimerReport(String type) {
+        if (DeclarationDataReportType.EXCEL_DEC.getReportName().equals(type)) {
             timerExcel.cancel();
-        } else if (ReportType.XML_DEC.equals(reportType)) {
+        } else if (DeclarationDataReportType.XML_DEC.getReportName().equals(type)) {
             timerXML.cancel();
-        } else if (ReportType.PDF_DEC.equals(reportType)) {
+        } else if (DeclarationDataReportType.PDF_DEC.getReportName().equals(type)) {
             timerPDF.cancel();
-        } else if (ReportType.ACCEPT_DEC.equals(reportType)) {
+        } else if (DeclarationDataReportType.ACCEPT_DEC.getReportName().equals(type)) {
             timerAccept.cancel();
         }
     }
