@@ -258,7 +258,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 						return null;
 				}
 			} catch (ParseException e) {
-				throw new IllegalArgumentException(String.format("Значение \"%s\" не является типом %s", value, columnType.name()));
+				throw new IllegalArgumentException(String.format("Значение \"%s\" не является типом %s", value, columnType.name()), e);
 			}
 		}
 	}

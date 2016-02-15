@@ -152,7 +152,7 @@ public class DataRowMapperTest {
 	@Test
 	public void parseCellValueTest() {
 		assertNull(DataRowMapper.parseCellValue(ColumnType.STRING, null));
-		assertEquals("2016.12.31", SDF.format((Date) DataRowMapper.parseCellValue(ColumnType.DATE, "31.12.2016")));
+		assertEquals("31.12.2016 12:21:59", SDF.format((Date) DataRowMapper.parseCellValue(ColumnType.DATE, "31.12.2016 12:21:59")));
 		assertEquals("All 7 tests passed ", DataRowMapper.parseCellValue(ColumnType.STRING, "All 7 tests passed "));
 		assertEquals("", DataRowMapper.parseCellValue(ColumnType.STRING, ""));
 		assertEquals(567L, DataRowMapper.parseCellValue(ColumnType.REFBOOK, "567"));
@@ -202,7 +202,7 @@ public class DataRowMapperTest {
 		assertNull(DataRowMapper.formatCellValue(ColumnType.REFERENCE, 5L));
 		assertNull(DataRowMapper.formatCellValue(ColumnType.STRING, null));
 		assertEquals(" qww rt ds", DataRowMapper.formatCellValue(ColumnType.STRING, " qww rt ds"));
-		assertEquals("2016.12.31", DataRowMapper.formatCellValue(ColumnType.DATE, SDF.parse("31.12.2016")));
+		assertEquals("31.12.2016 12:21:59", DataRowMapper.formatCellValue(ColumnType.DATE, SDF.parse("31.12.2016 12:21:59")));
 		assertEquals("472", DataRowMapper.formatCellValue(ColumnType.REFBOOK, 472L));
 		assertEquals("34523.12366", DataRowMapper.formatCellValue(ColumnType.NUMBER, BigDecimal.valueOf(34523.12366)));
 		assertEquals("34523.12", DataRowMapper.formatCellValue(ColumnType.NUMBER, BigDecimal.valueOf(34523.120)));

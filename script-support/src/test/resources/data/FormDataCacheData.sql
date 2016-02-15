@@ -111,14 +111,14 @@ INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, ita
 INSERT INTO department_report_period(id, department_id, report_period_id, is_active, is_balance_period) VALUES (1, 1, 1, 1, 0);
 
 -- FormColumn
-INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
-	values (1, 'Строковый столбец', 1, 1, 'stringColumn', 'S', 10, NULL, 500, 1);
-INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
-	values (2, 'Числовой столбец', 1, 2, 'numericColumn', 'N', 10, 2, 15, 0);
-INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id)
-	values (3, 'Справочный столбец 1', 1, 2, 'referenceColumn1', 'R', 10, NULL, NULL, 0, 1);
-INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id)
-	values (4, 'Справочный столбец 2', 1, 2, 'referenceColumn2', 'R', 10, NULL, NULL, 0, 2);
+INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, data_ord)
+	values (1, 'Строковый столбец', 1, 1, 'stringColumn', 'S', 10, NULL, 500, 1, 0);
+INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, data_ord)
+	values (2, 'Числовой столбец', 1, 2, 'numericColumn', 'N', 10, 2, 15, 0, 1);
+INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, data_ord)
+	values (3, 'Справочный столбец 1', 1, 2, 'referenceColumn1', 'R', 10, NULL, NULL, 0, 1, 2);
+INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, data_ord)
+	values (4, 'Справочный столбец 2', 1, 2, 'referenceColumn2', 'R', 10, NULL, NULL, 0, 2, 3);
 
 --создать таблицу
 CREATE TABLE form_data_1 (
