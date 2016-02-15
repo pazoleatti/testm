@@ -15,6 +15,7 @@ public enum ReportType {
     XML_DEC(1, "XML", "Расчет %s", 6L, 106L),
     PDF_DEC(2, "PDF", "Создание формы предварительного просмотра %s", 7L, 107L),
     JASPER_DEC(3, "JASPER", "", 8L, 108L),
+    SPECIFIC_REPORT_DEC(3, "SPECIFIC", "Формирование отчета \"%s\" %s", 26L, 126L),
 
     CHECK_DEC(0, "CHECK_DECLARATION", "Проверка %s", 14L, 114L),
     ACCEPT_DEC(1, "ACCEPT_DECLARATION", "Принятие %s", 15L, 115L),

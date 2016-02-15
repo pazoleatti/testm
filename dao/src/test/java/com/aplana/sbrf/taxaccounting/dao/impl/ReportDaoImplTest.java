@@ -44,4 +44,11 @@ public class ReportDaoImplTest {
     public void deleteDecTest(){
         reportDao.deleteDec(Arrays.asList(1l, 2l));
     }
+
+    @Test
+    @Transactional(readOnly = false)
+    public void clean(){
+        reportDao.clean();
+    }
+
 }

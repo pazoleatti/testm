@@ -43,13 +43,14 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
 
     @Override
     public TimerReportResult execute(TimerReportAction action, ExecutionContext executionContext) throws ActionException {
+        final DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(action.getType());
         TimerReportResult result = new TimerReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        TimerReportResult.StatusReport status = getStatus(userInfo, action.getDeclarationDataId(), action.getType());
+        TimerReportResult.StatusReport status = getStatus(userInfo, action.getDeclarationDataId(), ddReportType);
         result.setExistReport(status);
-        if (TimerReportResult.StatusReport.EXIST.equals(status) && ReportType.PDF_DEC.equals(action.getType())) {
-        } else if (!TimerReportResult.StatusReport.LOCKED.equals(status) && ReportType.PDF_DEC.equals(action.getType())) {
-            TimerReportResult.StatusReport statusXML = getStatus(userInfo, action.getDeclarationDataId(), ReportType.XML_DEC);
+        if (TimerReportResult.StatusReport.EXIST.equals(status) && ReportType.PDF_DEC.equals(ddReportType.getReportType())) {
+        } else if (!TimerReportResult.StatusReport.LOCKED.equals(status) && ReportType.PDF_DEC.equals(ddReportType.getReportType())) {
+            TimerReportResult.StatusReport statusXML = getStatus(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
             if (TimerReportResult.StatusReport.LOCKED.equals(statusXML) ||
                     TimerReportResult.StatusReport.NOT_EXIST.equals(statusXML)) {
                 result.setExistXMLReport(statusXML);
@@ -58,14 +59,14 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
         return result;
     }
 
-    private TimerReportResult.StatusReport getStatus(TAUserInfo userInfo, long declarationDataId, ReportType reportType) {
-        String key = declarationDataService.generateAsyncTaskKey(declarationDataId, reportType);
+    private TimerReportResult.StatusReport getStatus(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType ddReportType) {
+        String key = declarationDataService.generateAsyncTaskKey(declarationDataId, ddReportType);
         if (!lockDataService.isLockExists(key, false)) {
-            if (ReportType.ACCEPT_DEC.equals(reportType)) {
+            if (DeclarationDataReportType.ACCEPT_DEC.equals(ddReportType)) {
                 return TimerReportResult.StatusReport.EXIST;
-            } else if (reportService.getDec(userInfo, declarationDataId, reportType) == null) {
-                Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, reportType);
-                Long limit = declarationDataService.getTaskLimit(reportType);
+            } else if (reportService.getDec(userInfo, declarationDataId, ddReportType) == null) {
+                Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, ddReportType.getReportType());
+                Long limit = declarationDataService.getTaskLimit(ddReportType.getReportType());
                 if (value != null && limit != 0 && limit < value) {
                     return TimerReportResult.StatusReport.LIMIT;
                 } else {

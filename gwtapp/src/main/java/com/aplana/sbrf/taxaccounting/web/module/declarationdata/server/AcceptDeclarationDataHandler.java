@@ -48,17 +48,17 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
 
     @Override
     public AcceptDeclarationDataResult execute(final AcceptDeclarationDataAction action, ExecutionContext context) throws ActionException {
-        final ReportType reportType = ReportType.ACCEPT_DEC;
+        final DeclarationDataReportType ddReportType = DeclarationDataReportType.ACCEPT_DEC;
         final AcceptDeclarationDataResult result = new AcceptDeclarationDataResult();
         Logger logger = new Logger();
         TAUserInfo userInfo = securityService.currentUserInfo();
         if (action.isAccepted()) {
-            String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), ReportType.XML_DEC);
+            String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), DeclarationDataReportType.XML_DEC);
             if (uuidXml != null) {
                 DeclarationData declarationData = declarationDataService.get(action.getDeclarationId(), userInfo);
                 if (!declarationData.isAccepted()) {
-                    String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
-                    Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(reportType, action.getTaxType()), userInfo, action.isForce(), logger);
+                    String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ddReportType);
+                    Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, action.isForce(), logger);
                     if (restartStatus != null && restartStatus.getFirst()) {
                         result.setStatus(CreateAsyncTaskStatus.LOCKED);
                         result.setRestartMsg(restartStatus.getSecond());
@@ -68,11 +68,11 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                         result.setStatus(CreateAsyncTaskStatus.CREATE);
                         Map<String, Object> params = new HashMap<String, Object>();
                         params.put("declarationDataId", action.getDeclarationId());
-                        asyncTaskManagerService.createTask(keyTask, reportType, params, action.isCancelTask(), PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                        asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, action.isCancelTask(), PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
                             @Override
                             public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                                 return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                        declarationDataService.getDeclarationFullName(action.getDeclarationId(), reportType),
+                                        declarationDataService.getDeclarationFullName(action.getDeclarationId(), ddReportType),
                                         LockData.State.IN_QUEUE.getText());
                             }
 
@@ -93,7 +93,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
 
                             @Override
                             public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                                return declarationDataService.getTaskName(reportType, action.getTaxType());
+                                return declarationDataService.getTaskName(ddReportType, action.getTaxType());
                             }
                         });
                     }

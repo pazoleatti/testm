@@ -15,7 +15,7 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
     private long declarationDataId;
     private boolean isForce;
     private TaxType taxType;
-    private ReportType reportType;
+    private String type;
 
     public long getDeclarationDataId() {
         return declarationDataId;
@@ -41,12 +41,12 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
         this.taxType = taxType;
     }
 
-    public ReportType getReportType() {
-        return reportType;
+    public String getType() {
+        return type;
     }
 
-    public void setReportType(ReportType reportType) {
-        this.reportType = reportType;
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override

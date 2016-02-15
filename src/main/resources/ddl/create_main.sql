@@ -826,13 +826,13 @@ create table declaration_report
 (
 declaration_data_id number(18) not null,
 blob_data_id varchar2(36),
-type number(1) not null
+type varchar2(128) not null
 );
 
 comment on table declaration_report is 'Отчеты по декларациям';
 comment on column declaration_report.declaration_data_id is 'Идентификатор декларации';
 comment on column declaration_report.blob_data_id is 'Идентификатор отчета';
-comment on column declaration_report.type is 'Тип отчета (0 - Excel, 1 - XML, 2 - PDF, 3 - Jasper)';
+comment on column declaration_report.type is 'Тип отчета';
 
 --------------------------------------------------------------------------------------------------------
 create table lock_data_subscribers

@@ -164,10 +164,10 @@ public interface DeclarationDataService {
     /**
      * Генерация ключа блокировки для асинхронных задач по декларациям
      * @param declarationDataId
-     * @param reportType
+     * @param type
      * @return код блокировки
      */
-    String generateAsyncTaskKey(long declarationDataId, ReportType reportType);
+    String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type);
 
     /**
      * Заблокировать DeclarationData.
@@ -205,10 +205,10 @@ public interface DeclarationDataService {
     /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего
      * @param declarationId идентификатор декларации
-     * @param reportType тип отчета. Может быть null
+     * @param ddReportType тип отчета. Может быть null
      * @return название
      */
-    String getDeclarationFullName(long declarationId, ReportType reportType);
+    String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
 
     /**
      * Проверяет существование операции, по которым требуется удалить блокировку
@@ -233,13 +233,13 @@ public interface DeclarationDataService {
      * @param ids идентификаторы деклараций
      * @param reportTypes типы отчетов, которые надо удалить
      */
-    void cleanBlobs(Collection<Long> ids, List<ReportType> reportTypes);
+    void cleanBlobs(Collection<Long> ids, List<DeclarationDataReportType> reportTypes);
 
     /**
      * Формирует название операции
-     * @param reportType
+     * @param ddReportType
      * @param taxType
      * @return
      */
-    String getTaskName(ReportType reportType, TaxType taxType);
+    String getTaskName(DeclarationDataReportType ddReportType, TaxType taxType, String... args);
 }

@@ -26,7 +26,7 @@ public interface ReportDao {
      * @param blobDataId
      * @param type
      */
-    void createDec(long declarationDataId, String blobDataId, ReportType type);
+    void createDec(long declarationDataId, String blobDataId, String type);
 
     /**
      * Создание записи об отчете декларации
@@ -53,7 +53,7 @@ public interface ReportDao {
      * @param type
      * @return uuid
      */
-    String getDec(long declarationDataId, ReportType type);
+    String getDec(long declarationDataId, String type);
 
     /**
      * Получение записи об отчете журнала аудита
@@ -79,7 +79,7 @@ public interface ReportDao {
 
     void deleteDec(Collection<Long> declarationDataIds);
 
-    void deleteDec(Collection<Long> declarationDataIds, List<ReportType> reportTypes);
+    void deleteDec(Collection<Long> declarationDataIds, List<String> reportTypes);
 
     /**
      * Удаление отчета по uuid

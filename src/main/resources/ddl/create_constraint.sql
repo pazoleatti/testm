@@ -273,7 +273,6 @@ alter table form_data_report add constraint form_data_rep_chk_absolute check (ab
 alter table declaration_report add constraint decl_report_pk primary key (declaration_data_id, type);
 alter table declaration_report add constraint decl_report_fk_decl_data foreign key(declaration_data_id) references declaration_data(id) on delete cascade;
 alter table declaration_report add constraint decl_report_fk_blob_data foreign key(blob_data_id) references blob_data(id) on delete cascade;
-alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3));
 
 alter table ifrs_data add constraint ifrs_data_pk primary key (report_period_id);
 alter table ifrs_data add constraint ifrs_data_fk_report_period foreign key (report_period_id) references report_period(id);
