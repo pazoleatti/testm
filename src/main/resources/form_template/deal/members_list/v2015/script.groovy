@@ -135,7 +135,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
     // Взаимозависимые лица
     def sourceFormTypeId1 = 800
     // Участники группы ПАО Сбербанк
@@ -189,6 +188,7 @@ void consolidation() {
     }
     def samples = []
     def tmpDataRows = []
+    def dataRows = []
     // 3
     if (getPeriodOrder() == 4) {
         for (row in sourceRows1) {
@@ -210,7 +210,6 @@ void consolidation() {
             }
         }
     }
-
     // 5
     def useTcoIds2 = getNamesFromSources(sourceRows2)
     for (sample in samples) {
@@ -225,7 +224,6 @@ void consolidation() {
             }
         }
     }
-
     for (row in tmpDataRows) {
         def newRow = formData.createDataRow()
         allColumns.each { column ->
@@ -233,7 +231,6 @@ void consolidation() {
         }
         dataRows.add(newRow)
     }
-
     // 5.1
     def useTcoIds1 = getNamesFromSources(sourceRows1)
     for (row in sourceRows2) {
