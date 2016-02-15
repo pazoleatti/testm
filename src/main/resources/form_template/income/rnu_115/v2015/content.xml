@@ -161,7 +161,7 @@
         <order>15</order>
         <width>11</width>
         <maxLength>20</maxLength>
-        <precision>5</precision>
+        <precision>10</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>reqCourse</alias>
@@ -229,7 +229,7 @@
         <order>22</order>
         <width>11</width>
         <maxLength>20</maxLength>
-        <precision>5</precision>
+        <precision>10</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>incomeDelta</alias>
