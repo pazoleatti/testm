@@ -183,7 +183,7 @@ public abstract class Column implements Ordered, Serializable {
 			throw new IllegalArgumentException("Field \"dataOrder\" must not be null");
 		}
 		if (dataOrder < MIN_DATA_ORDER || dataOrder > MAX_DATA_ORDER) {
-			throw new IllegalArgumentException(String.format("Value of field \"dataOrder\" must be in interval [%s; %s]", MIN_DATA_ORDER, MAX_DATA_ORDER));
+			throw new IllegalArgumentException("Value of field \"dataOrder\" must be in interval [" + MIN_DATA_ORDER + ";" + MAX_DATA_ORDER + "]");
 		}
 		this.dataOrder = dataOrder;
 	}
