@@ -233,7 +233,7 @@ public class Rnu_115Test extends ScriptTestBase {
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(2, dataRows.get(0).getCell("incomeSum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(2, dataRows.get(0).getCell("outcomeSum").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0, dataRows.get(0).getCell("outcomeSum").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(0, dataRows.get(0).getCell("incomeDelta").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(0, dataRows.get(0).getCell("outcomeDelta").getNumericValue().doubleValue(), 0);
     }

@@ -236,8 +236,8 @@ void logicCheck() {
         // Проверка отклонений по доходам
         // Проверка отклонений по расходам
         def needValue = formData.createDataRow()
-        needValue.incomeSum = calc1920(row)
-        needValue.outcomeSum = calc1920(row)
+        needValue.incomeSum = calc19(row)
+        needValue.outcomeSum = calc20(row)
         needValue.incomeDelta = calc22(row)
         needValue.outcomeDelta = calc23(row)
         checkCalc(row, calcColumns, needValue, logger, true)
@@ -273,8 +273,8 @@ void calc() {
             continue
         }
         // 19, 20
-        row.incomeSum = calc1920(row)
-        row.outcomeSum = calc1920(row)
+        row.incomeSum = calc19(row)
+        row.outcomeSum = calc20(row)
         // 22, 23
         row.incomeDelta = calc22(row)
         row.outcomeDelta = calc23(row)
@@ -287,10 +287,18 @@ void calc() {
     updateIndexes(dataRows)
 }
 
-def BigDecimal calc1920(def row) {
+def BigDecimal calc19(def row) {
     if (row.reqSum != null && row.guarSum != null) {
         def diff = row.reqSum + row.guarSum
         return diff > 0 ? diff : 0
+    }
+    return null
+}
+
+def BigDecimal calc20(def row) {
+    if (row.reqSum != null && row.guarSum != null) {
+        def diff = row.reqSum + row.guarSum
+        return diff < 0 ? diff : 0
     }
     return null
 }
@@ -392,6 +400,7 @@ def BigDecimal calc23(def row) {
             }
         }
     }
+    return null
 }
 
 def calcTotalRow(def dataRows) {
