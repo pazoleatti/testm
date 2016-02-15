@@ -118,22 +118,13 @@ public interface DeclarationDataService {
      */
     InputStream getXmlDataAsStream(long declarationDataId, TAUserInfo userInfo);
 	/**
-	 * Получить печатное представление данные декларации.
-	 * Получается путём подстановки данных декларации в формате xml в Jasper-reports отчёт, шаблона декларации
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @return файл Xlsx в виде байтового массива
-	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
-	 */
-	byte[] getXlsxData(long declarationDataId, TAUserInfo userInfo, LockStateLogger stateLogger);
-	/**
 	 * Получить печатное представление данных декларации в PDF формате
 	 * @param declarationId идентификатор декларации
 	 * @param userInfo информация о пользователе, выполняющего действие
 	 * @return файл Pdf в виде байтового массива
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
-	byte[] getPdfData(long declarationId, TAUserInfo userInfo);
+    InputStream getPdfDataAsStream(long declarationId, TAUserInfo userInfo);
 	/**
 	 * Получить имя файла в формате законодателя
 	 * @param declarationDataId идентификатор декларации
@@ -173,10 +164,10 @@ public interface DeclarationDataService {
     /**
      * Генерация ключа блокировки для асинхронных задач по декларациям
      * @param declarationDataId
-     * @param reportType
+     * @param type
      * @return код блокировки
      */
-    String generateAsyncTaskKey(long declarationDataId, ReportType reportType);
+    String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type);
 
     /**
      * Заблокировать DeclarationData.
@@ -214,10 +205,10 @@ public interface DeclarationDataService {
     /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего
      * @param declarationId идентификатор декларации
-     * @param reportType тип отчета. Может быть null
+     * @param ddReportType тип отчета. Может быть null
      * @return название
      */
-    String getDeclarationFullName(long declarationId, ReportType reportType);
+    String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
 
     /**
      * Проверяет существование операции, по которым требуется удалить блокировку
@@ -242,13 +233,13 @@ public interface DeclarationDataService {
      * @param ids идентификаторы деклараций
      * @param reportTypes типы отчетов, которые надо удалить
      */
-    void cleanBlobs(Collection<Long> ids, List<ReportType> reportTypes);
+    void cleanBlobs(Collection<Long> ids, List<DeclarationDataReportType> reportTypes);
 
     /**
      * Формирует название операции
-     * @param reportType
+     * @param ddReportType
      * @param taxType
      * @return
      */
-    String getTaskName(ReportType reportType, TaxType taxType);
+    String getTaskName(DeclarationDataReportType ddReportType, TaxType taxType, String... args);
 }

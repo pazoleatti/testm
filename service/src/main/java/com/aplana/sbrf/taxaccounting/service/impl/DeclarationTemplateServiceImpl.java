@@ -151,36 +151,45 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         if (jrxmlBlobData == null) {
             return null;
         }
+        StringWriter writer = new StringWriter();
         try {
-            //TODO: Лучше все через потоки делать
-            StringWriter writer = new StringWriter();
             IOUtils.copy(jrxmlBlobData.getInputStream(), writer, ENCODING);
+            IOUtils.closeQuietly(jrxmlBlobData.getInputStream());
             return writer.toString();
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw new ServiceException(JRXML_NOT_FOUND);
+        } finally {
+            IOUtils.closeQuietly(writer);
         }
-	}
+    }
 
     @Override
 	public InputStream getJasper(int declarationTemplateId) {
-        ByteArrayOutputStream  compiledReport = new ByteArrayOutputStream();
-        String jrxml = getJrxml(declarationTemplateId);
-        if (jrxml == null) {
-            throw new ServiceException(JRXML_NOT_FOUND);
-        }
+        ByteArrayOutputStream compiledReport = new ByteArrayOutputStream();
+        ByteArrayInputStream byteArrayInputStream = null;
         try {
-            JasperDesign jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes(ENCODING)));
-            JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
-        } catch (JRException e) {
-            LOG.error(e.getMessage(), e);
-            throw new ServiceException("Произошли ошибки во время формирования отчета!");
-        } catch (UnsupportedEncodingException e2) {
-            LOG.error(e2.getMessage(), e2);
-            throw new ServiceException("Шаблон отчета имеет неправильную кодировку!");
+            String jrxml = getJrxml(declarationTemplateId);
+            if (jrxml == null) {
+                throw new ServiceException(JRXML_NOT_FOUND);
+            }
+            try {
+                byteArrayInputStream = new ByteArrayInputStream(jrxml.getBytes(ENCODING));
+                JasperDesign jasperDesign = JRXmlLoader.load(byteArrayInputStream);
+                JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
+            } catch (JRException e) {
+                LOG.error(e.getMessage(), e);
+                throw new ServiceException("Произошли ошибки во время формирования отчета!");
+            } catch (UnsupportedEncodingException e2) {
+                LOG.error(e2.getMessage(), e2);
+                throw new ServiceException("Шаблон отчета имеет неправильную кодировку!");
+            }
+            return new ByteArrayInputStream(compiledReport.toByteArray());
+        } finally {
+            IOUtils.closeQuietly(byteArrayInputStream);
+            IOUtils.closeQuietly(compiledReport);
         }
-        return new ByteArrayInputStream(compiledReport.toByteArray());
-	}
+    }
 
 	@Override
 	public void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo){
@@ -333,14 +342,14 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
             DeclarationData data = declarationDataService.get(dataId, currUser);
-            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, ReportType.PDF_DEC);
-            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, ReportType.EXCEL_DEC);
+            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
+            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
             ReportPeriod rp = periodService.getReportPeriod(data.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.get(data.getDepartmentReportPeriodId());
             if (
-                    reportService.getDec(currUser, dataId, ReportType.PDF_DEC) != null
+                    reportService.getDec(currUser, dataId, DeclarationDataReportType.PDF_DEC) != null
                             ||
-                            reportService.getDec(currUser, dataId, ReportType.EXCEL_DEC) != null) {
+                            reportService.getDec(currUser, dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
                 existDec.add(String.format(
                         DEC_DATA_EXIST_IN_TASK,
                         template.getName(),
@@ -391,9 +400,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         HashSet<Long> dataIds = new HashSet<Long>();
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
-            if(reportService.getDec(userInfo, dataId, ReportType.PDF_DEC) != null
+            if(reportService.getDec(userInfo, dataId, DeclarationDataReportType.PDF_DEC) != null
                     ||
-                    reportService.getDec(userInfo, dataId, ReportType.EXCEL_DEC) != null){
+                    reportService.getDec(userInfo, dataId, DeclarationDataReportType.EXCEL_DEC) != null){
                 dataIds.add(dataId);
             }
         }
@@ -406,8 +415,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         HashSet<Long> lockDataIds = new HashSet<Long>();
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
-            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, ReportType.PDF_DEC);
-            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, ReportType.EXCEL_DEC);
+            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
+            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
             if (lockDataService.isLockExists(decKeyPDF, false) || lockDataService.isLockExists(decKeyXLSM, false)) {
                 lockDataIds.add(dataId);
             }

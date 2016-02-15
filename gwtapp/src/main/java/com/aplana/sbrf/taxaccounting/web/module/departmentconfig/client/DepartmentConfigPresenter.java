@@ -154,6 +154,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * @param endDate
          */
         void setRefBookPeriod(Date startDate, Date endDate);
+
+        void setConfigPeriod(Date configStartDate, Date configEndDate);
     }
 
     @Inject
@@ -195,6 +197,9 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                                 LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
                                                 if (!result.isHasError()) {
                                                     getView().reloadDepartmentParams();
+                                                }
+                                                if (result.getErrorMsg() != null) {
+                                                    Dialog.errorMessage(result.getErrorMsg());
                                                 }
                                             }
                                         }, DepartmentConfigPresenter.this));
@@ -333,7 +338,12 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         getView().setDereferenceValue(result.getRbTextValues());
                         getView().setReportPeriodActive(result.isReportPeriodActive());
                         getView().updateVisibleEditButton();
+                        getView().setConfigPeriod(result.getConfigStartDate(), result.getConfigEndDate());
                         result.getRbTextValues();
+
+                        if (result.getErrorMsg() != null) {
+                            Dialog.errorMessage(result.getErrorMsg());
+                        }
                         if (result.getUuid() != null) {
                             LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
                         }

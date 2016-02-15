@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Полное наименование юридического лица – участника группы"/>
+        <cell alias="pseudoName" colSpan="1" rowSpan="1" value="Полное наименование юридического лица – участника группы (в случае изменения названия)"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" value="Код участника в соответствие с классификатором АС «Статотчетность»"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="Номер (код) юридического лица (заполняется в порядке, установленном /3/ для формы 0409801)"/>
+        <cell alias="depName" colSpan="1" rowSpan="1" value="Наименование подразделения, ответственного за взаимодействие"/>
+        <cell alias="consoType" colSpan="1" rowSpan="1" value="Метод консолидации (1-полная консолидация, 2 - пропорционально доле участия)"/>
+        <cell alias="controlPart" colSpan="1" rowSpan="1" value="Доля контроля Группы в уставном капитале участника, %"/>
+        <cell alias="sharePart" colSpan="1" rowSpan="1" value="Доля участия Группы в уставном капитале участника, %"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="ИНН юридического лица"/>
+        <cell alias="date" colSpan="1" rowSpan="1" value="Дата включения участника в состав группы"/>
+        <cell alias="sign" colSpan="1" rowSpan="1" value="Является группой компаний (0 - нет, 1 - да)"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="pseudoName" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="depName" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="consoType" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="controlPart" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="sharePart" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="date" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="sign" colSpan="1" rowSpan="1" value="12"/>
+    </row>
+</rows>

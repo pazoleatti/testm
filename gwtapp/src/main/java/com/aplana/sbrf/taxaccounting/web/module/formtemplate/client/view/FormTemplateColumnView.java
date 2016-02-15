@@ -418,7 +418,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
     @UiHandler("refBookAttrFilterArea")
     public void onRefBookAttrFilterArea(KeyUpEvent event) {
-        ((RefBookColumn) columns.get(columnListBox.getSelectedIndex())).setFilter(refBookAttrFilterArea.getValue());
+        ((FilterColumn) columns.get(columnListBox.getSelectedIndex())).setFilter(refBookAttrFilterArea.getValue());
     }
 
     @UiHandler("refBooktAttrParentBox")
@@ -535,6 +535,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 			stringMaxLengthBox.setValue(maxLength);
 			stringMaxLengthPanel.setVisible(true);
+			refBookAttrFilterPanel.setVisible(true);
+			refBookAttrFilterArea.setValue(((StringColumn) column).getFilter(), false);
 		} else if (typeColumnDropBox.getValue().equals(NUMERIC_TYPE)) {
             // Число
 			int maxLength = ((NumericColumn) column).getMaxLength();

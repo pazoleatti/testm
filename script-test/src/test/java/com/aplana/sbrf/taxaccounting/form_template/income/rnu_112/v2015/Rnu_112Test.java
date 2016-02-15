@@ -104,7 +104,6 @@ public class Rnu_112Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Ставка сделки, % годовых» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма остаточных обязательств (требований) контрагента по сделке» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма выплаты по ценным бумагам» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата выплаты (гр. 12)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата начала начисления» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата окончания начисления» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «База (360/365/366)» не заполнена!", entries.get(i++).getMessage());

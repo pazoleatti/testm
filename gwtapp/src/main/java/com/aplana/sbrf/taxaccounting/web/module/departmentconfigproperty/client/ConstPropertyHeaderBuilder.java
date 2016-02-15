@@ -31,8 +31,14 @@ public class ConstPropertyHeaderBuilder extends AbstractHeaderOrFooterBuilder im
 
         TableRowBuilder tr = startRow();
         if (needCheckedRow) {
-            buildHeader(tr, checkBoxHeader, 0, 2, true);
+            buildHeader(tr, checkBoxHeader, 0, 3, true);
         }
+
+        buildHeader(tr, new TextHeader("№"), 0, 3, true);
+
+        tr.endTR();
+
+        tr = startRow();
 
         buildHeader(tr, new TextHeader("Параметры декларации"), 2, 0, true);
 

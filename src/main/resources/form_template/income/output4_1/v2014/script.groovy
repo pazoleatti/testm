@@ -244,7 +244,7 @@ void importTransportData() {
         def totalColumns = totalColumnsIndexMap.keySet().asList()
 
         // подсчет итогов
-        def itogValues = [:]
+        def itogValues = formData.createDataRow()
         totalColumns.each {alias ->
             itogValues[alias] = BigDecimal.ZERO
         }
@@ -255,17 +255,7 @@ void importTransportData() {
         }
 
         // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumns) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = itogValues[alias]
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
+        checkTFSum(itogValues, totalTF, totalColumnsIndexMap.keySet().asList(), totalTF?.getImportIndex(), logger, false)
     }
     showMessages(dataRows, logger)
 }

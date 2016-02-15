@@ -71,7 +71,7 @@
         <alias>reasonNumber</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Основание для совершения операции. номер</name>
+        <name>Основание для совершения операции. Номер</name>
         <order>7</order>
         <width>5</width>
         <maxLength>128</maxLength>
@@ -81,7 +81,7 @@
         <alias>reasonDate</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
-        <name>Основание для совершения операции. дата</name>
+        <name>Основание для совершения операции. Дата</name>
         <order>8</order>
         <width>6</width>
         <formatId>0</formatId>

@@ -91,24 +91,21 @@ public class SignServiceImplTest {
         } catch (NoSuchFieldException e) {
             throw new ServiceException("Failed to get field handle to set library path");
         }*/
-        Logger logger = new Logger();
-        signService.checkSign(copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0, logger);
-        Assert.assertTrue(signService.checkSign(copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0, new Logger()));
-
+        Assert.assertTrue(signService.checkSign("dataFile.data", copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0, new Logger()).getFirst());
     }
 
     @Test
     public void testXls() throws IOException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
-        Assert.assertTrue(signService.checkSign(copyTmp(DATA_XLS_FILE, "dataXlsFile", ".data").getAbsolutePath(), 0, new Logger()));
+        Assert.assertTrue(signService.checkSign("dataXlsFile.data", copyTmp(DATA_XLS_FILE, "dataXlsFile", ".data").getAbsolutePath(), 0, new Logger()).getFirst());
     }
 
     @Test
     public void testNonEncrypt() throws IOException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
-        Assert.assertFalse(signService.checkSign(copyTmp(NON_ENC_FILE, "non_enc", ".data").getAbsolutePath(), 0, new Logger()));
+        Assert.assertFalse(signService.checkSign("non_enc.data", copyTmp(NON_ENC_FILE, "non_enc", ".data").getAbsolutePath(), 0, new Logger()).getFirst());
     }
 
     //Тест с новым подписанным архивом. False, нормальный результат, так как нет такой подписи в нашей БОК
@@ -116,7 +113,7 @@ public class SignServiceImplTest {
     public void testZip() throws IOException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
-        Assert.assertFalse(signService.checkSign(copyTmp(ZIP_FILE, "zip", ".data").getAbsolutePath(), 0, new Logger()));
+        Assert.assertFalse(signService.checkSign("zip.data", copyTmp(ZIP_FILE, "zip", ".data").getAbsolutePath(), 0, new Logger()).getFirst());
     }
 
     private static File copyTmp(String dataFilePath, String prefix, String suffix) throws IOException {

@@ -54,16 +54,16 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
 
     @Override
     public CheckDeclarationDataResult execute(final CheckDeclarationDataAction action, ExecutionContext context) throws ActionException {
-        final ReportType reportType = ReportType.CHECK_DEC;
+        final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
 		CheckDeclarationDataResult result = new CheckDeclarationDataResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
-        LockData lockDataAccept = lockDataService.getLock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.ACCEPT_DEC));
+        LockData lockDataAccept = lockDataService.getLock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), DeclarationDataReportType.ACCEPT_DEC));
         if (lockDataAccept == null) {
-            String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), ReportType.XML_DEC);
+            String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), DeclarationDataReportType.XML_DEC);
             if (uuidXml != null) {
-                String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
-                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(reportType, action.getTaxType()), userInfo, action.isForce(), logger);
+                String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ddReportType);
+                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, action.isForce(), logger);
                 if (restartStatus != null && restartStatus.getFirst()) {
                     result.setStatus(CreateAsyncTaskStatus.LOCKED);
                     result.setRestartMsg(restartStatus.getSecond());
@@ -73,11 +73,11 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                     result.setStatus(CreateAsyncTaskStatus.CREATE);
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("declarationDataId", action.getDeclarationId());
-                    asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
                         @Override
                         public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                             return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                    declarationDataService.getDeclarationFullName(action.getDeclarationId(), reportType),
+                                    declarationDataService.getDeclarationFullName(action.getDeclarationId(), ddReportType),
                                     LockData.State.IN_QUEUE.getText());
                         }
 
@@ -96,7 +96,7 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
 
                         @Override
                         public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                            return declarationDataService.getTaskName(reportType, action.getTaxType());
+                            return declarationDataService.getTaskName(ddReportType, action.getTaxType());
                         }
                     });
                 }
@@ -113,7 +113,7 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                             LockData.LOCK_CURRENT,
                             sdf.format(lockDataAccept.getDateLock()),
                             userService.getUser(lockDataAccept.getUserId()).getName(),
-                            declarationDataService.getTaskName(ReportType.ACCEPT_DEC, action.getTaxType()))
+                            declarationDataService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, action.getTaxType()))
             );
             throw new ServiceLoggerException("Для текущего экземпляра %s запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()), action.getTaxType().getDeclarationShortName());
         }

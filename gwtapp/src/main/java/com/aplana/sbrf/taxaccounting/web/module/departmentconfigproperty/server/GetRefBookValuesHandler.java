@@ -1,13 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server.DepartmentParamAliases;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.GetRefBookValuesAction;
@@ -33,15 +34,18 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
     @Autowired
     RefBookFactory rbFactory;
     @Autowired
-    PeriodService reportService;
+    PeriodService periodService;
     @Autowired
     RefBookHelper refBookHelper;
+    @Autowired
+    LogEntryService logEntryService;
 
     Map<String, RefBookDataProvider> refProviders;
     Map<String, String> refAliases;
 
     @Override
     public GetRefBookValuesResult execute(GetRefBookValuesAction getRefBookValuesAction, ExecutionContext executionContext) throws ActionException {
+        Logger logger = new Logger();
 
         //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
         refProviders = new HashMap<String, RefBookDataProvider>();
@@ -62,10 +66,10 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
 
         String filterMaster = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + getRefBookValuesAction.getDepartmentId();
 
-        Calendar calendarFrom = reportService.getEndDate(getRefBookValuesAction.getReportPeriodId());
+        ReportPeriod reportPeriod = periodService.getReportPeriod(getRefBookValuesAction.getReportPeriodId());
 
         PagingResult<Map<String, RefBookValue>> paramsMaster = providerMaster.getRecords(
-                addDayToDate(calendarFrom.getTime(), -1), null, filterMaster, null);
+                addDayToDate(reportPeriod.getEndDate(), -1), null, filterMaster, null);
         if (paramsMaster.isEmpty()) {
             return result;
         }
@@ -78,15 +82,65 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         String filterSlave = "LINK = " + result.getRecordId();
         RefBookAttribute sortAttr = rbFactory.get(getRefBookValuesAction.getSlaveRefBookId()).getAttribute("ROW_ORD");
         PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(
-                addDayToDate(calendarFrom.getTime(), -1), null, filterSlave, sortAttr);
+                addDayToDate(reportPeriod.getEndDate(), -1), null, filterSlave, sortAttr);
         result.setTableValues(convert(paramsSlave, getRefBookValuesAction.getSlaveRefBookId(), true));
 
+        //Проверяем справочные значения для полученной таблицы
+        checkReferenceValues(refBook, result.getTableValues(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
+        if (logger.getMainMsg() != null) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            result.setErrorMsg(logger.getMainMsg());
+        }
+
+        // Заполняем период действия настроек
+        RefBookRecordVersion version = providerMaster.getRecordVersionInfo(result.getRecordId());
+        result.setConfigStartDate(version.getVersionStart());
+        result.setConfigEndDate(version.getVersionEnd());
         return result;
     }
 
     @Override
     public void undo(GetRefBookValuesAction getRefBookValuesAction, GetRefBookValuesResult getRefBookValuesResult, ExecutionContext executionContext) throws ActionException {
 
+    }
+
+    /**
+     * Проверка существования записей справочника на которые ссылаются атрибуты.
+     * Считаем что все справочные атрибуты хранятся в универсальной структуре как и сами настройки
+     * @param refBook
+     * @param rows
+     * @return возвращает true, если проверка пройдена
+     */
+    private void checkReferenceValues(RefBook refBook, List<Map<String, TableCell>> rows, Date versionFrom, Date versionTo, Logger logger) {
+        Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<RefBookDataProvider, List<RefBookLinkModel>>();
+
+        RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
+        RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
+
+        int i = 1;
+        for (Map<String, TableCell> row : rows) {
+            for (Map.Entry<String, TableCell> e : row.entrySet()) {
+                TableCell cell = e.getValue();
+                if (cell.getType() == null) {
+                    continue;
+                }
+                if (cell.getType() == RefBookAttributeType.REFERENCE) {
+                    if (cell.getRefValue() != null) {
+                        //Собираем ссылки на справочники и группируем их по провайдеру, обрабатывающему справочники
+                        RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
+                        if (!references.containsKey(linkProvider)) {
+                            references.put(linkProvider, new ArrayList<RefBookLinkModel>());
+                        }
+                        //Сохраняем данные для отображения сообщений
+                        references.get(linkProvider).add(new RefBookLinkModel(i, e.getKey(), cell.getRefValue(), null, versionFrom, versionTo));
+                    }
+                }
+            }
+            i++;
+        }
+
+        //Проверяем ссылки и выводим соообщения если надо
+        refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
     }
 
     private List<Map<String, TableCell>> convert(List<Map<String, RefBookValue>> data, Long refBookId, boolean needDeref) {

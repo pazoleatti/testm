@@ -45,7 +45,7 @@
         .scrolPanelStyle {
             background-color: white;
             position: absolute !important;
-            top: 45px;
+            top: 65px;
             bottom: 35px;
             left: 0;
             right: 0;
@@ -81,6 +81,17 @@
         .mgnr {
             margin-right: 40px;
             margin-bottom: 10px;
+        }
+
+
+        .periodPanelStyle {
+            background-color: white;
+            border-bottom: 1px solid #aeaeac;
+            width: 100%;
+        }
+        .toRight {
+            text-align: right;
+            padding-right: 20px;
         }
 
     </ui:style>
@@ -136,6 +147,13 @@
                     </g:cell>
 
                 </g:HorizontalPanel>
+
+                <g:HorizontalPanel spacing="5" height="44px" addStyleNames="{style.periodPanelStyle}">
+                    <g:cell width="100%">
+                        <g:Label ui:field="configPeriodLabel" addStyleNames="{style.toRight}"/>
+                    </g:cell>
+                </g:HorizontalPanel>
+
                 <g:ScrollPanel addStyleNames="{style.scrolPanelStyle}">
                     <g:FormPanel ui:field="formPanel" addStyleNames="{style.formPanel}">
                         <g:HorizontalPanel spacing="2" width="100%">
@@ -151,11 +169,11 @@
                                 <style:LabelSeparator text="Сведения о налогоплательщике" addStyleNames="{style.labelSeparetors}"/>
                                 <g:HorizontalPanel>
                                     <g:cell>
-                                        <style:LinkAnchor ui:field="addLink" text="Добавить запись" img="resources/img/row-add.png"
+                                        <style:LinkAnchor ui:field="addLink" text="Добавить строку" img="resources/img/row-add.png"
                                                           addStyleNames="{style.mgnl}" visible="false"/>
                                     </g:cell>
                                     <g:cell>
-                                        <style:LinkAnchor ui:field="delLink" text="Удалить запись" img="resources/img/row-delete.png"
+                                        <style:LinkAnchor ui:field="delLink" text="Удалить строку" img="resources/img/row-delete.png"
                                                           addStyleNames="{style.mgnr}" visible="false"/>
                                     </g:cell>
                                 </g:HorizontalPanel>

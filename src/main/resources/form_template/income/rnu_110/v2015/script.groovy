@@ -20,8 +20,8 @@ import groovy.transform.Field
 // iksr					(3) -  Идентификационный номер
 // transDoneDate  		(4) -  Дата совершения операции
 // code        			(5) -  Код налогового учёта
-// reasonNumber 		(6) -  номер
-// reasonDate 			(7) -  дата
+// reasonNumber 		(6) -  Номер
+// reasonDate 			(7) -  Дата
 // rent 				(8) -  Арендная ставка
 // taxRent     		    (9) -  Арендная ставка, признаваемая рыночной для целей налогообложения
 // sum1 			    (10) - Сумма фактически начисленной арендной платы
@@ -341,8 +341,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][3]): getColumnName(tmpRow, 'iksr')]),
             ([(headerRows[1][4]): getColumnName(tmpRow, 'transDoneDate')]),
             ([(headerRows[1][5]): getColumnName(tmpRow, 'code')]),
-            ([(headerRows[1][6]): 'номер']),
-            ([(headerRows[1][7]): 'дата']),
+            ([(headerRows[1][6]): 'Номер']),
+            ([(headerRows[1][7]): 'Дата']),
             ([(headerRows[1][8]): getColumnName(tmpRow, 'rent')]),
             ([(headerRows[1][9]): getColumnName(tmpRow, 'taxRent')]),
             ([(headerRows[1][10]): getColumnName(tmpRow, 'sum1')]),

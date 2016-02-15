@@ -22,6 +22,14 @@ public interface BlobDataService {
 
     /**
      * Создание записи
+     * @param path путь к файлу
+     * @param name имя для базы
+     * @return uuid идентификатор
+     */
+    String create(String path, String name);
+
+    /**
+     * Создание записи
      * @param file файл
      * @param name имя для базы
      * @param createDate дата (например, полученная из xml, как в декларациях)

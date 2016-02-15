@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -56,6 +57,8 @@ public class AuditServiceImplTest {
     private DepartmentService departmentService;
     @Autowired
     private PeriodService periodService;
+    @Autowired
+    private ServerInfo serverInfo;
 
     private TAUserInfo userInfo = new TAUserInfo();
 
@@ -89,6 +92,7 @@ public class AuditServiceImplTest {
         when(departmentService.getDepartment(0)).thenReturn(department1);
         when(departmentService.getParentTB(1)).thenReturn(department2);
         when(departmentService.getParentsHierarchy(1)).thenReturn("Центральный аппарат/Управление налогового планирования");
+        when(serverInfo.getServerName()).thenReturn("server");
 
         auditService.add(FormDataEvent.MIGRATION, userInfo, 0, null, null, null, null, "MIGRATION", null);
         auditService.add(FormDataEvent.LOGIN, userInfo, 1, null, null, null, null, "LOGIN", null);
@@ -101,6 +105,9 @@ public class AuditServiceImplTest {
 
         assertEquals(argument.getAllValues().get(1).getFormDepartmentName(), "Центральный аппарат/Управление налогового планирования");
         assertEquals(argument.getAllValues().get(1).getUserDepartmentName(), "Центральный аппарат/Управление налогового планирования");
+
+        assertEquals(argument.getAllValues().get(0).getServer(), "server");
+        assertEquals(argument.getAllValues().get(1).getServer(), "server");
     }
 
     @Test

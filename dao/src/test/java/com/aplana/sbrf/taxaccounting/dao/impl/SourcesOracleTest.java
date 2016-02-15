@@ -330,19 +330,19 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-11\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2024\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2024\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
 
-        //TODO: надо передавать во входных параметрах PERIOD_ORDER для случая когда id = null
-        /*formDataDao.delete(1, 11L);
+        formDataDao.delete(1, 11L);
         formData.setId(null);
         formData.setFormTemplateId(4);
         formData.setDepartmentReportPeriodId(6);
         formData.setKind(FormDataKind.CONSOLIDATED);
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
+        formData.setPeriodOrder(1);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
         assertEquals(3, relations.size());
         assertEquals("12, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2024\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-11\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2024\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
-        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2024\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));*/
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2024\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
     }
 
     @Test
@@ -359,19 +359,19 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-11\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
         assertEquals("15, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
 
-        //TODO: надо передавать во входных параметрах PERIOD_ORDER для случая когда id = null
-        /*formDataDao.delete(1, 13L);
+        formDataDao.delete(1, 13L);
         formData.setId(null);
         formData.setFormTemplateId(4);
         formData.setDepartmentReportPeriodId(7);
         formData.setKind(FormDataKind.CONSOLIDATED);
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
+        formData.setPeriodOrder(1);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
         assertEquals(3, relations.size());
         assertEquals("14, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-11\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
-        assertEquals("15, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));*/
+        assertEquals("15, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
     }
 
     @Test
@@ -1167,19 +1167,19 @@ public class SourcesOracleTest {
         assertEquals("48, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(2)));
 
 
-        //TODO: надо передавать во входных параметрах PERIOD_ORDER для случая когда id = null
-        /*formDataDao.delete(1, 15L);
+        formDataDao.delete(1, 15L);
         formData.setId(null);
         formData.setFormTemplateId(4);
         formData.setDepartmentReportPeriodId(7);
         formData.setKind(FormDataKind.PRIMARY);
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
+        formData.setPeriodOrder(1);
         relations = sourceDao.getDestinationsInfo(formData, true, false, null);
         assertEquals(3, relations.size());
         assertEquals("1012, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("13, Тип: \"Консолидированная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(1)));
-        assertEquals("48, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(2)));*/
+        assertEquals("48, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(2)));
     }
 
     @Test

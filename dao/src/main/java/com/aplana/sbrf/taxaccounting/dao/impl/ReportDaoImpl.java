@@ -50,7 +50,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public void createDec(final long declarationDataId, final String blobDataId, final ReportType type) {
+    public void createDec(final long declarationDataId, final String blobDataId, final String type) {
         try{
             PreparedStatementCreator psc = new PreparedStatementCreator() {
                 @Override
@@ -62,7 +62,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                                     "INSERT INTO DECLARATION_REPORT (DECLARATION_DATA_ID, BLOB_DATA_ID, TYPE) VALUES (?,?,?)");
                     ps.setLong(1, declarationDataId);
                     ps.setString(2, blobDataId);
-                    ps.setInt(3, type.getId());
+                    ps.setString(3, type);
                     return ps;
                 }
             };
@@ -104,13 +104,13 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public String getDec(final long declarationDataId, final ReportType type) {
+    public String getDec(final long declarationDataId, final String type) {
         try{
             PreparedStatementData ps = new PreparedStatementData();
             ps.appendQuery("SELECT BLOB_DATA_ID FROM DECLARATION_REPORT " +
                     "WHERE DECLARATION_DATA_ID = ? AND TYPE = ?");
             ps.addParam(declarationDataId);
-            ps.addParam(type.getId());
+            ps.addParam(type);
             return getJdbcTemplate().queryForObject(ps.getQuery().toString(), ps.getParams().toArray(), String.class);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -174,15 +174,11 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public void deleteDec(Collection<Long> declarationDataIds, List<ReportType> reportTypes) {
+    public void deleteDec(Collection<Long> declarationDataIds, List<String> reportTypes) {
         try{
-            List<Integer> types = new ArrayList<Integer>();
-            for (ReportType type : reportTypes) {
-                types.add(type.getId());
-            }
             String sql = String.format("DELETE FROM DECLARATION_REPORT WHERE %s and %s",
                     SqlUtils.transformToSqlInStatement("DECLARATION_DATA_ID", declarationDataIds),
-                    SqlUtils.transformToSqlInStatement("TYPE", types));
+                    SqlUtils.transformToSqlInStatement("TYPE", reportTypes));
             Map<String, Object> params = new HashMap<String, Object>();
             getNamedParameterJdbcTemplate().update(sql, params);
         } catch (DataAccessException e){
@@ -218,6 +214,20 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
             getJdbcTemplate().update("delete from log_system_report where blob_data_id=?", blobDataId);
         } catch (DataAccessException e){
             throw new DaoException("Не удалось удалить записи ЖА", e);
+        }
+    }
+
+    @Override
+    public int clean() {
+        try {
+            //Удаление Jasper-отчетов декларации, если есть сформированный XLSX-отчет
+            return getJdbcTemplate().update("delete from declaration_report dr\n" +
+                    "where type = 'JASPER' and exists ( \n" +
+                    "select declaration_data_id\n" +
+                    "from declaration_report dr1\n" +
+                    "where dr.declaration_data_id=dr1.declaration_data_id and type = 'XLSX')");
+        } catch (DataAccessException e){
+            throw new DaoException(String.format("Ошибка при удалении ненужных записей таблицы DECLARATION_REPORT. %s.", e.getMessage()), e);
         }
     }
 }

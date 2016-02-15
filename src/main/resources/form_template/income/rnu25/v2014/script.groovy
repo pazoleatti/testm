@@ -126,7 +126,7 @@ def nonEmptyColumns = ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'reserve', 
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4..7, 10..13)
 @Field
-def totalSumColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost', 'costOnMarketQuotation',
+def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost', 'costOnMarketQuotation',
         'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
 // Дата окончания отчетного периода
@@ -382,14 +382,14 @@ void logicCheck() {
         def tmpRow = getCalcSubtotalsRow(rows, codeName, totalRowAlias)
 
         // сравнить строки
-        if (row == null || isDiffRow(row, tmpRow, totalSumColumns)) {
+        if (row == null || isDiffRow(row, tmpRow, totalColumns)) {
             loggerError(row, "Итоговые значения по ГРН ${((!codeName || 'null'.equals(codeName?.trim())) ? "\"ГРН не задан\"" : codeName?.trim())} рассчитаны неверно!")
         }
     }
 
     // 18. Проверка итогового значений по всей форме
     if (totalRow != null) {
-        checkTotalSum(dataRows, totalSumColumns, logger, !isBalancePeriod)
+        checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
     } else {
         loggerError(null, "Итоговые значения рассчитаны неверно!")
     }
@@ -490,7 +490,7 @@ def getTotalRow(def dataRows, def regNumberValue, def alias) {
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-    calcTotalSum(dataRows, newRow, totalSumColumns)
+    calcTotalSum(dataRows, newRow, totalColumns)
     return newRow
 }
 
@@ -611,11 +611,11 @@ void checkTotalRow(def totalRow) {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     def totalCalc = getCalcTotalRow(dataRows)
 
-    def totalSumColumns = [4: 'lotSizePrev', 5: 'lotSizeCurrent', 7: 'cost', 10: 'costOnMarketQuotation',
+    def totalColumns = [4: 'lotSizePrev', 5: 'lotSizeCurrent', 7: 'cost', 10: 'costOnMarketQuotation',
             11: 'reserveCalcValue', 12: 'reserveCreation', 13: 'reserveRecovery']
     def errorColums = []
     if (totalCalc != null) {
-        totalSumColumns.each { index, columnAlias ->
+        totalColumns.each { index, columnAlias ->
             if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
                 errorColums.add(index)
             }
@@ -711,34 +711,7 @@ void importTransportData() {
     showMessages(newRows, logger)
 
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['lotSizePrev' : 4, 'lotSizeCurrent' : 5, 'reserve' : 6, 'cost' : 7,
-                'costOnMarketQuotation' : 10, 'reserveCalcValue' : 11, 'reserveCreation' : 12, 'reserveRecovery' : 13]
-
-        // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = totalRow.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
-        // задать итоговой строке нф значения из итоговой строки тф
-        totalSumColumns.each { alias ->
-            totalRow[alias] = totalTF[alias]
-        }
-    } else {
-        logger.warn("В транспортном файле не найдена итоговая строка")
-        // очистить итоги
-        totalSumColumns.each { alias ->
-            totalRow[alias] = null
-        }
-    }
+    checkAndSetTFSum(totalRow, totalTF, totalColumns, totalTF?.getImportIndex(), logger, false)
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(newRows)
@@ -904,7 +877,7 @@ void importData() {
 
             subTotalRow.setIndex(lastRowIndex + 1)
             tmpLastIndex = subTotalRow.getIndex()
-            compareSimpleTotalValues(subTotalRow, subTotalRowFromFile, groupRows, totalSumColumns, formData, logger, false)
+            compareSimpleTotalValues(subTotalRow, subTotalRowFromFile, groupRows, totalColumns, formData, logger, false)
         }
     }
 
@@ -913,7 +886,7 @@ void importData() {
     rows.add(totalRow)
     updateIndexes(rows)
     if (totalRowFromFile) {
-        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalSumColumns, formData, logger, false)
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
     }
 
     showMessages(rows, logger)

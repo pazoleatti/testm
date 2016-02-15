@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.mvp.client.UiHandlers;
 
@@ -11,11 +10,11 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
 	void accept(boolean accepted, boolean force, boolean cancelTask);
 	void delete();
 	void check(boolean force);
-    void viewReport(boolean force, ReportType reportType);
+    void viewReport(boolean force, String type);
 	void downloadXml();
 	void onInfoClicked();
     TaxType getTaxType();
-    void onTimerReport(final ReportType reportType, final boolean isTimer);
+    void onTimerReport(final String type, final boolean isTimer);
     void onOpenSourcesDialog();
     void revealPlaceRequest();
 }

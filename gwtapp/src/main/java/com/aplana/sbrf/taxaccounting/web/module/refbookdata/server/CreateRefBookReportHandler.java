@@ -109,6 +109,9 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
             } catch (IllegalArgumentException ignored) {
             }
         } else {
+            if (action.getSortColumnIndex() < 0) {
+                action.setSortColumnIndex(0);
+            }
             List<RefBookAttribute> refBookAttributeList = new LinkedList<RefBookAttribute>();
             for (RefBookAttribute attribute : refBook.getAttributes()) {
                 if (attribute.isVisible()) {
@@ -148,7 +151,7 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
 
             @Override
             public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                return refBookFactory.getTaskName(reportType, action.getRefBookId(), action.getName());
+                return refBookFactory.getTaskName(reportType, action.getRefBookId(), action.getReportName());
             }
         });
         result.setUuid(logEntryService.save(logger.getEntries()));

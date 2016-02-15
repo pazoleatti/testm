@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -185,7 +186,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
-
+        final Long prevRefBookId = refBookId;
         refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
         refBookLinearPresenter.setRefBookId(refBookId);
         versionPresenter.setRefBookId(refBookId);
@@ -251,8 +252,16 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                                 }
                                                             }, RefBookDataPresenter.this));
                                         } else {
-                                            getProxy().manualReveal(RefBookDataPresenter.this);
-                                            Dialog.errorMessage("Доступ к справочнику запрещен!");
+                                            placeManager.unlock();
+                                            Dialog.errorMessage("Доступ к справочнику запрещен!", new DialogHandler() {
+                                                @Override
+                                                public void close() {
+                                                    super.close();
+                                                    PlaceRequest.Builder builder = new PlaceRequest.Builder().nameToken(RefBookDataTokens.REFBOOK_DATA);
+                                                    builder.with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(prevRefBookId));
+                                                    placeManager.revealPlace(builder.build());
+                                                }
+                                            });
                                         }
                                     }
                                 }, RefBookDataPresenter.this));

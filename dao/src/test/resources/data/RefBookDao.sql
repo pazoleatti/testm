@@ -8,6 +8,7 @@ insert into ref_book(id, name, script_id, visible) values
 (3, 'Библиотека', '24af57ef-ec1c-455f-a4fa-f0fb29483066', 0);
 insert into ref_book (id, name, type, visible, read_only) values
 (4, 'Коды ОКАТО', 1, 1, 0);
+insert into ref_book (id, name) values (5, 'Участники ТЦО');
 insert into ref_book (id, name) values (52, 'Бухотчетность');
 
 insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
@@ -42,6 +43,9 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
   (14, 52, 'Идентификатор', 'ITEM_NAME', 1, 3, null, null, 1, null, 11, 0, 2, 8);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) values
   (15, 52, 'Идентификатор 2', 'ACCOUNT_PERIOD_ID', 4, 4, 4, 8, 1, null, 11, 0, 0, null);
+-- Участники ТЦО
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) values
+  (16, 5, 'Дата начала', 'DATETIME', 3, 1, NULL, NULL, 1, NULL, 11, 0, 0, null);
 
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values
   (1, 1, 1, date '2013-01-01', 0);
@@ -79,6 +83,9 @@ insert into ref_book_record(id, record_id, ref_book_id, version, status) values
 (16, 9, 4, date '2013-01-01', 0);
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values
 (17, 10, 4, date '2013-01-01', 0);
+-- Участники ТЦО
+insert into ref_book_record(id, record_id, ref_book_id, version, status) values
+(18, 1, 5, date '2013-01-01', 0);
 
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
   (1, 1, 'Алиса в стране чудес', null, null, null);
@@ -177,3 +184,6 @@ insert into ref_book_value(record_id, attribute_id, string_value, number_value, 
   (17, 8, 'Самара', null, null, null);
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
   (17, 7, '05000000', null, null, null);
+-- Участники ТЦО
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (18, 16, null, null, '2013-01-01 13:12:12', null);

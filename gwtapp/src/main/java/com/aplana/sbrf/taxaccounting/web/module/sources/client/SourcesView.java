@@ -95,7 +95,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             periodTo;
 
     @UiField(provided = true)
-    ValueListBox<TaxType> taxTypeList;
+    com.aplana.gwt.client.ValueListBox<TaxType> taxTypeList;
 
     @UiField
     Spinner yearFrom,
@@ -158,17 +158,17 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     private TextColumn<DepartmentAssign> leftNameTypeColumn;
 
     private Column<DepartmentAssign, Boolean> rightCheckBoxColumn;
-    private Column<DepartmentAssign, DepartmentAssign> rightFormKindColumn;
-    private Column<DepartmentAssign, DepartmentAssign> rightNameTypeColumn;
+    private IdentityColumn<DepartmentAssign> rightFormKindColumn;
+    private IdentityColumn<DepartmentAssign> rightNameTypeColumn;
 
     private Column<CurrentAssign, Boolean> downCheckBoxColumn;
     private IdentityColumn<CurrentAssign> downIndexColumn;
-    private TextColumn<CurrentAssign> downAssignKindColumn;
-    private TextColumn<CurrentAssign> downDepartmentColumn;
-    private TextColumn<CurrentAssign> downNameTypeColumn;
-    private Column<CurrentAssign, Date> downStartColumn;
-    private Column<CurrentAssign, Date> downEndColumn;
-    private TextColumn<CurrentAssign> downTaxTypeColumn;
+    private IdentityColumn<CurrentAssign> downAssignKindColumn;
+    private IdentityColumn<CurrentAssign> downDepartmentColumn;
+    private IdentityColumn<CurrentAssign> downNameTypeColumn;
+    private IdentityColumn<CurrentAssign> downStartColumn;
+    private IdentityColumn<CurrentAssign> downEndColumn;
+    private IdentityColumn<CurrentAssign> downTaxTypeColumn;
 
     private boolean isForm = true;
     private boolean isTaxTypeDeal = false;
@@ -214,17 +214,17 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 return item != null ? item.getCode() : null;
             }
         });
-        taxTypeList = new ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
+        taxTypeList = new com.aplana.gwt.client.ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
             @Override
             public String render(TaxType item) {
                 return item.getName();
             }
-        }, new ProvidesKey<TaxType>() {
+        }) {
             @Override
-            public Object getKey(TaxType item) {
-                return item;
+            protected void updateLabelValue() {
+                setLabelValue(((TaxType)((HasValue) this).getValue()).getName());
             }
-        });
+        };
         taxTypeList.addValueChangeHandler(new ValueChangeHandler<TaxType>() {
             @Override
             public void onValueChange(ValueChangeEvent<TaxType> event) {
@@ -363,7 +363,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             }
         };
 
-        rightFormKindColumn = new Column<DepartmentAssign, DepartmentAssign>(new AbstractCell<DepartmentAssign>(){
+        rightFormKindColumn = new IdentityColumn<DepartmentAssign>(new AbstractCell<DepartmentAssign>(){
             @Override
             public void render(Context context, DepartmentAssign value, SafeHtmlBuilder sb) {
                 if (value != null) {
@@ -375,14 +375,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                     }
                 }
             }
-        }){
-            @Override
-            public DepartmentAssign getValue(DepartmentAssign object) {
-                return object;
-            }
-        };
+        });
 
-        rightNameTypeColumn =  new Column<DepartmentAssign, DepartmentAssign>(new AbstractCell<DepartmentAssign>(){
+        rightNameTypeColumn =  new IdentityColumn<DepartmentAssign>(new AbstractCell<DepartmentAssign>(){
             @Override
             public void render(Context context, DepartmentAssign value, SafeHtmlBuilder sb) {
                 if (value != null) {
@@ -394,12 +389,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                     }
                 }
             }
-        }){
-            @Override
-            public DepartmentAssign getValue(DepartmentAssign object) {
-                return object;
-            }
-        };
+        });
         rightCheckBoxColumn = new Column<DepartmentAssign, Boolean>(new CheckboxCell(true, false){
             @Override
             public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
@@ -489,9 +479,41 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                         + item.getStartDateAssign().getTime() + "_"
                         + (item.getEndDateAssign() != null ? item.getEndDateAssign().getTime() : "null");
             }
-        });
+        }) {
+            @Override
+            public Set<CurrentAssign> getSelectedSet() {
+                Set<CurrentAssign> set = super.getSelectedSet();
+                Iterator<CurrentAssign> it = set.iterator();
+                while (it.hasNext()) {
+                    CurrentAssign assign = it.next();
+                    if (!assign.isEnabled())
+                        it.remove();
+                }
+                return set;
+            }
+        };
 
-        downCheckBoxColumn = new Column<CurrentAssign, Boolean>(new CheckboxCell(true, false)) {
+        downCheckBoxColumn = new Column<CurrentAssign, Boolean>(new CheckboxCell(true, false){
+            @Override
+            public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
+                // Get the view data.
+                CurrentAssign key = (CurrentAssign)context.getKey();
+                Boolean viewData = getViewData(key);
+                if (viewData != null && viewData.equals(value)) {
+                    clearViewData(key);
+                    viewData = null;
+                }
+                String checked = "";
+                String enabled = "";
+                if (value != null && ((viewData != null) ? viewData : value)) {
+                    checked = "checked ";
+                }
+                if (!key.isEnabled()) {
+                    enabled = "disabled ";
+                }
+                sb.appendHtmlConstant("<input type=\"checkbox\" tabindex=\"-1\" " + checked + enabled +"/>");
+            }
+        }) {
             @Override
             public Boolean getValue(CurrentAssign object) {
                 return (object == null || object.getId() == null) ? null : downSM.isSelected(object);
@@ -503,7 +525,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 if (event.getValue()) {
                     for (CurrentAssign currentAssign : downTable.getVisibleItems()) {
-                        downSM.setSelected(currentAssign, true);
+                        if (currentAssign.isEnabled())
+                            downSM.setSelected(currentAssign, true);
                     }
                 } else {
                     downSM.clear();
@@ -515,59 +538,98 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         downIndexColumn = new IdentityColumn<CurrentAssign>(new AbstractCell<CurrentAssign>() {
             @Override
             public void render(Context context, CurrentAssign value, SafeHtmlBuilder sb) {
-                sb.append(context.getIndex() + 1);
+                if (value.isEnabled()) {
+                    sb.append(context.getIndex() + 1);
+                } else {
+                    sb.appendHtmlConstant("<span class=\"gwt-TextBox-readonly\">" + (context.getIndex() + 1) + "</span>");
+                }
             }
         });
         downIndexColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        downTaxTypeColumn = new TextColumn<CurrentAssign>() {
+        downTaxTypeColumn = new IdentityColumn<CurrentAssign>(new AbstractCell<CurrentAssign>(){
             @Override
-            public String getValue(CurrentAssign object) {
-                return object.getTaxType().getName();
+            public void render(Context context, CurrentAssign value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    String text = value.getTaxType().getName();
+                    if (value.isEnabled()) {
+                        sb.appendHtmlConstant(text);
+                    } else {
+                        sb.appendHtmlConstant("<span class=\"gwt-TextBox-readonly\">" + text + "</span>");
+                    }
+                }
             }
-        };
+        });
 
-        downDepartmentColumn = new TextColumn<CurrentAssign>() {
+        downDepartmentColumn = new IdentityColumn<CurrentAssign>(new AbstractCell<CurrentAssign>(){
             @Override
-            public String getValue(CurrentAssign object) {
-                return object.getDepartmentName();
+            public void render(Context context, CurrentAssign value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    String text = value.getDepartmentName();
+                    if (value.isEnabled()) {
+                        sb.appendHtmlConstant(text);
+                    } else {
+                        sb.appendHtmlConstant("<span class=\"gwt-TextBox-readonly\">" + text + "</span>");
+                    }
+                }
             }
-        };
+        });
 
-        downAssignKindColumn = new TextColumn<CurrentAssign>() {
+        downAssignKindColumn = new IdentityColumn<CurrentAssign>(new AbstractCell<CurrentAssign>(){
             @Override
-            public String getValue(CurrentAssign object) {
-                return object.getFormKind() != null ? object.getFormKind().getTitle() : "—";
+            public void render(Context context, CurrentAssign value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    String text = value.getFormKind() != null ? value.getFormKind().getTitle() : "—";
+                    if (value.isEnabled()) {
+                        sb.appendHtmlConstant(text);
+                    } else {
+                        sb.appendHtmlConstant("<span class=\"gwt-TextBox-readonly\">" + text + "</span>");
+                    }
+                }
             }
-        };
+        });
 
-        downNameTypeColumn = new TextColumn<CurrentAssign>() {
+        downNameTypeColumn = new IdentityColumn<CurrentAssign>(new AbstractCell<CurrentAssign>(){
             @Override
-            public String getValue(CurrentAssign object) {
-                return object.getName();
+            public void render(Context context, CurrentAssign value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    String text = value.getName();
+                    if (value.isEnabled()) {
+                        sb.appendHtmlConstant(text);
+                    } else {
+                        sb.appendHtmlConstant("<span class=\"gwt-TextBox-readonly\">" + text + "</span>");
+                    }
+                }
             }
-        };
+        });
 
-        AbstractCell<Date> dateCell = new AbstractCell<Date>() {
+        downStartColumn = new IdentityColumn<CurrentAssign>(new AbstractCell<CurrentAssign>(){
             @Override
-            public void render(Context context, Date value, SafeHtmlBuilder sb) {
-                String rend = value != null ? WidgetUtils.dateTimeFormat.format(value) : "—";
-                sb.append(SafeHtmlUtils.fromString(rend));
+            public void render(Context context, CurrentAssign value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    String rend = value.getStartDateAssign() != null ? WidgetUtils.dateTimeFormat.format(value.getStartDateAssign()) : "—";
+                    if (value.isEnabled()) {
+                        sb.append(SafeHtmlUtils.fromString(rend));
+                    } else {
+                        sb.appendHtmlConstant("<span class=\"gwt-TextBox-readonly\">" + SafeHtmlUtils.fromString(rend).asString() + "</span>");
+                    }
+                }
             }
-        };
+        });
 
-        downStartColumn = new Column<CurrentAssign, Date>(dateCell) {
+        downEndColumn = new IdentityColumn<CurrentAssign>(new AbstractCell<CurrentAssign>(){
             @Override
-            public Date getValue(CurrentAssign object) {
-                return object.getStartDateAssign();
+            public void render(Context context, CurrentAssign value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    String rend = value.getEndDateAssign() != null ? WidgetUtils.dateTimeFormat.format(value.getEndDateAssign()) : "—";
+                    if (value.isEnabled()) {
+                        sb.append(SafeHtmlUtils.fromString(rend));
+                    } else {
+                        sb.appendHtmlConstant("<span class=\"gwt-TextBox-readonly\">" + SafeHtmlUtils.fromString(rend).asString() + "</span>");
+                    }
+                }
             }
-        };
-        downEndColumn = new Column<CurrentAssign, Date>(dateCell) {
-            @Override
-            public Date getValue(CurrentAssign object) {
-                return object.getEndDateAssign();
-            }
-        };
+        });
 
         downStartColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         downEndColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -594,6 +656,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
                     @Override
                     public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<CurrentAssign> event) {
+                        if (event.getValue() != null && !event.getValue().isEnabled())
+                            return DefaultSelectionEventManager.SelectAction.IGNORE;
                         return DefaultSelectionEventManager.SelectAction.TOGGLE;
                     }
                 }));
@@ -660,7 +724,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
     @Override
     public void init(TaxType taxType, List<AppointmentType> types, AppointmentType type, int year, List<PeriodInfo> periods,
-                     boolean isForm) {
+                     boolean isForm, boolean isControlUNP) {
         this.isForm = isForm;
         this.isTaxTypeDeal = taxType.equals(TaxType.DEAL);
         this.isTaxTypeETR = taxType.equals(TaxType.ETR);
@@ -683,7 +747,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         SourcesUtils.setupPeriodTitle(periodTo);
 
         taxTypeList.setValue(taxType);
-        taxTypeList.setAcceptableValues(Arrays.asList(TaxType.values()));
+        if (isControlUNP) {
+            taxTypeList.setAcceptableValues(Arrays.asList(TaxType.values()));
+            taxTypeList.setEnabled(true);
+        } else {
+            taxTypeList.setAcceptableValues(Arrays.asList(taxType));
+            taxTypeList.setEnabled(false);
+        }
 
         yearFrom.setValue(year);
         yearTo.setValue(null);

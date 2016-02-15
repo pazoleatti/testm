@@ -121,8 +121,8 @@ public class Rnu_111Test extends ScriptTestBase {
         int i = 0;
         Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица (резидента оффшорной зоны)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Код налогового учёта» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. номер» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. дата» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. Номер» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. Дата» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма кредита (ед. валюты)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Валюта» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Срок» не заполнена!", entries.get(i++).getMessage());
@@ -135,7 +135,7 @@ public class Rnu_111Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)»: выполнение расчета невозможно, " +
                 "так как не заполнена используемая в расчете графа «Сумма фактически начисленного дохода (руб.)», «Сумма дохода, соответствующая рыночному уровню (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «База для расчёта процентного дохода (дней в году)»: выполнение расчета невозможно, " +
-                "так как не заполнена используемая в расчете графа «Основание для совершения операции. дата»!", entries.get(i++).getMessage());
+                "так как не заполнена используемая в расчете графа «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

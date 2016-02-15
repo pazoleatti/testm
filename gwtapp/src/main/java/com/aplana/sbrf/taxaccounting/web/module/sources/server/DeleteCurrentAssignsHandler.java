@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
@@ -9,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.DeleteCurrentAssignsAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.DeleteCurrentAssignsResult;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
@@ -31,9 +33,10 @@ public class DeleteCurrentAssignsHandler  extends AbstractActionHandler<DeleteCu
     private SourceService sourceService;
     @Autowired
     private DepartmentService departmentService;
-
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private SecurityService securityService;
 
     public DeleteCurrentAssignsHandler() {
         super(DeleteCurrentAssignsAction.class);
@@ -45,8 +48,16 @@ public class DeleteCurrentAssignsHandler  extends AbstractActionHandler<DeleteCu
         PeriodsInterval period = action.getPeriodsInterval();
         SourceClientData sourceClientData = new SourceClientData();
         Logger logger = new Logger();
-        String leftDepartmentName = departmentService.getDepartment(action.getDepartmentAssign().getDepartmentId()).getName();
 
+        if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+            for (CurrentAssign assign : action.getCurrentAssigns()) {
+                if (action.getTaxType() != assign.getTaxType()) {
+                    throw new ActionException("Недостаточно прав на удаление назначения: назначенные формы должны относится к текущему налогу!");
+                }
+            }
+        }
+
+        String leftDepartmentName = departmentService.getDepartment(action.getDepartmentAssign().getDepartmentId()).getName();
         List<SourceObject> sourceObjects = new ArrayList<SourceObject>();
         List<SourcePair> sourcePairs = new ArrayList<SourcePair>();
         for (CurrentAssign assign : action.getCurrentAssigns()) {

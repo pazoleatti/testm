@@ -97,4 +97,11 @@ public interface DeclarationService {
      */
     List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
                                              TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Получить список id типов декларации для указанного налога.
+     *
+     * @param taxType тип налога
+     */
+    List<Integer> getDeclarationTypeIds(TaxType taxType);
 }

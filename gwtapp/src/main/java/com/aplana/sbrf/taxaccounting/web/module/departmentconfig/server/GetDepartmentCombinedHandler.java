@@ -2,15 +2,15 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -42,7 +42,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
     private static final Log LOG = LogFactory.getLog(GetDepartmentCombinedHandler.class);
 
     @Autowired
-    private PeriodService reportService;
+    private PeriodService periodService;
 
     @Autowired
     private RefBookFactory rbFactory;
@@ -52,6 +52,8 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    private RefBookHelper refBookHelper;
 
     public GetDepartmentCombinedHandler() {
         super(GetDepartmentCombinedAction.class);
@@ -101,7 +103,8 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             provider = rbFactory.getDataProvider(parentRefBookId);
         }
 
-        Calendar calendarFrom = reportService.getEndDate(action.getReportPeriodId());
+
+        ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
 
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
         //Берем -1 день, чтобы исключить возможность пересечения периодов актуальности для периодов 9 мес и год.
@@ -109,12 +112,13 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         //то возникает ошибка дубликата ключевых полей таблицы ref_book_record, т.к уже существует версия с полем version = 01.10.xxxx для 9 мес (фактически это фиктивная версия),
         //а сейчас мы пытаемся добавить запись с такой же датой начала для настроек на год
         PagingResult<Map<String, RefBookValue>> params = provider.getRecords(
-                addDayToDate(calendarFrom.getTime(), -1), null, filter, null);
+                addDayToDate(reportPeriod.getEndDate(), -1), null, filter, null);
 
+        Map<String, RefBookValue> paramsMap = null;
         if (!params.isEmpty()) {
-            Map<String, RefBookValue> paramsMap = params.get(0);
+            paramsMap = params.get(0);
             if (params.size() != 1) {
-                String dt = new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime());
+                String dt = new SimpleDateFormat("dd.MM.yyyy").format(reportPeriod.getEndDate());
                 LOG.debug(String.format("Found more than one record on version = %s ref_book_id = %s department_id = %s map = %s",
 						dt, action.getDepartmentId(), params));
                 throw new ActionException("Найдено несколько записей для версии " + dt);
@@ -223,12 +227,54 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         result.setRbTextValues(rbTextValues);
 
+        if (paramsMap != null) {
+            //Проверяем справочные значения
+            checkReferenceValues(provider, rbFactory.get(parentRefBookId), paramsMap, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
+            if (logger.getMainMsg() != null) {
+                result.setUuid(logEntryService.save(logger.getEntries()));
+                result.setErrorMsg(logger.getMainMsg());
+            }
+        }
+
         // Запись ошибок в лог при наличии
-        if (!logger.getEntries().isEmpty()) {
+        if (result.getUuid() == null && !logger.getEntries().isEmpty()) {
             result.setUuid(logEntryService.save(logger.getEntries()));
         }
 
+        // Заполняем период действия настроек
+        RefBookRecordVersion version = provider.getRecordVersionInfo(depCombined.getRecordId());
+        result.setConfigStartDate(version.getVersionStart());
+        result.setConfigEndDate(version.getVersionEnd());
         return result;
+    }
+
+    /**
+     * Проверка существования записей справочника на которые ссылаются атрибуты.
+     * Считаем что все справочные атрибуты хранятся в универсальной структуре как и сами настройки
+     * @param refBook
+     * @param rows
+     */
+    private void checkReferenceValues(RefBookDataProvider provider, RefBook refBook, Map<String, RefBookValue> rows, Date versionFrom, Date versionTo, Logger logger) {
+        Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<RefBookDataProvider, List<RefBookLinkModel>>();
+
+        RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
+        for (Map.Entry<String, RefBookValue> e : rows.entrySet()) {
+            if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE && !e.getKey().equals("DEPARTMENT_ID")) {
+                Long link = e.getValue().getReferenceValue();
+                if (link != null) {
+                    //Собираем ссылки на справочники и группируем их по провайдеру, обрабатывающему справочники
+                    RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
+                    if (!references.containsKey(linkProvider)) {
+                        references.put(linkProvider, new ArrayList<RefBookLinkModel>());
+                    }
+                    //Сохраняем данные для отображения сообщений
+                    references.get(linkProvider).add(new RefBookLinkModel(null, e.getKey(), link, null, versionFrom, versionTo));
+                }
+            }
+        }
+
+        //Проверяем ссылки и выводим соообщения если надо
+        refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
     }
 
     /**

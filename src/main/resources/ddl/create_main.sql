@@ -613,7 +613,8 @@ CREATE TABLE log_system (
   form_department_id    NUMBER(9),
   blob_data_id          VARCHAR2(36),
   form_type_id               NUMBER(9,0),
-  is_error NUMBER(1) DEFAULT 0 NOT NULL
+  is_error NUMBER(1) DEFAULT 0 NOT NULL,
+  server varchar2(200)
 );
 comment on table log_system is  'Системный журнал';
 comment on column log_system.id is 'Код записи';
@@ -633,6 +634,7 @@ comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор �
 comment on column log_system.blob_data_id is 'Ссылка на логи';
 comment on column log_system.form_type_id is 'Идентификатор вида НФ';
 comment on column log_system.is_error is 'Признак ошибки';
+comment on column log_system.server is 'Сервер';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
@@ -826,13 +828,13 @@ create table declaration_report
 (
 declaration_data_id number(18) not null,
 blob_data_id varchar2(36),
-type number(1) not null
+type varchar2(128) not null
 );
 
 comment on table declaration_report is 'Отчеты по декларациям';
 comment on column declaration_report.declaration_data_id is 'Идентификатор декларации';
 comment on column declaration_report.blob_data_id is 'Идентификатор отчета';
-comment on column declaration_report.type is 'Тип отчета (0 - Excel, 1 - XML, 2 - PDF, 3 - Jasper)';
+comment on column declaration_report.type is 'Тип отчета';
 
 --------------------------------------------------------------------------------------------------------
 create table lock_data_subscribers
@@ -996,6 +998,26 @@ create table department_form_type_performer
 comment on table department_form_type_performer is 'Назначения нескольких исполнителей для связки НФ-подразделение';
 comment on column department_form_type_performer.department_form_type_id is 'Идентификатор связи подразделения с формой';
 comment on column department_form_type_performer.performer_dep_id is 'Исполнитель'; 
+--------------------------------------------------------------------------------------------------------
+create table ref_book_vzl_history
+(
+  id number(18) not null,
+  jur_person number(18) not null,
+  category number(18) not null,
+  form_data_id number(18) not null,
+  change_date date not null,
+  state number(9) not null
+);
+
+comment on table ref_book_vzl_history is 'История изменения категории ВЗЛ';
+comment on column ref_book_vzl_history.id is 'Идентификатор записи';
+comment on column ref_book_vzl_history.jur_person is 'ВЗЛ';
+comment on column ref_book_vzl_history.category is 'Категория ВЗЛ';
+comment on column ref_book_vzl_history.form_data_id is 'Код формы';
+comment on column ref_book_vzl_history.change_date is 'Дата изменения';
+comment on column ref_book_vzl_history.state is 'Код состояния';
+
+create sequence seq_ref_book_vzl_history start with 1;
 --------------------------------------------------------------------------------------------------------
 CREATE TABLE form_data_row (
   id NUMBER(18),

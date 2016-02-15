@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client
 
 import com.aplana.gwt.client.DoubleBox;
 import com.aplana.gwt.client.TextBox;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -13,21 +14,26 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -173,6 +179,12 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @UiField
     Button findButton;
 
+    @UiField
+    @Editor.Ignore
+    Label configPeriodLabel;
+
+    private final static DateTimeFormat SDF = DateTimeFormat.getFormat("dd.MM.yyyy");
+
     // Выбранное подразделение
     private Integer currentDepartmentId;
 
@@ -199,6 +211,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     ListDataProvider<DataRow<Cell>> model;
     Column<DataRow<Cell>, Boolean> checkColumn;
+    private IdentityColumn<DataRow<Cell>> indexColumn;
 
     private HandlerRegistration resizeHandler;
     private Timer resizeTimer;
@@ -323,6 +336,14 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     }
 
     @Override
+    public void setConfigPeriod(Date configStartDate, Date configEndDate) {
+        configPeriodLabel.setText("Период действия настроек с " +
+                SDF.format(configStartDate) + " по " +
+                (configEndDate != null ? SDF.format(configEndDate)  : "-")
+        );
+    }
+
+    @Override
     public TableHeader[] getCurrentTableHeaders() {
         if (taxType == TaxType.PROPERTY) {
             return tableHeaderProperty;
@@ -361,6 +382,16 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         });
 
         table.setColumnWidth(checkColumn, 2, Style.Unit.EM);
+
+
+        indexColumn = new IdentityColumn<DataRow<Cell>>(new AbstractCell<DataRow<Cell>>() {
+            @Override
+            public void render(Context context, DataRow<Cell> value, SafeHtmlBuilder sb) {
+                sb.appendHtmlConstant("<span class=\"gwt-TextBox-readonly\">" + (context.getIndex() + 1) + "</span>");
+            }
+        });
+        table.setColumnWidth(indexColumn, 30, Style.Unit.PX);
+        table.addColumn(indexColumn, "№ пп");
 
         Map<String, RefBookAttribute> attributeMap = new HashMap<String, RefBookAttribute>();
 
@@ -518,6 +549,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         formatVersion.setText("");
         version.setText("");
         taxRate.setValue(null);
+        configPeriodLabel.setText("");
     }
 
     @Override
@@ -705,7 +737,13 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @UiHandler("findButton")
     public void onFind(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onFind();
+
+            if (departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty() &&
+                    periodPickerPopup.getValue() != null && !periodPickerPopup.getValue().isEmpty()) {
+                getUiHandlers().onFind();
+            } else {
+                Dialog.errorMessage("Не заполнены обязательные поля", "Для поиска должно быть заполнено поле \"Подразделение\" и \"Период\"");
+            }
         }
     }
 

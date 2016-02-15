@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Дао для октмо
@@ -259,15 +260,6 @@ public interface RefBookOktmoDao {
     int getRecordsCount(Long oktmoRefBookId, String tableName, Date version, String filter);
 
     /**
-     * Проверяет действуют ли записи справочника в указанном периоде
-     * @param recordIds уникальные идентификаторы записей справочника
-     * @param periodFrom начало периода
-     * @param periodTo окончание периода
-     * @return список id записей при проверке которых были обнаружены ошибки + код ошибки
-     */
-    Map<Long, CheckResult> getInactiveRecordsInPeriod(String tableName, @NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
-
-    /**
      * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
      * @param version дата актуальности. Может быть null - тогда не учитывается
      * @param needAccurateVersion признак того, что нужно точное совпадение по дате начала действия записи
@@ -275,8 +267,6 @@ public interface RefBookOktmoDao {
      * @return пары идентификатор версии элемента - идентификатор элемента справочника
      */
     List<Pair<Long, Long>> getRecordIdPairs(String tableName, @NotNull Long refBookId, Date version, Boolean needAccurateVersion, String filter);
-
-    List<Long> isRecordsExist(List<Long> uniqueRecordIds);
 
     /**
      * Возвращает все версии из указанной группы версий записи справочника

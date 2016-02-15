@@ -2,8 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
@@ -91,11 +91,11 @@ public class DeclarationDataPresenter
 
         void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp, TaxType taxType);
 
-        void startTimerReport(ReportType reportType);
+        void startTimerReport(String type);
 
-        void stopTimerReport(ReportType reportType);
+        void stopTimerReport(String type);
 
-        void updatePrintReportButtonName(ReportType reportType, boolean isLoad);
+        void updatePrintReportButtonName(String type, boolean isLoad);
 
         void setPdfPage(int page);
 
@@ -195,8 +195,8 @@ public class DeclarationDataPresenter
 								getView().showDelete(result.isCanDelete());
 								getView().showRecalculateButton(result.isCanDelete());
 
-                                onTimerReport(ReportType.XML_DEC, false);
-                                onTimerReport(ReportType.EXCEL_DEC, false);
+                                onTimerReport(DeclarationDataReportType.XML_DEC.getReportName(), false);
+                                onTimerReport(DeclarationDataReportType.EXCEL_DEC.getReportName(), false);
 							}
 						}, DeclarationDataPresenter.this).addCallback(
 						TaManualRevealCallback.create(
@@ -205,53 +205,54 @@ public class DeclarationDataPresenter
 	}
 
     @Override
-    public void onTimerReport(final ReportType reportType, final boolean isTimer) {
+    public void onTimerReport(final String type, final boolean isTimer) {
         TimerReportAction action = new TimerReportAction();
         action.setDeclarationDataId(declarationId);
-        action.setType(reportType);
+        action.setType(type);
         dispatcher.execute(action, CallbackUtils
                 .simpleCallback(new AbstractCallback<TimerReportResult>() {
                     @Override
                     public void onSuccess(TimerReportResult result) {
-                        if (ReportType.PDF_DEC.equals(reportType) && result.getExistXMLReport() != null) {
+                        if (DeclarationDataReportType.PDF_DEC.getReportName().equals(type) && result.getExistXMLReport() != null) {
                             //перезапуск таймера XML, выполняется если был запущен таймер ожидания PDF при этом нету XML
-                            getView().stopTimerReport(reportType);
-                            onTimerReport(ReportType.XML_DEC, false);
+                            getView().stopTimerReport(type);
+                            onTimerReport(DeclarationDataReportType.XML_DEC.getReportName(), false);
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
-                            getView().updatePrintReportButtonName(reportType, true);
-                            if (ReportType.XML_DEC.equals(reportType)) {
-                                onTimerReport(ReportType.PDF_DEC, false);
-                                onTimerReport(ReportType.EXCEL_DEC, false);
-                            } else if (ReportType.PDF_DEC.equals(reportType)) {
-                                getView().setPdf(result.getPdf());
+                            getView().updatePrintReportButtonName(type, true);
+                            if (DeclarationDataReportType.XML_DEC.getReportName().equals(type)) {
+                                onTimerReport(DeclarationDataReportType.PDF_DEC.getReportName(), false);
+                                onTimerReport(DeclarationDataReportType.EXCEL_DEC.getReportName(), false);
+                            } else if (DeclarationDataReportType.PDF_DEC.getReportName().equals(type)) {
+                                getView().showNoPdf("Загрузка формы предварительного просмотра");
+                                getPdf();
                             }
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не существует и нет блокировки(т.е. задачу отменили или ошибка при формировании)
-                            getView().stopTimerReport(reportType);
-                            if (ReportType.XML_DEC.equals(reportType)) {
+                            getView().stopTimerReport(type);
+                            if (DeclarationDataReportType.XML_DEC.getReportName().equals(type)) {
                                 getView().showNoPdf("Область предварительного просмотра");
-                            } else if (ReportType.PDF_DEC.equals(reportType)) {
+                            } else if (DeclarationDataReportType.PDF_DEC.getReportName().equals(type)) {
                                 getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
                                         " Форма предварительного просмотра не сформирована");
                             }
-                            getView().updatePrintReportButtonName(reportType, false);
+                            getView().updatePrintReportButtonName(type, false);
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.LIMIT)) {
-                            getView().stopTimerReport(reportType);
-                            if (ReportType.PDF_DEC.equals(reportType)) {
+                            getView().stopTimerReport(type);
+                            if (DeclarationDataReportType.PDF_DEC.getReportName().equals(type)) {
                                 getView().showNoPdf((!TaxType.DEAL.equals(taxType) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D) +
                                         "  Форма предварительного просмотра недоступна");
-                            } else if (ReportType.XML_DEC.equals(reportType)) {
+                            } else if (DeclarationDataReportType.XML_DEC.equals(type)) {
                                 getView().showNoPdf("Область предварительного просмотра");
                             }
-                            getView().updatePrintReportButtonName(reportType, false);
+                            getView().updatePrintReportButtonName(type, false);
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
-                            if (ReportType.XML_DEC.equals(reportType)) {
+                            if (DeclarationDataReportType.XML_DEC.getReportName().equals(type)) {
                                 getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение декларации данными":"Заполнение уведомления данными");
-                            } else if (ReportType.PDF_DEC.equals(reportType)) {
+                            } else if (DeclarationDataReportType.PDF_DEC.getReportName().equals(type)) {
                                 getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
                                         " Идет формирование формы предварительного просмотра");
                             }
-                            getView().updatePrintReportButtonName(reportType, false);
-                            getView().startTimerReport(reportType);
+                            getView().updatePrintReportButtonName(type, false);
+                            getView().startTimerReport(type);
                         }
                     }
                 }));
@@ -302,14 +303,14 @@ public class DeclarationDataPresenter
                                                 }
                                             });
                                         }
-                                        onTimerReport(ReportType.XML_DEC, false);
+                                        onTimerReport(DeclarationDataReportType.XML_DEC.getReportName(), false);
 									}
 
                                     @Override
                                     public void onFailure(Throwable caught) {
                                         super.onFailure(caught);
-                                        onTimerReport(ReportType.EXCEL_DEC, false);
-                                        onTimerReport(ReportType.XML_DEC, false);
+                                        onTimerReport(DeclarationDataReportType.EXCEL_DEC.getReportName(), false);
+                                        onTimerReport(DeclarationDataReportType.XML_DEC.getReportName(), false);
                                     }
                                 }, DeclarationDataPresenter.this));
 	}
@@ -334,7 +335,7 @@ public class DeclarationDataPresenter
 												AcceptDeclarationDataResult result) {
                                             LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                                             if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
-                                                Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.ACCEPT_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
+                                                Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + DeclarationDataReportType.ACCEPT_DEC.getReportType().getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
                                             } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
                                                 Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                                     @Override
@@ -350,7 +351,7 @@ public class DeclarationDataPresenter
                                                     }
                                                 });
                                             }
-                                            onTimerReport(ReportType.ACCEPT_DEC, false);
+                                            onTimerReport(DeclarationDataReportType.ACCEPT_DEC.getReportName(), false);
 										}
 									}, DeclarationDataPresenter.this));
 		} else {
@@ -416,7 +417,7 @@ public class DeclarationDataPresenter
                         LogCleanEvent.fire(DeclarationDataPresenter.this);
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                         if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
-                            Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", "данных") + " невозможна");
+                            Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + DeclarationDataReportType.CHECK_DEC.getReportType().getDescription().replaceAll("\\%s", "данных") + " невозможна");
                         } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
                             Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
@@ -461,18 +462,19 @@ public class DeclarationDataPresenter
     @Override
     protected void onHide() {
         super.onHide();
-        getView().stopTimerReport(ReportType.XML_DEC);
-        getView().stopTimerReport(ReportType.PDF_DEC);
-        getView().stopTimerReport(ReportType.EXCEL_DEC);
+        getView().stopTimerReport(DeclarationDataReportType.ACCEPT_DEC.getReportName());
+        getView().stopTimerReport(DeclarationDataReportType.XML_DEC.getReportName());
+        getView().stopTimerReport(DeclarationDataReportType.PDF_DEC.getReportName());
+        getView().stopTimerReport(DeclarationDataReportType.EXCEL_DEC.getReportName());
     }
 
     @Override
-    public void viewReport(final boolean force, final ReportType reportType) {
+    public void viewReport(final boolean force, final String type) {
         CreateReportAction action = new CreateReportAction();
         action.setDeclarationDataId(declarationId);
         action.setForce(force);
         action.setTaxType(taxType);
-        action.setReportType(reportType);
+        action.setType(type);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateReportResult>() {
                     @Override
@@ -480,26 +482,38 @@ public class DeclarationDataPresenter
                         LogCleanEvent.fire(DeclarationDataPresenter.this);
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                         if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
-                            Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.PDF_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
+                            Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + DeclarationDataReportType.PDF_DEC.getReportType().getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
                         } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && force == false) {
                             Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
                                 public void yes() {
-                                    viewReport(true, reportType);
+                                    viewReport(true, type);
                                 }
                             });
                         } else if (CreateAsyncTaskStatus.EXIST.equals(result.getStatus()) &&
-                                ReportType.EXCEL_DEC.equals(reportType)) {
+                                DeclarationDataReportType.EXCEL_DEC.getReportName().equals(type)) {
                             DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
                                     + declarationId);
                         }
-                        onTimerReport(reportType, false);
+                        onTimerReport(type, false);
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
                         super.onFailure(caught);
-                        onTimerReport(reportType, false);
+                        onTimerReport(type, false);
+                    }
+                }, this));
+    }
+
+    private void getPdf() {
+        GetPdfAction action = new GetPdfAction();
+        action.setDeclarationDataId(declarationId);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallbackNoLock(new AbstractCallback<GetPdfResult>() {
+                    @Override
+                    public void onSuccess(GetPdfResult result) {
+                        getView().setPdf(result.getPdf());
                     }
                 }, this));
     }

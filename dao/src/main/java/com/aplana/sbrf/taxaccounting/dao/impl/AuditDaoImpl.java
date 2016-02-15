@@ -34,7 +34,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     private static final String LOG_SYSTEM_DATA_BY_FILTER = "select ordDat.* from (select dat.*, count(*) over() cnt, rownum as rn from ( select DISTINCT " +
             "ls.id, ls.log_date, ls.ip, ls.event_id, ev.name event, ls.user_login user_login, ls.roles, ls.department_name, " +
             "ls.report_period_name, ls.declaration_type_name, ls.form_type_name, ls.form_kind_id, ls.form_type_id, " +
-            "fk.name form_kind_name, ls.note, %s ls.user_department_name, ls.blob_data_id " +
+            "fk.name form_kind_name, ls.note, %s ls.user_department_name, ls.blob_data_id, ls.server " +
             "from log_system ls " +
             "left join event ev on ls.event_id=ev.\"ID\" " +
             "left join form_kind fk on ls.form_kind_id=fk.\"ID\" ";
@@ -480,8 +480,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             jt.update(
                     "insert into log_system (id, log_date, ip, event_id, user_login, roles, department_name, report_period_name, " +
                             "declaration_type_name, form_type_name, form_kind_id, note, user_department_name, form_department_id, " +
-                            "blob_data_id, form_type_id)" +
-                            " values (?, SYSDATE, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            "blob_data_id, form_type_id, server)" +
+                            " values (?, SYSDATE, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
                     logSystem.getIp(),
                     logSystem.getEventId(),
@@ -496,7 +496,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     logSystem.getUserDepartmentName(),
                     logSystem.getFormDepartmentId(),
                     logSystem.getBlobDataId(),
-                    logSystem.getFormTypeId()
+                    logSystem.getFormTypeId(),
+                    logSystem.getServer()
             );
         } catch (DataAccessException e){
 			LOG.error("Ошибки при логировании.", e);
@@ -664,6 +665,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			log.setBlobDataId(rs.getString("blob_data_id"));
             log.setFormTypeId(SqlUtils.getInteger(rs, "form_type_id"));
             if (isSupportOver())log.setCnt(SqlUtils.getInteger(rs, "cnt"));
+            log.setServer(rs.getString("server"));
 			return log;
 		}
 	}
@@ -711,6 +713,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 break;
             case IP_ADDRESS:
                 column = "ls.ip";
+                break;
+            case SERVER:
+                column = "ls.server";
                 break;
             default:
                 column = "ls.log_date";

@@ -3,21 +3,37 @@ package com.aplana.sbrf.taxaccounting.refbook;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Универсальный помощник для работы со справочниками
  * @author avanteev
  */
 public interface RefBookHelper {
+
+    /** Режим проверки ссылочных значений */
+    enum CHECK_REFERENCES_MODE {
+        REFBOOK,                //Справочники
+        DEPARTMENT_CONFIG       //Настройки подразделений
+    }
+
+    /**
+     * Проверка корректности справочных ссылок для настроек подразделений. Выкидывает исключение в зависимости от режима работы
+     * http://conf.aplana.com/pages/viewpage.action?pageId=23245326
+     * @param refBook справочник, в котором хранятся настройки подразделений
+     * @param references список ссылок на справочники в привязке к строкам/полям настроек подразделений/справочников
+     * @param mode Режим проверки ссылочных значений
+     * @param logger логгер для вывода информации о проверке в лог-панель
+     */
+    void checkReferenceValues(RefBook refBook, Map<RefBookDataProvider, List<RefBookLinkModel>> references,
+                              CHECK_REFERENCES_MODE mode, Logger logger);
 
     /**
      * Проверка наличия справочных значений

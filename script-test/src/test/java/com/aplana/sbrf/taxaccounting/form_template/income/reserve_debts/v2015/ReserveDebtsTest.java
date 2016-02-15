@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * Сводный регистр налогового учета по формированию и использованию резерва по сомнительным долгам.
@@ -99,8 +99,8 @@ public class ReserveDebtsTest extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev)
-    // @Test
+    // TODO ERROR Ошибка исполнения [619]: Cannot get property 'rows' on null object
+    //@Test
     public void importTransportFileTest() {
         int expected = 2; // в файле 2 строки
         testHelper.setImportFileInputStream(getImportRnuInputStream());
@@ -110,8 +110,8 @@ public class ReserveDebtsTest extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev)
-    // @Test
+    // TODO ERROR Ошибка исполнения [791]: Cannot get property 'rows' on null object
+    //@Test
     public void importExcelTest() {
         int expected = 2; // в файле 2 строки
         testHelper.setImportFileInputStream(getImportXlsInputStream());

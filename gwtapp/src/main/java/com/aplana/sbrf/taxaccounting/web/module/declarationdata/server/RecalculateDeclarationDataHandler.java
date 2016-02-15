@@ -48,7 +48,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
 
     @Override
     public RecalculateDeclarationDataResult execute(final RecalculateDeclarationDataAction action, ExecutionContext context) throws ActionException {
-        final ReportType reportType = ReportType.XML_DEC;
+        final DeclarationDataReportType ddReportType = DeclarationDataReportType.XML_DEC;
         final RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
@@ -63,8 +63,8 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
             }
             throw new ServiceLoggerException("%s. Обнаружены фатальные ошибки", uuid, !TaxType.DEAL.equals(action.getTaxType()) ? "Декларация не может быть сформирована" : "Уведомление не может быть сформировано");
         }
-        String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
-        Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(reportType, action.getTaxType()), userInfo, action.isForce(), logger);
+        String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ddReportType);
+        Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, action.isForce(), logger);
         if (restartStatus != null && restartStatus.getFirst()) {
             result.setStatus(CreateAsyncTaskStatus.LOCKED);
             result.setRestartMsg(restartStatus.getSecond());
@@ -75,11 +75,11 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("declarationDataId", action.getDeclarationId());
             params.put("docDate", action.getDocDate());
-            asyncTaskManagerService.createTask(keyTask, reportType, params, action.isCancelTask(), PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+            asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, action.isCancelTask(), PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
                 @Override
                 public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                     return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                            declarationDataService.getDeclarationFullName(action.getDeclarationId(), reportType),
+                            declarationDataService.getDeclarationFullName(action.getDeclarationId(), ddReportType),
                             LockData.State.IN_QUEUE.getText());
                 }
 
@@ -100,7 +100,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
 
                 @Override
                 public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                    return declarationDataService.getTaskName(reportType, action.getTaxType());
+                    return declarationDataService.getTaskName(ddReportType, action.getTaxType());
                 }
             });
         }

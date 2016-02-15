@@ -44,14 +44,8 @@ drop sequence seq_form_data;
 drop table form_data_consolidation;
 drop table declaration_data_consolidation;
 drop table form_data_ref_book;
-
-begin
- for x in (select * from user_tables where regexp_like (table_name, '^FORM_DATA_[0-9]+$')) loop
-     execute immediate 'DROP TABLE '||x.table_name;     
- end loop;
-end;
-/
 drop table form_data_file;
+drop table ref_book_vzl_history;
 drop table form_data;
 drop sequence seq_declaration_data;
 drop table declaration_data;
@@ -103,6 +97,7 @@ drop table tax_type;
 drop table log_clob_query;
 drop sequence seq_log_query;
 drop sequence seq_log_query_session;
+drop sequence seq_ref_book_vzl_history;
 
 drop function blob_to_clob;
 drop procedure create_form_data_nnn;
@@ -110,3 +105,7 @@ drop procedure delete_form_template;
 drop procedure rebuild_form_data_ref_book;
 drop package body form_data_nnn;
 drop package form_data_nnn;
+drop package body form_data_pckg;
+drop package form_data_pckg;
+drop package body declaration_pckg;
+drop package declaration_pckg;

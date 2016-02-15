@@ -67,6 +67,7 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
         File file = new File(tmpDir + File.separator + fileName + ".csv");
         FileWriter fileWriter = new FileWriter(file);
         FileReader fileReader = new FileReader(file);
+        FileOutputStream fileOutputStream = null;
         try {
             CSVWriter csvWriter = new CSVWriter(fileWriter, ';');
 
@@ -77,10 +78,11 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
             csvWriter.close();
 
             File zipFile = new File(tmpDir + File.separator + fileName + POSTFIX);
-            ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));
+            fileOutputStream = new FileOutputStream(zipFile);
+            ZipOutputStream zout = new ZipOutputStream(fileOutputStream);
             ZipEntry zipEntry = new ZipEntry(file.getName());
             zout.putNextEntry(zipEntry);
-            zout.write(IOUtils.toByteArray(new FileReader(file), ENCODING));
+            zout.write(IOUtils.toByteArray(fileReader, ENCODING));
             zout.close();
 
             return zipFile.getAbsolutePath();
@@ -89,6 +91,7 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
         } finally {
             IOUtils.closeQuietly(fileWriter);
             IOUtils.closeQuietly(fileReader);
+            IOUtils.closeQuietly(fileOutputStream);
             if (!file.delete())
                 LOG.warn(String.format("Временнный файл %s не был удален.", file.getName()));
         }

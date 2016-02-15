@@ -93,7 +93,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 
     @Override
     public List<Long> isRecordsExist(List<Long> uniqueRecordIds) {
-        return dao.isRecordsExist(uniqueRecordIds);
+        return refBookDao.isRecordsExist(getTableName(), new HashSet<Long>(uniqueRecordIds));
     }
 
     @Override
@@ -324,8 +324,8 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     }
 
     @Override
-    public Map<Long, CheckResult>  getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        return dao.getInactiveRecordsInPeriod(getTableName(), recordIds, periodFrom, periodTo);
+    public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
+        return refBookDao.getInactiveRecordsInPeriod(getTableName(), recordIds, periodFrom, periodTo, false);
     }
 
     @Override

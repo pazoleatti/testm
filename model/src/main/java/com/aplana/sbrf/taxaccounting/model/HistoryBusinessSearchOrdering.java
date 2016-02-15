@@ -16,5 +16,6 @@ public enum HistoryBusinessSearchOrdering {
     USER,
     USER_ROLE,
     USER_DEPARTMENT,
-    IP_ADDRESS
+    IP_ADDRESS,
+    SERVER
 }

@@ -1,35 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="">
-        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ пп"/>
+        <cell alias="fix" colSpan="2" rowSpan="2" value="№ пп"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="2" value=""/>
         <cell alias="dealNum" colSpan="1" rowSpan="2" value="Номер сделки"/>
         <cell alias="dealType" colSpan="1" rowSpan="2" value="Вид сделки"/>
         <cell alias="dealDate" colSpan="1" rowSpan="2" value="Дата заключения сделки"/>
-        <cell alias="dealDoneDate" colSpan="1" rowSpan="2" value="Дата окончания сделки"/>
-        <cell alias="iksr" colSpan="1" rowSpan="2" value="Идентификационный номер"/>
+        <cell alias="dealDoneDate" colSpan="1" rowSpan="2" value="Дата исполнения сделки"/>
+        <cell alias="iksr" colSpan="1" rowSpan="2" value="ИНН / код налогоплательщика в стране регистрации (инкорпорации) или его аналог"/>
         <cell alias="countryName" colSpan="1" rowSpan="2" value="Страна местоположения взаимозависимого лица (резидента оффшорной зоны)"/>
         <cell alias="name" colSpan="1" rowSpan="2" value="Контрагент"/>
         <cell alias="dealFocus" colSpan="1" rowSpan="2" value="Тип сделки"/>
-        <cell alias="reqCurCode" colSpan="1" rowSpan="2" value="Код валюты (драгоценных металлов) по сделке приобретения (требования)"/>
-        <cell alias="reqVolume" colSpan="1" rowSpan="2" value="Объем покупаемой валюты / драгоценных металлов (в граммах)"/>
-        <cell alias="guarCurCode" colSpan="1" rowSpan="2" value="Код валюты (драгоценных металлов) по сделке продажи (обязательства)"/>
-        <cell alias="guarVolume" colSpan="1" rowSpan="2" value="Объем продаваемой валюты / драгоценных металлов (в граммах)"/>
-        <cell alias="price" colSpan="1" rowSpan="2" value="Цена сделки"/>
+        <cell alias="reqCurCode" colSpan="1" rowSpan="2" value="Код валюты по сделке приобретения (требования)"/>
+        <cell alias="reqVolume" colSpan="1" rowSpan="2" value="Объем покупаемой валюты"/>
+        <cell alias="guarCurCode" colSpan="1" rowSpan="2" value="Код валюты по сделке продажи (обязательства)"/>
+        <cell alias="guarVolume" colSpan="1" rowSpan="2" value="Объем продаваемой валюты"/>
+        <cell alias="price" colSpan="1" rowSpan="2" value="Курс сделки"/>
         <cell alias="reqCourse" colSpan="2" rowSpan="1" value="Курс Банка России на дату исполнения (досрочного исполнения) сделки, руб."/>
+        <cell alias="guarCourse" colSpan="1" rowSpan="1" value="Курс Банка России на дату исполнения (досрочного исполнения) сделки, руб."/>
         <cell alias="reqSum" colSpan="2" rowSpan="1" value="Требования (обязательства) по сделке, руб."/>
+        <cell alias="guarSum" colSpan="1" rowSpan="1" value="Требования (обязательства) по сделке, руб."/>
         <cell alias="incomeSum" colSpan="2" rowSpan="1" value="Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб."/>
+        <cell alias="outcomeSum" colSpan="1" rowSpan="1" value="Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб."/>
         <cell alias="marketPrice" colSpan="1" rowSpan="2" value="Рыночная цена сделки"/>
         <cell alias="incomeDelta" colSpan="1" rowSpan="2" value="Отклонения по доходам, в руб."/>
         <cell alias="outcomeDelta" colSpan="1" rowSpan="2" value="Отклонения по расходам, в руб."/>
     </row>
     <row alias="">
+        <cell alias="fix" colSpan="2" rowSpan="1" value="№ пп"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="dealNum" colSpan="1" rowSpan="1" value="Номер сделки"/>
+        <cell alias="dealType" colSpan="1" rowSpan="1" value="Вид сделки"/>
+        <cell alias="dealDate" colSpan="1" rowSpan="1" value="Дата заключения сделки"/>
+        <cell alias="dealDoneDate" colSpan="1" rowSpan="1" value="Дата исполнения сделки"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="ИНН / код налогоплательщика в стране регистрации (инкорпорации) или его аналог"/>
+        <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна местоположения взаимозависимого лица (резидента оффшорной зоны)"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Контрагент"/>
+        <cell alias="dealFocus" colSpan="1" rowSpan="1" value="Тип сделки"/>
+        <cell alias="reqCurCode" colSpan="1" rowSpan="1" value="Код валюты по сделке приобретения (требования)"/>
+        <cell alias="reqVolume" colSpan="1" rowSpan="1" value="Объем покупаемой валюты"/>
+        <cell alias="guarCurCode" colSpan="1" rowSpan="1" value="Код валюты по сделке продажи (обязательства)"/>
+        <cell alias="guarVolume" colSpan="1" rowSpan="1" value="Объем продаваемой валюты"/>
+        <cell alias="price" colSpan="1" rowSpan="1" value="Курс сделки"/>
         <cell alias="reqCourse" colSpan="1" rowSpan="1" value="В отношении требования"/>
         <cell alias="guarCourse" colSpan="1" rowSpan="1" value="В отношении обязательства"/>
         <cell alias="reqSum" colSpan="1" rowSpan="1" value="Требования"/>
         <cell alias="guarSum" colSpan="1" rowSpan="1" value="Обязательства"/>
         <cell alias="incomeSum" colSpan="1" rowSpan="1" value="Доходы"/>
         <cell alias="outcomeSum" colSpan="1" rowSpan="1" value="Расходы"/>
+        <cell alias="marketPrice" colSpan="1" rowSpan="1" value="Рыночная цена сделки"/>
+        <cell alias="incomeDelta" colSpan="1" rowSpan="1" value="Отклонения по доходам, в руб."/>
+        <cell alias="outcomeDelta" colSpan="1" rowSpan="1" value="Отклонения по расходам, в руб."/>
     </row>
     <row alias="">
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>

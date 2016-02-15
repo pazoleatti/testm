@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.After;
 import org.junit.Assert;
@@ -24,7 +25,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -234,7 +237,7 @@ public class LoadFormDataServiceTest {
     }
 
     private void mockSignService() {
-        when(signService.checkSign(anyString(), anyInt(), any(Logger.class))).thenReturn(true);
+        when(signService.checkSign(anyString(), anyString(), anyInt(), any(Logger.class))).thenReturn(new Pair<Boolean, Set<String>>(true, new HashSet<String>()));
     }
 
     // Успешный импорт ТФ НФ

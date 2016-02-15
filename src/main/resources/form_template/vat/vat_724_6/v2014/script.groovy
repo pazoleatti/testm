@@ -355,29 +355,11 @@ void importTransportData() {
 
     def totalRow = getFixedRow('Итого', 'total', true)
     newRows.add(totalRow)
+    // подсчет итогов
+    calcTotalSum(newRows, totalRow, totalColumns)
 
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['sum' : 5, 'sum2' : 7]
-        calcTotalSum(newRows, totalRow, totalColumnsIndexMap.keySet().asList())
-        // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = totalRow.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
-        // задать итоговой строке нф значения из итоговой строки тф
-        totalColumns.each { alias ->
-            totalRow[alias] = totalTF[alias]
-        }
-    }
+    checkAndSetTFSum(totalRow, totalTF, totalColumns, totalTF?.getImportIndex(), logger, false)
 
     updateIndexes(newRows)
     showMessages(newRows, logger)

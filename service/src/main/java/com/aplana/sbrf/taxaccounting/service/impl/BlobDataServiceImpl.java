@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,9 @@ public class BlobDataServiceImpl implements BlobDataService {
     @Autowired
     BlobDataDao blobDataDao;
 
+    @Autowired
+    private ReportDao reportDao;
+
     @Override
     public String create(InputStream is, String name) {
         BlobData blobData = initBlob("", is, name, null);
@@ -31,13 +36,29 @@ public class BlobDataServiceImpl implements BlobDataService {
     }
 
     @Override
-    public String create(File file, String name, Date createDate) {
+    public String create(String path, String name) {
+        FileInputStream fileInputStream = null;
         try {
-            FileInputStream fileInputStream = new FileInputStream(file);
+            fileInputStream = new FileInputStream(path);
+            return create(fileInputStream, name);
+        } catch (FileNotFoundException e) {
+            throw new ServiceException("", e);
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
+        }
+    }
+
+    @Override
+    public String create(File file, String name, Date createDate) {
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(file);
             BlobData data = initBlob("", fileInputStream, name, createDate);
             return blobDataDao.createWithDate(data);
         } catch (FileNotFoundException e) {
             throw new ServiceException("", e);
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
         }
     }
 
@@ -95,6 +116,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public int clean() {
+        reportDao.clean();
         return blobDataDao.clean();
     }
 }

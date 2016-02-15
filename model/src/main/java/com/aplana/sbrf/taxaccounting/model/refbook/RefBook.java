@@ -45,8 +45,7 @@ public class RefBook implements Serializable {
 
     //Участники ТЦО
     public static final long TCO = 520L;
-    //Виды услуг - пример справочника из универсальной структуры хранения
-    public static final long UNIVERSAL_REF_BOOK_ID = 13L;
+	public static final String REF_BOOK_RECORD_TABLE_NAME = "REF_BOOK_RECORD";
 
     /**
      * Соотношение основной и табличной части настроек подразделений с типом налога

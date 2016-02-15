@@ -658,13 +658,14 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     @Override
     public List<Relation> getSourcesInfo(FormData destinationFormData, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
         Map<String, Object> params = new HashMap<String, Object>();
-        String sql = "select * from table(form_data_pckg.get_sources(:stateRestriction, :excludeIfNotExist, :destinationFormDataId, :formTemplateId, :departmentReportPeriodId, :kind, :compPeriod, :accruing))";
+        String sql = "select * from table(form_data_pckg.get_sources(:stateRestriction, :excludeIfNotExist, :destinationFormDataId, :formTemplateId, :departmentReportPeriodId, :kind, :compPeriod, :accruing, :periodOrder))";
         params.put("destinationFormDataId", destinationFormData.getId());
         params.put("formTemplateId", destinationFormData.getId() == null ? destinationFormData.getFormTemplateId() : null);
         params.put("departmentReportPeriodId", destinationFormData.getId() == null ? destinationFormData.getDepartmentReportPeriodId() : null);
         params.put("kind", destinationFormData.getKind() != null ? destinationFormData.getKind().getId() : null);
         params.put("compPeriod", destinationFormData.getId() == null ? destinationFormData.getComparativePeriodId() : null);
         params.put("accruing", destinationFormData.getId() == null ? destinationFormData.isAccruing() ? 1 : 0 : null);
+        params.put("periodOrder", destinationFormData.getId() == null ? destinationFormData.getPeriodOrder() : null);
         params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
         params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
         try {
@@ -679,13 +680,14 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     @Override
     public List<Relation> getDestinationsInfo(FormData sourceFormData, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
         Map<String, Object> params = new HashMap<String, Object>();
-        String sql = "select * from table(form_data_pckg.get_destinations(:stateRestriction, :excludeIfNotExist, :sourceFormDataId, :formTemplateId, :departmentReportPeriodId, :kind, :compPeriod, :accruing))";
+        String sql = "select * from table(form_data_pckg.get_destinations(:stateRestriction, :excludeIfNotExist, :sourceFormDataId, :formTemplateId, :departmentReportPeriodId, :kind, :compPeriod, :accruing, :periodOrder))";
         params.put("sourceFormDataId", sourceFormData.getId());
         params.put("formTemplateId", sourceFormData.getId() == null ? sourceFormData.getFormTemplateId() : null);
         params.put("departmentReportPeriodId", sourceFormData.getId() == null ? sourceFormData.getDepartmentReportPeriodId() : null);
         params.put("kind", sourceFormData.getKind() != null ? sourceFormData.getKind().getId() : null);
         params.put("compPeriod", sourceFormData.getId() == null ? sourceFormData.getComparativePeriodId() : null);
         params.put("accruing", sourceFormData.getId() == null ? sourceFormData.isAccruing() ? 1 : 0 : null);
+        params.put("periodOrder", sourceFormData.getId() == null ? sourceFormData.getPeriodOrder() : null);
         params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
         params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
         try {

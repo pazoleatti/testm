@@ -8,7 +8,7 @@ import java.io.Serializable;
  * Для строковых столбцов существует возможность задать справочник, значения из которого могут использоваться для заполнения столбца
  * @author dsultanbekov
  */
-public class StringColumn extends Column  implements Serializable {
+public class StringColumn extends FilterColumn  implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -67,5 +67,13 @@ public class StringColumn extends Column  implements Serializable {
 			}
 		};
 
+	}
+
+	public boolean matches(String valueToCheck) {
+		boolean filterChecked = true;
+		if (filter != null && valueToCheck != null && !valueToCheck.isEmpty()) {
+			filterChecked = valueToCheck.matches(filter);
+		}
+		return filterChecked;
 	}
 }

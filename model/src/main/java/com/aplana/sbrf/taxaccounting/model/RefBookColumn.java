@@ -7,7 +7,7 @@ package com.aplana.sbrf.taxaccounting.model;
  * 
  * @author sgoryachkin
  */
-public class RefBookColumn extends Column {
+public class RefBookColumn extends FilterColumn {
 	private static final long serialVersionUID = -6969365681036598158L;
 
 	private Long refBookAttributeId;
@@ -16,18 +16,9 @@ public class RefBookColumn extends Column {
 
     private long nameAttributeId;
 
-	private String filter;
-
     private boolean searchEnabled;
 
     private boolean isHierarchical = false;
-
-	private static Formatter formatter = new Formatter() {
-		@Override
-		public String format(String valueToFormat) {
-			return String.valueOf(valueToFormat);
-		}
-	};
 
 	private static ValidationStrategy validationStrategy = new ValidationStrategy() {
 		@Override
@@ -49,14 +40,6 @@ public class RefBookColumn extends Column {
 		this.refBookAttributeId = refBookAttributeId;
 	}
 
-	public String getFilter() {
-		return filter;
-	}
-
-	public void setFilter(String filter) {
-		this.filter = filter;
-	}
-
     public boolean isHierarchical() {
         return isHierarchical;
     }
@@ -73,9 +56,29 @@ public class RefBookColumn extends Column {
         this.nameAttributeId = nameAttributeId;
     }
 
-    @Override
+	@Override
 	public Formatter getFormatter() {
-		return formatter;
+		return new Formatter() {
+			@Override
+			public String format(String valueToFormat) {
+				try {
+					Long val = Long.parseLong(valueToFormat);
+					String plainString = val.toString();
+
+					int length = plainString.length();
+					StringBuilder stringBuilder = new StringBuilder(plainString.substring(0, length));
+					for (int i = 3; i < length; i += 3) {
+						if (i < length) {
+							stringBuilder.insert(length - i, " ");
+						}
+					}
+					return stringBuilder.toString();
+				} catch (NumberFormatException e) {
+					return String.valueOf(valueToFormat);
+				}
+
+			}
+		};
 	}
 
 	@Override

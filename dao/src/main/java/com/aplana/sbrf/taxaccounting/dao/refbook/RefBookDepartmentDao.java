@@ -103,15 +103,6 @@ public interface RefBookDepartmentDao {
     Map<RefBookAttributePair,String> getAttributesValues(List<RefBookAttributePair> attributePairs);
 
     /**
-     * Проверяет действуют ли записи справочника в указанном периоде
-     * @param recordIds уникальные идентификаторы записей справочника
-     * @param periodFrom начало периода
-     * @param periodTo окончание периода
-     * @return список id записей при проверке которых были обнаружены ошибки + код ошибки
-     */
-    Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
-
-    /**
      * Проверка использования записи в справочниках
      * @param refBookId идентификатор справочника
      * @param uniqueRecordIds уникальные идентификаторы версий записей справочника

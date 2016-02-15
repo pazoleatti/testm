@@ -12,7 +12,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class TimerReportAction extends UnsecuredActionImpl<TimerReportResult> implements ActionName {
 
     private long declarationDataId;
-    private ReportType type;
+    private String type;
 
     public long getDeclarationDataId() {
         return declarationDataId;
@@ -22,11 +22,11 @@ public class TimerReportAction extends UnsecuredActionImpl<TimerReportResult> im
         this.declarationDataId = declarationDataId;
     }
 
-    public ReportType getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(ReportType type) {
+    public void setType(String type) {
         this.type = type;
     }
 
