@@ -120,8 +120,7 @@ public class Rnu_110Test extends ScriptTestBase {
         row.getCell("sum2").setValue(-1, null);
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals("Строка 1: Графа «Сумма доначисления арендной платы до рыночного уровня арендной ставки» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата совершения операции","01.01.2014", "31.12.2014"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения операции» должно быть не меньше значения графы «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Дата по графе «Дата совершения операции» должна принимать значение из диапазона 01.01.2014 - 31.12.2014 и быть больше либо равна дате по графе «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Основание для совершения операции. Дата","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Арендная ставка» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Арендная ставка, признаваемая рыночной для целей налогообложения» должно быть больше или равно «0»!", entries.get(i++).getMessage());

@@ -154,13 +154,12 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // Проверка даты совершения операции
-        checkDatePeriod(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-
-        // Проверка даты совершения операции
-        if (row.transDoneDate && row.reasonDate && (row.transDoneDate < row.reasonDate)) {
-            def msg = row.getCell('transDoneDate').column.name
-            def msg1 = row.getCell('reasonDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть не меньше значения графы «$msg1»!")
+        if (row.transDoneDate != null && row.reasonDate != null && (row.transDoneDate < getReportPeriodStartDate() || row.transDoneDate > getReportPeriodEndDate() || row.transDoneDate < row.reasonDate)) {
+            def col4Name = getColumnName(row, 'transDoneDate')
+            def col7Name = getColumnName(row, 'reasonDate')
+            def startDateString = getReportPeriodStartDate()?.format('dd.MM.yyyy')
+            def endDateString = getReportPeriodEndDate()?.format('dd.MM.yyyy')
+            logger.error("Строка $rowNum: Дата по графе «$col4Name» должна принимать значение из диапазона $startDateString - $endDateString и быть больше либо равна дате по графе «$col7Name»!")
         }
 
         // Проверка даты основания совершения операции
