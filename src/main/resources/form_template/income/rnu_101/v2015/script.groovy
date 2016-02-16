@@ -170,8 +170,13 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // 2. Проверка даты совершения операции
-        def date = (row.reasonDate != null && row.reasonDate >= getReportPeriodStartDate() && row.reasonDate < getReportPeriodEndDate()) ? row.reasonDate : getReportPeriodStartDate()
-        checkDatePeriod(logger, row, 'transDoneDate', date as Date, getReportPeriodEndDate(), true)
+        if (row.transDoneDate != null && row.reasonDate != null && (row.transDoneDate < getReportPeriodStartDate() || row.transDoneDate > getReportPeriodEndDate() || row.transDoneDate < row.reasonDate)) {
+            def col5Name = getColumnName(row, 'transDoneDate')
+            def col9Name = getColumnName(row, 'reasonDate')
+            def startDateString = getReportPeriodStartDate()?.format('dd.MM.yyyy')
+            def endDateString = getReportPeriodEndDate()?.format('dd.MM.yyyy')
+            logger.error("Строка $rowNum: Дата по графе «$col5Name» должна принимать значение из диапазона $startDateString - $endDateString и быть больше либо равна дате по графе «$col9Name»!")
+        }
 
         // 3. Проверка курса валюты
         if (row.course != null && row.course <= 0) {
