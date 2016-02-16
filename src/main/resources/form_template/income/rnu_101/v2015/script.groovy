@@ -197,7 +197,7 @@ void logicCheck() {
         // 7. Проверка положительной цены для целей налогообложения
         if (row.taxPrice != null && row.taxPrice <= 0) {
             def msg = row.getCell('taxPrice').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
+            logger.warn("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // 8. Проверка суммы фактически начисленного дохода
