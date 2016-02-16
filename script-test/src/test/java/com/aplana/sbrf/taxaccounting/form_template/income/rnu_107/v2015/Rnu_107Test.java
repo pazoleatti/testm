@@ -123,8 +123,7 @@ public class Rnu_107Test extends ScriptTestBase {
         row.getCell("sum3").setValue(-1, null);
         row.getCell("sum4").setValue(-1, null);
         testHelper.execute(FormDataEvent.CHECK);
-        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата совершения операции","01.01.2014", "31.12.2014"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения операции» должно быть не меньше значения графы «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Дата по графе «Дата совершения операции» должна принимать значение из диапазона 01.01.2014 - 31.12.2014 и быть больше либо равна дате по графе «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Основание для совершения операции. Дата","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного дохода» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Неверное значение граф: «Сумма доначисления дохода до рыночного уровня тарифа»!", entries.get(i++).getMessage());
