@@ -170,43 +170,35 @@ void logicCheck() {
         // 2. Проверка даты договора цессии
         checkDatePeriod(logger, row, 'dealDate', Date.parse("dd.MM.yyyy", "01.01.1991"), getReportPeriodEndDate(), true)
 
-        // 3, 4. Проверка даты погашения и уступки
-        ['repaymentDate', 'concessionsDate'].each { alias ->
-            checkDatePeriod(logger, row, alias, getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-            if (row[alias] && row.dealDate && row[alias] < row.dealDate) {
-                logger.error("Строка $rowNum: Значение графы «${getColumnName(row, alias)}» должно быть больше или равно значения графы «${getColumnName(row, 'dealDate')}»!")
-            }
-        }
-
-        // 5. Проверка положительности суммы дохода
+        // 3. Проверка положительности суммы дохода
         if (row.income != null && row.income < 0) {
             logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'income')}» должно быть больше или равно «0»!")
         }
 
-        // 6. Проверка финансовых результатов
+        // 4. Проверка финансовых результатов
         if (row.finResultTax != null && row.finResult != null &&
                 row.finResultTax <= row.finResult && row.finResult >= 0) {
             logger.warn("Строка $rowNum: Графа «${getColumnName(row, 'incomeCorrection')}» заполнена значением «0», т.к. не выполнен порядок заполнения графы!")
         }
 
-        // 7. Проверка корректности финансового результата уступки
+        // 5. Проверка корректности финансового результата уступки
         if (row.finResult != null && row.income != null && row.cost != null && row.costReserve != null &&
                 row.finResult != (row.income - (row.cost - row.costReserve))) {
             logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'finResult')}» должно равняться выражению: «${getColumnName(row, 'income')}» - («${getColumnName(row, 'cost')}» - «${getColumnName(row, 'costReserve')}»)!")
         }
 
-        // 8. Проверка кода налогового учета
+        // 6. Проверка кода налогового учета
          if (row.code != null && !['10360', '10361'].contains(row.code)) {
              logger.error("Строка $rowNum: Графа «${getColumnName(row, 'code')}» должна принимать значение из следующего списка: «10360» или «10361»!")
          }
 
-        // 9. Проверка корректности финансового результата из рыночной цены
+        // 7. Проверка корректности финансового результата из рыночной цены
         if (row.finResultTax != null && row.marketPrice != null && row.cost != null && row.costReserve != null &&
                 row.finResultTax != (row.marketPrice - (row.cost - row.costReserve))) {
             logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'finResultTax')}» должно равняться выражению: «${getColumnName(row, 'marketPrice')}» - («${getColumnName(row, 'cost')}» - «${getColumnName(row, 'costReserve')}»)!")
         }
 
-        // 10. Проверка корректировки финансового результата
+        // 8. Проверка корректировки финансового результата
         // a. Если «Графа 11» больше или равно «0» И «Графа 14» больше «Графа 11», то «Графа 15» = «Графа 14» - «Графа 11»
         // b.	Если «Графа 11» меньше «0» И «Графа 14» больше «Графа 11», то «Графа 15» = |«Графа 13»| - |«Графа 11»|
         // c.	Если «Графа 11» больше или равно «0» И «Графа 14» меньше или равно «Графа 11», то «Графа 15» = «0»
