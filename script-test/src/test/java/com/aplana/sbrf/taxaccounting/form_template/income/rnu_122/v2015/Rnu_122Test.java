@@ -105,7 +105,6 @@ public class Rnu_122Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Расчетный период (согласно условиям сделки). Дата окончания» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «База для расчета, кол. дней» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Плата по условиям сделки,% год./ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма фактического дохода / расхода, Ед. вал.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма фактического дохода / расхода, Руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Рыночная Плата, % годовых / ед. вал.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Рыночная сумма дохода (расхода), выраженная в: Руб.» не заполнена!", entries.get(i++).getMessage());
