@@ -201,7 +201,7 @@ void logicCheck() {
         }
 
         // 8. Проверка суммы фактически начисленного дохода
-        if (row.sum1 != null && row.sum1 <= 0) {
+        if (row.sum1 != null && row.sum1 < 0) {
             def msg = row.getCell('sum1').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
@@ -258,7 +258,9 @@ void calc() {
     }
 
     // Сортировка
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll {
+        groupColumns.contains(it.getAlias())
+    })
     sortRows(dataRows, groupColumns)
 
     // Добавление подитогов
