@@ -213,7 +213,7 @@ public class Rnu_102Test extends ScriptTestBase {
         checkAfterCalc(testHelper.getDataRowHelper().getAll());
 
         // 3 сообщения в логгере (неверные даты)
-        Assert.assertEquals(3, testHelper.getLogger().getEntries().size());
+        Assert.assertEquals(2, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }
 
