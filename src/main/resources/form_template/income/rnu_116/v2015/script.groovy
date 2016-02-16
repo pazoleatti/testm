@@ -200,14 +200,13 @@ void logicCheck() {
         checkDatePeriod(logger, row, 'dealDate', getPrevReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка даты исполнения сделки
-        if (row.dealDate && row.dealDoneDate && row.dealDate > row.dealDoneDate) {
-            def msg1 = row.getCell('dealDate').column.name
-            def msg2 = row.getCell('dealDoneDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg2» должно быть не меньше значения графы «$msg1»!")
+        if (row.dealDate != null && row.dealDoneDate != null && (row.dealDoneDate < getReportPeriodStartDate() || row.dealDoneDate > getReportPeriodEndDate() || row.dealDoneDate < row.dealDate)) {
+            def col4Name = getColumnName(row, 'dealDate')
+            def col5Name = getColumnName(row, 'dealDoneDate')
+            def startDateString = getReportPeriodStartDate()?.format('dd.MM.yyyy')
+            def endDateString = getReportPeriodEndDate()?.format('dd.MM.yyyy')
+            logger.error("Строка $rowNum: Дата по графе «$col5Name» должна принимать значение из диапазона $startDateString - $endDateString и быть больше либо равна дате по графе «$col4Name»!")
         }
-
-        // Проверка даты исполнения сделки
-        checkDatePeriod(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка объема покупаемой валюты
         if (row.reqVolume != null && row.reqVolume < 0) {
