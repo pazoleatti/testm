@@ -236,7 +236,7 @@ void logicCheck() {
 
         // Проверка рыночной цены
         if (row.marketPrice != null && row.marketPrice <= 0) {
-            def msg = row.getCell('guarSum').column.name
+            def msg = row.getCell('marketPrice').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
