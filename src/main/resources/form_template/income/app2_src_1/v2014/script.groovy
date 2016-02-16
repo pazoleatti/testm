@@ -231,7 +231,7 @@ void logicCheck() {
     def address = ['postcode', 'district', 'city', 'locality', 'street', 'house', 'housing', 'apartment']
 
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
-    def needValue = [:]
+    def needValues = [:]
 
     boolean wasError = false
 
@@ -246,7 +246,40 @@ void logicCheck() {
         // 1. Проверка на заполнение поля «<Наименование поля>»
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
-        // 2. Проверка на заполнение графы 12 «Регион (код)»
+        // 2. Проверка на соответствие паттерну
+        // 3. Проверка контрольной суммы по графе «ИНН в РФ»
+        if (row.innRF && checkPattern(row, 'innRF', row.innRF, INN_IND_PATTERN, wasError ? null : INN_IND_MEANING, true)) {
+            checkControlSumInn(logger, row, 'innRF', row.innRF, false)
+        } else if (row.innRF) {
+            wasError = true
+        }
+
+        // 4. Проверка правильности заполнения графы «ИНН в стране гражданства»
+        if (row.inn && row.citizenship && citizenshipCode == '643') {
+            def nameInn = getColumnName(row, 'inn')
+            def nameCitizenship = getColumnName(row, 'citizenship')
+            rowError(logger, row, errorMsg + "Графа «$nameInn» не должна быть заполнена, если графа «$nameCitizenship» равна «643»")
+        }
+
+        // 5. Проверка правильности заполнения графы «Статус налогоплательщика»
+        if (row.status && !row.status?.matches("^[1-4]+\$")) {
+            def name = getColumnName(row, 'status')
+            rowError(logger, row, errorMsg + "Графа «$name» заполнена неверно (${row.status})! Возможные значения: «1», «2», «3», «4»")
+        }
+
+        // 6. Проверка вводимых символов в поле «Серия и номер документа»
+        def code = (row.code != null ? getRefBookValue(360, row.code)?.CODE?.value : null)
+        if (code == '21' && row.series != null && !row.series?.matches("^[а-яА-ЯёЁa-zA-Z0-9]+\$")) {
+            def name = getColumnName(row, 'series')
+            rowError(logger, row, errorMsg + "Графа «$name» содержит недопустимые символы!")
+        }
+
+        // 7. Проверка заполнения полей 11, 13, 14, 15, 16, 17, 18, 19
+        if (row.region != null) {
+            checkNonEmptyColumns(row, row.getIndex(), address, logger, false)
+        }
+
+        // 8. Проверка на заполнение графы 12 «Регион (код)»
         if ((address.find { row.getCell(it).value != null }
                 || (row.country == null && row.address == null)
                 || ('1'.equals(row.status))
@@ -260,67 +293,13 @@ void logicCheck() {
                     getColumnName(row, "region"), getColumnName(row, "status"), getColumnName(row, "citizenship")))
         }
 
-        // 3. Проверка вводимых символов в поле «Серия и номер документа»
-        def code = (row.code != null ? getRefBookValue(360, row.code)?.CODE?.value : null)
-        if (code == '21' && row.series != null && !row.series?.matches("^[а-яА-ЯёЁa-zA-Z0-9]+\$")) {
-            def name = getColumnName(row, 'series')
-            rowError(logger, row, errorMsg + "Графа «$name» содержит недопустимые символы!")
-        }
-
-        // 4. Проверка заполнения поля «Номер дома (владения)»
+        // 9. Проверка заполнения поля «Номер дома (владения)»
         if (row.house && !row.house?.matches("^[а-яА-ЯёЁa-zA-Z0-9/-]+\$")) {
             def name = getColumnName(row, 'house')
             rowWarning(logger, row, errorMsg + "Графа «$name» содержит недопустимые символы!")
         }
 
-        // 5. Проверка заполнения полей 11, 13, 14, 15, 16, 17, 18, 19
-        if (row.region != null) {
-            checkNonEmptyColumns(row, row.getIndex(), address, logger, false)
-        }
-
-        // 7. Проверка правильности заполнения графы «ИНН в стране гражданства»
-        if (row.inn && row.citizenship && citizenshipCode == '643') {
-            def nameInn = getColumnName(row, 'inn')
-            def nameCitizenship = getColumnName(row, 'citizenship')
-            rowError(logger, row, errorMsg + "Графа «$nameInn» не должно быть заполнено, если графа «$nameCitizenship» равна «643»")
-        }
-
-        // 8. Проверка правильности заполнения графы «Статус налогоплательщика»
-        if (row.status && !row.status?.matches("^[1-3]+\$")) {
-            def name = getColumnName(row, 'status')
-            rowError(logger, row, errorMsg + "Графа «$name» содержит недопустимое значение! Поле может содержать только одно из значений: «1», «2», «3»")
-        }
-
-        // 9. Проверка соответствия суммы дохода суммам вычета
-        def String errorMsg1 = errorMsg + "Сумма граф «Сумма вычета» для кода дохода = «%s» превышает значение поля «Сумма дохода» для данного кода."
-        if (getSum1(row) > roundValue(row.col_041_1 ?: 0)) {
-            def value = getRefBookValue(370L, row.col_040_1)?.CODE?.value
-            rowWarning(logger, row, String.format(errorMsg1, value))
-        }
-        if (getSum2(row) > roundValue(row.col_041_2 ?: 0)) {
-            def value = getRefBookValue(370L, row.col_040_2)?.CODE?.value
-            rowWarning(logger, row, String.format(errorMsg1, value))
-        }
-        if (getSum3(row) > roundValue(row.col_041_3 ?: 0)) {
-            def value = getRefBookValue(370L, row.col_040_3)?.CODE?.value
-            rowWarning(logger, row, String.format(errorMsg1, value))
-        }
-
-        // 10. Арифметические проверки расчета граф 23, 25, 26
-        needValue['income'] = calc23(row)
-        needValue['deduction'] = calc24(row)
-        needValue['taxBase'] = calc25(row)
-        def arithmeticCheckAlias = needValue.keySet().asList()
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
-
-        // 11. Проверка на соответствие паттерну
-        if (row.innRF && checkPattern(logger, row, 'innRF', row.innRF, INN_IND_PATTERN, wasError ? null : INN_IND_MEANING, true)) {
-            checkControlSumInn(logger, row, 'innRF', row.innRF, true)
-        } else if (row.innRF) {
-            wasError = true
-        }
-
-        // 12. Проверка заполнения графы 20, 21
+        // 10. Проверка заполнения графы 20, 21
         if (citizenshipCode != '643' && (address + "region").find { row[it] } == null) {
             ["country", "address"].each { alias ->
                 if (!row[alias]) {
@@ -330,7 +309,131 @@ void logicCheck() {
                 }
             }
         }
+
+        // 11. Арифметические проверки расчета граф 23, 25, 26
+        needValues['income'] = calc23(row)
+        needValues['deduction'] = calc24(row)
+        needValues['taxBase'] = calc25(row)
+        def calcColumns = needValues.keySet().asList()
+        def algorithms = ['income'   : '«Графа 23» = «Графа 32» + «Графа 44» + «Графа 56»',
+                          'deduction': '«Графа 24» = «Графа 34» + «Графа 36» + «Графа 38» + «Графа 40» + «Графа 42» + «Графа 46» + «Графа 48» + «Графа 50» + «Графа 52» + «Графа 54» + «Графа 58» + «Графа 60» + «Графа 62» + «Графа 64» + «Графа 66» + «Графа 68» + «Графа 70»',
+                          'taxBase'  : '«Графа 25» = «Графа 23» - «Графа 24»']
+        checkCalc(row, calcColumns, needValues, algorithms)
+
+        // 12. Проверка соответствия суммы дохода суммам вычета
+        def String errorMsg1 = errorMsg + "Сумма значений граф %s «043 (Сумма вычета)» превышает значение графы %s «041 (Сумма дохода)»!"
+        def messageMap = ["34, 36, 38, 40, 42" : "32", "46, 48, 50, 52, 54" : "44", "58, 60, 62, 64, 66" : "56"]
+        // всего три группы колонок
+        (1..3).each { colGroupNum ->
+            if (getSumGroupCol(row, colGroupNum) > roundValue(row["col_041_${colGroupNum}"] ?: 0)) {
+                def key = (messageMap.keySet())[colGroupNum - 1]
+                logger.warn(errorMsg1, key, messageMap[key])
+            }
+        }
+
+        // 13. Проверка заполнения граф по доходам в случае если заполнена хотя бы одна из граф по вычетам
+        // 14. Проверка заполнения граф по доходам в случае если не заполнена ни одна из граф по вычетам
+        messageMap = ["33-42" : "31 и 32", "45-54" : "43 и 44", "57-66" : "55 и 56"]
+        (1..3).each { colGroupNum ->
+            def notEmpty042_043 = isNotEmpty042_043(row, colGroupNum)
+            def filled040_041 = isFilled040_041(row, colGroupNum)
+            def empty040_041 = isEmpty040_041(row, colGroupNum)
+            def key = (messageMap.keySet())[colGroupNum - 1]
+            if (notEmpty042_043 && !filled040_041) {
+                logger.error(errorMsg + "Если заполнена хотя бы одна из граф %s («042 (Код вычета)», «043 (Сумма вычета)»), то должна быть заполнена графа %s («040 (Код дохода)», «041 (Сумма дохода)»)!", key, messageMap[key])
+            }
+            if (!notEmpty042_043 && !filled040_041 && !empty040_041) {
+                logger.error(errorMsg + "Если не заполнена ни одна из граф %s («042 (Код вычета)», «043 (Сумма вычета)»), то должны быть одновременно заполнены либо незаполнены графы %s («040 (Код дохода)», «041 (Сумма дохода)»)!", key, messageMap[key])
+            }
+        }
+
+        // 15. Проверка заполнения граф по вычетам
+        def foundBadPair = false
+        for (def colGroupNum in (1..3)) {
+            foundBadPair = (1..5).find { def colSubGroupNum ->
+                !isSameFillingColPair(row, colGroupNum, colSubGroupNum, true) // если одна заполнена, а вторая - нет
+            } != null
+        }
+        // если в 042 нет ошибок, то проверяем 051
+        if (!foundBadPair) {
+            foundBadPair = [1, 2].find { def colSubGroupNum ->
+                !isSameFillingColPair(row, 3, colSubGroupNum, false) // если одна заполнена, а вторая - нет
+            } != null
+        }
+        if (foundBadPair) {
+            logger.error(errorMsg + "Должны быть одновременно заполнены либо незаполнены графы «Код вычета» и «Сумма вычета» (33 и 34, ..., 41 и 42; 45 и 46, ..., 53 и 54; 57 и 58, ..., 65 и 66; 67 и 68, 69 и 70)!")
+        }
     }
+}
+
+def checkCalc(DataRow<Cell> row, List<String> calcColumns, Map<String, Object> calcValues, Map<String, String> algoritms) {
+    List<String> errorColumns = new LinkedList<String>();
+    for (String alias : calcColumns) {
+        if (calcValues.get(alias) == null && row.getCell(alias).getValue() == null) {
+            continue;
+        }
+        if (calcValues.get(alias) == null || row.getCell(alias).getValue() == null
+                || ((BigDecimal) calcValues.get(alias)).compareTo((BigDecimal) row.getCell(alias).getValue()) != 0) {
+            errorColumns.add('«' + getColumnName(row, alias) + '»');
+        }
+    }
+    for (String alias : errorColumns) {
+        String msg = String.format("Строка %d: Неверное значение граф: %s! Не выполняется условие: %s", row.getIndex(), alias, algoritms.get(alias));
+        logger.warn(msg);
+    }
+}
+
+// проверяем заполненные графы 040 и 041 (обе заполнены)
+boolean isFilled040_041(def row, def colGroupNum) {
+    return row["col_040_${colGroupNum}"] != null && row["col_041_${colGroupNum}"] != null
+}
+
+// проверяем пустоту граф 040 и 041 (обе пусты)
+boolean isEmpty040_041(def row, def colGroupNum) {
+    return row["col_040_${colGroupNum}"] == null && row["col_041_${colGroupNum}"] == null
+}
+
+// проверяем заполненные графы 042 и 043 (заполнена хотя бы одна)
+boolean isNotEmpty042_043(def row, def colGroupNum) {
+    return (1..5).find { colSubGroupNum -> // в каждой группе 1 (не проверяемые) + 5 (проверяемые) пар колонок
+        row["col_042_${colGroupNum}_${colSubGroupNum}"] != null || row["col_043_${colGroupNum}_${colSubGroupNum}"] != null
+    } != null
+}
+
+/** Проверяем заполненные графы 042 и 043 (или 051 и 052) в паре (заполнена хотя бы одна)
+ * @param row
+ * @param colGroupNum номер группы (от 1 до 3)
+ * @param colSubGroupNum (номер пары от 1 до 5)
+ * @param flag042 (true для пары 042, 043, false для пары 051, 052)
+ * @return
+ */
+boolean isSameFillingColPair(def row, def colGroupNum, def colSubGroupNum, boolean flag042) {
+    def first = row["col_${flag042 ? '042' : '051'}_${colGroupNum}_${colSubGroupNum}"]
+    def second = row["col_${flag042 ? '043' : '052'}_${colGroupNum}_${colSubGroupNum}"]
+    return (first != null && second != null) || (first == null && second == null)
+}
+
+/**
+ * Проверка текста на паттерны
+ * @param row строка НФ
+ * @param alias псевдоним столбца
+ * @param value проверяемое значение (строка или дата)
+ * @param pattern regExp для проверки
+ * @param meaning расшифровка
+ * @param fatal
+ */
+def boolean checkPattern(DataRow<Cell> row, String alias, String value, String pattern, String meaning, boolean fatal) {
+    if (value == null || value.isEmpty()) {
+        return false;
+    }
+    boolean result = checkFormat(value, pattern);
+    if (!result) {
+        rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Графа \"%s\" заполнена неверно (%s)! Ожидаемый паттерн: \"%s\"", getColumnName(row, alias), value, pattern), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        if (meaning != null) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Расшифровка паттерна \"%s\": %s", pattern, meaning), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+    }
+    return result;
 }
 
 // Алгоритмы заполнения полей формы
@@ -383,7 +486,7 @@ def BigDecimal calc23(def row) {
 def BigDecimal calc24(def row) {
     // графа 68, 70
     def tmp = getSum(row, ['col_052_3_1', 'col_052_3_2'])
-    return getSum1(row) + getSum2(row) + getSum3(row) + tmp
+    return getSumGroupCol(row, 1) + getSumGroupCol(row, 2) + getSumGroupCol(row, 3) + tmp
 }
 
 def BigDecimal calc25(def row) {
@@ -391,20 +494,11 @@ def BigDecimal calc25(def row) {
 }
 
 /** Получить сумму «Графа 34» + «Графа 36» + «Графа 38» + «Графа 40» + «Графа 42». */
-def BigDecimal getSum1(def row) {
-    return getSum(row, ['col_043_1_1', 'col_043_1_2', 'col_043_1_3', 'col_043_1_4', 'col_043_1_5'])
-}
-
 /** Получить сумму «Графа 46» + «Графа 48» + « Графа 50» + «Графа 52» + «Графа 54». */
-def BigDecimal getSum2(def row) {
-    return getSum(row, ['col_043_2_1', 'col_043_2_2', 'col_043_2_3', 'col_043_2_4', 'col_043_2_5'])
-}
-
 /** Получить сумму «Графа 58» + «Графа 60» + «Графа 62» + «Графа 64» + «Графа 66». */
-def BigDecimal getSum3(def row) {
-    return getSum(row, ['col_043_3_1', 'col_043_3_2', 'col_043_3_3', 'col_043_3_4', 'col_043_3_5'])
+def BigDecimal getSumGroupCol(def row, def groupNum) {
+    return getSum(row, ["col_043_${groupNum}_1", "col_043_${groupNum}_2", "col_043_${groupNum}_3", "col_043_${groupNum}_4", "col_043_${groupNum}_5"])
 }
-
 /**
  * Получить сумму графов одной строки.
  *
