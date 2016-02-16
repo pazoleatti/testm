@@ -201,10 +201,12 @@ void logicCheck() {
             logger.error("Строка $rowNum: Графа «$msg» может содержать только одно из значений: «покупка», продажа»!")
         }
 
-        // Проверка суммы требований
-        if (row.reqSum != null && row.reqSum < 0) {
-            def msg = row.getCell('reqSum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+        // Проверка положительного значения графы 11, 13, 14-16
+        ['reqVolume', 'guarVolume', 'reqCourse', 'guarCourse'].each {
+            if (row[it] != null && row[it] < 0) {
+                def msg = row.getCell(it).column.name
+                logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            }
         }
 
         // Проверка корректности суммы требований
@@ -217,19 +219,25 @@ void logicCheck() {
         }
 
         // Проверка суммы обязательств
-        if (row.guarSum != null && row.guarSum < 0) {
+        if (row.guarSum != null && row.guarSum > 0) {
             def msg = row.getCell('guarSum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть меньше или равно «0»!")
         }
 
         // Проверка корректности суммы обязательств
         if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) &&
-                row.guarSum != ScriptUtils.round(row.guarVolume * row.guarCourse, row.getCell('guarSum').getColumn().precision).abs()) {
+                row.guarSum != -1 * ScriptUtils.round(row.guarVolume * row.guarCourse, row.getCell('guarSum').getColumn().precision).abs()) {
             flag = false
             def msg1 = row.getCell('guarSum').column.name
             def msg2 = row.getCell('guarVolume').column.name
             def msg3 = row.getCell('guarCourse').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно равняться модулю произведения «$msg2» и «$msg3»!")
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно равняться модулю произведения граф «$msg2» и «$msg3» со знаком «-»!")
+        }
+
+        // Проверка рыночной цены
+        if (row.marketPrice != null && row.marketPrice <= 0) {
+            def msg = row.getCell('guarSum').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // Проверка расчётных граф
