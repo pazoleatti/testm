@@ -23,6 +23,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -88,7 +89,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
-    //@Cacheable(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
+    @Cacheable(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
@@ -126,7 +127,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    //@Cacheable(value = "PermanentData", key = "'RefBook_attribute_'+#attributeId.toString()")
+    @Cacheable(value = "PermanentData", key = "'RefBook_attribute_'+#attributeId.toString()")
     public RefBook getByAttribute(Long attributeId) {
         try {
             return get(getJdbcTemplate().queryForLong(

@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -77,7 +79,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
     };
 
 	@Override
-	//@Cacheable(value = "User", key = "#userId")
+	@Cacheable(value = "User", key = "#userId")
 	public TAUser getUser(int userId) {
 		TAUser user;
 		try {
@@ -96,7 +98,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	}
 	
 	@Override
-    //@Cacheable(value = "User", key = "'login_'+#login")
+    @Cacheable(value = "User", key = "'login_'+#login")
 	public int getUserIdByLogin(String login) {
 		try {
 			return getJdbcTemplate().queryForInt("select id from sec_user where lower(login) = ?", login.toLowerCase());
@@ -167,7 +169,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	}
 
 	@Override
-	//@CacheEvict(value="User", key="#userId", beforeInvocation=true)
+	@CacheEvict(value="User", key="#userId", beforeInvocation=true)
 	public void setUserIsActive(int userId, int isActive) {
 		int rows = getJdbcTemplate().update("update sec_user set is_active=? where id = ?", 
 				new Object[]{isActive, userId},
@@ -177,7 +179,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	}
 
 	@Override
-	//@CacheEvict(value="User", key="#user.id", beforeInvocation=true)
+	@CacheEvict(value="User", key="#user.id", beforeInvocation=true)
 	public void updateUser(final TAUser user) {
 		try {
 			List<Object> array = new ArrayList<Object>();

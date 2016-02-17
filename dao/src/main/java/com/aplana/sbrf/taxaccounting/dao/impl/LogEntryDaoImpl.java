@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.io.BufferedInputStream;
@@ -26,7 +28,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
     BlobDataDao blobDataDao;
 
     @Override
-    //@CacheEvict(value = "DataBlobsCache", key = "#uuid", beforeInvocation = true)
+    @CacheEvict(value = "DataBlobsCache", key = "#uuid", beforeInvocation = true)
     public void save(List<LogEntry> logEntries, String uuid) {
         if (logEntries == null || logEntries.isEmpty() || uuid == null || uuid.isEmpty()) {
             return;
@@ -61,7 +63,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
     }
 
     @Override
-    //@Cacheable(value = "DataBlobsCache", key = "#uuid")
+    @Cacheable(value = "DataBlobsCache", key = "#uuid")
     public List<LogEntry> get(String uuid) {
         if (uuid.isEmpty()) {
             return null;
@@ -82,6 +84,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
     }
 
     @Override
+    @CacheEvict(value = "DataBlobsCache", key = "#uuid", beforeInvocation = true)
     public void update(List<LogEntry> logEntries, String uuid) {
         if (logEntries == null || logEntries.isEmpty() || uuid == null || uuid.isEmpty()) {
             return;
