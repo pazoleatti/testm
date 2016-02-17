@@ -192,12 +192,17 @@ void logicCheck() {
             positive = false
         }
 
-        // Проверка суммы доначисленной арендной платы
-        if (row.sum1 != null && row.sum2 != null && positive && (row.sum3 != row.sum2 - row.sum1)) {
-            def msg = row.getCell('sum1').column.name
-            def msg1 = row.getCell('sum2').column.name
-            def msg2 = row.getCell('sum3').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно разности значений граф «$msg2» и «$msg1»!")
+        // Проверка расчетных граф
+        def values = [:]
+        values["sum3"] = calc12(row)
+        def errorColumnNames = values.findAll { key, value ->
+            value != null && value != row[key]
+        }.collect { key, value ->
+            getColumnName(row, key)
+        }
+        if (!errorColumnNames.empty) {
+            def str = errorColumnNames.join(", ")
+            rowError(logger, row, "Строка $rowNum: Неверное значение граф: «$str»!")
         }
     }
 
