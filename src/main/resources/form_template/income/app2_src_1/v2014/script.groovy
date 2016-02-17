@@ -374,11 +374,11 @@ def checkCalc(DataRow<Cell> row, List<String> calcColumns, Map<String, Object> c
         }
         if (calcValues.get(alias) == null || row.getCell(alias).getValue() == null
                 || ((BigDecimal) calcValues.get(alias)).compareTo((BigDecimal) row.getCell(alias).getValue()) != 0) {
-            errorColumns.add('«' + getColumnName(row, alias) + '»');
+            errorColumns.add(alias);
         }
     }
     for (String alias : errorColumns) {
-        String msg = String.format("Строка %d: Неверное значение граф: %s! Не выполняется условие: %s", row.getIndex(), alias, algoritms.get(alias));
+        String msg = String.format("Строка %d: Неверно рассчитана графа «%s»! Не выполняется условие: %s", row.getIndex(), getColumnName(row, alias), algoritms.get(alias));
         logger.warn(msg);
     }
 }
@@ -1109,33 +1109,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     newRow.region = getRecordIdImport(4L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
 
-    // Графа 13
-    colIndex++
-    newRow.district = values[colIndex]
-
-    // Графа 14
-    colIndex++
-    newRow.city = values[colIndex]
-
-    // Графа 15
-    colIndex++
-    newRow.locality = values[colIndex]
-
-    // Графа 16
-    colIndex++
-    newRow.street = values[colIndex]
-
-    // Графа 17
-    colIndex++
-    newRow.house = values[colIndex]
-
-    // Графа 18
-    colIndex++
-    newRow.housing = values[colIndex]
-
-    // Графа 19
-    colIndex++
-    newRow.apartment = values[colIndex]
+    // графа 13..19
+    ['district', 'city', 'locality', 'street', 'house', 'housing', 'apartment'].each { alias ->
+        colIndex++
+        newRow[alias] = values[colIndex]
+    }
 
     // Графа 20 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
     colIndex++
@@ -1145,41 +1123,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     newRow.address = values[colIndex]
 
-    // Графа 22
-    colIndex++
-    newRow.taxRate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 23
-    colIndex++
-    // newRow.income = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 24
-    colIndex++
-    // newRow.deduction = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 25
-    colIndex++
-    // newRow.taxBase = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 26
-    colIndex++
-    newRow.calculated = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 27
-    colIndex++
-    newRow.withheld = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 28
-    colIndex++
-    newRow.listed = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 29
-    colIndex++
-    newRow.withheldAgent = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 30
-    colIndex++
-    newRow.nonWithheldAgent = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 22..30
+    ['taxRate', 'income', 'deduction', 'taxBase', 'calculated', 'withheld', 'listed', 'withheldAgent', 'nonWithheldAgent'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    }
 
     // Графа 31 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
     colIndex++
