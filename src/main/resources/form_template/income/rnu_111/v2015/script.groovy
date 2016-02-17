@@ -55,14 +55,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
-        sortFormDataRows()
-        break
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
-        sortFormDataRows()
-        break
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"sortFormDataRows()
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
-        sortFormDataRows()
         break
     case FormDataEvent.COMPOSE: // Консолидация
         formDataService.consolidationSimple(formData, logger, userInfo)
@@ -159,8 +154,14 @@ void logicCheck() {
         // 2. Проверка даты основания совершения операции
         checkDatePeriod(logger, row, 'reasonDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
-        // 3. Проверка положительного значения графы 8-9, 11-15
-        ['base', 'sum', 'time', 'rate', 'sum1', 'rate1', 'sum2', 'rate2', 'sum3'].each {
+        // 3. Проверка значения базы для расчёта процентного дохода
+        if (row.base != null && (row.base <= 0 || row.base >= 367)) {
+            msg = row.getCell('base').column.name
+            rowError(logger, row, "Строка $rowNum: Графа «$msg» должна принимать значение из диапазона: 1 - 366!")
+        }
+
+        // 4. Проверка положительного значения графы 9, 11-15
+        ['sum', 'time', 'rate', 'sum1', 'rate1', 'sum2', 'rate2', 'sum3'].each {
             if (row[it] != null && row[it] < 0) {
                 msg = row.getCell(it).column.name
                 rowError(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
@@ -168,7 +169,7 @@ void logicCheck() {
         }
 
         def values = []
-        // 4. Проверка значения графы 16,17
+        // 5. Проверка значения графы 16,17
         if (calc16(row) != null && row.rate2 != calc16(row)) {
             values.add(row.getCell('rate2').column.name)
         }
@@ -181,7 +182,7 @@ void logicCheck() {
         }
     }
 
-    // 5. Проверка итоговых значений пофиксированной строке «Итого»
+    // 6. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
@@ -459,10 +460,29 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll {
-        sortColumns.contains(it.getAlias())
-    })
-    sortRows(dataRows, sortColumns)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    def newRows = []
+    def tempRows = []
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            if (!tempRows.isEmpty()) {
+                sortRows(tempRows, columns)
+                newRows.addAll(tempRows)
+                tempRows = []
+            }
+            newRows.add(row)
+            continue
+        }
+        tempRows.add(row)
+    }
+    if (!tempRows.isEmpty()) {
+        sortRows(tempRows, columns)
+        newRows.addAll(tempRows)
+    }
+    dataRowHelper.setAllCached(newRows)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
