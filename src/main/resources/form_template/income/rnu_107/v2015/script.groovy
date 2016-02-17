@@ -106,6 +106,9 @@ def calcColumns = ['sum4']
 @Field
 def groupColumns = ['code']
 
+@Field
+def sortColumns = ['code', 'name', 'reasonNumber', 'reasonDate', 'transDoneDate']
+
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -219,8 +222,7 @@ void calc() {
         row.sum4 = calc13(row)
     }
 
-    // Сортировка
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
+    // Сортировка по группируемой графе (разыменовывание не нужно, так как строка)
     sortRows(dataRows, groupColumns)
 
     // Добавление подитогов
@@ -571,9 +573,29 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), dataRows.find {
-        it.getAlias() == 'total'
-    }, true)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    def newRows = []
+    def tempRows = []
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            if (!tempRows.isEmpty()) {
+                sortRows(tempRows, columns)
+                newRows.addAll(tempRows)
+                tempRows = []
+            }
+            newRows.add(row)
+            continue
+        }
+        tempRows.add(row)
+    }
+    if (!tempRows.isEmpty()) {
+        sortRows(tempRows, columns)
+        newRows.addAll(tempRows)
+    }
+    dataRowHelper.setAllCached(newRows)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
