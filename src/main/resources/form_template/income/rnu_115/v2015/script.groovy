@@ -193,7 +193,14 @@ void logicCheck() {
         checkDatePeriod(logger, row, 'dealDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка корректности даты заключения сделки
-        checkDatePeriod(logger, row, 'dealDoneDate', 'dealDate', getReportPeriodEndDate(), true)
+        if (row.dealDate && row.dealDoneDate && (row.dealDoneDate.before(getReportPeriodStartDate()) ||
+                row.dealDoneDate.after(getReportPeriodEndDate()) || row.dealDoneDate < row.dealDate)) {
+            def msg4 = row.getCell('dealDate').column.name
+            def msg5 = row.getCell('dealDoneDate').column.name
+            def dateFrom = getReportPeriodStartDate()?.format('dd.MM.yyyy')
+            def dateTo = getReportPeriodEndDate()?.format('dd.MM.yyyy')
+            logger.error("Строка $rowNum: Дата по графе «$msg5» должна принимать значение из диапазона $dateFrom - $dateTo и быть больше либо равна дате по графе «$msg4»!")
+        }
 
         // Проверка типа сделки
         if (row.dealFocus && (row.dealFocus != direction1 && row.dealFocus != direction2)) {
