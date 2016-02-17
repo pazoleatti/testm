@@ -55,9 +55,14 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+        sortFormDataRows()
+        break
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        sortFormDataRows()
+        break
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"sortFormDataRows()
         logicCheck()
+        sortFormDataRows()
         break
     case FormDataEvent.COMPOSE: // Консолидация
         formDataService.consolidationSimple(formData, logger, userInfo)
@@ -198,8 +203,6 @@ void calc() {
         row.rate2 = calc16(row)
         row.sum3 = calc17(row)
     }
-
-    sortFormDataRows(false)
 
     // Общий итог
     def total = calcTotalRow(dataRows)
