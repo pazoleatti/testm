@@ -186,12 +186,12 @@ void logicCheck() {
         values["finResultTax"] = calc14(row)
         values["incomeCorrection"] = calc15(row)
         def errorColumnNames = values.findAll { key, value ->
-            value != null && value != row[key]
+            value != false && value != row[key]
         }.collect { key, value ->
             getColumnName(row, key)
         }
         if (!errorColumnNames.empty) {
-            def str = errorColumnNames.join(", ")
+            def str = errorColumnNames.join("», «")
             rowError(logger, row, "Строка $rowNum: Неверное значение граф: «$str»!")
         }
     }
@@ -273,9 +273,13 @@ void calc() {
         if(row.getAlias() != null){
             continue
         }
-        row.finResult = calc11(row)
-        row.finResultTax = calc14(row)
-        row.incomeCorrection = calc15(row)
+        Object temp = calc11(row)
+        // оставить (temp != false)
+        row.finResult = (temp != false) ? temp : null
+        temp = calc14(row)
+        row.finResultTax = (temp != false) ? temp : null
+        temp = calc15(row)
+        row.incomeCorrection = (temp != false) ? temp : null
     }
 
     // Сортировка
@@ -302,7 +306,7 @@ def calc11(def row) {
     if (row.income != null && row.cost != null && row.costReserve != null) {
         return row.income - (row.cost - row.costReserve)
     } else {
-        return null
+        return false
     }
 }
 
@@ -311,7 +315,7 @@ def calc14(def row) {
     if (row.marketPrice != null && row.cost != null && row.costReserve != null) {
         return row.marketPrice - (row.cost - row.costReserve)
     } else {
-        return null
+        return false
     }
 }
 
@@ -320,15 +324,23 @@ def calc15(def row) {
     // ЕСЛИ «Графа 11»≥ «0» И «Графа 14»>«Графа 11», ТО «Графа 15» = «Графа 14» - «Графа 11»
     // ИНАЧЕ «Графа 15» не заполняется
     if (row.finResult == null) {
-        return null
+        return false
     }
     if (row.finResult < 0) {
         if (row.marketPrice != null) {
             return row.marketPrice.abs() - row.finResult.abs()
+        } else {
+            return false
         }
     } else {
-        if (!(row.finResult < 0) && row.finResultTax != null && (row.finResultTax > row.finResult)) {
-            return row.finResultTax - row.finResult
+        if (!(row.finResult < 0)) {
+            if (row.finResultTax != null) {
+                if (row.finResultTax > row.finResult) {
+                    return row.finResultTax - row.finResult
+                }
+            } else {
+                return false
+            }
         }
     }
     return null
