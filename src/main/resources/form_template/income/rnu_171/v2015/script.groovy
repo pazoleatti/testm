@@ -175,46 +175,24 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'income')}» должно быть больше или равно «0»!")
         }
 
-        // 4. Проверка финансовых результатов
-        if (row.finResultTax != null && row.finResult != null &&
-                row.finResultTax <= row.finResult && row.finResult >= 0) {
-            logger.warn("Строка $rowNum: Графа «${getColumnName(row, 'incomeCorrection')}» заполнена значением «0», т.к. не выполнен порядок заполнения графы!")
-        }
-
-        // 5. Проверка корректности финансового результата уступки
-        if (row.finResult != null && row.income != null && row.cost != null && row.costReserve != null &&
-                row.finResult != (row.income - (row.cost - row.costReserve))) {
-            logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'finResult')}» должно равняться выражению: «${getColumnName(row, 'income')}» - («${getColumnName(row, 'cost')}» - «${getColumnName(row, 'costReserve')}»)!")
-        }
-
-        // 6. Проверка кода налогового учета
+        // 4. Проверка кода налогового учета
          if (row.code != null && !['10360', '10361'].contains(row.code)) {
              logger.error("Строка $rowNum: Графа «${getColumnName(row, 'code')}» должна принимать значение из следующего списка: «10360» или «10361»!")
          }
 
-        // 7. Проверка корректности финансового результата из рыночной цены
-        if (row.finResultTax != null && row.marketPrice != null && row.cost != null && row.costReserve != null &&
-                row.finResultTax != (row.marketPrice - (row.cost - row.costReserve))) {
-            logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'finResultTax')}» должно равняться выражению: «${getColumnName(row, 'marketPrice')}» - («${getColumnName(row, 'cost')}» - «${getColumnName(row, 'costReserve')}»)!")
+        // 5. Проверка расчетных граф
+        def values = [:]
+        values["finResult"] = calc11(row)
+        values["finResultTax"] = calc14(row)
+        values["incomeCorrection"] = calc15(row)
+        def errorColumnNames = values.findAll { key, value ->
+            value != null && value != row[key]
+        }.collect { key, value ->
+            getColumnName(row, key)
         }
-
-        // 8. Проверка корректировки финансового результата
-        // a. Если «Графа 11» больше или равно «0» И «Графа 14» больше «Графа 11», то «Графа 15» = «Графа 14» - «Графа 11»
-        // b.	Если «Графа 11» меньше «0» И «Графа 14» больше «Графа 11», то «Графа 15» = |«Графа 13»| - |«Графа 11»|
-        // c.	Если «Графа 11» больше или равно «0» И «Графа 14» меньше или равно «Графа 11», то «Графа 15» = «0»
-        if (row.finResult != null && row.finResultTax != null) {
-            if (row.finResult >= 0 && row.finResultTax > row.finResult &&
-                    (row.incomeCorrection != row.finResultTax - row.finResult)) {
-                logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'incomeCorrection')}» должно равняться разнице между графой «${getColumnName(row, 'finResultTax')}» и «${getColumnName(row, 'finResult')}»!")
-            }
-            if (row.finResult < 0 && row.finResultTax > row.finResult && row.marketPrice != null &&
-                    (row.incomeCorrection != row.marketPrice.abs() - row.finResult.abs())) {
-                logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'incomeCorrection')}» должно равняться разнице между графой «${getColumnName(row, 'marketPrice')}» по модулю и «${getColumnName(row, 'finResult')}» по модулю!")
-            }
-            if (row.finResult >= 0 && row.finResultTax <= row.finResult &&
-                    row.incomeCorrection != BigDecimal.ZERO) {
-                logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'incomeCorrection')}» должно быть равно нулю!")
-            }
+        if (!errorColumnNames.empty) {
+            def str = errorColumnNames.join(", ")
+            rowError(logger, row, "Строка $rowNum: Неверное значение граф: «$str»!")
         }
     }
 
@@ -298,29 +276,18 @@ void calc() {
         // «Графа 11» = «Графа 10» - («Графа 6» - «Графа 7»)
         if (row.income != null && row.cost != null && row.costReserve != null) {
             row.finResult = row.income - (row.cost - row.costReserve)
+        } else {
+            row.finResult = null
         }
         // «Графа 14» = «Графа 13» - («Графа 6» - «Графа 7»)
         if (row.marketPrice != null && row.cost != null && row.costReserve != null) {
             row.finResultTax = row.marketPrice - (row.cost - row.costReserve)
+        } else {
+            row.finResultTax = null
         }
-        // ЕСЛИ «Графа 11» больше или равно «0» И «Графа 14» больше «Графа 11», ТО
-        // «Графа 15» = «Графа 14» - «Графа 11»
-        // ЕСЛИ «Графа 11» меньше «0» И «Графа 14» больше «Графа 11», ТО
-        // «Графа 15» = |«Графа 13»| - |«Графа 11»|
-        // ЕСЛИ «Графа 11» больше или равно «0» И «Графа 14» меньше или равно «Графа 11», ТО
-        // «Графа 15» = «0»
-        if (row.finResult != null && row.finResultTax != null) {
-            if (row.finResult >= 0 && row.finResultTax > row.finResult) {
-                row.incomeCorrection = row.finResultTax - row.finResult
-            } else if (row.finResult < 0 && row.finResultTax > row.finResult) {
-                if (row.marketPrice != null) {
-                    row.incomeCorrection = row.marketPrice.abs() - row.finResult.abs()
-                }
-            } else if (row.finResult >= 0 && row.finResultTax <= row.finResult) {
-                row.incomeCorrection = 0
-            }
-        }
-
+        row.finResult = calc11(row)
+        row.finResultTax = calc14(row)
+        row.incomeCorrection = calc15(row)
     }
 
     // Сортировка
@@ -342,6 +309,43 @@ void calc() {
     updateIndexes(dataRows)
 }
 
+def calc11(def row) {
+    // «Графа 11» = «Графа 10» - («Графа 6» - «Графа 7»)
+    if (row.income != null && row.cost != null && row.costReserve != null) {
+        return row.income - (row.cost - row.costReserve)
+    } else {
+        return null
+    }
+}
+
+def calc14(def row) {
+    // «Графа 14» = «Графа 13» - («Графа 6» - «Графа 7»)
+    if (row.marketPrice != null && row.cost != null && row.costReserve != null) {
+        return row.marketPrice - (row.cost - row.costReserve)
+    } else {
+        return null
+    }
+}
+
+def calc15(def row) {
+    // ЕСЛИ «Графа 11»<0, ТО «Графа 15» = |«Графа 13»| - |«Графа 11»|
+    // ЕСЛИ «Графа 11»≥ «0» И «Графа 14»>«Графа 11», ТО «Графа 15» = «Графа 14» - «Графа 11»
+    // ИНАЧЕ «Графа 15» не заполняется
+    if (row.finResult == null) {
+        return null
+    }
+    if (row.finResult < 0) {
+        if (row.marketPrice != null) {
+            return row.marketPrice.abs() - row.finResult.abs()
+        }
+    } else {
+        if (!(row.finResult < 0) && row.finResultTax != null && (row.finResultTax > row.finResult)) {
+            return row.finResultTax - row.finResult
+        }
+    }
+    return null
+}
+
 // Расчет подитогового значения
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def newRow = getSubTotalRow(i)
@@ -359,7 +363,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
 
 DataRow<Cell> getSubTotalRow(int i) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
-    newRow.fix = 'Итого:'
+    newRow.fix = 'Итого'
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 2
     allColumns.each {
@@ -371,7 +375,7 @@ DataRow<Cell> getSubTotalRow(int i) {
 def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
-    totalRow.fix = 'Всего:'
+    totalRow.fix = 'Всего'
     totalRow.getCell('fix').colSpan = 2
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
