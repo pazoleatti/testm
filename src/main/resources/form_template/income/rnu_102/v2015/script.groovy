@@ -110,7 +110,7 @@ def totalColumns = ['sum3']
 def groupColumns = ['outcomeCode']
 
 @Field
-def sortColumns = ['incomeCode', 'name', 'reasonNumber', 'reasonDate', 'transDoneDate']
+def sortColumns = ['outcomeCode', 'name', 'reasonNumber', 'reasonDate', 'transDoneDate']
 
 @Field
 def calcColumns = ['sum2', 'sum3']
