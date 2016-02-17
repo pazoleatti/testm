@@ -102,6 +102,9 @@ def nonEmptyColumns = ['name', 'code', 'reasonNumber', 'reasonDate', 'sum', 'cur
 @Field
 def totalColumns = ['sum3']
 
+@Field
+def sortColumns = ["name", 'reasonNumber', 'reasonDate']
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
@@ -195,6 +198,8 @@ void calc() {
         row.rate2 = calc16(row)
         row.sum3 = calc17(row)
     }
+
+    sortFormDataRows(false)
 
     // Общий итог
     def total = calcTotalRow(dataRows)
@@ -472,7 +477,10 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(dataRows.findAll { it.getAlias() == null })
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll {
+        sortColumns.contains(it.getAlias())
+    })
+    sortRows(dataRows, sortColumns)
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
