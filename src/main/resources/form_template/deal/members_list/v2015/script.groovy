@@ -1,7 +1,8 @@
 package form_template.deal.members_list.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import groovy.transform.Field
 
 /**
@@ -75,6 +76,9 @@ def endDate = null
 @Field
 def periodOrder = null
 
+@Field
+def reportPeriod = null
+
 def getReportPeriodEndDate() {
     if (endDate == null) {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
@@ -94,6 +98,13 @@ def getPeriodOrder() {
         periodOrder = reportPeriodService.get(formData.reportPeriodId).getOrder()
     }
     return periodOrder
+}
+
+ReportPeriod getReportPeriod() {
+    if (reportPeriod == null) {
+        reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    }
+    return reportPeriod
 }
 
 def getPeriod() {
@@ -144,52 +155,31 @@ void consolidation() {
     def source2 = null
     def sourceRows1 = [:]
     def sourceRows2 = [:]
-    //TODO  получение источников изменить после доработки ЧТЗ
+
+    source1 = formDataService.getLast(sourceFormTypeId1, FormDataKind.PRIMARY, formData.departmentId, getReportPeriod()?.id, null, null, false)
+    def formName = formDataService.getFormTemplate(sourceFormTypeId1, getReportPeriod()?.id).name
+    if (source1 == null) {
+        logger.error("Не найдена форма «%s»: Тип: %s, Период: %s, Подразделение: %s!",
+                formName, FormDataKind.PRIMARY, getPeriod(), departmentService.get(formData.departmentId))
+        return
+    }
+    sourceRows1 = formDataService.getDataRowHelper(source1)?.allSaved
+    if (sourceRows1.isEmpty()) {
+        logger.error("Данные на форме «%s» за отчетный период %s отсутствуют!", formName, getPeriod())
+        return
+    }
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        // 1
-        if (it.formTypeId == sourceFormTypeId1) {
-            source1 = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
-            if (source1 == null) {
-                // лп1
-                //TODO  source1.formType.name - беру имя у несуществующией формы
-                logger.error("Не найдена форма «%s»: Тип: %s, Период: %s, Подразделение: %s!",
-                        source1.formType.name, source1.kind, getPeriod(), departmentService.get(source1.departmentId))
-                return
-            }
-            sourceRows1 = formDataService.getDataRowHelper(source1)?.allSaved
-            if (sourceRows1.isEmpty()) {
-                // лп2
-                logger.error("Данные на форме «%s» за отчетный период %s отсутствуют!", source1.formType.name, getPeriod())
-                return
-            }
-        }
-        // 2
         if (it.formTypeId == sourceFormTypeId2) {
             source2 = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
-            if (source2 == null) {
-                // лп3
-                logger.error("Не найдена форма «%s»: Тип: %s, Период: %s, Подразделение: %s!",
-                        source2.formType.name, source2.formType, getPeriod(), departmentService.get(source2.departmentId))
-                return
-            }
-            if (source2.state != WorkflowState.ACCEPTED) {
-                // лп5
-                logger.error("Форма «%s» находится в статусе, отличном от «Принята»!", source2.formType.name)
-                return
-            }
-            sourceRows2 = formDataService.getDataRowHelper(source2)?.allSaved
-            if (sourceRows2.isEmpty()) {
-                // лп4
-                logger.error("Данные на форме «%s» за отчетный период %s отсутствуют!", source2.formType.name, getPeriod())
-                return
-            }
+
         }
     }
+
     def samples = []
     def tmpDataRows = []
     def dataRows = []
-    // 3
+
     if (getPeriodOrder() == 4) {
         for (row in sourceRows1) {
             if (row.endData == null || row.endData > getReportPeriodEndDate()) {
@@ -197,12 +187,11 @@ void consolidation() {
             }
         }
     }
-    // 4
+
     if (getPeriodOrder() == 3) {
         def orgCode = getRecordId(513, 'CODE', '1')
         def taxStatus = getRecordId(511, 'CODE', '2')
         for (row in sourceRows1) {
-            //TODO очень много запросов к справочнику. уточнить.
             def RefOrgCode = getRefBookValue(520L, row.name).ORG_CODE?.value
             def RefTaxStatus = getRefBookValue(520L, row.name).TAX_STATUS?.value
             if (RefOrgCode == orgCode && RefTaxStatus == taxStatus && (row.endData == null || row.endData > getReportPeriodEndDate())) {
@@ -210,7 +199,7 @@ void consolidation() {
             }
         }
     }
-    // 5
+
     def useTcoIds2 = getNamesFromSources(sourceRows2)
     for (sample in samples) {
         boolean flag = sample.name in useTcoIds2
@@ -224,6 +213,7 @@ void consolidation() {
             }
         }
     }
+
     for (row in tmpDataRows) {
         def newRow = formData.createDataRow()
         allColumns.each { column ->
@@ -245,6 +235,7 @@ void consolidation() {
     updateIndexes(dataRows)
     dataRowHelper.allCached = dataRows
 }
+
 /**
  * Получить список идентификаторов с формы Участники группы ПАО Сбербанк или ВЗЛ.
  *
