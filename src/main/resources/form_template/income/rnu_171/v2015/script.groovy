@@ -273,18 +273,6 @@ void calc() {
         if(row.getAlias() != null){
             continue
         }
-        // «Графа 11» = «Графа 10» - («Графа 6» - «Графа 7»)
-        if (row.income != null && row.cost != null && row.costReserve != null) {
-            row.finResult = row.income - (row.cost - row.costReserve)
-        } else {
-            row.finResult = null
-        }
-        // «Графа 14» = «Графа 13» - («Графа 6» - «Графа 7»)
-        if (row.marketPrice != null && row.cost != null && row.costReserve != null) {
-            row.finResultTax = row.marketPrice - (row.cost - row.costReserve)
-        } else {
-            row.finResultTax = null
-        }
         row.finResult = calc11(row)
         row.finResultTax = calc14(row)
         row.incomeCorrection = calc15(row)
