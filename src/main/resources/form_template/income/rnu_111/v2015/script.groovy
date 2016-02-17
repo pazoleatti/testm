@@ -208,27 +208,6 @@ void calc() {
     updateIndexes(dataRows)
 }
 
-void sortRows(def dataRows) {
-    dataRows.sort { def rowA, def rowB ->
-        def aValue = getRefBookValue(520, rowA.name).NAME?.value
-        def bValue = getRefBookValue(520, rowB.name).NAME?.value
-        if (aValue != bValue) {
-            return aValue <=> bValue
-        }
-        aValue = rowA.reasonNumber
-        bValue = rowB.reasonNumber
-        if (aValue != bValue) {
-            return aValue <=> bValue
-        }
-        aValue = rowA.reasonDate
-        bValue = rowB.reasonDate
-        if (aValue != bValue) {
-            return aValue <=> bValue
-        }
-        return 0
-    }
-}
-
 def BigDecimal calc16(def row) {
     if (row.rate != null && row.rate1 != null) {
         return row.rate1 - row.rate
