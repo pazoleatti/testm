@@ -102,9 +102,8 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'incomeCorrection']
 def nonEmptyColumns = ['dealNum', 'name', 'code', 'currency', 'date1Part', 'date2Part', 'dealRate', 'dealLeftSum',
                        'bondSum', 'accrStartDate', 'accrEndDate', 'yearBase', 'dealIncome', 'rateDiff', 'incomeCorrection']
 
-// Группируемые атрибуты
 @Field
-def groupColumns = ['name', 'reasonNumber', 'reasonDate']
+def sortColumns = ["dealNum", "accrStartDate"]
 
 @Field
 def totalColumns = ['incomeCorrection']
@@ -227,22 +226,6 @@ def calc19 (def row) {
     def a = ((BigDecimal) ((row.dealLeftSum * row.rateDiff) * (row.accrEndDate - row.accrStartDate + 1))).divide(100 * row.yearBase,
             row.getCell('incomeCorrection').getColumn().precision, BigDecimal.ROUND_HALF_UP)
     return a
-}
-
-void sortRows(def dataRows) {
-    dataRows.sort{ def rowA, def rowB ->
-        def aValue = rowA.dealNum
-        def bValue = rowB.dealNum
-        if (aValue != bValue) {
-            return aValue <=> bValue
-        }
-        aValue = rowA.accrStartDate
-        bValue = rowB.accrStartDate
-        if (aValue != bValue) {
-            return bValue <=> aValue
-        }
-        return 0
-    }
 }
 
 def calcTotalRow(def dataRows) {
@@ -465,7 +448,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(dataRows.findAll{ it.getAlias() == null})
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (без подитогов)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    sortRows(dataRows, columns)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {

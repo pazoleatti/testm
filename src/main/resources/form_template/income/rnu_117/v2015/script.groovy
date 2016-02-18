@@ -98,9 +98,8 @@ def autoFillColumns = ['countryName', 'iksr', 'rate2', 'sum3']
 @Field
 def nonEmptyColumns = ['name', 'code', 'reasonNumber', 'reasonDate', 'rate', 'sum1', 'rate1', 'sum2']
 
-// Группируемые атрибуты
 @Field
-def groupColumns = ['name', 'reasonNumber', 'reasonDate']
+def sortColumns = ["name", "reasonNumber", "reasonDate"]
 
 @Field
 def totalColumns = ['sum3']
@@ -270,27 +269,6 @@ void calc() {
     dataRows.add(total)
 
     updateIndexes(dataRows)
-}
-
-void sortRows(def dataRows) {
-    dataRows.sort{ def rowA, def rowB ->
-        def aValue = getRefBookValue(520, rowA.name)?.NAME?.value
-        def bValue = getRefBookValue(520, rowB.name)?.NAME?.value
-        if (aValue != bValue) {
-            return aValue <=> bValue
-        }
-        aValue = rowA.reasonNumber
-        bValue = rowB.reasonNumber
-        if (aValue != bValue) {
-            return aValue <=> bValue
-        }
-        aValue = rowA.reasonDate
-        bValue = rowB.reasonDate
-        if (aValue != bValue) {
-            return aValue <=> bValue
-        }
-        return 0
-    }
 }
 
 def BigDecimal calc12(def row) {
@@ -502,7 +480,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(dataRows.findAll{ it.getAlias() == null})
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (без подитогов)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    sortRows(dataRows, columns)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {

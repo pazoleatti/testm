@@ -283,8 +283,7 @@ void calc() {
     }
 
     // Сортировка
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { sortColumns.contains(it.getAlias())})
-    sortRows(dataRows, sortColumns)
+    sortRows(dataRows, groupColumns)
 
     // Добавление подитогов
     addAllAliased(dataRows, new CalcAliasRow() {
@@ -593,46 +592,33 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { sortColumns.contains(it.getAlias())})
-    sortRows(dataRows)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (внутри групп)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    def newRows = []
+    def tempRows = []
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            if (!tempRows.isEmpty()) {
+                sortRows(tempRows, columns)
+                newRows.addAll(tempRows)
+                tempRows = []
+            }
+            newRows.add(row)
+            continue
+        }
+        tempRows.add(row)
+    }
+    if (!tempRows.isEmpty()) {
+        sortRows(tempRows, columns)
+        newRows.addAll(tempRows)
+    }
+    dataRowHelper.setAllCached(newRows)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
         updateIndexes(dataRows)
-    }
-}
-
-// Сортируем
-void sortRows(def dataRows) {
-    def complexList = []
-    def tmpRows = []
-    def currentCode = null
-    for (def row : dataRows) {
-        // если (под)итоги, то закрываем группу
-        if (row.getAlias() != null) {
-            complexList.add(tmpRows)
-            tmpRows = []
-            continue
-        }
-        // в начале запоминаем код
-        if (currentCode == null) {
-            currentCode = row.code ?: ""
-        }
-        // при смене кода закрываем группу и создаем новую
-        if (!(row.code ?: "").equalsIgnoreCase(currentCode)) {
-            complexList.add(tmpRows)
-            tmpRows = [row]
-        } else {
-            tmpRows.add(row)
-        }
-    }
-    // последнюю группу заносим в список
-    if (!tmpRows.isEmpty()) {
-        complexList.add(tmpRows)
-    }
-    // проходим по группам и сортируем
-    complexList.each { rows ->
-        sortRows(rows, sortColumns)
     }
 }
 

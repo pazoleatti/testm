@@ -96,6 +96,9 @@ def nonEmptyColumns = ['name', 'transDoneDate', 'code', 'reasonNumber', 'reasonD
 @Field
 def totalColumns = ['sum3']
 
+@Field
+def sortColumns = ["name", "reasonNumber", "reasonDate", "transDoneDate"]
+
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -177,19 +180,16 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        boolean positive = true
         // Проверка положительной суммы арендной платы
         if (row.sum1 != null && row.sum1 < 0) {
             def msg = row.getCell('sum1').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
-            positive = false
         }
 
         // Проверка положительной суммы арендной платы
         if (row.sum2 != null && row.sum2 < 0) {
             def msg = row.getCell('sum2').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
-            positive = false
         }
 
         // Проверка расчетных граф
@@ -201,7 +201,7 @@ void logicCheck() {
             getColumnName(row, key)
         }
         if (!errorColumnNames.empty) {
-            def str = errorColumnNames.join(", ")
+            def str = errorColumnNames.join("», «")
             rowError(logger, row, "Строка $rowNum: Неверное значение граф: «$str»!")
         }
     }
@@ -451,7 +451,11 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, dataRows.find { it.getAlias() == 'total' }, true)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (без подитогов)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    sortRows(dataRows, columns)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {

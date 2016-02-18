@@ -116,6 +116,9 @@ def calcColumns = ['sum6']
 @Field
 def groupColumns = ['code']
 
+@Field
+def sortColumns = ['code', 'name', 'docNumber', 'docDate', 'transDoneDate']
+
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -282,14 +285,6 @@ void calc() {
     dataRows.add(total)
 
     sortFormDataRows(false)
-}
-
-def calcFlag18(def row) {
-    if (row.tradePay != null) {
-        String col18 = row.tradePay.trim()
-        return (col18[-1] != "%") ? false : true
-    }
-    return null
 }
 
 def calc21(def row) {
@@ -676,9 +671,29 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), dataRows.find {
-        it.getAlias() == 'total'
-    }, true)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (внутри групп)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    def newRows = []
+    def tempRows = []
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            if (!tempRows.isEmpty()) {
+                sortRows(tempRows, columns)
+                newRows.addAll(tempRows)
+                tempRows = []
+            }
+            newRows.add(row)
+            continue
+        }
+        tempRows.add(row)
+    }
+    if (!tempRows.isEmpty()) {
+        sortRows(tempRows, columns)
+        newRows.addAll(tempRows)
+    }
+    dataRowHelper.setAllCached(newRows)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {

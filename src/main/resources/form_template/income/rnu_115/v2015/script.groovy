@@ -115,6 +115,9 @@ def totalColumns = ['incomeDelta', 'outcomeDelta']
 @Field
 def calcColumns = ['incomeSum', 'outcomeSum','incomeDelta', 'outcomeDelta']
 
+@Field
+def sortColumns = ["name", "dealNum"]
+
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -632,32 +635,15 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(dataRows.findAll { it.getAlias() == null })
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (без подитогов)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    sortRows(dataRows, columns)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
         updateIndexes(dataRows)
-    }
-}
-
-void sortRows(def dataRows) {
-    dataRows.sort { def rowA, def rowB ->
-        def aValue = getRefBookValue(520, rowA.name)?.NAME?.value
-        def bValue = getRefBookValue(520, rowB.name)?.NAME?.value
-        if (aValue != bValue) {
-            return aValue <=> bValue
-        }
-        aValue = rowA.reasonNumber
-        bValue = rowB.reasonNumber
-        if (aValue != bValue) {
-            return aValue <=> bValue
-        }
-        aValue = rowA.reasonDate
-        bValue = rowB.reasonDate
-        if (aValue != bValue) {
-            return aValue <=> bValue
-        }
-        return 0
     }
 }
 

@@ -461,27 +461,9 @@ void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def columns = sortColumns + (allColumns - sortColumns)
-    // Сортировка
+    // Сортировка (без подитогов)
     refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
-    def newRows = []
-    def tempRows = []
-    for (def row : dataRows) {
-        if (row.getAlias() != null) {
-            if (!tempRows.isEmpty()) {
-                sortRows(tempRows, columns)
-                newRows.addAll(tempRows)
-                tempRows = []
-            }
-            newRows.add(row)
-            continue
-        }
-        tempRows.add(row)
-    }
-    if (!tempRows.isEmpty()) {
-        sortRows(tempRows, columns)
-        newRows.addAll(tempRows)
-    }
-    dataRowHelper.setAllCached(newRows)
+    sortRows(dataRows, columns)
 
     if (saveInDB) {
         dataRowHelper.saveSort()

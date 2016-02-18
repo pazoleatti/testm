@@ -634,7 +634,7 @@ void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def columns = sortColumns + (allColumns - sortColumns)
-    // Сортировка
+    // Сортировка (внутри групп)
     refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
     def newRows = []
     def tempRows = []
