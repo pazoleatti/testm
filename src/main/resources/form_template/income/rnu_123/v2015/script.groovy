@@ -125,7 +125,7 @@ def calcColumns = ['sum4', 'sum5', 'sum8']
 def course810 = getRecordId(15, 'CODE', '810')
 
 @Field
-def pattern = /[0-9]+([\.|\,][0-9]+)?\%?/
+def pattern = /[0-9]{1,18}([\.|\,][0-9]{1,2})?\%?/
 
 // Дата начала отчетного периода
 @Field
@@ -263,7 +263,23 @@ void logicCheck() {
             }
         }
 
-        // 13. Проверка положительной суммы дохода
+        def flag23 = calcFlag23(row)
+        BigDecimal calcCol23 = calc23(flag23, row)
+
+        // 13. Проверка допустимых целочисленных значений
+        def maxValueColumn23 = 100_000_000_000
+        if (!flag23 && calcCol23 >= maxValueColumn23) {
+            // a.
+            def msg = row.getCell('tradePay').column.name
+            logger.error("Строка $rowNum: Значение графы «%s» должно быть меньше значения «100 000 000 000»!", msg)
+
+        } else if (flag23 && calcCol23 * 100 >= maxValueColumn23) {
+            // b.
+            def msg = row.getCell('tradePay').column.name
+            logger.error("Строка $rowNum: Значение графы «%s» должно быть меньше значения «100 000 000 000%%»!", msg)
+        }
+
+        // 14. Проверка положительной суммы дохода
         ['sum2', 'sum3', 'sum5', 'sum6'].each {
             if (row.getCell(it).value != null && row.getCell(it).value < 0) {
                 def msg = row.getCell(it).column.name
@@ -271,16 +287,14 @@ void logicCheck() {
             }
         }
 
-        // 14. Проверка расчётных граф (арифметические проверки)
+        // 15. Проверка расчётных граф (арифметические проверки)
         def needValue = formData.createDataRow()
-        def flag23 = calcFlag23(row)
-        BigDecimal calcCol23 = calc23(flag23, row)
         needValue.sum4 = calc22(row)
         needValue.sum5 = calc24(row, flag23, calcCol23)
         needValue.sum8 = calc27(row)
         checkCalc(row, calcColumns, needValue, logger, true)
 
-        // 15. Проверка корректности суммы доначисления  дохода до рыночного уровня по данным налогового учета
+        // 16. Проверка корректности суммы доначисления  дохода до рыночного уровня по данным налогового учета
         if (row.sum4 && row.sum7 && row.sum8 && row.sum9 && row.sum10) {
             def msg22 = row.getCell('sum4').column.name
             def msg26 = row.getCell('sum7').column.name
@@ -297,7 +311,7 @@ void logicCheck() {
         }
     }
 
-    // 16. Проверка итоговых значений пофиксированной строке «Итого»
+    // 17. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
