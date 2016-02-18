@@ -77,46 +77,46 @@ public final class ScriptUtils {
     public static final String KPP_MEANING = RefBookUtils.KPP_MEANING;
     public static final String TAX_ORGAN_PATTERN = RefBookUtils.TAX_ORGAN_PATTERN;
     public static final String TAX_ORGAN_MEANING = RefBookUtils.TAX_ORGAN_MEANING;
-    private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне граф «%s» - «%s» должны " +
+    public static final String WRONG_COLUMN_TYPE = "В указанном диапазоне граф «%s» - «%s» должны " +
             "быть только графы численного типа. Графа «%s» имеет неверный тип.";
-    private static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
-    private static final String CELL_NOT_FOUND = "Ячейка («%s», «%s») не найдена";
-    private static final String WRONG_NUMBER = "Проверка файла: Строка %d, столбец %s содержит нечисловое значение «%s»!";
-    private static final String WRONG_DATE = "Проверка файла: Строка %d, столбец %s содержит значение «%s», которое не " +
+    public static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
+    public static final String CELL_NOT_FOUND = "Ячейка («%s», «%s») не найдена";
+    public static final String WRONG_NUMBER = "Проверка файла: Строка %d, столбец %s содержит нечисловое значение «%s»!";
+    public static final String WRONG_DATE = "Проверка файла: Строка %d, столбец %s содержит значение «%s», которое не " +
             "соответствует дате в формате «%s»!";
-    private static final String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
+    public static final String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
             "Ожидается «%s» вместо «%s»!";
-    private static final String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+    public static final String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
             "Количество граф менее ожидаемого!";
-    private static final String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+    public static final String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
             "Количество строк в заголовке менее ожидаемого!";
-    private static final String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
-    private static final String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
-    private static final String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
-    private static final String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
-    private static final String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
-    private static final String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
-    private static final String WRONG_SUBTOTAL = "Неверное итоговое значение по коду '%s' графы «%s»!";
-    private static final String IMPORT_IS_NOT_PROVIDED = "Импорт данных не предусмотрен!";
-    private static final String WRONG_DATA_PARSE = "Отсутствие значения после обработки потока данных!";
-    private static final String EMPTY_FILE_NAME = "Имя файла не должно быть пустым!";
-    private static final String EMPTY_INPUT_STREAM = "Поток данных пуст!";
-    private static final String WRONG_FORMAT_FILE = "Неверная структура загружаемого файла! ";
-    private static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
-    private static final String WRONG_RNU_FORMAT = "Выбранный файл не соответствует формату rnu!";
-    private static final String WRONG_FIXED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
-    private static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
-    private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
-    private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
+    public static final String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
+    public static final String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
+    public static final String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
+    public static final String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
+    public static final String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
+    public static final String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
+    public static final String WRONG_SUBTOTAL = "Неверное итоговое значение по коду '%s' графы «%s»!";
+    public static final String IMPORT_IS_NOT_PROVIDED = "Импорт данных не предусмотрен!";
+    public static final String WRONG_DATA_PARSE = "Отсутствие значения после обработки потока данных!";
+    public static final String EMPTY_FILE_NAME = "Имя файла не должно быть пустым!";
+    public static final String EMPTY_INPUT_STREAM = "Поток данных пуст!";
+    public static final String WRONG_FORMAT_FILE = "Неверная структура загружаемого файла! ";
+    public static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
+    public static final String WRONG_RNU_FORMAT = "Выбранный файл не соответствует формату rnu!";
+    public static final String WRONG_FIXED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
+    public static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
+    public static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
+    public static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
     public static final String CHECK_DATE_PERIOD = "Строка %d: Дата по графе «%s» должна принимать значение из диапазона: %s - %s!";
     @SuppressWarnings("unused")
-    private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна.";
+    public static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна.";
     public static final String TRANSPORT_FILE_SUM_ERROR_1 = "Строка %d файла: Итоговое значение по графе «%s» (значение «%s») указано некорректно. Системой рассчитано значение «%s»";
     public static final String TRANSPORT_FILE_SUM_ERROR_2 = "Строка %d файла: Итоговое значение по графе «%s» не указано. Системой рассчитано значение «%s»";
-    private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
-    private static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
+    public static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
+    public static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
     // разделитель между идентификаторами в ключе для кеширования записей справочника
-    private static final String SEPARATOR = "_";
+    public static final String SEPARATOR = "_";
 
     /**
      * Запрещаем создавать экземляры класса
@@ -1982,27 +1982,6 @@ public final class ScriptUtils {
     }
 
     /**
-     * Интерфейс для переопределения алгоритма расчета
-     */
-    public interface CalcAliasRow {
-        DataRow<Cell> calc(int index, List<DataRow<Cell>> dataRows);
-    }
-
-    /**
-     * Интерфейс для получения строки со значениями в группе
-     */
-    public interface GroupString {
-        String getString(DataRow<Cell> row);
-    }
-
-    /**
-     * Интерфейс для проверки сумм в итоговых строках
-     */
-    public interface CheckGroupSum {
-        String check(DataRow<Cell> row1, DataRow<Cell> row2);
-    }
-
-    /**
      * Сравнить суммы из транспортного файла с посчитанными суммами и задать значения из строки тф в строку нф.
      *
      * @param totalRow строка с посчитанными суммами
@@ -2064,6 +2043,27 @@ public final class ScriptUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Интерфейс для переопределения алгоритма расчета
+     */
+    public interface CalcAliasRow {
+        DataRow<Cell> calc(int index, List<DataRow<Cell>> dataRows);
+    }
+
+    /**
+     * Интерфейс для получения строки со значениями в группе
+     */
+    public interface GroupString {
+        String getString(DataRow<Cell> row);
+    }
+
+    /**
+     * Интерфейс для проверки сумм в итоговых строках
+     */
+    public interface CheckGroupSum {
+        String check(DataRow<Cell> row1, DataRow<Cell> row2);
     }
 
     static final class SheetHandler extends DefaultHandler {
