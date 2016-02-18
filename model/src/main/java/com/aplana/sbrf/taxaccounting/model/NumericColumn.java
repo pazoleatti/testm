@@ -36,7 +36,7 @@ public class NumericColumn extends Column implements Serializable {
 	private static Formatter formatter;
 
 	public NumericColumn() {
-		setColumnType(ColumnType.NUMBER);
+		columnType = ColumnType.NUMBER;
 	}
 
 	/**

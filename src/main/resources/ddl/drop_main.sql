@@ -95,7 +95,6 @@ drop table async_task_type;
 drop table configuration_email;
 drop table tax_type;
 drop table log_clob_query;
-drop sequence seq_form_data_nnn;
 drop sequence seq_log_query;
 drop sequence seq_log_query_session;
 drop sequence seq_ref_book_vzl_history;

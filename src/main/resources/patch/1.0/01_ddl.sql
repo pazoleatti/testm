@@ -54,6 +54,15 @@ delete from ref_book_record where ref_book_id = 521;
 commit;
 
 ----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-14691: Новое событие ЖА - Изменение пути базы открытых ключей
+insert into event (id, name) values (951, 'Изменение пути базы открытых ключей');
+insert into role_event (event_id, role_id) values (951, 5);
+
+alter table log_system drop constraint log_system_chk_dcl_form;
+alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
+alter table log_system drop constraint log_system_chk_rp;
+alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951) or report_period_name is not null);
+----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14602: Заархивировать JasperPrint-отчеты декларации
 set serveroutput on size 1000000;
 

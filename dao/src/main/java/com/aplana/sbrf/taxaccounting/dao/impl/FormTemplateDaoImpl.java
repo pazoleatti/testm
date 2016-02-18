@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -15,6 +16,9 @@ import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -84,7 +88,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		}
 	}
 
-	//@Cacheable(CacheConstants.FORM_TEMPLATE)
+	@Cacheable(CacheConstants.FORM_TEMPLATE)
 	@Override
 	public FormTemplate get(int formId) {
 		if (LOG.isDebugEnabled()) {
@@ -113,8 +117,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	 * Кэш инвалидируется перед вызовом. Т.е. несмотря на результат выполнения, кэш будет сброшен.
 	 * Иначе, если версии не совпадают кэш продолжает возвращать старую версию.
 	 */
-    //@Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
-    //        @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
+    @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
+            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	@Override
 	public int save(final FormTemplate formTemplate) {
         try {
@@ -154,7 +158,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
             //http://jira.aplana.com/browse/SBRFACCTAX-11384
             final Collection<Integer> removedStyleIds = formStyleDao.saveFormStyles(formTemplate);
-            final Map<ColumnKeyEnum, Collection<Long>> columns  = columnDao.updateFormColumns(formTemplate);
+            /*final Map<ColumnKeyEnum, Collection<Long>> columns  = columnDao.updateFormColumns(formTemplate);
 
             //Очистка полей содержащих значения удаленных стилей
             if (!removedStyleIds.isEmpty()){
@@ -178,7 +182,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     );
                     LOG.info("Number of updated styles " + num);
                 }
-            }
+            }*/
 
             return formTemplateId;
         } catch (DataAccessException e){
@@ -187,7 +191,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
 	}
 
-    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, allEntries = true)
+    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, allEntries = true)
     @Override
     public int[] update(final List<FormTemplate> formTemplates) {
         try {
@@ -414,7 +418,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true)
+    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true)
     public int delete(int formTemplateId) {
         try {
             getJdbcTemplate().update("delete from form_template where id = ?", new Object[]{formTemplateId}, new int[]{Types.INTEGER});
@@ -426,7 +430,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, allEntries = true)
+    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, allEntries = true)
     public void delete(final Collection<Integer> formTemplateIds) {
         try {
             getNamedParameterJdbcTemplate().update("delete from form_template where " + SqlUtils.transformToSqlInStatement("id", formTemplateIds),
@@ -519,7 +523,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, key = "#formTemplateId")
+    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, key = "#formTemplateId")
     public int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId) {
         try {
             return getJdbcTemplate().update("update form_template set status=? where id = ?", versionStatus.getId(), formTemplateId);
@@ -727,20 +731,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	}
 
     @Override
-    public void createFDTable(final int ftId) {
-        getJdbcTemplate().call(new CallableStatementCreator() {
-            @Override
-            public CallableStatement createCallableStatement(Connection con) throws SQLException {
-                CallableStatement statement = con.prepareCall("call create_form_data_nnn(?)");
-                statement.setInt(1, ftId);
-                return statement;
-            }
-        }, new ArrayList<SqlParameter>() {{
-            add(new SqlParameter("FT_ID", ftId));
-        }});
-    }
-
-    @Override
     public void dropFDTable(int ftId) {
         getJdbcTemplate().execute(String.format("drop table form_data_%d", ftId));
     }
@@ -774,6 +764,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
+    @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
+            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
     public void updateScript(final int formTemplateId, final String script) {
         getJdbcTemplate().update("UPDATE FORM_TEMPLATE SET SCRIPT = ? WHERE ID = ?", script, formTemplateId);
     }

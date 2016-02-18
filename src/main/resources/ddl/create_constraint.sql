@@ -246,8 +246,9 @@ alter table template_changes add constraint template_changes_fk_event foreign ke
 alter table template_changes add constraint template_changes_chk_template check ((form_template_id is not null and declaration_template_id is null) or (form_template_id is null and declaration_template_id is not null));
 
 alter table log_system add constraint log_system_fk_event_id foreign key (event_id) references event(id);
-alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
-alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904) or report_period_name is not null);
+alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
+alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951) or report_period_name is not null);
+
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
 alter table log_system add constraint log_system_fk_blob_data foreign key (blob_data_id) references blob_data(id) on delete set null;
@@ -294,6 +295,11 @@ alter table log_system_report add constraint log_system_report_fk_sec_user forei
 alter table log_system_report add constraint log_system_report_chk_type check (type in (0, 1));
 alter table log_system_report add constraint log_system_report_unq_sec_user unique(sec_user_id);
 
+ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_pk PRIMARY KEY (id);
+ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_fk_form_data FOREIGN KEY(form_data_id) REFERENCES form_data(id) ON DELETE CASCADE;
+ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_unq UNIQUE (form_data_id, temporary, manual, ord);
+ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_chk_temp CHECK (temporary IN (0, 1));
+ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_chk_manual CHECK (manual IN (0, 1));
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);

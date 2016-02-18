@@ -9,11 +9,17 @@ package com.aplana.sbrf.taxaccounting.model;
 
 public enum ColumnType {
 
+	/** Автонумеруемая графа */
 	AUTO ('A', "Автонумеруемая графа"),
+	/** Дата */
 	DATE ('D', "Дата"),
+	/** Число */
 	NUMBER ('N', "Число"),
+	/** Справочник */
 	REFBOOK ('R', "Справочник"),
+	/** Зависимая графа */
 	REFERENCE ('R', "Зависимая графа"),
+	/** Строка */
 	STRING ('S', "Строка");
 
 	private char code;

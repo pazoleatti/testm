@@ -13,7 +13,7 @@ public class DateColumn extends Column implements Serializable {
 	private Integer formatId = Formats.NONE.getId();
 
 	public DateColumn() {
-		setColumnType(ColumnType.DATE);
+		columnType = ColumnType.DATE;
 	}
 
 	public Integer getFormatId() {

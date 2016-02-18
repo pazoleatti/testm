@@ -28,7 +28,7 @@ public class RefBookColumn extends FilterColumn {
 	};
 
     public RefBookColumn() {
-		setColumnType(ColumnType.REFBOOK);
+		columnType = ColumnType.REFBOOK;
         searchEnabled = true;
     }
 

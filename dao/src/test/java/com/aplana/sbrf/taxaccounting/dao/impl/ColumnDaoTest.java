@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
-import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,13 +14,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ColumnDaoTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class ColumnDaoTest {
+public class ColumnDaoTest extends AbstractDao {
 
     @Autowired
     private ColumnDao columnDao;
@@ -38,45 +39,290 @@ public class ColumnDaoTest {
     }
 
     @Test
-    public void getFormColumns() {
-        //Given FORM_ID_FOR_TEST, NUMBER_OF_STYLES
-
-        //When
+    public void getFormColumnsTest() {
         List<Column> listOfColumnsInDb = columnDao.getFormColumns(FORM_ID_FOR_TEST);
+        assertEquals(NUMBER_OF_COLUMNS, listOfColumnsInDb.size());
 
-        //Then
-        Assert.assertEquals(NUMBER_OF_COLUMNS, listOfColumnsInDb.size());
+        assertEquals(Integer.valueOf(1), listOfColumnsInDb.get(FIRST_COLUMN).getId());
+        assertEquals("Строковый столбец", listOfColumnsInDb.get(FIRST_COLUMN).getName());
+        assertEquals(1, listOfColumnsInDb.get(FIRST_COLUMN).getOrder());
+        assertEquals("stringColumn", listOfColumnsInDb.get(FIRST_COLUMN).getAlias());
+        assertEquals(500, ((StringColumn) listOfColumnsInDb.get(FIRST_COLUMN)).getMaxLength());
+        assertEquals(true, listOfColumnsInDb.get(FIRST_COLUMN).isChecking());
 
-        Assert.assertEquals(Integer.valueOf(1), listOfColumnsInDb.get(FIRST_COLUMN).getId());
-        Assert.assertEquals("Строковый столбец", listOfColumnsInDb.get(FIRST_COLUMN).getName());
-        Assert.assertEquals(1, listOfColumnsInDb.get(FIRST_COLUMN).getOrder());
-        Assert.assertEquals("stringColumn", listOfColumnsInDb.get(FIRST_COLUMN).getAlias());
-        Assert.assertEquals(500, ((StringColumn) listOfColumnsInDb.get(FIRST_COLUMN)).getMaxLength());
-        Assert.assertEquals(true, listOfColumnsInDb.get(FIRST_COLUMN).isChecking());
+        assertEquals(Integer.valueOf(2), listOfColumnsInDb.get(SECOND_COLUMN).getId());
+        assertEquals("Числовой столбец", listOfColumnsInDb.get(SECOND_COLUMN).getName());
+        assertEquals(2, listOfColumnsInDb.get(SECOND_COLUMN).getOrder());
+        assertEquals("numericColumn", listOfColumnsInDb.get(SECOND_COLUMN).getAlias());
+        assertEquals(false, listOfColumnsInDb.get(SECOND_COLUMN).isChecking());
 
-        Assert.assertEquals(Integer.valueOf(2), listOfColumnsInDb.get(SECOND_COLUMN).getId());
-        Assert.assertEquals("Числовой столбец", listOfColumnsInDb.get(SECOND_COLUMN).getName());
-        Assert.assertEquals(2, listOfColumnsInDb.get(SECOND_COLUMN).getOrder());
-        Assert.assertEquals("numericColumn", listOfColumnsInDb.get(SECOND_COLUMN).getAlias());
-        Assert.assertEquals(false, listOfColumnsInDb.get(SECOND_COLUMN).isChecking());
+        assertEquals(Integer.valueOf(3), listOfColumnsInDb.get(THIRD_COLUMN).getId());
+        assertEquals("Дата-столбец", listOfColumnsInDb.get(THIRD_COLUMN).getName());
+        assertEquals(3, listOfColumnsInDb.get(THIRD_COLUMN).getOrder());
+		assertEquals(2, listOfColumnsInDb.get(THIRD_COLUMN).getDataOrder().intValue());
+		assertEquals("dateColumn", listOfColumnsInDb.get(THIRD_COLUMN).getAlias());
+        assertEquals(false, listOfColumnsInDb.get(SECOND_COLUMN).isChecking());
 
-        Assert.assertEquals(Integer.valueOf(3), listOfColumnsInDb.get(THIRD_COLUMN).getId());
-        Assert.assertEquals("Дата-столбец", listOfColumnsInDb.get(THIRD_COLUMN).getName());
-        Assert.assertEquals(3, listOfColumnsInDb.get(THIRD_COLUMN).getOrder());
-        Assert.assertEquals("dateColumn", listOfColumnsInDb.get(THIRD_COLUMN).getAlias());
-        Assert.assertEquals(false, listOfColumnsInDb.get(SECOND_COLUMN).isChecking());
-
-        Assert.assertEquals(Integer.valueOf(4), listOfColumnsInDb.get(FOURTH_COLUMN).getId());
-        Assert.assertEquals("Автонумеруемая графа", listOfColumnsInDb.get(FOURTH_COLUMN).getName());
-        Assert.assertEquals(4, listOfColumnsInDb.get(FOURTH_COLUMN).getOrder());
-        Assert.assertEquals("autoNumerationColumn", listOfColumnsInDb.get(FOURTH_COLUMN).getAlias());
-        Assert.assertEquals(false, listOfColumnsInDb.get(FOURTH_COLUMN).isChecking());
+        assertEquals(Integer.valueOf(4), listOfColumnsInDb.get(FOURTH_COLUMN).getId());
+        assertEquals("Автонумеруемая графа", listOfColumnsInDb.get(FOURTH_COLUMN).getName());
+        assertEquals(4, listOfColumnsInDb.get(FOURTH_COLUMN).getOrder());
+        assertEquals("autoNumerationColumn", listOfColumnsInDb.get(FOURTH_COLUMN).getAlias());
+        assertEquals(false, listOfColumnsInDb.get(FOURTH_COLUMN).isChecking());
         if (ColumnType.AUTO.equals(listOfColumnsInDb.get(FOURTH_COLUMN).getColumnType())) {
-            Assert.assertEquals(1, ((AutoNumerationColumn)listOfColumnsInDb.get(FOURTH_COLUMN)).getNumerationType().getId());
+            assertEquals(1, ((AutoNumerationColumn)listOfColumnsInDb.get(FOURTH_COLUMN)).getNumerationType().getId());
         }
     }
 
-    //@Test
+    @Test
+	public void calculateNewDataOrderTest() {
+		List<Column> oldColumns = new ArrayList<Column>();
+		for (int i = 0; i < 5; i++) {
+			Column column = new StringColumn();
+			column.setDataOrder(i);
+			oldColumns.add(column);
+		}
+		List<Column> newColumns = new ArrayList<Column>();
+		for (int i = 0; i < 3; i++) {
+			newColumns.add(new StringColumn());
+		}
+		// 1 случай
+		ColumnDaoImpl.calculateNewDataOrder(newColumns, oldColumns);
+		assertEquals(5, newColumns.get(0).getDataOrder().intValue());
+		assertEquals(6, newColumns.get(1).getDataOrder().intValue());
+		assertEquals(7, newColumns.get(2).getDataOrder().intValue());
+		// 2 случай
+		oldColumns.get(1).setDataOrder(6);
+		ColumnDaoImpl.calculateNewDataOrder(newColumns, oldColumns);
+		assertEquals(1, newColumns.get(0).getDataOrder().intValue());
+		assertEquals(5, newColumns.get(1).getDataOrder().intValue());
+		assertEquals(7, newColumns.get(2).getDataOrder().intValue());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void calculateNewDataOrderTest2() {
+		List<Column> oldColumns = new ArrayList<Column>();
+		// забиваем до предела
+		for (int i = 0; i <= Column.MAX_DATA_ORDER; i++) {
+			Column column = new StringColumn();
+			column.setDataOrder(i);
+			oldColumns.add(column);
+		}
+		List<Column> newColumns = new ArrayList<Column>();
+		newColumns.add(new StringColumn());
+		ColumnDaoImpl.calculateNewDataOrder(newColumns, oldColumns);
+	}
+
+	private FormTemplate getFormTemplate() {
+		List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
+		FormTemplate formTemplate = new FormTemplate();
+		formTemplate.setId(FORM_ID_FOR_TEST);
+		formTemplate.getColumns().addAll(columnList);
+		return formTemplate;
+	}
+
+	@Test
+	public void createFormColumnsTest() {
+		FormTemplate formTemplate = getFormTemplate();
+		int columnCount = formTemplate.getColumns().size();
+		List<Column> newColumns = new ArrayList<Column>();
+
+		StringColumn stringColumn = new StringColumn();
+		stringColumn.setName("строка");
+		stringColumn.setMaxLength(10);
+		stringColumn.setAlias("stringColumn2");
+		stringColumn.setOrder(6);
+		newColumns.add(stringColumn);
+
+		NumericColumn numericColumn = new NumericColumn();
+		numericColumn.setName("число");
+		numericColumn.setMaxLength(10);
+		numericColumn.setPrecision(2);
+		numericColumn.setOrder(5);
+		numericColumn.setAlias("numericColumn2");
+		newColumns.add(numericColumn);
+
+		ReferenceColumn referenceColumn = new ReferenceColumn();
+		referenceColumn.setName("зависимая");
+		referenceColumn.setParentAlias("stringColumn");
+		referenceColumn.setRefBookAttributeId(5);
+		referenceColumn.setAlias("referenceColumn2");
+		referenceColumn.setName("Зависимая графа");
+		referenceColumn.setOrder(7);
+		referenceColumn.setDataOrder(referenceColumn.getOrder() - 1);
+		referenceColumn.setChecking(false);
+		newColumns.add(referenceColumn);
+
+		ColumnDaoImpl.calculateNewDataOrder(newColumns, formTemplate.getColumns());
+		assertEquals(4, stringColumn.getDataOrder().intValue());
+		assertEquals(5, numericColumn.getDataOrder().intValue());
+		assertEquals(6, referenceColumn.getDataOrder().intValue());
+
+		assertEquals(":)", getJdbcTemplate().queryForObject("SELECT c4 FROM form_data_row WHERE id = 5", String.class));
+
+		((ColumnDaoImpl) columnDao).createFormColumns(newColumns, formTemplate);
+		List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
+		assertEquals("numericColumn2", columnList.get(columnCount).getAlias());
+		assertEquals("stringColumn2", columnList.get(columnCount + 1).getAlias());
+
+		assertNull(getJdbcTemplate().queryForObject("SELECT c4 FROM form_data_row WHERE id = 5", String.class));
+	}
+
+	@Test
+	public void setReferenceParentIdTest() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<Column> newColumns = new ArrayList<Column>();
+
+		NumericColumn numericColumn = new NumericColumn();
+		numericColumn.setName("число");
+		numericColumn.setMaxLength(10);
+		numericColumn.setPrecision(2);
+		numericColumn.setOrder(5);
+		numericColumn.setAlias("numericColumn2");
+		newColumns.add(numericColumn);
+
+		ReferenceColumn referenceColumn = new ReferenceColumn();
+		referenceColumn.setName("зависимая");
+		referenceColumn.setParentAlias("stringColumn");
+		referenceColumn.setRefBookAttributeId(5);
+		referenceColumn.setAlias("referenceColumn2");
+		referenceColumn.setName("Зависимая графа");
+		referenceColumn.setOrder(6);
+		referenceColumn.setDataOrder(referenceColumn.getOrder() - 1);
+		referenceColumn.setChecking(false);
+		newColumns.add(referenceColumn);
+
+		((ColumnDaoImpl) columnDao).setReferenceParentId(formTemplate, newColumns);
+		assertEquals(1, ((ReferenceColumn) newColumns.get(1)).getParentId());
+	}
+
+	@Test
+	public void deleteFormColumnsTest() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<String> removeColumns = new ArrayList<String>();
+		removeColumns.add(formTemplate.getColumn("numericColumn").getAlias());
+		removeColumns.add(formTemplate.getColumn("dateColumn").getAlias());
+
+		assertEquals("50", getJdbcTemplate().queryForObject("SELECT c1 FROM form_data_row WHERE id = 5", String.class));
+
+		((ColumnDaoImpl) columnDao).deleteFormColumns(removeColumns, formTemplate);
+
+		List<Column> columns = columnDao.getFormColumns(formTemplate.getId());
+		assertEquals(2, columns.size());
+		assertEquals("stringColumn", columns.get(0).getAlias());
+		assertEquals("autoNumerationColumn", columns.get(1).getAlias());
+
+		assertNull(getJdbcTemplate().queryForObject("SELECT c1 FROM form_data_row WHERE id = 5", String.class));
+		assertNull(getJdbcTemplate().queryForObject("SELECT c2 FROM form_data_row WHERE id = 5", String.class));
+	}
+
+	@Test
+	public void clearTypeChangedColumnsTest() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<Column> columns = formTemplate.getColumns();
+		// меняем тип графы
+		String alias = "stringColumn";
+		columns.remove(formTemplate.getColumn(alias));
+		NumericColumn numericColumn = new NumericColumn();
+		numericColumn.setName("число");
+		numericColumn.setMaxLength(10);
+		numericColumn.setPrecision(2);
+		numericColumn.setOrder(5);
+		numericColumn.setDataOrder(4);
+		numericColumn.setAlias(alias);
+		columns.add(numericColumn);
+
+		assertEquals("qwerty", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertEquals(4, formTemplate.getColumn(alias).getDataOrder().intValue());
+		((ColumnDaoImpl) columnDao).clearTypeChangedColumns(formTemplate);
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		// dataOrder должно поменяться на то значение, которые было в удаляемой графе с таким же алиасом
+		assertEquals(0, formTemplate.getColumn(alias).getDataOrder().intValue());
+	}
+
+	@Test
+	public void deleteColumnDataTest() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<Integer> dataOrders = new ArrayList<Integer>();
+		dataOrders.add(0);
+		dataOrders.add(3);
+
+		assertEquals("qwerty", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertEquals("sum", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
+		((ColumnDaoImpl) columnDao).deleteColumnData(formTemplate, dataOrders);
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
+	}
+
+	@Test
+	public void updateFormColumnsTest() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<Column> oldColumns = new ArrayList<Column>();
+		// меняем тип графы
+		NumericColumn numericColumn = new NumericColumn();
+		numericColumn.setId(12312);
+		numericColumn.setName("число");
+		numericColumn.setMaxLength(10);
+		numericColumn.setPrecision(2);
+		numericColumn.setOrder(1);
+		numericColumn.setDataOrder(0);
+		numericColumn.setAlias("stringColumn");
+		oldColumns.add(numericColumn);
+
+		List<Column> columns = formTemplate.getColumns();
+		columns.remove(formTemplate.getColumn("stringColumn"));
+		columns.add(numericColumn);
+		oldColumns.add(formTemplate.getColumn("numericColumn"));
+		((NumericColumn) oldColumns.get(1)).setMaxLength(15);
+
+		assertEquals("qwerty", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertEquals("sum", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
+
+		((ColumnDaoImpl) columnDao).updateFormColumns(oldColumns, formTemplate);
+
+		columns = columnDao.getFormColumns(formTemplate.getId());
+		assertEquals("stringColumn", columns.get(0).getAlias());
+		assertEquals(ColumnType.NUMBER, columns.get(0).getColumnType());
+		assertEquals("numericColumn", columns.get(1).getAlias());
+		assertEquals(15, ((NumericColumn) columns.get(1)).getMaxLength());
+
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
+	}
+
+	@Test
+	public void updateFormColumnsTest2() {
+		FormTemplate formTemplate = getFormTemplate();
+		List<Column> columns = formTemplate.getColumns();
+		// меняем тип графы
+		columns.remove(formTemplate.getColumn("stringColumn"));
+		NumericColumn numericColumn = new NumericColumn();
+		numericColumn.setId(43623);
+		numericColumn.setName("число");
+		numericColumn.setMaxLength(10);
+		numericColumn.setPrecision(2);
+		numericColumn.setOrder(1);
+		numericColumn.setDataOrder(0);
+		numericColumn.setAlias("stringColumn");
+		columns.add(numericColumn);
+
+		((NumericColumn) formTemplate.getColumn("numericColumn")).setMaxLength(15);
+
+		assertEquals("qwerty", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertEquals("sum", getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
+
+		columnDao.updateFormColumns(formTemplate);
+
+		columns = columnDao.getFormColumns(formTemplate.getId());
+		assertEquals(ColumnType.NUMBER, columns.get(0).getColumnType());
+		assertEquals("numericColumn", columns.get(0).getAlias());
+		assertEquals(1, ((DateColumn) columns.get(1)).getFormatId().intValue());
+		assertEquals("dateColumn", columns.get(1).getAlias());
+
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 8", String.class));
+		assertNull(getJdbcTemplate().queryForObject("SELECT c0 FROM form_data_row WHERE id = 10", String.class));
+	}
+
+	//@Test
     public void saveFormColumns1Test() {
         //Given FORM_ID_FOR_TEST
         List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
@@ -85,6 +331,7 @@ public class ColumnDaoTest {
         newColumn.setAlias("newColumn");
         newColumn.setName("Новый столбец");
         newColumn.setOrder(5);
+		newColumn.setDataOrder(newColumn.getOrder() - 1);
         newColumn.setMaxLength(100);
         newColumn.setChecking(false);
         columnList.add(newColumn);
@@ -101,12 +348,12 @@ public class ColumnDaoTest {
 
         newColumn = (StringColumn) columnList.get(4);
 
-        Assert.assertEquals(5, columnList.size());
-        Assert.assertEquals("newColumn", newColumn.getAlias());
-        Assert.assertEquals("Новый столбец", newColumn.getName());
-        Assert.assertEquals(5, newColumn.getOrder());
-        Assert.assertEquals(100, newColumn.getMaxLength());
-        Assert.assertEquals(false, newColumn.isChecking());
+        assertEquals(5, columnList.size());
+        assertEquals("newColumn", newColumn.getAlias());
+        assertEquals("Новый столбец", newColumn.getName());
+        assertEquals(5, newColumn.getOrder());
+        assertEquals(100, newColumn.getMaxLength());
+        assertEquals(false, newColumn.isChecking());
     }
 
     @Test
@@ -119,6 +366,7 @@ public class ColumnDaoTest {
         newColumn.setAlias("newColumn");
         newColumn.setName("Новый столбец");
         newColumn.setOrder(5);
+		newColumn.setDataOrder(newColumn.getOrder() - 1);
         newColumn.setMaxLength(100);
         newColumn.setChecking(false);
         columnList.add(newColumn);
@@ -132,7 +380,7 @@ public class ColumnDaoTest {
 
         //Then
         columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
-        Assert.assertEquals(4, columnList.size());
+        assertEquals(4, columnList.size());
     }
 
     //@Test
@@ -145,6 +393,7 @@ public class ColumnDaoTest {
         refBookColumn.setAlias("refBookColumn");
         refBookColumn.setName("Справочная графа");
         refBookColumn.setOrder(4);
+		refBookColumn.setDataOrder(refBookColumn.getOrder() - 1);
         refBookColumn.setChecking(false);
         columnList.add(refBookColumn);
 
@@ -154,6 +403,7 @@ public class ColumnDaoTest {
         referenceColumn.setAlias("referenceColumn");
         referenceColumn.setName("Зависимая графа");
         referenceColumn.setOrder(5);
+		referenceColumn.setDataOrder(referenceColumn.getOrder() - 1);
         referenceColumn.setChecking(false);
         columnList.add(referenceColumn);
 
@@ -167,12 +417,12 @@ public class ColumnDaoTest {
 
         referenceColumn = (ReferenceColumn) columnList.get(5);
 
-        Assert.assertEquals(6, columnList.size());
-        Assert.assertEquals("referenceColumn", referenceColumn.getAlias());
-        Assert.assertEquals("Зависимая графа", referenceColumn.getName());
-        Assert.assertEquals(6, referenceColumn.getOrder());
-        Assert.assertEquals(false, referenceColumn.isChecking());
-        Assert.assertEquals(1, referenceColumn.getParentId());
-        Assert.assertEquals(5, referenceColumn.getRefBookAttributeId());
+        assertEquals(6, columnList.size());
+        assertEquals("referenceColumn", referenceColumn.getAlias());
+        assertEquals("Зависимая графа", referenceColumn.getName());
+        assertEquals(6, referenceColumn.getOrder());
+        assertEquals(false, referenceColumn.isChecking());
+        assertEquals(1, referenceColumn.getParentId());
+        assertEquals(5, referenceColumn.getRefBookAttributeId());
     }
 }

@@ -40,9 +40,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private static final Log LOG = LogFactory.getLog(DataRowDaoImpl.class);
 	private static final byte COL_VALUE_IDX = 0;
 	private static final byte COL_STYLE_IDX = 1;
-	private static final byte COL_EDIT_IDX = 2;
-	private static final byte COL_COLSPAN_IDX = 3;
-	private static final byte COL_ROWSPAN_IDX = 4;
 
 	@Autowired
 	private BDUtils bdUtils;
@@ -98,12 +95,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				"with fc as (select row_number() over (order by ord) as pos, form_template_id, id, ord, type, numeration_row, precision, parent_column_id from form_column fc where form_template_id = :ftId order by ord)\n" +
 				"select fc.pos, fc.form_template_id, case when fc.pos = 1 then '' else ' union all ' end \n" +
 				"       || 'select ord as row_index, '||fc.id ||' as column_id, '\n" +
-				"       || case when type = 'S' then 'to_char(c'||fc.id||') as raw_value, '\n" +
-				"               when type = 'N' then case when fc.precision is null or fc.precision = 0 then 'to_char(c'||fc.id||') as raw_value, '\n" +
-				"                 else 'ltrim(to_char(c'||fc.id||',substr(''99999999999999990.0000000000'',1,18+'||fc.precision||'))) as raw_value, ' end\n" +
+				"       || case when type = 'S' then 'to_char(c'||fc.data_ord||') as raw_value, '\n" +
+				"               when type = 'N' then case when fc.precision is null or fc.precision = 0 then 'to_char(c'||fc.data_ord||') as raw_value, '\n" +
+				"                 else 'ltrim(to_char(c'||fc.data_ord||',substr(''99999999999999990.0000000000'',1,18+'||fc.precision||'))) as raw_value, ' end\n" +
 				"               when type = 'A' then 'to_char((row_number() over(order by ord)) + ' || case when fc.NUMERATION_ROW=0 then 0 else (select number_previous_row from form_data where id = :fdId) end ||') as raw_value,'  \n" +
 				"               else ' null as raw_value, ' end\n" +
-				"				|| case when (type = 'R' and parent_column_id is null) then 'c'||fc.id||' as reference_id ' \n" +
+				"				|| case when (type = 'R' and parent_column_id is null) then 'c'||fc.data_ord||' as reference_id ' \n" +
 				"               	when (type = 'R' and parent_column_id is not null) then 'c'||fc.parent_column_id||' as reference_id '\n" +
 				"               	else ' null as reference_id ' end " +
 				"       || ' from t ' as row_query\n" +
@@ -125,7 +122,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						"  SELECT row_index, fc.ord AS column_index, coalesce(raw_value, d.string_value, o.string_value, z.string_value) AS true_val\n" +
 						"  FROM (\n" +
 						"    WITH t AS (\n" +
-						"        SELECT * FROM form_data_" + formTemplateId + " fd WHERE fd.form_data_id = :fdId and fd.temporary = :temporary and fd.manual = :manual)\n" +
+						"        SELECT * FROM form_data_row fd WHERE fd.form_data_id = :fdId and fd.temporary = :temporary and fd.manual = :manual)\n" +
 						subSql +
 						"        ) hell\n" +
 						"  INNER JOIN form_column fc ON fc.id = hell.column_id\n" +
@@ -176,8 +173,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		removeRows(formData);
 		// Копирование данных из постоянного среза источника в постоянный срез приемника
 		Map<Integer, String[]> columnNames = DataRowMapper.getColumnNames(formData);
-		StringBuilder sql = new StringBuilder("INSERT INTO form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("INSERT INTO form_data_row");
 		sql.append(" (id, form_data_id, temporary, manual, ord, alias");
 		for (Column column : formData.getFormColumns()) {
 			sql.append('\n');
@@ -185,15 +181,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				sql.append(", ").append(name);
 			}
 		}
-		sql.append(")\nSELECT seq_form_data_nnn.nextval, :form_data_id, :temporary, manual, ord, alias");
+		sql.append(")\nSELECT seq_form_data_row.nextval, :form_data_id, :temporary, manual, ord, alias");
 		for (Column column : formData.getFormColumns()) {
 			sql.append('\n');
 			for (String name : columnNames.get(column.getId())) {
 				sql.append(", ").append(name);
 			}
 		}
-		sql.append("\nFROM form_data_");
-		sql.append(formData.getFormTemplateId());
+		sql.append("\nFROM form_data_row");
 		sql.append("\nWHERE form_data_id = :form_data_source_id AND temporary = :temporary_source AND manual = :manual");
 
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -218,8 +213,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// сдвигаем все строки, чтобы обойти ограничение уникального индекса при сортировке
 		shiftRows(formData, new DataRowRange(1, rows.size()));
 		// обновляем данные в бд
-		StringBuilder sql = new StringBuilder("UPDATE form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("UPDATE form_data_row");
 		sql.append(" SET ord = :ord WHERE id = :id");
 
 		List<Map<String, Object>> params = new ArrayList<Map<String, Object>>(rows.size());
@@ -241,8 +235,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	@Override
 	public boolean isDataRowsCountChanged(FormData formData) {
 		// сравниваем кол-во реальных строк с числом, хранящимся в form_data.number_current_row
-		StringBuilder sql = new StringBuilder("SELECT (SELECT COUNT(*) FROM form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("SELECT (SELECT COUNT(*) FROM form_data_row");
 		sql.append(" WHERE form_data_id = :form_data_id AND (alias IS NULL OR alias LIKE '%\n");
 		sql.append(DataRowMapper.ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%')");
 		sql.append(" AND temporary = :temporary AND manual = :manual");
@@ -279,8 +272,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// вставляем новые в образовавшийся промежуток
 		Map<Integer, String[]> columnNames = DataRowMapper.getColumnNames(formData);
 
-		StringBuilder sql = new StringBuilder("INSERT INTO form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("INSERT INTO form_data_row");
 		sql.append(" (id, form_data_id, temporary, manual, ord, alias");
 		for (Column column : formData.getFormColumns()) {
 			sql.append('\n');
@@ -315,11 +307,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			for (Column column : formData.getFormColumns()) {
 				String[] names = columnNames.get(column.getId());
 				Cell cell = row.getCell(column.getAlias());
-				values.put(names[COL_VALUE_IDX], cell.getValue());
-				values.put(names[COL_STYLE_IDX], cell.getStyle() == null ? null : cell.getStyle().getId());
-				values.put(names[COL_EDIT_IDX], cell.isEditable() ? 1 : 0);
-				values.put(names[COL_COLSPAN_IDX], cell.getColSpan());
-				values.put(names[COL_ROWSPAN_IDX], cell.getRowSpan());
+				values.put(names[COL_VALUE_IDX], DataRowMapper.formatCellValue(cell));
+				values.put(names[COL_STYLE_IDX], DataRowMapper.formatCellStyle(cell));
 			}
 			params.add(values);
 		}
@@ -348,8 +337,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public void updateRows(FormData formData, Collection<DataRow<Cell>> rows) {
-		StringBuilder sql = new StringBuilder("UPDATE form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("UPDATE form_data_row");
 		sql.append(" SET alias = :alias");
 
 		Map<Integer, String[]> columnNames = DataRowMapper.getColumnNames(formData);
@@ -372,11 +360,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			for (Column column : formData.getFormColumns()) {
 				String[] names = columnNames.get(column.getId());
 				Cell cell = row.getCell(column.getAlias());
-				values.put(names[COL_VALUE_IDX], cell.getValue());
-				values.put(names[COL_STYLE_IDX], cell.getStyle() == null ? null : cell.getStyle().getId());
-				values.put(names[COL_EDIT_IDX], cell.isEditable() ? 1 : 0);
-				values.put(names[COL_COLSPAN_IDX], cell.getColSpan());
-				values.put(names[COL_ROWSPAN_IDX], cell.getRowSpan());
+				values.put(names[COL_VALUE_IDX], DataRowMapper.formatCellValue(cell));
+				values.put(names[COL_STYLE_IDX], DataRowMapper.formatCellStyle(cell));
 			}
 			params.add(values);
 		}
@@ -386,13 +371,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params.toArray(new Map[0]));
 	}
 
+	private static final String DELETE_BY_ROW_ID = "DELETE FROM form_data_row WHERE id = :id";
 	@Override
 	public void removeRows(FormData formData, final List<DataRow<Cell>> rows) {
 		// примечание: строки надо удалять так, чтобы не нарушалась последовательность ORD = 1, 2, 3, ...
-		StringBuilder sql = new StringBuilder("DELETE FROM form_data_");
-		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE id = :id");
-
 		// формируем список параметров для батча
 		List<Map<String, Long>> params = new ArrayList<Map<String, Long>>(rows.size());
 		for (DataRow<Cell> row : rows) {
@@ -401,9 +383,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			params.add(values);
 		}
 		if (LOG.isTraceEnabled()) {
-			LOG.trace(sql.toString());
+			LOG.trace(DELETE_BY_ROW_ID.toString());
 		}
-		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params.toArray(new Map[0]));
+		getNamedParameterJdbcTemplate().batchUpdate(DELETE_BY_ROW_ID.toString().intern(), params.toArray(new Map[0]));
 		reorderRows(formData);
 	}
 
@@ -413,16 +395,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param formData
 	 */
 	private void reorderRows(FormData formData) {
-		StringBuilder sql = new StringBuilder("MERGE INTO form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("MERGE INTO form_data_row");
 		sql.append(" t USING\n(SELECT id, ROW_NUMBER() ");
 		if (isSupportOver()) {
 			sql.append("OVER (ORDER BY ord)");
 		} else {
 			sql.append("OVER ()");
 		}
-		sql.append(" AS neword FROM form_data_");
-		sql.append(formData.getFormTemplateId());
+		sql.append(" AS neword FROM form_data_row");
 		sql.append("\nWHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual) s");
 		sql.append("\nON (t.id = s.id) WHEN MATCHED THEN UPDATE SET t.ord = s.neword");
 
@@ -449,8 +429,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// удаляем постоянный срез
 		removeRowsInternal(formData, DataRowType.SAVED);
 		// переносим данные из временного среза - восстановление контрольной точки
-		StringBuilder sql = new StringBuilder("UPDATE form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("UPDATE form_data_row");
 		sql.append(" SET temporary = :temporary WHERE form_data_id = :form_data_id AND manual = :manual");
 
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -474,14 +453,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// удаляет данные
 		removeRowsInternal(formData, DataRowType.SAVED);
 		// формируем запрос на копирование среза
-		StringBuilder sql = new StringBuilder("INSERT INTO form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("INSERT INTO form_data_row");
 		sql.append(" (id, form_data_id, temporary, manual, ord, alias");
 		DataRowMapper.getColumnNamesString(formData, sql);
-		sql.append(") \nSELECT seq_form_data_nnn.nextval, form_data_id, :temporary AS temporary, :manual AS manual, ord, alias");
+		sql.append(") \nSELECT seq_form_data_row.nextval, form_data_id, :temporary AS temporary, :manual AS manual, ord, alias");
 		DataRowMapper.getColumnNamesString(formData, sql);
-		sql.append("\nFROM form_data_");
-		sql.append(formData.getFormTemplateId());
+		sql.append("\nFROM form_data_row");
 		sql.append("\nWHERE form_data_id = :form_data_id AND temporary = :temporary_src");
 
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -501,14 +478,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	public void createCheckPoint(FormData formData) {
 		removeRowsInternal(formData, DataRowType.TEMP);
 		// формируем запрос на копирование среза
-		StringBuilder sql = new StringBuilder("INSERT INTO form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("INSERT INTO form_data_row");
 		sql.append(" (id, form_data_id, temporary, manual, ord, alias");
 		DataRowMapper.getColumnNamesString(formData, sql);
-		sql.append(") \nSELECT seq_form_data_nnn.nextval, form_data_id, :temporary AS temporary, manual, ord, alias");
+		sql.append(") \nSELECT seq_form_data_row.nextval, form_data_id, :temporary AS temporary, manual, ord, alias");
 		DataRowMapper.getColumnNamesString(formData, sql);
-		sql.append("\nFROM form_data_");
-		sql.append(formData.getFormTemplateId());
+		sql.append("\nFROM form_data_row");
 		sql.append("\nWHERE form_data_id = :form_data_id AND manual = :manual");
 
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -545,8 +520,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public int getAutoNumerationRowCount(FormData formData) {
-		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_row");
 		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND (alias IS NULL");
 		sql.append(" OR alias LIKE '%").append(DataRowMapper.ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%')");
 
@@ -590,8 +564,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @return
 	 */
 	private int getSizeInternal(FormData formData, DataRowType dataRowType) {
-		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_row");
 		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual");
 
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -613,8 +586,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public void removeAllManualRows(FormData formData) {
-		StringBuilder sql = new StringBuilder("DELETE FROM form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("DELETE FROM form_data_row");
 		sql.append(" WHERE form_data_id = :form_data_id AND manual = :manual");
 
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -641,8 +613,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			throw new IllegalArgumentException("Value of argument 'isTemporary' is incorrect");
 		}
 
-		StringBuilder sql = new StringBuilder("DELETE FROM form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("DELETE FROM form_data_row");
 		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary");
 		if (dataRowType == DataRowType.SAVED) {
 			sql.append(" AND manual = :manual");
@@ -664,8 +635,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public void removeRows(FormData formData, DataRowRange range) {
-		StringBuilder sql = new StringBuilder("DELETE FROM form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("DELETE FROM form_data_row");
 		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND ord BETWEEN :indexFrom AND :indexTo");
 
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -691,8 +661,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @return количество смещенных строк
 	 */
 	private int shiftRows(FormData formData, DataRowRange range) {
-		StringBuilder sql = new StringBuilder("UPDATE form_data_");
-		sql.append(formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("UPDATE form_data_row");
 		sql.append(" SET ord = ord + :shift WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND ord >= :offset");
 
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -720,7 +689,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		List<String> names = new ArrayList<String>();
 		for (Column column : formData.getFormColumns()) {
 			if (column.getColumnType() == ColumnType.REFBOOK) {
-				names.add("c" + column.getId());
+				names.add("c" + column.getDataOrder());
 			}
 		}
 		// если справочных граф нет, то выходим - делать нечего
@@ -734,14 +703,17 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		for (int i = 1; i < names.size(); i++) {
 			withSql.append(", ").append(names.get(i));
 		}
-		withSql.append(" FROM form_data_").append(formData.getFormTemplateId());
+		withSql.append(" FROM form_data_row");
 		withSql.append(" WHERE temporary = :temporary AND form_data_id = :form_data_id), DATA AS(\n");
-		withSql.append("SELECT DISTINCT '").append(names.get(0)).append("' AS column_name, ").append(names.get(0)).append(" AS value FROM TAB");
+
+		withSql.append("SELECT DISTINCT '").append(names.get(0)).append("' AS column_name, TO_NUMBER(").append(names.get(0)).append(") AS value FROM TAB");
 		for (int i = 1; i < names.size(); i++) {
-			withSql.append(" UNION \n SELECT DISTINCT '").append(names.get(i)).append("' AS column_name, ").append(names.get(i)).append(" AS value FROM TAB");
+			withSql.append(" UNION \n SELECT DISTINCT '").append(names.get(i)).append("' AS column_name, TO_NUMBER(").append(names.get(i)).append(") AS value FROM TAB");
 		}
+
 		withSql.append(")\nSELECT DISTINCT rba.ref_book_id, data.value AS record_id FROM data\n");
-		withSql.append("JOIN form_column fc ON('c'||fc.id = data.column_name AND fc.parent_column_id IS NULL)\n");
+		withSql.append("JOIN form_column fc ON('c'||fc.data_ord = data.column_name AND fc.parent_column_id IS NULL ");
+		withSql.append("AND form_template_id = :form_template_id)\n");
 		withSql.append("JOIN ref_book_attribute rba ON rba.id = fc.attribute_id\n");
 		withSql.append("WHERE data.value IS NOT NULL)");
 		// запрос на удаление лишних ссылок
@@ -757,6 +729,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
 		params.put("temporary", DataRowType.SAVED.getCode());
+		params.put("form_template_id", formData.getFormTemplateId());
+
 
 		if (LOG.isTraceEnabled()) {
 			LOG.trace(params);

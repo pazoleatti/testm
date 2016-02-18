@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
@@ -13,6 +14,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -74,7 +78,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	}
 
 	@Override
-	//@Cacheable(CacheConstants.DECLARATION_TEMPLATE)
+	@Cacheable(CacheConstants.DECLARATION_TEMPLATE)
 	public DeclarationTemplate get(int declarationTemplateId) {
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -114,8 +118,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
 	@Override
 	@Transactional(readOnly = false)
-    //@Caching(evict = {@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id", beforeInvocation = true),
-    //        @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id + new String(\"_script\")", beforeInvocation = true)})
+    @Caching(evict = {@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id", beforeInvocation = true),
+            @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	public int save(DeclarationTemplate declarationTemplate) {
         try {
             int count = getJdbcTemplate().update(
@@ -213,7 +217,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
     @Override
     @Transactional(readOnly = false)
-    //@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId", beforeInvocation = true)
+    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId", beforeInvocation = true)
     public void setJrxml(int declarationTemplateId, String jrxmlBlobId) {
         int count = getJdbcTemplate().update(
                 "update declaration_template set jrxml = ? where id = ?",
@@ -232,7 +236,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    //@Cacheable(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId + new String(\"_script\")")
+    @Cacheable(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId + new String(\"_script\")")
     public String getDeclarationTemplateScript(int declarationTemplateId) {
         try {
             return getJdbcTemplate().queryForObject(
@@ -395,7 +399,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    //@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true)
+    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true)
     public int delete(int declarationTemplateId) {
         try {
             getJdbcTemplate().update("delete from declaration_template where id = ?", new Object[]{declarationTemplateId},
@@ -408,7 +412,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    //@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true, allEntries = true)
+    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true, allEntries = true)
     public void delete(final Collection<Integer> templateIds) {
         try {
             getNamedParameterJdbcTemplate().update("delete from declaration_template where " + SqlUtils.transformToSqlInStatement("id", templateIds),
@@ -455,7 +459,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         }
     }
 
-    //@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true ,key = "#decTemplateId")
+    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true ,key = "#decTemplateId")
     @Override
     public int updateVersionStatus(VersionedObjectStatus versionStatus, int decTemplateId) {
         try {
@@ -482,6 +486,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
+    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true ,key = "#decTemplateId")
     public void deleteXsd(int dtId) {
         try{
             getJdbcTemplate().update("update declaration_template set xsd = null where ID = ?", dtId);
@@ -491,6 +496,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
+    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true ,key = "#decTemplateId")
     public void deleteJrxml(int dtId) {
         try{
             getJdbcTemplate().update("update declaration_template set jrxml = null WHERE ID = ?", dtId);
@@ -510,6 +516,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
+    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true ,key = "#declarationTemplateId + new String(\"_script\")")
     public void updateScript(final int declarationTemplateId, final String script) {
         getJdbcTemplate().update("UPDATE DECLARATION_TEMPLATE SET CREATE_SCRIPT = ? WHERE ID = ?", script, declarationTemplateId);
     }

@@ -46,7 +46,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public void createDec(long declarationDataId, String blobDataId, DeclarationDataReportType type) {
-        reportDao.createDec(declarationDataId, blobDataId, type.getReportName());
+        reportDao.createDec(declarationDataId, blobDataId, type);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public String getDec(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType type) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL1);
-        return reportDao.getDec(declarationDataId, type.getReportName());
+        return reportDao.getDec(declarationDataId, type);
     }
 
     @Override
@@ -85,11 +85,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void deleteDec(Collection<Long> declarationDataId, List<DeclarationDataReportType> reportTypes) {
         if (reportTypes != null && !reportTypes.isEmpty()) {
-            List<String> types = new ArrayList<String>();
-            for (DeclarationDataReportType type : reportTypes) {
-                types.add("'" + type.getReportName()+"'");
-            }
-            reportDao.deleteDec(declarationDataId, types);
+            reportDao.deleteDec(declarationDataId, reportTypes);
         }
     }
 

@@ -1,15 +1,28 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AutoNumerationColumn;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DataRowType;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.NumerationType;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +33,22 @@ import java.util.Map;
  */
 class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
-	//private static final Log LOG = LogFactory.getLog(DataRowMapper.class);
+	private static final Log LOG = LogFactory.getLog(DataRowMapper.class);
+
+	private static final char STYLE_SEPARATOR = ';';
+	static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+	private static final char DECIMAL_SEPARATOR = '.';
+	private static final char WRONG_DECIMAL_SEPARATOR = ',';
+	private static final DecimalFormat DECIMAL_FORMAT;
+	static{
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		symbols.setDecimalSeparator(DECIMAL_SEPARATOR);
+		DECIMAL_FORMAT = new DecimalFormat("#0.#", symbols);
+		DECIMAL_FORMAT.setParseBigDecimal(true);
+		DECIMAL_FORMAT.setDecimalSeparatorAlwaysShown(false);
+		DECIMAL_FORMAT.setMaximumIntegerDigits(19);
+		DECIMAL_FORMAT.setMaximumFractionDigits(19);
+	}
 
 	/**
 	 * Признак участия фиксированной строки в автонумерации
@@ -53,14 +81,14 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			.append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') THEN 1 ELSE 0 END ORDER BY ord)\n")
 			.append("ELSE NULL END ");
         if (range != null) {
-            sql.append("+ (SELECT count(*) from form_data_").append(formData.getFormTemplateId())
+            sql.append("+ (SELECT count(*) from form_data_row")
                 .append(" WHERE (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') AND")
                 .append(" form_data_id = :formDataId AND temporary = :temporary AND manual = :manual")
                 .append(" AND ord < :from)");
         }
         sql.append(" numeration");
 		getColumnNamesString(formData, sql);
-		sql.append("\nFROM form_data_").append(formData.getFormTemplateId());
+		sql.append("\nFROM form_data_row");
 		sql.append("\nWHERE form_data_id = :formDataId AND temporary = :temporary AND manual = :manual");
 		// пейджинг
 		if (range != null) {
@@ -91,18 +119,15 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	/**
 	 * Формирует список названий столбцов таблицы как они хранятся в бд
 	 * @param formData
-	 * @return
+	 * @return Map<columnId, [cNN, cNN_style]>
 	 */
 	static Map<Integer, String[]> getColumnNames(FormData formData) {
 		Map<Integer, String[]> columnNames = new HashMap<Integer, String[]>();
 		for (Column column : formData.getFormColumns()){
-			String id = ('c' + column.getId().toString()).intern();
+			StringBuilder sb = new StringBuilder("c");
 			columnNames.put(column.getId(), new String[]{
-					id,
-					(id + "_style_id").intern(),
-					(id + "_editable").intern(),
-					(id + "_colspan").intern(),
-					(id + "_rowspan").intern()});
+					(sb.append(column.getDataOrder()).toString()).intern(),
+					(sb.append("_style").toString()).intern()});
 		}
 		return columnNames;
 	}
@@ -113,29 +138,21 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		Integer previousRowNumber = formData.getPreviousRowNumber() != null ? formData.getPreviousRowNumber() : 0;
 		String alias = rs.getString("alias");
 		for (Cell cell : cells) {
-			Integer columnId = cell.getColumn().getId();
+			Column column = cell.getColumn();
 			// Values
-			if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) &&
+			if (ColumnType.AUTO.equals(column.getColumnType()) &&
 					(alias == null || alias.contains(ALIASED_WITH_AUTO_NUMERATION_AFFIX))) {
 				Long numeration = SqlUtils.getLong(rs, "numeration");
-				if (NumerationType.CROSS.equals(((AutoNumerationColumn) cell.getColumn()).getNumerationType())) {
+				if (NumerationType.CROSS.equals(((AutoNumerationColumn) column).getNumerationType())) {
 					cell.setValue(numeration + previousRowNumber, rowNum);
 				} else {
 					cell.setValue(numeration, rowNum);
 				}
 			} else {
-				cell.setValue(getCellValue(cell.getColumn(), rs, String.format("c%s", columnId)), rowNum);
+				cell.setValue(parseCellValue(column.getColumnType(), rs.getString("c" + column.getDataOrder())), rowNum);
 			}
-			// Styles
-			BigDecimal styleId = rs.getBigDecimal(String.format("c%s_style_id", columnId));
-			cell.setStyleId(styleId != null ? styleId.intValueExact() : null);
-			// Editable
-			cell.setEditable(rs.getBoolean(String.format("c%s_editable", columnId)));
-			// Span Info
-			Integer colSpan = SqlUtils.getInteger(rs, String.format("c%s_colspan", columnId));
-			cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
-			Integer rowSpan = SqlUtils.getInteger(rs, String.format("c%s_rowspan", columnId));
-			cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
+			// чтение стилей
+			parseCellStyle(cell, rs.getString("c" + column.getDataOrder() + "_style"));
 		}
 		DataRow<Cell> dataRow = new DataRow<Cell>(alias, cells);
 		dataRow.setId(SqlUtils.getLong(rs, "id"));
@@ -144,21 +161,133 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	}
 
 	/**
-	 * Извлекает значение ячейки в зависимости от её типа
-	 * @param column
-	 * @param rs
-	 * @param columnLabel
+	 * Чтение стилей ячейки из строки
+	 * @param cell
+	 * @param value
+	 */
+	static final void parseCellStyle(Cell cell, String value) {
+		// значения по умолчанию
+		cell.setStyleId(null);
+		cell.setEditable(false);
+		cell.setColSpan(1);
+		cell.setRowSpan(1);
+		// разбираем стили
+	 	if (value != null && !value.isEmpty()) {
+			String[] styles = StringUtils.split(value, STYLE_SEPARATOR);
+			for (String style : styles) {
+				char ch = style.charAt(0);
+				if (ch == 'e') {
+					cell.setEditable(true);
+					if (style.length() != 1) { // никаких цифр быть не должно после буквы "e"
+						throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", value));
+					}
+				} else {
+					String numStr = style.substring(1);
+					if (numStr.isEmpty()) { // хоть одна циферка должна быть
+						throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", value));
+					}
+					Integer num = Integer.valueOf(numStr);
+					switch (ch) {
+						case 's':
+							cell.setStyleId(num);
+							break;
+						case 'c':
+							cell.setColSpan(num);
+							break;
+						case 'r':
+							cell.setRowSpan(num);
+							break;
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Запись стиля ячейки в строку
+	 * @param cell
+	 * @return
+	 */
+	static final String formatCellStyle(Cell cell) {
+		StringBuilder sb = new StringBuilder();
+		if (cell.getStyle() != null) {
+			sb.append('s').append(cell.getStyle().getId()).append(STYLE_SEPARATOR);
+		}
+		if (cell.isEditable()) {
+			sb.append('e').append(STYLE_SEPARATOR);
+		}
+		if (cell.getColSpan() > 1) {
+			sb.append('c').append(cell.getColSpan()).append(STYLE_SEPARATOR);
+		}
+		if (cell.getRowSpan() > 1) {
+			sb.append('r').append(cell.getRowSpan()).append(STYLE_SEPARATOR);
+		}
+		if (sb.length() > 0) {
+			return sb.substring(0, sb.length() - 1);
+		}
+		return null;
+	}
+
+	/**
+	 * Чтение данных ячейки. Преобразование строки в конкретный тип
+	 * @param columnType
+	 * @param value
 	 * @return
 	 * @throws SQLException
 	 */
-	private Object getCellValue(Column column, ResultSet rs, String columnLabel) throws SQLException {
-		switch (column.getColumnType()) {
-			case STRING:
-				return rs.getString(columnLabel);
-			case DATE:
-				return rs.getDate(columnLabel);
-			default:
-				return rs.getBigDecimal(columnLabel);
+	static final Object parseCellValue(ColumnType columnType, String value) {
+		if (value == null) {
+			return null;
+		} else {
+			try {
+				switch (columnType) {
+					case STRING:
+						return value;
+					case DATE:
+						return SDF.parse(value);
+					case NUMBER:
+						String cleanValue = value.replace(WRONG_DECIMAL_SEPARATOR, DECIMAL_SEPARATOR);
+						return DECIMAL_FORMAT.parse(cleanValue);
+					case REFBOOK:
+						// только целые числа
+						if (value.indexOf(WRONG_DECIMAL_SEPARATOR) + value.indexOf(DECIMAL_SEPARATOR) != -2) {
+							throw new IllegalArgumentException(String.format("Значение \"%s\" не является типом %s", value, columnType.name()));
+						}
+						return DECIMAL_FORMAT.parse(value).longValue();
+					default:
+						return null;
+				}
+			} catch (ParseException e) {
+				throw new IllegalArgumentException(String.format("Значение \"%s\" не является типом %s", value, columnType.name()), e);
+			}
+		}
+	}
+
+	public static String formatCellValue(Cell cell) {
+		return formatCellValue(cell.getColumn().getColumnType(), cell.getValue());
+	}
+
+	/**
+	 * Запись значения ячейки. Преобразование значения конкретного типа в строку
+	 * @param columnType
+	 * @param value
+	 * @return
+	 */
+	 static final String formatCellValue(ColumnType columnType, Object value) {
+		if (value == null) {
+			return null;
+		} else {
+			switch (columnType) {
+				case STRING:
+					return value.toString();
+				case DATE:
+					return SDF.format(value);
+				case NUMBER:
+				case REFBOOK:
+					return DECIMAL_FORMAT.format(value);
+				default:
+					return null;
+			}
 		}
 	}
 }

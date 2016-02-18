@@ -30,7 +30,7 @@ public class ReferenceColumn extends Column {
     };
 
 	public ReferenceColumn() {
-		setColumnType(ColumnType.REFERENCE);
+		columnType = ColumnType.REFERENCE;
 	}
 
 	/**

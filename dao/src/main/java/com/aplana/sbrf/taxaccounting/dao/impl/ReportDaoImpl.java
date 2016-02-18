@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -50,7 +51,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public void createDec(final long declarationDataId, final String blobDataId, final String type) {
+    public void createDec(final long declarationDataId, final String blobDataId, final DeclarationDataReportType type) {
         try{
             PreparedStatementCreator psc = new PreparedStatementCreator() {
                 @Override
@@ -62,7 +63,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                                     "INSERT INTO DECLARATION_REPORT (DECLARATION_DATA_ID, BLOB_DATA_ID, TYPE) VALUES (?,?,?)");
                     ps.setLong(1, declarationDataId);
                     ps.setString(2, blobDataId);
-                    ps.setString(3, type);
+                    ps.setLong(3, type.getReportType().getId());
                     return ps;
                 }
             };
@@ -104,13 +105,13 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public String getDec(final long declarationDataId, final String type) {
+    public String getDec(final long declarationDataId, final DeclarationDataReportType type) {
         try{
             PreparedStatementData ps = new PreparedStatementData();
             ps.appendQuery("SELECT BLOB_DATA_ID FROM DECLARATION_REPORT " +
                     "WHERE DECLARATION_DATA_ID = ? AND TYPE = ?");
             ps.addParam(declarationDataId);
-            ps.addParam(type);
+            ps.addParam(type.getReportType().getId());
             return getJdbcTemplate().queryForObject(ps.getQuery().toString(), ps.getParams().toArray(), String.class);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -174,11 +175,15 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public void deleteDec(Collection<Long> declarationDataIds, List<String> reportTypes) {
+    public void deleteDec(Collection<Long> declarationDataIds, List<DeclarationDataReportType> ddReportTypes) {
         try{
+            List<Integer> types = new ArrayList<Integer>();
+            for (DeclarationDataReportType type : ddReportTypes) {
+                types.add(type.getReportType().getId());
+            }
             String sql = String.format("DELETE FROM DECLARATION_REPORT WHERE %s and %s",
                     SqlUtils.transformToSqlInStatement("DECLARATION_DATA_ID", declarationDataIds),
-                    SqlUtils.transformToSqlInStatement("TYPE", reportTypes));
+                    SqlUtils.transformToSqlInStatement("TYPE", types));
             Map<String, Object> params = new HashMap<String, Object>();
             getNamedParameterJdbcTemplate().update(sql, params);
         } catch (DataAccessException e){

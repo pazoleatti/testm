@@ -245,7 +245,8 @@ create table form_column (
   filter varchar2(1000),
   parent_column_id number(9),
   attribute_id2 number(18),
-  numeration_row number(9)
+  numeration_row number(9),
+  data_ord number(2) not null
 );
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
@@ -264,6 +265,7 @@ comment on column form_column.max_length IS 'Максимальная длина
 comment on column form_column.parent_column_id is 'Ссылка на родительскую графу';
 comment on column form_column.attribute_id2 is 'Код отображаемого атрибута для столбцов-ссылок второго уровня';
 comment on column form_column.numeration_row is 'Тип нумерации строк для автонумеруемой графы (0 - последовательная, 1 - сквозная)';
+comment on column form_column.data_ord is 'Порядковый номер столбца в таблице данных';
 
 create sequence seq_form_column start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -632,7 +634,7 @@ comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор �
 comment on column log_system.blob_data_id is 'Ссылка на логи';
 comment on column log_system.form_type_id is 'Идентификатор вида НФ';
 comment on column log_system.is_error is 'Признак ошибки';
-comment on column log_system.server is 'Сервер'; 
+comment on column log_system.server is 'Сервер';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
@@ -931,9 +933,6 @@ comment on column form_data_ref_book.record_id is 'Идентификатор з
 
 alter table form_data_ref_book add constraint form_data_ref_book_pk primary key (form_data_id, ref_book_id, record_id);
 --------------------------------------------------------------------------------------------------------
-create sequence seq_form_data_nnn start with 10000;
-
---------------------------------------------------------------------------------------------------------
 create table log_clob_query 
 (
 id number(9) not null primary key, 
@@ -1002,12 +1001,12 @@ comment on column department_form_type_performer.performer_dep_id is 'Испол
 --------------------------------------------------------------------------------------------------------
 create table ref_book_vzl_history
 (
-id number(18) not null,
-jur_person number(18) not null,
-category number(18) not null,
-form_data_id number(18) not null,
-change_date date not null,
-state number(9) not null
+  id number(18) not null,
+  jur_person number(18) not null,
+  category number(18) not null,
+  form_data_id number(18) not null,
+  change_date date not null,
+  state number(9) not null
 );
 
 comment on table ref_book_vzl_history is 'История изменения категории ВЗЛ';
@@ -1019,4 +1018,114 @@ comment on column ref_book_vzl_history.change_date is 'Дата изменени
 comment on column ref_book_vzl_history.state is 'Код состояния';
 
 create sequence seq_ref_book_vzl_history start with 1;
+--------------------------------------------------------------------------------------------------------
+CREATE TABLE form_data_row (
+  id NUMBER(18),
+  form_data_id NUMBER(18),
+  temporary NUMBER(1),
+  manual NUMBER(1),
+  ord NUMBER(14),
+  alias VARCHAR2(20 char),
+  c0 VARCHAR2(2000 char),	c0_style VARCHAR2(50 char),
+  c1 VARCHAR2(2000 char),	c1_style VARCHAR2(50 char),
+  c2 VARCHAR2(2000 char),	c2_style VARCHAR2(50 char),
+  c3 VARCHAR2(2000 char),	c3_style VARCHAR2(50 char),
+  c4 VARCHAR2(2000 char),	c4_style VARCHAR2(50 char),
+  c5 VARCHAR2(2000 char),	c5_style VARCHAR2(50 char),
+  c6 VARCHAR2(2000 char),	c6_style VARCHAR2(50 char),
+  c7 VARCHAR2(2000 char),	c7_style VARCHAR2(50 char),
+  c8 VARCHAR2(2000 char),	c8_style VARCHAR2(50 char),
+  c9 VARCHAR2(2000 char),	c9_style VARCHAR2(50 char),
+  c10 VARCHAR2(2000 char), c10_style VARCHAR2(50 char),
+  c11 VARCHAR2(2000 char), c11_style VARCHAR2(50 char),
+  c12 VARCHAR2(2000 char), c12_style VARCHAR2(50 char),
+  c13 VARCHAR2(2000 char), c13_style VARCHAR2(50 char),
+  c14 VARCHAR2(2000 char), c14_style VARCHAR2(50 char),
+  c15 VARCHAR2(2000 char), c15_style VARCHAR2(50 char),
+  c16 VARCHAR2(2000 char), c16_style VARCHAR2(50 char),
+  c17 VARCHAR2(2000 char), c17_style VARCHAR2(50 char),
+  c18 VARCHAR2(2000 char), c18_style VARCHAR2(50 char),
+  c19 VARCHAR2(2000 char), c19_style VARCHAR2(50 char),
+  c20 VARCHAR2(2000 char), c20_style VARCHAR2(50 char),
+  c21 VARCHAR2(2000 char), c21_style VARCHAR2(50 char),
+  c22 VARCHAR2(2000 char), c22_style VARCHAR2(50 char),
+  c23 VARCHAR2(2000 char), c23_style VARCHAR2(50 char),
+  c24 VARCHAR2(2000 char), c24_style VARCHAR2(50 char),
+  c25 VARCHAR2(2000 char), c25_style VARCHAR2(50 char),
+  c26 VARCHAR2(2000 char), c26_style VARCHAR2(50 char),
+  c27 VARCHAR2(2000 char), c27_style VARCHAR2(50 char),
+  c28 VARCHAR2(2000 char), c28_style VARCHAR2(50 char),
+  c29 VARCHAR2(2000 char), c29_style VARCHAR2(50 char),
+  c30 VARCHAR2(2000 char), c30_style VARCHAR2(50 char),
+  c31 VARCHAR2(2000 char), c31_style VARCHAR2(50 char),
+  c32 VARCHAR2(2000 char), c32_style VARCHAR2(50 char),
+  c33 VARCHAR2(2000 char), c33_style VARCHAR2(50 char),
+  c34 VARCHAR2(2000 char), c34_style VARCHAR2(50 char),
+  c35 VARCHAR2(2000 char), c35_style VARCHAR2(50 char),
+  c36 VARCHAR2(2000 char), c36_style VARCHAR2(50 char),
+  c37 VARCHAR2(2000 char), c37_style VARCHAR2(50 char),
+  c38 VARCHAR2(2000 char), c38_style VARCHAR2(50 char),
+  c39 VARCHAR2(2000 char), c39_style VARCHAR2(50 char),
+  c40 VARCHAR2(2000 char), c40_style VARCHAR2(50 char),
+  c41 VARCHAR2(2000 char), c41_style VARCHAR2(50 char),
+  c42 VARCHAR2(2000 char), c42_style VARCHAR2(50 char),
+  c43 VARCHAR2(2000 char), c43_style VARCHAR2(50 char),
+  c44 VARCHAR2(2000 char), c44_style VARCHAR2(50 char),
+  c45 VARCHAR2(2000 char), c45_style VARCHAR2(50 char),
+  c46 VARCHAR2(2000 char), c46_style VARCHAR2(50 char),
+  c47 VARCHAR2(2000 char), c47_style VARCHAR2(50 char),
+  c48 VARCHAR2(2000 char), c48_style VARCHAR2(50 char),
+  c49 VARCHAR2(2000 char), c49_style VARCHAR2(50 char),
+  c50 VARCHAR2(2000 char), c50_style VARCHAR2(50 char),
+  c51 VARCHAR2(2000 char), c51_style VARCHAR2(50 char),
+  c52 VARCHAR2(2000 char), c52_style VARCHAR2(50 char),
+  c53 VARCHAR2(2000 char), c53_style VARCHAR2(50 char),
+  c54 VARCHAR2(2000 char), c54_style VARCHAR2(50 char),
+  c55 VARCHAR2(2000 char), c55_style VARCHAR2(50 char),
+  c56 VARCHAR2(2000 char), c56_style VARCHAR2(50 char),
+  c57 VARCHAR2(2000 char), c57_style VARCHAR2(50 char),
+  c58 VARCHAR2(2000 char), c58_style VARCHAR2(50 char),
+  c59 VARCHAR2(2000 char), c59_style VARCHAR2(50 char),
+  c60 VARCHAR2(2000 char), c60_style VARCHAR2(50 char),
+  c61 VARCHAR2(2000 char), c61_style VARCHAR2(50 char),
+  c62 VARCHAR2(2000 char), c62_style VARCHAR2(50 char),
+  c63 VARCHAR2(2000 char), c63_style VARCHAR2(50 char),
+  c64 VARCHAR2(2000 char), c64_style VARCHAR2(50 char),
+  c65 VARCHAR2(2000 char), c65_style VARCHAR2(50 char),
+  c66 VARCHAR2(2000 char), c66_style VARCHAR2(50 char),
+  c67 VARCHAR2(2000 char), c67_style VARCHAR2(50 char),
+  c68 VARCHAR2(2000 char), c68_style VARCHAR2(50 char),
+  c69 VARCHAR2(2000 char), c69_style VARCHAR2(50 char),
+  c70 VARCHAR2(2000 char), c70_style VARCHAR2(50 char),
+  c71 VARCHAR2(2000 char), c71_style VARCHAR2(50 char),
+  c72 VARCHAR2(2000 char), c72_style VARCHAR2(50 char),
+  c73 VARCHAR2(2000 char), c73_style VARCHAR2(50 char),
+  c74 VARCHAR2(2000 char), c74_style VARCHAR2(50 char),
+  c75 VARCHAR2(2000 char), c75_style VARCHAR2(50 char),
+  c76 VARCHAR2(2000 char), c76_style VARCHAR2(50 char),
+  c77 VARCHAR2(2000 char), c77_style VARCHAR2(50 char),
+  c78 VARCHAR2(2000 char), c78_style VARCHAR2(50 char),
+  c79 VARCHAR2(2000 char), c79_style VARCHAR2(50 char),
+  c80 VARCHAR2(2000 char), c80_style VARCHAR2(50 char),
+  c81 VARCHAR2(2000 char), c81_style VARCHAR2(50 char),
+  c82 VARCHAR2(2000 char), c82_style VARCHAR2(50 char),
+  c83 VARCHAR2(2000 char), c83_style VARCHAR2(50 char),
+  c84 VARCHAR2(2000 char), c84_style VARCHAR2(50 char),
+  c85 VARCHAR2(2000 char), c85_style VARCHAR2(50 char),
+  c86 VARCHAR2(2000 char), c86_style VARCHAR2(50 char),
+  c87 VARCHAR2(2000 char), c87_style VARCHAR2(50 char),
+  c88 VARCHAR2(2000 char), c88_style VARCHAR2(50 char),
+  c89 VARCHAR2(2000 char), c89_style VARCHAR2(50 char),
+  c90 VARCHAR2(2000 char), c90_style VARCHAR2(50 char),
+  c91 VARCHAR2(2000 char), c91_style VARCHAR2(50 char),
+  c92 VARCHAR2(2000 char), c92_style VARCHAR2(50 char),
+  c93 VARCHAR2(2000 char), c93_style VARCHAR2(50 char),
+  c94 VARCHAR2(2000 char), c94_style VARCHAR2(50 char),
+  c95 VARCHAR2(2000 char), c95_style VARCHAR2(50 char),
+  c96 VARCHAR2(2000 char), c96_style VARCHAR2(50 char),
+  c97 VARCHAR2(2000 char), c97_style VARCHAR2(50 char),
+  c98 VARCHAR2(2000 char), c98_style VARCHAR2(50 char),
+  c99 VARCHAR2(2000 char), c99_style VARCHAR2(50 char)
+);
+CREATE SEQUENCE seq_form_data_row START WITH 10000;
 --------------------------------------------------------------------------------------------------------
