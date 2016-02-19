@@ -150,103 +150,36 @@ void logicCheck() {
         // 1. Проверка на заполнение граф
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // 2. Проверка заполнения графы 2 справочным значением по ВЗЛ/РОЗ
-        if (row.name) {
-            def typeId = getRefBookValue(520, row.name).TYPE?.referenceValue
-            if (typeId) {
-                def type = getRefBookValue(525, typeId).CODE?.stringValue
-                if (!['ВЗЛ', 'РОЗ'].contains(type)) {
-                    def msg1 = row.getCell('name').column.name
-                    rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть заполнено наименованием Взаимозависимого лица/резидента оффшорной зоны!")
-                }
+        // 2. Проверка даты основания совершения операции
+        checkDatePeriod(logger, row, 'reasonDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
+
+        // 3. Проверка положительного значения расходов - графы 9, 11
+        ['sum1', 'sum2'].each { alias ->
+            if(row[alias] != null  && row[alias] < 0){
+                rowError(logger, row, "Строка $rowNum: Значение графы «${row.getCell(alias).column.name}» должно быть больше или равно «0»!")
             }
         }
 
-        // 3. Проверка даты основания совершения операции
-        checkDatePeriod(logger, row, 'reasonDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
-
-        // 3. Проверка возможности заполнения графы 12
-        if (!row.rate && !row.rate1) {
-            def msg1 = row.getCell('rate2').column.name
-            def msg2 = row.getCell('rate').column.name
-            def msg3 = row.getCell('rate1').column.name
-            rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
-                    "используемая в расчете графа «$msg2», «$msg3»!")
-        } else if (!row.rate || !row.rate1) {
-            def msg1 = row.getCell('rate2').column.name
-            def msg2 = (!row.rate) ? row.getCell('rate').column.name : row.getCell('rate1').column.name
-            rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
-                    "используемая в расчете графа «$msg2»!")
-        }
-
-        // 4. Проверка возможности заполнения графы 13
-        if (row.sum1==null && row.sum2==null) {
-            def msg1 = row.getCell('sum3').column.name
-            def msg2 = row.getCell('sum1').column.name
-            def msg3 = row.getCell('sum2').column.name
-            rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
-                    "используемая в расчете графа «$msg2», «$msg3»!")
-        } else if (row.sum1==null || row.sum2==null) {
-            def msg1 = row.getCell('sum3').column.name
-            def msg2 = (row.sum1==null) ? row.getCell('sum1').column.name : row.getCell('sum2').column.name
-            rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
-                    "используемая в расчете графа «$msg2»!")
-        }
-
-        // 5. Проверка значения графы 12
-        if (row.rate1 && row.rate && row.rate2 != calc12(row)) {
-            def msg1 = row.getCell('rate2').column.name
-            def msg2 = row.getCell('rate1').column.name
-            def msg3 = row.getCell('rate').column.name
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно разности значений графы «$msg2» и «$msg3»!")
-        }
-
-        // 6. Проверка значения графы 13
-        if (row.sum2 && row.sum1 && row.sum3 != calc13(row)) {
-            def msg1 = row.getCell('sum3').column.name
-            def msg2 = row.getCell('sum2').column.name
-            def msg3 = row.getCell('sum1').column.name
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно разности по модулю значений графы «$msg2» и «$msg3»!")
-        }
-
-        // 7. Проверка значения графы 9, 11
+        // 4. Проверка значения граф 9, 11
         if(row.sum1 != null && row.sum2 != null && row.sum1 < row.sum2){
-            def msg1 = row.getCell('sum1').column.name
-            def msg2 = row.getCell('sum2').column.name
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
-        }
-        // 8. Проверка положительного значения графы 13, 15
-        if(row.sum1 != null  && row.sum1 < 0){
-            msg = row.getCell('sum1').column.name
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
-        }
-        if(row.sum2 != null  && row.sum2 < 0){
-            msg = row.getCell('sum2').column.name
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            def col9Name = row.getCell('sum1').column.name
+            def col11Name = row.getCell('sum2').column.name
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$col9Name» должно быть не меньше значения графы «$col11Name»!")
         }
 
-        // 10. Проверка КНУ
-        if (row.code && !recordsExist(row.code)) {
-            rowError(logger, row, "Строка $rowNum: В справочнике «Классификатор расходов ПАО Сбербанк для целей налогового учёта» отсутствуют записи с КНУ равным значению графы «${getColumnName(row, 'code')}» (${row.code})!")
-        }
+        // 5. Проверка расчётных граф
+        def needValue = formData.createDataRow()
+        needValue.rate2 = calc12(row)
+        needValue.sum3 = calc13(row)
+        checkCalc(row, ['rate2', 'sum3'], needValue, logger, true)
     }
 
-    // 9. Проверка итоговых значений пофиксированной строке «Итого»
+    // 6. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
 }
 
-boolean recordsExist(String code) {
-    def refBookId = 27L
-    if (!providerCache.containsKey(refBookId)) {
-        providerCache.put(refBookId, refBookFactory.getDataProvider(refBookId))
-    }
-    def provider = providerCache.get(refBookId)
-
-    def records = provider.getRecords(getReportPeriodEndDate(), null, "LOWER(CODE) = LOWER('$code')", null)
-    return records != null && records.size() > 0
-}
 // Алгоритмы заполнения полей формы
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
@@ -505,12 +438,6 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 9
-    def colIndex = 9
-    //newRow.sum1 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 11
-    colIndex = 11
-    //newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 13
     colIndex = 13
     newRow.sum3 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)

@@ -95,8 +95,8 @@
         <name>Процентная ставка, % годовых</name>
         <order>9</order>
         <width>10</width>
-        <maxLength>5</maxLength>
-        <precision>2</precision>
+        <maxLength>9</maxLength>
+        <precision>6</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum1</alias>
@@ -115,8 +115,8 @@
         <name>Процентная ставка, признаваемая рыночной для целей налогообложения, % годовых</name>
         <order>11</order>
         <width>10</width>
-        <maxLength>5</maxLength>
-        <precision>2</precision>
+        <maxLength>9</maxLength>
+        <precision>6</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum2</alias>
@@ -135,8 +135,8 @@
         <name>Отклонение (превышение) Процентной ставки от рыночного уровня, % годовых</name>
         <order>13</order>
         <width>10</width>
-        <maxLength>5</maxLength>
-        <precision>2</precision>
+        <maxLength>9</maxLength>
+        <precision>6</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum3</alias>
