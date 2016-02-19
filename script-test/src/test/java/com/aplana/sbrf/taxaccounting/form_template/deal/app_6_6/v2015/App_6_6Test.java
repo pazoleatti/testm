@@ -21,9 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -96,16 +94,16 @@ public class App_6_6Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
-        Assert.assertEquals("Строка 1: Графа «Полное наименование с указанием ОПФ» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Номер договора» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата договора» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата (заключения) сделки» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата исполнения 1-ой части сделки» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата исполнения 2-ой части сделки» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Цена 1-ой части сделки, ед. валюты» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Код валюты расчетов по сделке» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Курс ЦБ РФ» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Цена 1-ой части сделки, руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Полное наименование с указанием ОПФ"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Номер договора"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата договора"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата (заключения) сделки"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата исполнения 1-ой части сделки"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата исполнения 2-ой части сделки"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Цена 1-ой части сделки, ед. валюты"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Код валюты расчетов по сделке"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Курс ЦБ РФ"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Цена 1-ой части сделки, руб."), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Выполнение расчета графы «Дата совершения сделки» невозможно, так как не заполнена используемая в расчете графа «Дата исполнения 2-ой части сделки»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» должна быть заполнена, если не заполнена графа «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
