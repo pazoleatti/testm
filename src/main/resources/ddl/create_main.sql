@@ -820,6 +820,16 @@ comment on column form_data_report.manual is 'Режим ввода данных
 comment on column form_data_report.checking is 'Типы столбцов (0 - только обычные, 1 - вместе с контрольными)';
 comment on column form_data_report.absolute is 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
 
+
+create table declaration_subreport
+(
+id number(9) not null,
+declaration_template_id number(9) not null,
+name varchar2(1000) not null,
+ord number(9) not null,
+alias varchar2(128),
+blob_data_id varchar2(36)
+);
 --------------------------------------------------------------------------------------------------------
 
 create table declaration_report

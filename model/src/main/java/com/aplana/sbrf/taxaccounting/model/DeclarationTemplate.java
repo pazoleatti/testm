@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+
 import java.util.Date;
+import java.util.List;
 
 /**
  * Шаблон декларации
@@ -14,6 +17,9 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
     private String xsdId;
     private String jrxmlBlobId;
     private String name;
+    private String createScript;
+    private VersionedObjectStatus status;
+    private List<DeclarationSubreport> subreports;
 
     public String getName() {
         return name;
@@ -22,10 +28,6 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
     public void setName(String name) {
         this.name = name;
     }
-
-    private String createScript;
-
-    private VersionedObjectStatus status;
 
     public VersionedObjectStatus getStatus() {
         return status;
@@ -112,5 +114,37 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
      */
     public void setJrxmlBlobId(String jrxmlBlobId) {
         this.jrxmlBlobId = jrxmlBlobId;
+    }
+
+    /**
+     * Получить список спец отчетов
+     * @return
+     */
+    public List<DeclarationSubreport> getSubreports() {
+        return subreports;
+    }
+
+    /**
+     * Установка набора спец отчетов
+     * @param subreports
+     */
+    public void setSubreports(List<DeclarationSubreport> subreports) {
+        this.subreports = subreports;
+    }
+
+    /**
+     * Добавляет спец отчет
+     * @param subreport добавляемый отчет
+     */
+    public void addSubreport(DeclarationSubreport subreport) {
+        subreports.add(subreport);
+    }
+
+    /**
+     * Удаляет спец отчет
+     * @param subreport удаляемый отчет
+     */
+    public void removeSubreport(DeclarationSubreport subreport) {
+        subreports.remove(subreport);
     }
 }

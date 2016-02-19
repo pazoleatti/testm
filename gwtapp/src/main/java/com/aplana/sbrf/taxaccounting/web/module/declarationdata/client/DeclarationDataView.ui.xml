@@ -91,6 +91,11 @@
         border-top: 1px solid #aeaeac;
         background-color: white;
     }
+
+    .printAnchor {
+        padding-left: 14px;
+        padding-right: 6px;
+    }
 </ui:style>
 
     <fm:MainContainer>
@@ -107,6 +112,10 @@
                 </fm:left>
                 <fm:right>
                     <fm:Right>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <style:DropdownButton ui:field="printAnchor" text="Формирование отчетов" img="resources/img/printer-16.png"
+                                                  title="Формирование отчето" panelStyleName="{style.printAnchor}"/>
+                        </style:LeftBar>
                     </fm:Right>
                 </fm:right>
                 <fm:resizable>
@@ -177,10 +186,6 @@
                                               title="Отобразить историю налоговой формы"/>
                             <style:LinkButton ui:field="sources" text="Источники" img="resources/img/source-target.png"
                                               title="Источники"/>
-                            <style:LinkAnchor text="Выгрузить в XML" ui:field="downloadXmlButton" img="resources/img/download-xml-16.png"
-                                              title="Скачать декларацию в формате законодателя"/>
-                            <style:LinkAnchor text="Выгрузить в xlsx" ui:field="downloadExcelButton" img="resources/img/download-xls-16.png"
-                                              title="Скачать декларацию в формате Excel-документа" visible="false"/>
                         </g:VerticalPanel>
                     </g:cell>
 

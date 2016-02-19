@@ -1,5 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui'
              xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
              xmlns:fileuplod='urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
@@ -9,8 +10,7 @@
     <ui:style>
         .header {
             font-size: 14px;
-            color:  #636460;
-            white-space: nowrap;
+            color: #636460;
         }
 
         .header div {
@@ -25,15 +25,12 @@
             vertical-align: middle !important;
         }
 
-        .marginLeft {
-            margin-left: 5px;
-        }
 
         .btnPanel2 td {
             vertical-align: middle !important;
         }
 
-        .table {
+        .table2 {
             z-index: 0;
             position: absolute !important;
             bottom: 0;
@@ -44,10 +41,13 @@
             border-top: 1px solid #aeaeac;
         }
 
-        .separator {
-            height: 90px;
-            margin: 0 9px;
-            border-right: 1px solid #aeaeac;
+        .table {
+            position: absolute !important;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            top: 45px;
+            margin: 0 5px;
         }
 
         .horSep {
@@ -55,10 +55,7 @@
             margin: 4px 9px;
             border-top: 1px solid #aeaeac;
         }
-        .upload {
-            margin-top: 25px;
-            margin-left: 25px;
-        }
+
     </ui:style>
 
     <ui:style field="lock">
@@ -128,69 +125,11 @@
 
                 <g:Label addStyleNames="{style.horSep}"/>
 
-                <g:HorizontalPanel addStyleNames="{style.marginLeft}">
-                    <g:VerticalPanel addStyleNames="{style.btnPanel2}">
-                        <g:cell>
-                            <g:HorizontalPanel>
-                                <g:cell>
-                                    <g:Label width="150px" text="Наименование декларации"/>
-                                </g:cell>
-                                <g:cell>
-                                    <g:TextBox width="300px" ui:field="decName"/>
-                                </g:cell>
-                            </g:HorizontalPanel>
-                        </g:cell>
-                        <g:HorizontalPanel height="30px">
-                            <g:Label width="150px" text="Период актуальности с"/>
-                            <g:HorizontalPanel width="300px">
-                                <w:YearMaskBox ui:field="versionDateBegin" width="134px" mayBeNull="true"/>
-                                <g:cell horizontalAlignment="center">
-                                    <g:Label width="30px" text="по"/>
-                                </g:cell>
-                                <w:YearMaskBox ui:field="versionDateEnd" width="134px" mayBeNull="true"/>
-                            </g:HorizontalPanel>
-                        </g:HorizontalPanel>
-
-                    </g:VerticalPanel>
-
-                    <g:cell verticalAlignment="middle">
-                        <g:HTML addStyleNames="{style.separator}"/>
-                    </g:cell>
-
-                    <g:HorizontalPanel addStyleNames="{style.btnPanel2}">
-                        <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
-                            <g:cell>
-                                <fileuplod:FileUploadWidget ui:field="uploadXsdFile" extension="xsd" text="Загрузить xsd"/>
-                            </g:cell>
-                            <g:cell>
-                                <fileuplod:FileUploadWidget isJrxml="true" ui:field="uploadJrxmlFile" extension="jrxml" text="Загрузить jrxml"/>
-                            </g:cell>
-                        </g:VerticalPanel>
-                        <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
-                            <g:cell>
-                                <style:LinkAnchor text="Скачать xsd" ui:field="downloadXsd" img="resources/img/down_cc.png"
-                                                  addStyleNames="{style.marginLeft}" title="Скачать xsd"/>
-                            </g:cell>
-                            <g:cell>
-                                <style:LinkAnchor text="Скачать jrxml" ui:field="downloadJrxmlButton" img="resources/img/down_cc.png"
-                                                  title="Скачать jrxml файл" addStyleNames="{style.marginLeft}"/>
-                            </g:cell>
-                        </g:VerticalPanel>
-                        <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
-                            <g:cell>
-                                <style:LinkButton text="Удалить xsd" ui:field="deleteXsd" img="resources/img/row-delete.png"
-                                                  addStyleNames="{style.marginLeft}" title="Скачать xsd"/>
-                            </g:cell>
-                            <g:cell>
-                                <style:LinkButton text="Удалить jrxml" ui:field="deleteJrxml" img="resources/img/row-delete.png"
-                                                  title="Скачать jrxml файл" addStyleNames="{style.marginLeft}"/>
-                            </g:cell>
-                        </g:VerticalPanel>
-                    </g:HorizontalPanel>
-                </g:HorizontalPanel>
-
-                <cm:CodeMirror ui:field="createScript" addStyleNames="{style.table}"/>
-
+                <g:DockLayoutPanel ui:field="dockPanel" addStyleNames="{style.table}">
+                    <g:center>
+                        <npui:SimpleTabPanel ui:field="tabPanel"/>
+                    </g:center>
+                </g:DockLayoutPanel>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>

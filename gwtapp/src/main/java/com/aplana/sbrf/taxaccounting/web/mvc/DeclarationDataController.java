@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
@@ -37,6 +35,9 @@ public class DeclarationDataController {
     @Autowired
     private BlobDataService blobDataService;
 
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
+
     private static final String ENCODING = "UTF-8";
 
 
@@ -67,6 +68,42 @@ public class DeclarationDataController {
                 out.close();
             }
             response.setContentLength(count);
+        }
+    }
+
+    @RequestMapping(value = "/specific/{alias}/{id}", method = RequestMethod.GET)
+    public void specific(@PathVariable String alias, @PathVariable long id, HttpServletResponse response)
+            throws IOException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
+        DeclarationData declaration = declarationService.get(id, userInfo);
+        ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias));
+
+        String uuid = reportService.getDec(securityService.currentUserInfo(), id, ddReportType);
+        if (uuid != null) {
+            BlobData blobData = blobDataService.get(uuid);
+
+            String fileName = URLEncoder.encode(blobData.getName(), ENCODING);
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-Disposition", "attachment; filename=\""
+                    + fileName + "\"");
+
+            DataInputStream in = new DataInputStream(blobData.getInputStream());
+            OutputStream out = response.getOutputStream();
+            int count = 0;
+            try {
+                count = IOUtils.copy(in, out);
+            } finally {
+                in.close();
+                out.close();
+            }
+            response.setContentLength(count);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().printf("Отчет не найден");
+
         }
     }
 

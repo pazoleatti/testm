@@ -58,13 +58,24 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                 public PreparedStatement createPreparedStatement(Connection con)
                         throws SQLException {
 
-                    PreparedStatement ps = con
-                            .prepareStatement(
-                                    "INSERT INTO DECLARATION_REPORT (DECLARATION_DATA_ID, BLOB_DATA_ID, TYPE) VALUES (?,?,?)");
-                    ps.setLong(1, declarationDataId);
-                    ps.setString(2, blobDataId);
-                    ps.setLong(3, type.getReportType().getId());
-                    return ps;
+                    if (type.getSubreport() != null) {
+                        PreparedStatement ps = con
+                                .prepareStatement(
+                                        "INSERT INTO DECLARATION_REPORT (DECLARATION_DATA_ID, BLOB_DATA_ID, TYPE, SUBREPORT_ID) VALUES (?,?,?,?)");
+                        ps.setLong(1, declarationDataId);
+                        ps.setString(2, blobDataId);
+                        ps.setLong(3, type.getReportType().getId());
+                        ps.setLong(4, type.getSubreport().getId());
+                        return ps;
+                    } else {
+                        PreparedStatement ps = con
+                                .prepareStatement(
+                                        "INSERT INTO DECLARATION_REPORT (DECLARATION_DATA_ID, BLOB_DATA_ID, TYPE, SUBREPORT_ID) VALUES (?,?,?,null)");
+                        ps.setLong(1, declarationDataId);
+                        ps.setString(2, blobDataId);
+                        ps.setLong(3, type.getReportType().getId());
+                        return ps;
+                    }
                 }
             };
             getJdbcTemplate().update(psc);
@@ -112,6 +123,11 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                     "WHERE DECLARATION_DATA_ID = ? AND TYPE = ?");
             ps.addParam(declarationDataId);
             ps.addParam(type.getReportType().getId());
+            if (type.getSubreport() != null) {
+                ps.appendQuery("AND SUBREPORT_ID = ?");
+                ps.addParam(type.getSubreport().getId());
+            }
+
             return getJdbcTemplate().queryForObject(ps.getQuery().toString(), ps.getParams().toArray(), String.class);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -227,10 +243,10 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
         try {
             //Удаление Jasper-отчетов декларации, если есть сформированный XLSX-отчет
             return getJdbcTemplate().update("delete from declaration_report dr\n" +
-                    "where type = 'JASPER' and exists ( \n" +
+                    "where type = 3 and exists ( \n" +
                     "select declaration_data_id\n" +
                     "from declaration_report dr1\n" +
-                    "where dr.declaration_data_id=dr1.declaration_data_id and type = 'XLSX')");
+                    "where dr.declaration_data_id=dr1.declaration_data_id and type = 0)");
         } catch (DataAccessException e){
             throw new DaoException(String.format("Ошибка при удалении ненужных записей таблицы DECLARATION_REPORT. %s.", e.getMessage()), e);
         }

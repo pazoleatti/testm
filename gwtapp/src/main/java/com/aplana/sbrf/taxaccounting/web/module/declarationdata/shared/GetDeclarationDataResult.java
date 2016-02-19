@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.Date;
+import java.util.List;
 
 public class GetDeclarationDataResult implements Result {
 	private TaxType taxType;
@@ -16,6 +18,7 @@ public class GetDeclarationDataResult implements Result {
     private String taxOrganCode;
     private String kpp;
 	private String uuid;
+    private List<DeclarationSubreport> subreports;
 
 	private boolean accepted;
 	private boolean canAccept;
@@ -132,4 +135,12 @@ public class GetDeclarationDataResult implements Result {
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
 	}
+
+    public List<DeclarationSubreport> getSubreports() {
+        return subreports;
+    }
+
+    public void setSubreports(List<DeclarationSubreport> subreports) {
+        this.subreports = subreports;
+    }
 }

@@ -2,12 +2,16 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
+import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -18,6 +22,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.Date;
+import java.util.List;
 
 public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHandlers>
 		implements DeclarationDataPresenter.MyView{
@@ -35,10 +40,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Button cancelButton;
     @UiField
     Button viewPdf;
-	@UiField
-	Anchor downloadExcelButton;
-	@UiField
-	Anchor downloadXmlButton;
+	//@UiField
+	//Anchor downloadExcelButton;
+	//@UiField
+	//Anchor downloadXmlButton;
 	@UiField
 	Button deleteButton;
 	@UiField
@@ -87,18 +92,46 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     DateMaskBoxPicker dateBox;
     @UiField
     LinkButton sources;
+    @UiField
+    DropdownButton printAnchor;
 
-    private Timer timerExcel, timerXML, timerPDF, timerAccept;
+    private LinkButton printToXml, printToExcel;
+
+    private Timer timerExcel, timerXML, timerPDF, timerAccept, timerSpecific;
 
 	@Inject
 	@UiConstructor
 	public DeclarationDataView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
+        printToXml = new LinkButton("Выгрузить в XML");
+        printToXml.setHeight("20px");
+        printToXml.setDisableImage(true);
+        printToXml.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().downloadXml();
+                }
+            }
+        });
+
+        printToExcel = new LinkButton("Сформировать в xlsx");
+        printToExcel.setHeight("20px");
+        printToExcel.setDisableImage(true);
+        printToExcel.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().viewReport(false, DeclarationDataReportType.EXCEL_DEC);
+                }
+            }
+        });
+
         timerExcel = new Timer() {
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(DeclarationDataReportType.EXCEL_DEC.getReportName(), true);
+                    getUiHandlers().onTimerReport(DeclarationDataReportType.EXCEL_DEC, true);
                 } catch (Exception e) {
                     //Nothing
                 }
@@ -109,7 +142,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(DeclarationDataReportType.XML_DEC.getReportName(), true);
+                    getUiHandlers().onTimerReport(DeclarationDataReportType.XML_DEC, true);
                 } catch (Exception e) {
                     //Nothing
                 }
@@ -120,7 +153,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(DeclarationDataReportType.PDF_DEC.getReportName(), true);
+                    getUiHandlers().onTimerReport(DeclarationDataReportType.PDF_DEC, true);
                 } catch (Exception e) {
                 }
             }
@@ -130,7 +163,17 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(DeclarationDataReportType.ACCEPT_DEC.getReportName(), true);
+                    getUiHandlers().onTimerReport(DeclarationDataReportType.ACCEPT_DEC, true);
+                } catch (Exception e) {
+                }
+            }
+        };
+
+        timerSpecific = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    getUiHandlers().onTimerSubsreport(true);
                 } catch (Exception e) {
                 }
             }
@@ -140,6 +183,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         timerXML.cancel();
         timerPDF.cancel();
         timerAccept.cancel();
+        timerSpecific.cancel();
 	}
 
     @Override
@@ -179,8 +223,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     @Override
     public void showDownloadButtons(boolean show) {
-        downloadExcelButton.setVisible(show);
-        downloadXmlButton.setVisible(show);
+        printToExcel.setVisible(show);
+        printToXml.setVisible(show);
     }
 
 	@Override
@@ -301,20 +345,21 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     @UiHandler("viewPdf")
     public void onViewPdfButton(ClickEvent event){
-        getUiHandlers().viewReport(false, DeclarationDataReportType.PDF_DEC.getReportName());
+        getUiHandlers().viewReport(false, DeclarationDataReportType.PDF_DEC);
         //getUiHandlers().viewPdf(false);
     }
-
+/*
 	@UiHandler("downloadExcelButton")
 	public void onDownloadExcelButton(ClickEvent event){
-        getUiHandlers().viewReport(false, DeclarationDataReportType.EXCEL_DEC.getReportName());
+        getUiHandlers().viewReport(false, DeclarationDataReportType.EXCEL_DEC);
 		//getUiHandlers().downloadExcel();
 	}
+
 
 	@UiHandler("downloadXmlButton")
 	public void onDownloadAsLegislatorButton(ClickEvent event){
 		getUiHandlers().downloadXml();
-	}
+	}*/
 
 	@UiHandler("infoAnchor")
 	void onInfoButtonClicked(ClickEvent event) {
@@ -328,33 +373,38 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void updatePrintReportButtonName(String type, boolean isLoad) {
-        if (DeclarationDataReportType.EXCEL_DEC.getReportName().equals(type)) {
+    public void updatePrintReportButtonName(DeclarationDataReportType type, boolean isLoad) {
+        if (DeclarationDataReportType.EXCEL_DEC.equals(type)) {
             if (isLoad) {
-                downloadExcelButton.setText("Выгрузить в xlsx");
+                printToExcel.setText("Выгрузить в xlsx");
                 timerExcel.cancel();
             } else {
-                downloadExcelButton.setText("Сформировать xlsx");
+                printToExcel.setText("Сформировать xlsx");
             }
-        } else if (DeclarationDataReportType.XML_DEC.getReportName().equals(type)) {
-            downloadExcelButton.setVisible(false);
+        } else if (DeclarationDataReportType.XML_DEC.equals(type)) {
+            printToExcel.setVisible(false);
             if (isLoad) {
-                downloadExcelButton.setVisible(true);
-                downloadXmlButton.setVisible(true);
+                printToExcel.setVisible(true);
+                printToXml.setVisible(true);
+                printAnchor.setVisible(true);
                 timerXML.cancel();
+                timerSpecific.scheduleRepeating(10000);
+                timerSpecific.run();
             } else {
                 viewPdf.setVisible(false);
-                downloadXmlButton.setVisible(false);
-                downloadExcelButton.setVisible(false);
+                printToXml.setVisible(false);
+                printToExcel.setVisible(false);
+                printAnchor.setVisible(false);
+                timerSpecific.cancel();
             }
-        } else if (DeclarationDataReportType.PDF_DEC.getReportName().equals(type)) {
+        } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
             if (isLoad) {
                 viewPdf.setVisible(false);
                 timerPDF.cancel();
             } else {
                 viewPdf.setVisible(true);
             }
-        } else if (DeclarationDataReportType.ACCEPT_DEC.getReportName().equals(type)) {
+        } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
             if (isLoad) {
                 getUiHandlers().revealPlaceRequest();
                 timerAccept.cancel();
@@ -365,32 +415,34 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void startTimerReport(String type) {
-        if (DeclarationDataReportType.EXCEL_DEC.getReportName().equals(type)) {
+    public void startTimerReport(DeclarationDataReportType type) {
+        if (DeclarationDataReportType.EXCEL_DEC.equals(type)) {
             timerExcel.scheduleRepeating(10000);
             timerExcel.run();
-        } else if (DeclarationDataReportType.XML_DEC.getReportName().equals(type)) {
+        } else if (DeclarationDataReportType.XML_DEC.equals(type)) {
             timerXML.scheduleRepeating(10000);
             timerXML.run();
-        } else if (DeclarationDataReportType.PDF_DEC.getReportName().equals(type)) {
+        } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
             timerPDF.scheduleRepeating(10000);
             timerPDF.run();
-        } else if (DeclarationDataReportType.ACCEPT_DEC.getReportName().equals(type)) {
+        } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
             timerAccept.scheduleRepeating(10000);
             timerAccept.run();
         }
     }
 
     @Override
-    public void stopTimerReport(String type) {
-        if (DeclarationDataReportType.EXCEL_DEC.getReportName().equals(type)) {
+    public void stopTimerReport(DeclarationDataReportType type) {
+        if (DeclarationDataReportType.EXCEL_DEC.equals(type)) {
             timerExcel.cancel();
-        } else if (DeclarationDataReportType.XML_DEC.getReportName().equals(type)) {
+        } else if (DeclarationDataReportType.XML_DEC.equals(type)) {
             timerXML.cancel();
-        } else if (DeclarationDataReportType.PDF_DEC.getReportName().equals(type)) {
+        } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
             timerPDF.cancel();
-        } else if (DeclarationDataReportType.ACCEPT_DEC.getReportName().equals(type)) {
+        } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
             timerAccept.cancel();
+        } else if (type.isSubreport()) {
+            timerSpecific.cancel();
         }
     }
 
@@ -399,4 +451,36 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         return !noPdfPanel.isVisible();
     }
 
+    @Override
+    public void setSubreports(List<DeclarationSubreport> subreports) {
+        printAnchor.clear();
+        printAnchor.addItem(DeclarationDataReportType.XML_DEC.getReportType().getName(), printToXml);
+        printAnchor.addItem(DeclarationDataReportType.EXCEL_DEC.getReportType().getName(), printToExcel);
+
+        for(final DeclarationSubreport subreport: subreports) {
+            LinkButton linkButton = new LinkButton("Сформировать \"" + subreport.getName() + "\"");
+            linkButton.setHeight("20px");
+            linkButton.setDisableImage(true);
+            linkButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().viewReport(false, new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport));
+                    }
+                }
+            });
+            printAnchor.addItem(subreport.getAlias(), linkButton);
+        }
+    }
+
+    public void updatePrintSubreportButtonName(DeclarationSubreport subreport, boolean exist) {
+        LinkButton linkButton = (LinkButton) printAnchor.getItem(subreport.getAlias());
+        if (linkButton != null) {
+            if (exist) {
+                linkButton.setText("Выгрузить \"" + subreport.getName() + "\"");
+            } else {
+                linkButton.setText("Сформировать \"" + subreport.getName() + "\"");
+            }
+        }
+    }
 }

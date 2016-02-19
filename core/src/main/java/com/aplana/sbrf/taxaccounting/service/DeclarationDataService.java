@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.util.JRSwapFile;
 
 import java.io.InputStream;
 import java.util.Collection;
@@ -62,6 +64,17 @@ public interface DeclarationDataService {
 	 * @return объект декларации
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
+
+    /**
+     * Формирование специфичного отчета декларации
+     * @param logger
+     * @param declarationData
+     * @param ddReportType
+     * @param userInfo
+     * @param stateLogger
+     */
+    void createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, TAUserInfo userInfo, LockStateLogger stateLogger);
+
 	DeclarationData get(long declarationDataId, TAUserInfo userInfo);
 
 	/**
@@ -241,5 +254,14 @@ public interface DeclarationDataService {
      * @param taxType
      * @return
      */
-    String getTaskName(DeclarationDataReportType ddReportType, TaxType taxType, String... args);
+    String getTaskName(DeclarationDataReportType ddReportType, TaxType taxType);
+
+    /**
+     * Формирование jasper-отчета
+     * @param xmlIn поток данных xml
+     * @param jrxml текст jrxml
+     * @param jrSwapFile
+     * @return
+     */
+    JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile);
 }

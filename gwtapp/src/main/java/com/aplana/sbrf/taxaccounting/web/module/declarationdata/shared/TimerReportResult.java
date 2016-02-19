@@ -13,7 +13,6 @@ public class TimerReportResult implements Result {
         LIMIT // превышен лимит требований по формированию отчета
     }
     private StatusReport existReport;
-    private Pdf pdf;
     private StatusReport existXMLReport; // только для PDF отчетов, отображается статус формированяи PDF
 
 
@@ -23,14 +22,6 @@ public class TimerReportResult implements Result {
 
     public void setExistReport(StatusReport existReport) {
         this.existReport = existReport;
-    }
-
-    public Pdf getPdf() {
-        return pdf;
-    }
-
-    public void setPdf(Pdf pdf) {
-        this.pdf = pdf;
     }
 
     public StatusReport getExistXMLReport() {

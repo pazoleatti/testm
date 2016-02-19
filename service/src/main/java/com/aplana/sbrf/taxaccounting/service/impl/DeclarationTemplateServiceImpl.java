@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
@@ -71,6 +72,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     private LogEntryService logEntryService;
 	@Autowired
 	private TAUserService userService;
+    @Autowired
+    private DeclarationSubreportDao declarationSubreportDao;
 
     @Override
 	public List<DeclarationTemplate> listAll() {
@@ -164,34 +167,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         }
     }
 
-    @Override
-	public InputStream getJasper(int declarationTemplateId) {
-        ByteArrayOutputStream compiledReport = new ByteArrayOutputStream();
-        ByteArrayInputStream byteArrayInputStream = null;
-        try {
-            String jrxml = getJrxml(declarationTemplateId);
-            if (jrxml == null) {
-                throw new ServiceException(JRXML_NOT_FOUND);
-            }
-            try {
-                byteArrayInputStream = new ByteArrayInputStream(jrxml.getBytes(ENCODING));
-                JasperDesign jasperDesign = JRXmlLoader.load(byteArrayInputStream);
-                JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
-            } catch (JRException e) {
-                LOG.error(e.getMessage(), e);
-                throw new ServiceException("Произошли ошибки во время формирования отчета!");
-            } catch (UnsupportedEncodingException e2) {
-                LOG.error(e2.getMessage(), e2);
-                throw new ServiceException("Шаблон отчета имеет неправильную кодировку!");
-            }
-            return new ByteArrayInputStream(compiledReport.toByteArray());
-        } finally {
-            IOUtils.closeQuietly(byteArrayInputStream);
-            IOUtils.closeQuietly(compiledReport);
-        }
-    }
-
-	@Override
+ 	@Override
 	public void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo){
 		if (declarationTemplateId!=null){
 			LockData objectLock = lockDataService.getLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
@@ -469,5 +445,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     public Integer get(int declarationTypeId, int year) {
         return declarationTemplateDao.get(declarationTypeId, year);
+    }
+
+    @Override
+    public DeclarationSubreport getSubreportByAlias(int declarationTemplateId, String alias) {
+        return declarationSubreportDao.getSubreportByAlias(declarationTemplateId, alias);
     }
 }

@@ -72,6 +72,7 @@ public class GetDeclarationDataHandler
         result.setTaxType(taxType);
 
         result.setDeclarationType(declarationTemplate.getType().getName());
+        result.setSubreports(declarationTemplate.getSubreports());
         result.setDepartment(departmentService.getParentsHierarchy(
                 declaration.getDepartmentId()));
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(

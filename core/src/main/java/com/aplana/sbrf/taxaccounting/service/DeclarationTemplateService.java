@@ -59,13 +59,6 @@ public interface DeclarationTemplateService {
 	String getJrxml(int declarationTemplateId);
 	
 	/**
-	 * Получить jasper-файл
-	 * @param declarationTemplateId идентификатор вида декларации
-	 * @return поток jasper-файла
-	 */
-    InputStream getJasper(int declarationTemplateId);
-
-	/**
 	 * Снять блокировку с declarationTemplate.
 	 * @param declarationTemplateId - идентификатор шаблона налоговой формы
 	 * @param userInfo - информация о пользователе
@@ -233,4 +226,12 @@ public interface DeclarationTemplateService {
      * @param script скрипт
      */
     void updateScript(DeclarationTemplate declarationTemplate, Logger log);
+
+    /**
+     *
+     * @param declarationTypeId
+     * @param alias
+     * @return
+     */
+    DeclarationSubreport getSubreportByAlias(int declarationTypeId, String alias);
 }

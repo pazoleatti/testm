@@ -13,9 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
@@ -23,6 +22,7 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.fill.JRSwapFileVirtualizer;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRSwapFile;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +57,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	private static final Log LOG = LogFactory.getLog(DeclarationDataService.class);
     private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
+    private static final String ENCODING = "UTF-8";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
     private static final SimpleDateFormat SDF_DD_MM_YYYY_HH_MM_SS = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
     private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir")+ File.separator +"%s.%s";
@@ -467,22 +468,53 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return blobDataService.get(pdfUuid).getInputStream();
     }
 
+    private InputStream getJasper(String jrxml) {
+        ByteArrayOutputStream compiledReport = new ByteArrayOutputStream();
+        ByteArrayInputStream byteArrayInputStream = null;
+        try {
+            try {
+                byteArrayInputStream = new ByteArrayInputStream(jrxml.getBytes(ENCODING));
+                JasperDesign jasperDesign = JRXmlLoader.load(byteArrayInputStream);
+                JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
+            } catch (JRException e) {
+                LOG.error(e.getMessage(), e);
+                throw new ServiceException("Произошли ошибки во время формирования отчета!");
+            } catch (UnsupportedEncodingException e2) {
+                LOG.error(e2.getMessage(), e2);
+                throw new ServiceException("Шаблон отчета имеет неправильную кодировку!");
+            }
+            return new ByteArrayInputStream(compiledReport.toByteArray());
+        } finally {
+            IOUtils.closeQuietly(byteArrayInputStream);
+            IOUtils.closeQuietly(compiledReport);
+        }
+    }
+
+    @Override
+    public JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile) {
+        InputStream jasperTemplate = null;
+        try {
+            jasperTemplate = getJasper(jrxml);
+            return fillReport(xmlIn, jasperTemplate, jrSwapFile);
+        } finally {
+            IOUtils.closeQuietly(xmlIn);
+            IOUtils.closeQuietly(jasperTemplate);
+        }
+    }
+
     private JasperPrint createJasperReport(DeclarationData declarationData, JRSwapFile jrSwapFile, TAUserInfo userInfo) {
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC);
         InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
         try {
             if (zipXml != null) {
-                InputStream jasperTemplate = null;
                 ZipInputStream zipXmlIn = new ZipInputStream(zipXml);
                 try {
                     zipXmlIn.getNextEntry();
-                    jasperTemplate = declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId());
-                    return fillReport(zipXmlIn, jasperTemplate, jrSwapFile);
+                    return createJasperReport(zipXmlIn, declarationTemplateService.getJrxml(declarationData.getDeclarationTemplateId()), jrSwapFile);
                 } catch (IOException e) {
                     throw new ServiceException(e.getLocalizedMessage(), e);
                 } finally {
                     IOUtils.closeQuietly(zipXmlIn);
-                    IOUtils.closeQuietly(jasperTemplate);
                 }
             } else {
                 throw new ServiceException("Декларация не сформирована");
@@ -535,6 +567,45 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    public void createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, TAUserInfo userInfo, LockStateLogger stateLogger) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
+        File reportFile = null;
+        try {
+            reportFile = File.createTempFile("specific_report", ".dat");
+            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(reportFile));
+            InputStream inputStream = null;
+            if (ddReportType.getSubreport().getBlobDataId() != null) {
+                inputStream = blobDataService.get(ddReportType.getSubreport().getBlobDataId()).getInputStream();
+            }
+            try {
+                scriptSpecificReportHolder.setDeclarationSubreport(ddReportType.getSubreport());
+                scriptSpecificReportHolder.setFileOutputStream(outputStream);
+                scriptSpecificReportHolder.setFileInputStream(inputStream);
+                scriptSpecificReportHolder.setFileName(ddReportType.getSubreport().getAlias());
+                params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
+                stateLogger.updateState("Формирование отчета");
+                if (!declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE_SPECIFIC_REPORT, logger, params)) {
+                    throw new ServiceException("Не предусмотрена возможность формирования отчета \"%s\"", ddReportType.getSubreport().getName());
+                }
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceLoggerException("Возникли ошибки при формировании отчета", logEntryService.save(logger.getEntries()));
+                }
+            } finally {
+                IOUtils.copy(inputStream, outputStream);
+                IOUtils.closeQuietly(outputStream);
+                IOUtils.closeQuietly(inputStream);
+            }
+            stateLogger.updateState("Сохранение отчета в базе данных");
+            reportService.createDec(declarationData.getId(), blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName()), ddReportType);
+        } catch (IOException e) {
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {
+            if (reportFile != null)
+                reportFile.delete();
+        }
+    }
+
     public void setXlsxDataBlobs(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
         File xlsxFile = null;
         try {
@@ -1031,7 +1102,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "");
             case SPECIFIC_REPORT_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
-                        getTaskName(ddReportType, declarationTemplate.getType().getTaxType(), args[0]),
+                        getTaskName(ddReportType, declarationTemplate.getType().getTaxType()),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
@@ -1072,6 +1143,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         switch (reportType) {
             case PDF_DEC:
             case EXCEL_DEC:
+            case SPECIFIC_REPORT_DEC:
                 String uuidXmlReport = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
                 if (uuidXmlReport != null) {
                     return (long)Math.ceil(blobDataService.getLength(uuidXmlReport) / 1024.);
@@ -1145,7 +1217,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String getTaskName(DeclarationDataReportType ddReportType, TaxType taxType, String... args) {
+    public String getTaskName(DeclarationDataReportType ddReportType, TaxType taxType) {
         switch (ddReportType.getReportType()) {
             case CHECK_DEC:
             case ACCEPT_DEC:
@@ -1154,7 +1226,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case PDF_DEC:
                 return String.format(ddReportType.getReportType().getDescription(), taxType.getDeclarationShortName());
             case SPECIFIC_REPORT_DEC:
-                return String.format(ddReportType.getReportType().getDescription(), args[0], taxType.getDeclarationShortName());
+                return String.format(ddReportType.getReportType().getDescription(), ddReportType.getSubreport().getName(), taxType.getDeclarationShortName());
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", ddReportType.getReportType().getName());
         }
