@@ -238,12 +238,6 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
-        // Проверка суммы требований
-        if (row.reqSum != null && row.reqSum < 0) {
-            def msg = row.getCell('reqSum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
-        }
-
         // Проверка корректности суммы требований
         if (row.dealType != null && row.reqVolume != null && row.reqCourse != null && row.reqSum != null) {
             if ((row.dealType == dealType1 || row.dealType == dealType2) && row.reqSum != calc17(row)) {
@@ -252,12 +246,6 @@ void logicCheck() {
                 def msg2 = row.getCell('reqCourse').column.name
                 logger.error("Строка $rowNum: Значение графы «$msg» должно равняться произведению «$msg1» и «$msg2»!")
             }
-        }
-
-        // Проверка суммы обязательств
-        if (row.guarSum != null && row.guarSum < 0) {
-            def msg = row.getCell('guarSum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // Проверка корректности суммы обязательств
