@@ -182,7 +182,9 @@ void consolidation() {
 
     if (getPeriodOrder() == 4) {
         for (row in sourceRows1) {
-            if (row.endData == null || row.endData > getReportPeriodEndDate()) {
+            def record = getRefBookValue(520L, row.name)
+            def end = record?.END_DATE?.value
+            if (end == null || end > getReportPeriodEndDate()) {
                 samples.add(row)
             }
         }
@@ -192,9 +194,11 @@ void consolidation() {
         def orgCode = getRecordId(513, 'CODE', '1')
         def taxStatus = getRecordId(511, 'CODE', '2')
         for (row in sourceRows1) {
-            def RefOrgCode = getRefBookValue(520L, row.name).ORG_CODE?.value
-            def RefTaxStatus = getRefBookValue(520L, row.name).TAX_STATUS?.value
-            if (RefOrgCode == orgCode && RefTaxStatus == taxStatus && (row.endData == null || row.endData > getReportPeriodEndDate())) {
+            def record = getRefBookValue(520L, row.name)
+            def RefOrgCode = record?.ORG_CODE?.value
+            def RefTaxStatus = record?.TAX_STATUS?.value
+            def end = record?.END_DATE?.value
+            if (RefOrgCode == orgCode && RefTaxStatus == taxStatus && (end == null || end > getReportPeriodEndDate())) {
                 samples.add(row)
             }
         }
@@ -221,6 +225,7 @@ void consolidation() {
         }
         dataRows.add(newRow)
     }
+
     // 5.1
     def useTcoIds1 = getNamesFromSources(sourceRows1)
     for (row in sourceRows2) {
