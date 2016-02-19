@@ -105,7 +105,7 @@ def editableColumns = ['name', 'code', 'docNumber', 'docDate', 'sum1', 'course',
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'sum4', 'sum5', 'sum6', 'sum7', 'sum8']
+def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'sum4', 'sum5', 'sum8']
 
 // Проверяемые на пустые значения атрибуты
 @Field
