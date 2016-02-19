@@ -160,7 +160,7 @@ void consolidation() {
     def formName = formDataService.getFormTemplate(sourceFormTypeId1, getReportPeriod()?.id).name
     if (source1 == null) {
         logger.error("Не найдена форма «%s»: Тип: %s, Период: %s, Подразделение: %s!",
-                formName, FormDataKind.PRIMARY, getPeriod(), departmentService.get(formData.departmentId))
+                formName, FormDataKind.PRIMARY.title, getPeriod(), departmentService.get(formData.departmentId)?.name)
         return
     }
     sourceRows1 = formDataService.getDataRowHelper(source1)?.allSaved
