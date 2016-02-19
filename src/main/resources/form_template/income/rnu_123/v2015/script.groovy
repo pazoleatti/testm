@@ -301,10 +301,10 @@ void logicCheck() {
             def msg27 = row.getCell('sum8').column.name
             def msg28 = row.getCell('sum9').column.name
             def msg29 = row.getCell('sum10').column.name
-            if (getPeriodOrder() == 1 && (row.sum10 != row.sum7 - row.sum4 || row.sum10 != row.sum8 - row.sum9)) {
+            if (getPeriodOrder() == 1 && row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 - row.sum9) {
                 // a
                 logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности значений граф «$msg26» и «$msg22» или разности значений граф «$msg27» и «$msg28»!")
-            } else if (getPeriodOrder() == 4 && (row.sum10 != row.sum7 - row.sum4 || row.sum10 != row.sum8 + row.sum9)) {
+            } else if (getPeriodOrder() == 4 && row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 + row.sum9) {
                 // b
                 logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности значений граф «$msg26» и «$msg22» или сумме значений граф «$msg27» и «$msg28»!")
             }
