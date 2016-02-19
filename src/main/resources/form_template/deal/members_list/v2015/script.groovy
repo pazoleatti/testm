@@ -172,7 +172,7 @@ void consolidation() {
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == sourceFormTypeId2) {
             source2 = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
-
+            sourceRows2 = formDataService.getDataRowHelper(source2)?.allSaved
         }
     }
 
