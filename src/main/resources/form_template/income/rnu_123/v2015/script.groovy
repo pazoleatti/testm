@@ -256,7 +256,7 @@ void logicCheck() {
 
         // 12. Проверка допустимых значений
         ['dealPay', 'tradePay'].each { alias ->
-            if (row[alias] != null && !(row[alias] ==~ pattern)) {
+            if (row[alias] != null && !(row[alias].replaceAll(" ", "") ==~ pattern)) {
                 def msg = row.getCell(alias).column.name
                 logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
                         " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
@@ -363,14 +363,14 @@ def calcFlag23(def row) {
 
 BigDecimal calc23(def flag23, def row) {
     if (row.tradePay != null) {
-        String col23 = row.tradePay.trim().replaceAll(",", ".")
+        String col23 = row.tradePay.replaceAll(" ", "").replaceAll(",", ".")
         return flag23 ? round(new BigDecimal(col23[0..-2]) / 100, 8) : // взяли с запасом
                 round(new BigDecimal(col23), 6)
     }
 }
 
 def calc24(def row, def flag23, def calcCol23) {
-    if (row.tradePay ==~ pattern) {
+    if (row.tradePay != null && row.tradePay.replaceAll(" ", "") ==~ pattern) {
         if (row.sum3 == null) {
             return null
         } else if (!flag23) {
