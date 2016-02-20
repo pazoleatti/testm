@@ -83,12 +83,15 @@ def recordCache = [:]
 def refBookCache = [:]
 
 @Field
+def course810 = getRecordId(15, 'CODE', '810')
+
+@Field
 def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryName', 'code', 'docNumber', 'docDate', 'residual',
                   'currencyCode', 'courseCB', 'period', 'base', 'rate1', 'rate2', 'deviation', 'sum1', 'sum2']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['name', 'code', 'code', 'docNumber', 'docDate', 'residual',  'currencyCode', 'courseCB',
+def editableColumns = ['name', 'code', 'docNumber', 'docDate', 'residual', 'currencyCode', 'courseCB',
                        'period', 'base', 'rate1', 'rate2', 'sum2']
 
 // Автозаполняемые атрибуты
@@ -161,6 +164,12 @@ void logicCheck() {
         // Проверка даты кредитного договора
         checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
+        // Проверка положительности курса
+        if (row.courseCB != null && row.courseCB <= 0) {
+            def msg1 = row.getCell('courseCB').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть больше «0»!")
+        }
+
         // Проверка количества календарных дней
         if (row.period != null && row.period <= 0) {
             def msg1 = row.getCell('period').column.name
@@ -170,16 +179,36 @@ void logicCheck() {
         // Проверка базы года
         if (row.base != null && !(row.base.intValue() in [360, 365, 366])) {
             def msg1 = row.getCell('base').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно «360» или «365» или «366»!")
+            logger.error("Строка $rowNum: Графа «$msg1» должна принимать значение из следующего списка: «360», «365», «366»!")
         }
 
-        //Проверка соотношения процентных ставок
-        if (row.period != null && row.rate1 > row.rate2) {
+        // Проверка соотношения процентных ставок
+        if (row.rate1 != null && row.rate2 != null && row.rate1 > row.rate2) {
             def msg1 = row.getCell('rate1').column.name
             def msg2 = row.getCell('rate2').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть меньше или равно значению графы «$msg2»!")
+            logger.error("Строка $rowNum: Значение графы «$msg2» должно быть больше или равно значению графы «$msg1»!")
         }
 
+        def values = []
+        // Проверка расчётных граф
+        if (calc15(row) != null && row.deviation != calc15(row)) {
+            values.add(row.getCell('deviation').column.name)
+        }
+        if (calc16(row) != null && row.sum1 != calc16(row)) {
+            values.add(row.getCell('sum1').column.name)
+        }
+        if (!values.empty) {
+            def str = values.join(", ")
+            rowError(logger, row, "Строка $rowNum: Неверное значение граф: «$str»!")
+        }
+
+        // Проверка положительности доходов
+        ['deviation', 'sum1', 'sum2'].each {
+            if (row[it] != null && row[it] < 0) {
+                msg = row.getCell(it).column.name
+                rowError(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            }
+        }
     }
 
     // Проверка итоговых значений пофиксированной строке «Итого»
@@ -217,9 +246,19 @@ def BigDecimal calc15(def row) {
 }
 
 def BigDecimal calc16(def row) {
-    if (row.residual != null && row.courseCB != null && row.period != null && row.deviation != null && row.base != null) {
-        return round((BigDecimal) ((row.residual * row.courseCB *  row.period * row.deviation) / row.base), 2)
+    if (row.currencyCode == course810) {
+        if (row.residual != null && row.period != null && row.deviation != null && row.base != null
+                && row.base != 0 && row.period > 0 && (row.base.intValue() in [360, 365, 366]) && row.deviation == calc15(row)) {
+            return round((BigDecimal) ((row.residual * row.period * (row.deviation / 100)) / row.base), 2)
+        }
     }
+    if (row.currencyCode != course810) {
+        if (row.residual != null && row.period != null && row.courseCB != null && row.deviation != null && row.base != null
+                && row.base != 0 && row.courseCB > 0 && row.period > 0 && (row.base.intValue() in [360, 365, 366]) && row.deviation == calc15(row)) {
+            return round((BigDecimal) ((row.residual * row.period * row.courseCB * (row.deviation / 100)) / row.base), 2)
+        }
+    }
+
     return null
 }
 
@@ -417,8 +456,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графы 10-17
-    ['courseCB', 'period', 'base', 'rate1', 'rate2', 'deviation', 'sum1', 'sum2'].each{
-        newRow[it]= parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    ['courseCB', 'period', 'base', 'rate1', 'rate2', 'deviation', 'sum1', 'sum2'].each {
+        newRow[it] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
         colIndex++
     }
 
@@ -431,7 +470,9 @@ void sortFormDataRows(def saveInDB = true) {
     def dataRows = dataRowHelper.allCached
     def columns = sortColumns + (allColumns - sortColumns)
     // Сортировка (без подитогов)
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll {
+        columns.contains(it.getAlias())
+    })
     sortRows(dataRows, columns)
 
     if (saveInDB) {

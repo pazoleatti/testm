@@ -146,8 +146,8 @@
         <name>Совокупная процентная ставка</name>
         <order>14</order>
         <width>5</width>
-        <maxLength>5</maxLength>
-        <precision>2</precision>
+        <maxLength>9</maxLength>
+        <precision>6</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rate2</alias>
@@ -156,8 +156,8 @@
         <name>Рыночная ставка</name>
         <order>15</order>
         <width>5</width>
-        <maxLength>5</maxLength>
-        <precision>2</precision>
+        <maxLength>9</maxLength>
+        <precision>6</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>deviation</alias>
@@ -166,8 +166,8 @@
         <name>Отклонение Совокупной процентной ставки от рыночного уровня</name>
         <order>16</order>
         <width>5</width>
-        <maxLength>10</maxLength>
-        <precision>2</precision>
+        <maxLength>9</maxLength>
+        <precision>6</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum1</alias>
