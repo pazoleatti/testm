@@ -1129,7 +1129,7 @@ def getTotalRowFromXls(def alias, def title, def colSpan, def values, def colOff
  */
 void checkDeclaration() {
     declarationType = 2    // Тип декларации которую проверяем (Налог на прибыль)
-    declaration = declarationService.getLast(declarationType, formData.getDepartmentId(), formData.getReportPeriodId(), formData.comparativePeriodId, formData.accruing)
+    declaration = declarationService.getLast(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
     if (declaration != null && declaration.isAccepted()) {
         logger.error("Декларация банка находится в статусе принята")
     }
