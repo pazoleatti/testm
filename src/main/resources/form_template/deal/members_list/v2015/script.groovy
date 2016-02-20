@@ -213,6 +213,7 @@ void consolidation() {
             for (row in sourceRows2) {
                 if (sample.name == row.name && row.sign == 0) {
                     tmpDataRows.add(sample)
+                    break
                 }
             }
         }
