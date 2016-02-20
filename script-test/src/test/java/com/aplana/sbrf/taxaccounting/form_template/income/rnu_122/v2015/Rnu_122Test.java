@@ -109,8 +109,6 @@ public class Rnu_122Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Рыночная Плата, % годовых / ед. вал.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Рыночная сумма дохода (расхода), выраженная в: Руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода (корректировки расхода) до рыночного уровня (руб.)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 5 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
-
 
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
