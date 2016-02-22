@@ -41,19 +41,19 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     private CellStyleBuilder cellStyleBuilder;
     private static final String TEMPLATE = ClassUtils
-			.classPackageAsResourcePath(FormDataXlsmReportBuilder.class)
-			+ "/acctax.xlsm";
+            .classPackageAsResourcePath(FormDataXlsmReportBuilder.class)
+            + "/acctax.xlsm";
 
     private static final int MERGE_REGIONS_NUM_BACK = 10;
 
-	private enum CellType{
-		DATE,
-		STRING,
-		BIGDECIMAL,
+    private enum CellType{
+        DATE,
+        STRING,
+        BIGDECIMAL,
         NUMERATION,
-		EMPTY ,
-		DEFAULT
-	}
+        EMPTY ,
+        DEFAULT
+    }
 
     private final class CellStyleBuilder{
 
@@ -141,13 +141,14 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
     }
 
-	private FormData data;
+    private FormData data;
+    private List<DataRow<HeaderCell>> headers = new ArrayList<DataRow<HeaderCell>>();
     private RefBookValue refBookValue;
-	private List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
-	private FormTemplate formTemplate;
-	private ReportPeriod reportPeriod,rpCompare;
-	private Date acceptanceDate;
-	private Date creationDate;
+    private List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
+    private FormTemplate formTemplate;
+    private ReportPeriod reportPeriod,rpCompare;
+    private Date acceptanceDate;
+    private Date creationDate;
 
     private Map<String, XSSFFont> fontMap = new HashMap<String, XSSFFont>();
 
@@ -161,37 +162,121 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             throw new IOException("Wrong file format. Template must be in format of 2007 Excel!!!");
         }
         sheet = workBook.getSheetAt(0);
-	}
+    }
 
-	public FormDataXlsmReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows, RefBookValue refBookValue)
+    public FormDataXlsmReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows, RefBookValue refBookValue)
             throws IOException {
-		this();
-		this.data = data.getData();
+        this();
+        this.data = data.getData();
+        this.headers = this.data.cloneHeaders();
         this.dataRows = dataRows;
-		formTemplate = data.getFormTemplate();
-		this.isShowChecked = isShowChecked;
-		reportPeriod = data.getReportPeriod();
-		acceptanceDate = data.getAcceptanceDate();
-		creationDate = data.getCreationDate();
+        formTemplate = data.getFormTemplate().clone();
+        this.isShowChecked = isShowChecked;
+        reportPeriod = data.getReportPeriod();
+        acceptanceDate = data.getAcceptanceDate();
+        creationDate = data.getCreationDate();
         this.refBookValue = refBookValue;
         cellStyleBuilder = new CellStyleBuilder();
         this.rpCompare = data.getRpCompare();
         if (!isShowChecked) {
-            Iterator<Column> iterator = data.getFormTemplate().getColumns().iterator();
+            Iterator<Column> iterator = this.formTemplate.getColumns().iterator();
+            int i = 1;
             while (iterator.hasNext()) {
                 Column c = iterator.next();
-                if (c.isChecking()) {
-                    for(DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow: this.dataRows) {
+                if (c.isChecking() || c.getWidth() == 0) {
+                    Column nextColumn = null;
+                    if (i <= formTemplate.getColumns().size()) {
+                        nextColumn = formTemplate.getColumns().get(i);
+                    }
+
+                    //Удаляем скрытый столбец из данных таблицы
+                    for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow: this.dataRows) {
+                        if (nextColumn != null) {
+                            String value = (String) dataRow.get(c.getAlias());
+                            //Если в скрытом столбце есть какие то значения и он объединяется с соседними столбцами/ячейками (т.е в них нет значений), то перед удалением переносим значения в соседний
+                            com.aplana.sbrf.taxaccounting.model.Cell cell = dataRow.getCell(c.getAlias());
+                            if (cell.getColSpan() > 1 || cell.getRowSpan() > 1) {
+                                dataRow.putForce(nextColumn.getAlias(), value);
+                                com.aplana.sbrf.taxaccounting.model.Cell nextCell = dataRow.getCell(nextColumn.getAlias());
+                                nextCell.setStyleAlias(cell.getStyleAlias());
+                                if (cell.getColSpan() > 1) {
+                                    nextCell.setColSpan(cell.getColSpan() - 1);
+                                }
+                                if (cell.getRowSpan() > 1) {
+                                    nextCell.setRowSpan(cell.getRowSpan());
+                                }
+                            } else {
+                                //Если объединение ячеек было прописано не для скрытого столбца, то просматриваем предыдущие не должны ли они были объединяться со скрытым
+                                //Если они объединялись, то уменьшаем colSpan или rowSpan на 1, т.к этой колонки уже не будет
+                                for (Column prevCol : formTemplate.getColumns()) {
+                                    if (prevCol.getOrder() < c.getOrder()) {
+                                        com.aplana.sbrf.taxaccounting.model.Cell prevCell = dataRow.getCell(prevCol.getAlias());
+                                        if (prevCell.getColSpan() > 1 && (c.getOrder() - (prevCol.getOrder() + prevCell.getColSpan()) <= 1)) {
+                                            //Найденная ячейка объединяет скрытую
+                                            prevCell.setColSpan(prevCell.getColSpan() - 1);
+                                        }
+                                    }
+                                }
+                                //Проверяем объединение по строкам аналогично
+                                for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> prevRow: this.dataRows) {
+                                    if (prevRow.getIndex() < dataRow.getIndex() && prevRow.containsKey(c.getAlias())) {
+                                        com.aplana.sbrf.taxaccounting.model.Cell prevCell = prevRow.getCell(c.getAlias());
+                                        if (prevCell.getRowSpan() > 1 && (dataRow.getIndex() - (prevRow.getIndex() + prevCell.getRowSpan()) <= 1)) {
+                                            //Найденная ячейка объединяет скрытую
+                                            prevCell.setColSpan(prevCell.getColSpan() - 1);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         dataRow.removeColumn(c);
                     }
-                    for(DataRow<HeaderCell> header: this.data.getHeaders()) {
+
+                    //Удаляем скрытый столбец из шапки таблицы
+                    for(DataRow<HeaderCell> header: this.headers) {
+                        if (nextColumn != null) {
+                            HeaderCell headerCell = header.getCell(c.getAlias());
+                            if (headerCell.getColSpan() > 1 || headerCell.getRowSpan() > 1) {
+                                //Если скрытый столбец объединяется с соседним, то перед удалением назначаем объединение соседу
+                                HeaderCell nextHeaderCell = header.getCell(nextColumn.getAlias());
+                                if (headerCell.getColSpan() > 1) {
+                                    nextHeaderCell.setColSpan(headerCell.getColSpan() - 1);
+                                }
+                                if (headerCell.getRowSpan() > 1) {
+                                    nextHeaderCell.setRowSpan(headerCell.getRowSpan());
+                                }
+                            } else {
+                                //Иначе ищем начало объединения в предыдущих ячейках
+                                for (Column prevCol : formTemplate.getColumns()) {
+                                    if (prevCol.getOrder() < c.getOrder()) {
+                                        HeaderCell prevHeaderCell = header.getCell(prevCol.getAlias());
+                                        if (prevHeaderCell.getColSpan() > 1 && (c.getOrder() - (prevCol.getOrder() + prevHeaderCell.getColSpan()) <= 1)) {
+                                            //Найденная ячейка объединяет скрытую
+                                            prevHeaderCell.setColSpan(prevHeaderCell.getColSpan() - 1);
+                                        }
+                                    }
+                                }
+                                //Проверяем объединение по строкам аналогично
+                                for (DataRow<HeaderCell> prevHeader: this.headers) {
+                                    if (prevHeader.getIndex() < header.getIndex() && prevHeader.containsKey(c.getAlias())) {
+                                        HeaderCell prevHeaderCell = prevHeader.getCell(c.getAlias());
+                                        if (prevHeaderCell.getRowSpan() > 1 && (header.getIndex() - (prevHeader.getIndex() + prevHeaderCell.getRowSpan()) <= 1)) {
+                                            //Найденная ячейка объединяет скрытую
+                                            prevHeaderCell.setColSpan(prevHeaderCell.getColSpan() - 1);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         header.removeColumn(c);
                     }
                     iterator.remove();
+                    i--;
                 }
+                i++;
             }
         }
-	}
+    }
 
     @Override
     protected void fillHeader(){
@@ -316,28 +401,34 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2);
     }
 
-	@Override
+    @Override
     protected void createTableHeaders(){
         //Поскольку имеется шаблон с выставленными алиасами, то чтобы не записать данные в ячейку с алиасом
         //делаем проверку на то, что сумма начала записи таблицы и кол-ва строк не превышает номер строки с алиасом
         //и если превышает,то сдвигаем
         AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
         Row r = sheet.getRow(ar.getFirstCell().getRow());
-        if (rowNumber + data.getHeaders().size() >= r.getRowNum()){
-            int rowBreakes = rowNumber + data.getHeaders().size() - r.getRowNum();
+        if (rowNumber + headers.size() >= r.getRowNum()){
+            int rowBreakes = rowNumber + headers.size() - r.getRowNum();
             if(0 == rowBreakes)
                 sheet.shiftRows(r.getRowNum(), r.getRowNum() + 1, 1);
             else
                 sheet.shiftRows(r.getRowNum(), r.getRowNum() + 1, rowBreakes);
         }
-        for (DataRow<HeaderCell> headerCellDataRow : data.getHeaders()){
+        for (DataRow<HeaderCell> headerCellDataRow : headers){
             Row row = sheet.createRow(rowNumber);
             for (int i=0; i<formTemplate.getColumns().size(); i++){
                 Column column = formTemplate.getColumns().get(i);
-                if ((column.isChecking() && !isShowChecked)){
+                if (column.isChecking() && !isShowChecked){
                     continue;
                 }
                 HeaderCell headerCell = headerCellDataRow.getCell(column.getAlias());
+                if (column.getWidth() == 0){
+                    if(headerCell.getColSpan() > 1){
+                        i = i + headerCell.getColSpan() - 1;
+                    }
+                    continue;
+                }
                 Cell workBookcell = mergedDataCells(headerCellDataRow.getCell(column.getAlias()), row, i, true);
                 workBookcell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DEFAULT, column.getAlias() + "_header"));
                 workBookcell.setCellValue(String.valueOf(headerCell.getValue()));
@@ -359,7 +450,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
             for (int i = 0; i < formTemplate.getColumns().size(); i++) {
                 Column column = formTemplate.getColumns().get(i);
-                if (column.isChecking() && !isShowChecked) {
+                if ((column.isChecking() && !isShowChecked)) {
                     continue;
                 }
                 if (column.getWidth() == 0 && column.getAlias() != null) {
@@ -376,42 +467,49 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 Object obj = dataRow.get(column.getAlias());
                 Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, i, false);
                 CellStyle cellStyle;
-                if (ColumnType.STRING.equals(column.getColumnType())) {
+                if (!dataRow.getCell(column.getAlias()).isForceValue()) {
+                    if (ColumnType.STRING.equals(column.getColumnType())) {
+                        String str = (String) obj;
+                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.STRING, column.getAlias());
+                        cell.setCellStyle(cellStyle);
+                        cell.setCellValue(str);
+                    } else if (ColumnType.DATE.equals(column.getColumnType())) {
+                        Date date = (Date) obj;
+                        if (date != null)
+                            cell.setCellValue(date);
+                        else
+                            cell.setCellValue("");
+                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.DATE, column.getAlias());
+                        cell.setCellStyle(cellStyle);
+                    } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
+                        BigDecimal bd = (BigDecimal) obj;
+                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.BIGDECIMAL, column.getAlias());
+                        cell.setCellStyle(cellStyle);
+                        cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+
+                        if (bd != null){
+                            cell.setCellValue(((NumericColumn)column).getPrecision() >0 ? Double.parseDouble(bd.toString()) : bd.longValue());
+                        }
+                    } else if (ColumnType.AUTO.equals(column.getColumnType())) {
+                        Long bd = (Long) obj;
+                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.NUMERATION, column.getAlias());
+                        cell.setCellStyle(cellStyle);
+
+                        cell.setCellValue(bd != null ? String.valueOf(bd) : "");
+                    } else if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
+                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.STRING, column.getAlias());
+                        cell.setCellStyle(cellStyle);
+                        cell.setCellValue(dataRow.getCell(column.getAlias()).getRefBookDereference());
+                    } else if (obj == null) {
+                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.EMPTY, column.getAlias());
+                        cell.setCellStyle(cellStyle);
+                        cell.setCellValue("");
+                    }
+                } else {
                     String str = (String) obj;
                     cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.STRING, column.getAlias());
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue(str);
-                } else if (ColumnType.DATE.equals(column.getColumnType())) {
-                    Date date = (Date) obj;
-                    if (date != null)
-                        cell.setCellValue(date);
-                    else
-                        cell.setCellValue("");
-                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.DATE, column.getAlias());
-                    cell.setCellStyle(cellStyle);
-                } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
-                    BigDecimal bd = (BigDecimal) obj;
-                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.BIGDECIMAL, column.getAlias());
-                    cell.setCellStyle(cellStyle);
-                    cell.setCellType(Cell.CELL_TYPE_NUMERIC);
-
-                    if (bd != null){
-                        cell.setCellValue(((NumericColumn)column).getPrecision() >0 ? Double.parseDouble(bd.toString()) : bd.longValue());
-                    }
-                } else if (ColumnType.AUTO.equals(column.getColumnType())) {
-                    Long bd = (Long) obj;
-                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.NUMERATION, column.getAlias());
-                    cell.setCellStyle(cellStyle);
-
-                    cell.setCellValue(bd != null ? String.valueOf(bd) : "");
-                } else if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
-                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.STRING, column.getAlias());
-                    cell.setCellStyle(cellStyle);
-                    cell.setCellValue(dataRow.getCell(column.getAlias()).getRefBookDereference());
-                } else if (obj == null) {
-                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.EMPTY, column.getAlias());
-                    cell.setCellStyle(cellStyle);
-                    cell.setCellValue("");
                 }
                 if (dataRow.getCell(column.getAlias()).getColSpan() > 1)
                     i = i + dataRow.getCell(column.getAlias()).getColSpan() - 1;
@@ -517,30 +615,34 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
             Cell crsP = createNotHiddenCell(XlsxReportMetadata.CELL_POS, rs);
 
-            String position = data.getSigners().get(i).getPosition();
-            crsP.setCellValue(position);
-            // Вычисляем количество строк
-            int linesCount = getLinesCount(position, columnWidth);
-            rs.setHeight((short) (sheet.getDefaultRowHeight() * linesCount));
+            if (crsP != null) {
+                String position = data.getSigners().get(i).getPosition();
+                crsP.setCellValue(position);
+                // Вычисляем количество строк
+                int linesCount = getLinesCount(position, columnWidth);
+                rs.setHeight((short) (sheet.getDefaultRowHeight() * linesCount));
 
-            Cell crsS = createNotHiddenCell(cellSignPosition, rs);
-            crsS.setCellValue("_______");
-            Cell crsFio = createNotHiddenCell(cellSignPosition + 2, rs);
-            crsFio.setCellValue("(" + data.getSigners().get(i).getName() + ")");
-            crsP.setCellStyle(cs);
-            crsS.setCellStyle(cs);
-            crsFio.setCellStyle(cs);
-            rowNumber++;
+                Cell crsS = createNotHiddenCell(cellSignPosition, rs);
+                crsS.setCellValue("_______");
+                Cell crsFio = createNotHiddenCell(cellSignPosition + 2, rs);
+                crsFio.setCellValue("(" + data.getSigners().get(i).getName() + ")");
+                crsP.setCellStyle(cs);
+                crsS.setCellStyle(cs);
+                crsFio.setCellStyle(cs);
+                rowNumber++;
+            }
         }
 
         //Fill performer
         if(data.getPerformer()!=null){
             r = sheet.createRow(rowNumber);
             c = createNotHiddenCell(0, r);
-            String performer = "Исполнитель: " + (data.getPerformer().getName() != null ? data.getPerformer().getName() : "") + "/" +
-                    (data.getPerformer().getPhone() != null ? data.getPerformer().getPhone() : "");
-            c.setCellValue(performer);
-            sheet.shiftRows(sheet.getLastRowNum(), sheet.getLastRowNum(), 1);
+            if (c != null) {
+                String performer = "Исполнитель: " + (data.getPerformer().getName() != null ? data.getPerformer().getName() : "") + "/" +
+                        (data.getPerformer().getPhone() != null ? data.getPerformer().getPhone() : "");
+                c.setCellValue(performer);
+                sheet.shiftRows(sheet.getLastRowNum(), sheet.getLastRowNum(), 1);
+            }
         }
 
     }
@@ -553,8 +655,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 columnBreaks++;
             }
         }
-        workBook.setPrintArea(0, 0, (!data.getHeaders().isEmpty()?data.getHeaders().get(0).size() - columnBreaks : 0) , 0,
-                (dataRows != null ? dataRows.size() : 0) + data.getSigners().size() + data.getHeaders().size() + 15);
+        workBook.setPrintArea(0, 0, (!headers.isEmpty() ? headers.get(0).size() - columnBreaks : 0) , 0,
+                (dataRows != null ? dataRows.size() : 0) + data.getSigners().size() + headers.size() + 15);
         sheet.setFitToPage(true);
         sheet.setAutobreaks(true);
         sheet.getPrintSetup().setFitHeight((short) 0);
@@ -620,6 +722,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     private Cell createNotHiddenCell(int columnIndex, Row row){
         if (sheet.getColumnWidth(columnIndex) == 0)
+            //return null;
             return createNotHiddenCell(columnIndex + 1, row);
         return row.getCell(columnIndex) != null ? row.getCell(columnIndex) :
                 row.createCell(columnIndex);
@@ -639,18 +742,20 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             r.getCell(ar.getFirstCell().getCol()).setCellValue("");//чтобы при печати не залипала перенесенная запись
         }
         Cell c = createNotHiddenCell(ar.getFirstCell().getCol() + shiftColumns, r);
-        if (richTextString.numFormattingRuns() > 1){
-            int richTextStart = richTextString.length() - 1;
-            XSSFFont richTextIndex = richTextString.getFontAtIndex(richTextStart);
-            richTextString.append(cellValue != null?cellValue:"");
-            richTextString.applyFont(richTextStart,
-                    richTextString.length(), richTextIndex);
-        } else {
-            richTextString.append(cellValue != null?cellValue:"");
-            c.setCellStyle(r.getCell(ar.getFirstCell().getCol())!=null?r.getCell(ar.getFirstCell().getCol()).getCellStyle()
-                : r.createCell(ar.getFirstCell().getCol()).getCellStyle());
+        if (c != null) {
+            if (richTextString.numFormattingRuns() > 1){
+                int richTextStart = richTextString.length() - 1;
+                XSSFFont richTextIndex = richTextString.getFontAtIndex(richTextStart);
+                richTextString.append(cellValue != null?cellValue:"");
+                richTextString.applyFont(richTextStart,
+                        richTextString.length(), richTextIndex);
+            } else {
+                richTextString.append(cellValue != null?cellValue:"");
+                c.setCellStyle(r.getCell(ar.getFirstCell().getCol())!=null?r.getCell(ar.getFirstCell().getCol()).getCellStyle()
+                        : r.createCell(ar.getFirstCell().getCol()).getCellStyle());
+            }
+            c.setCellValue(richTextString);
         }
-        c.setCellValue(richTextString);
     }
 
     private void autoSizeHeaderRowsHeight() {

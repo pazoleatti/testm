@@ -3,14 +3,15 @@ package com.aplana.sbrf.taxaccounting.model;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Данные по отчётной форме
- * 
+ *
  * @author dsultanbekov
  * @author sgoryachkin
- * 
+ *
  */
 public class FormData extends IdentityObject<Long> {
 	private static final long serialVersionUID = 1L;
@@ -66,10 +67,10 @@ public class FormData extends IdentityObject<Long> {
 	 * вызвать только один раз для каждого инстанса FormData, предполагается,
 	 * что это будет делаться в сервисном слое или в DAO. Для того, чтобы
 	 * изменить стадию у уже существующего объекта нужно использовать методы
-	 * 
+	 *
 	 * @{link FormDataWorkflowService} и затем перечитать состояние объекта из
 	 *        БД при помощи DAO
-	 * 
+	 *
 	 * @param state
 	 *            объект, задающий стадию жизненного цикла
 	 */
@@ -88,7 +89,7 @@ public class FormData extends IdentityObject<Long> {
 	/**
 	 * Задать идентификатор {@link Department подразделения} к которому
 	 * относится налоговая форма
-	 * 
+	 *
 	 * @param departmentId
 	 *            идентификатор подразделения
 	 */
@@ -99,7 +100,7 @@ public class FormData extends IdentityObject<Long> {
 	/**
 	 * Возвращает идентификатор отчётного периода, к которому относится
 	 * налоговая форма
-	 * 
+	 *
 	 * @return идентификатор отчётного периода
 	 */
 	public Integer getReportPeriodId() {
@@ -109,7 +110,7 @@ public class FormData extends IdentityObject<Long> {
 	/**
 	 * Задать идентификатор отчётного периода, к которому относится налоговая
 	 * форма
-	 * 
+	 *
 	 * @param reportPeriodId
 	 *            значение идентификатора отчётного периода
 	 */
@@ -140,7 +141,7 @@ public class FormData extends IdentityObject<Long> {
 	 * для каждого объекта, попытка вызвать его повторно приведёт к исключению
 	 * IllegalStateException. При создании объекта FormData с помощью
 	 * конструктора, принимающего Form, этот метод будет вызван автоматически.
-	 * 
+	 *
 	 * @param formTemplate
 	 *            описание шаблона налоговой формы
 	 * @throws IllegalStateException
@@ -172,11 +173,11 @@ public class FormData extends IdentityObject<Long> {
 	public List<Column> getFormColumns() {
 		return formColumns;
 	}
-	
+
 	/**
 	 * Получить информацию об {@link FormDataPerformer исполнителе налоговой
 	 * формы}
-	 * 
+	 *
 	 * @return информация об исполнителе налоговой формы
 	 */
 	public FormDataPerformer getPerformer() {
@@ -186,7 +187,7 @@ public class FormData extends IdentityObject<Long> {
 	/**
 	 * Задать информацию об {@link FormDataPerformer исполнителе налоговой
 	 * формы}
-	 * 
+	 *
 	 * @param performer
 	 *            информация об исполнителе налоговой формы
 	 */
@@ -196,7 +197,7 @@ public class FormData extends IdentityObject<Long> {
 
 	/**
 	 * Получить список подписантов налоговой формы
-	 * 
+	 *
 	 * @return список {@link FormDataSigner подписантов} налоговой формы
 	 */
 	public List<FormDataSigner> getSigners() {
@@ -205,7 +206,7 @@ public class FormData extends IdentityObject<Long> {
 
 	/**
 	 * Задать список подписантов налоговой формы
-	 * 
+	 *
 	 * @param signers
 	 *            список {@link FormDataSigner подписантов} налоговой формы
 	 */
@@ -243,7 +244,7 @@ public class FormData extends IdentityObject<Long> {
 		}
 		return new DataRow<Cell>(cells);
 	}
-   
+
 	public boolean isReturnSign() {
 		return returnSign;
 	}
@@ -299,6 +300,19 @@ public class FormData extends IdentityObject<Long> {
     public void setAccruing(boolean accruing) {
         this.accruing = accruing;
     }
+
+	/**
+	 * Копирует заголовки таблицы.
+	 * Необходим, т.к объект FormData хранится на клиентской части и изменение заголовков в одном месте меняет их сразу везде, что не всегда нужно
+	 * @return склонированные заголовки
+     */
+	public List<DataRow<HeaderCell>> cloneHeaders() {
+		List<DataRow<HeaderCell>> clone = new ArrayList<DataRow<HeaderCell>>();
+		for (DataRow<HeaderCell> header : getHeaders()) {
+			clone.add(header.clone());
+		}
+		return clone;
+	}
 
     @Override
     public String toString() {

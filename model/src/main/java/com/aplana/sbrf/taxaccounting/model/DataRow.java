@@ -253,6 +253,15 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 		return cellValue.setValue(value, getIndex());
 	}
 
+	/**
+	 * Принудительно устанавливает значение ячейки в строке
+     * @return
+     */
+	public Object putForce(String key, Object value) {
+		C cellValue = getCell(key);
+		return cellValue.setValue(value, getIndex(), true);
+	}
+
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
 		for (Map.Entry<? extends String, ?> entry : map.entrySet()) {
@@ -318,4 +327,20 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
     public void setImportIndex(Integer importIndex) {
         this.importIndex = importIndex;
     }
+
+	/**
+	 * Клонирует данные строки для локальных изменений
+	 * @return склонированная строка
+     */
+	public DataRow<C> clone() {
+		DataRow<C> clone = new DataRow<C>();
+		clone.setAlias(this.getAlias());
+		clone.setIndex(this.getIndex());
+		clone.setImportIndex(this.getImportIndex());
+
+		List<C> cloneData = new ArrayList<C>();
+		cloneData.addAll(data);
+		clone.setFormColumns(cloneData);
+		return clone;
+	}
 }

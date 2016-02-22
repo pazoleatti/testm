@@ -44,4 +44,9 @@ public class HeaderCell extends AbstractCell {
 		return this.value;
 	}
 
+	@Override
+	public Object setValue(Object object, Integer rowNumber, boolean force) {
+		return setValue(value, rowNumber);
+	}
+
 }
