@@ -240,7 +240,7 @@ public class FormDataXlsxReportBuilderTestMock {
 
 	@Test
 	public void testReport() throws IOException{
-		FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data,true, dataRows, refBookValue);
+		FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data,true, dataRows, refBookValue, true);
         String reportPath = null;
         try {
             reportPath = builder.createReport();

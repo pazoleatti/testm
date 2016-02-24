@@ -144,7 +144,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     private FormData data;
     private List<DataRow<HeaderCell>> headers = new ArrayList<DataRow<HeaderCell>>();
     private List<Column> columns = new ArrayList<Column>();
-    private RefBookValue refBookValue;
+    private RefBookValue periodCode;
     private List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
     private FormTemplate formTemplate;
     private ReportPeriod reportPeriod,rpCompare;
@@ -153,7 +153,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     private Map<String, XSSFFont> fontMap = new HashMap<String, XSSFFont>();
 
-    public FormDataXlsmReportBuilder() throws IOException {
+    private FormDataXlsmReportBuilder() throws IOException {
         super("report", ".xlsm");
         InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
         try {
@@ -165,7 +165,16 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         sheet = workBook.getSheetAt(0);
     }
 
-    public FormDataXlsmReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows, RefBookValue refBookValue)
+    /**
+     *
+     * @param data данные нф
+     * @param isShowChecked отображать проверочные столбцы?
+     * @param dataRows табличные данные
+     * @param periodCode код периода из справочника
+     * @param deleteHiddenColumns признак того, что в печатном представлении надо убрать скрытые столбцы
+     * @throws IOException
+     */
+    public FormDataXlsmReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows, RefBookValue periodCode, boolean deleteHiddenColumns)
             throws IOException {
         this();
         this.data = data.getData();
@@ -175,7 +184,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         this.reportPeriod = data.getReportPeriod();
         this.acceptanceDate = data.getAcceptanceDate();
         this.creationDate = data.getCreationDate();
-        this.refBookValue = refBookValue;
+        this.periodCode = periodCode;
         this.cellStyleBuilder = new CellStyleBuilder();
         this.rpCompare = data.getRpCompare();
         this.headers = this.data.cloneHeaders();
@@ -183,10 +192,26 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         if (!isShowChecked) {
             Iterator<Column> iterator = this.columns.iterator();
+            while (iterator.hasNext()) {
+                Column c = iterator.next();
+                if (c.isChecking()) {
+                    for(DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow: this.dataRows) {
+                        dataRow.removeColumn(c);
+                    }
+                    for(DataRow<HeaderCell> header: this.data.getHeaders()) {
+                        header.removeColumn(c);
+                    }
+                    iterator.remove();
+                }
+            }
+        }
+
+        if (deleteHiddenColumns) {
+            Iterator<Column> iterator = this.columns.iterator();
             int i = 1;
             while (iterator.hasNext()) {
                 Column c = iterator.next();
-                if (c.isChecking() || c.getWidth() == 0) {
+                if (c.getWidth() == 0) {
                     Column nextColumn = null;
                     if (i < columns.size()) {
                         nextColumn = columns.get(i);
@@ -208,12 +233,12 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                             if (cell.getColSpan() > 1) {
                                 //Уменьшаем объединение столбцов на 1, т.к скрытый столбец будет удален
                                 nextCell.setColSpan(cell.getColSpan() - 1);
+                                if (cell.getRowSpan() > 1) {
+                                    //Строки объединяем только если одновременно объединяются столбцы
+                                    nextCell.setRowSpan(cell.getRowSpan());
+                                }
                             }
-                            if (cell.getRowSpan() > 1) {
-                                nextCell.setRowSpan(cell.getRowSpan());
-                            }
-                        }
-                        if (nextColumn == null || (cell.getColSpan() == 1 && cell.getRowSpan() == 1)) {
+                        } else if (nextColumn == null || cell.getColSpan() == 1) {
                             //Если объединение ячеек было прописано не для скрытого столбца, то просматриваем предыдущие не должны ли они были объединяться со скрытым
                             for (Column prevCol : columns) {
                                 if (prevCol.getOrder() < c.getOrder()) {
@@ -238,12 +263,12 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                             if (headerCell.getColSpan() > 1) {
                                 //Уменьшаем объединение столбцов на 1, т.к скрытый столбец будет удален
                                 nextHeaderCell.setColSpan(headerCell.getColSpan() - 1);
+                                if (headerCell.getRowSpan() > 1) {
+                                    //Строки объединяем только если одновременно объединяются столбцы
+                                    nextHeaderCell.setRowSpan(headerCell.getRowSpan());
+                                }
                             }
-                            if (headerCell.getRowSpan() > 1) {
-                                nextHeaderCell.setRowSpan(headerCell.getRowSpan());
-                            }
-                        }
-                        if (nextColumn == null || (headerCell.getColSpan() == 1 && headerCell.getRowSpan() == 1)) {
+                        } else if (nextColumn == null || headerCell.getColSpan() == 1) {
                             //Если столбец удаляется, но объединение прописано в предыдущих столбах, но надо его найти и уменьшить на 1
                             for (Column prevCol : columns) {
                                 if (prevCol.getOrder() < c.getOrder()) {
@@ -258,6 +283,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                         header.removeColumn(c);
                     }
                     iterator.remove();
+                    //Уменьшаем счетчик т.к один столбец удалили
                     i--;
                 }
                 i++;
@@ -359,8 +385,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         StringBuilder sbPeriodName = new StringBuilder();
         //Fill period
         if(data.getComparativePeriodId() != null){
-            /*String rpName =  !refBookValue.getStringValue().equals("34") ? reportPeriod.getName() : "";
-            String rpCompareName =  !refBookValue.getStringValue().equals("34") ? rpCompare.getName() : "";*/
+            /*String rpName =  !periodCode.getStringValue().equals("34") ? reportPeriod.getName() : "";
+            String rpCompareName =  !periodCode.getStringValue().equals("34") ? rpCompare.getName() : "";*/
             sbPeriodName.append(String.format(
                     XlsxReportMetadata.REPORT_PERIOD,
                     rpCompare.getName(),
@@ -377,7 +403,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         } else {
             sbPeriodName.append(
                     String.format(XlsxReportMetadata.MONTHLY,
-                            !refBookValue.getStringValue().equals("34") ? reportPeriod.getName() : "",
+                            !periodCode.getStringValue().equals("34") ? reportPeriod.getName() : "",
                             reportPeriod.getTaxPeriod().getYear()
                     )
             );

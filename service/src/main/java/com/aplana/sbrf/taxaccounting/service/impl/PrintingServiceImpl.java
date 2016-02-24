@@ -76,7 +76,7 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
-	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger) {
+	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, boolean deleteHiddenColumns, LockStateLogger stateLogger) {
         String filePath = null;
         Logger log = new Logger();
         try {
@@ -103,13 +103,13 @@ public class PrintingServiceImpl implements PrintingService {
             List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getRows(formData, null) : dataRowDao.getTempRows(formData, null));
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
 
-            RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
+            RefBookValue periodCode = refBookFactory.getDataProvider(REF_BOOK_ID).
                 getRecordData(reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
 
             if (stateLogger != null) {
                 stateLogger.updateState("Формирование XLSM-файла");
             }
-            FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data, isShowChecked, dataRows, refBookValue);
+            FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data, isShowChecked, dataRows, periodCode, deleteHiddenColumns);
             filePath = builder.createReport();
             if (stateLogger != null) {
                 stateLogger.updateState("Сохранение XLSM-файла в базе данных");

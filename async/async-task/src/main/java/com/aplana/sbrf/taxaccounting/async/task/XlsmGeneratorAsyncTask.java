@@ -75,7 +75,7 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
         formDataAccessService.canRead(userInfo, formDataId);
-        String uuid = printingService.generateExcel(userInfo, formDataId, manual, isShowChecked, saved, new LockStateLogger() {
+        String uuid = printingService.generateExcel(userInfo, formDataId, manual, isShowChecked, saved, false, new LockStateLogger() {
             @Override
             public void updateState(String state) {
                 lockService.updateState(lock, lockDate, state);
