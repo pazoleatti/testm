@@ -671,7 +671,7 @@ void checkItog(def dataRows) {
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
     // все строки, кроме общего итога
     def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
-    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
+    checkItogRows(groupRows, testItogRows, itogRows, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
@@ -687,6 +687,62 @@ void checkItog(def dataRows) {
             return null
         }
     })
+}
+
+// вынес метод в скрипт для правки проверок
+void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.GroupString groupString, ScriptUtils.CheckGroupSum checkGroupSum) {
+    // считает количество реальных групп данных
+    def groupCount = 0
+    // Итоговые строки были удалены
+    // Неитоговые строки были удалены
+    for (int i = 0; i < dataRows.size(); i++) {
+        DataRow<Cell> row = dataRows.get(i);
+        // итог после итога
+        if (row.getAlias() != null) {
+            if (i < 1 || dataRows.get(i - 1).getAlias() != null) {
+                logger.error("Строка %d: Строка итога не относится к какой-либо группе!", row.getIndex()); // итога (не  подитога)
+                // удаляем из проверяемых итогов строку без подчиненных строк
+                itogRows.remove(row)
+            } else {
+                groupCount++
+            }
+        }
+        // строка другой группы после строки без подитога между ними
+        if (i > 0 && (row == null || row.getAlias() == null)) {
+            def prevRow = dataRows.get(i - 1)
+            if (i < (dataRows.size() - 1) && prevRow.getAlias() == null && isDiffRow(prevRow, row, groupColumns)) {
+                itogRows.add(groupCount, null)
+                groupCount++
+                String groupCols = groupString.getString(prevRow);
+                if (groupCols != null) {
+                    logger.error("Группа «%s» не имеет строки итога!", groupCols); // итога (не  подитога)
+                }
+            }
+        }
+    }
+    if (testItogRows.size() == itogRows.size()) {
+        for (int i = 0; i < testItogRows.size(); i++) {
+            DataRow<Cell> testItogRow = testItogRows.get(i);
+            DataRow<Cell> realItogRow = itogRows.get(i);
+            if (realItogRow == null) {
+                continue
+            }
+            int itg = Integer.valueOf(realItogRow.getAlias().replaceAll("itg#", ""));
+            if (dataRows.size() > itg) {
+                if (dataRows.get(itg).getAlias() != null) {
+                    logger.error(GROUP_WRONG_ITOG_ROW, realItogRow.getIndex());
+                } else {
+                    String groupCols = groupString.getString(dataRows.get(itg));
+                    if (groupCols != null) {
+                        String checkStr = checkGroupSum.check(testItogRow, realItogRow);
+                        if (checkStr != null) {
+                            logger.error(String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr));
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 // Возвращает строку со значениями полей строки по которым идет группировка

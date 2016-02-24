@@ -103,7 +103,6 @@ public class Rnu_101Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Сумма фактически начисленного дохода (руб.)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма дохода, соответствующая рыночному уровню (руб.)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода до рыночного уровня (руб.)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 7 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
 
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -124,7 +123,6 @@ public class Rnu_101Test extends ScriptTestBase {
         row.getCell("sum3").setValue(12L, null);
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(String.format("Строка %d: Неверное значение граф: %s!", 1, "«Сумма дохода, соответствующая рыночному уровню (руб.)», «Сумма доначисления дохода до рыночного уровня (руб.)»"), entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «1» не имеет строки подитога!", entries.get(i++).getMessage());
 
         // Для прохождения всех ЛП после расчета
         testHelper.execute(FormDataEvent.CALCULATE);

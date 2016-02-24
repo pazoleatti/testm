@@ -108,7 +108,6 @@ public class Rnu_171Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Рыночная цена прав требования для целей налогообложения (руб. коп.)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Корректировка финансового результата (руб. коп.)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 12 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -138,7 +137,6 @@ public class Rnu_171Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Доход (выручка) от уступки права требования (руб. коп.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Код налогового учета» должна принимать значение из следующего списка: «10360» или «10361»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Неверное значение граф: «Финансовый результат уступки права требования (руб. коп.)», «Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)», «Корректировка финансового результата (руб. коп.)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «10345» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -155,7 +153,7 @@ public class Rnu_171Test extends ScriptTestBase {
         row.getCell("finResultTax").setValue(2L, null);
         DataRow<Cell> subTotal = formData.createDataRow();
         dataRows.add(subTotal);
-        subTotal.setAlias("itg#1");
+        subTotal.setAlias("itg#0");
         subTotal.getCell("incomeCorrection").setValue(0L, null);
         subTotal.setIndex(2);
         testHelper.execute(FormDataEvent.CHECK);
