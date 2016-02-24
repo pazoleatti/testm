@@ -219,6 +219,12 @@ end;
 
 drop procedure create_form_data_nnn;
 drop sequence seq_form_data_nnn;
+drop function get_style;
+
+drop view v_log_clob_query;
+drop table log_clob_query;
+drop sequence seq_log_query;
+drop sequence seq_log_query_session; 
 
 
 COMMIT;

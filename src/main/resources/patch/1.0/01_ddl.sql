@@ -218,7 +218,8 @@ create or replace package FORM_DATA_PCKG is
                          p_in_departmentReportPeriodId      number,
                          p_in_kind                          number,
                          p_in_compPeriod                    number,
-                         p_in_accruing                      number
+                         p_in_accruing                      number,
+						 p_in_periodorder					number
                         ) RETURN t_source PIPELINED;
 
   FUNCTION get_destinations (
@@ -229,7 +230,8 @@ create or replace package FORM_DATA_PCKG is
                          p_in_departmentReportPeriodId      number,
                          p_in_kind                          number,
                          p_in_compPeriod                    number,
-                         p_in_accruing                      number
+                         p_in_accruing                      number,
+						 p_in_periodorder					number
                         ) RETURN t_destination PIPELINED;
 
 end FORM_DATA_PCKG;
@@ -244,7 +246,8 @@ FUNCTION get_sources (
                          p_in_departmentReportPeriodId      number,
                          p_in_kind                          number,
                          p_in_compPeriod                    number,
-                         p_in_accruing                      number
+                         p_in_accruing                      number,
+						             p_in_periodorder					number
                         ) RETURN t_source PIPELINED IS
     l_source t_source;
     query_source sys_refcursor;
@@ -271,9 +274,9 @@ BEGIN
                 nvl(dual_fd.DEPARTMENT_REPORT_PERIOD_ID, fd.DEPARTMENT_REPORT_PERIOD_ID) as DEPARTMENT_REPORT_PERIOD_ID,
                 nvl(dual_fd.COMPARATIVE_DEP_REP_PER_ID, fd.COMPARATIVE_DEP_REP_PER_ID) as COMPARATIVE_DEP_REP_PER_ID,
                 nvl(dual_fd.ACCRUING, fd.ACCRUING) as ACCRUING,
-                fd.period_order as period_order
+                nvl(dual_fd.PERIOD_ORDER, fd.period_order) as period_order
                 from (
-                 select p_in_destinationFormDataId as ID, p_in_formTemplateId as FORM_TEMPLATE_ID, p_in_kind as KIND, p_in_departmentReportPeriodId as DEPARTMENT_REPORT_PERIOD_ID, p_in_compPeriod as COMPARATIVE_DEP_REP_PER_ID, p_in_accruing as ACCRUING from dual) dual_fd
+                 select p_in_destinationFormDataId as ID, p_in_formTemplateId as FORM_TEMPLATE_ID, p_in_kind as KIND, p_in_departmentReportPeriodId as DEPARTMENT_REPORT_PERIOD_ID, p_in_compPeriod as COMPARATIVE_DEP_REP_PER_ID, p_in_accruing as ACCRUING, p_in_periodorder as PERIOD_ORDER from dual) dual_fd
                  left join form_data fd on fd.id = dual_fd.id) fd
             join department_report_period drp on drp.id = fd.DEPARTMENT_REPORT_PERIOD_ID and (p_in_destinationFormDataId is null or fd.id = p_in_destinationFormDataId)
             join report_period rp on rp.id = drp.REPORT_PERIOD_ID
@@ -390,7 +393,8 @@ FUNCTION get_destinations (
                          p_in_departmentReportPeriodId      number,
                          p_in_kind                          number,
                          p_in_compPeriod                    number,
-                         p_in_accruing                      number
+                         p_in_accruing                      number,
+						             p_in_periodorder					number
                         ) RETURN t_destination PIPELINED IS
     l_destination t_destination;
     query_destination sys_refcursor;
@@ -430,15 +434,15 @@ BEGIN
 				nvl(dual_fd.DEPARTMENT_REPORT_PERIOD_ID, fd.DEPARTMENT_REPORT_PERIOD_ID) as DEPARTMENT_REPORT_PERIOD_ID,
 				nvl(dual_fd.COMPARATIVE_DEP_REP_PER_ID, fd.COMPARATIVE_DEP_REP_PER_ID) as COMPARATIVE_DEP_REP_PER_ID,
 				nvl(dual_fd.ACCRUING, fd.ACCRUING) as ACCRUING,
-        nvl(dual_fd.Period_Order, fd.period_order) as period_order
+				nvl(dual_fd.Period_Order, fd.period_order) as period_order
 				from (
-					select p_in_sourceFormDataId as ID, p_in_formTemplateId as FORM_TEMPLATE_ID, p_in_kind as KIND, p_in_departmentReportPeriodId as DEPARTMENT_REPORT_PERIOD_ID, p_in_compPeriod as COMPARATIVE_DEP_REP_PER_ID, p_in_accruing as ACCRUING, cast(null as number(2)) as PERIOD_ORDER from dual) dual_fd
+					select p_in_sourceFormDataId as ID, p_in_formTemplateId as FORM_TEMPLATE_ID, p_in_kind as KIND, p_in_departmentReportPeriodId as DEPARTMENT_REPORT_PERIOD_ID, p_in_compPeriod as COMPARATIVE_DEP_REP_PER_ID, p_in_accruing as ACCRUING, p_in_periodorder as PERIOD_ORDER from dual) dual_fd
 					left join form_data fd on fd.id = dual_fd.id) fd
 					join department_report_period drp on drp.id = fd.DEPARTMENT_REPORT_PERIOD_ID and (p_in_sourceFormDataId is null or fd.id = p_in_sourceFormDataId)
 					join department_report_period neighbours_drp on neighbours_drp.report_period_id = drp.report_period_id
 					join (
 						  select id, form_template_id, kind, department_report_period_id, COMPARATIVE_DEP_REP_PER_ID, accruing, period_order from form_data
-						  union all (select null as ID, cast(p_in_formTemplateId as NUMBER(9,0)) as FORM_TEMPLATE_ID, cast(p_in_kind as NUMBER(9,0)) as KIND, cast(p_in_departmentReportPeriodId as NUMBER(18,0)) as DEPARTMENT_REPORT_PERIOD_ID, cast(p_in_compPeriod as NUMBER(18,0)) as COMPARATIVE_DEP_REP_PER_ID, cast(p_in_accruing as NUMBER(1,0)) as ACCRUING, cast(null as number(2)) as PERIOD_ORDER from dual)
+						  union all (select null as ID, cast(p_in_formTemplateId as NUMBER(9,0)) as FORM_TEMPLATE_ID, cast(p_in_kind as NUMBER(9,0)) as KIND, cast(p_in_departmentReportPeriodId as NUMBER(18,0)) as DEPARTMENT_REPORT_PERIOD_ID, cast(p_in_compPeriod as NUMBER(18,0)) as COMPARATIVE_DEP_REP_PER_ID, cast(p_in_accruing as NUMBER(1,0)) as ACCRUING, cast(p_in_periodorder as number(2)) as PERIOD_ORDER from dual)
 						) neighbours_fd on neighbours_fd.department_report_period_id = neighbours_drp.id and neighbours_fd.form_template_id = fd.form_template_id and neighbours_fd.kind = fd.kind
 					) fd
       join report_period rp on rp.id = fd.REPORT_PERIOD_ID
