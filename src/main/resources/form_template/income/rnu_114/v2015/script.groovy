@@ -198,7 +198,7 @@ void logicCheck() {
             values.add(row.getCell('sum1').column.name)
         }
         if (!values.empty) {
-            def str = values.join(", ")
+            def str = values.join("», «")
             rowError(logger, row, "Строка $rowNum: Неверное значение граф: «$str»!")
         }
 

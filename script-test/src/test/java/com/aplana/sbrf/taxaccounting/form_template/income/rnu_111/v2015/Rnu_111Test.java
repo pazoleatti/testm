@@ -168,7 +168,7 @@ public class Rnu_111Test extends ScriptTestBase {
         row.getCell("rate2").setValue(1, null);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
-        Assert.assertEquals("Строка 1: Неверное значение граф: «Отклонение процентной ставки от рыночного уровня, (% годовых), Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Неверное значение граф: «Отклонение процентной ставки от рыночного уровня, (% годовых)», «Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
