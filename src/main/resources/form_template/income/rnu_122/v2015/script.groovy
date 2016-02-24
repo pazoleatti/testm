@@ -221,9 +221,9 @@ void logicCheck() {
         }
 
         // 9. Проверка допустимых значений
-        def pattern = /[0-9]+([\.|\,][0-9]+)?\%?/
+        def pattern = /[0-9]+[\.|\,]?[0-9]{0,2}\%?/
         ['dealPay', 'tradePay'].each { alias ->
-            if (row[alias] != null && !(row[alias] ==~ pattern)) {
+            if (row[alias] != null && !(row[alias].replaceAll(" ", "") ==~ pattern)) {
                 def msg = row.getCell(alias).column.name
                 logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
                         " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")

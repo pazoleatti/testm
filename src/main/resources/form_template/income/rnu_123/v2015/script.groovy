@@ -125,7 +125,7 @@ def calcColumns = ['sum4', 'sum5', 'sum8']
 def course810 = getRecordId(15, 'CODE', '810')
 
 @Field
-def pattern = /[0-9]{1,18}([\.|\,][0-9]{1,2})?\%?/
+def pattern = /[0-9]{1,10}[\.|\,]?[0-9]{0,2}\%?/
 
 // Дата начала отчетного периода
 @Field
@@ -268,12 +268,12 @@ void logicCheck() {
 
         // 13. Проверка допустимых целочисленных значений
         def maxValueColumn23 = 100_000_000_000
-        if (!flag23 && calcCol23 >= maxValueColumn23) {
+        if (!flag23 && calcCol23 != null && calcCol23 >= maxValueColumn23) {
             // a.
             def msg = row.getCell('tradePay').column.name
             logger.error("Строка $rowNum: Значение графы «%s» должно быть меньше значения «100 000 000 000»!", msg)
 
-        } else if (flag23 && calcCol23 * 100 >= maxValueColumn23) {
+        } else if (flag23 && calcCol23 != null && calcCol23 * 100 >= maxValueColumn23) {
             // b.
             def msg = row.getCell('tradePay').column.name
             logger.error("Строка $rowNum: Значение графы «%s» должно быть меньше значения «100 000 000 000%%»!", msg)
@@ -362,8 +362,8 @@ def calcFlag23(def row) {
 }
 
 BigDecimal calc23(def flag23, def row) {
-    if (row.tradePay != null) {
-        String col23 = row.tradePay.replaceAll(" ", "").replaceAll(",", ".")
+    if (row.tradePay != null && row.tradePay.replaceAll(" ", "") ==~ pattern) {
+        String col23 = row.tradePay.replaceAll(/\s/, "").replaceAll(",", ".")
         return flag23 ? round(new BigDecimal(col23[0..-2]) / 100, 8) : // взяли с запасом
                 round(new BigDecimal(col23), 6)
     }
