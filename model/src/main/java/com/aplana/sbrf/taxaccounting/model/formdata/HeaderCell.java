@@ -49,4 +49,21 @@ public class HeaderCell extends AbstractCell {
 		return setValue(value, rowNumber);
 	}
 
+	private void setValue(String value) {
+		this.value = value;
+	}
+
+	/**
+	 * Клонирует данные ячейки для локальных изменений
+	 * @return склонированная строка
+	 */
+	public HeaderCell clone() {
+		HeaderCell cell = new HeaderCell();
+		cell.setColSpan(this.getColSpan());
+		cell.setRowSpan(this.getRowSpan());
+		cell.setColumn(this.getColumn());
+		cell.setValueOwner(this.getValueOwner());
+		cell.setValue(this.value);
+		return cell;
+	}
 }

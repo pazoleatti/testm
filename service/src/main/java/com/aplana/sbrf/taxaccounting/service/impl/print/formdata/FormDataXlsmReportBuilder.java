@@ -180,6 +180,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         this.rpCompare = data.getRpCompare();
         this.headers = this.data.cloneHeaders();
         this.columns = this.formTemplate.cloneColumns();
+
         if (!isShowChecked) {
             Iterator<Column> iterator = this.columns.iterator();
             int i = 1;
@@ -187,46 +188,40 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 Column c = iterator.next();
                 if (c.isChecking() || c.getWidth() == 0) {
                     Column nextColumn = null;
-                    if (i <= columns.size()) {
+                    if (i < columns.size()) {
                         nextColumn = columns.get(i);
                     }
 
-                    //Удаляем скрытый столбец из данных таблицы
+                    //Удаляем скрытый столбец таблицы
                     for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow: this.dataRows) {
-                        if (nextColumn != null) {
-                            String value = (String) dataRow.get(c.getAlias());
-                            //Если в скрытом столбце есть какие то значения и он объединяется с соседними столбцами/ячейками (т.е в них нет значений), то перед удалением переносим значения в соседний
-                            com.aplana.sbrf.taxaccounting.model.Cell cell = dataRow.getCell(c.getAlias());
-                            if (cell.getColSpan() > 1 || cell.getRowSpan() > 1) {
+                        String value = (String) dataRow.get(c.getAlias());
+                        com.aplana.sbrf.taxaccounting.model.Cell cell = dataRow.getCell(c.getAlias());
+                        if (nextColumn != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)) {
+                            if (value != null && !value.isEmpty()) {
+                                //Если в скрытом столбце есть какие то значения и он объединяется с соседними столбцами/ячейками (т.е значение для объединенной ячейки хранится в скрытой), то перед удалением переносим значения в соседний
                                 dataRow.putForce(nextColumn.getAlias(), value);
-                                com.aplana.sbrf.taxaccounting.model.Cell nextCell = dataRow.getCell(nextColumn.getAlias());
-                                nextCell.setStyleAlias(cell.getStyleAlias());
-                                if (cell.getColSpan() > 1) {
-                                    nextCell.setColSpan(cell.getColSpan() - 1);
-                                }
-                                if (cell.getRowSpan() > 1) {
-                                    nextCell.setRowSpan(cell.getRowSpan());
-                                }
-                            } else {
-                                //Если объединение ячеек было прописано не для скрытого столбца, то просматриваем предыдущие не должны ли они были объединяться со скрытым
-                                //Если они объединялись, то уменьшаем colSpan или rowSpan на 1, т.к этой колонки уже не будет
-                                for (Column prevCol : columns) {
-                                    if (prevCol.getOrder() < c.getOrder()) {
-                                        com.aplana.sbrf.taxaccounting.model.Cell prevCell = dataRow.getCell(prevCol.getAlias());
-                                        if (prevCell.getColSpan() > 1 && (c.getOrder() - (prevCol.getOrder() + prevCell.getColSpan()) <= 1)) {
-                                            //Найденная ячейка объединяет скрытую
-                                            prevCell.setColSpan(prevCell.getColSpan() - 1);
-                                        }
-                                    }
-                                }
-                                //Проверяем объединение по строкам аналогично
-                                for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> prevRow: this.dataRows) {
-                                    if (prevRow.getIndex() < dataRow.getIndex() && prevRow.containsKey(c.getAlias())) {
-                                        com.aplana.sbrf.taxaccounting.model.Cell prevCell = prevRow.getCell(c.getAlias());
-                                        if (prevCell.getRowSpan() > 1 && (dataRow.getIndex() - (prevRow.getIndex() + prevCell.getRowSpan()) <= 1)) {
-                                            //Найденная ячейка объединяет скрытую
-                                            prevCell.setColSpan(prevCell.getColSpan() - 1);
-                                        }
+                            }
+                            //Переносим стиль с удаленного ячейке в столбце на ячейку в следующем столбце
+                            com.aplana.sbrf.taxaccounting.model.Cell nextCell = dataRow.getCell(nextColumn.getAlias());
+                            nextCell.setStyleAlias(cell.getStyleAlias());
+                            //Переносим объединение ячеек
+                            if (cell.getColSpan() > 1) {
+                                //Уменьшаем объединение столбцов на 1, т.к скрытый столбец будет удален
+                                nextCell.setColSpan(cell.getColSpan() - 1);
+                            }
+                            if (cell.getRowSpan() > 1) {
+                                nextCell.setRowSpan(cell.getRowSpan());
+                            }
+                        }
+                        if (nextColumn == null || (cell.getColSpan() == 1 && cell.getRowSpan() == 1)) {
+                            //Если объединение ячеек было прописано не для скрытого столбца, то просматриваем предыдущие не должны ли они были объединяться со скрытым
+                            for (Column prevCol : columns) {
+                                if (prevCol.getOrder() < c.getOrder()) {
+                                    com.aplana.sbrf.taxaccounting.model.Cell prevCell = dataRow.getCell(prevCol.getAlias());
+                                    if (prevCell.getColSpan() > 1 && (c.getOrder() - (prevCol.getOrder() + prevCell.getColSpan()) <= 1)) {
+                                        //Найденная ячейка объединяет скрытую
+                                        //Уменьшаем объединение столбцов на 1, т.к скрытый столбец будет удален
+                                        prevCell.setColSpan(prevCell.getColSpan() - 1);
                                     }
                                 }
                             }
@@ -235,37 +230,27 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     }
 
                     //Удаляем скрытый столбец из шапки таблицы
-                    for(DataRow<HeaderCell> header: this.headers) {
-                        if (nextColumn != null) {
-                            HeaderCell headerCell = header.getCell(c.getAlias());
-                            if (headerCell.getColSpan() > 1 || headerCell.getRowSpan() > 1) {
-                                //Если скрытый столбец объединяется с соседним, то перед удалением назначаем объединение соседу
-                                HeaderCell nextHeaderCell = header.getCell(nextColumn.getAlias());
-                                if (headerCell.getColSpan() > 1) {
-                                    nextHeaderCell.setColSpan(headerCell.getColSpan() - 1);
-                                }
-                                if (headerCell.getRowSpan() > 1) {
-                                    nextHeaderCell.setRowSpan(headerCell.getRowSpan());
-                                }
-                            } else {
-                                //Иначе ищем начало объединения в предыдущих ячейках
-                                for (Column prevCol : columns) {
-                                    if (prevCol.getOrder() < c.getOrder()) {
-                                        HeaderCell prevHeaderCell = header.getCell(prevCol.getAlias());
-                                        if (prevHeaderCell.getColSpan() > 1 && (c.getOrder() - (prevCol.getOrder() + prevHeaderCell.getColSpan()) <= 1)) {
-                                            //Найденная ячейка объединяет скрытую
-                                            prevHeaderCell.setColSpan(prevHeaderCell.getColSpan() - 1);
-                                        }
-                                    }
-                                }
-                                //Проверяем объединение по строкам аналогично
-                                for (DataRow<HeaderCell> prevHeader: this.headers) {
-                                    if (prevHeader.getIndex() < header.getIndex() && prevHeader.containsKey(c.getAlias())) {
-                                        HeaderCell prevHeaderCell = prevHeader.getCell(c.getAlias());
-                                        if (prevHeaderCell.getRowSpan() > 1 && (header.getIndex() - (prevHeader.getIndex() + prevHeaderCell.getRowSpan()) <= 1)) {
-                                            //Найденная ячейка объединяет скрытую
-                                            prevHeaderCell.setColSpan(prevHeaderCell.getColSpan() - 1);
-                                        }
+                    for (DataRow<HeaderCell> header: this.headers) {
+                        HeaderCell headerCell = header.getCell(c.getAlias());
+                        if (nextColumn != null && (headerCell.getColSpan() > 1 || headerCell.getRowSpan() > 1)) {
+                            //Если скрытый столбец объединяется с соседним, то перед удалением назначаем объединение соседу
+                            HeaderCell nextHeaderCell = header.getCell(nextColumn.getAlias());
+                            if (headerCell.getColSpan() > 1) {
+                                //Уменьшаем объединение столбцов на 1, т.к скрытый столбец будет удален
+                                nextHeaderCell.setColSpan(headerCell.getColSpan() - 1);
+                            }
+                            if (headerCell.getRowSpan() > 1) {
+                                nextHeaderCell.setRowSpan(headerCell.getRowSpan());
+                            }
+                        }
+                        if (nextColumn == null || (headerCell.getColSpan() == 1 && headerCell.getRowSpan() == 1)) {
+                            //Если столбец удаляется, но объединение прописано в предыдущих столбах, но надо его найти и уменьшить на 1
+                            for (Column prevCol : columns) {
+                                if (prevCol.getOrder() < c.getOrder()) {
+                                    HeaderCell prevHeaderCell = header.getCell(prevCol.getAlias());
+                                    if (prevHeaderCell.getColSpan() > 1 && (c.getOrder() - (prevCol.getOrder() + prevHeaderCell.getColSpan()) <= 1)) {
+                                        //Найденная ячейка объединяет скрытую
+                                        prevHeaderCell.setColSpan(prevHeaderCell.getColSpan() - 1);
                                     }
                                 }
                             }

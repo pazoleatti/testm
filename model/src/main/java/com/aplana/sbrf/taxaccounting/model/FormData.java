@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Данные по отчётной форме
@@ -307,11 +308,22 @@ public class FormData extends IdentityObject<Long> {
 	 * @return склонированные заголовки
      */
 	public List<DataRow<HeaderCell>> cloneHeaders() {
-		List<DataRow<HeaderCell>> clone = new ArrayList<DataRow<HeaderCell>>();
+		List<DataRow<HeaderCell>> cloneHeaders = new ArrayList<DataRow<HeaderCell>>();
 		for (DataRow<HeaderCell> header : getHeaders()) {
-			clone.add(header.clone());
+			DataRow<HeaderCell> cloneRow = new DataRow<HeaderCell>();
+			cloneRow.setAlias(header.getAlias());
+			cloneRow.setIndex(header.getIndex());
+			cloneRow.setImportIndex(header.getImportIndex());
+
+			List<HeaderCell> cloneColumns = new ArrayList<HeaderCell>();
+			for (Map.Entry<String, Object> column : header.entrySet()) {
+				HeaderCell headerCell = (HeaderCell) ((DataRow.MapEntry) column).getCell();
+				cloneColumns.add(headerCell.clone());
+			}
+			cloneRow.setFormColumns(cloneColumns);
+			cloneHeaders.add(cloneRow);
 		}
-		return clone;
+		return cloneHeaders;
 	}
 
     @Override
