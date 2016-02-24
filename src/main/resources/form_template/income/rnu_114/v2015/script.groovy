@@ -266,7 +266,7 @@ def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 2
+    totalRow.getCell('fix').colSpan = 3
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
