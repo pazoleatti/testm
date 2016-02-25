@@ -1340,8 +1340,8 @@ public class FormDataServiceTest extends Assert{
         assertTrue(specificReportTypes.contains("Type1"));
         assertTrue(specificReportTypes.contains("Type2(CSV)"));
         assertTrue(specificReportTypes.contains("Тип3 список"));
-        assertTrue(!specificReportTypes.contains("XLSM")); // Стандартные типы не переопределяются
-        assertEquals(specificReportTypes.size(), 3);
+        assertTrue(specificReportTypes.contains("XLSM")); // Стандартные типы теперь переопределяются
+        assertEquals(4, specificReportTypes.size());
     }
 
 
