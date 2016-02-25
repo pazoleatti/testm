@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
@@ -127,11 +128,11 @@ public class Etr4_11Test extends ScriptTestBase {
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
         Assert.assertEquals("Строка 1: Неверное значение граф: «Уровень доначислений/ не учитываемых расходов (в % от факта)», «Налоговое бремя, тыс. руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Графа «Наименование сделки» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Графа «Сумма фактического дохода/расхода по нерыночным сделкам, тыс. руб. (налоговый учет)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Графа «Сумма доначислений до рыночного уровня, тыс. руб.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Графа «Уровень доначислений/ не учитываемых расходов (в % от факта)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Графа «Налоговое бремя, тыс. руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 2, "Наименование сделки"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 2, "Сумма фактического дохода/расхода по нерыночным сделкам, тыс. руб. (налоговый учет)"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 2, "Сумма доначислений до рыночного уровня, тыс. руб."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 2, "Уровень доначислений/ не учитываемых расходов (в % от факта)"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 2, "Налоговое бремя, тыс. руб."), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 2: Графа «Уровень доначислений/ не учитываемых расходов (в % от факта)» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно). Ячейка будет заполнена значением «0».", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 3: Графа «Уровень доначислений/ не учитываемых расходов (в % от факта)» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно). Ячейка будет заполнена значением «0».", entries.get(i++).getMessage());
 

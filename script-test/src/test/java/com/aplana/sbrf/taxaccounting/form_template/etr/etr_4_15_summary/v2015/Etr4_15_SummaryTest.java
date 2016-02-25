@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.form_template.etr.etr_4_15_summary.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
@@ -83,21 +85,18 @@ public class Etr4_15_SummaryTest extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         // ожидаемый результат - должны быть незаполненые обязательные поля в итогах
         Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
-        String [] logMsgs = new String [] {
-                "Строка 1: Графа «Период сравнения. НДС всего, млн. руб.» не заполнена!",
-                "Строка 1: Графа «Период сравнения. В том числе НДС не учитываемый, млн. руб.» не заполнена!",
-                "Строка 1: Графа «Период сравнения. Доля НДС не учитываемый, %» не заполнена!",
-                "Строка 1: Графа «Период. НДС всего, млн. руб.» не заполнена!",
-                "Строка 1: Графа «Период. В том числе НДС не учитываемый, млн. руб.» не заполнена!",
-                "Строка 1: Графа «Период. Доля НДС не учитываемый, %» не заполнена!",
-                "Строка 1: Графа «Изменения за период. НДС всего, млн. руб.» не заполнена!",
-                "Строка 1: Графа «Изменения за период. В том числе НДС не учитываемый, млн. руб.» не заполнена!",
-                "Строка 1: Графа «Изменения за период. Доля НДС не учитываемый, %» не заполнена!"
-        };
-        for (String logMsg : logMsgs) {
-            Assert.assertEquals(logMsg, testHelper.getLogger().getEntries().get(i++).getMessage());
-        }
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Период сравнения. НДС всего, млн. руб."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Период сравнения. В том числе НДС не учитываемый, млн. руб."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Период сравнения. Доля НДС не учитываемый, %"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Период. НДС всего, млн. руб."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Период. В том числе НДС не учитываемый, млн. руб."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Период. Доля НДС не учитываемый, %"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Изменения за период. НДС всего, млн. руб."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Изменения за период. В том числе НДС не учитываемый, млн. руб."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Изменения за период. Доля НДС не учитываемый, %"), entries.get(i++).getMessage());
+
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
 
         // получение строк, в форме одна итогвая строка + добавить еще одну обычную
