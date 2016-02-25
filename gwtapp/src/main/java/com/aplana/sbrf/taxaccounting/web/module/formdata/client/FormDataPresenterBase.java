@@ -128,7 +128,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void updateRightButtonsHeight(int height);
 
-        void setSpecificReportTypes(List<String> specificReportTypes);
+        void setReportTypes(List<String> reportTypes);
     }
 
 	public static final String NAME_TOKEN = "!formData";

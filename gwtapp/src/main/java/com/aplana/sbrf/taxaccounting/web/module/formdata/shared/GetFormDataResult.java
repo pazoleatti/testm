@@ -36,7 +36,7 @@ public class GetFormDataResult implements Result {
     private boolean canCreatedManual;
     private boolean correctionDiff;
     private boolean readOnly;
-    private List<String> specificReportTypes;
+    private List<String> reportTypes;
 	/* Т.к. на GWT уровне сложно преобразовать Date в дату формата dd.mm.yyyy hh:mm (из-за того что функции работы
 	с временем в Date - Deprecated, а Calendar не поддерживается), то клиенту мы будем посылать уже сформировнную в
 	таком формате строку*/
@@ -111,12 +111,12 @@ public class GetFormDataResult implements Result {
 		this.allStyles = allStyles;
 	}
 
-    public List<String> getSpecificReportTypes() {
-        return specificReportTypes;
+    public List<String> getReportTypes() {
+        return reportTypes;
     }
 
-    public void setSpecificReportTypes(List<String> specificReportTypes) {
-        this.specificReportTypes = specificReportTypes;
+    public void setReportTypes(List<String> reportTypes) {
+        this.reportTypes = reportTypes;
     }
 
     public String getLockDate() {

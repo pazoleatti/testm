@@ -292,19 +292,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     @Override
     public void updatePrintReportButtonName(String fdReportType, boolean isLoad) {
-        if (ReportType.EXCEL.getName().equals(fdReportType)) {
-            if (isLoad) {
-                printToExcel.setText("Выгрузить в XLSM");
-            } else {
-                printToExcel.setText("Сформировать XLSM");
-            }
-        } else if (ReportType.CSV.getName().equals(fdReportType)) {
-            if (isLoad) {
-                printToCSV.setText("Выгрузить в CSV");
-            } else {
-                printToCSV.setText("Сформировать CSV");
-            }
-        } else if (fdReportType != null && !fdReportType.isEmpty()) {
+        if (fdReportType != null && !fdReportType.isEmpty()) {
             LinkButton linkButton = (LinkButton) printAnchor.getItem(fdReportType);
             if (linkButton != null) {
                 if (isLoad) {
@@ -981,23 +969,21 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-    public void setSpecificReportTypes(List<String> specificReportTypes) {
+    public void setReportTypes(List<String> reportTypes) {
         printAnchor.clear();
-        printAnchor.addItem(ReportType.EXCEL.getName(), printToExcel);
-        printAnchor.addItem(ReportType.CSV.getName(), printToCSV);
-        for(final String specificReportType: specificReportTypes) {
-            LinkButton linkButton = new LinkButton("Сформировать \"" + specificReportType + "\"");
+        for(final String reportType: reportTypes) {
+            LinkButton linkButton = new LinkButton("Сформировать \"" + reportType + "\"");
             linkButton.setHeight("20px");
             linkButton.setDisableImage(true);
             linkButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     if (getUiHandlers() != null) {
-                        getUiHandlers().onPrintClicked(specificReportType, false);
+                        getUiHandlers().onPrintClicked(reportType, false);
                     }
                 }
             });
-            printAnchor.addItem(specificReportType, linkButton);
+            printAnchor.addItem(reportType, linkButton);
         }
     }
 }

@@ -2078,15 +2078,6 @@ public class FormDataServiceImpl implements FormDataService {
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.warn("Возникли ошибки при получении списка отчетов");
         }
-        Iterator<String> iterator = specificReportTypes.iterator();
-        while (iterator.hasNext()) {
-            String specificReportType = iterator.next();
-            if (FormDataReportType.EXCEL.getReportName().equals(specificReportType) ||
-                    FormDataReportType.CSV.getReportName().equals(specificReportType)) {
-                iterator.remove();
-                LOG.error(String.format("Нельзя переопределить стандартный отчет: %s.", specificReportType));
-            }
-        }
         return specificReportTypes;
     }
 

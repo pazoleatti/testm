@@ -166,7 +166,17 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             }
 
             result.getFormData().initFormTemplateParams(formTemplate);
-            result.setSpecificReportTypes(formDataService.getSpecificReportTypes(formData, userInfo, logger));
+
+            //Составляем общий список печатных представлений
+            List<String> reportTypes = formDataService.getSpecificReportTypes(formData, userInfo, logger);
+            //Если название спецотчета совпадает с названием стадартного отчета, то он заменяет его, иначе добавляем стандартный отчет
+            if (!reportTypes.contains(FormDataReportType.EXCEL.getReportName())) {
+                reportTypes.add(FormDataReportType.EXCEL.getReportName());
+            }
+            if (!reportTypes.contains(FormDataReportType.CSV.getReportName())) {
+                reportTypes.add(FormDataReportType.CSV.getReportName());
+            }
+            result.setReportTypes(reportTypes);
             return result;
         } catch (Exception e) {
 			LOG.error(e.getMessage(), e);

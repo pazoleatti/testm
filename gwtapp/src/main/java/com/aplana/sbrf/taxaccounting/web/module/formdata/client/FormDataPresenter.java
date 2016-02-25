@@ -56,7 +56,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private final LogAreaPresenter logAreaPresenter;
     private ReportType timerType;
     private Map<String, TimerReportResult.StatusReport> reportTimerStatus;
-    private List<String> specificReportTypes = new ArrayList<String>();
+    private List<String> reportTypes = new ArrayList<String>();
 
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
@@ -297,7 +297,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
-        action.setSpecificReportTypes(specificReportTypes);
+        action.setReportTypes(reportTypes);
         dispatcher.execute(action, CallbackUtils
                 .simpleCallback(new AbstractCallback<TimerReportResult>() {
                     @Override
@@ -896,8 +896,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 formSearchPresenter.setFormTemplateId(formData.getFormTemplateId());
                                 eventScriptStatus = result.getEventScriptStatus();
 
-                                specificReportTypes = result.getSpecificReportTypes();
-                                getView().setSpecificReportTypes(result.getSpecificReportTypes());
+                                reportTypes = result.getReportTypes();
+                                getView().setReportTypes(result.getReportTypes());
                                 if (formData.getComparativePeriodId() != null) {
                                     getView().updateTableTopPosition(FormDataView.DEFAULT_TABLE_TOP_POSITION + 20);
                                     getView().updateRightButtonsHeight(FormDataView.DEFAULT_RIGHT_BUTTONS_HEIGHT + 20);
