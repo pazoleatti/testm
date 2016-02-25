@@ -284,7 +284,7 @@ void calc() {
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
 
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 def calc21(def row) {
