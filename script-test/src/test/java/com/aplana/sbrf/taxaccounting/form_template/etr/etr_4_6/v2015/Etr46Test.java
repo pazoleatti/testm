@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.form_template.etr.etr_4_6.v2015;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -14,7 +15,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*;
+import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.getColumnName;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 
@@ -101,11 +102,11 @@ public class Etr46Test extends ScriptTestBase {
 
         int i = 0;
         for (int rowIndex = 1; rowIndex <= dataRows.size(); rowIndex++) {
-            Assert.assertEquals(String.format(WRONG_NON_EMPTY, rowIndex, getColumnName(row, "comparePeriod")), entries.get(i++).getMessage());
-            Assert.assertEquals(String.format(WRONG_NON_EMPTY, rowIndex, getColumnName(row, "currentPeriod")), entries.get(i++).getMessage());
+            Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, rowIndex, getColumnName(row, "comparePeriod")), entries.get(i++).getMessage());
+            Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, rowIndex, getColumnName(row, "currentPeriod")), entries.get(i++).getMessage());
             if (rowIndex < 4) {
-                Assert.assertEquals(String.format(WRONG_NON_EMPTY, rowIndex, getColumnName(row, "deltaRub")), entries.get(i++).getMessage());
-                Assert.assertEquals(String.format(WRONG_NON_EMPTY, rowIndex, getColumnName(row, "deltaPercent")), entries.get(i++).getMessage());
+                Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, rowIndex, getColumnName(row, "deltaRub")), entries.get(i++).getMessage());
+                Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, rowIndex, getColumnName(row, "deltaPercent")), entries.get(i++).getMessage());
             }
         }
         for (int rowIndex = 1; rowIndex <= 3; rowIndex++) {
