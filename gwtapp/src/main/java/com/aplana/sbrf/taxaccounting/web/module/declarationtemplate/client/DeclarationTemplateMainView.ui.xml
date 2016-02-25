@@ -18,27 +18,12 @@
         }
 
         .btnPanel {
-            height: 30px;
+            padding-left: 10px;
+            padding-top: 10px;
         }
-
-        .btnPanel td {
-            vertical-align: middle !important;
-        }
-
 
         .btnPanel2 td {
             vertical-align: middle !important;
-        }
-
-        .table2 {
-            z-index: 0;
-            position: absolute !important;
-            bottom: 0;
-            right: 10px;
-            left: 1px;
-            top: 140px;
-            height: inherit !important;
-            border-top: 1px solid #aeaeac;
         }
 
         .table {
@@ -52,7 +37,7 @@
 
         .horSep {
             height: 1px;
-            margin: 4px 9px;
+            margin: 10px 10px;
             border-top: 1px solid #aeaeac;
         }
 
@@ -105,7 +90,7 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}"  width="100%">
+                <g:HorizontalPanel width="100%">
                     <g:cell>
                         <style:LeftBar childValign="middle" marginRight="10" addStyleNames="{style.btnPanel}">
                             <g:Button text="Сохранить" ui:field="saveButton"/>

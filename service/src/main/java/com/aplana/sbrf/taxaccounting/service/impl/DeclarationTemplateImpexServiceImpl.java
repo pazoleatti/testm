@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
@@ -12,8 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -31,6 +34,7 @@ public class DeclarationTemplateImpexServiceImpl implements
     public final static String VERSION_FILE = "version";
     public final static String SCRIPT_FILE = "script.groovy";
     public final static String REPORT_FILE = "report.jrxml";
+    private static final String CONTENT_FILE = "content.xml";
 
 	private final static String ENCODING = "UTF-8";
 
@@ -46,7 +50,36 @@ public class DeclarationTemplateImpexServiceImpl implements
 			/*zos.putNextEntry(ze);
 			zos.write("1.0".getBytes());
 			zos.closeEntry();*/
-			
+
+            ze = new ZipEntry(CONTENT_FILE);
+            zos.putNextEntry(ze);
+            DeclarationTemplateContent dtc = new DeclarationTemplateContent();
+            dtc.fillDeclarationTemplateContent(dt);
+            for (DeclarationSubreportContent declarationSubreportContent: dtc.getSubreports()) {
+                if (declarationSubreportContent.getBlobDataId() != null) {
+                    declarationSubreportContent.setFileName(blobDataService.get(declarationSubreportContent.getBlobDataId()).getName());
+                }
+            }
+            JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            jaxbMarshaller.marshal(dtc, zos);
+            zos.closeEntry();
+
+            for(DeclarationSubreport subreport: dt.getSubreports()) {
+                if (subreport.getBlobDataId() != null) {
+                    ze = new ZipEntry(subreport.getBlobDataId());
+                    zos.putNextEntry(ze);
+                    InputStream is = blobDataService.get(subreport.getBlobDataId()).getInputStream();
+                    try {
+                        IOUtils.copy(is, zos);
+                    } finally {
+                        IOUtils.closeQuietly(is);
+                        zos.closeEntry();
+                    }
+                }
+            }
+
 			// Script
             String dtScript = dt.getCreateScript();
             if (dtScript != null){
@@ -84,12 +117,14 @@ public class DeclarationTemplateImpexServiceImpl implements
 	public DeclarationTemplate importDeclarationTemplate(TAUserInfo userInfo, Integer id,
 			InputStream is) {
 		try {
-			ZipInputStream zis = new ZipInputStream(is);
+            ZipInputStream zis = new ZipInputStream(is);
 			ZipEntry entry;
             DeclarationTemplate dt = declarationTemplateService.get(id);
             dt.setXsdId(null);
             dt.setJrxmlBlobId(null);
             dt.setCreateScript("");
+            Map<String, byte[]> files = new HashMap<String, byte[]>();
+            DeclarationTemplateContent dtc = null;
             while((entry = zis.getNextEntry())!=null){
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 if (entry.getSize() == 0){
@@ -102,12 +137,29 @@ public class DeclarationTemplateImpexServiceImpl implements
                     IOUtils.copy(zis, baos);
                     String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
                     dt.setJrxmlBlobId(uuid);
-                }else if (entry.getName().endsWith(".xsd")){
+                } else if (entry.getName().endsWith(".xsd")){
                     IOUtils.copy(zis, baos);
                     String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
                     dt.setXsdId(uuid);
+                } else if (entry.getName().equals(CONTENT_FILE)){
+                    IOUtils.copy(zis, baos);
+                    JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
+                    Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+                    dtc = (DeclarationTemplateContent) jaxbUnmarshaller.unmarshal(
+                            new InputStreamReader(new ByteArrayInputStream(baos.toByteArray()), ENCODING));
+                } else {
+                    baos = new ByteArrayOutputStream();
+                    IOUtils.copy(zis, baos);
+                    files.put(entry.getName(), baos.toByteArray());
                 }
             }
+            for(DeclarationSubreportContent declarationSubreportContent: dtc.getSubreports()) {
+                if (declarationSubreportContent.getBlobDataId() != null && files.get(declarationSubreportContent.getBlobDataId()) != null) {
+                    String uuid = blobDataService.create(new ByteArrayInputStream(files.get(declarationSubreportContent.getBlobDataId())), declarationSubreportContent.getFileName());
+                    declarationSubreportContent.setBlobDataId(uuid);
+                }
+            }
+            dtc.fillDeclarationTemplate(dt);
             return dt;
 			
             /*if ("1.0".equals(version)){
@@ -125,7 +177,7 @@ public class DeclarationTemplateImpexServiceImpl implements
             } else {
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
             }*/
-		} catch (IOException e) {
+		} catch (Exception e) {
             throw new ServiceException("Не удалось импортировать шаблон", e);
         }
     }

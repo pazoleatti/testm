@@ -177,7 +177,8 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
                     "union select blob_data_id from form_data_report " +
                     "union select blob_data_id from notification " +
                     "union select blob_data_id from ifrs_data " +
-                    "union select blob_data_id from form_data_file) where id is not null) " +
+                    "union select blob_data_id from form_data_file " +
+                    "union select blob_data_id from declaration_subreport) where id is not null) " +
                     "and (sysdate - bd.creation_date) > " + (isDateDiffNumber() ? "1" : "numtodsinterval(24, 'hour')"));
         } catch (DataAccessException e){
             throw new DaoException(String.format("Ошибка при удалении устаревших записей таблицы BLOB_DATA. %s.", e.getMessage()));

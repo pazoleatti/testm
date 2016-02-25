@@ -25,7 +25,6 @@ public final class DeclarationTemplateTokens {
     public static final int declarationTemplateSubreportsPriority = 2;
 
 
-    public static final String declarationTemplate2 = "!declarationTemplate2";
     public static final String declarationTemplate = "!declarationTemplate";
     public static final String declarationVersionList = "!declarationVersionList";
 	public static final String declarationTemplateList = "!declarationTemplateList";

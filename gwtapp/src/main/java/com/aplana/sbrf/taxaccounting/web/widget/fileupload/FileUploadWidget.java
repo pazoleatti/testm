@@ -223,7 +223,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
             uploadReg = uploadData.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
                 @Override
                 public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                    String result = event.getResults().replaceAll(respPattern, "");
+                    String result = event.getResults().replaceAll(respPattern, "$2");
                     LogCleanEvent.fire(FileUploadWidget.this);
                     JSONObject answer = JSONParser.parseLenient(result).isObject();
                     if (answer.get(UuidEnum.UUID.toString()) != null) {

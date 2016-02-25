@@ -35,7 +35,6 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
         public DeclarationSubreport mapRow(ResultSet rs, int index) throws SQLException {
 			final DeclarationSubreport result = new DeclarationSubreport();
             result.setId(SqlUtils.getLong(rs, "id"));
-            result.setDeclarationTemplateId(SqlUtils.getInteger(rs, "declaration_template_id"));
             result.setAlias(rs.getString("alias"));
             result.setName(rs.getString("name"));
             result.setOrder(SqlUtils.getInteger(rs, "ord"));

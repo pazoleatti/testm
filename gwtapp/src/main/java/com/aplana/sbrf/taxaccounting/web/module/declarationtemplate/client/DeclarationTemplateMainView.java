@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
@@ -104,21 +105,23 @@ public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationT
 
 	@Override
 	public void setDeclarationTemplate(final DeclarationTemplateExt declarationTemplateExt) {
-        /*uploadDectForm.reset();*/
-        /*uploadJrxmlForm.reset();*/
         Integer id = declarationTemplateExt.getDeclarationTemplate().getId() != null ?
                 declarationTemplateExt.getDeclarationTemplate().getId() : 0;
         DeclarationTemplate template = declarationTemplateExt.getDeclarationTemplate();
         uploadDectFile.setActionUrl(urlTemplates.getUploadDTUrl(id).asString());
         title.setText(template.getType().getName());
-        //driver.edit(declarationTemplateExt);
         setEnabled(template.getId() != null);
-        templateId = id;
+        setTemplateId(templateId);
 	}
 
     @Override
     public HandlerRegistration addChangeHandlerDect(ValueChangeHandler<String> valueChangeHandler) {
         return uploadDectFile.addValueChangeHandler(valueChangeHandler);
+    }
+
+    @Override
+    public HandlerRegistration addStartLoadHandlerDect(StartLoadFileEvent.StartLoadFileHandler handler) {
+        return uploadDectFile.addStartLoadHandler(handler);
     }
 
     @Override

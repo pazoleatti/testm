@@ -48,79 +48,83 @@ public class DeclarationTemplateController {
     @RequestMapping(value = "declarationTemplate/downloadDect/{declarationTemplateId}",method = RequestMethod.GET)
 	public void downloadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
-		resp.setContentType("application/zip");
-		resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-		resp.setCharacterEncoding("UTF-8");
-		try {
-			declarationTemplateImpexService.exportDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, resp.getOutputStream());
-		} finally {
-        	IOUtils.closeQuietly(resp.getOutputStream());
-		}
+        if (checkRole(resp, securityService.currentUserInfo())) {
+            String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
+            resp.setContentType("application/zip");
+            resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            resp.setCharacterEncoding("UTF-8");
+            try {
+                declarationTemplateImpexService.exportDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, resp.getOutputStream());
+            } finally {
+                IOUtils.closeQuietly(resp.getOutputStream());
+            }
+        }
 	}
 
 	@RequestMapping(value = "declarationTemplate/uploadDect/{declarationTemplateId}",method = RequestMethod.POST)
 	public void uploadDect(@RequestParam(value = "uploader", required = true) MultipartFile file,
                            @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws FileUploadException, IOException {
-        if (declarationTemplateId == 0)
-            throw new ServiceException("Сначала сохраните шаблон.");
+        if (checkRole(resp, securityService.currentUserInfo())) {
+            if (declarationTemplateId == 0)
+                throw new ServiceException("Сначала сохраните шаблон.");
 
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        declarationTemplateService.checkLockedByAnotherUser(declarationTemplateId, userInfo);
-        declarationTemplateService.lock(declarationTemplateId, userInfo);
+            TAUserInfo userInfo = securityService.currentUserInfo();
+            declarationTemplateService.checkLockedByAnotherUser(declarationTemplateId, userInfo);
+            declarationTemplateService.lock(declarationTemplateId, userInfo);
 
-        try {
-            req.setCharacterEncoding("UTF-8");
+            try {
+                req.setCharacterEncoding("UTF-8");
 
-            if (file.getSize() == 0)
-                throw new ServiceException("Архив пустой.");
-            DeclarationTemplate declarationTemplate = declarationTemplateImpexService.importDeclarationTemplate
-                    (securityService.currentUserInfo(), declarationTemplateId, file.getInputStream());
-            //http://jira.aplana.com/browse/SBRFACCTAX-12066
-            Logger logger = new Logger();
-            logger.setTaUserInfo(securityService.currentUserInfo());
+                if (file.getSize() == 0)
+                    throw new ServiceException("Архив пустой.");
+                DeclarationTemplate declarationTemplate = declarationTemplateImpexService.importDeclarationTemplate
+                        (securityService.currentUserInfo(), declarationTemplateId, file.getInputStream());
+                //http://jira.aplana.com/browse/SBRFACCTAX-12066
+                Logger logger = new Logger();
+                logger.setTaUserInfo(securityService.currentUserInfo());
 
 
-            Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
+                Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
 
-            if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
-                mainOperatingService.isInUsed(
-                        declarationTemplateId,
-                        declarationTemplate.getType().getId(),
-                        declarationTemplate.getStatus(),
-                        declarationTemplate.getVersion(),
-                        endDate,
-                        logger);
-                checkErrors(logger);
-            }
+                if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)) {
+                    mainOperatingService.isInUsed(
+                            declarationTemplateId,
+                            declarationTemplate.getType().getId(),
+                            declarationTemplate.getStatus(),
+                            declarationTemplate.getVersion(),
+                            endDate,
+                            logger);
+                    checkErrors(logger);
+                }
 
-            //Проверка на использоваение jrxml другими декларациями
-            //http://jira.aplana.com/browse/SBRFACCTAX-12066
-            if (
-                    declarationTemplate.getJrxmlBlobId() != null
-                            &&
-                    declarationTemplateService.checkExistingDataJrxml(declarationTemplateId, logger)){
+                //Проверка на использоваение jrxml другими декларациями
+                //http://jira.aplana.com/browse/SBRFACCTAX-12066
+                if (
+                        declarationTemplate.getJrxmlBlobId() != null
+                                &&
+                                declarationTemplateService.checkExistingDataJrxml(declarationTemplateId, logger)) {
+                    JSONObject resultUuid = new JSONObject();
+                    String uploadUuid = blobDataService.create(file.getInputStream(), file.getName());
+                    resultUuid.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(logger.getEntries()));
+                    resultUuid.put(UuidEnum.UPLOADED_FILE.toString(), uploadUuid);
+
+                    resp.getWriter().printf(resultUuid.toString());
+                    return;
+                } else {
+                    mainOperatingService.edit(declarationTemplate, endDate, logger, securityService.currentUserInfo());
+                }
+
                 JSONObject resultUuid = new JSONObject();
-                String uploadUuid = blobDataService.create(file.getInputStream(), file.getName());
-                resultUuid.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(logger.getEntries()));
-                resultUuid.put(UuidEnum.UPLOADED_FILE.toString(), uploadUuid);
-
+                resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(logger.getEntries()));
                 resp.getWriter().printf(resultUuid.toString());
-                return;
-            } else {
-                mainOperatingService.edit(declarationTemplate, endDate, logger, securityService.currentUserInfo());
+            } catch (JSONException e) {
+                LOG.error(e);
+                throw new ServiceException("", e);
+            } finally {
+                declarationTemplateService.unlock(declarationTemplateId, userInfo);
+                IOUtils.closeQuietly(file.getInputStream());
             }
-
-            JSONObject resultUuid = new JSONObject();
-            resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(logger.getEntries()));
-            resp.getWriter().printf(resultUuid.toString());
-        } catch (JSONException e) {
-            LOG.error(e);
-            throw new ServiceException("", e);
-        } finally {
-            declarationTemplateService.unlock(declarationTemplateId, userInfo);
-            IOUtils.closeQuietly(file.getInputStream());
         }
 	}
 
@@ -129,69 +133,71 @@ public class DeclarationTemplateController {
     public void processUpload(@RequestParam(value = "uploader", required = true) MultipartFile file,
                               @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
             throws FileUploadException, IOException {
-        if (declarationTemplateId == 0)
-            throw new ServiceException("Сначала сохраните шаблон.");
+        if (checkRole(resp, securityService.currentUserInfo())) {
+            if (declarationTemplateId == 0)
+                throw new ServiceException("Сначала сохраните шаблон.");
 
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        declarationTemplateService.checkLockedByAnotherUser(declarationTemplateId, userInfo);
-        declarationTemplateService.lock(declarationTemplateId, userInfo);
+            TAUserInfo userInfo = securityService.currentUserInfo();
+            declarationTemplateService.checkLockedByAnotherUser(declarationTemplateId, userInfo);
+            declarationTemplateService.lock(declarationTemplateId, userInfo);
 
-        req.setCharacterEncoding("UTF-8");
-        resp.setCharacterEncoding("UTF-8");
-        InputStream inputStream = null;
-        try {
-            if (file.getSize() == 0)
-                throw new ServiceException("Файл jrxml пустой.");
-            if (!file.getOriginalFilename().endsWith(".jrxml"))
-                throw new ServiceException("Формат файла должен быть *.jrxml");
-            inputStream = file.getInputStream();
-            Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
-            Logger logger = new Logger();
-            logger.setTaUserInfo(securityService.currentUserInfo());
-            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
-            if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
-                mainOperatingService.isInUsed(
-                        declarationTemplateId,
-                        declarationTemplate.getType().getId(),
-                        declarationTemplate.getStatus(),
-                        declarationTemplate.getVersion(),
-                        endDate,
-                        logger);
-                checkErrors(logger);
+            req.setCharacterEncoding("UTF-8");
+            resp.setCharacterEncoding("UTF-8");
+            InputStream inputStream = null;
+            try {
+                if (file.getSize() == 0)
+                    throw new ServiceException("Файл jrxml пустой.");
+                if (!file.getOriginalFilename().endsWith(".jrxml"))
+                    throw new ServiceException("Формат файла должен быть *.jrxml");
+                inputStream = file.getInputStream();
+                Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
+                Logger logger = new Logger();
+                logger.setTaUserInfo(securityService.currentUserInfo());
+                DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+                if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)) {
+                    mainOperatingService.isInUsed(
+                            declarationTemplateId,
+                            declarationTemplate.getType().getId(),
+                            declarationTemplate.getStatus(),
+                            declarationTemplate.getVersion(),
+                            endDate,
+                            logger);
+                    checkErrors(logger);
+                }
+
+                //Проверка на использоваение jrxml другими декларациями
+                //http://jira.aplana.com/browse/SBRFACCTAX-12066
+                String uploadUuid = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
+                declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
+                if (
+                        declarationTemplate.getJrxmlBlobId() != null
+                                &&
+                                declarationTemplateService.checkExistingDataJrxml(declarationTemplateId, logger)) {
+                    JSONObject resultUuid = new JSONObject();
+                    resultUuid.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(logger.getEntries()));
+                    resultUuid.put(UuidEnum.UPLOADED_FILE.toString(), uploadUuid);
+
+                    resp.getWriter().printf(resultUuid.toString());
+                } else {
+                    declarationTemplate.setJrxmlBlobId(uploadUuid);
+                    mainOperatingService.edit(declarationTemplate, endDate, logger, securityService.currentUserInfo());
+
+                    checkErrors(logger);
+
+                    JSONObject resultUuid = new JSONObject();
+                    resultUuid.put(UuidEnum.UUID.toString(), uploadUuid);
+                    resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(logger.getEntries()));
+                    resp.getWriter().printf(resultUuid.toString());
+                }
+            } catch (JSONException e) {
+                LOG.error(e);
+                throw new ServiceException("", e);
+            } finally {
+                if (inputStream != null) {
+                    IOUtils.closeQuietly(inputStream);
+                }
+                declarationTemplateService.unlock(declarationTemplateId, userInfo);
             }
-
-            //Проверка на использоваение jrxml другими декларациями
-            //http://jira.aplana.com/browse/SBRFACCTAX-12066
-            String uploadUuid = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
-            declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
-            if (
-                    declarationTemplate.getJrxmlBlobId() != null
-                            &&
-                            declarationTemplateService.checkExistingDataJrxml(declarationTemplateId, logger)){
-                JSONObject resultUuid = new JSONObject();
-                resultUuid.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(logger.getEntries()));
-                resultUuid.put(UuidEnum.UPLOADED_FILE.toString(), uploadUuid);
-
-                resp.getWriter().printf(resultUuid.toString());
-            } else {
-                declarationTemplate.setJrxmlBlobId(uploadUuid);
-                mainOperatingService.edit(declarationTemplate, endDate, logger, securityService.currentUserInfo());
-
-                checkErrors(logger);
-
-                JSONObject resultUuid = new JSONObject();
-                resultUuid.put(UuidEnum.UUID.toString(), uploadUuid);
-                resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(logger.getEntries()));
-                resp.getWriter().printf(resultUuid.toString());
-            }
-        } catch (JSONException e) {
-            LOG.error(e);
-            throw new ServiceException("", e);
-        } finally {
-            if (inputStream!= null){
-                IOUtils.closeQuietly(inputStream);
-            }
-            declarationTemplateService.unlock(declarationTemplateId, userInfo);
         }
     }
 
@@ -200,45 +206,51 @@ public class DeclarationTemplateController {
     public void processUploadXsd(@RequestParam(value = "uploader", required = true) MultipartFile file,
                                  @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
             throws FileUploadException, IOException {
-        if (declarationTemplateId == 0)
-            throw new ServiceException("Сначала сохраните шаблон.");
+        if (checkRole(resp, securityService.currentUserInfo())) {
+            if (declarationTemplateId == 0)
+                throw new ServiceException("Сначала сохраните шаблон.");
 
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        declarationTemplateService.checkLockedByAnotherUser(declarationTemplateId, userInfo);
-        declarationTemplateService.lock(declarationTemplateId, userInfo);
+            if (checkRole(resp, securityService.currentUserInfo())) {
+                TAUserInfo userInfo = securityService.currentUserInfo();
+                declarationTemplateService.checkLockedByAnotherUser(declarationTemplateId, userInfo);
+                declarationTemplateService.lock(declarationTemplateId, userInfo);
 
-        req.setCharacterEncoding("UTF-8");
-        resp.setCharacterEncoding("UTF-8");
-        JSONObject resultUuid = new JSONObject();
+                req.setCharacterEncoding("UTF-8");
+                resp.setCharacterEncoding("UTF-8");
+                JSONObject resultUuid = new JSONObject();
 
-        try {
-            if (file.getSize() == 0)
-                throw new ServiceException("Файл xsd пустой.");
+                try {
+                    if (file.getSize() == 0)
+                        throw new ServiceException("Файл xsd пустой.");
 
-            Logger customLog = new Logger();
-            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
-            String xsdBlobId = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
-            declarationTemplate.setXsdId(xsdBlobId);
-            declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
-            resultUuid.put(UuidEnum.UUID.toString(), xsdBlobId);
-            declarationTemplateService.save(declarationTemplate);
+                    Logger customLog = new Logger();
+                    DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+                    String xsdBlobId = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
+                    declarationTemplate.setXsdId(xsdBlobId);
+                    declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
+                    resultUuid.put(UuidEnum.UUID.toString(), xsdBlobId);
+                    declarationTemplateService.save(declarationTemplate);
 
-            checkErrors(customLog);
-            resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
-            resp.getWriter().printf(resultUuid.toString());
-        } catch (JSONException e) {
-            LOG.error(e);
-            throw new ServiceException("", e);
-        } finally {
-            declarationTemplateService.unlock(declarationTemplateId, userInfo);
+                    checkErrors(customLog);
+                    resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
+                    resp.getWriter().printf(resultUuid.toString());
+                } catch (JSONException e) {
+                    LOG.error(e);
+                    throw new ServiceException("", e);
+                } finally {
+                    declarationTemplateService.unlock(declarationTemplateId, userInfo);
+                }
+            }
         }
     }
 
 	@RequestMapping(value = "/downloadByUuid/{uuid}",method = RequestMethod.GET)
 	public void processDownload(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-        BlobData blobData = blobDataService.get(uuid);
-        createResponse(req, resp, blobData);
+        if (checkRole(resp, securityService.currentUserInfo())) {
+            BlobData blobData = blobDataService.get(uuid);
+            createResponse(req, resp, blobData);
+        }
     }
 
     @ExceptionHandler(ServiceLoggerException.class)
@@ -296,5 +308,16 @@ public class DeclarationTemplateController {
             fileNameAttr = fileNameAttr.replace("=", "*=") + ENCODING + "''";
         }
         response.setHeader("Content-Disposition", "attachment;" + fileNameAttr + fileName);
+    }
+
+    private boolean checkRole(HttpServletResponse response, TAUserInfo userInfo) throws IOException {
+        if (!userInfo.getUser().hasRole(TARole.ROLE_CONF)) {
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().printf("Ошибка доступа (недостаточно прав)");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return false;
+        }
+        return true;
     }
 }

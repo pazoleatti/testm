@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.DeclarationVersionHistoryPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -65,8 +66,10 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                 declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
                 declarationTemplate.setVersion(new Date());
                 declarationTemplate.setType(result.getDeclarationType());
+                getView().setTemplateId(0);
                 getView().setDeclarationTemplate(declarationTemplateExt);
-                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+                UpdateTemplateEvent.fire(DeclarationTemplateMainPresenter.this);
+                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateInfo).
                         with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
                 TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
 
@@ -88,10 +91,12 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
         declarationType.setStatus(VersionedObjectStatus.DRAFT);
         declarationType.setTaxType(event.getTaxType());
         declarationTemplate.setType(declarationType);
+        getView().setTemplateId(0);
         getView().setDeclarationTemplate(declarationTemplateExt);
+        UpdateTemplateEvent.fire(DeclarationTemplateMainPresenter.this);
         TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
         RevealContentEvent.fire(DeclarationTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), DeclarationTemplateMainPresenter.this);
-        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateInfo).
                 with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
 
     }
@@ -104,6 +109,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
 	public interface MyView extends TabView, HasUiHandlers<DeclarationTemplateMainUiHandlers> {
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
         HandlerRegistration addChangeHandlerDect(ValueChangeHandler<String> valueChangeHandler);
+        HandlerRegistration addStartLoadHandlerDect(StartLoadFileEvent.StartLoadFileHandler handler);
         HandlerRegistration addEndLoadHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler);
         HandlerRegistration addJrxmlLoadHandlerDect(JrxmlFileExistEvent.JrxmlFileExistHandler handler);
         void activateButtonName(String name);
@@ -136,18 +142,6 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                     GWT.getHostPageBaseURL() + "download/declarationTemplate/downloadDect/" + declarationTemplate.getId());
         }
     }
-
-    /*
-	 * Здесь происходит подготовка декларации администрирования.
-	 *
-	 * @param request запрос
-	 */
-    /*
-	@Override
-	public void prepareFromRequest(PlaceRequest request) {
-		super.prepareFromRequest(request);
-        setDeclarationTemplate();
-	}*/
 
     @Override
     protected void onReveal() {
@@ -198,7 +192,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                     declarationTemplate.setId(result.getDeclarationTemplateId());
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                             with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
-                    getView().setDeclarationTemplate(declarationTemplateExt);
+                    reset();
                     getView().activateButton(true);
                 }
             }, this));
@@ -215,6 +209,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                             with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
                     getView().setDeclarationTemplate(declarationTemplateExt);
+                    reset();
                     getView().activateButton(true);
                 }
             }, this));
@@ -309,7 +304,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
 							getView().setDeclarationTemplate(declarationTemplateExt);
 							TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
                             UpdateTemplateEvent.fire(DeclarationTemplateMainPresenter.this);
-                            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+                            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateInfo).
                                     with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(declarationId)).build());
 						}
 					}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplateMainPresenter.this)));
@@ -324,7 +319,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
             return;
         UnlockDeclarationAction action = new UnlockDeclarationAction();
 		action.setDeclarationId(declarationId);
-		//dispatcher.execute(action, CallbackUtils.emptyCallback());
+		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 
     @Override
@@ -341,10 +336,13 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
         addToPopupSlot(versionHistoryPresenter);
     }
 
-    private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[3];
+    private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[4];
+
     @Override
     protected void onBind() {
         super.onBind();
+        addRegisteredHandler(CreateNewDTVersionEvent.getType(), this);
+        addRegisteredHandler(DTCreateNewTypeEvent.getType(), this);
 
         ValueChangeHandler<String> vchDect = new ValueChangeHandler<String>() {
             @Override
@@ -352,18 +350,18 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                 Dialog.infoMessage(SUCCESS_MSG);
             }
         };
-        EndLoadFileEvent.EndLoadFileHandler loadFileHandlerContent = new EndLoadFileEvent.EndLoadFileHandler() {
+        StartLoadFileEvent.StartLoadFileHandler startLoadFileHandler = new StartLoadFileEvent.StartLoadFileHandler() {
             @Override
-            public void onEndLoad(EndLoadFileEvent event) {
-                if (event.isHasError()){
-                    Dialog.errorMessage(ERROR_MSG);
-                }
-                LogAddEvent.fire(DeclarationTemplateMainPresenter.this, event.getUuid());
+            public void onStartLoad(StartLoadFileEvent event) {
+                // Чистим логи и блокируем форму
+                LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
+                LockInteractionEvent.fire(DeclarationTemplateMainPresenter.this, true);
             }
         };
         EndLoadFileEvent.EndLoadFileHandler loadFileHandlerDect = new EndLoadFileEvent.EndLoadFileHandler() {
             @Override
             public void onEndLoad(EndLoadFileEvent event) {
+                LockInteractionEvent.fire(DeclarationTemplateMainPresenter.this, false);
                 if (event.isHasError()){
                     Dialog.errorMessage(ERROR_MSG);
                 } else if (event.getUuid() == null || event.getUuid().isEmpty()){// TODO проверить условие
@@ -377,6 +375,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
         handlerRegistrations[0] = getView().addChangeHandlerDect(vchDect);
         handlerRegistrations[1] = getView().addEndLoadHandlerDect(loadFileHandlerDect);
         handlerRegistrations[2] = getView().addJrxmlLoadHandlerDect(getJrxmlFileExistHandler(true));
+        handlerRegistrations[3] = getView().addStartLoadHandlerDect(startLoadFileHandler);
     }
 
     public JrxmlFileExistEvent.JrxmlFileExistHandler getJrxmlFileExistHandler(final boolean isArchive){

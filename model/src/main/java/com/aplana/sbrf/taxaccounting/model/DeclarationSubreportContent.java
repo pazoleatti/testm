@@ -1,28 +1,21 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-/**
- * Модельный класс для спец отчетов
- * @author lhaziev
- */
-public class DeclarationSubreport implements Ordered, Serializable{
+
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+public class DeclarationSubreportContent implements Ordered, Serializable{
 	private static final long serialVersionUID = 1L;
 
-    private long id;
     private String alias;
     private String name;
     private int order;
     private String blobDataId;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+    private String fileName;
 
     public String getAlias() {
         return alias;
@@ -48,12 +41,19 @@ public class DeclarationSubreport implements Ordered, Serializable{
         this.order = order;
     }
 
-    @XmlTransient
     public String getBlobDataId() {
         return blobDataId;
     }
 
     public void setBlobDataId(String blobDataId) {
         this.blobDataId = blobDataId;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

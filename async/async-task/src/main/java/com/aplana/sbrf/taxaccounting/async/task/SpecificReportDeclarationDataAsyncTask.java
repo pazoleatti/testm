@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.*;
 
-public abstract class SpecificReportDeclarationDataGeneratorAsyncTask extends AbstractAsyncTask {
+public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private TAUserService userService;

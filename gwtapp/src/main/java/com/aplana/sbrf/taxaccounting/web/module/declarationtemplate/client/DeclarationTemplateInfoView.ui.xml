@@ -1,61 +1,11 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui'
-             xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
              xmlns:fileuplod='urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:fm="urn:import:com.aplana.gwt.client.form"
              xmlns:w='urn:import:com.aplana.gwt.client.mask.ui'>
     <ui:style>
-        .header {
-            font-size: 14px;
-            color: #636460;
-        }
-
-        .header div {
-            font-size: 14px !important;
-        }
-
-        .btnPanel {
-            height: 30px;
-        }
-
-        .btnPanel td {
-            vertical-align: middle !important;
-        }
-
         .marginLeft {
             margin-left: 5px;
-        }
-
-        .btnPanel2 td {
-            vertical-align: middle !important;
-        }
-
-        .table2 {
-            z-index: 0;
-            position: absolute !important;
-            bottom: 0;
-            right: 10px;
-            left: 1px;
-            top: 140px;
-            height: inherit !important;
-            border-top: 1px solid #aeaeac;
-        }
-
-        .table {
-            position: absolute !important;
-            bottom: 0;
-            right: 0;
-            left: 0;
-            top: 45px;
-            margin: 0 5px;
-        }
-
-        .separator {
-            height: 90px;
-            margin: 0 9px;
-            border-right: 1px solid #aeaeac;
         }
 
         .formStyle {
@@ -70,39 +20,42 @@
             margin-top: 25px;
             margin-left: 25px;
         }
+
+        .fix{
+            padding-left: 2px;
+        }
+
+        .margin5 {
+            margin-right: 5px;
+        }
+
+        .minWidth {
+            width: 32px;
+        }
     </ui:style>
 
 
-    <g:HorizontalPanel addStyleNames="{style.marginLeft}">
+    <g:VerticalPanel width="100%">
         <g:FlowPanel styleName="{style.formStyle}">
-            <g:VerticalPanel addStyleNames="{style.btnPanel2}">
-                <g:cell>
-                    <g:HorizontalPanel>
-                        <g:cell>
-                            <g:Label width="150px" text="Наименование декларации"/>
-                        </g:cell>
-                        <g:cell>
-                            <g:TextBox width="300px" ui:field="decName"/>
-                        </g:cell>
-                    </g:HorizontalPanel>
-                </g:cell>
-                <g:HorizontalPanel height="30px">
-                    <g:Label width="150px" text="Период актуальности с"/>
-                    <g:HorizontalPanel width="300px">
-                        <w:YearMaskBox ui:field="versionDateBegin" width="134px" mayBeNull="true"/>
-                        <g:cell horizontalAlignment="center">
-                            <g:Label width="30px" text="по"/>
-                        </g:cell>
-                        <w:YearMaskBox ui:field="versionDateEnd" width="134px" mayBeNull="true"/>
+            <g:VerticalPanel>
+                <g:HorizontalPanel verticalAlignment="middle">
+                    <g:Label width="250px" wordWrap="false" text="Период актуальности:"/>
+                    <g:HorizontalPanel verticalAlignment="middle">
+                        <g:Label wordWrap="false" text="C 1 января" width="67px" addStyleNames="{style.margin5}"/>
+                        <w:YearMaskBox ui:field="versionDateBegin" mayBeNull="true" width="32" addStyleNames="{style.margin5}, {style.fix}, {style.minWidth}" />
+                        <g:Label wordWrap="false" width="120px" text="года по 31 декабря"/>
+                        <w:YearMaskBox ui:field="versionDateEnd" mayBeNull="true" width="32" addStyleNames="{style.margin5}, {style.fix}, {style.minWidth}" />
+                        <g:Label wordWrap="false" text="года"/>
                     </g:HorizontalPanel>
                 </g:HorizontalPanel>
-
             </g:VerticalPanel>
-
-
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label width="250px" text="Наименование декларации:"/>
+                <g:TextBox width="500px" ui:field="decName" addStyleNames="{style.fix}"/>
+            </g:HorizontalPanel>
         </g:FlowPanel>
 
-        <g:HorizontalPanel addStyleNames="{style.btnPanel2}">
+        <g:HorizontalPanel>
             <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
                 <g:cell>
                     <fileuplod:FileUploadWidget ui:field="uploadXsdFile" extension="xsd" text="Загрузить xsd"/>
@@ -124,13 +77,13 @@
             <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
                 <g:cell>
                     <style:LinkButton text="Удалить xsd" ui:field="deleteXsd" img="resources/img/row-delete.png"
-                                      addStyleNames="{style.marginLeft}" title="Скачать xsd"/>
+                                      addStyleNames="{style.marginLeft}" title="Удалить xsd"/>
                 </g:cell>
                 <g:cell>
                     <style:LinkButton text="Удалить jrxml" ui:field="deleteJrxml" img="resources/img/row-delete.png"
-                                      title="Скачать jrxml файл" addStyleNames="{style.marginLeft}"/>
+                                      title="Удалить jrxml файл" addStyleNames="{style.marginLeft}"/>
                 </g:cell>
             </g:VerticalPanel>
         </g:HorizontalPanel>
-    </g:HorizontalPanel>
+    </g:VerticalPanel>
 </ui:UiBinder>

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
     private String name;
     private String createScript;
     private VersionedObjectStatus status;
-    private List<DeclarationSubreport> subreports;
+    private List<DeclarationSubreport> subreports = new ArrayList<DeclarationSubreport>();
 
     public String getName() {
         return name;

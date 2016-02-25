@@ -186,6 +186,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                             Types.NUMERIC
                     }
             );
+            declarationTemplate.setId(declarationTemplateId);
+            declarationSubreportDao.updateDeclarationSubreports(declarationTemplate);
+
             return declarationTemplateId;
         } catch (DataAccessException e){
 			LOG.error("Ошибка при создании шаблона.", e);

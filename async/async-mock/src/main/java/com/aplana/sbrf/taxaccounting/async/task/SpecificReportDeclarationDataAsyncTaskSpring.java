@@ -9,5 +9,5 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component("SpecificReportDeclarationDataAsyncTaskSpring")
 @Transactional
-public class SpecificReportDeclarationDataAsyncTaskSpring extends SpecificReportDeclarationDataGeneratorAsyncTask {
+public class SpecificReportDeclarationDataAsyncTaskSpring extends SpecificReportDeclarationDataAsyncTask {
 }

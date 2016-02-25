@@ -960,10 +960,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void deleteReport(long declarationDataId, int userId, boolean isCalc, String cause) {
         DeclarationDataReportType[] ddReportTypes = {DeclarationDataReportType.XML_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.ACCEPT_DEC};
         for (DeclarationDataReportType ddReportType : ddReportTypes) {
-            if (ReportType.SPECIFIC_REPORT_DEC.equals(ddReportType.getReportType())) {
-
-            }
-            if (!isCalc || !DeclarationDataReportType.XML_DEC.equals(ddReportType)) {
+            if (ddReportType.isSubreport()) {
+                DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+                List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
+                for(DeclarationSubreport subreport : subreports) {
+                    ddReportType.setSubreport(subreport);
+                    LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
+                    if (lock != null)
+                        lockDataService.interruptTask(lock, userId, true, cause);
+                }
+            } else if (!isCalc || !DeclarationDataReportType.XML_DEC.equals(ddReportType)) {
                 LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
                 if (lock != null)
                     lockDataService.interruptTask(lock, userId, true, cause);
@@ -980,9 +986,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationDataReportType[] getCheckTaskList(ReportType reportType) {
         switch (reportType) {
             case XML_DEC:
-                return new DeclarationDataReportType[]{DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.ACCEPT_DEC};
+                return new DeclarationDataReportType[]{DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.ACCEPT_DEC, new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, null)};
             case ACCEPT_DEC:
                 return new DeclarationDataReportType[]{DeclarationDataReportType.CHECK_DEC};
+            case UPDATE_TEMPLATE_DEC:
+                return new DeclarationDataReportType[]{new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, null)};
             default:
                 return null;
         }
@@ -996,33 +1004,62 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         boolean exist = false;
         for (DeclarationDataReportType ddReportType : ddReportTypes) {
-            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
-            if (lock != null) {
-                exist = true;
-                if (LockData.State.IN_QUEUE.getText().equals(lock.getState())) {
-                    logger.info(LockData.CANCEL_TASK_NOT_PROGRESS,
-                            SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
-                            taUserService.getUser(lock.getUserId()).getName(),
-                            getTaskName(ddReportType, declarationTemplate.getType().getTaxType()));
-                } else {
-                    logger.info(LockData.CANCEL_TASK_IN_PROGRESS,
-                            SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
-                            taUserService.getUser(lock.getUserId()).getName(),
-                            getTaskName(ddReportType, declarationTemplate.getType().getTaxType()));
+            if (ddReportType.isSubreport()) {
+                List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
+                for(DeclarationSubreport subreport : subreports) {
+                    ddReportType.setSubreport(subreport);
+                    exist |= checkExistTask(declarationDataId, ddReportType, declarationTemplate.getType().getTaxType(), logger);
                 }
+            } else {
+                exist |= checkExistTask(declarationDataId, ddReportType, declarationTemplate.getType().getTaxType(), logger);
             }
         }
         return exist;
+    }
+
+    private boolean checkExistTask(long declarationDataId, DeclarationDataReportType ddReportType, TaxType taxType, Logger logger) {
+        LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
+        if (lock != null) {
+            if (LockData.State.IN_QUEUE.getText().equals(lock.getState())) {
+                logger.info(LockData.CANCEL_TASK_NOT_PROGRESS,
+                        SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                        taUserService.getUser(lock.getUserId()).getName(),
+                        getTaskName(ddReportType, taxType));
+            } else {
+                logger.info(LockData.CANCEL_TASK_IN_PROGRESS,
+                        SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                        taUserService.getUser(lock.getUserId()).getName(),
+                        getTaskName(ddReportType, taxType));
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void interruptTask(long declarationDataId, int userId, ReportType reportType, String cause) {
         DeclarationDataReportType[] ddReportTypes = getCheckTaskList(reportType);
         if (ddReportTypes == null) return;
-        for (DeclarationDataReportType type : ddReportTypes) {
-            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, type));
-            if (lock != null) {
-                lockDataService.interruptTask(lock, userId, true, cause);
+        TAUserInfo taUserInfo = new TAUserInfo();
+        taUserInfo.setUser(taUserService.getUser(userId));
+        DeclarationData declarationData = get(declarationDataId, taUserInfo);
+        for (DeclarationDataReportType ddReportType : ddReportTypes) {
+            List<String> taskKeyList = new ArrayList<String>();
+            if (ddReportType.isSubreport()) {
+                List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
+                for(DeclarationSubreport subreport: subreports) {
+                    ddReportType.setSubreport(subreport);
+                    taskKeyList.add(generateAsyncTaskKey(declarationDataId, ddReportType));
+                }
+                reportService.deleteDec(Arrays.asList(declarationDataId), Arrays.asList(ddReportType));
+            } else {
+                taskKeyList.add(generateAsyncTaskKey(declarationDataId, ddReportType));
+            }
+            for (String key : taskKeyList) {
+                LockData lock = lockDataService.getLock(key);
+                if (lock != null) {
+                    lockDataService.interruptTask(lock, userId, true, cause);
+                }
             }
         }
         if (DeclarationDataReportType.XML_DEC.getReportType().equals(reportType)) {
