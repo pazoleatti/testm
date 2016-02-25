@@ -191,10 +191,10 @@ void logicCheck() {
 
         def values = []
         // Проверка расчётных граф
-        if (calc15(row) != null && row.deviation != calc15(row)) {
+        if (row.deviation != calc15(row)) {
             values.add(row.getCell('deviation').column.name)
         }
-        if (calc16(row) != null && row.sum1 != calc16(row)) {
+        if (row.sum1 != calc16(row)) {
             values.add(row.getCell('sum1').column.name)
         }
         if (!values.empty) {
