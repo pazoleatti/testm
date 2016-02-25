@@ -116,18 +116,18 @@ public class Rnu_114Test extends ScriptTestBase {
 
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
-        Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица/резидента оффшорной зоны» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Код классификации дохода» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Номер кредитного договора» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата кредитного договора» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Остаток задолженности» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Валюта» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Курс валюты Банка России» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Количество календарных дней в периоде» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «База года (360/365/366)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Совокупная процентная ставка» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Рыночная ставка» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма фактического процентного дохода» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Наименование Взаимозависимого лица/резидента оффшорной зоны"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Код классификации дохода"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Номер кредитного договора"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата кредитного договора"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Остаток задолженности"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Валюта"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Курс валюты Банка России"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Количество календарных дней в периоде"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "База года (360/365/366)"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Совокупная процентная ставка"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная ставка"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактического процентного дохода"), entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

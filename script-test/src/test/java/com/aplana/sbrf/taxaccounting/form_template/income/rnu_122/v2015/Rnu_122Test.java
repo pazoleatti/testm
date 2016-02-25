@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -93,23 +94,23 @@ public class Rnu_122Test extends ScriptTestBase {
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
 
-        Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица/резидента оффшорной зоны» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Код классификации дохода / расхода» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Первичный документ. Номер» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Первичный документ. Дата» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма кредита для расчёта (остаток задолженности, невыбранный лимит кредита), ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Валюта» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата фактического отражения операции» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Курс Банка России на дату фактического отражения в бухгалтерском учёте (руб.)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Расчетный период (согласно условиям сделки). Дата начала» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Расчетный период (согласно условиям сделки). Дата окончания» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «База для расчета, кол. дней» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Плата по условиям сделки,% год./ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма фактического дохода / расхода, Ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма фактического дохода / расхода, Руб.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Рыночная Плата, % годовых / ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Рыночная сумма дохода (расхода), выраженная в: Руб.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода (корректировки расхода) до рыночного уровня (руб.)» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Наименование Взаимозависимого лица/резидента оффшорной зоны"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Код классификации дохода / расхода"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Первичный документ. Номер"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Первичный документ. Дата"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма кредита для расчёта (остаток задолженности, невыбранный лимит кредита), ед. вал."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Валюта"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата фактического отражения операции"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Курс Банка России на дату фактического отражения в бухгалтерском учёте (руб.)"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Расчетный период (согласно условиям сделки). Дата начала"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Расчетный период (согласно условиям сделки). Дата окончания"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "База для расчета, кол. дней"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Плата по условиям сделки,% год./ед. вал."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактического дохода / расхода, Ед. вал."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактического дохода / расхода, Руб."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная Плата, % годовых / ед. вал."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная сумма дохода (расхода), выраженная в: Руб."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма доначисления дохода (корректировки расхода) до рыночного уровня (руб.)"), entries.get(i++).getMessage());
         Assert.assertEquals("Группа «графа 5 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
 
 

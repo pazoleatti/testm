@@ -21,9 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -94,17 +92,17 @@ public class Rnu_107Test extends ScriptTestBase {
 
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
-        Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица (резидента оффшорной зоны)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата совершения операции» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Код налогового учёта» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. Номер» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. Дата» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма операции (сумма оборота по операции) / количество операций» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Тариф за оказание услуги» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Тариф, признаваемый рыночным для целей налогообложения» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма фактически начисленного дохода» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма дохода, соответствующая рыночному уровню тарифа» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода до рыночного уровня тарифа» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Наименование Взаимозависимого лица (резидента оффшорной зоны)"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата совершения операции"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Код налогового учёта"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Основание для совершения операции. Номер"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Основание для совершения операции. Дата"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма операции (сумма оборота по операции) / количество операций"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Тариф за оказание услуги"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Тариф, признаваемый рыночным для целей налогообложения"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактически начисленного дохода"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма дохода, соответствующая рыночному уровню тарифа"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма доначисления дохода до рыночного уровня тарифа"), entries.get(i++).getMessage());
         Assert.assertEquals("Группа «графа 5 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();

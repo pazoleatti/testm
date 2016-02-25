@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
@@ -21,10 +22,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * Сведения о дивидендах (доходах от долевого участия в других организациях,
@@ -134,16 +136,16 @@ public class Output2_2Test extends ScriptTestBase {
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
 
-        Assert.assertEquals("Строка 1: Графа «Эмитент» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Номер решения о выплате дивидендов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Получатель. ИНН» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Получатель. КПП» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Получатель. Тип.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Получатель. Наименование» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Место нахождения (адрес). Код региона» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата перечисления дивидендов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма дивидендов в рублях» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма налога в рублях» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Эмитент"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Номер решения о выплате дивидендов"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Получатель. ИНН"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Получатель. КПП"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Получатель. Тип."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Получатель. Наименование"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Место нахождения (адрес). Код региона"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата перечисления дивидендов"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма дивидендов в рублях"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма налога в рублях"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графы «Фамилия» и «Имя» должны быть заполнены одновременно (либо обе графы не должны заполняться)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Получатель. Тип» заполнена неверно!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 2: Графа «Получатель. Тип» заполнена неверно!", entries.get(i++).getMessage());
