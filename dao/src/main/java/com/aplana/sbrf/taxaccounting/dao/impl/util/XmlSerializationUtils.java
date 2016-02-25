@@ -255,7 +255,10 @@ public final class XmlSerializationUtils {
 		Element root = document.getDocumentElement();
 		NodeList nodeList = root.getElementsByTagName(TAG_ROW);
 		for (int i = 0; i < nodeList.getLength(); i++) {
-			rows.add((DataRow<T>) parseDataRow((Element) nodeList.item(i), columns, styles, clazz));
+			DataRow<T> dataRow = (DataRow<T>) parseDataRow((Element) nodeList.item(i), columns, styles, clazz);
+			//Устанавливаем нумерацию строк в заголовках, так же как внутри таблицы. Необходимо для построения xlsm представления
+			dataRow.setIndex(i + 1);
+			rows.add(dataRow);
 		}
 
 		return rows;

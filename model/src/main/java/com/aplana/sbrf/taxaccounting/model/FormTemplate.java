@@ -13,11 +13,11 @@ import java.util.List;
  */
 public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	private static final long serialVersionUID = -8304772615983231523L;
-	
+
 	private FormType type;
 	private Date version;
     private boolean fixedRows;
-    
+
     private String name;
     private String fullName;
     private String header;
@@ -62,7 +62,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return полное наименование необходимое для печатной формы.
 	 */
 	public String getFullName() {
@@ -98,7 +98,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 
 	private List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
 	private List<DataRow<HeaderCell>> headers = new ArrayList<DataRow<HeaderCell>>();
-	
+
 	private List<Column> columns = new ArrayList<Column>();
 	private List<FormStyle> styles = new ArrayList<FormStyle>();
 
@@ -109,19 +109,19 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	 * создания объекта FormTemplate и не может быть изменена в ходе жизни
 	 * объекта. Если требуется внести изменения в список элементов необходимо
 	 * добавлять и удалять элементы из существующего экземпляра списка.
-	 * 
+	 *
 	 * @return список столбцов, образующих налоговую форму.
 	 */
 	public List<Column> getColumns() {
 		return columns;
 	}
-	
+
 	/**
 	 * Возвращает коллекцию {@link FormStyle стилей формы} Коллекция создаётся в
 	 * момент создания объекта FormTemplate и не может быть изменена в ходе
 	 * жизни объекта. Если требуется внести изменения в список элементов
 	 * необходимо добавлять и удалять элементы из существующего экземпляра
-	 * 
+	 *
 	 * @return список стилей, определённых в налоговой форме
 	 */
 	public List<FormStyle> getStyles() {
@@ -130,7 +130,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 
 	/**
 	 * Задаёт {@link FormType вид налоговой формы}
-	 * 
+	 *
 	 * @param type
 	 *            вид налоговой формы
 	 */
@@ -140,7 +140,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 
 	/**
 	 * Возвращает {@link FormType вид налоговой формы}
-	 * 
+	 *
 	 * @return вид налоговой формы
 	 */
 	public FormType getType() {
@@ -149,7 +149,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 
 	/**
 	 * Получить определение столбца по числовому идентификатору
-	 * 
+	 *
 	 * @param columnId
 	 *            идентификатор столбца
 	 * @return определение столбца
@@ -174,7 +174,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 
 	/**
 	 * Получить определение столбца налоговой формы по алиасу
-	 * 
+	 *
 	 * @param columnAlias - алиас колонки
 	 * @return определение столбца
 	 * @throws NullPointerException
@@ -193,12 +193,12 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 		}
 		throw new IllegalArgumentException("Wrong columnAlias: " + columnAlias);
 	}
-	
-	
+
+
 	/**
 	 * Получить версию формы: для каждого типа формы может существовать
 	 * несколько версий
-	 * 
+	 *
 	 * @return версия формы
 	 */
 	public Date getVersion() {
@@ -207,7 +207,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 
 	/**
 	 * Установить дату актуальности шаблона
-	 * 
+	 *
 	 * @param version
 	 *            дата актуальности
 	 */
@@ -222,7 +222,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	public List<DataRow<Cell>> getRows() {
 		return rows;
 	}
-	
+
 	public List<DataRow<HeaderCell>> getHeaders() {
 		return headers;
 	}
@@ -282,7 +282,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 
 	/**
 	 * Получить определение стиля по его алиасу
-	 * 
+	 *
 	 * @param alias
 	 *            алиас стиля
 	 * @return объект, описывающий стиль {@link FormStyle}, заданный алиасом
@@ -302,7 +302,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 		}
 		throw new IllegalArgumentException("Wrong style alias: '" + alias + '\'');
 	}
-	
+
     /**
      * Определить работаем-ли мы с фиксированным набором строк или нет
      * @return true - пользователь работает с предопределённым набором строк. false -  пользователь может
@@ -382,6 +382,12 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 
         return formTemplateClone;
     }
+
+	public List<Column> cloneColumns() {
+		List<Column> clone = new ArrayList<Column>();
+		clone.addAll(this.getColumns());
+		return clone;
+	}
 
 
 

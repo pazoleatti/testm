@@ -2105,6 +2105,10 @@ public class FormDataServiceImpl implements FormDataService {
                 scriptSpecificReportHolder.setFileOutputStream(outputStream);
                 scriptSpecificReportHolder.setFileName(specificReportType);
                 params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
+                params.put("formDataId", formData.getId());
+                params.put("manual", formData.isManual());
+                params.put("isShowChecked", isShowChecked);
+                params.put("saved", saved);
                 stateLogger.updateState("Формирование отчета");
                 if (!formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CREATE_SPECIFIC_REPORT, logger, params)) {
                     throw new ServiceException("Не предусмотрена возможность формирования отчета \"%s\"", specificReportType);
@@ -2115,10 +2119,14 @@ public class FormDataServiceImpl implements FormDataService {
             } finally {
                 IOUtils.closeQuietly(outputStream);
             }
-            stateLogger.updateState("Сохранение отчета в базе данных");
-            reportService.create(formData.getId(), blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName()),
-                    new FormDataReportType(ReportType.SPECIFIC_REPORT, specificReportType), isShowChecked, formData.isManual(), saved);
-
+            if (scriptSpecificReportHolder.getUuid() == null) {
+                stateLogger.updateState("Сохранение отчета в базе данных");
+                reportService.create(formData.getId(), blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName()),
+                        new FormDataReportType(ReportType.SPECIFIC_REPORT, specificReportType), isShowChecked, formData.isManual(), saved);
+            } else {
+                reportService.create(formData.getId(), scriptSpecificReportHolder.getUuid(),
+                        new FormDataReportType(ReportType.SPECIFIC_REPORT, specificReportType), isShowChecked, formData.isManual(), saved);
+            }
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {

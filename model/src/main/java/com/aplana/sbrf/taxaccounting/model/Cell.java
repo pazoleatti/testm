@@ -23,6 +23,7 @@ public class Cell extends AbstractCell {
     private Date dateValue;
     private BigDecimal numericValue;
     private boolean editable;
+    private boolean forceValue;
 
     private String refBookDereference;
 
@@ -35,6 +36,10 @@ public class Cell extends AbstractCell {
     private String errorMessage;
     /** Включен ли режим проверки (true - записывать в ячейки, false - бросать исключение) */
     private boolean errorMode;
+
+    public boolean isForceValue() {
+        return forceValue;
+    }
 
     /**
      * Конструктор только для сериализации
@@ -50,25 +55,39 @@ public class Cell extends AbstractCell {
 
     @Override
     public Object getValue() {
-		ColumnType columnType = getColumn().getColumnType();
-        // Получаем значение из главной ячейки (SBRFACCTAX-2082)
-        if (hasValueOwner()) {
-			return null;
+        if (!forceValue) {
+            ColumnType columnType = getColumn().getColumnType();
+            // Получаем значение из главной ячейки (SBRFACCTAX-2082)
+            if (hasValueOwner()) {
+                return null;
+            }
+            switch (columnType) {
+                case AUTO:
+                case REFBOOK:
+                    return numericValue == null ? null : numericValue.longValueExact();
+                case STRING: return stringValue;
+                case DATE: return dateValue;
+                case NUMBER: return numericValue;
+                case REFERENCE:
+                default: return null;
+            }
+        } else {
+            //Для принудительного значения всегда возвращаем строку
+            return stringValue;
         }
-		switch (columnType) {
-			case AUTO:
-			case REFBOOK:
-				return numericValue == null ? null : numericValue.longValueExact();
-			case STRING: return stringValue;
-			case DATE: return dateValue;
-			case NUMBER: return numericValue;
-			case REFERENCE:
-			default: return null;
-		}
+    }
+
+    @Override
+    public Object setValue(Object value, Integer rowNumber, boolean force) {
+        return doSetValue(value, rowNumber, force);
     }
 
     @Override
     public Object setValue(Object value, Integer rowNumber) {
+        return doSetValue(value, rowNumber, false);
+    }
+
+    private Object doSetValue(Object value, Integer rowNumber, boolean force) {
 		stringValue = null;
 		dateValue = null;
 		numericValue = null;
@@ -87,85 +106,92 @@ public class Cell extends AbstractCell {
             msg = "Строка " + rowNumber + ": " + msg;
             msgValue = "Строка " + rowNumber + ": " + msgValue;
         }
-		// Проверка совместимости типа значения с типом графы
-		ColumnType columnType = getColumn().getColumnType();
-        if (!(value instanceof Number && (ColumnType.NUMBER.equals(columnType) || ColumnType.REFBOOK.equals(columnType) ||
-				ColumnType.REFERENCE.equals(columnType) || ColumnType.AUTO.equals(columnType))
-                || value instanceof String && ColumnType.STRING.equals(columnType)
-                || value instanceof Date && ColumnType.DATE.equals(columnType))) {
-            return showError(msg + "Несовместимые типы колонки и значения");
-        }
-		switch (columnType) {
-			case AUTO:
-			case NUMBER:
-			case REFBOOK:{
-				// Допустимы для установки значений только типы Integer, Long, Double и BigDecimal
-				if (value instanceof Integer) {
-					value = new BigDecimal((Integer) value);
-				} else if (value instanceof Double) {
-					value = new BigDecimal((Double) value);
-				} else if (value instanceof Long) {
-					value = new BigDecimal((Long) value);
-				} else if (!(value instanceof BigDecimal)) {
-					return showError(msg + "Несовместимые типы графы и значения. Тип значения: \"" + value.getClass().getName() +
-                            "\", типа графы: \"" + columnType.getTitle() + "\". " +
-                            "Значение должно иметь тип Integer, Long или BigDecimal. Для автонумеруемых и справочных граф еще и без дробной части");
-				}
-
-				if (ColumnType.NUMBER.equals(columnType)) {
-					int precision = ((NumericColumn) getColumn()).getPrecision();
-					value = ((BigDecimal) value).setScale(precision, RoundingMode.HALF_UP);
-					String str = ((BigDecimal) value).toPlainString();
-					if (!getColumn().getValidationStrategy().matches(str)) {
-                        NumericColumn numericColumn = (NumericColumn) getColumn();
-						return showError(msgValue + "превышает допустимую разрядность. Должно быть не более " +
-                                (numericColumn.getMaxLength()-numericColumn.getPrecision()) + " знакомест и не более " + numericColumn.getPrecision() +
-                                " знаков после запятой. Устанавливаемое значение: " + str);
-					}
-				} else { // ColumnType.AUTO ColumnType.REFBOOK
-					value = ((BigDecimal) value).setScale(0, RoundingMode.HALF_UP);
-					if (!getColumn().getValidationStrategy().matches(((BigDecimal) value).toPlainString())) {
-						return showError(msgValue + "превышает допустимую разрядность (19 знаков)!");
-					}
-				}
-				numericValue = (BigDecimal) value;
-				return getValue();
-			}
-            case STRING: {
-                if (value instanceof String) {
-                    String temp = (String) value;
-                    if (!getColumn().getValidationStrategy().matches(temp)) {
-                        return showError(msgValue + "превышает допустимую разрядность (" +
-                                ((StringColumn) getColumn()).getMaxLength() + ")!");
-                    }
-                    // Проверка на соответствие паттерну
-                    if (!temp.isEmpty() && !((StringColumn) getColumn()).matches(temp)) {
-                        return showError(msgValue + "не соответствует паттерну \'" +
-                                ((StringColumn) getColumn()).getFilter() + "\'!");
+        if (force) {
+            //Устанавливаем строковое значение и условие для его возврата по флагу
+            this.forceValue = true;
+            stringValue = (String) value;
+            return getValue();
+        } else {
+            // Проверка совместимости типа значения с типом графы
+            ColumnType columnType = getColumn().getColumnType();
+            if (!(value instanceof Number && (ColumnType.NUMBER.equals(columnType) || ColumnType.REFBOOK.equals(columnType) ||
+                    ColumnType.REFERENCE.equals(columnType) || ColumnType.AUTO.equals(columnType))
+                    || value instanceof String && ColumnType.STRING.equals(columnType)
+                    || value instanceof Date && ColumnType.DATE.equals(columnType))) {
+                return showError(msg + "Несовместимые типы колонки и значения");
+            }
+            switch (columnType) {
+                case AUTO:
+                case NUMBER:
+                case REFBOOK: {
+                    // Допустимы для установки значений только типы Integer, Long, Double и BigDecimal
+                    if (value instanceof Integer) {
+                        value = new BigDecimal((Integer) value);
+                    } else if (value instanceof Double) {
+                        value = new BigDecimal((Double) value);
+                    } else if (value instanceof Long) {
+                        value = new BigDecimal((Long) value);
+                    } else if (!(value instanceof BigDecimal)) {
+                        return showError(msg + "Несовместимые типы графы и значения. Тип значения: \"" + value.getClass().getName() +
+                                "\", типа графы: \"" + columnType.getTitle() + "\". " +
+                                "Значение должно иметь тип Integer, Long или BigDecimal. Для автонумеруемых и справочных граф еще и без дробной части");
                     }
 
-                    stringValue = temp;
+                    if (ColumnType.NUMBER.equals(columnType)) {
+                        int precision = ((NumericColumn) getColumn()).getPrecision();
+                        value = ((BigDecimal) value).setScale(precision, RoundingMode.HALF_UP);
+                        String str = ((BigDecimal) value).toPlainString();
+                        if (!getColumn().getValidationStrategy().matches(str)) {
+                            NumericColumn numericColumn = (NumericColumn) getColumn();
+                            return showError(msgValue + "превышает допустимую разрядность. Должно быть не более " +
+                                    (numericColumn.getMaxLength() - numericColumn.getPrecision()) + " знакомест и не более " + numericColumn.getPrecision() +
+                                    " знаков после запятой. Устанавливаемое значение: " + str);
+                        }
+                    } else { // ColumnType.AUTO ColumnType.REFBOOK
+                        value = ((BigDecimal) value).setScale(0, RoundingMode.HALF_UP);
+                        if (!getColumn().getValidationStrategy().matches(((BigDecimal) value).toPlainString())) {
+                            return showError(msgValue + "превышает допустимую разрядность (19 знаков)!");
+                        }
+                    }
+                    numericValue = (BigDecimal) value;
                     return getValue();
                 }
+                case STRING: {
+                    if (value instanceof String) {
+                        String temp = (String) value;
+                        if (!getColumn().getValidationStrategy().matches(temp)) {
+                            return showError(msgValue + "превышает допустимую разрядность (" +
+                                    ((StringColumn) getColumn()).getMaxLength() + ")!");
+                        }
+                        // Проверка на соответствие паттерну
+                        if (!temp.isEmpty() && !((StringColumn) getColumn()).matches(temp)) {
+                            return showError(msgValue + "не соответствует паттерну \'" +
+                                    ((StringColumn) getColumn()).getFilter() + "\'!");
+                        }
+
+                        stringValue = temp;
+                        return getValue();
+                    }
+                }
+                case DATE: {
+                    Date date = (Date) value;
+                    if (date.before(DATE_1900)) { // Сделано из-за ограничений Excel при работе с датами SBRFACCTAX-9982
+                        return showError(msg + "Не может быть указана более ранняя дата, чем 01.01.1900!");
+                    }
+                    if (date.after(DATE_9999)) {
+                        return showError(msg + "Не может быть указана более поздняя дата, чем 31.12.9999!");
+                    }
+                    dateValue = date;
+                    return getValue();
+                }
+                case REFERENCE: {
+                    return showError(msg + "Нельзя устанавливать значения в зависимую графу!");
+                }
+                default: {
+                    return showError("Values of type " + value.getClass().getName() + " are not supported");
+                }
             }
-            case DATE: {
-                Date date = (Date) value;
-                if (date.before(DATE_1900)) { // Сделано из-за ограничений Excel при работе с датами SBRFACCTAX-9982
-                    return showError(msg + "Не может быть указана более ранняя дата, чем 01.01.1900!");
-                }
-                if (date.after(DATE_9999)) {
-                    return showError(msg + "Не может быть указана более поздняя дата, чем 31.12.9999!");
-                }
-				dateValue = date;
-				return getValue();
-			}
-			case REFERENCE: {
-				return showError(msg + "Нельзя устанавливать значения в зависимую графу!");
-			}
-			default: {
-				return showError("Values of type " + value.getClass().getName() + " are not supported");
-			}
-		}
+        }
     }
 
     /** Записывает сообщение об ошибке в ячейку или выбрасывает исключение */

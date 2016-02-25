@@ -253,6 +253,15 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 		return cellValue.setValue(value, getIndex());
 	}
 
+	/**
+	 * Принудительно устанавливает значение ячейки в строке
+     * @return
+     */
+	public Object putForce(String key, Object value) {
+		C cellValue = getCell(key);
+		return cellValue.setValue(value, getIndex(), true);
+	}
+
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
 		for (Map.Entry<? extends String, ?> entry : map.entrySet()) {

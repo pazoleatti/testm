@@ -17,9 +17,10 @@ public interface PrintingService {
      * @param formDataId
      * @param manual
      * @param isShowChecked
+     * @param deleteHiddenColumns признак того, что из печатного представления надо удалить скрытые столбцы
      * @return uuid записи с данными из таблицы BLOB_DATA
      */
-    String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger);
+    String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, boolean deleteHiddenColumns, LockStateLogger stateLogger);
     /**
      * Формирует CSV-отчет НФ, сохраняет его в таблицы BLOB_DATA и возвращает uuid
      * @param userInfo

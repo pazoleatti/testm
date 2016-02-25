@@ -19,10 +19,20 @@ public class ScriptSpecificFormDataReportHolder {
     private List<DataRow<HeaderCell>> headers;
     private boolean isShowChecked;
     private boolean saved;
+    /** Отчет сохраненный в blob_data */
+    private String uuid;
     /**
      * Скрипт должен вернуть название файла для сформированного отчета
      */
     private String fileName;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public String getSpecificReportType() {
         return specificReportType;
