@@ -155,6 +155,7 @@ public class Rnu_171Test extends ScriptTestBase {
         dataRows.add(subTotal);
         subTotal.setAlias("itg#0");
         subTotal.getCell("incomeCorrection").setValue(0L, null);
+        subTotal.getCell("code").setValue("10360", null);
         subTotal.setIndex(2);
         testHelper.execute(FormDataEvent.CHECK);
 
@@ -181,6 +182,7 @@ public class Rnu_171Test extends ScriptTestBase {
         row.getCell("finResultTax").setValue(2L, null);
         row.getCell("incomeCorrection").setValue(1L, null);
         subTotal.getCell("incomeCorrection").setValue(1L, null);
+        subTotal.getCell("code").setValue("10361", null);
         row.getCell("code").setValue("10361", null);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;

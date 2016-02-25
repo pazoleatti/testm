@@ -347,7 +347,7 @@ void importData() {
     def totalRowFromFile = null
     def totalRowFromFileMap = [:] // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 
-    // формирвание строк нф
+    // формирование строк нф
     for (def i = 0; i < allValuesCount; i++) {
         rowValues = allValues[0]
         fileRowIndex++
@@ -697,26 +697,26 @@ void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.Gro
     // Неитоговые строки были удалены
     for (int i = 0; i < dataRows.size(); i++) {
         DataRow<Cell> row = dataRows.get(i);
-        // итог после итога
-        if (row.getAlias() != null) {
-            if (i < 1 || dataRows.get(i - 1).getAlias() != null) {
-                logger.error("Строка %d: Строка итога не относится к какой-либо группе!", row.getIndex()); // итога (не  подитога)
-                // удаляем из проверяемых итогов строку без подчиненных строк
-                itogRows.remove(row)
-            } else {
-                groupCount++
-            }
-        }
-        // строка другой группы после строки без подитога между ними
-        if (i > 0 && (row == null || row.getAlias() == null)) {
+        // строка или итог другой группы после строки без подитога между ними
+        if (i > 0) {
             def prevRow = dataRows.get(i - 1)
-            if (i < (dataRows.size() - 1) && prevRow.getAlias() == null && isDiffRow(prevRow, row, groupColumns)) {
+            if (i < (dataRows.size() - 1) && prevRow.getAlias() == null && isDiffRow(prevRow, row, groupColumns)) { // TODO сравнение
                 itogRows.add(groupCount, null)
                 groupCount++
                 String groupCols = groupString.getString(prevRow);
                 if (groupCols != null) {
                     logger.error("Группа «%s» не имеет строки итога!", groupCols); // итога (не  подитога)
                 }
+            }
+        }
+        if (row.getAlias() != null) {
+            // итог после итога (или после строки из другой группы)
+            if (i < 1 || dataRows.get(i - 1).getAlias() != null || isDiffRow(dataRows.get(i - 1), row, groupColumns)) { // TODO сравнение
+                logger.error("Строка %d: Строка итога не относится к какой-либо группе!", row.getIndex()); // итога (не  подитога)
+                // удаляем из проверяемых итогов строку без подчиненных строк
+                itogRows.remove(row)
+            } else {
+                groupCount++
             }
         }
     }
@@ -727,18 +727,13 @@ void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.Gro
             if (realItogRow == null) {
                 continue
             }
-            int itg = Integer.valueOf(realItogRow.getAlias().replaceAll("itg#", ""));
-            if (dataRows.size() > itg) {
-                if (dataRows.get(itg).getAlias() != null) {
-                    logger.error(GROUP_WRONG_ITOG_ROW, realItogRow.getIndex());
-                } else {
-                    String groupCols = groupString.getString(dataRows.get(itg));
-                    if (groupCols != null) {
-                        String checkStr = checkGroupSum.check(testItogRow, realItogRow);
-                        if (checkStr != null) {
-                            logger.error(String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr));
-                        }
-                    }
+            int rowIndex = dataRows.indexOf(realItogRow) - 1
+            def row = dataRows.get(rowIndex)
+            String groupCols = groupString.getString(row);
+            if (groupCols != null) {
+                String checkStr = checkGroupSum.check(testItogRow, realItogRow);
+                if (checkStr != null) {
+                    logger.error(String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr));
                 }
             }
         }
