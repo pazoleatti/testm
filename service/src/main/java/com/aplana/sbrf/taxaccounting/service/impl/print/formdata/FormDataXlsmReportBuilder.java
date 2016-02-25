@@ -436,12 +436,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     continue;
                 }
                 HeaderCell headerCell = headerCellDataRow.getCell(column.getAlias());
-                if (column.getWidth() == 0){
-                    if(headerCell.getColSpan() > 1){
-                        i = i + headerCell.getColSpan() - 1;
-                    }
-                    continue;
-                }
                 Cell workBookcell = mergedDataCells(headerCellDataRow.getCell(column.getAlias()), row, i, true);
                 workBookcell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DEFAULT, column.getAlias() + "_header"));
                 workBookcell.setCellValue(String.valueOf(headerCell.getValue()));
@@ -735,7 +729,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     private Cell createNotHiddenCell(int columnIndex, Row row){
         if (sheet.getColumnWidth(columnIndex) == 0)
-            //return null;
             return createNotHiddenCell(columnIndex + 1, row);
         return row.getCell(columnIndex) != null ? row.getCell(columnIndex) :
                 row.createCell(columnIndex);
