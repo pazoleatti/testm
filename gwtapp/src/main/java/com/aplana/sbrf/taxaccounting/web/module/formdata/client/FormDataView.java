@@ -192,8 +192,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     DropdownButton printAnchor;
 
-    private LinkButton printToExcel, printToCSV;
-
     public static final int DEFAULT_TABLE_TOP_POSITION = 104;
     public static final int DEFAULT_RIGHT_BUTTONS_HEIGHT = 61;
     private static final int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
@@ -262,30 +260,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             @Override
             public void onResize(ResizeEvent event) {
                 recalcReportPeriodLabelWidth();
-            }
-        });
-
-        printToExcel = new LinkButton("Выгрузить в XLSM");
-        printToExcel.setHeight("20px");
-        printToExcel.setDisableImage(true);
-        printToExcel.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintClicked(ReportType.EXCEL.getName(), false);
-                }
-            }
-        });
-
-        printToCSV = new LinkButton("Выгрузить в CSV");
-        printToCSV.setHeight("20px");
-        printToCSV.setDisableImage(true);
-        printToCSV.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintClicked(ReportType.CSV.getName(), false);
-                }
             }
         });
     }
@@ -969,9 +943,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-    public void setReportTypes(List<String> reportTypes) {
+    public void setReportTypes(List<FormDataReportType> reportTypes) {
         printAnchor.clear();
-        for(final String reportType: reportTypes) {
+        for(final FormDataReportType reportType: reportTypes) {
             LinkButton linkButton = new LinkButton("Сформировать \"" + reportType + "\"");
             linkButton.setHeight("20px");
             linkButton.setDisableImage(true);
@@ -983,7 +957,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                     }
                 }
             });
-            printAnchor.addItem(reportType, linkButton);
+            printAnchor.addItem(reportType.getReportName(), linkButton);
         }
     }
 }

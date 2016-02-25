@@ -44,12 +44,11 @@ public class TimerReportHandler extends AbstractActionHandler<TimerReportAction,
         TimerReportResult result = new TimerReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Map<String, TimerReportResult.StatusReport> mapExistReport = new HashMap<String, TimerReportResult.StatusReport>();
-        for(String type: action.getReportTypes()) {
+        for(FormDataReportType type: action.getReportTypes()) {
             TimerReportResult.StatusReport statusReport;
-            final FormDataReportType fdReportType = FormDataReportType.getFDReportTypeByName(type);
-            String key = formDataService.generateReportKey(action.getFormDataId(), fdReportType, action.isShowChecked(), action.isManual(), action.isSaved());
+            String key = formDataService.generateReportKey(action.getFormDataId(), type, action.isShowChecked(), action.isManual(), action.isSaved());
             if (!lockDataService.isLockExists(key, false)) {
-                String uuid = reportService.get(userInfo, action.getFormDataId(), fdReportType, action.isShowChecked(), action.isManual(), action.isSaved());
+                String uuid = reportService.get(userInfo, action.getFormDataId(), type, action.isShowChecked(), action.isManual(), action.isSaved());
                 if (uuid == null) {
                     statusReport = TimerReportResult.StatusReport.NOT_EXIST;
                 } else {
@@ -58,7 +57,7 @@ public class TimerReportHandler extends AbstractActionHandler<TimerReportAction,
             } else {
                 statusReport = TimerReportResult.StatusReport.LOCKED;
             }
-            mapExistReport.put(type, statusReport);
+            mapExistReport.put(type.getReportName(), statusReport);
         }
         result.setMapExistReport(mapExistReport);
         return result;

@@ -22,11 +22,10 @@ public class FormDataReportType implements Serializable {
      */
     private String name;
 
+    public FormDataReportType() {
+    }
+
     public FormDataReportType(ReportType reportType, String name) {
-        if (!ReportType.EXCEL.equals(reportType) && ReportType.EXCEL.getName().equals(name) ||
-                !ReportType.CSV.equals(reportType) && ReportType.CSV.getName().equals(name)) {
-            throw new IllegalArgumentException("Некорректное название отчета: " + name);
-        }
         this.reportType = reportType;
         this.name = name;
     }

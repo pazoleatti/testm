@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataReportType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -16,7 +17,7 @@ public class TimerReportAction extends UnsecuredActionImpl<TimerReportResult> im
     private boolean isShowChecked;
     private boolean manual;
     private boolean saved;
-    private List<String> reportTypes;
+    private List<FormDataReportType> reportTypes;
 
     public long getFormDataId() {
         return formDataId;
@@ -50,11 +51,11 @@ public class TimerReportAction extends UnsecuredActionImpl<TimerReportResult> im
         this.saved = saved;
     }
 
-    public List<String> getReportTypes() {
+    public List<FormDataReportType> getReportTypes() {
         return reportTypes;
     }
 
-    public void setReportTypes(List<String> reportTypes) {
+    public void setReportTypes(List<FormDataReportType> reportTypes) {
         this.reportTypes = reportTypes;
     }
 

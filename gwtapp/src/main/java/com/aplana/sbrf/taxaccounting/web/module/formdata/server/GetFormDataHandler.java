@@ -166,17 +166,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             }
 
             result.getFormData().initFormTemplateParams(formTemplate);
-
-            //Составляем общий список печатных представлений
-            List<String> reportTypes = formDataService.getSpecificReportTypes(formData, userInfo, logger);
-            //Если название спецотчета совпадает с названием стадартного отчета, то он заменяет его, иначе добавляем стандартный отчет
-            if (!reportTypes.contains(FormDataReportType.EXCEL.getReportName())) {
-                reportTypes.add(FormDataReportType.EXCEL.getReportName());
-            }
-            if (!reportTypes.contains(FormDataReportType.CSV.getReportName())) {
-                reportTypes.add(FormDataReportType.CSV.getReportName());
-            }
-            result.setReportTypes(reportTypes);
+            result.setReportTypes(fillReports(formData, userInfo, logger));
             return result;
         } catch (Exception e) {
 			LOG.error(e.getMessage(), e);
@@ -193,6 +183,23 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             throw new ActionException(e);
         }
 	}
+
+    private List<FormDataReportType> fillReports(FormData formData, TAUserInfo userInfo, Logger logger) {
+        //Составляем общий список печатных представлений
+        List<String> reportTypeNames = formDataService.getSpecificReportTypes(formData, userInfo, logger);
+        List<FormDataReportType> reportTypes = new ArrayList<FormDataReportType>();
+        //Если название спецотчета совпадает с названием стадартного отчета, то он заменяет его, иначе добавляем стандартный отчет
+        if (!reportTypeNames.contains(FormDataReportType.EXCEL.getReportName())) {
+            reportTypes.add(new FormDataReportType(ReportType.EXCEL, FormDataReportType.EXCEL.getReportName()));
+        }
+        if (!reportTypeNames.contains(FormDataReportType.CSV.getReportName())) {
+            reportTypes.add(new FormDataReportType(ReportType.CSV, FormDataReportType.CSV.getReportName()));
+        }
+        for (String name : reportTypeNames) {
+            reportTypes.add(new FormDataReportType(ReportType.SPECIFIC_REPORT, name));
+        }
+        return reportTypes;
+    }
 
     /**
      * Проверки правильности параметров запроса

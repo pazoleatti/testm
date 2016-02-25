@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataReportType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -12,7 +13,7 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
 
     private boolean force;
     private long formDataId;
-    private String type;
+    private FormDataReportType type;
     private boolean isShowChecked;
     private boolean manual;
     private boolean saved;
@@ -33,11 +34,11 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
         this.formDataId = formDataId;
     }
 
-    public String getType() {
+    public FormDataReportType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(FormDataReportType type) {
         this.type = type;
     }
 

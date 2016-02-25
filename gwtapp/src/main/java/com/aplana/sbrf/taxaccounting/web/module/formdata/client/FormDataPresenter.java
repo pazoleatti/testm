@@ -56,7 +56,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private final LogAreaPresenter logAreaPresenter;
     private ReportType timerType;
     private Map<String, TimerReportResult.StatusReport> reportTimerStatus;
-    private List<String> reportTypes = new ArrayList<String>();
+    private List<FormDataReportType> reportTypes = new ArrayList<FormDataReportType>();
 
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
@@ -321,7 +321,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
     @Override
-    public void onPrintClicked(final String fdReportType, boolean force) {
+    public void onPrintClicked(final FormDataReportType fdReportType, boolean force) {
         CreateReportAction action = new CreateReportAction();
         action.setFormDataId(formData.getId());
         action.setType(fdReportType);
@@ -336,16 +336,16 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         LogCleanEvent.fire(FormDataPresenter.this);
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                         if (result.isExistReport()) {
-                            getView().updatePrintReportButtonName(fdReportType, true);
+                            getView().updatePrintReportButtonName(fdReportType.getReportName(), true);
                             DownloadUtils.openInIframe(
                                     GWT.getHostPageBaseURL() + "download/downloadBlobController/"
-                                            + fdReportType + "/"
+                                            + fdReportType.getReportName() + "/"
                                             + formData.getId() + "/"
                                             + getView().getCheckedColumnsClicked() + "/"
                                             + formData.isManual() + "/"
                                             + absoluteView);
                         } else if (result.isLock()) {
-                            getView().updatePrintReportButtonName(fdReportType, false);
+                            getView().updatePrintReportButtonName(fdReportType.getReportName(), false);
                             Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
                                 public void yes() {
@@ -353,7 +353,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 }
                             });
                         } else {
-                            getView().updatePrintReportButtonName(fdReportType, false);
+                            getView().updatePrintReportButtonName(fdReportType.getReportName(), false);
                         }
                     }
                 }, this));
