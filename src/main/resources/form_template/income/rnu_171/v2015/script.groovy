@@ -245,7 +245,7 @@ void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.Gro
         // строка или итог другой группы после строки без подитога между ними
         if (i > 0) {
             def prevRow = dataRows.get(i - 1)
-            if (i < (dataRows.size() - 1) && prevRow.getAlias() == null && isDiffRow(prevRow, row, groupColumns)) { // TODO сравнение
+            if (prevRow.getAlias() == null && isDiffRow(prevRow, row, groupColumns)) { // TODO сравнение
                 itogRows.add(groupCount, null)
                 groupCount++
                 String groupCols = groupString.getString(prevRow);
