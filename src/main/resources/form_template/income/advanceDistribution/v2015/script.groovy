@@ -738,7 +738,7 @@ void logicalCheckAfterCalc() {
         needValue.subjectTaxCredit = row.subjectTaxCredit
         calcColumnFrom14To21(prevDataRows, needValue, row, sumNal, reportPeriod)
         calc18_19(prevDataRows, dataRows, needValue, reportPeriod)
-        checkCalc(row, calcColumns, needValue, logger, true)
+        checkCalc(row, calcColumns, needValue, logger, false)
         // нечисловые значения
         def names = []
         notNumberCalcColumns.each { alias ->
@@ -748,7 +748,7 @@ void logicalCheckAfterCalc() {
         }
         if (names) {
             def tmpNames = '«' + names.join('», «') + '»'
-            logger.error(WRONG_CALC, row.getIndex(), tmpNames)
+            logger.warn(WRONG_CALC, row.getIndex(), tmpNames)
         }
     }
     if (caTotalRow == null || totalRow == null) { // строк нет, в расчеты не зашел, проверять нечего
