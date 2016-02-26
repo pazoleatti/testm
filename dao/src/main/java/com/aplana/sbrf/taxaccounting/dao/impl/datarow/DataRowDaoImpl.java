@@ -92,7 +92,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		String generateSubSqlQuery = "select listagg(row_query, ' ' ) WITHIN GROUP (ORDER BY pos) as query from \n" +
 				"(\n" +
-				"with fc as (select row_number() over (order by ord) as pos, form_template_id, id, ord, type, numeration_row, precision, parent_column_id from form_column fc where form_template_id = :ftId order by ord)\n" +
+				"with fc as (select row_number() over (order by fc.ord) as pos, fc.form_template_id, fc.id, fc.ord, fc.type, fc.numeration_row, fc.precision, fc.parent_column_id, fc.data_ord, pfc.data_ord parent_data_ord from form_column fc " +
+				" left join form_column pfc on (pfc.id = fc.parent_column_id) where fc.form_template_id = :ftId order by fc.ord)\n" +
 				"select fc.pos, fc.form_template_id, case when fc.pos = 1 then '' else ' union all ' end \n" +
 				"       || 'select ord as row_index, '||fc.id ||' as column_id, '\n" +
 				"       || case when type = 'S' then 'to_char(c'||fc.data_ord||') as raw_value, '\n" +
@@ -101,7 +102,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				"               when type = 'A' then 'to_char((row_number() over(order by ord)) + ' || case when fc.NUMERATION_ROW=0 then 0 else (select number_previous_row from form_data where id = :fdId) end ||') as raw_value,'  \n" +
 				"               else ' null as raw_value, ' end\n" +
 				"				|| case when (type = 'R' and parent_column_id is null) then 'c'||fc.data_ord||' as reference_id ' \n" +
-				"               	when (type = 'R' and parent_column_id is not null) then 'c'||fc.parent_column_id||' as reference_id '\n" +
+				"               	when (type = 'R' and parent_column_id is not null) then 'c'||fc.parent_data_ord||' as reference_id '\n" +
 				"               	else ' null as reference_id ' end " +
 				"       || ' from t ' as row_query\n" +
 				"from fc\n" +

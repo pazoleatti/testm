@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,7 +143,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
         dataRowDao.removeRows(fd);
         this.dataRows = new ArrayList<DataRow<Cell>>();
 
-        updateIndexes(dataRows);
+		ScriptUtils.updateIndexes(dataRows);
         FormDataUtils.cleanValueOwners(dataRows);
 
 		// сохранение строк порциями
@@ -161,14 +162,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
         FormDataUtils.setValueOwners(dataRows);
         this.dataRows = dataRows;
-    }
-
-    void updateIndexes(List<DataRow<Cell>> dataRows) {
-        Integer index = 1;
-        for(DataRow<Cell> row: dataRows) {
-            row.setIndex(index++);
-        }
-    }
+	}
 
     @Override
     public DataRow getDataRow(List<DataRow<Cell>> dataRows, String rowAlias) {
