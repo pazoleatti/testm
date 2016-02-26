@@ -38,6 +38,7 @@
     <filter-mapping>
         <filter-name>characterEncodingFilter</filter-name>
         <url-pattern>/download/downloadBlobController/*</url-pattern>
+        <url-pattern>/download/declarationData/*</url-pattern>
     </filter-mapping>
 
     <filter>

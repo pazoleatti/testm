@@ -9,6 +9,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -264,4 +265,18 @@ public interface DeclarationDataService {
      * @return
      */
     JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile);
+
+    /**
+     * Формирование PDF отчета
+     * @param jasperPrint
+     * @param data
+     */
+    void exportPDF(JasperPrint jasperPrint, OutputStream data);
+
+    /**
+     * Формирование XLSX отчета
+     * @param jasperPrint
+     * @param data
+     */
+    void exportXLSX(JasperPrint jasperPrint, OutputStream data);
 }

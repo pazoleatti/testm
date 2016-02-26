@@ -417,7 +417,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ObjectInputStream objectInputStream = null;
                 InputStream zipJasper = null;
                 try {
-                    zipJasper =  blobDataService.get(uuid).getInputStream();
+                    zipJasper = blobDataService.get(uuid).getInputStream();
                     ZipInputStream zipJasperIn = new ZipInputStream(zipJasper);
                     try {
                         zipJasperIn.getNextEntry();
@@ -541,7 +541,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 LOG.info(String.format("Заполнение PDF-файла декларации %s", declarationData.getId()));
                 stateLogger.updateState("Заполнение PDF-файла");
                 pdfFile = File.createTempFile("report", ".pdf");
-                exportPDF(jasperPrint, pdfFile);
+
+                OutputStream outputStream = null;
+                try {
+                    outputStream = new FileOutputStream(pdfFile);
+                    exportPDF(jasperPrint, outputStream);
+                } finally {
+                    IOUtils.closeQuietly(outputStream);
+                }
 
                 LOG.info(String.format("Сохранение PDF-файла в базе данных для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение PDF-файла в базе данных");
@@ -592,7 +599,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceLoggerException("Возникли ошибки при формировании отчета", logEntryService.save(logger.getEntries()));
                 }
             } finally {
-                IOUtils.copy(inputStream, outputStream);
                 IOUtils.closeQuietly(outputStream);
                 IOUtils.closeQuietly(inputStream);
             }
@@ -697,7 +703,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 stateLogger.updateState("Сохранение XML-файла в базе данных");
 
                 reportService.createDec(declarationData.getId(),
-                        blobDataService.create(zipOutFile, String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "zip"), decDate),
+                        blobDataService.create(zipOutFile, decName + ".zip", decDate),
                         DeclarationDataReportType.XML_DEC);
             } finally {
                 if (zipOutFile != null && !zipOutFile.delete()) {
@@ -781,7 +787,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private static void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
+    @Override
+    public void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
         try {
             JRXlsxExporter exporter = new JRXlsxExporter();
             exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT,
@@ -809,10 +816,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private static void exportPDF(JasperPrint jasperPrint, File pdfFile) {
-        OutputStream data = null;
+    @Override
+    public void exportPDF(JasperPrint jasperPrint, OutputStream data) {
         try {
-            data = new FileOutputStream(pdfFile);
             JRPdfExporter exporter = new JRPdfExporter();
             exporter.setParameter(JRPdfExporterParameter.JASPER_PRINT, jasperPrint);
             exporter.setParameter(JRPdfExporterParameter.OUTPUT_STREAM, data);

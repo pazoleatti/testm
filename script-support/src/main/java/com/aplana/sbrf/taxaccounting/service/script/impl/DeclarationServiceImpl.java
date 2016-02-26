@@ -26,6 +26,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.zip.ZipInputStream;
 
@@ -228,5 +229,15 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile) {
         return declarationDataService.createJasperReport(xmlIn, jrxml, jrSwapFile);
+    }
+
+    @Override
+    public void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
+        declarationDataService.exportXLSX(jasperPrint, data);
+    }
+
+    @Override
+    public void exportPDF(JasperPrint jasperPrint, OutputStream data) {
+        declarationDataService.exportPDF(jasperPrint, data);
     }
 }
