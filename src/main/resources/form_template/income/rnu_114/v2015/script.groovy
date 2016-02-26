@@ -84,6 +84,8 @@ def refBookCache = [:]
 
 @Field
 def course810 = getRecordId(15, 'CODE', '810')
+@Field
+def course643 = getRecordId(15, 'CODE', '643')
 
 @Field
 def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryName', 'code', 'docNumber', 'docDate', 'residual',
@@ -246,13 +248,13 @@ def BigDecimal calc15(def row) {
 }
 
 def BigDecimal calc16(def row) {
-    if (row.currencyCode == course810) {
+    if (row.currencyCode == course810 || row.currencyCode == course643) {
         if (row.residual != null && row.period != null && row.deviation != null && row.base != null
                 && row.base != 0 && row.period > 0 && (row.base.intValue() in [360, 365, 366]) && row.deviation == calc15(row)) {
             return round((BigDecimal) ((row.residual * row.period * (row.deviation / 100)) / row.base), 2)
         }
     }
-    if (row.currencyCode != course810) {
+    if (row.currencyCode != course810 && row.currencyCode != course643) {
         if (row.residual != null && row.period != null && row.courseCB != null && row.deviation != null && row.base != null
                 && row.base != 0 && row.courseCB > 0 && row.period > 0 && (row.base.intValue() in [360, 365, 366]) && row.deviation == calc15(row)) {
             return round((BigDecimal) ((row.residual * row.period * row.courseCB * (row.deviation / 100)) / row.base), 2)
