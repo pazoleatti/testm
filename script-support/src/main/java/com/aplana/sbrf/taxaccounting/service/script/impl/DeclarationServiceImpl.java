@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.util.JRSwapFile;
 import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -57,19 +59,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Autowired
     private FormDataDao formDataDao;
     @Autowired
-    private FormDataService formDataService;
-    @Autowired
-    private DepartmentDao departmentDao;
-    @Autowired
-    private FormTypeDao formTypeDao;
-    @Autowired
-    private FormTemplateDao formTemplateDao;
-    @Autowired
     private DeclarationTemplateDao declarationTemplateDao;
     @Autowired
     private SourceService sourceService;
-    @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
     private DeclarationDataSearchService declarationDataSearchService;
     @Autowired
@@ -231,5 +223,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         TemplateFilter filter = new TemplateFilter();
         filter.setTaxType(taxType);
         return declarationTypeDao.getByFilter(filter);
+    }
+
+    @Override
+    public JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile) {
+        return declarationDataService.createJasperReport(xmlIn, jrxml, jrSwapFile);
     }
 }

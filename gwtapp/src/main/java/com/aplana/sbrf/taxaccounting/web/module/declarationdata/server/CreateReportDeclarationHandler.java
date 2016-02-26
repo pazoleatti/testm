@@ -45,6 +45,9 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     @Autowired
     private AsyncTaskManagerService asyncTaskManagerService;
 
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
+
     public CreateReportDeclarationHandler() {
         super(CreateReportAction.class);
     }
@@ -52,6 +55,11 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     @Override
     public CreateReportResult execute(final CreateReportAction action, ExecutionContext executionContext) throws ActionException {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(action.getType());
+        if (ddReportType.isSubreport()) {
+            TAUserInfo userInfo = securityService.currentUserInfo();
+            DeclarationData declaration = declarationDataService.get(action.getDeclarationDataId(), userInfo);
+            ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), action.getType()));
+        }
         CreateReportResult result = new CreateReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
@@ -63,7 +71,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                 return result;
             } else {
                 String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationDataId(), ddReportType);
-                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType(), ddReportType.getReportName()), userInfo, action.isForce(), logger);
+                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, action.isForce(), logger);
                 if (restartStatus != null && restartStatus.getFirst()) {
                     result.setStatus(CreateAsyncTaskStatus.LOCKED);
                     result.setRestartMsg(restartStatus.getSecond());
@@ -73,6 +81,9 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                     result.setStatus(CreateAsyncTaskStatus.CREATE);
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("declarationDataId", action.getDeclarationDataId());
+                    if (ddReportType.isSubreport()) {
+                        params.put("alias", ddReportType.getReportAlias());
+                    }
                     asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
                         @Override
                         public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
@@ -96,7 +107,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
 
                         @Override
                         public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                            return declarationDataService.getTaskName(ddReportType, action.getTaxType(), ddReportType.getReportName());
+                            return declarationDataService.getTaskName(ddReportType, action.getTaxType());
                         }
                     });
                 }

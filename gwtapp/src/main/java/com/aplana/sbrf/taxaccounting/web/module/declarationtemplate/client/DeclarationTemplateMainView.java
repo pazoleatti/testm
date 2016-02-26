@@ -5,10 +5,15 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.gwt.client.mask.ui.YearMaskBox;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateMainPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.BaseTab;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.SimpleTabPanel;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
@@ -27,15 +32,17 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
+import com.gwtplatform.mvp.client.Tab;
+import com.gwtplatform.mvp.client.TabData;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTemplateUiHandlers>
-		implements DeclarationTemplatePresenter.MyView, Editor<DeclarationTemplateExt> {
+import java.util.List;
 
-    interface Binder extends UiBinder<Widget, DeclarationTemplateView> { }
+public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationTemplateMainUiHandlers>
+		implements DeclarationTemplateMainPresenter.MyView {
 
-	interface MyDriver extends SimpleBeanEditorDriver<DeclarationTemplateExt, DeclarationTemplateView> {
-	}
+    interface Binder extends UiBinder<Widget, DeclarationTemplateMainView> { }
+
 
     interface UrlTemplates extends SafeHtmlTemplates {
         @Template("download/downloadByUuid/{0}")
@@ -55,22 +62,13 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     }
 
     private static final UrlTemplates urlTemplates = GWT.create(UrlTemplates.class);
-	private final MyDriver driver = GWT.create(MyDriver.class);
+	//private final MyDriver driver = GWT.create(MyDriver.class);
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 140;
     private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
 
-    @UiField
-    @Path("declarationTemplate.version")
-    YearMaskBox versionDateBegin;
-
-    @UiField
-    @Path("endDate")
-    YearMaskBox versionDateEnd;
-
 	@UiField
-	@Editor.Ignore
-	FileUploadWidget uploadJrxmlFile, uploadDectFile, uploadXsdFile;
+	FileUploadWidget uploadDectFile;
 
 	@UiField
 	@Editor.Ignore
@@ -80,64 +78,41 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@Editor.Ignore
 	Label title;
 
-	@UiField
-    @Path("declarationTemplate.createScript")
-	CodeMirror createScript;
-
     @UiField
     @Editor.Ignore
     Label lockInformation;
 
     @UiField
-    @Path("declarationTemplate.name")
-    TextBox decName;
-
-    @UiField
-    @Editor.Ignore
-    Anchor downloadDectButton, downloadJrxmlButton, downloadXsd;
+    Anchor downloadDectButton;
 
     @UiField
     LinkAnchor returnAnchor;
+
+
     @UiField
-    LinkButton deleteXsd, deleteJrxml;
+    @Editor.Ignore
+    SimpleTabPanel tabPanel;
 
     @Inject
 	@UiConstructor
-	public DeclarationTemplateView(final Binder uiBinder) {
+	public DeclarationTemplateMainView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
-        FormElement.as(uploadJrxmlFile.getElement()).setAcceptCharset("UTF-8");
         FormElement.as(uploadDectFile.getElement()).setAcceptCharset("UTF-8");
-		driver.initialize(this);
+		//driver.initialize(this);
 	}
+
+    private int templateId;
 
 	@Override
 	public void setDeclarationTemplate(final DeclarationTemplateExt declarationTemplateExt) {
-        /*uploadDectForm.reset();*/
-        /*uploadJrxmlForm.reset();*/
         Integer id = declarationTemplateExt.getDeclarationTemplate().getId() != null ?
                 declarationTemplateExt.getDeclarationTemplate().getId() : 0;
         DeclarationTemplate template = declarationTemplateExt.getDeclarationTemplate();
         uploadDectFile.setActionUrl(urlTemplates.getUploadDTUrl(id).asString());
-        uploadJrxmlFile.setActionUrl(urlTemplates.getUploadJrxmlUrl(id).asString());
-        uploadXsdFile.setActionUrl(urlTemplates.getUploadXsdlUrl(id).asString());
         title.setText(template.getType().getName());
-        driver.edit(declarationTemplateExt);
         setEnabled(template.getId() != null);
-        downloadJrxmlButton.setEnabled(template.getJrxmlBlobId() != null);
-        deleteJrxml.setEnabled(template.getJrxmlBlobId() != null);
-        downloadXsd.setEnabled(template.getXsdId() != null);
-        deleteXsd.setEnabled(template.getXsdId() != null);
+        setTemplateId(templateId);
 	}
-
-    @Override
-    public HandlerRegistration addValueChangeHandlerJrxml(ValueChangeHandler<String> valueChangeHandler) {
-        return uploadJrxmlFile.addValueChangeHandler(valueChangeHandler);
-    }
-
-    @Override
-    public HandlerRegistration addValueChangeHandlerXsd(ValueChangeHandler<String> valueChangeHandler) {
-        return uploadXsdFile.addValueChangeHandler(valueChangeHandler);
-    }
 
     @Override
     public HandlerRegistration addChangeHandlerDect(ValueChangeHandler<String> valueChangeHandler) {
@@ -145,13 +120,8 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     }
 
     @Override
-    public HandlerRegistration addEndLoadHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler) {
-        return uploadXsdFile.addEndLoadHandler(handler);
-    }
-
-    @Override
-    public HandlerRegistration addEndLoadHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler) {
-        return uploadJrxmlFile.addEndLoadHandler(handler);
+    public HandlerRegistration addStartLoadHandlerDect(StartLoadFileEvent.StartLoadFileHandler handler) {
+        return uploadDectFile.addStartLoadHandler(handler);
     }
 
     @Override
@@ -164,15 +134,8 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         return uploadDectFile.addJrxmlLoadHandler(handler);
     }
 
-    @Override
-    public HandlerRegistration addJrxmlLoadHandler(JrxmlFileExistEvent.JrxmlFileExistHandler handler) {
-        return uploadJrxmlFile.addJrxmlLoadHandler(handler);
-    }
-
     private void setEnabled(boolean isEnable){
-        uploadJrxmlFile.setEnabled(isEnable);
         uploadDectFile.setEnabled(isEnable);
-        uploadXsdFile.setEnabled(isEnable);
         downloadDectButton.setEnabled(isEnable);
     }
 
@@ -198,36 +161,17 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         changeTableTopPosition(isVisible);
     }
 
-    @Override
-    public void clearCode() {
-        createScript.setText("");
-    }
-
     /**
      * Увеличивает верхний отступ у панели, когда показывается сообщение о блокировки
      * @param isLockInfoVisible показано ли сообщение
      */
     private void changeTableTopPosition(Boolean isLockInfoVisible) {
-        Style formDataTableStyle = createScript.getElement().getStyle();
+        Style formDataTableStyle = tabPanel.getElement().getStyle();
         int downShift = 0;
         if (isLockInfoVisible){
             downShift = LOCK_INFO_BLOCK_HEIGHT;
         }
-        formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
-    }
-
-    @UiHandler("downloadJrxmlButton")
-    void onDownloadJrxmlButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().downloadJrxml();
-        }
-    }
-
-    @UiHandler("downloadXsd")
-    void onDownloadXsdClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().downloadXsd();
-        }
+        //formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
     }
 
     @UiHandler("downloadDectButton")
@@ -240,7 +184,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiHandler("saveButton")
 	public void onSave(ClickEvent event){
-		driver.flush();
+		//driver.flush();
         getUiHandlers().save();
 	}
 
@@ -265,7 +209,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
                     @Override
                     public void yes() {
-                        driver.flush();
+                        //driver.flush();
                         getUiHandlers().save();
                     }
                 });
@@ -293,24 +237,59 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         }
     }
 
-    @UiHandler("deleteXsd")
-    void onDeleteXsd(ClickEvent event){
-        Dialog.confirmMessage("Удаление xsd файла", "Вы действительно хотите удалить xsd-файл?", new DialogHandler() {
-            @Override
-            public void yes() {
-                getUiHandlers().onDeleteXsd();
+
+    @Override
+    public void setTemplateId(int templateId) {
+        List<BaseTab> tabList = tabPanel.getTabList();
+
+        if (this.templateId != 0) {
+            for (BaseTab tab : tabList) {
+                tab.setTargetHistoryToken(tab.getTargetHistoryToken()
+                        .substring(0, tab.getTargetHistoryToken().length() - String.valueOf(this.templateId).length()));
             }
-        });
+        }
+
+        for (BaseTab tab : tabList) {
+            tab.setTargetHistoryToken(tab.getTargetHistoryToken() + templateId);
+        }
+
+        this.templateId = templateId;
     }
 
-    @UiHandler("deleteJrxml")
-    void onDeleteJrxml(ClickEvent event){
-        Dialog.confirmMessage("Удаление jrxml файла", "Вы действительно хотите удалить jrxml файл?", new DialogHandler() {
-            @Override
-            public void yes() {
-                getUiHandlers().onCheckBeforeDeleteJrxml();
-            }
-        });
+    @Override
+    public Tab addTab(TabData tabData, String historyToken) {
+        if (templateId != 0) {
+            return tabPanel.addTab(tabData, historyToken + ";" + DeclarationTemplateTokens.declarationTemplateId + "=" + templateId);
+        }
+        return tabPanel.addTab(tabData, historyToken + ";" + DeclarationTemplateTokens.declarationTemplateId + "=");
     }
 
+    @Override
+    public void removeTab(Tab tab) {
+        tabPanel.removeTab(tab);
+    }
+
+    @Override
+    public void removeTabs() {
+        tabPanel.removeTabs();
+    }
+
+    @Override
+    public void setActiveTab(Tab tab) {
+        tabPanel.setActiveTab(tab);
+    }
+
+    @Override
+    public void changeTab(Tab tab, TabData tabData, String historyToken) {
+        tabPanel.changeTab(tab, tabData, historyToken + ";" + DeclarationTemplateTokens.declarationTemplateId + "=" + templateId);
+    }
+
+    @Override
+    public void setInSlot(Object slot, IsWidget content) {
+        if (slot == DeclarationTemplateMainPresenter.TYPE_SetTabContent) {
+            tabPanel.setPanelContent(content);
+        } else {
+            super.setInSlot(slot, content);
+        }
+    }
 }

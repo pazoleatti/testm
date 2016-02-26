@@ -83,18 +83,9 @@ public class DeclarationServiceTest {
         departmentReportPeriod.setReportPeriod(reportPeriod);
         departmentReportPeriod.setDepartmentId(2);
 
-        DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
-        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-        filter.setDepartmentIdList(Arrays.asList(1));
-        filter.setReportPeriodIdList(Arrays.asList(101));
-
-        when(departmentReportPeriodDao.getListByFilter(filter)).thenReturn(Arrays.asList(departmentReportPeriod));
-        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
-
         FormDataDao formDataDao = mock(FormDataDao.class);
 
         ReflectionTestUtils.setField(service, "formDataDao", formDataDao);
-        ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(mockUser(1, 1, TARole.ROLE_CONTROL_UNP));
         assertTrue(service.getAcceptedFormDataSources(declarationData, userInfo, new Logger()) != null);

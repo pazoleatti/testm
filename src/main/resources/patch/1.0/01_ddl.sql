@@ -148,6 +148,50 @@ commit;
 drop package pck_zip;
 drop java source "ZipBlob";
 ----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-14699
+alter table declaration_report drop constraint decl_report_pk; 
+alter table declaration_report modify blob_data_id not null;
+alter table declaration_report drop constraint decl_report_chk_type;
+alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3, 4));
+comment on column declaration_report.type is 'Тип отчета (0 - Excel, 1 - XML, 2 - PDF, 3 - Jasper, 4 - Спец.отчет)';
+alter table declaration_report add subreport_id number(9);
+alter table declaration_report add constraint decl_report_chk_subreport_id check ((type = 4 and subreport_id is not null) or (type in (0, 1, 2, 3) and subreport_id is null));
+comment on column declaration_report.subreport_id is 'Идентификатор спец. отчета';
+alter table declaration_report modify type not null;
+alter table declaration_report add constraint declaration_report_unq_combo unique (declaration_data_id, type, subreport_id); 
+create index i_decl_report_blob_data_id on declaration_report(blob_data_id);
+
+--http://jira.aplana.com/browse/SBRFACCTAX-14735
+create table declaration_subreport
+(
+id number(9) not null,
+declaration_template_id number(9) not null,
+name varchar2(1000) not null,
+ord number(9) not null,
+alias varchar2(128),
+blob_data_id varchar2(36)
+);
+ 
+comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
+comment on column declaration_subreport.id is 'Идентификатор отчета';
+comment on column declaration_subreport.declaration_template_id is 'Идентификатор шаблона декларации';
+comment on column declaration_subreport.name is 'Наименование спец. отчета';
+comment on column declaration_subreport.ord is 'Порядковый номер';
+comment on column declaration_subreport.alias is 'Код спец. отчета';
+comment on column declaration_subreport.blob_data_id is 'Макет JasperReports для формирования печатного представления формы';
+comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
+ 
+alter table declaration_subreport add constraint decl_subrep_pk primary key(id);
+alter table declaration_subreport add constraint decl_subrep_unq_combo unique (declaration_template_id, alias);
+alter table declaration_subreport add constraint decl_subrep_fk_decl_template foreign key (declaration_template_id) references declaration_template(id) on delete cascade;
+alter table declaration_subreport add constraint decl_subrep_fk_blob_data foreign key (blob_data_id) references blob_data(id);
+create index i_decl_subrep_blob_data_id on declaration_subreport(blob_data_id);
+
+
+alter table declaration_report add constraint decl_report_fk_decl_subreport foreign key (subreport_id) references declaration_subreport(id) on delete cascade;
+
+create sequence seq_declaration_subreport start with 1;
+----------------------------------------------------------------------------------------------------------------
 create or replace package FORM_DATA_PCKG is
   -- Запросы получения источников-приемников для налоговых форм
   -- Источники - возвращаемый результат

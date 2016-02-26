@@ -1,0 +1,121 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui'
+             xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
+             xmlns:fileuplod='urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload'
+             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+             xmlns:fm="urn:import:com.aplana.gwt.client.form"
+             xmlns:w='urn:import:com.aplana.gwt.client.mask.ui'>
+
+    <ui:style>
+        .header {
+            font-size: 14px;
+            color: #636460;
+        }
+
+        .header div {
+            font-size: 14px !important;
+        }
+
+        .btnPanel {
+            padding-left: 10px;
+            padding-top: 10px;
+        }
+
+        .btnPanel2 td {
+            vertical-align: middle !important;
+        }
+
+        .table {
+            position: absolute !important;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            top: 45px;
+            margin: 0 5px;
+        }
+
+        .horSep {
+            height: 1px;
+            margin: 10px 10px;
+            border-top: 1px solid #aeaeac;
+        }
+
+    </ui:style>
+
+    <ui:style field="lock">
+        .lockInformation {
+            height: 25px;   /*@see com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.FormTemplateMainView.LOCK_INFO_BLOCK_HEIGHT*/
+            line-height: 24px;
+            background: #FFDC82;
+            padding-left: 15px;
+            margin: 2px;
+            font-size: 14px;
+            border: 1px solid #DBDBDB;
+
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
+        }
+    </ui:style>
+
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:left>
+                    <fm:Left>
+                        <style:LeftBar childValign="middle" height="100%">
+                            <style:LinkAnchor ui:field="returnAnchor" title="Перейти к списку версий макета налоговой формы"
+                                              text="Версии макета" addStyleNames="{style.header}" disableImage="true"/>
+                            <g:Label text="—" addStyleNames="{style.header}"/>
+                        </style:LeftBar>
+                    </fm:Left>
+                </fm:left>
+                <fm:right>
+                    <fm:Right>
+                        <style:LeftBar childValign="middle" height="100%">
+                            <style:LinkAnchor text="Экспорт макета" ui:field="downloadDectButton" img="resources/img/down_cc.png"
+                                              title="Экспорт макета деклараций"/>
+                            <fileuplod:FileUploadWidget isJrxml="true" ui:field="uploadDectFile" text="Импорт макета"/>
+                        </style:LeftBar>
+                    </fm:Right>
+                </fm:right>
+                <fm:resizable>
+                    <fm:Resizable>
+                        <g:Label ui:field="title" text="Декларация"/>
+                    </fm:Resizable>
+                </fm:resizable>
+            </fm:HeaderContainer>
+        </fm:header>
+        <fm:body>
+            <fm:BodyContainer>
+                <g:HorizontalPanel width="100%">
+                    <g:cell>
+                        <style:LeftBar childValign="middle" marginRight="10" addStyleNames="{style.btnPanel}">
+                            <g:Button text="Сохранить" ui:field="saveButton"/>
+                            <g:Button text="Сбросить" ui:field="resetButton"/>
+                            <g:Button text="Отменить" ui:field="cancelButton"/>
+                            <g:Button text="Ввести в действие" ui:field="activateVersion"/>
+                        </style:LeftBar>
+                    </g:cell>
+                    <g:cell horizontalAlignment="right">
+                        <style:RightBar addStyleNames="{style.btnPanel}">
+                            <style:LinkButton text="История изменений" ui:field="historyVersion"/>
+                        </style:RightBar>
+                    </g:cell>
+                </g:HorizontalPanel>
+
+                <g:Label ui:field="lockInformation" visible="false" addStyleNames="{lock.lockInformation}"/>
+
+                <g:Label addStyleNames="{style.horSep}"/>
+
+                <g:DockLayoutPanel ui:field="dockPanel" addStyleNames="{style.table}">
+                    <g:center>
+                        <npui:SimpleTabPanel ui:field="tabPanel"/>
+                    </g:center>
+                </g:DockLayoutPanel>
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
+</ui:UiBinder>

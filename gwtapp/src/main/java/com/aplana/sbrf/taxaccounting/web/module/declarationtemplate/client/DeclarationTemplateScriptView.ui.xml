@@ -1,0 +1,28 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'>
+    <ui:style>
+        .marginLeft {
+            margin-left: 5px;
+        }
+
+        .table {
+            z-index: 0;
+            position: absolute !important;
+            bottom: 0;
+            right: 1px;
+            left: 1px;
+            top: 33px;
+            height: inherit !important;
+            border-top: 1px solid #aeaeac;
+        }
+
+    </ui:style>
+
+
+    <g:HorizontalPanel addStyleNames="{style.marginLeft}">
+        <g:FlowPanel>
+            <cm:CodeMirror ui:field="createScript" addStyleNames="{style.table}"/>
+        </g:FlowPanel>
+    </g:HorizontalPanel>
+</ui:UiBinder>

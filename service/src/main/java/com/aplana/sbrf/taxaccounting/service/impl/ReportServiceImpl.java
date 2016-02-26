@@ -83,9 +83,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void deleteDec(Collection<Long> declarationDataId, List<DeclarationDataReportType> reportTypes) {
-        if (reportTypes != null && !reportTypes.isEmpty()) {
-            reportDao.deleteDec(declarationDataId, reportTypes);
+    public void deleteDec(Collection<Long> declarationDataId, List<DeclarationDataReportType> ddReportTypes) {
+        if (ddReportTypes != null && !ddReportTypes.isEmpty()) {
+            reportDao.deleteDec(declarationDataId, ddReportTypes);
         }
     }
 

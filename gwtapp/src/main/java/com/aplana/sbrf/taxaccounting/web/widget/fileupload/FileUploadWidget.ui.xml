@@ -11,7 +11,7 @@
         }
 
         .heightInherit tbody, tr, td {
-            height: inherit;
+            /*height: inherit;*/
         }
     </ui:style>
 

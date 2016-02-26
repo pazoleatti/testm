@@ -3,8 +3,11 @@ package com.aplana.sbrf.taxaccounting.service.script;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.util.JRSwapFile;
 
 import javax.xml.stream.XMLStreamReader;
+import java.io.InputStream;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
@@ -104,4 +107,13 @@ public interface DeclarationService {
      * @param taxType тип налога
      */
     List<Integer> getDeclarationTypeIds(TaxType taxType);
+
+    /**
+     * Формирование jasper-отчета
+     * @param xmlIn поток данных xml
+     * @param jrxml текст jrxml
+     * @param jrSwapFile
+     * @return
+     */
+    JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile);
 }

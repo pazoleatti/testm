@@ -90,6 +90,12 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             checkError(logger, SAVE_MESSAGE);
         }
 
+        List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(declarationTemplate.getId(), declarationTemplate.getVersion());
+        for (long declarationId : ddIds) {
+            // Отменяем задачи формирования спец отчетов/удаляем спец отчеты
+            declarationDataService.interruptTask(declarationId, user.getUser().getId(), ReportType.UPDATE_TEMPLATE_DEC, "Обновление макета");
+        }
+
         int id = declarationTemplateService.save(declarationTemplate);
 
         auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, declarationTemplate.getVersion(),

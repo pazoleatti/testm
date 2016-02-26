@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -59,7 +60,14 @@ public class DeclarationTemplateControllerTest {
 
     @Before
     public void setup() {
-        Mockito.when(securityService.currentUserInfo()).thenReturn(new TAUserInfo());
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        TARole role = new TARole(){{
+            setAlias(TARole.ROLE_CONF);
+        }};
+        user.setRoles(Arrays.asList(role));
+        userInfo.setUser(user);
+        Mockito.when(securityService.currentUserInfo()).thenReturn(userInfo);
 
         // Setup Spring test in standalone mode
         this.mockMvc = MockMvcBuilders.standaloneSetup(declarationTemplateController).build();

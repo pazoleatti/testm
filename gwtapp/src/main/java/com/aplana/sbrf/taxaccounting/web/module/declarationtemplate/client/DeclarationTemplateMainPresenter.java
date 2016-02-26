@@ -13,36 +13,45 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DeclarationTemplateFlushEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.UpdateTemplateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.DeclarationVersionHistoryPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.HasUiHandlers;
-import com.gwtplatform.mvp.client.Presenter;
-import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
+import com.gwtplatform.mvp.client.*;
+import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.Date;
 
-public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplatePresenter.MyView, DeclarationTemplatePresenter.MyProxy>
-		implements DeclarationTemplateUiHandlers, CreateNewDTVersionEvent.MyHandler, DTCreateNewTypeEvent.MyHandler {
+public class DeclarationTemplateMainPresenter extends TabContainerPresenter<DeclarationTemplateMainPresenter.MyView, DeclarationTemplateMainPresenter.MyProxy>
+		implements DeclarationTemplateMainUiHandlers, CreateNewDTVersionEvent.MyHandler, DTCreateNewTypeEvent.MyHandler {
 
     private static final String ERROR_MSG = "Не удалось загрузить макет";
     private static final String SUCCESS_MSG = "Файл загружен";
     private static final String JRXML_INFO_MES =
             "Загрузка нового jrxml файла приведет к удалению уже сформированных pdf, xlsx отчетов и отмене ранее запущенных операций формирования pdf, xlsx отчетов экземпляров деклараций данной версии макета. Продолжить?";
+
+    @RequestTabs
+    public static final GwtEvent.Type<RequestTabsHandler> TYPE_RequestTabs = new GwtEvent.Type<RequestTabsHandler>();
+
+    @ChangeTab
+    public static final GwtEvent.Type<ChangeTabHandler> TYPE_ChangeTab = new GwtEvent.Type<ChangeTabHandler>();
+
+    @ContentSlot
+    public static final GwtEvent.Type<RevealContentHandler<?>> TYPE_SetTabContent = new GwtEvent.Type<RevealContentHandler<?>>();
 
     @Override
     @ProxyEvent
@@ -57,13 +66,15 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                 declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
                 declarationTemplate.setVersion(new Date());
                 declarationTemplate.setType(result.getDeclarationType());
+                getView().setTemplateId(0);
                 getView().setDeclarationTemplate(declarationTemplateExt);
-                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+                UpdateTemplateEvent.fire(DeclarationTemplateMainPresenter.this);
+                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateInfo).
                         with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
-                TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
+                TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
 
             }
-        }, this).addCallback(new ManualRevealCallback<GetDeclarationTypeResult>(DeclarationTemplatePresenter.this)));
+        }, this).addCallback(new ManualRevealCallback<GetDeclarationTypeResult>(DeclarationTemplateMainPresenter.this)));
     }
 
     @Override
@@ -80,35 +91,31 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         declarationType.setStatus(VersionedObjectStatus.DRAFT);
         declarationType.setTaxType(event.getTaxType());
         declarationTemplate.setType(declarationType);
+        getView().setTemplateId(0);
         getView().setDeclarationTemplate(declarationTemplateExt);
-        TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
-        RevealContentEvent.fire(DeclarationTemplatePresenter.this, RevealContentTypeHolder.getMainContent(), DeclarationTemplatePresenter.this);
-        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+        UpdateTemplateEvent.fire(DeclarationTemplateMainPresenter.this);
+        TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
+        RevealContentEvent.fire(DeclarationTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), DeclarationTemplateMainPresenter.this);
+        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateInfo).
                 with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
 
     }
 
     @ProxyCodeSplit
 	@NameToken(DeclarationTemplateTokens.declarationTemplate)
-	public interface MyProxy extends ProxyPlace<DeclarationTemplatePresenter>, Place {
+	public interface MyProxy extends ProxyPlace<DeclarationTemplateMainPresenter>, Place {
 	}
 
-	public interface MyView extends View, HasUiHandlers<DeclarationTemplateUiHandlers> {
+	public interface MyView extends TabView, HasUiHandlers<DeclarationTemplateMainUiHandlers> {
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
-        HandlerRegistration addValueChangeHandlerJrxml(ValueChangeHandler<String> valueChangeHandler);
-        HandlerRegistration addValueChangeHandlerXsd(ValueChangeHandler<String> valueChangeHandler);
         HandlerRegistration addChangeHandlerDect(ValueChangeHandler<String> valueChangeHandler);
-        HandlerRegistration addEndLoadHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler);
-        HandlerRegistration addEndLoadHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addStartLoadHandlerDect(StartLoadFileEvent.StartLoadFileHandler handler);
         HandlerRegistration addEndLoadHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler);
         HandlerRegistration addJrxmlLoadHandlerDect(JrxmlFileExistEvent.JrxmlFileExistHandler handler);
-        HandlerRegistration addJrxmlLoadHandler(JrxmlFileExistEvent.JrxmlFileExistHandler handler);
         void activateButtonName(String name);
         void activateButton(boolean isVisible);
         void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
-
-        void clearCode();
-
+        void setTemplateId(int templateId);
     }
 
 	private final DispatchAsync dispatcher;
@@ -119,28 +126,14 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
     protected DeclarationVersionHistoryPresenter versionHistoryPresenter;
 
 	@Inject
-    public DeclarationTemplatePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager,
-                                        DeclarationVersionHistoryPresenter versionHistoryPresenter) {
-        super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+    public DeclarationTemplateMainPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager,
+                                            DeclarationVersionHistoryPresenter versionHistoryPresenter) {
+        super(eventBus, view, proxy, TYPE_SetTabContent, TYPE_RequestTabs, TYPE_ChangeTab, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
         this.versionHistoryPresenter = versionHistoryPresenter;
 	}
-
-    @Override
-    public void downloadJrxml() {
-        if (declarationTemplate.getJrxmlBlobId() != null && !declarationTemplate.getJrxmlBlobId().isEmpty()) {
-            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/downloadByUuid/" + declarationTemplate.getJrxmlBlobId());
-        }
-    }
-
-    @Override
-    public void downloadXsd() {
-        if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
-            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/downloadByUuid/" + declarationTemplate.getXsdId());
-        }
-    }
 
     @Override
     public void downloadDect() {
@@ -150,16 +143,12 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         }
     }
 
-    /**
-	 * Здесь происходит подготовка декларации администрирования.
-	 *
-	 * @param request запрос
-	 */
-	@Override
-	public void prepareFromRequest(PlaceRequest request) {
-		super.prepareFromRequest(request);
+    @Override
+    protected void onReveal() {
+        super.onReveal();
         setDeclarationTemplate();
-	}
+        LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
+    }
 
 	@Override
 	public void reset() {
@@ -172,7 +161,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         unlockForm(declarationTemplate.getId() != null ? declarationTemplate.getId() : 0);
 		if (closeDeclarationTemplateHandlerRegistration != null)
             closeDeclarationTemplateHandlerRegistration.removeHandler();
-        getView().clearCode();
 	}
 
 	/**
@@ -181,6 +169,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	 */
 	@Override
 	public void save() {
+        DeclarationTemplateFlushEvent.fire(DeclarationTemplateMainPresenter.this);
         if (declarationTemplateExt.getEndDate() != null &&
                 declarationTemplate.getVersion().compareTo(declarationTemplateExt.getEndDate()) >0 ){
             Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуализации.");
@@ -197,13 +186,13 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CreateNewDeclarationTypeResult>() {
                 @Override
                 public void onSuccess(CreateNewDeclarationTypeResult result) {
-                    LogCleanEvent.fire(DeclarationTemplatePresenter.this);
-                    LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
+                    LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
+                    LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getLogUuid());
                     Dialog.infoMessage("Декларация сохранена");
                     declarationTemplate.setId(result.getDeclarationTemplateId());
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                             with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
-                    getView().setDeclarationTemplate(declarationTemplateExt);
+                    reset();
                     getView().activateButton(true);
                 }
             }, this));
@@ -213,13 +202,14 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CreateNewDTVersionResult>() {
                 @Override
                 public void onSuccess(CreateNewDTVersionResult result) {
-                    LogCleanEvent.fire(DeclarationTemplatePresenter.this);
-                    LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
+                    LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
+                    LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getLogUuid());
                     Dialog.infoMessage("Декларация сохранена");
                     declarationTemplate.setId(result.getDeclarationTemplateId());
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                             with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
                     getView().setDeclarationTemplate(declarationTemplateExt);
+                    reset();
                     getView().activateButton(true);
                 }
             }, this));
@@ -230,8 +220,8 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                     .defaultCallback(new AbstractCallback<UpdateDeclarationResult>() {
                         @Override
                         public void onSuccess(UpdateDeclarationResult result) {
-                            LogCleanEvent.fire(DeclarationTemplatePresenter.this);
-                            LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
+                            LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
+                            LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getLogUuid());
                             Dialog.infoMessage("Декларация сохранена");
                         }
                     }, this));
@@ -261,7 +251,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SetActiveResult>() {
             @Override
             public void onSuccess(SetActiveResult result) {
-                LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
+                LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getUuid());
                 if (!result.isSetStatusSuccessfully()) { //
                     Dialog.confirmMessage("Информация",
                             "Найдены экземпляры деклараций, использующие версию макета. Изменить статус версии?",
@@ -298,7 +288,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 					.defaultCallback(new AbstractCallback<GetDeclarationResult>() {
 						@Override
 						public void onSuccess(GetDeclarationResult result) {
-                            LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
+                            LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getUuid());
                             if (result.isLockedByAnotherUser()) {
                                 getView().setLockInformation(true, result.getLockDate(), result.getLockedByUser());
                             } else {
@@ -306,14 +296,18 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                             }
                             declarationTemplateExt = new DeclarationTemplateExt();
 							declarationTemplate = result.getDeclarationTemplate();
+                            getView().setTemplateId(declarationTemplate.getId());
                             getView().activateButtonName(declarationTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
                             getView().activateButton(true);
                             declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
                             declarationTemplateExt.setEndDate(result.getEndDate());
 							getView().setDeclarationTemplate(declarationTemplateExt);
-							TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
+							TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
+                            UpdateTemplateEvent.fire(DeclarationTemplateMainPresenter.this);
+                            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateInfo).
+                                    with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(declarationId)).build());
 						}
-					}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
+					}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplateMainPresenter.this)));
         } else {
             getView().activateButton(false);
             getView().setLockInformation(false, null, null);
@@ -342,126 +336,53 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         addToPopupSlot(versionHistoryPresenter);
     }
 
-    @Override
-    public void onDeleteXsd() {
-        DeleteXsdAction action = new DeleteXsdAction();
-        action.setDtId(declarationTemplate.getId());
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteXsdResult>() {
-            @Override
-            public void onSuccess(DeleteXsdResult result) {
-                declarationTemplate.setXsdId(null);
-                getView().setDeclarationTemplate(declarationTemplateExt);
-            }
-        }, this));
-    }
+    private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[4];
 
-    @Override
-    public void onCheckBeforeDeleteJrxml() {
-        final CheckJrxmlAction action = new CheckJrxmlAction();
-        action.setDtId(declarationTemplate.getId());
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckJrxmlResult>() {
-            @Override
-            public void onSuccess(final CheckJrxmlResult result) {
-                if (result.isCanDelete()){
-                    DeleteJrxmlAction jrxmlAction = new DeleteJrxmlAction();
-                    jrxmlAction.setDtId(declarationTemplate.getId());
-                    dispatcher.execute(jrxmlAction, CallbackUtils.defaultCallback(new AbstractCallback<DeleteJrxmlResult>() {
-                        @Override
-                        public void onSuccess(DeleteJrxmlResult result) {
-                            LogCleanEvent.fire(DeclarationTemplatePresenter.this);
-                            declarationTemplate.setJrxmlBlobId(null);
-                            getView().setDeclarationTemplate(declarationTemplateExt);
-                        }
-                    }, DeclarationTemplatePresenter.this));
-                } else {
-                    LogCleanEvent.fire(DeclarationTemplatePresenter.this);
-                    LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
-                    Dialog.confirmMessage("Удаление jrxml файла",
-                            "Удаление jrxml файла приведет к удалению уже сформированных pdf, xlsx отчетов и отмене ранее запущенных операций формирования pdf, xlsx отчетов экземпляров деклараций данной версии макета. Продолжить?",
-                            new DialogHandler() {
-                                @Override
-                                public void yes() {
-                                    DeleteJrxmlAction jrxmlAction = new DeleteJrxmlAction();
-                                    jrxmlAction.setDtId(declarationTemplate.getId());
-                                    dispatcher.execute(jrxmlAction, CallbackUtils.defaultCallback(new AbstractCallback<DeleteJrxmlResult>() {
-                                        @Override
-                                        public void onSuccess(DeleteJrxmlResult result) {
-                                            LogCleanEvent.fire(DeclarationTemplatePresenter.this);
-                                            declarationTemplate.setJrxmlBlobId(null);
-                                            getView().setDeclarationTemplate(declarationTemplateExt);
-                                        }
-                                    }, DeclarationTemplatePresenter.this));
-                                }
-                            });
-                }
-            }
-        }, this));
-    }
-
-    private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[8];
     @Override
     protected void onBind() {
         super.onBind();
+        addRegisteredHandler(CreateNewDTVersionEvent.getType(), this);
+        addRegisteredHandler(DTCreateNewTypeEvent.getType(), this);
 
-        ValueChangeHandler<String> vchJrxml = new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                Dialog.infoMessage(SUCCESS_MSG);
-                declarationTemplateExt.getDeclarationTemplate().setJrxmlBlobId(event.getValue());
-                getView().setDeclarationTemplate(declarationTemplateExt);
-            }
-        };
-        ValueChangeHandler<String> vchXsd = new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                Dialog.infoMessage(SUCCESS_MSG);
-                declarationTemplateExt.getDeclarationTemplate().setXsdId(event.getValue());
-                getView().setDeclarationTemplate(declarationTemplateExt);
-            }
-        };
         ValueChangeHandler<String> vchDect = new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 Dialog.infoMessage(SUCCESS_MSG);
             }
         };
-        EndLoadFileEvent.EndLoadFileHandler loadFileHandlerContent = new EndLoadFileEvent.EndLoadFileHandler() {
+        StartLoadFileEvent.StartLoadFileHandler startLoadFileHandler = new StartLoadFileEvent.StartLoadFileHandler() {
             @Override
-            public void onEndLoad(EndLoadFileEvent event) {
-                if (event.isHasError()){
-                    Dialog.errorMessage(ERROR_MSG);
-                }
-                LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
+            public void onStartLoad(StartLoadFileEvent event) {
+                // Чистим логи и блокируем форму
+                LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
+                LockInteractionEvent.fire(DeclarationTemplateMainPresenter.this, true);
             }
         };
         EndLoadFileEvent.EndLoadFileHandler loadFileHandlerDect = new EndLoadFileEvent.EndLoadFileHandler() {
             @Override
             public void onEndLoad(EndLoadFileEvent event) {
+                LockInteractionEvent.fire(DeclarationTemplateMainPresenter.this, false);
                 if (event.isHasError()){
                     Dialog.errorMessage(ERROR_MSG);
                 } else if (event.getUuid() == null || event.getUuid().isEmpty()){// TODO проверить условие
                     reset();
                     Dialog.infoMessage("Макет успешно обновлен");
                 }
-                LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
+                LogAddEvent.fire(DeclarationTemplateMainPresenter.this, event.getUuid());
             }
         };
 
-        handlerRegistrations[0] = getView().addValueChangeHandlerJrxml(vchJrxml);
-        handlerRegistrations[1] = getView().addValueChangeHandlerXsd(vchXsd);
-        handlerRegistrations[2] = getView().addChangeHandlerDect(vchDect);
-        handlerRegistrations[3] = getView().addEndLoadHandlerXsd(loadFileHandlerContent);
-        handlerRegistrations[4] = getView().addEndLoadHandlerJrxml(loadFileHandlerContent);
-        handlerRegistrations[5] = getView().addEndLoadHandlerDect(loadFileHandlerDect);
-        handlerRegistrations[6] = getView().addJrxmlLoadHandlerDect(getJrxmlFileExistHandler(true));
-        handlerRegistrations[7] = getView().addJrxmlLoadHandler(getJrxmlFileExistHandler(false));
+        handlerRegistrations[0] = getView().addChangeHandlerDect(vchDect);
+        handlerRegistrations[1] = getView().addEndLoadHandlerDect(loadFileHandlerDect);
+        handlerRegistrations[2] = getView().addJrxmlLoadHandlerDect(getJrxmlFileExistHandler(true));
+        handlerRegistrations[3] = getView().addStartLoadHandlerDect(startLoadFileHandler);
     }
 
-    private JrxmlFileExistEvent.JrxmlFileExistHandler getJrxmlFileExistHandler(final boolean isArchive){
+    public JrxmlFileExistEvent.JrxmlFileExistHandler getJrxmlFileExistHandler(final boolean isArchive){
         return new JrxmlFileExistEvent.JrxmlFileExistHandler() {
             @Override
             public void onJrxmlExist(final JrxmlFileExistEvent event) {
-                LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getErrorUuid());
+                LogAddEvent.fire(DeclarationTemplateMainPresenter.this, event.getErrorUuid());
                 Dialog.confirmMessage("Загрузка jrxml файла", JRXML_INFO_MES,
                         new DialogHandler() {
                             @Override
@@ -481,12 +402,12 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                                             public void onSuccess(ResidualSaveResult result) {
                                                 declarationTemplateExt.getDeclarationTemplate().setJrxmlBlobId(event.getErrorUuid());
                                                 Dialog.infoMessage("Макет успешно обновлен");
-                                                LogCleanEvent.fire(DeclarationTemplatePresenter.this);
-                                                LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getSuccessUuid(), true);
+                                                LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
+                                                LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getSuccessUuid(), true);
                                             }
-                                        }, DeclarationTemplatePresenter.this));
+                                        }, DeclarationTemplateMainPresenter.this));
                                     }
-                                }, DeclarationTemplatePresenter.this));
+                                }, DeclarationTemplateMainPresenter.this));
                             }
                         });
             }
@@ -499,5 +420,9 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         for (HandlerRegistration han : handlerRegistrations){
             han.removeHandler();
         }
+    }
+
+    public DeclarationTemplateExt getDeclarationTemplateExt() {
+        return declarationTemplateExt;
     }
 }

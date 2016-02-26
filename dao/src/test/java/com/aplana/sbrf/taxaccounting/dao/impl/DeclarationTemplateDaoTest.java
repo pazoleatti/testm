@@ -109,6 +109,7 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
 		declarationTemplate.setVersion(new Date());
 		declarationTemplate.setCreateScript("MyScript");
+        declarationTemplate.setSubreports(new ArrayList<DeclarationSubreport>());
 		DeclarationType declarationType = declarationTypeDao.get(1);
 		declarationTemplate.setType(declarationType);
 
@@ -132,6 +133,7 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
         declarationTemplate.setJrxmlBlobId(SAMPLE_BLOB_ID);
+        declarationTemplate.setSubreports(new ArrayList<DeclarationSubreport>());
         DeclarationType declarationType = declarationTypeDao.get(1);
         declarationTemplate.setType(declarationType);
 
@@ -189,6 +191,7 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
+        declarationTemplate.setSubreports(new ArrayList<DeclarationSubreport>());
         DeclarationType declarationType = declarationTypeDao.get(1);
         declarationTemplate.setType(declarationType);
 

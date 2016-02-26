@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
@@ -49,6 +50,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	private DeclarationTypeDao declarationTypeDao;
     @Autowired
     private ReportPeriodDao reportPeriodDao;
+    @Autowired
+    private DeclarationSubreportDao declarationSubreportDao;
 
 	private final class DeclarationTemplateRowMapper implements RowMapper<DeclarationTemplate> {
 		@Override
@@ -61,7 +64,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             d.setXsdId(rs.getString("XSD"));
             d.setJrxmlBlobId(rs.getString("JRXML"));
             d.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
-			return d;
+            d.setSubreports(declarationSubreportDao.getDeclarationSubreports(d.getId()));
+            return d;
 		}
 	}
 
@@ -152,6 +156,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                 throw new DaoException("Не удалось сохранить данные");
             }
 
+            declarationSubreportDao.updateDeclarationSubreports(declarationTemplate);
+
             return declarationTemplate.getId();
         } catch (DataAccessException e) {
 			LOG.error("Ошибка при создании шаблона.", e);
@@ -184,6 +190,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                             Types.NUMERIC
                     }
             );
+            declarationTemplate.setId(declarationTemplateId);
+            declarationSubreportDao.updateDeclarationSubreports(declarationTemplate);
+
             return declarationTemplateId;
         } catch (DataAccessException e){
 			LOG.error("Ошибка при создании шаблона.", e);
