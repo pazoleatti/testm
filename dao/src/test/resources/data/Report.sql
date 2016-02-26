@@ -1,0 +1,2 @@
+insert into form_data_report (form_data_id, blob_data_id, type, checking, manual, absolute) values (1, 'uuid_5', 0, 0, 0, 0);
+insert into declaration_report (declaration_data_id, blob_data_id, type) values (2, 'uuid_6', 0);

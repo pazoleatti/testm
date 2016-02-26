@@ -69,7 +69,7 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
     }
 
 	@Override
-	public Map<ColumnKeyEnum, Collection<Long>> updateDeclarationSubreports(final DeclarationTemplate declarationTemplate) {
+	public void updateDeclarationSubreports(final DeclarationTemplate declarationTemplate) {
 		final int declarationTemplateId = declarationTemplate.getId();
 
 		JdbcTemplate jt = getJdbcTemplate();
@@ -96,7 +96,6 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
 			}
 		}
 
-        HashMap<ColumnKeyEnum, Collection<Long>> columnsInfo = new HashMap<ColumnKeyEnum, Collection<Long>>(3);
 		if(!removedSubreports.isEmpty()){
             deleteDeclarationSubreports(removedSubreports, declarationTemplate.getId());
 		}
@@ -106,8 +105,6 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
 		if(!oldSubreports.isEmpty()){
             updateDeclarationSubreports(oldSubreports, declarationTemplate.getId());
 		}
-
-        return columnsInfo;
 	}
 
     private List<Long> createDeclarationSubreports(final List<DeclarationSubreport> newSubreports, final int declarationTempldateId) {

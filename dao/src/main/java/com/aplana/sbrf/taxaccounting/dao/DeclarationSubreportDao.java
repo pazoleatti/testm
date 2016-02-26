@@ -33,7 +33,7 @@ public interface DeclarationSubreportDao {
      * @param declarationTemplate
      * @return
      */
-    Map<ColumnKeyEnum, Collection<Long>> updateDeclarationSubreports(final DeclarationTemplate declarationTemplate);
+    void updateDeclarationSubreports(final DeclarationTemplate declarationTemplate);
 
     /**
      * Получить спец. отчет по id

@@ -16,8 +16,10 @@ import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"AuditDaoTest.xml"})
+@ContextConfiguration({"ReportDaoTest.xml"})
 @Transactional(readOnly = true)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ReportDaoImplTest {
@@ -48,7 +50,7 @@ public class ReportDaoImplTest {
     @Test
     @Transactional(readOnly = false)
     public void clean(){
-        reportDao.clean();
+        assertEquals(reportDao.clean(), 1);
     }
 
 }
