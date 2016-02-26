@@ -464,7 +464,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex = 2
     def String iksrName = getColumnName(newRow, 'iksr')
     def nameFromFile = values[2]
-    def recordId = getRecordId(nameFromFile, values[3], fileRowIndex, colIndex, iksrName)
+    def recordId = getTcoRecordId(nameFromFile, values[3], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
     newRow.name = recordId
 
     // графа 4
@@ -511,102 +511,6 @@ def getNewTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIn
     newRow.ndsSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
-}
-
-// Получение Id записи из справочника 520 с использованием кэширования
-def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String iksrName) {
-    if (!iksr) {
-        logger.warn("Строка $fileRowIndex , столбец " + getXLSColumnName(colIndex) + ": " +
-                "На форме не заполнены графы с общей информацией о юридическом лице, так как в файле отсутствует значение по графе «$iksrName»!")
-        return null
-    }
-    def ref_id = 520
-    def RefBook refBook = refBookFactory.get(ref_id)
-
-    String filter = "(LOWER(INN) = LOWER('$iksr') or " +
-            "LOWER(REG_NUM) = LOWER('$iksr') or " +
-            "LOWER(TAX_CODE_INCORPORATION) = LOWER('$iksr') or " +
-            "LOWER(SWIFT) = LOWER('$iksr') or " +
-            "LOWER(KIO) = LOWER('$iksr'))"
-    if (recordCache[ref_id] != null) {
-        if (recordCache[ref_id][filter] != null) {
-            return recordCache[ref_id][filter]
-        }
-    } else {
-        recordCache[ref_id] = [:]
-    }
-
-    def provider = refBookFactory.getDataProvider(ref_id)
-    def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
-    if (records.size() == 1) {
-        // 5
-        def record = records.get(0)
-
-        if (StringUtils.cleanString(name) != StringUtils.cleanString(record.get('NAME')?.stringValue)) {
-            // сообщение 4
-            String msg = name ? "В файле указано другое наименование юридического лица - «$name»!" : "Наименование юридического лица в файле не заполнено!"
-            def refBookAttributeName
-            for (alias in ['INN', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT', 'KIO']) {
-                if (iksr.equals(record.get(alias)?.stringValue)) {
-                    refBookAttributeName = refBook.attributes.find { it.alias == alias }.name
-                    break
-                }
-            }
-            logger.warn("Строка $fileRowIndex , столбец " + getXLSColumnName(colIndex) + ": " +
-                    "На форме графы с общей информацией о юридическом лице заполнены данными записи справочника «Участники ТЦО», " +
-                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + record.get('NAME')?.stringValue + "», " +
-                    "атрибут «$refBookAttributeName» = «" + iksr + "». $msg")
-        }
-
-        recordCache[ref_id][filter] = record.get(RefBook.RECORD_ID_ALIAS).numberValue
-        return recordCache[ref_id][filter]
-    } else if (records.empty) {
-        // 6
-        if(!name){
-            name = "наименование юридического лица в файле не заполнено"
-        }
-        // сообщение 1
-        logger.warn("Строка $fileRowIndex , столбец " + getXLSColumnName(colIndex) + ": " +
-                "Для заполнения графы «$iksrName» формы в справочнике «Участники ТЦО» " +
-                "не найдено значение «$iksr» ($name), актуальное на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "»!")
-        endMessage(iksrName)
-    } else {
-        // 7
-        def recordsByName
-        if (name) {
-            recordsByName = provider.getRecords(getReportPeriodEndDate(), null, "LOWER(NAME) = LOWER('$name') and " + filter, null)
-        }
-        if (recordsByName && recordsByName.size() == 1) {
-            recordCache[ref_id][filter] = recordsByName.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-            return recordCache[ref_id][filter]
-        } else {
-            if (!name) {
-                name = "наименование юридического лица в файле не заполнено"
-            }
-            // сообщение 2
-            logger.warn("Строка $fileRowIndex , столбец " + getXLSColumnName(colIndex) + ": " +
-                    "Для заполнения графы «$iksrName» формы в справочнике «Участники ТЦО» " +
-                    "найдено несколько записей со значением «$iksr» ($name), актуальным на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "»! " +
-                    "Графа «$iksrName» формы заполнена первой найденной записью справочника:")
-            def record
-            records.each {
-                def refBookAttributeName
-                for(alias in ['INN', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT', 'KIO']){
-                    if(iksr.equals(it.get(alias)?.stringValue)){
-                        refBookAttributeName = refBook.attributes.find{ it.alias == alias}.name
-                        record = it
-                        break
-                    }
-                }
-                // сообщение 3
-                logger.warn("Атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + it.get('NAME')?.stringValue + "», " +
-                        "атрибут «$refBookAttributeName» = «" + iksr + "»")
-            }
-            endMessage(iksrName)
-            return record.get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
-    }
-    return null
 }
 
 def endMessage(String iksrName) {

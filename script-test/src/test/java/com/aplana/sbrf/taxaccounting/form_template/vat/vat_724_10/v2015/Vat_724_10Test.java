@@ -124,7 +124,7 @@ public class Vat_724_10Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        mockIKSR();
+        mockBeforeImport();
         int expected = testHelper.getDataRowHelper().getAll().size() + 3;
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
@@ -174,7 +174,7 @@ public class Vat_724_10Test extends ScriptTestBase {
     // Консолидация
     @Test
     public void composeTest() {
-        mockIKSR();
+        mockBeforeImport();
         // Назначен один тип формы
         DepartmentFormType departmentFormType = new DepartmentFormType();
         departmentFormType.setKind(KIND);
@@ -215,8 +215,7 @@ public class Vat_724_10Test extends ScriptTestBase {
         checkLogger();
     }
 
-    private void mockIKSR() {
-        // TODO тесты для логики поиска по iksr
+    void mockBeforeImport() {
         Long refbookId = 520L;
 
         when(testHelper.getRefBookFactory().get(refbookId)).thenAnswer(
@@ -229,6 +228,10 @@ public class Vat_724_10Test extends ScriptTestBase {
                         RefBookAttribute e = new RefBookAttribute();
                         e.setAlias("INN");
                         e.setName("ИНН/ КИО");
+                        attributes.add(e);
+                        e = new RefBookAttribute();
+                        e.setAlias("NAME");
+                        e.setName("Наименование");
                         attributes.add(e);
                         refBook.setAttributes(attributes);
                         return refBook;
@@ -245,24 +248,43 @@ public class Vat_724_10Test extends ScriptTestBase {
                     @Override
                     public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
                         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-
+                        String str = ((String) invocation.getArguments()[2]).split("\'")[1];
+                        char iksr = str.charAt(0);
+                        long id = 0;
+                        switch (iksr) {
+                            case 'A':  id = 1L;
+                                break;
+                            case 'B':  id = 2L;
+                                break;
+                            case 'C':  id = 3L;
+                                break;
+                            default: str = null;
+                        }
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "A"));
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
+                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, str));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, str));
                         result.add(map);
-
-                        map = new HashMap<String, RefBookValue>();
-                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
-                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "B"));
-                        result.add(map);
-
-                        map = new HashMap<String, RefBookValue>();
-                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
-                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "C"));
-                        result.add(map);
-
                         return result;
                     }
                 });
+        when(provider.getRecordData(anyLong())).thenAnswer(new Answer<Map<String, RefBookValue>>() {
+            @Override
+            public Map<String, RefBookValue> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Long id = (Long) invocationOnMock.getArguments()[0];
+                Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                String str;
+                switch (id.intValue()) {
+                    case 1 : str = "A"; break;
+                    case 2 : str = "B"; break;
+                    case 3 : str = "C"; break;
+                    default : str = "";
+                }
+                map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
+                map.put("INN", new RefBookValue(RefBookAttributeType.STRING, str));
+                map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, str));
+                return map;
+            }
+        });
     }
 }
