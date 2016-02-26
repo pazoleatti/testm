@@ -188,7 +188,9 @@ alter table declaration_subreport add constraint decl_subrep_fk_blob_data foreig
 create index i_decl_subrep_blob_data_id on declaration_subreport(blob_data_id);
 
 
-alter table declaration_report add constraint decl_report_fk_decl_subreport foreign key (subreport_id) references declaration_subreport(id) on delete cascade; 
+alter table declaration_report add constraint decl_report_fk_decl_subreport foreign key (subreport_id) references declaration_subreport(id) on delete cascade;
+
+create sequence seq_declaration_subreport start with 1;
 ----------------------------------------------------------------------------------------------------------------
 create or replace package FORM_DATA_PCKG is
   -- Запросы получения источников-приемников для налоговых форм

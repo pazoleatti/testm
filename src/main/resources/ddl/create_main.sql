@@ -825,7 +825,7 @@ create table declaration_report
 (
 declaration_data_id number(18) not null,
 blob_data_id varchar2(36),
-type varchar2(128) not null,
+type number(9) not null,
 subreport_id number(9)
 );
 
@@ -835,6 +835,7 @@ comment on column declaration_report.blob_data_id is 'Идентификатор
 comment on column declaration_report.type is 'Тип отчета (0 - Excel, 1 - XML, 2 - PDF, 3 - Jasper, 4 - Спец.отчет)';
 comment on column declaration_report.subreport_id is 'Идентификатор спец. отчета';
 
+create sequence seq_declaration_subreport start with 100;
 --------------------------------------------------------------------------------------------------------
 create table declaration_subreport
 (
