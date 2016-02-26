@@ -820,7 +820,22 @@ comment on column form_data_report.manual is 'Режим ввода данных
 comment on column form_data_report.checking is 'Типы столбцов (0 - только обычные, 1 - вместе с контрольными)';
 comment on column form_data_report.absolute is 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
 
+--------------------------------------------------------------------------------------------------------
+create table declaration_report
+(
+declaration_data_id number(18) not null,
+blob_data_id varchar2(36),
+type varchar2(128) not null,
+subreport_id number(9)
+);
 
+comment on table declaration_report is 'Отчеты по декларациям';
+comment on column declaration_report.declaration_data_id is 'Идентификатор декларации';
+comment on column declaration_report.blob_data_id is 'Идентификатор отчета';
+comment on column declaration_report.type is 'Тип отчета (0 - Excel, 1 - XML, 2 - PDF, 3 - Jasper, 4 - Спец.отчет)';
+comment on column declaration_report.subreport_id is 'Идентификатор спец. отчета';
+
+--------------------------------------------------------------------------------------------------------
 create table declaration_subreport
 (
 id number(9) not null,
@@ -830,19 +845,15 @@ ord number(9) not null,
 alias varchar2(128),
 blob_data_id varchar2(36)
 );
---------------------------------------------------------------------------------------------------------
-
-create table declaration_report
-(
-declaration_data_id number(18) not null,
-blob_data_id varchar2(36),
-type varchar2(128) not null
-);
-
-comment on table declaration_report is 'Отчеты по декларациям';
-comment on column declaration_report.declaration_data_id is 'Идентификатор декларации';
-comment on column declaration_report.blob_data_id is 'Идентификатор отчета';
-comment on column declaration_report.type is 'Тип отчета';
+ 
+comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
+comment on column declaration_subreport.id is 'Идентификатор отчета';
+comment on column declaration_subreport.declaration_template_id is 'Идентификатор шаблона декларации';
+comment on column declaration_subreport.name is 'Наименование спец. отчета';
+comment on column declaration_subreport.ord is 'Порядковый номер';
+comment on column declaration_subreport.alias is 'Код спец. отчета';
+comment on column declaration_subreport.blob_data_id is 'Макет JasperReports для формирования печатного представления формы';
+comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
 
 --------------------------------------------------------------------------------------------------------
 create table lock_data_subscribers

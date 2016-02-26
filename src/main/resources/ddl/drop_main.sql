@@ -14,6 +14,7 @@ drop sequence seq_log_system;
 drop sequence seq_log_business;
 drop table form_data_report;
 drop table declaration_report;
+drop table declaration_subreport;
 drop table template_changes;
 drop sequence seq_template_changes;
 drop table task_context;

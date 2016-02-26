@@ -271,9 +271,17 @@ alter table form_data_report add constraint form_data_rep_chk_manual check (manu
 alter table form_data_report add constraint form_data_rep_chk_checking check (checking in (0,1));
 alter table form_data_report add constraint form_data_rep_chk_absolute check (absolute in (0,1));
 
-alter table declaration_report add constraint decl_report_pk primary key (declaration_data_id, type);
+alter table declaration_subreport add constraint decl_subrep_pk primary key(id);
+alter table declaration_subreport add constraint decl_subrep_unq_combo unique (declaration_template_id, alias);
+alter table declaration_subreport add constraint decl_subrep_fk_decl_template foreign key (declaration_template_id) references declaration_template(id) on delete cascade;
+alter table declaration_subreport add constraint decl_subrep_fk_blob_data foreign key (blob_data_id) references blob_data(id);
+
+alter table declaration_report add constraint declaration_report_unq_combo unique (declaration_data_id, type, subreport_id);
 alter table declaration_report add constraint decl_report_fk_decl_data foreign key(declaration_data_id) references declaration_data(id) on delete cascade;
 alter table declaration_report add constraint decl_report_fk_blob_data foreign key(blob_data_id) references blob_data(id) on delete cascade;
+alter table declaration_report add constraint decl_report_fk_decl_subreport foreign key (subreport_id) references declaration_subreport(id) on delete cascade; 
+alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3, 4));
+alter table declaration_report add constraint decl_report_chk_subreport_id check ((type = 4 and subreport_id is not null) or (type in (0, 1, 2, 3) and subreport_id is null));
 
 alter table ifrs_data add constraint ifrs_data_pk primary key (report_period_id);
 alter table ifrs_data add constraint ifrs_data_fk_report_period foreign key (report_period_id) references report_period(id);
@@ -316,3 +324,4 @@ create index i_declaration_template_jrxml on declaration_template(jrxml);
 create index i_notification_blob_data_id on notification(blob_data_id);
 create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
 create index i_lock_data_subscr on lock_data_subscribers(lock_key);
+create index i_decl_subrep_blob_data_id on declaration_subreport(blob_data_id);
