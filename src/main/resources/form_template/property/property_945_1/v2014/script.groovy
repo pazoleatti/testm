@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -815,10 +816,8 @@ def String getTitle(def int typeNum) {
 }
 
 void importTransportData() {
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
+    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+
     int COLUMN_COUNT = 7
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'

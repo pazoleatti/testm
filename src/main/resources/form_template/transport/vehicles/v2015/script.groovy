@@ -845,10 +845,8 @@ def getReportPeriod() {
 }
 
 void importTransportData() {
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
+    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+
     int COLUMN_COUNT = 26
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'

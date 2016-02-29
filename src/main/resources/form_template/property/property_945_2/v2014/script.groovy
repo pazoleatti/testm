@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -729,10 +730,8 @@ def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def ro
     return newRow
 }
 void importTransportData() {
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
+    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+
     int COLUMN_COUNT = 15
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'

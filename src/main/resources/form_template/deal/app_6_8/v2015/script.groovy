@@ -4,6 +4,7 @@ import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -430,10 +431,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 void importTransportData() {
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
+    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+
     int COLUMN_COUNT = 11
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'

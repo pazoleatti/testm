@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -527,10 +528,8 @@ def getYearSum(def aliases, def rowCurrent, def monthsRowMap) {
 }
 
 void importTransportData() {
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
+    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+
     int COLUMN_COUNT = 19
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'

@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -315,12 +316,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 }
 
 void importTransportData() {
+    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
     int COLUMN_COUNT = 23
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'

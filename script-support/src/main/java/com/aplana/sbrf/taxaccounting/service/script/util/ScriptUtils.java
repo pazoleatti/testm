@@ -1371,6 +1371,19 @@ public final class ScriptUtils {
         }
     }
 
+    /**
+     * Проверка загружаемого ТФ:
+     * 1. имя файла задано;
+     * 2. поток данных не пуст;
+     * 3. имя файла заканчивается на ".rnu"
+     */
+    public static void checkTF(BufferedInputStream inputStream, String fileName) {
+        checkBeforeGetXml(inputStream, fileName);
+        if (fileName != null && !fileName.toLowerCase().endsWith(".rnu")) {
+            throw new ServiceException(WRONG_RNU_FORMAT);
+        }
+    }
+
     private static GPathResult getXML(String xmlString) {
         if (xmlString == null) {
             throw new ServiceException(WRONG_DATA_PARSE);

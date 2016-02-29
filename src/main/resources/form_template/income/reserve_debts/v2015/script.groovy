@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -556,10 +557,8 @@ void sortFormDataRows(def saveInDB = true) {
 }
 
 void importTransportData() {
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
+    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+
     int COLUMN_COUNT = 14
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'

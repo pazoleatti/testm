@@ -622,10 +622,8 @@ def calcTotalRow(def dataRows) {
 }
 
 void importTransportData() {
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
+    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+
     int COLUMN_COUNT = 12
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
