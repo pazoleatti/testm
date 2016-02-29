@@ -153,8 +153,9 @@ public class Rnu_114Test extends ScriptTestBase {
         i = 0;
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата кредитного договора","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Количество календарных дней в периоде» должно быть больше нуля!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «База года (360/365/366)» должно быть равно «360» или «365» или «366»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Совокупная процентная ставка» должно быть меньше или равно значению графы «Рыночная ставка»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «База года (360/365/366)» должна принимать значение из следующего списка: «360», «365», «366»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Рыночная ставка» должно быть больше или равно значению графы «Совокупная процентная ставка»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Неверное значение граф: «Отклонение Совокупной процентной ставки от рыночного уровня»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -263,7 +264,7 @@ public class Rnu_114Test extends ScriptTestBase {
 
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(0.14, dataRows.get(2).getCell("sum1").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0.0, dataRows.get(2).getCell("sum1").getNumericValue().doubleValue(), 0);
     }
 }
 

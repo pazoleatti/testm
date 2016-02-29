@@ -101,11 +101,11 @@ def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryName', 'code', 'do
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['name', 'code', 'docNumber', 'docDate', 'sum1', 'course', 'transDoneDate', 'taxDoneDate', 'course2',
-                       'course3', 'startDate1', 'endDate1', 'startDate2', 'endDate2', 'base', 'dealPay', 'sum2', 'sum3', 'tradePay', 'sum9', 'sum10']
+                       'course3', 'startDate1', 'endDate1', 'startDate2', 'endDate2', 'base', 'dealPay', 'sum2', 'sum3', 'tradePay', 'sum6', 'sum7', 'sum9', 'sum10']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'sum4', 'sum5', 'sum6', 'sum7', 'sum8']
+def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'sum4', 'sum5', 'sum8']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -119,10 +119,13 @@ def totalColumns = ['sum2', 'sum3', 'sum4', 'sum5', 'sum6', 'sum7', 'sum8', 'sum
 def sortColumns = ['name', 'docNumber', 'docDate', 'transDoneDate']
 
 @Field
+def calcColumns = ['sum4', 'sum5', 'sum8']
+
+@Field
 def course810 = getRecordId(15, 'CODE', '810')
 
 @Field
-def pattern = /[0-9]+([\.|\,][0-9]+)?\%?/
+def pattern = /[0-9]{1,10}[\.|\,]?[0-9]{0,2}\%?/
 
 // Дата начала отчетного периода
 @Field
@@ -155,10 +158,6 @@ def getPeriodOrder() {
         periodOrder = reportPeriodService.get(formData.reportPeriodId).getOrder()
     }
     return periodOrder
-}
-
-def getPrevForm() {
-    return formDataService.getFormDataPrev(formData)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
@@ -198,101 +197,89 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        // Проверка заполнения обязательных полей
+        // 1. Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // Проверка уникальности строк
-        def msg2 = row.getCell('name').column.name
-        def map = getRefBookValue(520, row.name)
-        if (map != null) {
-            val2 = map.NAME?.stringValue
-        } else {
-            val2 = 'графа 2 не задана'
-        }
-        def msg3 = row.getCell('iksr').column.name
-        if (map != null) {
-            val3 = map.IKSR?.stringValue
-        } else {
-            val3 = 'графа 3 не задана'
-        }
-        def msg5 = row.getCell('code').column.name
-        def val5 = row.code != null ? row.code : 'графа 5 не задана'
-        def msg6 = row.getCell('docNumber').column.name
-        def val6 = row.docNumber != null ? row.docNumber : 'графа 6 не задана'
-        def msg7 = row.getCell('docDate').column.name
-        def val7 = row.docDate != null ? row.docDate.format('dd.MM.yyyy') : 'графа 7 не задана'
-        def msg9 = row.getCell('course').column.name
-        def val9 = getRefBookValue(15, row.course) != null ? getRefBookValue(15, row.course).CODE?.value : 'графа 9 не задана'
-        def matchRowNum = []
-        for (int i = 0; i < dataRows.size(); i++) {
-            if (dataRows.get(i).getIndex() != row.getIndex()) {
-                boolean flag = true
-                ['name', 'iksr', 'code', 'docNumber', 'docDate', 'course'].each {
-                    flag = flag && (dataRows.get(i)[it] == row[it])
-                }
-                if (flag) {
-                    matchRowNum.add(dataRows.get(i).getIndex())
-                }
-            }
-
-        }
-        def str = matchRowNum.join(", ")
-        if (matchRowNum.size() > 0) {
-            logger.warn("Строки $str: Неуникальное значение граф «$msg2»= «$val2» , «$msg3»= «$val3» , «$msg5»= «$val5» , «$msg6»= «$val6» , «$msg7»= «$val7» , «$msg9»= «$val9»!")
-        }
-
-        // Проверка корректности даты первичного документа
+        // 2. Проверка корректности даты первичного документа
         checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
-        //Проверка суммы гарантии/ аккредитива
+        // 3. Проверка суммы гарантии/ аккредитива
         if (row.sum1 != null && row.sum1 < 0) {
             def msg = row.getCell('sum1').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        // Проверка даты операции фактически отраженной в бухгалтерском учете
-        checkDatePeriod(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-
-        // Проверка корректности даты операции для целей доначисления дохода в налоговом учете
-        checkDatePeriod(logger, row, 'taxDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-
-        // Проверка значения граф 7, 10
-        checkDatePeriod(logger, row, 'transDoneDate', 'docDate', getReportPeriodEndDate(), true)
-
-        // Проверка значения граф 7, 11
-        checkDatePeriod(logger, row, 'taxDoneDate', 'docDate', getReportPeriodEndDate(), true)
-
-        // Проверка курса валюты
-        if (row.course2 != null && row.course2 <= 0) {
-            def msg = row.getCell('course2').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
+        // 4. Проверка даты операции, фактически отраженной в бухгалтерском учете
+        // 5. Проверка корректности даты операции для целей доначисления дохода в налоговом учете
+        ['transDoneDate', 'taxDoneDate'].each { alias ->
+            if (row.docDate && row[alias] && (row[alias].before(getReportPeriodStartDate()) ||
+                    row[alias].after(getReportPeriodEndDate()) || row[alias] < row.docDate)) {
+                def msg7 = row.getCell('docDate').column.name
+                def msg = row.getCell(alias).column.name
+                def dateFrom = getReportPeriodStartDate()?.format('dd.MM.yyyy')
+                def dateTo = getReportPeriodEndDate()?.format('dd.MM.yyyy')
+                logger.error("Строка $rowNum: Дата по графе «$msg» должна принимать значение из диапазона $dateFrom - $dateTo и быть больше либо равна дате по графе «$msg7»!")
+            }
         }
 
-        // Проверка курса валюты
-        if (row.course3 != null && row.course3 <= 0) {
-            def msg = row.getCell('course3').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
+        // 6. Проверка курса валюты
+        ['course2', 'course3'].each { alias ->
+            if (row[alias] != null && row[alias] <= 0) {
+                def msg = row.getCell(alias).column.name
+                logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
+            }
         }
 
-        // Проверка количества дней
+        // 7. Проверка даты начала расчетного периода для целейбухгалтерского учета(согласно условиям сделки)
+        // 8. Проверка даты окончания расчетного периода для целей бухгалтерского учета (согласно условиям сделки)
+        // 9. Проверка даты начала расчетного периода для целей доначисления в налоговом учете
+        // 10. Проверка даты окончания расчетного периода для целей доначисления в налоговом учете
+        def aliasesMap = [
+                'startDate1' : 'endDate1',      // графа 14 - графа 15
+                'endDate1'   : 'transDoneDate', // графа 15 - графа 10
+                'startDate2' : 'endDate2',      // графа 16 - графа 17
+                'endDate2'   : 'taxDoneDate'    // графа 17 - графа 11
+        ]
+        aliasesMap.each { alias1, alias2 ->
+            if (row[alias1] && row[alias2] && row[alias1] > row[alias2]) {
+                def msg1 = row.getCell(alias1).column.name
+                def msg2 = row.getCell(alias2).column.name
+                logger.error("Строка $rowNum: Дата по графе «$msg1» должна быть не больше даты по графе «$msg2»!")
+            }
+        }
+
+        // 11. Проверка количества дней
         if (row.base != null && row.base < 1) {
             def msg = row.getCell('base').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «1»!")
         }
 
-        // Проверка допустимых значений
-        if (row.dealPay && !(row.dealPay ==~ pattern)) {
-            def msg = row.getCell('dealPay').column.name
-            logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
-                    " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
-        }
-        if (row.tradePay && !(row.tradePay ==~ pattern)) {
-            def msg = row.getCell('tradePay').column.name
-            logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
-                    " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
+        // 12. Проверка допустимых значений
+        ['dealPay', 'tradePay'].each { alias ->
+            if (row[alias] != null && !(row[alias].replaceAll(" ", "") ==~ pattern)) {
+                def msg = row.getCell(alias).column.name
+                logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
+                        " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
+            }
         }
 
-        // Проверка положительной суммы дохода/расхода 16,17,19-21
+        def flag23 = calcFlag23(row)
+        BigDecimal calcCol23 = calc23(flag23, row)
+
+        // 13. Проверка допустимых целочисленных значений
+        def maxValueColumn23 = 100_000_000_000
+        if (!flag23 && calcCol23 != null && calcCol23 >= maxValueColumn23) {
+            // a.
+            def msg = row.getCell('tradePay').column.name
+            logger.error("Строка $rowNum: Значение графы «%s» должно быть меньше значения «100 000 000 000»!", msg)
+
+        } else if (flag23 && calcCol23 != null && calcCol23 * 100 >= maxValueColumn23) {
+            // b.
+            def msg = row.getCell('tradePay').column.name
+            logger.error("Строка $rowNum: Значение графы «%s» должно быть меньше значения «100 000 000 000%%»!", msg)
+        }
+
+        // 14. Проверка положительной суммы дохода
         ['sum2', 'sum3', 'sum5', 'sum6'].each {
             if (row.getCell(it).value != null && row.getCell(it).value < 0) {
                 def msg = row.getCell(it).column.name
@@ -300,216 +287,34 @@ void logicCheck() {
             }
         }
 
-        // проверки автозаполняемых
-        def msg8 = row.getCell('sum1').column.name
-        def msg12 = row.getCell('course2').column.name
-        def msg13 = row.getCell('course3').column.name
-        def msg14 = row.getCell('startDate1').column.name
-        def msg15 = row.getCell('endDate1').column.name
-        def msg16 = row.getCell('startDate2').column.name
-        def msg17 = row.getCell('endDate2').column.name
-        def msg18 = row.getCell('base').column.name
-        def msg20 = row.getCell('sum2').column.name
-        def msg21 = row.getCell('sum3').column.name
-        def msg22 = row.getCell('sum4').column.name
-        def msg23 = row.getCell('tradePay').column.name
-        def msg24 = row.getCell('sum5').column.name
-        def msg25 = row.getCell('sum6').column.name
-        def msg26 = row.getCell('sum7').column.name
-        def msg27 = row.getCell('sum8').column.name
-        def msg28 = row.getCell('sum9').column.name
-        def msg29 = row.getCell('sum10').column.name
-        def flag23 = calcFlag23(row)
-        BigDecimal calcCol23 = calc23(flag23, row)
+        // 15. Проверка расчётных граф (арифметические проверки)
+        def needValue = formData.createDataRow()
+        needValue.sum4 = calc22(row)
+        needValue.sum5 = calc24(row, flag23, calcCol23)
+        needValue.sum8 = calc27(row)
+        checkCalc(row, calcColumns, needValue, logger, true)
 
-        // Проверка корректности суммы фактического дохода по данным налогового учета
-        if (row.sum4 != null) {
-            if (row.sum2 != null && row.sum3 == null && row.sum4 != calc22(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно значению графы «$msg20»!")
-            }
-            if (getPeriodOrder() == 1 && row.sum2 != null && row.sum3 != null && row.sum4 != calc22(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно разности значений графы «$msg20» и «$msg21»!")
-            }
-            if (getPeriodOrder() == 4 && row.sum2 != null && row.sum3 != null && row.sum4 != calc22(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно сумме значений графы «$msg20» и «$msg21»!")
-            }
-            if (getPeriodOrder() != 4 && getPeriodOrder() != 1 && row.sum2 != null && row.sum3 != null && row.sum4 != 0) {
-                logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно «0»!")
-            }
-        }
-
-        // Проверка корректности суммы рыночного дохода по данным налогового учета согласно условиям сделки
-        if (row.sum3 == null && row.sum5 != null) {
-            logger.error("Строка $rowNum: Значение графы «$msg24» должно быть не заполнено!")
-        } else if (row.sum5 != null) {
-            if (row.sum3 != null && row.tradePay != null && !flag23) {
-                if (row.course == course810 && row.sum5 != calc24(row, flag23, calcCol23)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению графы «%s»!", msg23)
-                } else if (row.course != course810 && row.course2 != null && row.sum5 != calc24(row, flag23, calcCol23)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению выражения  «%s»*«$msg12»!", msg23)
-                }
-            } else if (flag23) {
-                boolean flag = true
-                ['sum1', 'startDate1', 'endDate1', 'base', 'tradePay'].each {
-                    if (row[it] == null) {
-                        flag = false
-                    }
-                }
-                if (flag && row.course == course810 && row.sum5 != calc24(row, flag23, calcCol23)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению выражения  " +
-                            "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»!", msg23)
-                } else if (flag && row.course2 != null && row.course != course810 && row.sum5 != calc24(row, flag23, calcCol23)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению выражения  " +
-                            "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»*«$msg12»!", msg23)
-                }
-            } else if (flag23 == null && row.sum3 != null && row.sum5 != 0) {
-                logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно «0»!")
-            }
-        }
-
-        // Проверка корректности суммы рыночного дохода по доначисленному  доходу для целей налогового учета
-        boolean flag = true
-        ['startDate2', 'endDate2', 'base', 'tradePay'].each {
-            if (row[it] == null) {
-                flag = false
-            }
-        }
-        boolean flag2 = true
-        ['name', 'iksr', 'code', 'docNumber', 'docDate', 'course'].each {
-            if (row[it] == null) {
-                flag2 = false
-            }
-        }
-
-        def prevForm = getPrevForm()
-        if (row.sum3 == null && row.sum6 != null) {
-            logger.error("Строка $rowNum: Значение графы «$msg25» должно быть не заполнено!")
-        } else if (row.sum6 != null) {
-            if (flag && !flag23) {
-                if (row.course == course810 && getPeriodOrder() == 4 && row.sum6 != calc25(row, flag23, calcCol23)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
-                            "«%s»*(«$msg17»-«$msg16»+1)/«$msg18»!", msg23)
-                } else if (flag && row.course3 != null && row.course != course810 && getPeriodOrder() == 4 && row.sum6 != calc25(row, flag23, calcCol23)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
-                            "«%s»*(«$msg17»-«$msg16»+1)/«$msg18»*«$msg13»!", msg23)
-                }
-            } else if (flag23) {
-                if (flag && row.sum1 != null && row.course == course810 && getPeriodOrder() == 4 && row.sum6 != calc25(row, flag23, calcCol23)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
-                            "«%s»*«$msg8»*(«$msg17»-«$msg16»+1)/«$msg18»!", msg23)
-                } else if (flag && row.sum1 != null && row.course3 != null && row.course != course810 && getPeriodOrder() == 4 && row.sum6 != calc25(row, flag23, calcCol23)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
-                            "«%s»*«$msg8»*(«$msg17»-«$msg16»+1)/«$msg18»*«$msg13»!", msg23)
-                }
-            } else if (getPeriodOrder() == 1) {
-                if (flag2 && prevForm != null && findMatch(row, prevForm) == 1 && row.sum6 != calc25(row, flag23, calcCol23)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению графы «$msg25» предыдущего налогового периода!")
-                } else if (flag2 && prevForm != null && findMatch(row, prevForm) == 0 && row.sum6 != 0) {
-                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
-                } else if (flag2 && prevForm != null && findMatch(row, prevForm) > 1 && row.sum6 != 0) {
-                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
-                } else if (prevForm == null && row.sum6 != 0) {
-                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
-                }
-            } else if (flag23 == null && getPeriodOrder() != 1 && row.sum3 != null) {
-                logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
-            }
-        }
-
-        // Проверка корректности суммы рыночного дохода по данным налогового учета
-        if (row.sum7 != null) {
-            if (row.sum7 != calc26(row, flag23, calcCol23)) {
-                if (row.sum5 == null && row.sum6 == null) {
-                    if (row.tradePay != null && !flag23) {
-                        if (row.course == course810) {
-                            logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению графы «%s»!", msg23)
-                        } else if (row.course2 != null && row.course != course810) {
-                            logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению выражения «%s»*«$msg12»!", msg23)
-                        }
-                    } else if (row.tradePay != null && flag23) {
-                        boolean flag3 = true
-                        ['sum1', 'startDate1', 'endDate1', 'base'].each {
-                            if (row[it] == null) {
-                                flag3 = false
-                            }
-                        }
-                        if (flag3 && row.course == course810) {
-                            logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению выражения  " +
-                                    "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»!", msg23)
-                        } else if (flag3 && row.course2 != null && row.course != course810) {
-                            logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению выражения  " +
-                                    "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»*«$msg12»!", msg23)
-                        }
-                    }
-                } else if (row.sum5 != null && row.sum6 != null) {
-                    if (getPeriodOrder() == 1) {
-                        logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно разности значений графы «$msg24» и «$msg25»!")
-                    } else if (getPeriodOrder() == 4) {
-                        logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно сумме значений графы «$msg24» и «$msg25»!")
-                    } else if (getPeriodOrder() != 1 && getPeriodOrder() != 4) {
-                        logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно «0»!")
-                    }
-                }
-            }
-        }
-
-        // Проверка корректности суммы доначисления  дохода до рыночного уровня по данным налогового учета согласно условиям сделки
-        if (row.sum5 == null && row.sum8 != null) {
-            logger.error("Строка $rowNum: Значение графы «$msg27» должно быть не заполнено!")
-        } else if (row.sum2 != null && row.sum5 != null && row.sum8 != calc27(row)) {
-            logger.error("Строка $rowNum: Значение графы «$msg27» должно быть равно разности значений графы «$msg24» и «$msg20»!")
-        }
-
-        // Проверка корректности суммы доначисления  дохода до рыночного уровня по доначисленному доходу для целей налогового учета
-        if (row.sum3 != null && row.sum6 != null && row.sum9 != null) {
-            if (getPeriodOrder() == 4 && row.sum9 != row.sum6 - row.sum3) {
-                logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»")
-            } else if (getPeriodOrder() != 4 && prevForm != null && (row.sum9 != row.sum6 - row.sum3 && row.sum9 != calcPrev28(row, prevForm))) {
-                logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»" +
-                        " или значению графы «$msg28» за предыдущий налоговый период!")
-            } else if (getPeriodOrder() != 4 && prevForm == null && row.sum9 != 0) {
-                logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»" +
-                        " или значению графы «$msg28» за предыдущий налоговый период!")
-            }
-        }
-
-        // Проверка корректности суммы доначисления  дохода до рыночного уровня по данным налогового учета
-        if (row.sum6 != null && row.sum10 != null) {
-            if (row.sum7 != null && row.sum4 != null) {
-                if (row.sum8 == null && row.sum9 == null && row.sum10 != row.sum7 - row.sum4) {
-                    // a
-                    logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности графы «$msg26» и «$msg22»")
-                } else if (getPeriodOrder() == 1 && row.sum8 != null && row.sum9 != null && (row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 - row.sum9)) {
-                    // b, c
-                    logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности графы «$msg25» и «$msg21»" +
-                            " или разности значений графы  «$msg27» и «$msg29»!")
-                } else if (getPeriodOrder() == 4 && row.sum8 != null && row.sum9 != null && (row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 + row.sum9)) {
-                    // d, e
-                    logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности графы «$msg25» и «$msg21»" +
-                            " или сумме значений графы  «$msg27» и «$msg29»!")
-                }
-            }
-            if (row.sum8 != null && row.sum9 != null && getPeriodOrder() != 4 && getPeriodOrder() != 1 && row.sum10 != 0) {
-                logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно «0»!")
+        // 16. Проверка корректности суммы доначисления  дохода до рыночного уровня по данным налогового учета
+        if (row.sum4 && row.sum7 && row.sum8 && row.sum9 && row.sum10) {
+            def msg22 = row.getCell('sum4').column.name
+            def msg26 = row.getCell('sum7').column.name
+            def msg27 = row.getCell('sum8').column.name
+            def msg28 = row.getCell('sum9').column.name
+            def msg29 = row.getCell('sum10').column.name
+            if (getPeriodOrder() == 1 && row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 - row.sum9) {
+                // a
+                logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности значений граф «$msg26» и «$msg22» или разности значений граф «$msg27» и «$msg28»!")
+            } else if (getPeriodOrder() == 4 && row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 + row.sum9) {
+                // b
+                logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности значений граф «$msg26» и «$msg22» или сумме значений граф «$msg27» и «$msg28»!")
             }
         }
     }
 
-    // Проверка итоговых значений пофиксированной строке «Итого»
+    // 17. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
-}
-
-/**
- * Округляет число до требуемой точности.
- *
- * @param value округляемое число
- * @param precision точность округления, знаки после запятой
- * @return округленное число
- */
-def roundValue(BigDecimal value, def precision) {
-    value.setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
 // Алгоритмы заполнения полей формы
@@ -526,10 +331,6 @@ void calc() {
         row.sum4 = calc22(row)
         // графа 24
         row.sum5 = calc24(row, flag23, calcCol23)
-        // графа 25
-        row.sum6 = calc25(row, flag23, calcCol23)
-        // графа 26
-        row.sum7 = calc26(row, flag23, calcCol23)
         // графа 27
         row.sum8 = calc27(row)
     }
@@ -561,22 +362,22 @@ def calcFlag23(def row) {
 }
 
 BigDecimal calc23(def flag23, def row) {
-    if (row.tradePay != null) {
-        String col23 = row.tradePay.trim().replaceAll(",", ".")
-        return flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 8) : // взяли с запасом
-                roundValue(new BigDecimal(col23), 6)
+    if (row.tradePay != null && row.tradePay.replaceAll(" ", "") ==~ pattern) {
+        String col23 = row.tradePay.replaceAll(/\s/, "").replaceAll(",", ".")
+        return flag23 ? round(new BigDecimal(col23[0..-2]) / 100, 8) : // взяли с запасом
+                round(new BigDecimal(col23), 6)
     }
 }
 
 def calc24(def row, def flag23, def calcCol23) {
-    if (row.tradePay ==~ pattern) {
+    if (row.tradePay != null && row.tradePay.replaceAll(" ", "") ==~ pattern) {
         if (row.sum3 == null) {
             return null
         } else if (!flag23) {
             if (row.course == course810) {
                 return calcCol23
             } else {
-                return roundValue(calcCol23 * row.course2, 2)
+                return round(calcCol23 * row.course2, 2)
             }
         } else if (flag23 && !(row.base < 1)) {
             if (row.course == course810) {
@@ -590,127 +391,12 @@ def calc24(def row, def flag23, def calcCol23) {
     }
 }
 
-// метод для применения в ЛП
-def findMatch(def row, def form) {
-    def dataRows = formDataService.getDataRowHelper(form).allCached
-    int cnt = 0
-    for (dataRow in dataRows) {
-        boolean flag = true
-        ['name', 'iksr', 'code', 'docNumber', 'docDate', 'course'].each {
-            if (dataRow[it] != row[it]) {
-                flag = false
-            }
-        }
-        if (flag) {
-            cnt++
-        }
-    }
-    return cnt
-}
-
-def calcPrev25(def row, def form) {
-    def value = 0
-    if (form != null) {
-        def dataRows = formDataService.getDataRowHelper(form).allCached//TODO
-        int cnt = 0
-        for (dataRow in dataRows) {
-            boolean flag = true
-            ['name', 'iksr', 'code', 'docNumber', 'docDate', 'course'].each {
-                flag = flag && (dataRow[it] == row[it])
-            }
-            if (flag) {
-                cnt++
-                value = dataRow.sum6
-            }
-        }
-        return (cnt == 1) ? value : 0
-    }
-    return 0
-}
-
-def calc25(def row, def flag23, def calcCol23) {
-    if (row.tradePay ==~ pattern) {
-        if (row.sum3 == null) {
-            return null
-        }
-        if (!flag23 && !(row.base < 1)) {
-            if (row.course == course810 && getPeriodOrder() == 4) {
-                return ((BigDecimal) (calcCol23 * (row.endDate2 - row.startDate2 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
-            } else if (row.course != course810 && getPeriodOrder() == 4) {
-                return ((BigDecimal) (calcCol23 * (row.endDate2 - row.startDate2 + 1) * row.course3)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
-            }
-        }
-        if (flag23 && !(row.base < 1)) {
-            if (row.course == course810 && getPeriodOrder() == 4) {
-                return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate2 - row.startDate2 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
-            } else if (row.course != course810 && getPeriodOrder() == 4) {
-                return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate2 - row.startDate2 + 1) * row.course3)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
-            }
-        }
-        if (getPeriodOrder() == 1) {
-            // в calcPrev25 вся логика, связанная с формой предыдущего отчетного периода
-            return calcPrev25(row, prevForm)
-        } else {
-            return 0
-        }
-    }
-}
-
-def calc26(def row, def flag23, def calcCol23) {
-    if (row.sum5 == null && row.sum6 == null) {
-        if (row.tradePay ==~ pattern) {
-            if (!flag23) {
-                if (row.course == course810) {
-                    return calcCol23
-                } else {
-                    return roundValue(calcCol23 * row.course2, 2)
-                }
-            }
-            if (flag23 && !(row.base < 1)) {
-                if (row.course == course810) {
-                    return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
-                } else {
-                    return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1) * row.course2)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
-                }
-            }
-            return 0
-        }
-    } else if (row.sum5 != null && row.sum6 != null) {
-        if (getPeriodOrder() == 1) {
-            return row.sum5 - row.sum6
-        } else if (getPeriodOrder() == 4) {
-            return row.sum5 + row.sum6
-        } else {
-            return 0
-        }
-    }
-}
-
 def calc27(def row) {
     if (row.sum5 == null) {
         return null
     } else {
         return row.sum5 - row.sum2
     }
-}
-
-def calcPrev28(def row, def form) {
-    if (form != null) {
-        def dataRows = formDataService.getDataRowHelper(form).allCached
-        int cnt = 0
-        for (dataRow in dataRows) {
-            boolean flag = true
-            ['name', 'iksr', 'code', 'docNumber', 'docDate', 'course'].each {
-                flag = flag && (dataRow[it] == row[it])
-            }
-            if (flag) {
-                cnt++
-                value = dataRow.sum6
-            }
-        }
-        return (cnt == 1) ? value : 0
-    }
-    return 0
 }
 
 def calcTotalRow(def dataRows) {
@@ -1020,10 +706,11 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll {
-        sortColumns.contains(it.getAlias())
-    })
-    sortRows(dataRows, sortColumns)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (без подитогов)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    sortRows(dataRows, columns)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {

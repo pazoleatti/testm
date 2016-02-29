@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -170,59 +171,29 @@ void logicCheck() {
         // 2. Проверка даты договора цессии
         checkDatePeriod(logger, row, 'dealDate', Date.parse("dd.MM.yyyy", "01.01.1991"), getReportPeriodEndDate(), true)
 
-        // 3, 4. Проверка даты погашения и уступки
-        ['repaymentDate', 'concessionsDate'].each { alias ->
-            checkDatePeriod(logger, row, alias, getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-            if (row[alias] && row.dealDate && row[alias] < row.dealDate) {
-                logger.error("Строка $rowNum: Значение графы «${getColumnName(row, alias)}» должно быть больше или равно значения графы «${getColumnName(row, 'dealDate')}»!")
-            }
-        }
-
-        // 5. Проверка положительности суммы дохода
+        // 3. Проверка положительности суммы дохода
         if (row.income != null && row.income < 0) {
             logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'income')}» должно быть больше или равно «0»!")
         }
 
-        // 6. Проверка финансовых результатов
-        if (row.finResultTax != null && row.finResult != null &&
-                row.finResultTax <= row.finResult && row.finResult >= 0) {
-            logger.warn("Строка $rowNum: Графа «${getColumnName(row, 'incomeCorrection')}» заполнена значением «0», т.к. не выполнен порядок заполнения графы!")
-        }
-
-        // 7. Проверка корректности финансового результата уступки
-        if (row.finResult != null && row.income != null && row.cost != null && row.costReserve != null &&
-                row.finResult != (row.income - (row.cost - row.costReserve))) {
-            logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'finResult')}» должно равняться выражению: «${getColumnName(row, 'income')}» - («${getColumnName(row, 'cost')}» - «${getColumnName(row, 'costReserve')}»)!")
-        }
-
-        // 8. Проверка кода налогового учета
+        // 4. Проверка кода налогового учета
          if (row.code != null && !['10360', '10361'].contains(row.code)) {
              logger.error("Строка $rowNum: Графа «${getColumnName(row, 'code')}» должна принимать значение из следующего списка: «10360» или «10361»!")
          }
 
-        // 9. Проверка корректности финансового результата из рыночной цены
-        if (row.finResultTax != null && row.marketPrice != null && row.cost != null && row.costReserve != null &&
-                row.finResultTax != (row.marketPrice - (row.cost - row.costReserve))) {
-            logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'finResultTax')}» должно равняться выражению: «${getColumnName(row, 'marketPrice')}» - («${getColumnName(row, 'cost')}» - «${getColumnName(row, 'costReserve')}»)!")
+        // 5. Проверка расчетных граф
+        def values = [:]
+        values["finResult"] = calc11(row)
+        values["finResultTax"] = calc14(row)
+        values["incomeCorrection"] = calc15(row)
+        def errorColumnNames = values.findAll { key, value ->
+            value != false && value != row[key]
+        }.collect { key, value ->
+            getColumnName(row, key)
         }
-
-        // 10. Проверка корректировки финансового результата
-        // a. Если «Графа 11» больше или равно «0» И «Графа 14» больше «Графа 11», то «Графа 15» = «Графа 14» - «Графа 11»
-        // b.	Если «Графа 11» меньше «0» И «Графа 14» больше «Графа 11», то «Графа 15» = |«Графа 13»| - |«Графа 11»|
-        // c.	Если «Графа 11» больше или равно «0» И «Графа 14» меньше или равно «Графа 11», то «Графа 15» = «0»
-        if (row.finResult != null && row.finResultTax != null) {
-            if (row.finResult >= 0 && row.finResultTax > row.finResult &&
-                    (row.incomeCorrection != row.finResultTax - row.finResult)) {
-                logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'incomeCorrection')}» должно равняться разнице между графой «${getColumnName(row, 'finResultTax')}» и «${getColumnName(row, 'finResult')}»!")
-            }
-            if (row.finResult < 0 && row.finResultTax > row.finResult && row.marketPrice != null &&
-                    (row.incomeCorrection != row.marketPrice.abs() - row.finResult.abs())) {
-                logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'incomeCorrection')}» должно равняться разнице между графой «${getColumnName(row, 'marketPrice')}» по модулю и «${getColumnName(row, 'finResult')}» по модулю!")
-            }
-            if (row.finResult >= 0 && row.finResultTax <= row.finResult &&
-                    row.incomeCorrection != BigDecimal.ZERO) {
-                logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'incomeCorrection')}» должно быть равно нулю!")
-            }
+        if (!errorColumnNames.empty) {
+            def str = errorColumnNames.join("», «")
+            rowError(logger, row, "Строка $rowNum: Неверное значение граф: «$str»!")
         }
     }
 
@@ -245,7 +216,7 @@ void checkItog(def dataRows) {
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
     // все строки, кроме общего итога
     def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
-    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
+    checkItogRows(groupRows, testItogRows, itogRows, new GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
@@ -261,6 +232,57 @@ void checkItog(def dataRows) {
             return null
         }
     })
+}
+
+// вынес метод в скрипт для правки проверок
+void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.GroupString groupString, ScriptUtils.CheckGroupSum checkGroupSum) {
+    // считает количество реальных групп данных
+    def groupCount = 0
+    // Итоговые строки были удалены
+    // Неитоговые строки были удалены
+    for (int i = 0; i < dataRows.size(); i++) {
+        DataRow<Cell> row = dataRows.get(i);
+        // строка или итог другой группы после строки без подитога между ними
+        if (i > 0) {
+            def prevRow = dataRows.get(i - 1)
+            if (prevRow.getAlias() == null && isDiffRow(prevRow, row, groupColumns)) { // TODO сравнение
+                itogRows.add(groupCount, null)
+                groupCount++
+                String groupCols = groupString.getString(prevRow);
+                if (groupCols != null) {
+                    logger.error("Группа «%s» не имеет строки итога!", groupCols); // итога (не  подитога)
+                }
+            }
+        }
+        if (row.getAlias() != null) {
+            // итог после итога (или после строки из другой группы)
+            if (i < 1 || dataRows.get(i - 1).getAlias() != null || isDiffRow(dataRows.get(i - 1), row, groupColumns)) { // TODO сравнение
+                logger.error("Строка %d: Строка итога не относится к какой-либо группе!", row.getIndex()); // итога (не  подитога)
+                // удаляем из проверяемых итогов строку без подчиненных строк
+                itogRows.remove(row)
+            } else {
+                groupCount++
+            }
+        }
+    }
+    if (testItogRows.size() == itogRows.size()) {
+        for (int i = 0; i < testItogRows.size(); i++) {
+            DataRow<Cell> testItogRow = testItogRows.get(i);
+            DataRow<Cell> realItogRow = itogRows.get(i);
+            if (realItogRow == null) {
+                continue
+            }
+            int rowIndex = dataRows.indexOf(realItogRow) - 1
+            def row = dataRows.get(rowIndex)
+            String groupCols = groupString.getString(row);
+            if (groupCols != null) {
+                String checkStr = checkGroupSum.check(testItogRow, realItogRow);
+                if (checkStr != null) {
+                    logger.error(String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr));
+                }
+            }
+        }
+    }
 }
 
 // Получить посчитанные подитоговые строки
@@ -303,37 +325,17 @@ void calc() {
         if(row.getAlias() != null){
             continue
         }
-        // «Графа 11» = «Графа 10» - («Графа 6» - «Графа 7»)
-        if (row.income != null && row.cost != null && row.costReserve != null) {
-            row.finResult = row.income - (row.cost - row.costReserve)
-        }
-        // «Графа 14» = «Графа 13» - («Графа 6» - «Графа 7»)
-        if (row.marketPrice != null && row.cost != null && row.costReserve != null) {
-            row.finResultTax = row.marketPrice - (row.cost - row.costReserve)
-        }
-        // ЕСЛИ «Графа 11» больше или равно «0» И «Графа 14» больше «Графа 11», ТО
-        // «Графа 15» = «Графа 14» - «Графа 11»
-        // ЕСЛИ «Графа 11» меньше «0» И «Графа 14» больше «Графа 11», ТО
-        // «Графа 15» = |«Графа 13»| - |«Графа 11»|
-        // ЕСЛИ «Графа 11» больше или равно «0» И «Графа 14» меньше или равно «Графа 11», ТО
-        // «Графа 15» = «0»
-        if (row.finResult != null && row.finResultTax != null) {
-            if (row.finResult >= 0 && row.finResultTax > row.finResult) {
-                row.incomeCorrection = row.finResultTax - row.finResult
-            } else if (row.finResult < 0 && row.finResultTax > row.finResult) {
-                if (row.marketPrice != null) {
-                    row.incomeCorrection = row.marketPrice.abs() - row.finResult.abs()
-                }
-            } else if (row.finResult >= 0 && row.finResultTax <= row.finResult) {
-                row.incomeCorrection = 0
-            }
-        }
-
+        Object temp = calc11(row)
+        // оставить (temp != false)
+        row.finResult = (temp != false) ? temp : null
+        temp = calc14(row)
+        row.finResultTax = (temp != false) ? temp : null
+        temp = calc15(row)
+        row.incomeCorrection = (temp != false) ? temp : null
     }
 
     // Сортировка
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { sortColumns.contains(it.getAlias())})
-    sortRows(dataRows, sortColumns)
+    sortRows(dataRows, groupColumns)
 
     // Добавление подитогов
     addAllAliased(dataRows, new CalcAliasRow() {
@@ -348,6 +350,51 @@ void calc() {
     dataRows.add(total)
 
     updateIndexes(dataRows)
+}
+
+def calc11(def row) {
+    // «Графа 11» = «Графа 10» - («Графа 6» - «Графа 7»)
+    if (row.income != null && row.cost != null && row.costReserve != null) {
+        return row.income - (row.cost - row.costReserve)
+    } else {
+        return false
+    }
+}
+
+def calc14(def row) {
+    // «Графа 14» = «Графа 13» - («Графа 6» - «Графа 7»)
+    if (row.marketPrice != null && row.cost != null && row.costReserve != null) {
+        return row.marketPrice - (row.cost - row.costReserve)
+    } else {
+        return false
+    }
+}
+
+def calc15(def row) {
+    // ЕСЛИ «Графа 11»<0, ТО «Графа 15» = |«Графа 13»| - |«Графа 11»|
+    // ЕСЛИ «Графа 11»≥ «0» И «Графа 14»>«Графа 11», ТО «Графа 15» = «Графа 14» - «Графа 11»
+    // ИНАЧЕ «Графа 15» не заполняется
+    if (row.finResult == null) {
+        return false
+    }
+    if (row.finResult < 0) {
+        if (row.marketPrice != null) {
+            return row.marketPrice.abs() - row.finResult.abs()
+        } else {
+            return false
+        }
+    } else {
+        if (!(row.finResult < 0)) {
+            if (row.finResultTax != null) {
+                if (row.finResultTax > row.finResult) {
+                    return row.finResultTax - row.finResult
+                }
+            } else {
+                return false
+            }
+        }
+    }
+    return null
 }
 
 // Расчет подитогового значения
@@ -367,7 +414,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
 
 DataRow<Cell> getSubTotalRow(int i) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
-    newRow.fix = 'Итого:'
+    newRow.fix = 'Итого'
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 2
     allColumns.each {
@@ -379,7 +426,7 @@ DataRow<Cell> getSubTotalRow(int i) {
 def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
-    totalRow.fix = 'Всего:'
+    totalRow.fix = 'Всего'
     totalRow.getCell('fix').colSpan = 2
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
@@ -597,46 +644,33 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { sortColumns.contains(it.getAlias())})
-    sortRows(dataRows)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (внутри групп)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    def newRows = []
+    def tempRows = []
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            if (!tempRows.isEmpty()) {
+                sortRows(tempRows, columns)
+                newRows.addAll(tempRows)
+                tempRows = []
+            }
+            newRows.add(row)
+            continue
+        }
+        tempRows.add(row)
+    }
+    if (!tempRows.isEmpty()) {
+        sortRows(tempRows, columns)
+        newRows.addAll(tempRows)
+    }
+    dataRowHelper.setAllCached(newRows)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
         updateIndexes(dataRows)
-    }
-}
-
-// Сортируем
-void sortRows(def dataRows) {
-    def complexList = []
-    def tmpRows = []
-    def currentCode = null
-    for (def row : dataRows) {
-        // если (под)итоги, то закрываем группу
-        if (row.getAlias() != null) {
-            complexList.add(tmpRows)
-            tmpRows = []
-            continue
-        }
-        // в начале запоминаем код
-        if (currentCode == null) {
-            currentCode = row.code ?: ""
-        }
-        // при смене кода закрываем группу и создаем новую
-        if (!(row.code ?: "").equalsIgnoreCase(currentCode)) {
-            complexList.add(tmpRows)
-            tmpRows = [row]
-        } else {
-            tmpRows.add(row)
-        }
-    }
-    // последнюю группу заносим в список
-    if (!tmpRows.isEmpty()) {
-        complexList.add(tmpRows)
-    }
-    // проходим по группам и сортируем
-    complexList.each { rows ->
-        sortRows(rows, sortColumns)
     }
 }
 

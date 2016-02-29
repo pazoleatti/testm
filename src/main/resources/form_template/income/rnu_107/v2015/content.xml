@@ -96,25 +96,25 @@
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>dealTariff</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
+        <columnType>STRING</columnType>
         <name>Тариф за оказание услуги</name>
         <order>10</order>
         <width>11</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>18</maxLength>
+        <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>taxTariff</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
+        <columnType>STRING</columnType>
         <name>Тариф, признаваемый рыночным для целей налогообложения</name>
         <order>11</order>
         <width>11</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>18</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum2</alias>

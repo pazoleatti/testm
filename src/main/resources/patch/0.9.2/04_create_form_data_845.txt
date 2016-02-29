@@ -1,0 +1,42 @@
+import groovy.transform.Field
+import org.springframework.jndi.JndiTemplate
+
+import javax.sql.DataSource
+
+/**
+ Создает таблицу для хранения НФ (выполнять после скрипта создания макета НФ)
+ # Инструкция:
+ 1) В 21-й строке указать id версии макета НФ
+ 2) В 24-й строке указать флаг пересоздания (true, false)
+ 3) Вставить текст данного скрипта на странице, соответствующей ссылке с окончанием:
+ .../gwtapp/#!scriptExecution
+ 4) Нажать "Выполнить".
+
+ */
+
+@Field
+def dataSourceName = 'jdbc/TaxAccDS-nonXA'
+
+@Field
+def form_template_id = 845
+
+@Field
+def recreate = false
+
+try {
+    def template = new JndiTemplate()
+    def DataSource dataSource = template.lookup(dataSourceName)
+    def connection = dataSource.connection
+
+    def stmt = connection.createStatement()
+    def result = namedParameterJdbcTemplate.queryForObject("SELECT count(TABLE_NAME) FROM USER_TABLES WHERE TABLE_NAME = 'FORM_DATA_$form_template_id'", [:], Integer.class)
+    if (result == 1) {
+        logger.info("Таблица FORM_DATA_$form_template_id НФ уже существует в системе!" + (recreate ? " Таблица будет пересоздана": " Для пересоздания таблицы поменяйте флаг recreate на true"))
+        if (!recreate) {
+            return
+        }
+    }
+    stmt.executeQuery("{CALL CREATE_FORM_DATA_NNN($form_template_id)}")
+} catch (Exception ex) {
+    logger.error("Error: ${ex.getLocalizedMessage()}")
+}

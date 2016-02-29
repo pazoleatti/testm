@@ -160,8 +160,8 @@
         <name>Курс сделки</name>
         <order>15</order>
         <width>11</width>
-        <maxLength>19</maxLength>
-        <precision>5</precision>
+        <maxLength>20</maxLength>
+        <precision>10</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>reqCourse</alias>
@@ -228,8 +228,8 @@
         <name>Рыночная цена сделки</name>
         <order>22</order>
         <width>11</width>
-        <maxLength>19</maxLength>
-        <precision>5</precision>
+        <maxLength>20</maxLength>
+        <precision>10</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>incomeDelta</alias>

@@ -102,6 +102,7 @@ void generateXML() {
     def incomeParamsTable = getDepartmentParamTable(incomeParams.record_id.value)
 
     def taxOrganCode = incomeParamsTable?.TAX_ORGAN_CODE?.value
+    def taxOrganCodeProm = incomeParamsTable?.TAX_ORGAN_CODE_PROM?.value
     def inn = incomeParams?.INN?.value
     def kpp = declarationData.kpp
     def formatVersion = incomeParams?.FORMAT_VERSION?.value
@@ -142,7 +143,7 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : generateXmlFileId(taxOrganCode),
+            ИдФайл : generateXmlFileId(taxOrganCodeProm, taxOrganCode),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion){
 
@@ -157,7 +158,7 @@ void generateXML() {
 
             Прибыль() {
                 // берем первые 500 строк (по 2 листа декларации на строку источника)
-                if (dataRowsApp2.size() >= 500) {
+                if (dataRowsApp2 != null && dataRowsApp2.size() >= 500) {
                     dataRowsApp2 = dataRowsApp2[0..499]
                 }
                 // Приложение №2
@@ -325,7 +326,10 @@ void generateXML() {
 List<String> getErrorTable(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.TAX_ORGAN_CODE?.value == null || record.TAX_ORGAN_CODE.value.isEmpty()) {
-        errorList.add("«Код налогового органа»")
+        errorList.add("«Код налогового органа (кон.)»")
+    }
+    if (record.TAX_ORGAN_CODE_PROM?.value == null || record.TAX_ORGAN_CODE_PROM.value.isEmpty()) {
+        errorList.add("«Код налогового органа (пром.)»")
     }
     return errorList
 }
@@ -426,12 +430,12 @@ def fillRecordsMap(def refBookIds) {
     }
 }
 
-def generateXmlFileId(String taxOrganCode) {
+def generateXmlFileId(String taxOrganCodeProm, String taxOrganCode) {
     def departmentParam = getDepartmentParam()
     if (departmentParam) {
         def date = Calendar.getInstance().getTime()?.format("yyyyMMdd")
         def fileId = TaxType.INCOME.declarationPrefix + '_' +
-                taxOrganCode + '_' +
+                taxOrganCodeProm + '_' +
                 taxOrganCode + '_' +
                 departmentParam.INN?.value +
                 declarationData.kpp + "_" +
