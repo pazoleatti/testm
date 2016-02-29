@@ -77,7 +77,7 @@ public class IncomeAgent1Test extends ScriptTestBase {
 
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "INN"));
+                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "1234567894"));
                         result.add(map);
 
                         return result;
@@ -106,6 +106,9 @@ public class IncomeAgent1Test extends ScriptTestBase {
         formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//income_agent_1//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        String msg;
+        Date date = new Date();
 
         // для попадания в ЛП:
         // 1. Проверка обязательных полей
@@ -113,10 +116,10 @@ public class IncomeAgent1Test extends ScriptTestBase {
         row.setIndex(1);
         dataRows.add(row);
 
-        testHelper.execute(FormDataEvent.CHECK);
-        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        // для попадания в ЛП:
+        // 1. Проверка обязательных полей
         int i = 0;
-
+        testHelper.execute(FormDataEvent.CHECK);
         // обязательные (графа 1..3, 7..13, 16, 17, 23..25, 27)
         String [] nonEmptyColumns = { "emitentName", "emitentInn", "decisionNumber", "decisionDate",
                 "year", "firstMonth", "lastMonth", "allSum", "addresseeName", "type", "status",
@@ -124,26 +127,374 @@ public class IncomeAgent1Test extends ScriptTestBase {
         for (String column : nonEmptyColumns) {
             // TODO (Ramil Timerbaev) недоступен ScriptUtils.WRONG_NON_EMPTY потому что private
             // String msg = String.format(ScriptUtils.WRONG_NON_EMPTY, 1, row.getCell(column).getColumn().getName());
-            String msg = String.format("Строка %d: Графа «%s» не заполнена!", 1, row.getCell(column).getColumn().getName());
+            msg = String.format("Строка %d: Графа «%s» не заполнена!", 1, row.getCell(column).getColumn().getName());
             Assert.assertEquals(msg, entries.get(i++).getMessage());
         }
 
-        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // TODO (Ramil Timerbaev) дополнить
-        // для попадания в ЛП:
-        // 1. Проверка обязательных полей
         // 2. Проверка на заполнение зависимого поля ИНН и КПП (графа 14 и 15)
-        // 3. Проверка паттернов (+ 5. Проверка контрольной суммы)
-        // 4. Проверка диапазона дат
+        row.getCell("emitentName").setValue("test", null);
+        row.getCell("emitentInn").setValue("0123456788", null);
+        row.getCell("decisionNumber").setValue("test", null);
+        row.getCell("decisionDate").setValue(date, null);
+        row.getCell("year").setValue(date, null);
+        row.getCell("firstMonth").setValue(1L, null);
+        row.getCell("lastMonth").setValue(1L, null);
+        row.getCell("allSum").setValue(1L, null);
+        row.getCell("addresseeName").setValue("test", null);
+        row.getCell("type").setValue(1L, null);
+        row.getCell("status").setValue(1L, null);
+        row.getCell("dividends").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("date").setValue(date, null);
+        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("inn").setValue(null, null);
+        row.getCell("kpp").setValue(null, null);
+        row.getCell("region").setValue(1L, null);
+        row.getCell("surname").setValue("test", null);
+        row.getCell("name").setValue("test", null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка 1: В случае если графы «%s» равна значению «1» / «3» / «4» / «5» и графа и «%s» равны значению «1», должна быть заполнена графа «%s» и «%s»!",
+                row.getCell("type").getColumn().getName(), row.getCell("status").getColumn().getName(), row.getCell("inn").getColumn().getName(), row.getCell("kpp").getColumn().getName());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
         // 5. Проверка контрольной суммы
+        String inn = "0123456789";
+        row.getCell("emitentName").setValue("test", null);
+        row.getCell("emitentInn").setValue(inn, null);
+        row.getCell("decisionNumber").setValue("test", null);
+        row.getCell("decisionDate").setValue(date, null);
+        row.getCell("year").setValue(date, null);
+        row.getCell("firstMonth").setValue(1L, null);
+        row.getCell("lastMonth").setValue(1L, null);
+        row.getCell("allSum").setValue(1L, null);
+        row.getCell("addresseeName").setValue("test", null);
+        row.getCell("type").setValue(2L, null);
+        row.getCell("status").setValue(1L, null);
+        row.getCell("dividends").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("date").setValue(date, null);
+        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("inn").setValue(null, null);
+        row.getCell("kpp").setValue(null, null);
+        row.getCell("region").setValue(1L, null);
+        row.getCell("surname").setValue("test", null);
+        row.getCell("name").setValue("test", null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка 1: Вычисленное контрольное число по полю \"%s\" некорректно (%s).",
+                row.getCell("emitentInn").getColumn().getName(), inn);
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 3. Проверка паттернов - графа 3 - паттерн
+        inn = "012345678b";
+        row.getCell("emitentName").setValue("test", null);
+        row.getCell("emitentInn").setValue(inn, null);
+        row.getCell("decisionNumber").setValue("test", null);
+        row.getCell("decisionDate").setValue(date, null);
+        row.getCell("year").setValue(date, null);
+        row.getCell("firstMonth").setValue(1L, null);
+        row.getCell("lastMonth").setValue(1L, null);
+        row.getCell("allSum").setValue(1L, null);
+        row.getCell("addresseeName").setValue("test", null);
+        row.getCell("type").setValue(2L, null);
+        row.getCell("status").setValue(1L, null);
+        row.getCell("dividends").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("date").setValue(date, null);
+        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("inn").setValue(null, null);
+        row.getCell("kpp").setValue(null, null);
+        row.getCell("region").setValue(1L, null);
+        row.getCell("surname").setValue("test", null);
+        row.getCell("name").setValue("test", null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка 1: Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\"",
+                row.getCell("emitentInn").getColumn().getName(), inn);
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        msg = "Строка 1: Расшифровка паттерна \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\": Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 8 символов: (0-9)";
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 3. Проверка паттернов - графа 14, 15 - контрольная сумма
+        inn = "0123456789";
+        String kpp = "12345678";
+        row.getCell("emitentName").setValue("test", null);
+        row.getCell("emitentInn").setValue("0123456788", null);
+        row.getCell("decisionNumber").setValue("test", null);
+        row.getCell("decisionDate").setValue(date, null);
+        row.getCell("year").setValue(date, null);
+        row.getCell("firstMonth").setValue(1L, null);
+        row.getCell("lastMonth").setValue(1L, null);
+        row.getCell("allSum").setValue(1L, null);
+        row.getCell("addresseeName").setValue("test", null);
+        row.getCell("type").setValue(1L, null);
+        row.getCell("status").setValue(1L, null);
+        row.getCell("dividends").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("date").setValue(date, null);
+        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("inn").setValue(inn, null);
+        row.getCell("kpp").setValue(kpp, null);
+        row.getCell("region").setValue(1L, null);
+        row.getCell("surname").setValue("test", null);
+        row.getCell("name").setValue("test", null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка 1: Вычисленное контрольное число по полю \"%s\" некорректно (%s).",
+                row.getCell("inn").getColumn().getName(), inn);
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        msg = String.format("Строка 1: Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})\"",
+                row.getCell("kpp").getColumn().getName(), kpp);
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        msg = "Строка 1: Расшифровка паттерна \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})\": Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9)";
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 3. Проверка паттернов - графа 14 - паттерн
+        inn = "012345678b";
+        row.getCell("emitentName").setValue("test", null);
+        row.getCell("emitentInn").setValue("0123456788", null);
+        row.getCell("decisionNumber").setValue("test", null);
+        row.getCell("decisionDate").setValue(date, null);
+        row.getCell("year").setValue(date, null);
+        row.getCell("firstMonth").setValue(1L, null);
+        row.getCell("lastMonth").setValue(1L, null);
+        row.getCell("allSum").setValue(1L, null);
+        row.getCell("addresseeName").setValue("test", null);
+        row.getCell("type").setValue(1L, null);
+        row.getCell("status").setValue(1L, null);
+        row.getCell("dividends").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("date").setValue(date, null);
+        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("inn").setValue(inn, null);
+        row.getCell("kpp").setValue("776001002", null);
+        row.getCell("region").setValue(1L, null);
+        row.getCell("surname").setValue("test", null);
+        row.getCell("name").setValue("test", null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка 1: Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\"",
+                row.getCell("inn").getColumn().getName(), inn);
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        msg = "Строка 1: Расшифровка паттерна \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\": Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 8 символов: (0-9)";
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 4. Проверка диапазона дат
+        Date tmpDate = sdf.parse("01.01.2100");
+        row.getCell("emitentName").setValue("test", null);
+        row.getCell("emitentInn").setValue("0123456788", null);
+        row.getCell("decisionNumber").setValue("test", null);
+        row.getCell("decisionDate").setValue(date, null);
+        row.getCell("year").setValue(date, null);
+        row.getCell("firstMonth").setValue(1L, null);
+        row.getCell("lastMonth").setValue(1L, null);
+        row.getCell("allSum").setValue(1L, null);
+        row.getCell("addresseeName").setValue("test", null);
+        row.getCell("type").setValue(5L, null);
+        row.getCell("status").setValue(3L, null);
+        row.getCell("dividends").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("date").setValue(tmpDate, null);
+        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("inn").setValue(null, null);
+        row.getCell("kpp").setValue(null, null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка 1: Значение даты графы «%s» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099!",
+                row.getCell("date").getColumn().getName());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
         // 6. Проверка значения «Графы 17» (статус получателя)
+        Long status = 9L;
+        row.getCell("emitentName").setValue("test", null);
+        row.getCell("emitentInn").setValue("0123456788", null);
+        row.getCell("decisionNumber").setValue("test", null);
+        row.getCell("decisionDate").setValue(date, null);
+        row.getCell("year").setValue(date, null);
+        row.getCell("firstMonth").setValue(1L, null);
+        row.getCell("lastMonth").setValue(1L, null);
+        row.getCell("allSum").setValue(1L, null);
+        row.getCell("addresseeName").setValue("test", null);
+        row.getCell("type").setValue(5L, null);
+        row.getCell("status").setValue(status, null);
+        row.getCell("dividends").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("date").setValue(date, null);
+        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("inn").setValue(null, null);
+        row.getCell("kpp").setValue(null, null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка 1: Графа «%s» заполнен неверно (%s)! Возможные значения: «1», «2», «3»",
+                row.getCell("status").getColumn().getName(), status.toString());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
         // 7. Проверка значения «Графы 16» (тип получателя)
+        Long type = 9L;
+        row.getCell("emitentName").setValue("test", null);
+        row.getCell("emitentInn").setValue("0123456788", null);
+        row.getCell("decisionNumber").setValue("test", null);
+        row.getCell("decisionDate").setValue(date, null);
+        row.getCell("year").setValue(date, null);
+        row.getCell("firstMonth").setValue(1L, null);
+        row.getCell("lastMonth").setValue(1L, null);
+        row.getCell("allSum").setValue(1L, null);
+        row.getCell("addresseeName").setValue("test", null);
+        row.getCell("type").setValue(type, null);
+        row.getCell("status").setValue(1L, null);
+        row.getCell("dividends").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("date").setValue(date, null);
+        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("inn").setValue(null, null);
+        row.getCell("kpp").setValue(null, null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка 1: Графа «%s» заполнена неверно (%s)! Возможные значения: «1», «2», «3», «4», «5»",
+                row.getCell("type").getColumn().getName(), type.toString());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
         // 8. Проверка значения «Графы 9» (отчетный год)
+        String emitentInn = "1234567894";
+        row.getCell("emitentName").setValue("test", null);
+        row.getCell("emitentInn").setValue(emitentInn, null);
+        row.getCell("decisionNumber").setValue("test", null);
+        row.getCell("decisionDate").setValue(date, null);
+        row.getCell("year").setValue(date, null);
+        row.getCell("firstMonth").setValue(1L, null);
+        row.getCell("lastMonth").setValue(1L, null);
+        row.getCell("allSum").setValue(1L, null);
+        row.getCell("addresseeName").setValue("test", null);
+        row.getCell("type").setValue(2L, null);
+        row.getCell("status").setValue(1L, null);
+        row.getCell("dividends").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("date").setValue(date, null);
+        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("inn").setValue(null, null);
+        row.getCell("kpp").setValue(null, null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка 1: Графа «%s» заполнена неверно (%s)! Для Банка " +
+                "(графа «%s» = ИНН %s формы настроек подразделения формы) по данной графе может быть указан " +
+                "отчетный год формы или предыдущие отчетные года с периодом давности до четырех лет включительно.",
+                row.getCell("year").getColumn().getName(), "2016", row.getCell("emitentInn").getColumn().getName(), emitentInn);
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
         // 9. Проверка значения «Графы 10» и «Графы 11» (период распределения)
+        Long firstMonth = 13L;
+        row.getCell("emitentName").setValue("test", null);
+        row.getCell("emitentInn").setValue("0123456788", null);
+        row.getCell("decisionNumber").setValue("test", null);
+        row.getCell("decisionDate").setValue(date, null);
+        row.getCell("year").setValue(date, null);
+        row.getCell("firstMonth").setValue(firstMonth, null);
+        row.getCell("lastMonth").setValue(1L, null);
+        row.getCell("allSum").setValue(1L, null);
+        row.getCell("addresseeName").setValue("test", null);
+        row.getCell("type").setValue(2L, null);
+        row.getCell("status").setValue(1L, null);
+        row.getCell("dividends").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("date").setValue(date, null);
+        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("inn").setValue(null, null);
+        row.getCell("kpp").setValue(null, null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка 1: Графа «%s» заполнена неверно (%s)! Возможные значения: «1», «2», «3», «4», «5», «6», «7», «8», «9», «10», «11», «12»",
+                row.getCell("firstMonth").getColumn().getName(), firstMonth.toString());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
         // 10. Проверка уникальности значения графы 7 (номер решения)
+        // if (row.emitentInn && departmentInn && row.emitentInn == departmentInn && row.year && row.decisionNumber) {
+        emitentInn = "1234567894";
+        DataRow<Cell> row2 = formData.createDataRow();
+        row2.setIndex(2);
+        dataRows.add(row2);
+        tmpDate = sdf.parse("01.01.2014");
+        for (DataRow<Cell> dataRow : dataRows) {
+            dataRow.getCell("rowNum").setValue(dataRow.getIndex(), null);
+            dataRow.getCell("emitentName").setValue("test", null);
+            dataRow.getCell("emitentInn").setValue(emitentInn, null);
+            dataRow.getCell("decisionNumber").setValue("test" + dataRow.getIndex(), null);
+            dataRow.getCell("decisionDate").setValue(date, null);
+            dataRow.getCell("year").setValue(tmpDate, null);
+            dataRow.getCell("firstMonth").setValue(1L, null);
+            dataRow.getCell("lastMonth").setValue(1L, null);
+            dataRow.getCell("allSum").setValue(1L, null);
+            dataRow.getCell("addresseeName").setValue("test", null);
+            dataRow.getCell("type").setValue(2L, null);
+            dataRow.getCell("status").setValue(1L, null);
+            dataRow.getCell("dividends").setValue(1L, null);
+            dataRow.getCell("sum").setValue(1L, null);
+            dataRow.getCell("date").setValue(tmpDate, null);
+            dataRow.getCell("withheldSum").setValue(1L, null);
+            dataRow.getCell("inn").setValue(null, null);
+            dataRow.getCell("kpp").setValue(null, null);
+        }
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строки 1, 2: Неуникальное значение графы «%s» (%s) в рамках «%s» = «%s» для строк Банка (графа «%s» = ИНН %s формы настроек подразделения формы)!",
+                row.getCell("decisionNumber").getColumn().getName(), "test1, test2", row.getCell("year").getColumn().getName(), "2014", row.getCell("emitentInn").getColumn().getName(), emitentInn);
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
         // 11. Проверка на заполнение зависимых полей Код региона, Фамилия, Имя (графы 31, 39, 40) - Начиная с периода формы «9 месяцев 2015»
+        dataRows.clear();
+        dataRows.add(row);
+        row.getCell("emitentName").setValue("test", null);
+        row.getCell("emitentInn").setValue("0123456788", null);
+        row.getCell("decisionNumber").setValue("test", null);
+        row.getCell("decisionDate").setValue(date, null);
+        row.getCell("year").setValue(date, null);
+        row.getCell("firstMonth").setValue(1L, null);
+        row.getCell("lastMonth").setValue(1L, null);
+        row.getCell("allSum").setValue(1L, null);
+        row.getCell("addresseeName").setValue("test", null);
+        row.getCell("type").setValue(1L, null);
+        row.getCell("status").setValue(1L, null);
+        row.getCell("dividends").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("date").setValue(date, null);
+        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("inn").setValue("0123456788", null);
+        row.getCell("kpp").setValue("776001002", null);
+        row.getCell("region").setValue(null, null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка 1: В случае если графа «%s» не равна значению «2» и графа «%s» равна значению «1», должна быть заполнена графа «%s», «%s» и «%s»!",
+                row.getCell("type").getColumn().getName(), row.getCell("status").getColumn().getName(),
+                row.getCell("region").getColumn().getName(), row.getCell("surname").getColumn().getName(),
+                row.getCell("name").getColumn().getName());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
     }
 
     @Test
