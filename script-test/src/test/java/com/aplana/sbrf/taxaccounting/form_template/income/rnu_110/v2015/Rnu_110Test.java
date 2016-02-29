@@ -118,9 +118,8 @@ public class Rnu_110Test extends ScriptTestBase {
         row.getCell("sum2").setValue(-1, null);
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма доначисления арендной платы до рыночного уровня арендной ставки"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата совершения операции","01.01.2014", "31.12.2014"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения операции» должно быть не меньше значения графы «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Основание для совершения операции. Дата","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Дата по графе «Дата совершения операции» должна принимать значение из диапазона 01.01.2014 - 31.12.2014 и быть больше либо равна дате по графе «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Основание для совершения операции. Дата", "01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Арендная ставка» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Арендная ставка, признаваемая рыночной для целей налогообложения» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленной арендной платы» должно быть больше или равно «0»!", entries.get(i++).getMessage());
@@ -218,10 +217,17 @@ public class Rnu_110Test extends ScriptTestBase {
                 Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                 String str;
                 switch (id.intValue()) {
-                    case 1 : str = "A"; break;
-                    case 2 : str = "B"; break;
-                    case 3 : str = "C"; break;
-                    default : str = "";
+                    case 1:
+                        str = "A";
+                        break;
+                    case 2:
+                        str = "B";
+                        break;
+                    case 3:
+                        str = "C";
+                        break;
+                    default:
+                        str = "";
                 }
                 map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
                 map.put("INN", new RefBookValue(RefBookAttributeType.STRING, str));

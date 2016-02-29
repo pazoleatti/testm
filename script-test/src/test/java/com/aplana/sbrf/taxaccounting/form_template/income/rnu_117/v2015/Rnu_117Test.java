@@ -125,10 +125,7 @@ public class Rnu_117Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Процентная ставка, % годовых"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактически начисленного расхода, руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Процентная ставка, признаваемая рыночной для целей налогообложения, % годовых"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма расхода, соответствующая рыночному уровню, руб."), entries.get(i++).getMessage());        Assert.assertEquals("Строка 1: Графа «Отклонение (превышение) Процентной ставки от рыночного уровня, % годовых»: выполнение расчета невозможно, " +
-                "так как не заполнена используемая в расчете графа «Процентная ставка, % годовых», «Процентная ставка, признаваемая рыночной для целей налогообложения, % годовых»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма отклонения (превышения) расхода фактического от соответствующего рыночному уровню, руб.»: выполнение расчета невозможно, " +
-                "так как не заполнена используемая в расчете графа «Сумма фактически начисленного расхода, руб.», «Сумма расхода, соответствующая рыночному уровню, руб.»!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма расхода, соответствующая рыночному уровню, руб."), entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

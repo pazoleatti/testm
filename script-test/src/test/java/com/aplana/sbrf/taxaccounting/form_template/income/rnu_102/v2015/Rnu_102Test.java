@@ -103,8 +103,6 @@ public class Rnu_102Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактически начисленного расхода (руб.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма расхода, соответствующая рыночному уровню (руб.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма доначисления расхода до рыночного уровня (руб.)"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Должно быть не заполнено или только значение графы «Цена, признаваемая рыночной для целей налогообложения», или только значение графы «Коэффициент корректировки расходов»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 7 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
 
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();

@@ -122,8 +122,8 @@ public class Rnu_111Test extends ScriptTestBase {
         int i = 0;
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Наименование Взаимозависимого лица (резидента оффшорной зоны)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Код налогового учёта"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Основание для совершения операции. Номер"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Основание для совершения операции. Дата"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Основание для совершения операции. номер"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Основание для совершения операции. дата"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма кредита (ед. валюты)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Валюта"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Срок"), entries.get(i++).getMessage());
@@ -131,12 +131,6 @@ public class Rnu_111Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактически начисленного дохода (руб.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Процентная ставка, признаваемая рыночной для целей налогообложения (% годовых)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма дохода, соответствующая рыночному уровню (руб.)"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Отклонение процентной ставки от рыночного уровня, (% годовых)»: выполнение расчета невозможно, " +
-                "так как не заполнена используемая в расчете графа «Процентная ставка, (% годовых)», «Процентная ставка, признаваемая рыночной для целей налогообложения (% годовых)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)»: выполнение расчета невозможно, " +
-                "так как не заполнена используемая в расчете графа «Сумма фактически начисленного дохода (руб.)», «Сумма дохода, соответствующая рыночному уровню (руб.)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «База для расчёта процентного дохода (дней в году)»: выполнение расчета невозможно, " +
-                "так как не заполнена используемая в расчете графа «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

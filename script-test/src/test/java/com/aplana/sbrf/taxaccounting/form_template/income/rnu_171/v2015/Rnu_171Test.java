@@ -108,7 +108,6 @@ public class Rnu_171Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная цена прав требования для целей налогообложения (руб. коп.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Корректировка финансового результата (руб. коп.)"), entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 12 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
