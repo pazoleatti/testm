@@ -106,13 +106,10 @@ public class Rnu_122Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Расчетный период (согласно условиям сделки). Дата окончания"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "База для расчета, кол. дней"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Плата по условиям сделки,% год./ед. вал."), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактического дохода / расхода, Ед. вал."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактического дохода / расхода, Руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная Плата, % годовых / ед. вал."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная сумма дохода (расхода), выраженная в: Руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма доначисления дохода (корректировки расхода) до рыночного уровня (руб.)"), entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 5 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
-
 
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();

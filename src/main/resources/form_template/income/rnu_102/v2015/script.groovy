@@ -109,6 +109,12 @@ def totalColumns = ['sum3']
 @Field
 def groupColumns = ['outcomeCode']
 
+@Field
+def sortColumns = ['outcomeCode', 'name', 'reasonNumber', 'reasonDate', 'transDoneDate']
+
+@Field
+def calcColumns = ['sum2', 'sum3']
+
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -163,135 +169,83 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        // Проверка заполнения обязательных полей
+        // 1. Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // Проверка даты совершения операции
-        if (row.transDoneDate && row.reasonDate && row.reasonDate > row.transDoneDate) {
-            def msg1 = row.getCell('transDoneDate').column.name
-            def msg2 = row.getCell('reasonDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
+        // 2. Проверка даты совершения операции
+        if (row.transDoneDate != null && row.reasonDate != null && (row.transDoneDate < getReportPeriodStartDate() || row.transDoneDate > getReportPeriodEndDate() || row.transDoneDate < row.reasonDate)) {
+            def col5Name = getColumnName(row, 'transDoneDate')
+            def col9Name = getColumnName(row, 'reasonDate')
+            def startDateString = getReportPeriodStartDate()?.format('dd.MM.yyyy')
+            def endDateString = getReportPeriodEndDate()?.format('dd.MM.yyyy')
+            logger.error("Строка $rowNum: Дата по графе «$col5Name» должна принимать значение из диапазона $startDateString - $endDateString и быть больше либо равна дате по графе «$col9Name»!")
         }
 
-        // Проверка даты совершения операции
-        checkDatePeriod(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-
-        // Проверка курса валюты
-        if (row.course != null && row.course < 0) {
+        // 3. Проверка курса валюты
+        if (row.course != null && row.course <= 0) {
             def msg = row.getCell('course').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
-        // Проверка даты основания совершения операции
+        // 4. Проверка даты основания совершения операции
         checkDatePeriod(logger, row, 'reasonDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
-        // Проверка количества
+        // 5. Проверка количества
         if (row.count != null && row.count < 1) {
             def msg = row.getCell('count').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «1»!")
         }
 
-        // Проверка положительной  цены
+        // 6. Проверка заполнения цены
         if (row.dealPrice != null && row.dealPrice < 0) {
             def msg = row.getCell('dealPrice').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        // Проверка положительной  суммы доходов
-        if (row.sum1 != null && row.sum1 < 0) {
-            def msg = row.getCell('sum1').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
-        }
-
-        // Проверка положительной цены для целей налогообложения
+        // 7. Проверка положительной цены для целей налогообложения
         if (row.taxPrice != null && row.taxPrice <= 0) {
             def msg = row.getCell('taxPrice').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
-        boolean noOne = (row.taxPrice == null && row.outcomeRate == null)
-        boolean both = (row.taxPrice != null && row.outcomeRate != null)
-        String taxPrice = getColumnName(row, 'taxPrice')
-        String outcomeRate = getColumnName(row, 'outcomeRate')
-        // Проверка наличия заполнения цены и коэффициента
-        if (noOne) {
-            logger.error("Строка $rowNum: Должно быть не заполнено или только значение графы «$taxPrice», или только значение графы «$outcomeRate»!")
-        }
-        // Проверка отсутствия заполнения цены и коэффициента
-        if (both) {
-            logger.error("Строка $rowNum: Должно быть заполнено или только значение графы «$taxPrice», или только значение графы «$outcomeRate»!")
-        }
-
-        // Проверка наличия заполнения суммы
-        if (row.outcomeRate != null && row.sum1 != null && row.sum1 <= 0) {
+        // 8. Проверка суммы фактически начисленного расхода
+        if (row.sum1 != null && row.sum1 < 0) {
             def msg = row.getCell('sum1').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
-        }
-
-        // Проверка положительного коэффициента
-        if (row.outcomeRate != null && row.outcomeRate < 0) {
-            def msg = row.getCell('outcomeRate').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        // Проверка коэффициента
-        if (row.sum1 != null && row.sum1 == 0 && row.outcomeRate != null) {
+        // 9. Проверка коэффициента
+        if (row.sum1 == 0 && row.outcomeRate != null) {
+            // a
             def msg1 = row.getCell('outcomeRate').column.name
             def msg2 = row.getCell('sum1').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не заполнено (т.к. значение графы «$msg2» равно «0»)!")
+        } else if (row.outcomeRate != null && row.outcomeRate < 0) {
+            // b
+            def msg1 = row.getCell('outcomeRate').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть больше или равно «0»!")
         }
 
-        // Проверка положительной суммы дохода
+        // 10. Проверка суммы расхода
         if (row.sum1 != null && row.sum2 != null && row.sum2 < row.sum1) {
             def msg1 = row.getCell('sum1').column.name
             def msg2 = row.getCell('sum2').column.name
             logger.error("Строка $rowNum: Значение графы «$msg2» должно быть не меньше значения графы «$msg1»!")
         }
 
-        // Проверка корректности суммы дохода
-        String msg6 = row.getCell('course').column.name
-        String msg10 = row.getCell('count').column.name
-        String msg12 = row.getCell('taxPrice').column.name
-        String msg13 = row.getCell('sum1').column.name
-        String msg14 = row.getCell('outcomeRate').column.name
-        String msg15 = row.getCell('sum2').column.name
-        String msg16 = row.getCell('sum3').column.name
-
-        if (row.sum2 != null) {
-            if (row.outcomeRate != null && row.sum1 != null && row.sum1 > 0 && row.taxPrice == null) {
-                if (row.sum2 != calc15(row)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно произведению значений граф «$msg13» и «$msg14»!")
-                }
-            } else if (row.outcomeRate == null && row.taxPrice != null && row.count != null && row.course != null) {
-                if (row.sum2 != calc15(row)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно произведению значений граф «$msg12», «$msg10» и «$msg6»!")
-                }
-            } else if (row.sum1 != null && row.sum1 == 0 && row.taxPrice != null) {
-                if (row.sum2 != calc15(row)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно значению графы «$msg12»!")
-                }
-            } else if (row.sum2 != calc15(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg15» заполнено значением «0», т.к. не выполнен порядок заполнения графы!")
-            }
-        }
-
-        // Проверка корректности суммы доначисления дохода
-        if (row.sum1 != null && row.sum1 == 0 && row.taxPrice != null) {
-            if (row.sum3 != calc16(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg16» должно быть равно значению графы «$msg12»!")
-            }
-        } else if (row.sum1 != null && row.sum2 != null && row.sum3 != calc16(row)) {
-            logger.error("Строка $rowNum: Значение графы «$msg16» должно быть равно разности значений граф «$msg15» и «$msg13»!")
-        }
-
+        // 11. Проверка расчётных граф
+        def needValue = formData.createDataRow()
+        needValue.sum2 = calc15(row)
+        needValue.sum3 = calc16(row)
+        checkCalc(row, calcColumns, needValue, logger, true)
     }
 
-    //  Проверка наличия всех фиксированных строк
-    //  Проверка отсутствия лишних фиксированных строк
-    //  Проверка итоговых значений по фиксированным строкам
+    // 12. Проверка наличия всех фиксированных строк
+    // 13. Проверка отсутствия лишних фиксированных строк
+    // 14. Проверка итоговых значений по фиксированным строкам
     checkItog(dataRows)
 
-    // Проверка итоговых значений пофиксированной строке «Итого»
+    // 15. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
@@ -311,10 +265,7 @@ void calc() {
         row.sum3 = calc16(row)
     }
 
-    // Сортировка
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll {
-        groupColumns.contains(it.getAlias())
-    })
+    // Сортировка по группируемой графе (разыменовывание не нужно, так как строка)
     sortRows(dataRows, groupColumns)
 
     // Добавление подитогов
@@ -333,40 +284,27 @@ void calc() {
 }
 
 def calc15(def row) {
-    if (row.outcomeRate != null && row.sum1 > 0 && row.taxPrice == null) {
-        return roundValue((row.sum1 ?: 0) * (row.outcomeRate ?: 0), 2)
+    if (row.outcomeRate != null && row.sum1 != null) {
+        return ScriptUtils.round(row.sum1 * row.outcomeRate, 2)
     }
-    if (row.outcomeRate == null && row.taxPrice != null) {
-        return roundValue((row.taxPrice ?: 0) * (row.count ?: 0) * (row.course ?: 0), 2)
+    if (row.outcomeRate == null && row.taxPrice != null && row.count != null && row.course != null) {
+        return ScriptUtils.round(row.taxPrice * row.count * row.course, 2)
     }
-    if (row.sum1 == 0 && row.taxPrice != null) {
-        return row.taxPrice
-    }
-    return 0
+    return null
 }
 
 def calc16(def row) {
-    if (row.sum1 == 0 && row.taxPrice != null) {
-        return row.taxPrice
+    if (row.sum2 != null && row.sum1 != null) {
+        return row.sum2 - row.sum1
     }
-    return (row.sum2 ?: 0) - (row.sum1 ?: 0)
-}
-/**
- * Округляет число до требуемой точности.
- *
- * @param value округляемое число
- * @param precision точность округления, знаки после запятой
- * @return округленное число
- */
-def roundValue(BigDecimal value, def precision) {
-    value.setScale(precision, BigDecimal.ROUND_HALF_UP)
+    return null
 }
 
 def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.fix = 'Всего'
-    totalRow.getCell('fix').colSpan = 3
+    totalRow.getCell('fix').colSpan = 2
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -381,7 +319,7 @@ void importData() {
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = '№ пп'
     String TABLE_END_VALUE = null
-    int INDEX_FOR_SKIP = 0
+    int INDEX_FOR_SKIP = 1
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -409,7 +347,7 @@ void importData() {
     def totalRowFromFile = null
     def totalRowFromFileMap = [:] // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 
-    // формирвание строк нф
+    // формирование строк нф
     for (def i = 0; i < allValuesCount; i++) {
         rowValues = allValues[0]
         fileRowIndex++
@@ -632,7 +570,7 @@ DataRow<Cell> getSubTotalRow(int i) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     newRow.fix = 'Итого'
     newRow.setAlias('itg#'.concat(i.toString()))
-    newRow.getCell('fix').colSpan = 3
+    newRow.getCell('fix').colSpan = 2
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -695,9 +633,29 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), dataRows.find {
-        it.getAlias() == 'total'
-    }, true)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (внутри групп)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    def newRows = []
+    def tempRows = []
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            if (!tempRows.isEmpty()) {
+                sortRows(tempRows, columns)
+                newRows.addAll(tempRows)
+                tempRows = []
+            }
+            newRows.add(row)
+            continue
+        }
+        tempRows.add(row)
+    }
+    if (!tempRows.isEmpty()) {
+        sortRows(tempRows, columns)
+        newRows.addAll(tempRows)
+    }
+    dataRowHelper.setAllCached(newRows)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
@@ -713,7 +671,7 @@ void checkItog(def dataRows) {
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
     // все строки, кроме общего итога
     def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
-    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
+    checkItogRows(groupRows, testItogRows, itogRows, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
@@ -729,6 +687,57 @@ void checkItog(def dataRows) {
             return null
         }
     })
+}
+
+// вынес метод в скрипт для правки проверок
+void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.GroupString groupString, ScriptUtils.CheckGroupSum checkGroupSum) {
+    // считает количество реальных групп данных
+    def groupCount = 0
+    // Итоговые строки были удалены
+    // Неитоговые строки были удалены
+    for (int i = 0; i < dataRows.size(); i++) {
+        DataRow<Cell> row = dataRows.get(i);
+        // строка или итог другой группы после строки без подитога между ними
+        if (i > 0) {
+            def prevRow = dataRows.get(i - 1)
+            if (prevRow.getAlias() == null && isDiffRow(prevRow, row, groupColumns)) { // TODO сравнение
+                itogRows.add(groupCount, null)
+                groupCount++
+                String groupCols = groupString.getString(prevRow);
+                if (groupCols != null) {
+                    logger.error("Группа «%s» не имеет строки итога!", groupCols); // итога (не  подитога)
+                }
+            }
+        }
+        if (row.getAlias() != null) {
+            // итог после итога (или после строки из другой группы)
+            if (i < 1 || dataRows.get(i - 1).getAlias() != null || isDiffRow(dataRows.get(i - 1), row, groupColumns)) { // TODO сравнение
+                logger.error("Строка %d: Строка итога не относится к какой-либо группе!", row.getIndex()); // итога (не  подитога)
+                // удаляем из проверяемых итогов строку без подчиненных строк
+                itogRows.remove(row)
+            } else {
+                groupCount++
+            }
+        }
+    }
+    if (testItogRows.size() == itogRows.size()) {
+        for (int i = 0; i < testItogRows.size(); i++) {
+            DataRow<Cell> testItogRow = testItogRows.get(i);
+            DataRow<Cell> realItogRow = itogRows.get(i);
+            if (realItogRow == null) {
+                continue
+            }
+            int rowIndex = dataRows.indexOf(realItogRow) - 1
+            def row = dataRows.get(rowIndex)
+            String groupCols = groupString.getString(row);
+            if (groupCols != null) {
+                String checkStr = checkGroupSum.check(testItogRow, realItogRow);
+                if (checkStr != null) {
+                    logger.error(String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr));
+                }
+            }
+        }
+    }
 }
 
 // Возвращает строку со значениями полей строки по которым идет группировка

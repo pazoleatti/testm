@@ -108,7 +108,6 @@ public class Rnu_171Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная цена прав требования для целей налогообложения (руб. коп.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Корректировка финансового результата (руб. коп.)"), entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 12 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -135,16 +134,9 @@ public class Rnu_171Test extends ScriptTestBase {
 
         i = 0;
         Assert.assertEquals("Строка 1: Дата по графе «Дата договора цессии» должна принимать значение из диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Дата по графе «Дата погашения основного долга» должна принимать значение из диапазона: 01.01.2014 - 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата погашения основного долга» должно быть больше или равно значения графы «Дата договора цессии»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Дата по графе «Дата уступки права требования» должна принимать значение из диапазона: 01.01.2014 - 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата уступки права требования» должно быть больше или равно значения графы «Дата договора цессии»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Доход (выручка) от уступки права требования (руб. коп.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Корректировка финансового результата (руб. коп.)» заполнена значением «0», т.к. не выполнен порядок заполнения графы!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Финансовый результат уступки права требования (руб. коп.)» должно равняться выражению: «Доход (выручка) от уступки права требования (руб. коп.)» - («Стоимость права требования (руб. коп.)» - «Стоимость права требования, списанного за счёт резервов (руб. коп.)»)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Код налогового учета» должна принимать значение из следующего списка: «10360» или «10361»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)» должно равняться выражению: «Рыночная цена прав требования для целей налогообложения (руб. коп.)» - («Стоимость права требования (руб. коп.)» - «Стоимость права требования, списанного за счёт резервов (руб. коп.)»)!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «10345» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Неверное значение граф: «Финансовый результат уступки права требования (руб. коп.)», «Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)», «Корректировка финансового результата (руб. коп.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -161,13 +153,14 @@ public class Rnu_171Test extends ScriptTestBase {
         row.getCell("finResultTax").setValue(2L, null);
         DataRow<Cell> subTotal = formData.createDataRow();
         dataRows.add(subTotal);
-        subTotal.setAlias("itg#1");
+        subTotal.setAlias("itg#0");
         subTotal.getCell("incomeCorrection").setValue(0L, null);
+        subTotal.getCell("code").setValue("10360", null);
         subTotal.setIndex(2);
         testHelper.execute(FormDataEvent.CHECK);
 
         i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Корректировка финансового результата (руб. коп.)» должно равняться разнице между графой «Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)» и «Финансовый результат уступки права требования (руб. коп.)»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Неверное значение граф: «Корректировка финансового результата (руб. коп.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -178,7 +171,7 @@ public class Rnu_171Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
 
         i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Корректировка финансового результата (руб. коп.)» должно равняться разнице между графой «Рыночная цена прав требования для целей налогообложения (руб. коп.)» по модулю и «Финансовый результат уступки права требования (руб. коп.)» по модулю!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Неверное значение граф: «Корректировка финансового результата (руб. коп.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -189,6 +182,7 @@ public class Rnu_171Test extends ScriptTestBase {
         row.getCell("finResultTax").setValue(2L, null);
         row.getCell("incomeCorrection").setValue(1L, null);
         subTotal.getCell("incomeCorrection").setValue(1L, null);
+        subTotal.getCell("code").setValue("10361", null);
         row.getCell("code").setValue("10361", null);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;

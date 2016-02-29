@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="">
-        <cell alias="fix" colSpan="2" rowSpan="2" value="№ пп"/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="2" value=""/>
+        <cell alias="rowNumber" colSpan="2" rowSpan="2" value="№ пп"/>
+        <cell alias="fix" colSpan="1" rowSpan="2" value=""/>
         <cell alias="name" colSpan="1" rowSpan="2" value="Наименование Взаимозависимого лица (резидента оффшорной зоны)"/>
         <cell alias="iksr" colSpan="1" rowSpan="2" value="Идентификационный номер"/>
         <cell alias="countryName" colSpan="1" rowSpan="2" value="Страна регистрации"/>
@@ -17,11 +17,11 @@
         <cell alias="sum1" colSpan="1" rowSpan="2" value="Сумма фактически начисленного дохода (руб.)"/>
         <cell alias="incomeRate" colSpan="1" rowSpan="2" value="Коэффициент корректировки доходов"/>
         <cell alias="sum2" colSpan="1" rowSpan="2" value="Сумма дохода, соответствующая рыночному уровню (руб.)"/>
-        <cell alias="sum3" colSpan="1" rowSpan="2" value="Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)"/>
+        <cell alias="sum3" colSpan="1" rowSpan="2" value="Сумма доначисления дохода до рыночного уровня (руб.)"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="2" rowSpan="1" value="№ пп"/>
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value="№ пп"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Наименование Взаимозависимого лица (резидента оффшорной зоны)"/>
         <cell alias="iksr" colSpan="1" rowSpan="1" value="Идентификационный номер"/>
         <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна регистрации"/>
@@ -36,11 +36,11 @@
         <cell alias="sum1" colSpan="1" rowSpan="1" value="Сумма фактически начисленного дохода (руб.)"/>
         <cell alias="incomeRate" colSpan="1" rowSpan="1" value="Коэффициент корректировки доходов"/>
         <cell alias="sum2" colSpan="1" rowSpan="1" value="Сумма дохода, соответствующая рыночному уровню (руб.)"/>
-        <cell alias="sum3" colSpan="1" rowSpan="1" value="Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)"/>
+        <cell alias="sum3" colSpan="1" rowSpan="1" value="Сумма доначисления дохода до рыночного уровня (руб.)"/>
     </row>
     <row alias="">
+        <cell alias="rowNumber" colSpan="2" rowSpan="1" value="1"/>
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
         <cell alias="iksr" colSpan="1" rowSpan="1" value="3"/>
         <cell alias="countryName" colSpan="1" rowSpan="1" value="4"/>

@@ -104,7 +104,6 @@ public class Rnu_112Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата второй части сделки"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Ставка сделки, % годовых"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма остаточных обязательств (требований) контрагента по сделке"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма выплаты по ценным бумагам"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата начала начисления"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата окончания начисления"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "База (360/365/366)"), entries.get(i++).getMessage());
@@ -145,9 +144,8 @@ public class Rnu_112Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Отклонение от рыночной процентной ставки для целей налогообложения» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма корректировки доходов» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата окончания начисления» должно быть больше значения графы «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата начала начисления»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Дата по графе «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата окончания начисления» должна принимать значение из диапазона: 01.01.2014 - 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Сумма корректировки доходов» должно равняться выражению: («Сумма остаточных обязательств (требований) контрагента по сделке» * «Отклонение от рыночной процентной ставки для целей налогообложения») * ((«Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата окончания начисления» - «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата начала начисления» + 1) / «База (360/365/366)») / 100!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «База (360/365/366)» должна принимать значение из следующего списка: «360», «365», «366»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Неверное значение граф: «Сумма корректировки доходов»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

@@ -103,8 +103,6 @@ public class Rnu_102Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактически начисленного расхода (руб.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма расхода, соответствующая рыночному уровню (руб.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма доначисления расхода до рыночного уровня (руб.)"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Должно быть не заполнено или только значение графы «Цена, признаваемая рыночной для целей налогообложения», или только значение графы «Коэффициент корректировки расходов»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 7 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
 
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -121,8 +119,12 @@ public class Rnu_102Test extends ScriptTestBase {
         row.getCell("dealPrice").setValue(1L, null);
         row.getCell("sum1").setValue(1L, null);
         row.getCell("outcomeRate").setValue(1L, null);
-        row.getCell("sum2").setValue(1L, null);
-        row.getCell("sum3").setValue(1L, null);
+        row.getCell("sum2").setValue(11L, null);
+        row.getCell("sum3").setValue(12L, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        Assert.assertEquals(String.format("Строка %d: Неверное значение граф: %s!", 1, "«Сумма расхода, соответствующая рыночному уровню (руб.)», «Сумма доначисления расхода до рыночного уровня (руб.)»"), entries.get(i++).getMessage());
+
+        // Для прохождения всех ЛП после расчета
         testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -197,27 +199,34 @@ public class Rnu_102Test extends ScriptTestBase {
 
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
+
+        List<String> aliases = Arrays.asList("transDoneDate", "course", "outcomeCode", "reasonNumber", "reasonDate",
+                "count", "dealPrice", "taxPrice", "sum1", "outcomeRate", "sum2", "sum3");
+        // ожидается 3 строки
+        int expected = 3;
+        defaultCheckLoadData(aliases, expected);
         checkLoadData(testHelper.getDataRowHelper().getAll());
 
         // проверка расчетов
         testHelper.execute(FormDataEvent.CALCULATE);
         checkAfterCalc(testHelper.getDataRowHelper().getAll());
-        checkLogger();
+
+        // 3 сообщения в логгере (неверные даты)
+        Assert.assertEquals(2, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
     }
 
     // Проверить загруженные данные
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(1L, dataRows.get(0).getCell("course").getNumericValue().longValue());
-        Assert.assertEquals(1L, dataRows.get(0).getCell("count").getNumericValue().longValue());
-
     }
 
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(0, dataRows.get(0).getCell("sum3").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(0, dataRows.get(1).getCell("sum3").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(0, dataRows.get(2).getCell("sum3").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(30, dataRows.get(0).getCell("sum2").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(25, dataRows.get(0).getCell("sum3").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(25, dataRows.get(1).getCell("sum3").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(25, dataRows.get(2).getCell("sum3").getNumericValue().doubleValue(), 0);
     }
 }
-

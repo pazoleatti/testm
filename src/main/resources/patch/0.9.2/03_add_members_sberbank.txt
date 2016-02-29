@@ -1,0 +1,369 @@
+import com.aplana.sbrf.taxaccounting.model.Column
+import com.aplana.sbrf.taxaccounting.model.ColumnType
+import com.aplana.sbrf.taxaccounting.model.FormStyle
+import com.aplana.sbrf.taxaccounting.model.FormTemplate
+import com.aplana.sbrf.taxaccounting.model.FormType
+import org.apache.commons.io.IOUtils
+
+/**
+ Создает макет НФ, кроме таблицы для хранения данных
+ # Инструкция:
+ Вставить текст данного скрипта на странице, соответствующей ссылке с окончанием:
+ .../gwtapp/#!scriptExecution
+ Нажать "Выполнить".
+
+ */
+
+boolean createType = true
+boolean createTemplate = true
+boolean addColumns = true
+boolean addStyles = true
+boolean addDataRows = true
+boolean addDataHeaders = true
+boolean addScript = true
+
+try {
+    // id типа формы, имя типа формы, вид налога(I, T, V, D, P, E), включать в ИФРС(флаг), имя ИФРС
+    FormType formType = new FormType()
+    formType.setId(845)
+    formType.setName('Участники группы ПАО Сбербанк')
+    formType.setTaxType(TaxType.DEAL)
+    formType.setIsIfrs(false)
+    formType.setIfrsName('')
+    formType.setCode('')
+    // id шаблона формы, имя шаблона короткое, имя шаблона полное, год версии, ежемесячность(флаг), код
+    FormTemplate formTemplate = new FormTemplate()
+    formTemplate.setId(845)
+    formTemplate.setFixedRows(false)
+    formTemplate.setName('Участники группы ПАО Сбербанк')
+    formTemplate.setFullName('Перечень участников группы ПАО Сбербанк')
+    formTemplate.setVersion(Date.parse('dd.MM.yyyy', '01.01.2015'))
+    formTemplate.setMonthly(false)
+    formTemplate.setHeader('')
+    formTemplate.setComparative(false)
+    formTemplate.setAccruing(false)
+    formTemplate.setUpdating(false)
+
+    def form_type_id = formType.id
+    def form_template_id = formTemplate.id
+
+    def rs = namedParameterJdbcTemplate.queryForObject("SELECT count(id) from FORM_TYPE where id = $form_type_id", [:], Integer.class)
+    if (rs == 1) {
+        logger.info("Макет НФ с данным id = $form_type_id уже существует в системе!")
+        if (createType) {
+            return
+        }
+    }
+
+    rs = namedParameterJdbcTemplate.queryForObject("SELECT count(id) from FORM_TEMPLATE where id = $form_template_id", [:], Integer.class)
+    if (rs == 1) {
+        logger.info("Версия макета НФ с данным id = $form_template_id уже существует в системе!")
+        if (createTemplate) {
+            return
+        }
+    }
+
+    addTypeTemplate(formType, formTemplate, createType, createTemplate)
+
+    List<Column> formColumns = new ArrayList<>()
+	def referenceColumnMap = [:]
+
+    //Добавление колонок
+    // NAME, ALIAS, TYPE, WIDTH, PRECISION, MAX_LENGTH, CHECKING, ATTRIBUTE_ID, FORMAT, FILTER, PARENT_COLUMN_ID, ATTRIBUTE_ID2, NUMERATION_ROW
+    if (addColumns) {
+        def Column formColumn = new AutoNumerationColumn()
+        formColumn.setOrder(1)
+        formColumn.setName('№ п/п')
+        formColumn.setAlias('rowNumber')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Автонумеруемая графа')})
+        formColumn.setWidth(4)
+        formColumn.setChecking(false)
+        formColumn.setNumerationType(NumerationType.getById(0))
+        formColumns.add(formColumn)
+
+        formColumn = new RefBookColumn()
+        formColumn.setOrder(2)
+        formColumn.setName('Полное наименование юридического лица – участника группы')
+        formColumn.setAlias('name')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Справочник')})
+        formColumn.setWidth(10)
+        formColumn.setChecking(false)
+        formColumn.setRefBookAttributeId(5201)
+        formColumn.setRefBookAttributeId2(null)
+        formColumn.setNameAttributeId(5201)
+        formColumn.setFilter('' ?: null)
+        formColumns.add(formColumn)
+
+        formColumn = new StringColumn()
+        formColumn.setOrder(3)
+        formColumn.setName('Полное наименование юридического лица – участника группы (в случае изменения названия)')
+        formColumn.setAlias('pseudoName')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Строка')})
+        formColumn.setWidth(10)
+        formColumn.setChecking(false)
+        formColumn.setMaxLength(256)
+        formColumn.setPrevLength(0)
+        formColumns.add(formColumn)
+
+        formColumn = new ReferenceColumn()
+        formColumn.setOrder(4)
+        formColumn.setName('Код участника в соответствие с классификатором АС «Статотчетность»')
+        formColumn.setAlias('statReportId')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Зависимая графа')})
+        formColumn.setWidth(10)
+        formColumn.setChecking(false)
+        formColumn.setParentAlias('statReportId')
+        formColumn.setRefBookAttributeId(5216)
+        formColumn.setRefBookAttributeId2(null)
+        referenceColumnMap['statReportId'] = 'name'
+        formColumns.add(formColumn)
+
+        formColumn = new StringColumn()
+        formColumn.setOrder(5)
+        formColumn.setName('Номер (код) юридического лица (заполняется в порядке, установленном /3/ для формы 0409801)')
+        formColumn.setAlias('code')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Строка')})
+        formColumn.setWidth(10)
+        formColumn.setChecking(false)
+        formColumn.setMaxLength(128)
+        formColumn.setPrevLength(0)
+        formColumns.add(formColumn)
+
+        formColumn = new StringColumn()
+        formColumn.setOrder(6)
+        formColumn.setName('Наименование подразделения, ответственного за взаимодействие')
+        formColumn.setAlias('depName')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Строка')})
+        formColumn.setWidth(10)
+        formColumn.setChecking(false)
+        formColumn.setMaxLength(128)
+        formColumn.setPrevLength(0)
+        formColumns.add(formColumn)
+
+        formColumn = new NumericColumn()
+        formColumn.setOrder(7)
+        formColumn.setName('Метод консолидации (1-полная консолидация, 2 - пропорционально доле участия)')
+        formColumn.setAlias('consoType')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Число')})
+        formColumn.setWidth(9)
+        formColumn.setChecking(false)
+        formColumn.setPrecision(0)
+        formColumn.setMaxLength(1)
+        formColumns.add(formColumn)
+
+        formColumn = new NumericColumn()
+        formColumn.setOrder(8)
+        formColumn.setName('Доля контроля Группы в уставном капитале участника, %')
+        formColumn.setAlias('controlPart')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Число')})
+        formColumn.setWidth(9)
+        formColumn.setChecking(false)
+        formColumn.setPrecision(4)
+        formColumn.setMaxLength(7)
+        formColumns.add(formColumn)
+
+        formColumn = new NumericColumn()
+        formColumn.setOrder(9)
+        formColumn.setName('Доля участия Группы в уставном капитале участника, %')
+        formColumn.setAlias('sharePart')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Число')})
+        formColumn.setWidth(9)
+        formColumn.setChecking(false)
+        formColumn.setPrecision(4)
+        formColumn.setMaxLength(7)
+        formColumns.add(formColumn)
+
+        formColumn = new ReferenceColumn()
+        formColumn.setOrder(10)
+        formColumn.setName('ИНН юридического лица')
+        formColumn.setAlias('iksr')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Зависимая графа')})
+        formColumn.setWidth(7)
+        formColumn.setChecking(false)
+        formColumn.setParentAlias('iksr')
+        formColumn.setRefBookAttributeId(5218)
+        formColumn.setRefBookAttributeId2(null)
+        referenceColumnMap['iksr'] = 'name'
+        formColumns.add(formColumn)
+
+        formColumn = new DateColumn()
+        formColumn.setOrder(11)
+        formColumn.setName('Дата включения участника в состав группы')
+        formColumn.setAlias('date')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Дата')})
+        formColumn.setWidth(6)
+        formColumn.setChecking(false)
+        formColumn.setFormatId(0)
+        formColumns.add(formColumn)
+
+        formColumn = new NumericColumn()
+        formColumn.setOrder(12)
+        formColumn.setName('Является группой компаний (0 - нет, 1 - да)')
+        formColumn.setAlias('sign')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Число')})
+        formColumn.setWidth(9)
+        formColumn.setChecking(false)
+        formColumn.setPrecision(0)
+        formColumn.setMaxLength(1)
+        formColumns.add(formColumn)
+
+
+        formTemplate.getColumns().addAll(formColumns)
+        columnDaoImpl.createFormColumns(formColumns, formTemplate)
+
+	  	referenceColumnMap.each { alias, parentAlias ->
+			def column = formColumns.find{ it.alias == alias }
+			if (column != null) {
+				column.setParentAlias(parentAlias)
+			} else {
+				logger.error("Родительская колонка с псевдонимом $parentAlias не обнаружена!")
+			}
+		}
+
+        if (!referenceColumnMap.isEmpty()) {
+            columnDaoImpl.updateFormColumns(formColumns, formTemplate)
+        }
+
+        logger.info("К версии макета добавлены колонки")
+    }
+
+    List<FormStyle> formStyles = new ArrayList<>()
+
+    if (addStyles) {
+        def FormStyle formStyle = new FormStyle()
+        formStyle.setAlias('Корректировка-изменено')
+        formStyle.setBackColor(Color.getById(4))
+        formStyle.setBold(true)
+        formStyle.setFontColor(Color.getById(10))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Корректировка-без изменений')
+        formStyle.setBackColor(Color.getById(6))
+        formStyle.setBold(false)
+        formStyle.setFontColor(Color.getById(0))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Корректировка-добавлено')
+        formStyle.setBackColor(Color.getById(12))
+        formStyle.setBold(false)
+        formStyle.setFontColor(Color.getById(0))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Корректировка-удалено')
+        formStyle.setBackColor(Color.getById(8))
+        formStyle.setBold(false)
+        formStyle.setFontColor(Color.getById(0))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Редактируемая')
+        formStyle.setBackColor(Color.getById(3))
+        formStyle.setBold(false)
+        formStyle.setFontColor(Color.getById(0))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Автозаполняемая')
+        formStyle.setBackColor(Color.getById(4))
+        formStyle.setBold(true)
+        formStyle.setFontColor(Color.getById(13))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Курсив')
+        formStyle.setBackColor(Color.getById(4))
+        formStyle.setBold(false)
+        formStyle.setFontColor(Color.getById(0))
+        formStyle.setItalic(true)
+        formStyles.add(formStyle)
+
+
+        formTemplate.getStyles().addAll(formStyles)
+        formStyleDaoImpl.saveFormStyles(formTemplate)
+        logger.info("К версии макета добавлены стили")
+    }
+
+    String longString = ''
+
+    if (addDataRows) {
+        longString += 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48cm93cy8+'
+
+        addLongText(form_template_id, longString, 'DATA_ROWS')
+        logger.info("К версии макета добавлены фиксированные строки")
+    }
+
+    longString = ''
+    if (addDataHeaders) {
+        longString += 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48cm93cz4NCiAgICA8cm93IGFsaWFzPSIiPg0KICAgICAgICA8Y2VsbCBhbGlhcz0icm93TnVtYmVyIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0i4oSWINC/L9C/Ii8+DQogICAgICAgIDxjZWxsIGFsaWFzPSJuYW1lIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0i0J/QvtC70L3QvtC1INC90LDQuNC80LXQvdC+0LLQsNC90LjQtSDRjtGA0LjQtNC40YfQtdGB0LrQvtCz0L4g0LvQuNGG0LAg4oCTINGD0YfQsNGB0YLQvdC40LrQsCDQs9GA0YPQv9C/0YsiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9InBzZXVkb05hbWUiIGNvbFNwYW49IjEiIHJvd1NwYW49IjEiIHZhbHVlPSLQn9C+0LvQvdC+0LUg0L3QsNC40LzQtdC90L7QstCw0L3QuNC1INGO0YDQuNC00LjRh9C10YHQutC+0LPQviDQu9C40YbQsCDigJMg0YPRh9Cw0YHRgtC90LjQutCwINCz0YDRg9C/0L/RiyAo0LIg0YHQu9GD0YfQsNC1INC40LfQvNC10L3QtdC90LjRjyDQvdCw0LfQstCw0L3QuNGPKSIvPg0KICAgICAgICA8Y2VsbCBhbGlhcz0ic3RhdFJlcG9ydElkIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0i0JrQvtC0INGD0YfQsNGB0YLQvdC40LrQsCDQsiDRgdC+0L7RgtCy0LXRgtGB0YLQstC40LUg0YEg0LrQu9Cw0YHRgdC40YTQuNC60LDRgtC+0YDQvtC8INCQ0KEgwqvQodGC0LDRgtC+0YLRh9C10YLQvdC+0YHRgtGMwrsiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9ImNvZGUiIGNvbFNwYW49IjEiIHJvd1NwYW49IjEiIHZhbHVlPSLQndC+0LzQtdGAICjQutC+0LQpINGO0YDQuNC00LjRh9C10YHQutC+0LPQviDQu9C40YbQsCAo0LfQsNC/0L7Qu9C90Y/QtdGC0YHRjyDQsiDQv9C+0YDRj9C00LrQtSwg0YPRgdGC0LDQvdC+0LLQu9C10L3QvdC+0LwgLzMvINC00LvRjyDRhNC+0YDQvNGLIDA0MDk4MDEpIi8+DQogICAgICAgIDxjZWxsIGFsaWFzPSJkZXBOYW1lIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0i0J3QsNC40LzQtdC90L7QstCw0L3QuNC1INC/0L7QtNGA0LDQt9C00LXQu9C10L3QuNGPLCDQvtGC0LLQtdGC0YHRgtCy0LXQvdC90L7Qs9C+INC30LAg0LLQt9Cw0LjQvNC+0LTQtdC50YHRgtCy0LjQtSIvPg0KICAgICAgICA8Y2VsbCBhbGlhcz0iY29uc29UeXBlIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0i0JzQtdGC0L7QtCDQutC+0L3RgdC+0LvQuNC00LDRhtC40LggKDEt0L/QvtC70L3QsNGPINC60L7QvdGB0L7Qu9C40LTQsNGG0LjRjywgMiAtINC/0YDQvtC/0L7RgNGG0LjQvtC90LDQu9GM0L3QviDQtNC+0LvQtSDRg9GH0LDRgdGC0LjRjykiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9ImNvbnRyb2xQYXJ0IiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0i0JTQvtC70Y8g0LrQvtC90YLRgNC+0LvRjyDQk9GA0YPQv9C/0Ysg0LIg0YPRgdGC0LDQstC90L7QvCDQutCw0L/QuNGC0LDQu9C1INGD0YfQsNGB0YLQvdC40LrQsCwgJSIvPg0KICAgICAgICA8Y2VsbCBhbGlhcz0ic2hhcmVQYXJ0IiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0i0JTQvtC70Y8g0YPRh9Cw0YHRgtC40Y8g0JPRgNGD0L/Qv9GLINCyINGD0YHRgtCw0LLQvdC+0Lwg0LrQsNC/0LjRgtCw0LvQtSDRg9GH0LDRgdGC0L3QuNC60LAsICUiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9Imlrc3IiIGNvbFNwYW49IjEiIHJvd1NwYW49IjEiIHZhbHVlPSLQmNCd0J0g0Y7RgNC40LTQuNGH0LXRgdC60L7Qs9C+INC70LjRhtCwIi8+DQogICAgICAgIDxjZWxsIGFsaWFzPSJkYXRlIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0i0JTQsNGC0LAg0LLQutC70Y7Rh9C10L3QuNGPINGD0YfQsNGB0YLQvdC40LrQsCDQsiDRgdC+0YHRgtCw0LIg0LPRgNGD0L/Qv9GLIi8+DQogICAgICAgIDxjZWxsIGFsaWFzPSJzaWduIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0i0K/QstC70Y/QtdGC0YHRjyDQs9GA0YPQv9C/0L7QuSDQutC+0LzQv9Cw0L3QuNC5ICgwIC0g0L3QtdGCLCAxIC0g0LTQsCkiLz4NCiAgICA8L3Jvdz4NCiAgICA8cm93IGFsaWFzPSIiPg0KICAgICAgICA8Y2VsbCBhbGlhcz0icm93TnVtYmVyIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0iMSIvPg0KICAgICAgICA8Y2VsbCBhbGlhcz0ibmFtZSIgY29sU3Bhbj0iMSIgcm93U3Bhbj0iMSIgdmFsdWU9IjIiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9InBzZXVkb05hbWUiIGNvbFNwYW49IjEiIHJvd1NwYW49IjEiIHZhbHVlPSIzIi8+DQogICAgICAgIDxjZWxsIGFsaWFzPSJzdGF0UmVwb3J0SWQiIGNvbFNwYW49IjEiIHJvd1NwYW49IjEiIHZhbHVlPSI0Ii8+DQogICAgICAgIDxjZWxsIGFsaWFzPSJjb2RlIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0iNSIvPg0KICAgICAgICA8Y2VsbCBhbGlhcz0iZGVwTmFtZSIgY29sU3Bhbj0iMSIgcm93U3Bhbj0iMSIgdmFsdWU9IjYiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9ImNvbnNvVHlwZSIgY29sU3Bhbj0iMSIgcm93U3Bhbj0iMSIgdmFsdWU9IjciLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9ImNvbnRyb2xQYXJ0IiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0iOCIvPg0KICAgICAgICA8Y2VsbCBhbGlhcz0ic2hhcmVQYXJ0IiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0iOSIvPg0KICAgICAgICA8Y2VsbCBhbGlhcz0iaWtzciIgY29sU3Bhbj0iMSIgcm93U3Bhbj0iMSIgdmFsdWU9IjEwIi8+DQogICAgICAgIDxjZWxsIGFsaWFzPSJkYXRlIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0iMTEiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9InNpZ24iIGNvbFNwYW49IjEiIHJvd1NwYW49IjEiIHZhbHVlPSIxMiIvPg0KICAgIDwvcm93Pg0KPC9yb3dzPg=='
+
+        addLongText(form_template_id, longString, 'DATA_HEADERS')
+        logger.info("К версии макета добавлен заголовок")
+    }
+
+    longString = ''
+    if (addScript) {
+        longString += 'cGFja2FnZSBmb3JtX3RlbXBsYXRlLmRlYWwubWVtYmVyc19zYmVyYmFuay52MjAxNQ0KDQppbXBvcnQgY29tLmFwbGFuYS5zYnJmLnRheGFjY291bnRpbmcubW9kZWwuRm9ybURhdGFFdmVudA0KaW1wb3J0IGNvbS5hcGxhbmEuc2JyZi50YXhhY2NvdW50aW5nLm1vZGVsLmV4Y2VwdGlvbi5TZXJ2aWNlRXhjZXB0aW9uDQppbXBvcnQgY29tLmFwbGFuYS5zYnJmLnRheGFjY291bnRpbmcubW9kZWwubG9nLkxvZ0xldmVsDQppbXBvcnQgZ3Jvb3Z5LnRyYW5zZm9ybS5GaWVsZA0KDQovKioNCiAqIDg0NSAtINCj0YfQsNGB0YLQvdC40LrQuCDQs9GA0YPQv9C/0Ysg0J/QkNCeINCh0LHQtdGA0LHQsNC90LoNCiAqDQogKiBmb3JtVGVtcGxhdGVJZD04NDUNCiAqLw0KDQovLyAgICByb3dOdW1iZXIgICAgIDEuCeKEliDQvy/Qvw0KLy8gICAgbmFtZSAgICAgICAgICAyLgnQn9C+0LvQvdC+0LUg0L3QsNC40LzQtdC90L7QstCw0L3QuNC1INGO0YDQuNC00LjRh9C10YHQutC+0LPQviDQu9C40YbQsCAtINGD0YfQsNGB0YLQvdC40LrQsCDQs9GA0YPQv9C/0YsNCi8vICAgIHBzZXVkb05hbWUgICAgMy4J0J/QvtC70L3QvtC1INC90LDQuNC80LXQvdC+0LLQsNC90LjQtSDRjtGA0LjQtNC40YfQtdGB0LrQvtCz0L4g0LvQuNGG0LAgLSDRg9GH0LDRgdGC0L3QuNC60LAg0LPRgNGD0L/Qv9GLICjQsiDRgdC70YPRh9Cw0LUg0LjQt9C80LXQvdC10L3QuNGPINC90LDQt9Cy0LDQvdC40Y8pDQovLyAgICBzdGF0UmVwb3J0SWQgIDQuCdCa0L7QtCDRg9GH0LDRgdGC0L3QuNC60LAg0LIg0YHQvtC+0YLQstC10YLRgdGC0LLQuNC1INGBINC60LvQsNGB0YHQuNGE0LjQutCw0YLQvtGA0L7QvCDQkNChIMKr0KHRgtCw0YLQvtGC0YfQtdGC0L3QvtGB0YLRjMK7DQovLyAgICBjb2RlICAgICAgICAgIDUuCdCd0L7QvNC10YAgKNC60L7QtCkg0Y7RgNC40LTQuNGH0LXRgdC60L7Qs9C+INC70LjRhtCwICjQt9Cw0L/QvtC70L3Rj9C10YLRgdGPINCyINC/0L7RgNGP0LTQutC1LCDRg9GB0YLQsNC90L7QstC70LXQvdC90L7QvCAvMy8g0LTQu9GPINGE0L7RgNC80YsgMDQwOTgwMSkNCi8vICAgIGRlcE5hbWUgICAgICAgNi4J0J3QsNC40LzQtdC90L7QstCw0L3QuNC1INC/0L7QtNGA0LDQt9C00LXQu9C10L3QuNGPLCDQvtGC0LLQtdGC0YHRgtCy0LXQvdC90L7Qs9C+INC30LAg0LLQt9Cw0LjQvNC+0LTQtdC50YHRgtCy0LjQtQ0KLy8gICAgY29uc29UeXBlICAgICA3LgnQnNC10YLQvtC0INC60L7QvdGB0L7Qu9C40LTQsNGG0LjQuCAoMS3Qv9C+0LvQvdCw0Y8g0LrQvtC90YHQvtC70LjQtNCw0YbQuNGPLCAyIC0g0L/RgNC+0L/QvtGA0YbQuNC+0L3QsNC70YzQvdC+INC00L7Qu9C1INGD0YfQsNGB0YLQuNGPKQ0KLy8gICAgY29udHJvbFBhcnQgICA4LgnQlNC+0LvRjyDQutC+0L3RgtGA0L7Qu9GPINCT0YDRg9C/0L/RiyDQsiDRg9GB0YLQsNCy0L3QvtC8INC60LDQv9C40YLQsNC70LUg0YPRh9Cw0YHRgtC90LjQutCwLCAlDQovLyAgICBzaGFyZVBhcnQgICAgIDkuCdCU0L7Qu9GPINGD0YfQsNGB0YLQuNGPINCT0YDRg9C/0L/RiyDQsiDRg9GB0YLQsNCy0L3QvtC8INC60LDQv9C40YLQsNC70LUg0YPRh9Cw0YHRgtC90LjQutCwLCAlDQovLyAgICBpa3NyICAgICAgICAgIDEwLgnQmNCd0J0g0Y7RgNC40LTQuNGH0LXRgdC60L7Qs9C+INC70LjRhtCwDQovLyAgICBkYXRlICAgICAgICAgIDExLgnQlNCw0YLQsCDQstC60LvRjtGH0LXQvdC40Y8g0YPRh9Cw0YHRgtC90LjQutCwINCyINGB0L7RgdGC0LDQsiDQs9GA0YPQv9C/0YsNCi8vICAgIHNpZ24gICAgICAgICAgMTIuCdCv0LLQu9GP0LXRgtGB0Y8g0LPRgNGD0L/Qv9C+0Lkg0LrQvtC80L/QsNC90LjQuSAoMCAtINC90LXRgiwgMSAtINC00LApDQoNCg0Kc3dpdGNoIChmb3JtRGF0YUV2ZW50KSB7DQogICAgY2FzZSBGb3JtRGF0YUV2ZW50LkNSRUFURToNCiAgICAgICAgZm9ybURhdGFTZXJ2aWNlLmNoZWNrVW5pcXVlKGZvcm1EYXRhLCBsb2dnZXIpDQogICAgICAgIGJyZWFrDQogICAgLy8g0YDQsNGB0YfQtdGCINC90LjRh9C10LPQviDQvdC1INC00LXQu9Cw0LXRgg0KICAgIGNhc2UgRm9ybURhdGFFdmVudC5DQUxDVUxBVEU6DQogICAgY2FzZSBGb3JtRGF0YUV2ZW50LkNIRUNLOg0KICAgICAgICBsb2dpY0NoZWNrKCkNCiAgICAgICAgYnJlYWsNCiAgICBjYXNlIEZvcm1EYXRhRXZlbnQuQUREX1JPVzoNCiAgICAgICAgZm9ybURhdGFTZXJ2aWNlLmFkZFJvdyhmb3JtRGF0YSwgY3VycmVudERhdGFSb3csIGVkaXRhYmxlQ29sdW1ucywgYXV0b0ZpbGxDb2x1bW5zKQ0KICAgICAgICBicmVhaw0KICAgIGNhc2UgRm9ybURhdGFFdmVudC5ERUxFVEVfUk9XOg0KICAgICAgICBmb3JtRGF0YVNlcnZpY2UuZ2V0RGF0YVJvd0hlbHBlcihmb3JtRGF0YSkuZGVsZXRlKGN1cnJlbnREYXRhUm93KQ0KICAgICAgICBicmVhaw0KICAgIGNhc2UgRm9ybURhdGFFdmVudC5NT1ZFX0NSRUFURURfVE9fUFJFUEFSRUQ6ICAvLyDQn9C+0LTQs9C+0YLQvtCy0LjRgtGMINC40LcgItCh0L7Qt9C00LDQvdCwIg0KICAgIGNhc2UgRm9ybURhdGFFdmVudC5NT1ZFX0NSRUFURURfVE9fQVBQUk9WRUQ6ICAvLyDQo9GC0LLQtdGA0LTQuNGC0Ywg0LjQtyAi0KHQvtC30LTQsNC90LAiDQogICAgY2FzZSBGb3JtRGF0YUV2ZW50Lk1PVkVfUFJFUEFSRURfVE9fQVBQUk9WRUQ6IC8vINCj0YLQstC10YDQtNC40YLRjCDQuNC3ICLQn9C+0LTQs9C+0YLQvtCy0LvQtdC90LAiDQogICAgY2FzZSBGb3JtRGF0YUV2ZW50Lk1PVkVfQ1JFQVRFRF9UT19BQ0NFUFRFRDogIC8vINCf0YDQuNC90Y/RgtGMINC40LcgItCh0L7Qt9C00LDQvdCwIg0KICAgIGNhc2UgRm9ybURhdGFFdmVudC5NT1ZFX1BSRVBBUkVEX1RPX0FDQ0VQVEVEOiAvLyDQn9GA0LjQvdGP0YLRjCDQuNC3ICLQn9C+0LTQs9C+0YLQvtCy0LvQtdC90LAiDQogICAgY2FzZSBGb3JtRGF0YUV2ZW50Lk1PVkVfQVBQUk9WRURfVE9fQUNDRVBURUQ6IC8vINCf0YDQuNC90Y/RgtGMINC40LcgItCj0YLQstC10YDQttC00LXQvdCwIg0KICAgICAgICBsb2dpY0NoZWNrKCkNCiAgICAgICAgYnJlYWsNCiAgICBjYXNlIEZvcm1EYXRhRXZlbnQuSU1QT1JUOg0KICAgICAgICBpbXBvcnREYXRhKCkNCiAgICAgICAgZm9ybURhdGFTZXJ2aWNlLnNhdmVDYWNoZWREYXRhUm93cyhmb3JtRGF0YSwgbG9nZ2VyKQ0KICAgICAgICBicmVhaw0KfQ0KDQovLy8vINCa0Y3RiNC4INC4INC60L7QvdGB0YLQsNC90YLRiw0KQEZpZWxkDQpkZWYgcHJvdmlkZXJDYWNoZSA9IFs6XQ0KQEZpZWxkDQpkZWYgcmVjb3JkQ2FjaGUgPSBbOl0NCkBGaWVsZA0KZGVmIHJlZkJvb2tDYWNoZSA9IFs6XQ0KDQpARmllbGQNCmRlZiBhbGxDb2x1bW5zID0gWydyb3dOdW1iZXInLCAnbmFtZScsICdwc2V1ZG9OYW1lJywgJ3N0YXRSZXBvcnRJZCcsICdjb2RlJywgJ2RlcE5hbWUnLCAnY29uc29UeXBlJywgJ2NvbnRyb2xQYXJ0JywgJ3NoYXJlUGFydCcsICdpa3NyJywgJ2RhdGUnLCAnc2lnbiddDQoNCi8vINCg0LXQtNCw0LrRgtC40YDRg9C10LzRi9C1INCw0YLRgNC40LHRg9GC0YsNCkBGaWVsZA0KZGVmIGVkaXRhYmxlQ29sdW1ucyA9IFsnbmFtZScsICdwc2V1ZG9OYW1lJywgJ2NvZGUnLCAnZGVwTmFtZScsICdjb25zb1R5cGUnLCAnY29udHJvbFBhcnQnLCAnc2hhcmVQYXJ0JywgJ2RhdGUnLCAnc2lnbiddDQoNCi8vINCQ0LLRgtC+0LfQsNC/0L7Qu9C90Y/QtdC80YvQtSDQsNGC0YDQuNCx0YPRgtGLDQpARmllbGQNCmRlZiBhdXRvRmlsbENvbHVtbnMgPSBbJ3N0YXRSZXBvcnRJZCcsICdpa3NyJ10NCg0KLy8g0J/RgNC+0LLQtdGA0Y/QtdC80YvQtSDQvdCwINC/0YPRgdGC0YvQtSDQt9C90LDRh9C10L3QuNGPINCw0YLRgNC40LHRg9GC0YsNCkBGaWVsZA0KZGVmIG5vbkVtcHR5Q29sdW1ucyA9IFsnbmFtZScsICdjb2RlJywgJ2RlcE5hbWUnLCAnY29uc29UeXBlJywgJ2NvbnRyb2xQYXJ0JywgJ3NoYXJlUGFydCcsICdkYXRlJywgJ3NpZ24nXQ0KDQovLyDQlNCw0YLQsCDQvdCw0YfQsNC70LAg0L7RgtGH0LXRgtC90L7Qs9C+INC/0LXRgNC40L7QtNCwDQpARmllbGQNCmRlZiBzdGFydERhdGUgPSBudWxsDQoNCi8vINCU0LDRgtCwINC+0LrQvtC90YfQsNC90LjRjyDQvtGC0YfQtdGC0L3QvtCz0L4g0L/QtdGA0LjQvtC00LANCkBGaWVsZA0KZGVmIGVuZERhdGUgPSBudWxsDQoNCi8vINCd0L7QvNC10YAg0L7RgtGH0LXRgtC90L7Qs9C+INC/0LXRgNC40L7QtNCwDQpARmllbGQNCmRlZiBwZXJpb2RPcmRlciA9IG51bGwNCg0KZGVmIGdldFJlcG9ydFBlcmlvZEVuZERhdGUoKSB7DQogICAgaWYgKGVuZERhdGUgPT0gbnVsbCkgew0KICAgICAgICBlbmREYXRlID0gcmVwb3J0UGVyaW9kU2VydmljZS5nZXRFbmREYXRlKGZvcm1EYXRhLnJlcG9ydFBlcmlvZElkKS50aW1lDQogICAgfQ0KICAgIHJldHVybiBlbmREYXRlDQp9DQoNCmRlZiBnZXRSZXBvcnRQZXJpb2RTdGFydERhdGUoKSB7DQogICAgaWYgKHN0YXJ0RGF0ZSA9PSBudWxsKSB7DQogICAgICAgIHN0YXJ0RGF0ZSA9IHJlcG9ydFBlcmlvZFNlcnZpY2UuZ2V0U3RhcnREYXRlKGZvcm1EYXRhLnJlcG9ydFBlcmlvZElkKS50aW1lDQogICAgfQ0KICAgIHJldHVybiBzdGFydERhdGUNCn0NCg0KZGVmIGdldFBlcmlvZE9yZGVyKCkgew0KICAgIGlmIChwZXJpb2RPcmRlciA9PSBudWxsKSB7DQogICAgICAgIHBlcmlvZE9yZGVyID0gcmVwb3J0UGVyaW9kU2VydmljZS5nZXQoZm9ybURhdGEucmVwb3J0UGVyaW9kSWQpLmdldE9yZGVyKCkNCiAgICB9DQogICAgcmV0dXJuIHBlcmlvZE9yZGVyDQp9DQoNCi8vLy8g0J7QsdC10YDRgtC60Lgg0LzQtdGC0L7QtNC+0LINCg0KLy8g0J/QvtC40YHQuiDQt9Cw0L/QuNGB0Lgg0LIg0YHQv9GA0LDQstC+0YfQvdC40LrQtSDQv9C+INC30L3QsNGH0LXQvdC40Y4gKNC00LvRjyDQuNC80L/QvtGA0YLQsCkNCmRlZiBnZXRSZWNvcmRJZEltcG9ydChkZWYgTG9uZyByZWZCb29rSWQsIGRlZiBTdHJpbmcgYWxpYXMsIGRlZiBTdHJpbmcgdmFsdWUsIGRlZiBpbnQgcm93SW5kZXgsIGRlZiBpbnQgY29sSW5kZXgsDQogICAgICAgICAgICAgICAgICAgICAgZGVmIGJvb2xlYW4gcmVxdWlyZWQgPSBmYWxzZSkgew0KICAgIGlmICh2YWx1ZSA9PSBudWxsIHx8IHZhbHVlLnRyaW0oKS5pc0VtcHR5KCkpIHsNCiAgICAgICAgcmV0dXJuIG51bGwNCiAgICB9DQogICAgcmV0dXJuIGZvcm1EYXRhU2VydmljZS5nZXRSZWZCb29rUmVjb3JkSWRJbXBvcnQocmVmQm9va0lkLCByZWNvcmRDYWNoZSwgcHJvdmlkZXJDYWNoZSwgYWxpYXMsIHZhbHVlLA0KICAgICAgICAgICAgZ2V0UmVwb3J0UGVyaW9kRW5kRGF0ZSgpLCByb3dJbmRleCwgY29sSW5kZXgsIGxvZ2dlciwgcmVxdWlyZWQpDQp9DQoNCi8vINCf0L7QuNGB0Log0LfQsNC/0LjRgdC4INCyINGB0L/RgNCw0LLQvtGH0L3QuNC60LUg0L/QviDQt9C90LDRh9C10L3QuNGOICjQtNC70Y8g0LjQvNC/0L7RgNGC0LApDQpkZWYgZ2V0UmVjb3JkSW1wb3J0KGRlZiBMb25nIHJlZkJvb2tJZCwgZGVmIFN0cmluZyBhbGlhcywgZGVmIFN0cmluZyB2YWx1ZSwgZGVmIGludCByb3dJbmRleCwgZGVmIGludCBjb2xJbmRleCwNCiAgICAgICAgICAgICAgICAgICAgZGVmIGJvb2xlYW4gcmVxdWlyZWQgPSBmYWxzZSkgew0KICAgIGlmICh2YWx1ZSA9PSBudWxsIHx8IHZhbHVlID09ICcnKSB7DQogICAgICAgIHJldHVybiBudWxsDQogICAgfQ0KICAgIHJldHVybiBmb3JtRGF0YVNlcnZpY2UuZ2V0UmVmQm9va1JlY29yZEltcG9ydChyZWZCb29rSWQsIHJlY29yZENhY2hlLCBwcm92aWRlckNhY2hlLCByZWZCb29rQ2FjaGUsIGFsaWFzLCB2YWx1ZSwNCiAgICAgICAgICAgIGdldFJlcG9ydFBlcmlvZEVuZERhdGUoKSwgcm93SW5kZXgsIGNvbEluZGV4LCBsb2dnZXIsIHJlcXVpcmVkKQ0KfQ0KDQovLyDQoNCw0LfRi9C80LXQvdC+0LLQsNC90LjQtSDQt9Cw0L/QuNGB0Lgg0YHQv9GA0LDQstC+0YfQvdC40LrQsA0KZGVmIGdldFJlZkJvb2tWYWx1ZShkZWYgbG9uZyByZWZCb29rSWQsIGRlZiBMb25nIHJlY29yZElkKSB7DQogICAgcmV0dXJuIGZvcm1EYXRhU2VydmljZS5nZXRSZWZCb29rVmFsdWUocmVmQm9va0lkLCByZWNvcmRJZCwgcmVmQm9va0NhY2hlKQ0KfQ0KDQp2b2lkIGxvZ2ljQ2hlY2soKSB7DQogICAgZGVmIGRhdGFSb3dzID0gZm9ybURhdGFTZXJ2aWNlLmdldERhdGFSb3dIZWxwZXIoZm9ybURhdGEpLmFsbENhY2hlZA0KICAgIGRlZiB1c2VDb2RlID0gZ2V0UGVyaW9kT3JkZXIoKSA9PSAzDQogICAgZGVmIHJlY29yZHM1MjAgPSBnZXRSZWNvcmRzNTIwKHVzZUNvZGUpDQogICAgZm9yIChkZWYgcm93IDogZGF0YVJvd3MpIHsNCiAgICAgICAgZGVmIHJvd051bSA9IHJvdy5nZXRJbmRleCgpDQoNCiAgICAgICAgLy8gMS4g0J/RgNC+0LLQtdGA0LrQsCDQt9Cw0L/QvtC70L3QtdC90LjRjyDQvtCx0Y/Qt9Cw0YLQtdC70YzQvdGL0YUg0L/QvtC70LXQuQ0KICAgICAgICBjaGVja05vbkVtcHR5Q29sdW1ucyhyb3csIHJvdy5nZXRJbmRleCgpLCBub25FbXB0eUNvbHVtbnMsIGxvZ2dlciwgdHJ1ZSkNCg0KICAgICAgICAvLyAyLiDQn9GA0L7QstC10YDQutCwINC80LXRgtC+0LTQsCDQutC+0L3RgdC+0LvQuNC00LDRhtC40LgNCiAgICAgICAgaWYgKHJvdy5jb25zb1R5cGUgIT0gbnVsbCAmJiAhWzEsIDJdLmNvbnRhaW5zKHJvdy5jb25zb1R5cGUuaW50VmFsdWUoKSkpIHsNCiAgICAgICAgICAgIGxvZ2dlci5lcnJvcigi0KHRgtGA0L7QutCwICRyb3dOdW06INCT0YDQsNGE0LAgwqske2dldENvbHVtbk5hbWUocm93LCAnY29uc29UeXBlJyl9wrsg0LTQvtC70LbQvdCwINC/0YDQuNC90LjQvNCw0YLRjCDQt9C90LDRh9C10L3QuNC1INC40Lcg0YHQu9C10LTRg9GO0YnQtdCz0L4g0YHQv9C40YHQutCwOiDCqzHCuyDQuNC70LggwqsywrshIikNCiAgICAgICAgfQ0KDQogICAgICAgIC8vIDMuINCf0YDQvtCy0LXRgNC60LAg0LTQvtC70Lgg0LrQvtC90YLRgNC+0LvRjyDQs9GA0YPQv9C/0YsNCiAgICAgICAgaWYgKHJvdy5jb250cm9sUGFydCAhPSBudWxsICYmIChyb3cuY29udHJvbFBhcnQgPCAwIHx8IHJvdy5jb250cm9sUGFydCA+IDEwMCkpIHsNCiAgICAgICAgICAgIGxvZ2dlci5lcnJvcigi0KHRgtGA0L7QutCwICVzOiDQl9C90LDRh9C10L3QuNC1INCz0YDQsNGE0Ysgwqslc8K7INC00L7Qu9C20L3QviDQv9GA0LjQvdC40LzQsNGC0Ywg0LfQvdCw0YfQtdC90LjQtSDQuNC3INC00LjQsNC/0LDQt9C+0L3QsDogwqswwrsgLSDCqzEwMMK7ISIsIHJvd051bSwgZ2V0Q29sdW1uTmFtZShyb3csICdjb250cm9sUGFydCcpKQ0KICAgICAgICB9DQoNCiAgICAgICAgLy8gNC4g0J/RgNC+0LLQtdGA0LrQsCDQtNC+0LvQuCDRg9GH0LDRgdGC0LjRjyDQs9GA0YPQv9C/0YsNCiAgICAgICAgaWYgKHJvdy5zaGFyZVBhcnQgIT0gbnVsbCAmJiAocm93LnNoYXJlUGFydCA8IDAgfHwgcm93LnNoYXJlUGFydCA+IDEwMCkpIHsNCiAgICAgICAgICAgIGxvZ2dlci5lcnJvcigi0KHRgtGA0L7QutCwICVzOiDQl9C90LDRh9C10L3QuNC1INCz0YDQsNGE0Ysgwqslc8K7INC00L7Qu9C20L3QviDQv9GA0LjQvdC40LzQsNGC0Ywg0LfQvdCw0YfQtdC90LjQtSDQuNC3INC00LjQsNC/0LDQt9C+0L3QsDogwqswwrsgLSDCqzEwMMK7ISIsIHJvd051bSwgZ2V0Q29sdW1uTmFtZShyb3csICdzaGFyZVBhcnQnKSkNCiAgICAgICAgfQ0KDQogICAgICAgIC8vIDUuINCf0YDQvtCy0LXRgNC60LAg0LTQsNGC0Ysg0LLQutC70Y7Rh9C10L3QuNC1INGD0YfQsNGB0YLQvdC40LrQsCDQsiDRgdC+0YHRgtCw0LIg0LPRgNGD0L/Qv9GLDQogICAgICAgIGNoZWNrRGF0ZVBlcmlvZChsb2dnZXIsIHJvdywgJ2RhdGUnLCBEYXRlLnBhcnNlKCdkZC5NTS55eXl5JywgJzAxLjAxLjE5OTEnKSwgZ2V0UmVwb3J0UGVyaW9kRW5kRGF0ZSgpLCB0cnVlKQ0KDQogICAgICAgIC8vIDYuINCf0YDQvtCy0LXRgNC60LAg0L/RgNC40LfQvdCw0LrQsCDQs9GA0YPQv9C/0Ysg0LrQvtC80L/QsNC90LjQuQ0KICAgICAgICBpZiAocm93LnNpZ24gIT0gbnVsbCAmJiAhWzAsIDFdLmNvbnRhaW5zKHJvdy5zaWduLmludFZhbHVlKCkpKSB7DQogICAgICAgICAgICBsb2dnZXIuZXJyb3IoItCh0YLRgNC+0LrQsCAkcm93TnVtOiDQk9GA0LDRhNCwIMKrJHtnZXRDb2x1bW5OYW1lKHJvdywgJ3NpZ24nKX3CuyDQtNC+0LvQttC90LAg0L/RgNC40L3QuNC80LDRgtGMINC30L3QsNGH0LXQvdC40LUg0LjQtyDRgdC70LXQtNGD0Y7RidC10LPQviDRgdC/0LjRgdC60LA6IMKrMMK7INC40LvQuCDCqzHCuyEiKQ0KICAgICAgICB9DQoNCiAgICAgICAgLy8gNy4g0J/RgNC+0LLQtdGA0LrQsCDQvdCwINC+0YLRgdGD0YLRgdGC0LLQuNC1INCyINGB0L/QuNGB0LrQtSDQvdC1INCS0JfQmyDQntCg0J0NCiAgICAgICAgZGVmIGlzVlpMID0gcmVjb3JkczUyMD8uZmluZCB7IGl0Py5yZWNvcmRfaWQ/LnZhbHVlID09IHJvdy5uYW1lIH0NCiAgICAgICAgaWYgKHJvdy5uYW1lICYmIHJlY29yZHM1MjAgJiYgIWlzVlpMKSB7DQogICAgICAgICAgICBkZWYgdmFsdWUyID0gZ2V0UmVmQm9va1ZhbHVlKDUyMEwsIHJvdy5uYW1lKT8uTkFNRT8udmFsdWUNCiAgICAgICAgICAgIGxvZ2dlci5lcnJvcih1c2VDb2RlID8gItCh0YLRgNC+0LrQsCAlczog0J7RgNCz0LDQvdC40LfQsNGG0LjRjyDCqyVzwrsg0L3QtSDRj9Cy0LvRj9C10YLRgdGPINCy0LfQsNC40LzQvtC30LDQstC40YHQuNC80YvQvCDQu9C40YbQvtC8INGBINC+0LHRidC40Lwg0YDQtdC20LjQvNC+0Lwg0L3QsNC70L7Qs9C+0L7QsdC70L7QttC10L3QuNGPINCyINC00LDQvdC90L7QvCDQvtGC0YfQtdGC0L3QvtC8INC/0LXRgNC40L7QtNC1ISIgOiAi0KHRgtGA0L7QutCwICVzOiDQntGA0LPQsNC90LjQt9Cw0YbQuNGPIMKrJXPCuyDQvdC1INGP0LLQu9GP0LXRgtGB0Y8g0LLQt9Cw0LjQvNC+0LfQsNCy0LjRgdC40LzRi9C8INC70LjRhtC+0Lwg0LIg0LTQsNC90L3QvtC8INC+0YLRh9C10YLQvdC+0Lwg0L/QtdGA0LjQvtC00LUhIiwgcm93TnVtLCB2YWx1ZTIpDQogICAgICAgIH0NCiAgICB9DQp9DQoNCkBGaWVsZA0KZGVmIHJlY29yZHM1MjAgPSBudWxsDQoNCi8qKg0KICog0J/QvtC70YPRh9C40YLRjCDQt9C90LDRh9C10L3QuNGPINC40Lcg0YHQv9GA0LDQstC+0YfQvdC40LrQsCAi0KPRh9Cw0YHRgtC90LjQutC4INCi0KbQniIuDQogKiBAcGFyYW0gdXNlQ29kZSB0cnVlINC00LvRjyA5INC80LXRgdGP0YbQtdCyLCBmYWxzZSDQtNC70Y8g0LPQvtC00LANCiAqIEByZXR1cm4NCiAqLw0KZGVmIGdldFJlY29yZHM1MjAoYm9vbGVhbiB1c2VDb2RlKSB7DQogICAgaWYgKHJlY29yZHM1MjAgIT0gbnVsbCkgew0KICAgICAgICByZXR1cm4gcmVjb3JkczUyMA0KICAgIH0NCiAgICAvLyDQv9C+0LvRg9GH0LjRgtGMIGlkINC30LDQv9C40YHQuCDRgSDQutC+0LTQvtC8ICIyIiDQuNC3INGB0L/RgNCw0LLQvtGH0L3QuNC60LAgItCh0L/QtdGG0LjQsNC70YzQvdGL0Lkg0L3QsNC70L7Qs9C+0LLRi9C5INGB0YLQsNGC0YPRgSINCiAgICBkZWYgcHJvdmlkZXINCiAgICBkZWYgcmVjb3Jkcw0KICAgIGRlZiBmaWx0ZXIgPSBudWxsDQogICAgaWYgKHVzZUNvZGUpIHsNCiAgICAgICAgcHJvdmlkZXIgPSBmb3JtRGF0YVNlcnZpY2UuZ2V0UmVmQm9va1Byb3ZpZGVyKHJlZkJvb2tGYWN0b3J5LCA1MTFMLCBwcm92aWRlckNhY2hlKQ0KICAgICAgICBmaWx0ZXIgPSAiQ09ERSA9IDIiDQogICAgICAgIHJlY29yZHMgPSBwcm92aWRlci5nZXRSZWNvcmRzKGdldFJlcG9ydFBlcmlvZEVuZERhdGUoKSwgbnVsbCwgZmlsdGVyLCBudWxsKQ0KICAgICAgICBkZWYgdGF4U3RhdHVzSWQNCiAgICAgICAgaWYgKHJlY29yZHMgJiYgcmVjb3Jkcy5zaXplKCkgPT0gMSkgew0KICAgICAgICAgICAgdGF4U3RhdHVzSWQgPSByZWNvcmRzLmdldCgwKT8ucmVjb3JkX2lkPy52YWx1ZQ0KICAgICAgICB9IGVsc2Ugew0KICAgICAgICAgICAgcmVjb3JkczUyMCA9W10NCiAgICAgICAgICAgIHJldHVybiByZWNvcmRzNTIwDQogICAgICAgIH0NCiAgICAgICAgZmlsdGVyID0gIlRBWF9TVEFUVVMgPSAkdGF4U3RhdHVzSWQiDQogICAgfQ0KICAgIC8vINC/0L7Qu9GD0YfQuNGC0Ywg0LfQsNC/0LjRgdC4INC40Lcg0YHQv9GA0LDQstC+0YfQvdC40LrQsCAi0KPRh9Cw0YHRgtC90LjQutC4INCi0KbQniINCiAgICBwcm92aWRlciA9IGZvcm1EYXRhU2VydmljZS5nZXRSZWZCb29rUHJvdmlkZXIocmVmQm9va0ZhY3RvcnksIDUyMEwsIHByb3ZpZGVyQ2FjaGUpDQogICAgcmVjb3JkcyA9IHByb3ZpZGVyLmdldFJlY29yZHMoZ2V0UmVwb3J0UGVyaW9kRW5kRGF0ZSgpLCBudWxsLCBmaWx0ZXIsIG51bGwpDQogICAgcmVjb3JkczUyMCA9IFtdDQogICAgcmVjb3Jkcy5lYWNoIHsgcmVjb3JkIC0+DQogICAgICAgIGRlZiBzdGFydCA9IHJlY29yZD8uU1RBUlRfREFURT8udmFsdWUNCiAgICAgICAgZGVmIGVuZCA9IHJlY29yZD8uRU5EX0RBVEU/LnZhbHVlDQogICAgICAgIGRlZiB0eXBlSWQgPSByZWNvcmQ/LlRZUEU/LnZhbHVlDQogICAgICAgIGlmIChpc1ZaTChzdGFydCwgZW5kLCB0eXBlSWQpKSB7DQogICAgICAgICAgICByZWNvcmRzNTIwLmFkZChyZWNvcmQpDQogICAgICAgIH0NCiAgICB9DQogICAgcmV0dXJuIHJlY29yZHM1MjANCn0NCg0KLy8g0L/RgNC+0LLQtdGA0LrQsCDQv9GA0LjQvdCw0LTQu9C10LbQvdC+0YHRgtC4INC+0YDQs9Cw0L3QuNC30LDRhtC40Lgg0Log0JLQl9CbINCyINC+0YLRh9C10YLQvdC+0Lwg0L/QtdGA0LjQvtC00LUNCmRlZiBpc1ZaTChkZWYgc3RhcnQsIGRlZiBlbmQsIGRlZiB0eXBlSWQpIHsNCiAgICBpZiAoc3RhcnQgPD0gZ2V0UmVwb3J0UGVyaW9kRW5kRGF0ZSgpICYmIChlbmQgPT0gbnVsbCB8fCBlbmQgPj0gZ2V0UmVwb3J0UGVyaW9kU3RhcnREYXRlKCkpICYmDQogICAgICAgICAgICBnZXRSZWZCb29rVmFsdWUoNTI1TCwgdHlwZUlkKT8uQ09ERT8udmFsdWUgPT0gItCS0JfQmyIpIHsNCiAgICAgICAgcmV0dXJuIHRydWUNCiAgICB9DQogICAgcmV0dXJuIGZhbHNlDQp9DQoNCi8vINCf0L7Qu9GD0YfQuNGC0Ywg0L3QvtCy0YPRjiDRgdGC0YDQvtC60YMNCmRlZiBnZXROZXdSb3coKSB7DQogICAgZGVmIHJvdyA9IChmb3JtRGF0YUV2ZW50IGluIFtGb3JtRGF0YUV2ZW50LklNUE9SVCwgRm9ybURhdGFFdmVudC5JTVBPUlRfVFJBTlNQT1JUX0ZJTEVdKSA/IGZvcm1EYXRhLmNyZWF0ZVN0b3JlTWVzc2FnaW5nRGF0YVJvdygpIDogZm9ybURhdGEuY3JlYXRlRGF0YVJvdygpDQogICAgZWRpdGFibGVDb2x1bW5zLmVhY2ggew0KICAgICAgICByb3cuZ2V0Q2VsbChpdCkuZWRpdGFibGUgPSB0cnVlDQogICAgICAgIHJvdy5nZXRDZWxsKGl0KS5zZXRTdHlsZUFsaWFzKCfQoNC10LTQsNC60YLQuNGA0YPQtdC80LDRjycpDQogICAgfQ0KICAgIGF1dG9GaWxsQ29sdW1ucy5lYWNoIHsNCiAgICAgICAgcm93LmdldENlbGwoaXQpLmVkaXRhYmxlID0gdHJ1ZQ0KICAgICAgICByb3cuZ2V0Q2VsbChpdCkuc2V0U3R5bGVBbGlhcygn0JDQstGC0L7Qt9Cw0L/QvtC70L3Rj9C10LzQsNGPJykNCiAgICB9DQogICAgcmV0dXJuIHJvdw0KfQ0KDQp2b2lkIGltcG9ydERhdGEoKSB7DQogICAgZGVmIHRtcFJvdyA9IGZvcm1EYXRhLmNyZWF0ZURhdGFSb3coKQ0KICAgIGludCBDT0xVTU5fQ09VTlQgPSAxMg0KICAgIGludCBIRUFERVJfUk9XX0NPVU5UID0gMg0KICAgIFN0cmluZyBUQUJMRV9TVEFSVF9WQUxVRSA9IGdldENvbHVtbk5hbWUodG1wUm93LCAncm93TnVtYmVyJykNCiAgICBTdHJpbmcgVEFCTEVfRU5EX1ZBTFVFID0gbnVsbA0KDQogICAgZGVmIGFsbFZhbHVlcyA9IFtdICAgICAgLy8g0LfQvdCw0YfQtdC90LjRjyDRhNC+0YDQvNGLDQogICAgZGVmIGhlYWRlclZhbHVlcyA9IFtdICAgLy8g0LfQvdCw0YfQtdC90LjRjyDRiNCw0L/QutC4DQogICAgZGVmIHBhcmFtc01hcCA9IFsncm93T2Zmc2V0JyA6IDAsICdjb2xPZmZzZXQnIDogMF0gIC8vINC80LDQv9CwINGBINC/0LDRgNCw0LzQtdGC0YDQsNC80LggKNC+0YLRgdGC0YPQv9GLINGB0LLQtdGA0YXRgyDQuCDRgdC70LXQstCwKQ0KDQogICAgY2hlY2tBbmRSZWFkRmlsZShJbXBvcnRJbnB1dFN0cmVhbSwgVXBsb2FkRmlsZU5hbWUsIGFsbFZhbHVlcywgaGVhZGVyVmFsdWVzLCBUQUJMRV9TVEFSVF9WQUxVRSwgVEFCTEVfRU5EX1ZBTFVFLCBIRUFERVJfUk9XX0NPVU5ULCBwYXJhbXNNYXApDQoNCiAgICAvLyDQv9GA0L7QstC10YDQutCwINGI0LDQv9C60LgNCiAgICBjaGVja0hlYWRlclhscyhoZWFkZXJWYWx1ZXMsIENPTFVNTl9DT1VOVCwgSEVBREVSX1JPV19DT1VOVCwgdG1wUm93KQ0KICAgIGlmIChsb2dnZXIuY29udGFpbnNMZXZlbChMb2dMZXZlbC5FUlJPUikpIHsNCiAgICAgICAgcmV0dXJuOw0KICAgIH0NCiAgICAvLyDQvtGB0LLQvtCx0L7QttC00LXQvdC40LUg0YDQtdGB0YPRgNGB0L7QsiDQtNC70Y8g0Y3QutC+0L3QvtC80LjQuCDQv9Cw0LzRj9GC0LgNCiAgICBoZWFkZXJWYWx1ZXMuY2xlYXIoKQ0KICAgIGhlYWRlclZhbHVlcyA9IG51bGwNCg0KICAgIGRlZiBmaWxlUm93SW5kZXggPSBwYXJhbXNNYXAucm93T2Zmc2V0DQogICAgZGVmIGNvbE9mZnNldCA9IHBhcmFtc01hcC5jb2xPZmZzZXQNCiAgICBwYXJhbXNNYXAuY2xlYXIoKQ0KICAgIHBhcmFtc01hcCA9IG51bGwNCg0KICAgIGRlZiByb3dJbmRleCA9IDANCiAgICBkZWYgcm93cyA9IFtdDQogICAgZGVmIGFsbFZhbHVlc0NvdW50ID0gYWxsVmFsdWVzLnNpemUoKQ0KDQogICAgLy8g0YTQvtGA0LzQuNGA0L7QstCw0L3QuNC1INGB0YLRgNC+0Log0L3RhA0KICAgIGZvciAoZGVmIGkgPSAwOyBpIDwgYWxsVmFsdWVzQ291bnQ7IGkrKykgew0KICAgICAgICByb3dWYWx1ZXMgPSBhbGxWYWx1ZXNbMF0NCiAgICAgICAgZmlsZVJvd0luZGV4KysNCiAgICAgICAgLy8g0LLRgdC1INGB0YLRgNC+0LrQuCDQv9GD0YHRgtGL0LUgLSDQstGL0YXQvtC0DQogICAgICAgIGlmICghcm93VmFsdWVzIHx8IHJvd1ZhbHVlcy5pc0VtcHR5KCkgfHwgIXJvd1ZhbHVlcy5maW5kIHsgaXQgfSkgew0KICAgICAgICAgICAgYWxsVmFsdWVzLnJlbW92ZShyb3dWYWx1ZXMpDQogICAgICAgICAgICByb3dWYWx1ZXMuY2xlYXIoKQ0KICAgICAgICAgICAgYnJlYWsNCiAgICAgICAgfQ0KICAgICAgICAvLyDQv9GA0L7RgdGC0LDRjyDRgdGC0YDQvtC60LANCiAgICAgICAgcm93SW5kZXgrKw0KICAgICAgICBkZWYgbmV3Um93ID0gZ2V0TmV3Um93RnJvbVhscyhyb3dWYWx1ZXMsIGNvbE9mZnNldCwgZmlsZVJvd0luZGV4LCByb3dJbmRleCkNCiAgICAgICAgcm93cy5hZGQobmV3Um93KQ0KICAgICAgICAvLyDQvtGB0LLQvtCx0L7QtNC40YLRjCDQvdC10L3Rg9C20L3Ri9C1INC00LDQvdC90YvQtSAtINC40L3QsNGH0LUg0L3QtSDRhdCy0LDRgtC40YIg0L/QsNC80Y/RgtC4DQogICAgICAgIGFsbFZhbHVlcy5yZW1vdmUocm93VmFsdWVzKQ0KICAgICAgICByb3dWYWx1ZXMuY2xlYXIoKQ0KICAgIH0NCg0KICAgIHNob3dNZXNzYWdlcyhyb3dzLCBsb2dnZXIpDQogICAgaWYgKCFsb2dnZXIuY29udGFpbnNMZXZlbChMb2dMZXZlbC5FUlJPUikpIHsNCiAgICAgICAgdXBkYXRlSW5kZXhlcyhyb3dzKQ0KICAgICAgICBmb3JtRGF0YVNlcnZpY2UuZ2V0RGF0YVJvd0hlbHBlcihmb3JtRGF0YSkuYWxsQ2FjaGVkID0gcm93cw0KICAgIH0NCn0NCg0KLyoqDQogKiDQn9GA0L7QstC10YDQuNGC0Ywg0YjQsNC/0LrRgyDRgtCw0LHQu9C40YbRiw0KICoNCiAqIEBwYXJhbSBoZWFkZXJSb3dzINGB0YLRgNC+0LrQuCDRiNCw0L/QutC4DQogKiBAcGFyYW0gY29sQ291bnQg0LrQvtC70LjRh9C10YHRgtCy0L4g0LrQvtC70L7QvdC+0Log0LIg0YLQsNCx0LvQuNGG0LUNCiAqIEBwYXJhbSByb3dDb3VudCDQutC+0LvQuNGH0LXRgdGC0LLQviDRgdGC0YDQvtC6INCyINGC0LDQsdC70LjRhtC1DQogKiBAcGFyYW0gdG1wUm93INCy0YHQv9C+0LzQvtCz0LDRgtC10LvRjNC90LDRjyDRgdGC0YDQvtC60LAg0LTQu9GPINC/0L7Qu9GD0YfQtdC90LjRjyDQvdCw0LfQstCw0L3QuNC4INCz0YDQsNGE0L7Qsg0KICovDQp2b2lkIGNoZWNrSGVhZGVyWGxzKGRlZiBoZWFkZXJSb3dzLCBkZWYgY29sQ291bnQsIHJvd0NvdW50LCBkZWYgdG1wUm93KSB7DQogICAgaWYgKGhlYWRlclJvd3MuaXNFbXB0eSgpKSB7DQogICAgICAgIHRocm93IG5ldyBTZXJ2aWNlRXhjZXB0aW9uKFdST05HX0hFQURFUl9ST1dfU0laRSkNCiAgICB9DQogICAgY2hlY2tIZWFkZXJTaXplKGhlYWRlclJvd3NbaGVhZGVyUm93cy5zaXplKCkgLSAxXS5zaXplKCksIGhlYWRlclJvd3Muc2l6ZSgpLCBjb2xDb3VudCwgcm93Q291bnQpDQoNCiAgICBkZWYgaGVhZGVyTWFwcGluZyA9IFsNCiAgICAgICAgICAgIChbKGhlYWRlclJvd3NbMF1bMF0pIDogZ2V0Q29sdW1uTmFtZSh0bXBSb3csICdyb3dOdW1iZXInKV0pLA0KICAgICAgICAgICAgKFsoaGVhZGVyUm93c1swXVsxXSkgOiBnZXRDb2x1bW5OYW1lKHRtcFJvdywgJ25hbWUnKV0pLA0KICAgICAgICAgICAgKFsoaGVhZGVyUm93c1swXVsyXSkgOiBnZXRDb2x1bW5OYW1lKHRtcFJvdywgJ3BzZXVkb05hbWUnKV0pLA0KICAgICAgICAgICAgKFsoaGVhZGVyUm93c1swXVszXSkgOiBnZXRDb2x1bW5OYW1lKHRtcFJvdywgJ3N0YXRSZXBvcnRJZCcpXSksDQogICAgICAgICAgICAoWyhoZWFkZXJSb3dzWzBdWzRdKSA6IGdldENvbHVtbk5hbWUodG1wUm93LCAnY29kZScpXSksDQogICAgICAgICAgICAoWyhoZWFkZXJSb3dzWzBdWzVdKSA6IGdldENvbHVtbk5hbWUodG1wUm93LCAnZGVwTmFtZScpXSksDQogICAgICAgICAgICAoWyhoZWFkZXJSb3dzWzBdWzZdKSA6IGdldENvbHVtbk5hbWUodG1wUm93LCAnY29uc29UeXBlJyldKSwNCiAgICAgICAgICAgIChbKGhlYWRlclJvd3NbMF1bN10pIDogZ2V0Q29sdW1uTmFtZSh0bXBSb3csICdjb250cm9sUGFydCcpXSksDQogICAgICAgICAgICAoWyhoZWFkZXJSb3dzWzBdWzhdKSA6IGdldENvbHVtbk5hbWUodG1wUm93LCAnc2hhcmVQYXJ0JyldKSwNCiAgICAgICAgICAgIChbKGhlYWRlclJvd3NbMF1bOV0pIDogZ2V0Q29sdW1uTmFtZSh0bXBSb3csICdpa3NyJyldKSwNCiAgICAgICAgICAgIChbKGhlYWRlclJvd3NbMF1bMTBdKSA6IGdldENvbHVtbk5hbWUodG1wUm93LCAnZGF0ZScpXSksDQogICAgICAgICAgICAoWyhoZWFkZXJSb3dzWzBdWzExXSkgOiBnZXRDb2x1bW5OYW1lKHRtcFJvdywgJ3NpZ24nKV0pDQogICAgXQ0KICAgICgxLi4xMikuZWFjaCB7DQogICAgICAgIGhlYWRlck1hcHBpbmcuYWRkKChbKGhlYWRlclJvd3NbMV1baXQgLSAxXSk6IGl0LnRvU3RyaW5nKCldKSkNCiAgICB9DQogICAgY2hlY2tIZWFkZXJFcXVhbHMoaGVhZGVyTWFwcGluZywgbG9nZ2VyKQ0KfQ0KDQovKioNCiAqINCf0L7Qu9GD0YfQuNGC0Ywg0L3QvtCy0YPRjiDRgdGC0YDQvtC60YMg0L3RhCDQv9C+INC30L3QsNGH0LXQvdC40Y/QvCDQuNC3INGN0LrRgdC10LvRjy4NCiAqDQogKiBAcGFyYW0gdmFsdWVzINGB0L/QuNGB0L7QuiDRgdGC0YDQvtC6INGB0L4g0LfQvdCw0YfQtdC90LjRj9C80LgNCiAqIEBwYXJhbSBjb2xPZmZzZXQg0L7RgtGB0YLRg9C/INCyINC60L7Qu9C+0L3QutCw0YUNCiAqIEBwYXJhbSBmaWxlUm93SW5kZXgg0L3QvtC80LXRgCDRgdGC0YDQvtC60Lgg0LIg0YLRhA0KICogQHBhcmFtIHJvd0luZGV4INGB0YLRgNC+0LrQsCDQsiDQvdGEDQogKi8NCmRlZiBnZXROZXdSb3dGcm9tWGxzKGRlZiB2YWx1ZXMsIGRlZiBjb2xPZmZzZXQsIGRlZiBmaWxlUm93SW5kZXgsIGRlZiByb3dJbmRleCkgew0KICAgIGRlZiBuZXdSb3cgPSBnZXROZXdSb3coKQ0KICAgIG5ld1Jvdy5zZXRJbmRleChyb3dJbmRleCkNCiAgICBuZXdSb3cuc2V0SW1wb3J0SW5kZXgoZmlsZVJvd0luZGV4KQ0KDQogICAgZGVmIGludCBjb2xJbmRleCA9IDENCg0KICAgIGRlZiByZWNvcmRJZCA9IGdldFRjb1JlY29yZElkKHZhbHVlc1sxXSwgdmFsdWVzWzldLCBnZXRDb2x1bW5OYW1lKG5ld1JvdywgJ2lrc3InKSwgZmlsZVJvd0luZGV4LCBjb2xJbmRleCwgZ2V0UmVwb3J0UGVyaW9kRW5kRGF0ZSgpLCB0cnVlLCBsb2dnZXIsIHJlZkJvb2tGYWN0b3J5LCByZWNvcmRDYWNoZSkNCiAgICBkZWYgbWFwID0gZ2V0UmVmQm9va1ZhbHVlKDUyMCwgcmVjb3JkSWQpDQoNCiAgICAvLyDQs9GA0LDRhNCwIDINCiAgICBuZXdSb3cubmFtZSA9IHJlY29yZElkDQogICAgY29sSW5kZXgrKw0KDQogICAgLy8g0LPRgNCw0YTQsCAzDQogICAgbmV3Um93LnBzZXVkb05hbWUgPSB2YWx1ZXNbY29sSW5kZXhdDQogICAgY29sSW5kZXgrKw0KDQogICAgLy8g0LPRgNCw0YTQsCA0IC0g0LDRgtGA0LjQsdGD0YIgNTIxNiAtIFNUQVRSRVBPUlRfSUQgLSDCq9CY0JQg0LIg0JDQoSAi0KHRgtCw0YLQvtGC0YfQtdGC0L3QvtGB0YLRjCLCuywg0YHQv9GA0LDQstC+0YfQvdC40LogNTIwIMKr0KPRh9Cw0YHRgtC90LjQutC4INCi0KbQnsK7DQogICAgaWYgKG1hcCAhPSBudWxsKSB7DQogICAgICAgIGZvcm1EYXRhU2VydmljZS5jaGVja1JlZmVyZW5jZVZhbHVlKDUyMCwgdmFsdWVzW2NvbEluZGV4XSwgbWFwLlNUQVRSRVBPUlRfSUQ/LnN0cmluZ1ZhbHVlLCBmaWxlUm93SW5kZXgsIGNvbEluZGV4ICsgY29sT2Zmc2V0LCBsb2dnZXIsIGZhbHNlKQ0KICAgIH0NCiAgICBjb2xJbmRleCsrDQoNCiAgICAvLyDQs9GA0LDRhNCwIDUNCiAgICBuZXdSb3cuY29kZSA9IHZhbHVlc1tjb2xJbmRleF0NCiAgICBjb2xJbmRleCsrDQoNCiAgICAvLyDQs9GA0LDRhNCwIDYNCiAgICBuZXdSb3cuZGVwTmFtZSA9IHZhbHVlc1tjb2xJbmRleF0NCiAgICBjb2xJbmRleCsrDQoNCiAgICAvLyDQs9GA0LDRhNCwIDcNCiAgICBuZXdSb3cuY29uc29UeXBlID0gcGFyc2VOdW1iZXIodmFsdWVzW2NvbEluZGV4XSwgZmlsZVJvd0luZGV4LCBjb2xJbmRleCArIGNvbE9mZnNldCwgbG9nZ2VyLCB0cnVlKQ0KICAgIGNvbEluZGV4KysNCg0KICAgIC8vINCz0YDQsNGE0LAgOA0KICAgIG5ld1Jvdy5jb250cm9sUGFydCA9IHBhcnNlTnVtYmVyKHZhbHVlc1tjb2xJbmRleF0sIGZpbGVSb3dJbmRleCwgY29sSW5kZXggKyBjb2xPZmZzZXQsIGxvZ2dlciwgdHJ1ZSkNCiAgICBjb2xJbmRleCsrDQoNCiAgICAvLyDQs9GA0LDRhNCwIDkNCiAgICBuZXdSb3cuc2hhcmVQYXJ0ID0gcGFyc2VOdW1iZXIodmFsdWVzW2NvbEluZGV4XSwgZmlsZVJvd0luZGV4LCBjb2xJbmRleCArIGNvbE9mZnNldCwgbG9nZ2VyLCB0cnVlKQ0KICAgIGNvbEluZGV4KysNCg0KICAgIC8vINCz0YDQsNGE0LAgMTANCiAgICBpZiAobWFwICE9IG51bGwpIHsNCiAgICAgICAgZm9ybURhdGFTZXJ2aWNlLmNoZWNrUmVmZXJlbmNlVmFsdWUoNTIwLCB2YWx1ZXNbY29sSW5kZXhdLCBtYXAuSUtTUj8uc3RyaW5nVmFsdWUsIGZpbGVSb3dJbmRleCwgY29sSW5kZXggKyBjb2xPZmZzZXQsIGxvZ2dlciwgZmFsc2UpDQogICAgfQ0KICAgIGNvbEluZGV4KysNCg0KICAgIC8vINCz0YDQsNGE0LAgMTENCiAgICBuZXdSb3cuZGF0ZSA9IHBhcnNlRGF0ZSh2YWx1ZXNbY29sSW5kZXhdLCAiZGQuTU0ueXl5eSIsIGZpbGVSb3dJbmRleCwgY29sSW5kZXggKyBjb2xPZmZzZXQsIGxvZ2dlciwgdHJ1ZSkNCiAgICBjb2xJbmRleCsrDQoNCiAgICAvLyDQs9GA0LDRhNCwIDEyDQogICAgbmV3Um93LnNpZ24gPSBwYXJzZU51bWJlcih2YWx1ZXNbY29sSW5kZXhdLCBmaWxlUm93SW5kZXgsIGNvbEluZGV4ICsgY29sT2Zmc2V0LCBsb2dnZXIsIHRydWUpDQoNCiAgICByZXR1cm4gbmV3Um93DQp9'
+
+        addLongText(form_template_id, longString, 'SCRIPT')
+        logger.info("К версии макета добавлен скрипт")
+    }
+
+} catch (Exception ex) {
+    logger.error("Error: ${ex.getLocalizedMessage()}. Все действия, выполненные скриптом, были отменены")
+}
+
+def void addTypeTemplate(FormType formType, FormTemplate formTemplate, boolean createType, boolean createTemplate) {
+    def form_type_id = formType.id ?: ""
+    def form_type_name = formType.name ?: ""
+    def form_type_tax_type = formType.taxType.code ?: ""
+    def form_type_is_ifrs = formType.isIfrs ? 1 : 0
+    def form_type_ifrs_name = formType.ifrsName ?: ""
+    def form_type_ifrs_code = formType.code ?: ""
+
+    def form_template_id = formTemplate.id ?: ""
+    def form_template_is_fixed_rows = formTemplate.isFixedRows() ? 1 : 0
+    def form_template_name = formTemplate.name ?: ""
+    def form_template_fullname = formTemplate.fullName ?: ""
+    def form_template_version = formTemplate.version.format("dd.MM.yy")
+    def form_template_monthly = formTemplate.isMonthly() ? 1 : 0
+    def form_template_comparative = formTemplate.isComparative() ? 1 : 0
+    def form_template_header = formTemplate.header ?: ""
+    def form_template_accruing = formTemplate.isAccruing() ? 1 : 0
+    def form_template_updating = formTemplate.isUpdating() ? 1 : 0
+
+    String formTypeSql = "INSERT INTO FORM_TYPE (ID, NAME, TAX_TYPE, STATUS, IS_IFRS, IFRS_NAME, CODE) VALUES " +
+            "('$form_type_id', '$form_type_name', '$form_type_tax_type', '0', '$form_type_is_ifrs', '$form_type_ifrs_name', '$form_type_ifrs_code')"
+    if (createType) {
+        namedParameterJdbcTemplate.update(formTypeSql, [:])
+        logger.info("Создан тип НФ с id = $form_type_id без версии макета, колонок, стилей, заголовка, фиксированных строк и скрипта")
+    }
+
+    String formTemplateSql = "INSERT INTO FORM_TEMPLATE (ID, TYPE_ID, FIXED_ROWS, NAME, FULLNAME, VERSION, STATUS, MONTHLY, HEADER, COMPARATIVE, ACCRUING, UPDATING) VALUES " +
+            "($form_template_id, '$form_type_id', '$form_template_is_fixed_rows', '$form_template_name', '$form_template_fullname', TO_DATE('$form_template_version', 'DD.MM.RR'), '1', '$form_template_monthly', '$form_template_header', '$form_template_comparative', '$form_template_accruing', '$form_template_updating')"
+    if (createTemplate) {
+        namedParameterJdbcTemplate.update(formTemplateSql, [:])
+        logger.info("Создан тип НФ с id = $form_template_id для версии макета с id = $form_type_id, но без колонок, стилей, заголовка, фиксированных строк и скрипта")
+    }
+}
+
+def void addLongText (def form_template_id, String longString, String alias) {
+    final int MAX_LENGTH = 2000
+    namedParameterJdbcTemplate.update("UPDATE FORM_TEMPLATE SET $alias = null where id = $form_template_id", [:])
+    int start = 0
+    longString = new String(longString.decodeBase64(), "UTF-8")
+    while (start < longString.length()) {
+        int end = (start + MAX_LENGTH) < longString.length() ? (start + MAX_LENGTH) : longString.length()
+        String text = longString.substring(start, end)
+       namedParameterJdbcTemplate.update('UPDATE FORM_TEMPLATE SET ' + alias + ' = ' + alias + ' || :text where id = ' +form_template_id, ['text' : text])
+        start += MAX_LENGTH
+    }
+}

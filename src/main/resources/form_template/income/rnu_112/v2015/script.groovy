@@ -100,11 +100,10 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'incomeCorrection']
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['dealNum', 'name', 'code', 'currency', 'date1Part', 'date2Part', 'dealRate', 'dealLeftSum',
-                       'bondSum', 'accrStartDate', 'accrEndDate', 'yearBase', 'dealIncome', 'rateDiff', 'incomeCorrection']
+                       'accrStartDate', 'accrEndDate', 'yearBase', 'dealIncome', 'rateDiff', 'incomeCorrection']
 
-// Группируемые атрибуты
 @Field
-def groupColumns = ['name', 'reasonNumber', 'reasonDate']
+def sortColumns = ["dealNum", "accrStartDate"]
 
 @Field
 def totalColumns = ['incomeCorrection']
@@ -166,33 +165,38 @@ void logicCheck() {
         // 1. Проверка на заполнение граф
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // 2. Проверка положительности сумм и отклонения
+        // 2. Проверка даты первой части сделки
+        checkDatePeriod(logger, row, 'date1Part', Date.parse("dd.MM.yyyy", "01.01.1991"), getReportPeriodEndDate(), true)
+
+        // 3. Проверка даты второй части сделки
+        if (row.date1Part && row.date2Part && row.date2Part < row.date1Part) {
+            logger.error("Строка $rowNum: Дата по графе «${getColumnName(row,'date2Part')}» должна быть не меньше даты по графе «${getColumnName(row,'date1Part')}»!")
+        }
+
+        // 4. Проверка положительности сумм и отклонения
         ['dealLeftSum', 'bondSum', 'dealIncome', 'rateDiff', 'incomeCorrection'].each { alias ->
             if (row[alias] != null && row[alias] < 0) {
                 logger.error("Строка $rowNum: Значение графы «${getColumnName(row, alias)}» должно быть больше или равно «0»!")
             }
         }
 
-        // 3. Проверка периодов начисления
+        // 5. Проверка периодов начисления
         if (row.accrStartDate && row.accrEndDate && row.accrStartDate >= row.accrEndDate) {
             logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'accrEndDate')}» должно быть больше значения графы «${getColumnName(row, 'accrStartDate')}»!")
-        }
-
-        // 4. Проверка даты окончания начисления
-        checkDatePeriod(logger, row, 'accrEndDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-
-        // 5. Проверка суммы корректировки доходов
-        if (row.incomeCorrection != null && row.dealLeftSum != null && row.rateDiff != null && row.accrEndDate != null && row.accrStartDate != null && row.yearBase != null && row.incomeCorrection != calc19(row)) {
-            logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'incomeCorrection')}» должно равняться выражению: («${getColumnName(row, 'dealLeftSum')}» * «${getColumnName(row, 'rateDiff')}») * ((«${getColumnName(row, 'accrEndDate')}» - «${getColumnName(row, 'accrStartDate')}» + 1) / «${getColumnName(row, 'yearBase')}») / 100!")
         }
 
         // 6. Проверка базы
         if (row.yearBase != null && ![360, 365, 366].contains(row.yearBase?.intValue())) {
             rowError(logger, row, "Строка $rowNum: Графа «${getColumnName(row, 'yearBase')}» должна принимать значение из следующего списка: «360», «365», «366»!")
         }
+
+        // 7. Проверка расчётных граф (арифметические проверки)
+        def needValue = formData.createDataRow()
+        needValue.incomeCorrection = calc19(row)
+        checkCalc(row, ['incomeCorrection'], needValue, logger, true)
     }
 
-    // 7. Проверка итоговых значений пофиксированной строке «Итого»
+    // 8. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
@@ -211,9 +215,7 @@ void calc() {
         if(row.getAlias() != null){
             continue
         }
-        if (row.dealLeftSum != null && row.rateDiff != null && row.accrEndDate != null && row.accrStartDate != null && row.yearBase != null) {
-            row.incomeCorrection = calc19 (row)
-        }
+        row.incomeCorrection = calc19 (row)
     }
 
     // Общий итог
@@ -224,24 +226,11 @@ void calc() {
 }
 
 def calc19 (def row) {
-    def a = ((BigDecimal) ((row.dealLeftSum * row.rateDiff) * (row.accrEndDate - row.accrStartDate + 1))).divide(100 * row.yearBase,
-            row.getCell('incomeCorrection').getColumn().precision, BigDecimal.ROUND_HALF_UP)
-    return a
-}
-
-void sortRows(def dataRows) {
-    dataRows.sort{ def rowA, def rowB ->
-        def aValue = rowA.dealNum
-        def bValue = rowB.dealNum
-        if (aValue != bValue) {
-            return aValue <=> bValue
-        }
-        aValue = rowA.accrStartDate
-        bValue = rowB.accrStartDate
-        if (aValue != bValue) {
-            return bValue <=> aValue
-        }
-        return 0
+    if (row.dealLeftSum != null && row.rateDiff != null && row.accrEndDate != null && row.accrStartDate != null && row.yearBase != null) {
+        return ((BigDecimal) ((row.dealLeftSum * row.rateDiff) * (row.accrEndDate - row.accrStartDate + 1))).divide(100 * row.yearBase,
+                row.getCell('incomeCorrection').getColumn().precision, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return null
     }
 }
 
@@ -465,7 +454,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(dataRows.findAll{ it.getAlias() == null})
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (без подитогов)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    sortRows(dataRows, columns)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {

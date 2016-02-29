@@ -83,7 +83,8 @@ public class Rnu_111Test extends ScriptTestBase {
                     }
                 }
                 return new PagingResult<Map<String, RefBookValue>>();
-            }});
+            }
+        });
     }
 
     @Test
@@ -121,8 +122,8 @@ public class Rnu_111Test extends ScriptTestBase {
         int i = 0;
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Наименование Взаимозависимого лица (резидента оффшорной зоны)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Код налогового учёта"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Основание для совершения операции. Номер"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Основание для совершения операции. Дата"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Основание для совершения операции. номер"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Основание для совершения операции. дата"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма кредита (ед. валюты)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Валюта"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Срок"), entries.get(i++).getMessage());
@@ -130,12 +131,6 @@ public class Rnu_111Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактически начисленного дохода (руб.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Процентная ставка, признаваемая рыночной для целей налогообложения (% годовых)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма дохода, соответствующая рыночному уровню (руб.)"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Отклонение процентной ставки от рыночного уровня, (% годовых)»: выполнение расчета невозможно, " +
-                "так как не заполнена используемая в расчете графа «Процентная ставка, (% годовых)», «Процентная ставка, признаваемая рыночной для целей налогообложения (% годовых)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)»: выполнение расчета невозможно, " +
-                "так как не заполнена используемая в расчете графа «Сумма фактически начисленного дохода (руб.)», «Сумма дохода, соответствующая рыночному уровню (руб.)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «База для расчёта процентного дохода (дней в году)»: выполнение расчета невозможно, " +
-                "так как не заполнена используемая в расчете графа «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -153,7 +148,6 @@ public class Rnu_111Test extends ScriptTestBase {
         row.getCell("rate1").setValue(1L, null);
         row.getCell("sum2").setValue(1L, null);
         testHelper.execute(FormDataEvent.CALCULATE);
-        testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -168,27 +162,17 @@ public class Rnu_111Test extends ScriptTestBase {
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        // 4. Проверка -  графа 13, 15 больше или равно 0
+        // 4. Проверка значения графы 16,17
         row.getCell("sum1").setValue(0, null);
         row.getCell("sum2").setValue(0, null);
-        testHelper.execute(FormDataEvent.CALCULATE);//перерасчет sum3
+        row.getCell("sum3").setValue(1, null);
+        row.getCell("rate2").setValue(1, null);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
+        Assert.assertEquals("Строка 1: Неверное значение граф: «Отклонение процентной ставки от рыночного уровня, (% годовых)», «Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
-
-        // 5. Проверка -  графа 13 должна быть >= графе 15
-        row.getCell("sum1").setValue(1, null);
-        row.getCell("sum2").setValue(2, null);
-        testHelper.execute(FormDataEvent.CALCULATE);//перерасчет sum3
-        testHelper.execute(FormDataEvent.CHECK);
-        entries = testHelper.getLogger().getEntries();
-        i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного дохода (руб.)» должно быть не меньше значения графы «Сумма дохода, соответствующая рыночному уровню (руб.)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного дохода (руб.)» должно быть не меньше значения графы «Сумма дохода, соответствующая рыночному уровню (руб.)»!", entries.get(i++).getMessage());
-        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
-        testHelper.getLogger().clear();
-
     }
 
     // Расчет пустой (в импорте - расчет заполненной)
@@ -237,13 +221,17 @@ public class Rnu_111Test extends ScriptTestBase {
                         char iksr = str.charAt(0);
                         long id = 0;
                         switch (iksr) {
-                            case 'A':  id = 1L;
+                            case 'A':
+                                id = 1L;
                                 break;
-                            case 'B':  id = 2L;
+                            case 'B':
+                                id = 2L;
                                 break;
-                            case 'C':  id = 3L;
+                            case 'C':
+                                id = 3L;
                                 break;
-                            default: str = null;
+                            default:
+                                str = null;
                         }
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
@@ -280,10 +268,6 @@ public class Rnu_111Test extends ScriptTestBase {
 
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(365, dataRows.get(0).getCell("base").getNumericValue().intValue());
-        Assert.assertEquals(365, dataRows.get(1).getCell("base").getNumericValue().intValue());
-        Assert.assertNull(dataRows.get(2).getCell("base").getNumericValue());
-
         Assert.assertEquals(2, dataRows.get(0).getCell("rate2").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(2, dataRows.get(1).getCell("rate2").getNumericValue().doubleValue(), 0);
         Assert.assertNull(dataRows.get(2).getCell("rate2").getNumericValue());

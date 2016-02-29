@@ -3,6 +3,7 @@ package form_template.deal.members_sberbank.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -51,6 +52,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
         break
 }
 
@@ -321,7 +325,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
             ([(headerRows[0][1]) : getColumnName(tmpRow, 'name')]),
             ([(headerRows[0][2]) : getColumnName(tmpRow, 'pseudoName')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'statReportId')]),
+            ([(headerRows[0][3]) : StringUtils.cleanString(getColumnName(tmpRow, 'statReportId'))]),
             ([(headerRows[0][4]) : getColumnName(tmpRow, 'code')]),
             ([(headerRows[0][5]) : getColumnName(tmpRow, 'depName')]),
             ([(headerRows[0][6]) : getColumnName(tmpRow, 'consoType')]),
@@ -365,7 +369,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 4 - атрибут 5216 - STATREPORT_ID - «ИД в АС "Статотчетность"», справочник 520 «Участники ТЦО»
     if (map != null) {
-        formDataService.checkReferenceValue(520, values[colIndex], map.STATREPORT_ID?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        formDataService.checkReferenceValue(520, values[colIndex], map.STATREPORT_ID?.stringValue as String, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
 
@@ -403,4 +407,16 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.sign = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+// Сортировка групп и строк
+void sortFormDataRows(def saveInDB = true) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, null, null)
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }

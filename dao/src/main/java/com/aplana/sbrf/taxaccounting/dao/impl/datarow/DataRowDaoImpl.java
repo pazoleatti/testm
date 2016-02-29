@@ -212,7 +212,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			return;
 		}
 		// сдвигаем все строки, чтобы обойти ограничение уникального индекса при сортировке
-		shiftRows(formData, new DataRowRange(1, rows.size()));
+		shiftRows(formData, new DataRowRange(1, rows.size()), DataRowType.SAVED);
 		// обновляем данные в бд
 		StringBuilder sql = new StringBuilder("UPDATE form_data_row");
 		sql.append(" SET ord = :ord WHERE id = :id");
@@ -269,7 +269,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			throw new IllegalArgumentException("Аргумент \"rows\" должен быть задан");
 		}
 		// сдвигаем строки
-		shiftRows(formData, new DataRowRange(index, rows.size()));
+		shiftRows(formData, new DataRowRange(index, rows.size()), dataRowType);
 		// вставляем новые в образовавшийся промежуток
 		Map<Integer, String[]> columnNames = DataRowMapper.getColumnNames(formData);
 
@@ -651,23 +651,24 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
-		shiftRows(formData, new DataRowRange(range.getOffset() + range.getCount(), -range.getCount()));
+		shiftRows(formData, new DataRowRange(range.getOffset() + range.getCount(), -range.getCount()), DataRowType.SAVED);
 	}
 
 	/**
 	 * Сдвигает строки на "range.count" позиций начиная с позиции "range.offset"
 	 *
 	 * @param formData экземпляр НФ для строк которых осуществляется сдвиг
-	 * @param range    диапазон для указания с какого индекса и на сколько осуществляем сдвиг
+	 * @param range диапазон для указания с какого индекса и на сколько осуществляем сдвиг
+	 * @param dataRowType тип среза в котором осуществляется сдвиг строк
 	 * @return количество смещенных строк
 	 */
-	private int shiftRows(FormData formData, DataRowRange range) {
+    private int shiftRows(FormData formData, DataRowRange range, DataRowType dataRowType) {
 		StringBuilder sql = new StringBuilder("UPDATE form_data_row");
 		sql.append(" SET ord = ord + :shift WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND ord >= :offset");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
-		params.put("temporary", DataRowType.SAVED.getCode());
+		params.put("temporary", dataRowType.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 		params.put("offset", range.getOffset());
 		params.put("shift", range.getCount());
