@@ -384,16 +384,16 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			params.add(values);
 		}
 		if (LOG.isTraceEnabled()) {
-			LOG.trace(DELETE_BY_ROW_ID.toString());
+			LOG.trace(DELETE_BY_ROW_ID);
 		}
-		getNamedParameterJdbcTemplate().batchUpdate(DELETE_BY_ROW_ID.toString().intern(), params.toArray(new Map[0]));
+		getNamedParameterJdbcTemplate().batchUpdate(DELETE_BY_ROW_ID.intern(), params.toArray(new Map[0]));
 		reorderRows(formData);
 	}
 
 	/**
 	 * Переупорядочивает строки, восстанавливает последовательность ORD = 1, 2, 3, ...
 	 *
-	 * @param formData
+	 * @param formData ссылка на экземпляр НФ
 	 */
 	private void reorderRows(FormData formData) {
 		StringBuilder sql = new StringBuilder("MERGE INTO form_data_row");
@@ -561,8 +561,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	/**
 	 * Возвращает количество строк в налоговой форме, включая итоговые (alias != null)
 	 *
-	 * @param formData
-	 * @return
+	 * @param formData ссылка на экземпляр НФ
+	 * @param dataRowType тип среза
+	 * @return количество записей в указанном срезе
 	 */
 	private int getSizeInternal(FormData formData, DataRowType dataRowType) {
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_row");

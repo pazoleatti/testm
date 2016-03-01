@@ -340,6 +340,9 @@ public class DataRowDaoImplTest extends Assert {
 				"form_data_id = :form_data_id AND ref_book_id = :ref_book_id", params, Integer.class);
 		assertEquals(1, recordIds.size());
 		assertEquals(Integer.valueOf(182632), recordIds.get(0));
+
+		formData = formDataDao.get(331, false);
+		dataRowDao.refreshRefBookLinks(formData);
 	}
 
 	@Test
@@ -389,8 +392,62 @@ public class DataRowDaoImplTest extends Assert {
 	@Test
 	public void saveTempRows() {
 		FormData formData = formDataDao.get(330, false);
-		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-		dataRowDao.saveTempRows(formData, dataRows);
+		List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
+		dataRowDao.saveTempRows(formData, rows);
+
+		formData = formDataDao.get(329, false);
+		rows = dataRowDao.getRows(formData, null);
+		dataRowDao.saveTempRows(formData, rows);
+		List<DataRow<Cell>> rowsB = dataRowDao.getRows(formData, null);
+		List<DataRow<Cell>> rowsT = dataRowDao.getTempRows(formData, null);
+		assertEquals(2, rowsB.size());
+		assertEquals(1, rowsB.get(0).getIndex().intValue());
+		assertEquals(2, rowsB.get(1).getIndex().intValue());
+		assertEquals(2, rowsT.size());
+		assertEquals(1, rowsT.get(0).getIndex().intValue());
+		assertEquals(2, rowsT.get(1).getIndex().intValue());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void copyRows2() {
+		dataRowDao.copyRows(329, 330);
+	}
+
+	@Test
+	public void reorderRows() {
+		FormData formData = formDataDao.get(329, false);
+		List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);
+		List<DataRow<Cell>> newRows = new ArrayList<DataRow<Cell>>();
+		newRows.add(rows.get(1));
+		newRows.add(rows.get(0));
+		dataRowDao.reorderRows(formData, newRows);
+
+		rows = dataRowDao.getRows(formData, null);
+		assertEquals(2, rows.size());
+		assertNull(rows.get(0).getAlias());
+		assertEquals("row_alias №1", rows.get(1).getAlias());
+
+		List<DataRow<Cell>> emptyRows = new ArrayList<DataRow<Cell>>();
+		dataRowDao.reorderRows(formData, emptyRows);
+		rows = dataRowDao.getRows(formData, null);
+		assertEquals(2, rows.size());
+		assertNull(rows.get(0).getAlias());
+		assertEquals("row_alias №1", rows.get(1).getAlias());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void createManual2() {
+		FormData formData = formDataDao.get(329, false);
+		dataRowDao.createManual(formData);
+	}
+
+	@Test
+	public void getTempRows() {
+		FormData formData = formDataDao.get(329, false);
+		List<DataRow<Cell>> rows = dataRowDao.getTempRows(formData, null);
+		assertEquals(3, dataRowDao.getTempRowCount(formData));
+		assertEquals(3, rows.size());
+		assertEquals("total", rows.get(2).getAlias());
 	}
 
 }
