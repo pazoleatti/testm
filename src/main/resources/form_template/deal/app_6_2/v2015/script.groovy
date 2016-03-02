@@ -254,7 +254,7 @@ void importData() {
         rowValues = allValues[0]
         fileRowIndex++
         // все строки пустые - выход
-        if (!rowValues) {
+        if (!rowValues || rowValues.isEmpty() || !rowValues.find { it }) {
             allValues.remove(rowValues)
             rowValues.clear()
             break

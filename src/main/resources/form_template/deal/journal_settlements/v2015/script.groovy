@@ -393,7 +393,7 @@ void importData() {
         fileRowIndex++
 
         // все строки пустые - выход
-        if (!rowValues || !rowValues.find { it }) {
+        if (!rowValues || rowValues.isEmpty() || !rowValues.find { it }) {
             allValues.remove(rowValues)
             rowValues.clear()
             if (isSection51) {
