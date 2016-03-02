@@ -283,7 +283,7 @@ void importData() {
         }
         rowIndex++
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+        if (rowValues[INDEX_FOR_SKIP]?.trim()?.equalsIgnoreCase("Итого")) {
             totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
 
             allValues.remove(rowValues)

@@ -326,13 +326,13 @@ void importData() {
         }
         rowIndex++
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+        if (rowValues[INDEX_FOR_SKIP]?.trim()?.equalsIgnoreCase("Итого")) {
             totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
 
             allValues.remove(rowValues)
             rowValues.clear()
             continue
-        } else if (rowValues[INDEX_FOR_SKIP].contains('Подитог')) {
+        } else if (rowValues[INDEX_FOR_SKIP]?.trim()?.equalsIgnoreCase("Подитог")) {
             def subTotalRow = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
             if (totalRowFromFileMap[subTotalRow.getIndex()] == null) {
                 totalRowFromFileMap[subTotalRow.getIndex()] = []
