@@ -169,14 +169,13 @@ public interface DataRowDao {
      * Полнотекстовый поиск по данным налоговой формы
      *
      * @param formDataId идентификатор НФ
-     * @param formTemplateId идентификатор шаблона НФ
      * @param range информация о выборке данных, с какой строки и сколько строк выбрать
      * @param key ключ для поиска
      * @param isCaseSensitive чувствительность к регистру
      * @param manual ручной ввод
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
-    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual);
+    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual);
 
 	/**
 	 * Обновляет существующие строки НФ

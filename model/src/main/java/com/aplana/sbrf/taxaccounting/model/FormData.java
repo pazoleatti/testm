@@ -175,7 +175,11 @@ public class FormData extends IdentityObject<Long> {
 		return formColumns;
 	}
 
-	/**
+    public void setFormColumns(List<Column> formColumns) {
+        this.formColumns = formColumns;
+    }
+
+    /**
 	 * Получить информацию об {@link FormDataPerformer исполнителе налоговой
 	 * формы}
 	 *

@@ -9,7 +9,7 @@ import java.io.Serializable;
  *
  * 28.03.2014
  */
-public class FormDataSearchResult implements Serializable {
+public class FormDataSearchResult implements Serializable, Comparable {
 
     private static final long serialVersionUID = -8906124879515002415L;
 
@@ -73,5 +73,13 @@ public class FormDataSearchResult implements Serializable {
         result = 31 * result + (rowIndex != null ? rowIndex.hashCode() : 0);
         result = 31 * result + (stringFound != null ? stringFound.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        FormDataSearchResult o1 = (FormDataSearchResult)o;
+        if (o1.getRowIndex() != this.getRowIndex())
+            return this.getRowIndex().compareTo(o1.getRowIndex());
+        return this.getColumnIndex().compareTo(o1.getColumnIndex());
     }
 }
