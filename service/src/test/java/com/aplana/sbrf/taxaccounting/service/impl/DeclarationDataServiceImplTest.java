@@ -2,34 +2,38 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("DeclarationDataServiceTest.xml")
@@ -387,16 +391,113 @@ public class DeclarationDataServiceImplTest {
 
     @Test
     public void getTaskName() {
+        DeclarationSubreport declarationSubreport = new DeclarationSubreport();
+        declarationSubreport.setName("report name");
+        DeclarationDataReportType specificReport = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, declarationSubreport);
+
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.CHECK_DEC, TaxType.INCOME), "Проверка декларации");
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, TaxType.INCOME), "Принятие декларации");
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.EXCEL_DEC, TaxType.INCOME), "Формирование отчета декларации в XLSX-формате");
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.XML_DEC, TaxType.INCOME), "Расчет декларации");
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.PDF_DEC, TaxType.INCOME), "Создание формы предварительного просмотра декларации");
+        assertEquals(declarationDataService.getTaskName(specificReport, TaxType.INCOME), "Формирование отчета \"report name\" декларации");
 
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.CHECK_DEC, TaxType.DEAL), "Проверка уведомления");
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, TaxType.DEAL), "Принятие уведомления");
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.EXCEL_DEC, TaxType.DEAL), "Формирование отчета уведомления в XLSX-формате");
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.XML_DEC, TaxType.DEAL), "Расчет уведомления");
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.PDF_DEC, TaxType.DEAL), "Создание формы предварительного просмотра уведомления");
+        assertEquals(declarationDataService.getTaskName(specificReport, TaxType.DEAL), "Формирование отчета \"report name\" уведомления");
     }
+
+    @Test
+    public void createSpecificReport() throws IOException {
+        Logger logger = new Logger();
+
+        DeclarationType declarationType = new DeclarationType();
+        declarationType.setId(112);
+        declarationType.setName("Тестовый тип декларации");
+
+        DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+        declarationTemplate.setType(declarationType);
+        declarationTemplate.setId(10010);
+        InputStream stream = DeclarationTemplateServiceImpl.class.getResourceAsStream("SpecificDecReport.groovy");
+        String script = IOUtils.toString(stream, "UTF-8");
+        declarationTemplate.setCreateScript(script);
+
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setDeclarationTemplateId(declarationTemplate.getId());
+        declarationData.setDepartmentId(1);
+        declarationData.setReportPeriodId(1);
+        declarationData.setId(1l);
+        declarationData.setDepartmentReportPeriodId(1);
+
+        DeclarationSubreport declarationSubreport = new DeclarationSubreport();
+        declarationSubreport.setName("report name");
+        declarationSubreport.setAlias("specific1");
+        DeclarationDataReportType specificReport = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, declarationSubreport);
+
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+
+        DeclarationDataScriptingServiceImpl scriptingService = new DeclarationDataScriptingServiceImpl();
+
+        DeclarationTemplateDao declarationTemplateDao = mock(DeclarationTemplateDao.class);
+        when(declarationTemplateDao.get(declarationTemplate.getId())).thenReturn(declarationTemplate);
+        when(declarationTemplateDao.getDeclarationTemplateScript(declarationTemplate.getId())).thenReturn(declarationTemplate.getCreateScript());
+
+        ReflectionTestUtils.setField(scriptingService, "declarationTemplateDao", declarationTemplateDao);
+
+        ApplicationContext ctx = mock(ApplicationContext.class);
+        when(ctx.getBeansWithAnnotation(ScriptExposed.class)).thenReturn(new HashMap<String, Object>());
+        scriptingService.setApplicationContext(ctx);
+
+        TransactionHelper tx = new TransactionHelper() {
+            @Override
+            public <T> T executeInNewTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
+            }
+
+            @Override
+            public <T> T executeInNewReadOnlyTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
+            }
+        };
+        ReflectionTestUtils.setField(scriptingService, "tx", tx);
+
+        ReflectionTestUtils.setField(declarationDataService, "declarationDataScriptingService", scriptingService);
+
+        BlobDataService blobDataService = mock(BlobDataService.class);
+        final List<String> strings = new ArrayList<String>();
+        when(blobDataService.create(anyString(), anyString())).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                String path = (String)invocation.getArguments()[0];
+                BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+                try {
+                    String s;
+                    while ((s = in.readLine()) != null) {
+                        strings.add(s);
+                    }
+                } finally {
+                    in.close();
+                }
+                return "uuid";
+            }
+        });
+        ReflectionTestUtils.setField(declarationDataService, "blobDataService", blobDataService);
+
+        declarationDataService.createSpecificReport(logger, declarationData, specificReport, userInfo, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+            }
+        });
+
+        assertEquals(strings.size(), 1);
+        assertEquals(strings.get(0), specificReport.getReportAlias());
+    }
+
 }
