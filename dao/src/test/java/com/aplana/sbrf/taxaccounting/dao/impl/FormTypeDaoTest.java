@@ -96,6 +96,6 @@ public class FormTypeDaoTest {
         Assert.assertEquals(1, formTypeDao.getByCode("code_1").getId());
         Assert.assertEquals(2, formTypeDao.getByCode("code_2").getId());
         Assert.assertEquals(3, formTypeDao.getByCode("code_3").getId());
-        Assert.assertEquals(4, formTypeDao.getByCode("code_4").getId());
+        Assert.assertEquals(4, formTypeDao.getByCode("codE_4").getId());
     }
 }

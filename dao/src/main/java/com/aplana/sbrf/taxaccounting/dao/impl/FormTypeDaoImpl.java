@@ -174,7 +174,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
         }
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, tax_type, status, code, is_ifrs, ifrs_name from form_type where code = ?",
+                    "select id, name, tax_type, status, code, is_ifrs, ifrs_name from form_type where lower(code) = lower(?)",
                     new Object[]{code},
                     new int[]{Types.VARCHAR},
                     new FormTypeMapper()
