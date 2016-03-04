@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import javax.validation.constraints.NotNull;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -234,4 +233,11 @@ public interface DeclarationTemplateService {
      * @return
      */
     DeclarationSubreport getSubreportByAlias(int declarationTypeId, String alias);
+
+    /**
+     * Валидировать модель данных для описания декларации
+     * @param declarationTemplate
+     * @param logger
+     */
+    void validateDeclarationTemplate(DeclarationTemplate declarationTemplate, Logger logger);
 }

@@ -115,7 +115,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             }
         });
 
-        printToExcel = new LinkButton("Сформировать в xlsx");
+        printToExcel = new LinkButton("Сформировать в XLSX");
         printToExcel.setHeight("20px");
         printToExcel.setDisableImage(true);
         printToExcel.addClickHandler(new ClickHandler() {
@@ -386,7 +386,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             if (isLoad) {
                 printToExcel.setVisible(true);
                 printToXml.setVisible(true);
-                printAnchor.setVisible(true);
+                printAnchor.setEnabled(true);
                 timerXML.cancel();
                 timerSpecific.scheduleRepeating(10000);
                 timerSpecific.run();
@@ -394,7 +394,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 viewPdf.setVisible(false);
                 printToXml.setVisible(false);
                 printToExcel.setVisible(false);
-                printAnchor.setVisible(false);
+                printAnchor.setEnabled(false);
                 timerSpecific.cancel();
             }
         } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
