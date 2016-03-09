@@ -1,17 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.ColumnType;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DataRowType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResult;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
@@ -48,22 +42,27 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private FormDataDao formDataDao;
 
 	@Override
-	public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual) {
-		Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, formTemplateId, key, isCaseSensitive, manual);
+	public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual) {
+        if (isSupportOver()) {
+            getJdbcTemplate().update("alter session set NLS_NUMERIC_CHARACTERS = '. '");
+        }
+
+		Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, key, isCaseSensitive, manual);
 		// get query and params
-		String query = sql.getFirst();
 		Map<String, Object> params = sql.getSecond();
 
+        String query = sql.getFirst();
 		// calculate count
 		String countQuery = "SELECT COUNT(*) FROM (" + query + ")";
+
 		int count = getNamedParameterJdbcTemplate().queryForObject(countQuery, params, Integer.class);
 
 		List<FormDataSearchResult> dataRows;
 
 		if (count != 0) {
-			String dataQuery = "SELECT idx, column_index, row_index, true_val FROM (" + query + ") WHERE idx BETWEEN :from AND :to";
-			params.put("from", range.getOffset());
-			params.put("to", range.getCount() * 2 - 1);
+			String dataQuery = "SELECT idx, column_index, row_index, raw_value FROM (" + query + ") WHERE idx BETWEEN :from AND :to";
+			params.put("from", 1);
+			params.put("to", range.getCount());
 
 			dataRows = getNamedParameterJdbcTemplate().query(dataQuery, params, new RowMapper<FormDataSearchResult>() {
 				@Override
@@ -72,7 +71,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 					result.setIndex(SqlUtils.getLong(rs, "idx"));
 					result.setColumnIndex(SqlUtils.getLong(rs, "column_index"));
 					result.setRowIndex(SqlUtils.getLong(rs, "row_index"));
-					result.setStringFound(rs.getString("true_val"));
+					result.setStringFound(rs.getString("raw_value"));
 					return result;
 				}
 			});
@@ -88,75 +87,58 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 *
 	 * @return
 	 */
-	private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive, boolean manual) {
-
-		String generateSubSqlQuery = "select listagg(row_query, ' ' ) WITHIN GROUP (ORDER BY pos) as query from \n" +
-				"(\n" +
-				"with fc as (select row_number() over (order by fc.ord) as pos, fc.form_template_id, fc.id, fc.ord, fc.type, fc.numeration_row, fc.precision, fc.parent_column_id, fc.data_ord, pfc.data_ord parent_data_ord from form_column fc " +
-				" left join form_column pfc on (pfc.id = fc.parent_column_id) where fc.form_template_id = :ftId order by fc.ord)\n" +
-				"select fc.pos, fc.form_template_id, case when fc.pos = 1 then '' else ' union all ' end \n" +
-				"       || 'select ord as row_index, '||fc.id ||' as column_id, '\n" +
-				"       || case when type = 'S' then 'to_char(c'||fc.data_ord||') as raw_value, '\n" +
-				"               when type = 'N' then case when fc.precision is null or fc.precision = 0 then 'to_char(c'||fc.data_ord||') as raw_value, '\n" +
-				"                 else 'ltrim(to_char(c'||fc.data_ord||',substr(''99999999999999990.0000000000'',1,18+'||fc.precision||'))) as raw_value, ' end\n" +
-				"               when type = 'A' then 'to_char((row_number() over(order by ord)) + ' || case when fc.NUMERATION_ROW=0 then 0 else (select number_previous_row from form_data where id = :fdId) end ||') as raw_value,'  \n" +
-				"               else ' null as raw_value, ' end\n" +
-				"				|| case when (type = 'R' and parent_column_id is null) then 'c'||fc.data_ord||' as reference_id ' \n" +
-				"               	when (type = 'R' and parent_column_id is not null) then 'c'||fc.parent_data_ord||' as reference_id '\n" +
-				"               	else ' null as reference_id ' end " +
-				"       || ' from t ' as row_query\n" +
-				"from fc\n" +
-				")";
+	private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, String key, boolean isCaseSensitive, boolean manual) {
+        FormData formData = formDataDao.get(formDataId, manual);
+        StringBuilder stringBuilder = new StringBuilder("");
+        String strUnion = "union all \n";
+        boolean f = false;
+        for(Column column: formData.getFormColumns()) {
+            switch (column.getColumnType()) {
+                case NUMBER:
+                    if (f) stringBuilder.append(strUnion);
+                    stringBuilder.append("select ord as row_index, ").append(column.getId()).append(" as column_id, ltrim(to_char(to_number(c").append(column.getDataOrder()).append("),'99999999999999990");
+                    if (((NumericColumn)column).getPrecision()>0) {
+                        stringBuilder.append(".");
+                        for(int i=0; i<((NumericColumn)column).getPrecision(); i++)
+                            stringBuilder.append("0");
+                    }
+                    stringBuilder.append("')) as raw_value, ").append(column.getOrder()).append(" as column_index from t ");
+                    f = true;
+                    break;
+                case STRING:
+                    if (f) stringBuilder.append(strUnion);
+                    stringBuilder.append("select ord as row_index, ").append(column.getId()).append(" as column_id, c").append(column.getDataOrder()).append(" as raw_value, ")
+                            .append(column.getOrder()).append(" as column_index from t ");
+                    f = true;
+                    break;
+                case AUTO:
+                    if (f) stringBuilder.append(strUnion);
+                    stringBuilder.append("select ord as row_index, ").append(column.getId()).append(" as column_id, (case when (alias IS NULL OR alias LIKE '%{wan}%') then to_char((row_number() over(PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%{wan}%') THEN 1 ELSE 0 END ORDER BY ord)) + ").append(formData.getPreviousRowNumber()).append(") else null end) as raw_value, ")
+                            .append(column.getOrder()).append(" as column_index from t ");
+                    f = true;
+                    break;
+            }
+        }
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("fdId", formDataId);
-		params.put("ftId", formTemplateId);
 		params.put("key", "%" + key + "%");
 		params.put("temporary", DataRowType.SAVED.getCode());
 		params.put("manual", manual);
 
-		String subSql = getNamedParameterJdbcTemplate().queryForObject(generateSubSqlQuery, params, String.class);
-
 		String sql =
-				"SELECT row_number() OVER (ORDER BY a.row_index, a.column_index) AS idx, row_index, column_index, true_val\n" +
+				"SELECT row_number() OVER (ORDER BY a.row_index, a.column_index) AS idx, row_index, column_index, raw_value\n" +
 						"FROM (\n" +
-						"  SELECT row_index, fc.ord AS column_index, coalesce(raw_value, d.string_value, o.string_value, z.string_value) AS true_val\n" +
-						"  FROM (\n" +
 						"    WITH t AS (\n" +
 						"        SELECT * FROM form_data_row fd WHERE fd.form_data_id = :fdId and fd.temporary = :temporary and fd.manual = :manual)\n" +
-						subSql +
-						"        ) hell\n" +
-						"  INNER JOIN form_column fc ON fc.id = hell.column_id\n" +
-						"  LEFT JOIN ref_book_attribute rba ON rba.id = fc.attribute_id\n" +
-						"  LEFT JOIN (\n" +
-						"      SELECT dep.id AS record_id, rba.id AS attribute_id, dep.string_value AS string_value\n" +
-						"      FROM (\n" +
-						"        SELECT id, to_char(NAME) AS NAME, to_char(type) AS type, to_char(shortname) AS shortname, to_char(tb_index) AS tb_index, to_char(sbrf_code) AS sbrf_code, to_char(code) code\n" +
-						"        FROM department\n" +
-						"        )\n" +
-						"      unpivot(string_value FOR alias IN (NAME, type, shortname, tb_index, sbrf_code, code)) dep\n" +
-						"      INNER JOIN ref_book_attribute rba ON rba.ref_book_id = 30 AND dep.alias = rba.alias\n" +
-						"      ) d ON fc.type = 'R' AND rba.ref_book_id = 30 AND d.record_id = hell.reference_id AND coalesce(fc.attribute_id, fc.attribute_id2) = d.attribute_id\n" +
-						"   LEFT JOIN (\n" +
-						"      SELECT oktmo.id AS record_id, rba.id AS attribute_id, oktmo.string_value\n" +
-						"      FROM (\n" +
-						"        SELECT id, to_char(code) AS code, to_char(NAME) AS NAME\n" +
-						"        FROM ref_book_oktmo rbo\n" +
-						"        )\n" +
-						"      unpivot(string_value FOR alias IN (code, NAME)) oktmo\n" +
-						"      INNER JOIN ref_book_attribute rba ON rba.ref_book_id = 96 AND oktmo.alias = rba.alias\n" +
-						"    ) o ON fc.type = 'R' AND rba.ref_book_id = 96 AND o.record_id = hell.reference_id AND coalesce(fc.attribute_id, fc.attribute_id2) = o.attribute_id\n" +
-						"  LEFT JOIN (\n" +
-						"      SELECT record_id, attribute_id, coalesce(string_value, TO_CHAR(number_value), TO_CHAR(date_value)) AS string_value\n" +
-						"      FROM ref_book_value\n" +
-						"      ) z ON fc.type = 'R' AND rba.ref_book_id NOT IN (30, 96) AND z.record_id = hell.reference_id AND coalesce(fc.attribute_id, fc.attribute_id2) = z.attribute_id\n" +
+                        stringBuilder.toString() +
 						"  ) a\n" +
 
 						// check case sensitive
 						(
 								isCaseSensitive ?
-										"            WHERE true_val like :key \n" :
-										"            WHERE LOWER(true_val) like LOWER(:key) \n"
+										"            WHERE raw_value like :key \n" :
+										"            WHERE LOWER(raw_value) like LOWER(:key) \n"
 						);
 
 		return new Pair<String, Map<String, Object>>(sql, params);

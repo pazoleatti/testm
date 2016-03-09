@@ -21,7 +21,7 @@ public final class DeclarationTemplateTokens {
     public static final int declarationTemplateScriptPriority = 1;
 
     public static final String declarationTemplateSubreports = "!declarationTemplateSubreports";
-    public static final String declarationTemplateSubreportsLabel = "Специфичные отчеты";
+    public static final String declarationTemplateSubreportsLabel = "Специфические отчеты";
     public static final int declarationTemplateSubreportsPriority = 2;
 
 

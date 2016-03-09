@@ -6,13 +6,17 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,6 +33,14 @@ public class DataRowServiceImpl implements DataRowService {
 
     @Autowired
     private FormDataService formDataService;
+
+    @Autowired
+    RefBookHelper refBookHelper;
+
+    @Autowired
+    FormTemplateService formTemplateService;
+
+    public static final String DEFAULT_DATE_FORMAT = "dd.MM.yyyy";
 
 	@Override
 	public PagingResult<DataRow<Cell>> getDataRows(long formDataId, DataRowRange range, boolean saved, boolean manual) {
@@ -69,8 +81,82 @@ public class DataRowServiceImpl implements DataRowService {
     }
 
     @Override
-    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual) {
-        return dataRowDao.searchByKey(formDataId, formTemplateId, range, key, isCaseSensitive, manual);
+    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual) {
+        PagingResult<FormDataSearchResult> results = new PagingResult<FormDataSearchResult>();
+        List<FormDataSearchResult> resultsList = new ArrayList<FormDataSearchResult>();
+        FormData formData = formDataDao.get(formDataId, manual);
+        List<Column> columnList = new ArrayList<Column>();
+        boolean existCommonColumn = false; // признак наличия числовых, строковых и/или автонумеруемых граф
+        for(Column column: formData.getFormColumns()) {
+            if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType()) || ColumnType.DATE.equals(column.getColumnType()))
+                columnList.add(column);
+            else
+                existCommonColumn = true;
+        }
+        formData.setFormColumns(columnList);
+        long index = 1;
+        if (columnList.size() > 0) {
+            List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);
+            refBookHelper.dataRowsDereference(new Logger(), rows, formData.getFormColumns());
+            String searchKey = key;
+            if (!isCaseSensitive) searchKey = searchKey.toUpperCase();
+            for (DataRow<Cell> row : rows) {
+                for (Column column : formData.getFormColumns()) {
+                    if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
+                        Cell valueCell = row.getCell(column.getAlias());
+                        if (valueCell != null && valueCell.getRefBookDereference() != null && (isCaseSensitive && valueCell.getRefBookDereference().indexOf(searchKey) >= 0
+                                || !isCaseSensitive && valueCell.getRefBookDereference().toUpperCase().indexOf(searchKey) >= 0)) {
+                            FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
+                            formDataSearchResult.setColumnIndex((long) column.getOrder());
+                            formDataSearchResult.setRowIndex(row.getIndex().longValue());
+                            formDataSearchResult.setStringFound(valueCell.getRefBookDereference());
+                            resultsList.add(formDataSearchResult);
+                            if ((++index) > range.getCount())
+                                break;
+                        }
+                    } else if (ColumnType.DATE.equals(column.getColumnType())) {
+                        Cell valueCell = row.getCell(column.getAlias());
+                        if (valueCell != null && valueCell.getDateValue() != null) {
+                            Formats formats = Formats.getById(((DateColumn) column).getFormatId());
+                            SimpleDateFormat df;
+                            if (formats.getId() == 0) {
+                                df = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
+                            } else {
+                                df = new SimpleDateFormat(formats.getFormat());
+                            }
+                            String valueStr = df.format(valueCell.getDateValue());
+                            if (isCaseSensitive && valueStr.indexOf(searchKey) >= 0
+                                    || !isCaseSensitive && valueStr.toUpperCase().indexOf(searchKey) >= 0) {
+                                FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
+                                formDataSearchResult.setColumnIndex((long) column.getOrder());
+                                formDataSearchResult.setRowIndex(row.getIndex().longValue());
+                                formDataSearchResult.setStringFound(valueStr);
+                                resultsList.add(formDataSearchResult);
+                                if ((++index) > range.getCount())
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        PagingResult<FormDataSearchResult> daoResults;
+        if (existCommonColumn) {
+            daoResults = dataRowDao.searchByKey(formDataId, range, key, isCaseSensitive, manual);
+        } else {
+            // если нет *обычных*(числовых, строковых, автонумеруемых) граф, то нет смысла проводить поиск
+            daoResults = new PagingResult<FormDataSearchResult>();
+        }
+        results.setTotalCount(daoResults.getTotalCount() + resultsList.size());
+        resultsList.addAll(daoResults);
+        Collections.sort(resultsList);
+        index = 1;
+        for(FormDataSearchResult searchResult: resultsList) {
+            searchResult.setIndex(index++);
+        }
+        if (range.getOffset() <= resultsList.size())
+            results.addAll(resultsList.subList(range.getOffset() - 1, Math.min(range.getCount(), resultsList.size())));
+        return results;
     }
 
     @Override

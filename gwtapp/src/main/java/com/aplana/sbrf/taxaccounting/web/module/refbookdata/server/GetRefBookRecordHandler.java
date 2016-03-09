@@ -15,14 +15,12 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueS
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @PreAuthorize("isAuthenticated()")
@@ -38,7 +36,10 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 	@Override
 	public GetRefBookRecordResult execute(GetRefBookRecordAction action, ExecutionContext executionContext) throws ActionException {
 		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
-        RefBook refBook = refBookFactory.get(action.getRefBookId());
+        RefBook refBookTemp = refBookFactory.get(action.getRefBookId());
+        RefBook refBook = SerializationUtils.clone(refBookTemp);
+        refBook.setAttributes(new ArrayList<RefBookAttribute>());
+        refBook.getAttributes().addAll(refBookTemp.getAttributes());
 		GetRefBookRecordResult result = new GetRefBookRecordResult();
 		Map<String, RefBookValueSerializable> recordData = new HashMap<String, RefBookValueSerializable>();
 		RefBookRecordVersionData fullVersionData = new RefBookRecordVersionData();
@@ -54,6 +55,7 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
             } else {
                 recordId = refBookPage.get(refBookPage.getTotalCount()-1).get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
             }
+
             refBook.getAttributes().add(RefBook.getVersionFromAttribute());
             refBook.getAttributes().add(RefBook.getVersionToAttribute());
         } else {

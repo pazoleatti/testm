@@ -1,15 +1,12 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:fileuplod='urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload'
-             xmlns:u='urn:import:com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui'>
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
     <ui:style>
         .marginLeft {
             margin-left: 50px;
         }
-        .upload {
-            margin-top: 25px;
-            margin-left: 25px;
+        .marginTop {
+            margin-top: 17px
         }
         .btnPanel2 td {
             margin-top: 25px;
@@ -23,7 +20,7 @@
         <g:HorizontalPanel width="100%" height="100%">
             <g:cell width="25%" height="100%">
                 <g:VerticalPanel width="100%" height="100%">
-                    <g:Label text="Графы"/>
+                    <g:Label text="Отчеты"/>
                     <g:cell height="92%">
                         <g:ListBox width="100%" height="100%" visibleItemCount="30" ui:field="subreportListBox"/>
                     </g:cell>
@@ -39,10 +36,8 @@
             </g:cell>
             <g:cell width="75%">
                 <g:FlowPanel ui:field="attrPanel" addStyleNames="{style.marginLeft}">
-                    <g:Label height="50px" text="Список атрибутов:"/>
-
-                    <g:HorizontalPanel height="30px">
-                        <g:Label width="150px">Наименование отчета</g:Label>
+                    <g:HorizontalPanel height="30px" addStyleNames="{style.marginTop}">
+                        <g:Label width="150px">Наименование</g:Label>
                         <g:TextBox width="600px" ui:field="nameBox"/>
                     </g:HorizontalPanel>
 

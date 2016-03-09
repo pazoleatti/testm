@@ -10,8 +10,6 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
@@ -271,12 +269,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
                                                               String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         PreparedStatementData ps = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, pagingParams, isSortAscending);
-        RefBook refBook = get(refBookId);
+        RefBook refBookClone = SerializationUtils.clone(get(refBookId));
         if (version == null) {
-            refBook.getAttributes().add(RefBook.getVersionFromAttribute());
-            refBook.getAttributes().add(RefBook.getVersionToAttribute());
+            refBookClone.setAttributes(new ArrayList<RefBookAttribute>());
+            refBookClone.getAttributes().addAll(get(refBookId).getAttributes());
+            refBookClone.getAttributes().add(RefBook.getVersionFromAttribute());
+            refBookClone.getAttributes().add(RefBook.getVersionToAttribute());
         }
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBookClone));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справочнике
         PreparedStatementData psForCount = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, null, true);
@@ -1382,6 +1382,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                                                          PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, null, sortAttribute, filter, pagingParams, true);
         RefBook refBookClone = SerializationUtils.clone(get(refBookId));
+        refBookClone.setAttributes(new ArrayList<RefBookAttribute>());
+        refBookClone.getAttributes().addAll(get(refBookId).getAttributes());
         refBookClone.getAttributes().add(RefBook.getVersionFromAttribute());
         refBookClone.getAttributes().add(RefBook.getVersionToAttribute());
 
@@ -1396,6 +1398,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long refBookId, Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         PreparedStatementData ps = getRefBookSql(refBookId, null, recordId, null, sortAttribute, filter, pagingParams, true);
         RefBook refBookClone = SerializationUtils.clone(get(refBookId));
+        refBookClone.setAttributes(new ArrayList<RefBookAttribute>());
+        refBookClone.getAttributes().addAll(get(refBookId).getAttributes());
         refBookClone.getAttributes().add(RefBook.getVersionFromAttribute());
         refBookClone.getAttributes().add(RefBook.getVersionToAttribute());
 
@@ -1656,20 +1660,22 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 for (int j = 0; j < uniqueAttributesValues.size(); j++) {
                     Pair<RefBookAttribute, RefBookValue> pair = uniqueAttributesValues.get(j);
                     RefBookAttribute attribute = pair.getFirst();
-                    sql.append(attribute.getAlias()).append(" = ? ");
 
                     /*************************************Добавление параметров****************************************/
                     if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                        sql.append("upper(").append(attribute.getAlias()).append(") = upper(?) ");
                         params.add(recordValues.get(attribute.getAlias()).getStringValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        params.add(recordValues.get(attribute.getAlias()).getReferenceValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                        params.add(recordValues.get(attribute.getAlias()).getNumberValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                        params.add(recordValues.get(attribute.getAlias()).getDateValue());
+                    } else {
+                        sql.append(attribute.getAlias()).append(" = ? ");
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                            params.add(recordValues.get(attribute.getAlias()).getReferenceValue());
+                        }
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                            params.add(recordValues.get(attribute.getAlias()).getNumberValue());
+                        }
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
+                            params.add(recordValues.get(attribute.getAlias()).getDateValue());
+                        }
                     }
                     /**************************************************************************************************/
 

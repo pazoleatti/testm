@@ -1274,8 +1274,4 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 throw new ServiceException("Неверный тип отчета(%s)", ddReportType.getReportType().getName());
         }
     }
-
-    public List<DeclarationDataReportType> getSpecificReportTypes() {
-        return null;
-    }
 }

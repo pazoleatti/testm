@@ -13,10 +13,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.design.JasperDesign;
-import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -47,6 +43,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
     private static final String DEC_DATA_EXIST_IN_TASK =
             "%s в подразделении \"%s\" в периоде \"%s %d%s\"%s%s";
+    private static final int SUBREPORT_NAME_MAX_VALUE = 1000;
+    private static final int SUBREPORT_ALIAS_MAX_VALUE = 128;
 
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
@@ -450,5 +448,51 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     public DeclarationSubreport getSubreportByAlias(int declarationTemplateId, String alias) {
         return declarationSubreportDao.getSubreportByAlias(declarationTemplateId, alias);
+    }
+
+    @Override
+    public void validateDeclarationTemplate(DeclarationTemplate declarationTemplate, Logger logger) {
+        List<DeclarationSubreport> subreports = declarationTemplate.getSubreports();
+        Set<String> checkSet = new HashSet<String>();
+
+        for (DeclarationSubreport subreport : subreports) {
+            if (subreport.getAlias() == null || subreport.getAlias().isEmpty()) {
+                logger.error(
+                        String.format(
+                                "Отчет №\"%s\". Поле \"Псевдоним\" обязательно для заполнения.",
+                                subreport.getOrder(), subreport.getAlias()
+                        )
+                );
+            } else {
+                if (!checkSet.add(subreport.getAlias())) {
+                    logger.error(
+                            String.format(
+                                    "Нарушено требование к уникальности, уже существует отчет с псевдонимом \"%s\" в данной версии макета!",
+                                    subreport.getAlias()
+                            )
+                    );
+                }
+                if (subreport.getAlias().getBytes().length > SUBREPORT_ALIAS_MAX_VALUE) {
+                    logger.error("Значение для псевдонима отчета \"" + subreport.getAlias() +
+                            "\" слишком велико (фактическое: " + subreport.getAlias().getBytes().length
+                            + ", максимальное: " + SUBREPORT_ALIAS_MAX_VALUE + ")");
+                }
+            }
+
+            if (subreport.getName() == null || subreport.getName().isEmpty()) {
+                logger.error(
+                        String.format(
+                                "Отчет №\"%s\". Поле \"Наименование\" обязательно для заполнения.",
+                                subreport.getOrder(), subreport.getName()
+                        )
+                );
+            } else {
+                if (subreport.getName().getBytes().length > SUBREPORT_NAME_MAX_VALUE) {
+                    logger.error("Значение для имени отчета \"" + subreport.getName() +
+                            "\" слишком велико (фактическое: " + subreport.getName().getBytes().length +
+                            ", максимальное: " + SUBREPORT_NAME_MAX_VALUE + ")");
+                }
+            }
+        }
     }
 }

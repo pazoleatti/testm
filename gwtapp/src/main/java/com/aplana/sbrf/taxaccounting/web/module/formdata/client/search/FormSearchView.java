@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.search;
 
 import com.aplana.gwt.client.ModalWindow;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResult;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
@@ -174,7 +175,11 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     @UiHandler("search")
     public void onSearchClicked(ClickEvent event){
         if (!filterText.getText().isEmpty()){
-            getUiHandlers().onRangeChange(0, pager.getPageSize());
+            if (filterText.getText().length()>=3) {
+                getUiHandlers().onRangeChange(0, pager.getPageSize());
+            } else {
+                Dialog.warningMessage("Слишком короткая строка запроса. Для поиска наберите не менее 3-х символов.");
+            }
         } else {
             clearTableData();
         }

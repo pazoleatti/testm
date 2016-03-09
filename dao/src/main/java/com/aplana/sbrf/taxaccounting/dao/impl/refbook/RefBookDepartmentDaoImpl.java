@@ -89,10 +89,17 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         for (final RefBookAttribute attribute : uniqueAttrs) {
             String querySql;
             Object value = null;
-            querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
-                    idOddsTag,
-                    andTag,
-                    "t." + attribute.getAlias() + " = ?" );
+            if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
+                        idOddsTag,
+                        andTag,
+                        "upper(t." + attribute.getAlias() + ") = upper(?)");
+            } else {
+                querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
+                        idOddsTag,
+                        andTag,
+                        "t." + attribute.getAlias() + " = ?");
+            }
             Map<String, RefBookValue> values = records.get(0).getValues();
 
             if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {

@@ -2,25 +2,19 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.gwt.client.mask.ui.YearMaskBox;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateMainPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.BaseTab;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.SimpleTabPanel;
-import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.editor.client.Editor;
-import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -43,28 +37,14 @@ public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationT
 
     interface Binder extends UiBinder<Widget, DeclarationTemplateMainView> { }
 
-
     interface UrlTemplates extends SafeHtmlTemplates {
-        @Template("download/downloadByUuid/{0}")
-        SafeHtml getDownloadUrl(String uuid);
-
-        @Template("download/declarationTemplate/downloadDect/{0}")
-        SafeHtml getDownloadDTUrl(int dtId);
-
-        @Template("download/uploadJrxml/{0}")
-        SafeHtml getUploadJrxmlUrl(int dtId);
-
-        @Template("download/uploadXsd/{0}")
-        SafeHtml getUploadXsdlUrl(int dtId);
-
         @Template("download/declarationTemplate/uploadDect/{0}")
         SafeHtml getUploadDTUrl(int dtId);
     }
 
     private static final UrlTemplates urlTemplates = GWT.create(UrlTemplates.class);
-	//private final MyDriver driver = GWT.create(MyDriver.class);
 
-    private final static int DEFAULT_TABLE_TOP_POSITION = 140;
+    private final static int DEFAULT_TABLE_TOP_POSITION = 0;
     private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
 
 	@UiField
@@ -88,7 +68,6 @@ public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationT
     @UiField
     LinkAnchor returnAnchor;
 
-
     @UiField
     @Editor.Ignore
     SimpleTabPanel tabPanel;
@@ -98,7 +77,6 @@ public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationT
 	public DeclarationTemplateMainView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
         FormElement.as(uploadDectFile.getElement()).setAcceptCharset("UTF-8");
-		//driver.initialize(this);
 	}
 
     private int templateId;
@@ -166,12 +144,12 @@ public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationT
      * @param isLockInfoVisible показано ли сообщение
      */
     private void changeTableTopPosition(Boolean isLockInfoVisible) {
-        Style formDataTableStyle = tabPanel.getElement().getStyle();
+        Style tabPanelStyle = tabPanel.getElement().getStyle();
         int downShift = 0;
         if (isLockInfoVisible){
             downShift = LOCK_INFO_BLOCK_HEIGHT;
         }
-        //formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
+        tabPanelStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
     }
 
     @UiHandler("downloadDectButton")
@@ -184,7 +162,6 @@ public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationT
 
     @UiHandler("saveButton")
 	public void onSave(ClickEvent event){
-		//driver.flush();
         getUiHandlers().save();
 	}
 

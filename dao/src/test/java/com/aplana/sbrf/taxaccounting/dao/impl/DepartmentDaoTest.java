@@ -61,7 +61,7 @@ public class DepartmentDaoTest {
     @Test
     public void getSbrfCode() {
         Department department;
-        department = departmentDao.getDepartmentBySbrfCode("23");
+        department = departmentDao.getDepartmentBySbrfCode("tB3");
         Assert.assertNotNull(department);
         Assert.assertTrue(true);
     }
@@ -79,7 +79,7 @@ public class DepartmentDaoTest {
         List<Integer> result = departmentDao.getDepartmentIdsByType(DepartmentType.ROOT_BANK.getCode());
         Assert.assertEquals(1, result.size());
         result = departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode());
-        Assert.assertEquals(2, result.size());
+        Assert.assertEquals(3, result.size());
         result = departmentDao.getDepartmentIdsByType(DepartmentType.CSKO_PCP.getCode());
         Assert.assertEquals(3, result.size());
         result = departmentDao.getDepartmentIdsByType(DepartmentType.MANAGEMENT.getCode());
@@ -91,7 +91,7 @@ public class DepartmentDaoTest {
         List<Department> result = departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode());
         Assert.assertEquals(1, result.size());
         result = departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode());
-        Assert.assertEquals(2, result.size());
+        Assert.assertEquals(3, result.size());
         result = departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode());
         Assert.assertEquals(3, result.size());
         result = departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode());

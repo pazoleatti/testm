@@ -51,6 +51,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
+        declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
+        checkError(logger, SAVE_MESSAGE);
         Date dbVersionBeginDate = declarationTemplateService.get(declarationTemplate.getId()).getVersion();
         Date dbVersionEndDate = declarationTemplateService.getDTEndDate(declarationTemplate.getId());
         if (dbVersionBeginDate.compareTo(declarationTemplate.getVersion()) !=0
@@ -107,6 +109,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
+        declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
+        checkError(logger, SAVE_MESSAGE);
         DeclarationType type = declarationTemplate.getType();
         type.setStatus(VersionedObjectStatus.NORMAL);
         type.setName(declarationTemplate.getName() != null && !declarationTemplate.getName().isEmpty()?declarationTemplate.getName():"");
@@ -126,6 +130,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
+        declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
         checkError(logger, SAVE_MESSAGE);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
         versionOperatingService.isIntersectionVersion(0, declarationTemplate.getType().getId(),

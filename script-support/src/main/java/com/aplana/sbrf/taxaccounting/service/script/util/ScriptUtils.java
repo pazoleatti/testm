@@ -101,9 +101,8 @@ public final class ScriptUtils {
     public static final String WRONG_DATA_PARSE = "Отсутствие значения после обработки потока данных!";
     public static final String EMPTY_FILE_NAME = "Имя файла не должно быть пустым!";
     public static final String EMPTY_INPUT_STREAM = "Поток данных пуст!";
-    public static final String WRONG_FORMAT_FILE = "Неверная структура загружаемого файла! ";
-    public static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
-    public static final String WRONG_RNU_FORMAT = "Выбранный файл не соответствует формату rnu!";
+    public static final String WRONG_FILE_FORMAT = "Неверная структура загружаемого файла!";
+    public static final String WRONG_FILE_EXTENSION = "Выбранный файл не соответствует формату %s!";
     public static final String WRONG_FIXED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
     public static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
     public static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
@@ -1217,7 +1216,7 @@ public final class ScriptUtils {
         checkBeforeGetXml(inputStream, fileName);
 
         if (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx") && !fileName.endsWith(".xlsm")) {
-            throw new ServiceException(WRONG_XLS_FORMAT);
+            throw new ServiceException(WRONG_FILE_EXTENSION, "xls/xlsx/xlsm");
         }
 
         String xmlString;
@@ -1239,7 +1238,7 @@ public final class ScriptUtils {
         checkBeforeGetXml(inputStream, fileName);
 
         if (!fileName.endsWith(".rnu")) {
-            throw new ServiceException(WRONG_RNU_FORMAT);
+            throw new ServiceException(WRONG_FILE_EXTENSION, "rnu");
         }
 
         String xmlString;
@@ -1380,7 +1379,7 @@ public final class ScriptUtils {
     public static void checkTF(BufferedInputStream inputStream, String fileName) {
         checkBeforeGetXml(inputStream, fileName);
         if (fileName != null && !fileName.toLowerCase().endsWith(".rnu")) {
-            throw new ServiceException(WRONG_RNU_FORMAT);
+            throw new ServiceException(WRONG_FILE_EXTENSION, "rnu");
         }
     }
 
@@ -1603,8 +1602,8 @@ public final class ScriptUtils {
         if (fileName == null || fileName.equals("")) {
             throw new ServiceException(EMPTY_FILE_NAME);
         }
-        if (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx") && !fileName.endsWith(".xlsm")) {
-            throw new ServiceException(WRONG_XLS_FORMAT);
+        if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xlsm")) {
+            throw new ServiceException(WRONG_FILE_EXTENSION, "xlsx/xlsm");
         }
         OPCPackage pkg = null;
         XSSFReader r = null;
@@ -1630,7 +1629,7 @@ public final class ScriptUtils {
             sheetSource = new InputSource(sheet1);
             parser.parse(sheetSource);
         } catch (InvalidFormatException e) {
-            throw new ServiceException(WRONG_FORMAT_FILE);
+            throw new ServiceException(WRONG_FILE_FORMAT);
         } finally {
             // освобождение ресурсов для экономии памяти
             if (sheet1 != null) {

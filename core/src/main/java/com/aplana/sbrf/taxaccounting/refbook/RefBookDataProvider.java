@@ -308,6 +308,7 @@ public interface RefBookDataProvider {
      * @param attributePairs связки атрибут-запись справочника
      * @return значения для связок
      */
+    @Deprecated
     Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs);
 
     /**

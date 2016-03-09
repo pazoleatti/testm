@@ -16,3 +16,5 @@ INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_cod
   VALUES (5, 'ЦСКО 1', 3, 3, NULL, NULL, NULL, 1, 5, 0);
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code, garant_use)
   VALUES (6, 'ЦСКО 1', 2, 3, NULL, NULL, NULL, 2, 6, 0);
+INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code, garant_use)
+  VALUES (7, 'ТБ3', 1, 2, NULL, NULL, 'tb3', 2, 3, 0);

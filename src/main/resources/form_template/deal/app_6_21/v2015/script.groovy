@@ -388,12 +388,12 @@ void importData() {
         }
         rowIndex++
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+        if (rowValues[INDEX_FOR_SKIP]?.trim()?.equalsIgnoreCase("Итого")) {
             totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
             allValues.remove(rowValues)
             rowValues.clear()
             continue
-        } else if (rowValues[INDEX_FOR_SKIP] == "Подитог") {
+        } else if (rowValues[INDEX_FOR_SKIP]?.trim()?.equalsIgnoreCase("Подитог")) {
             //для расчета уникального среди групп(groupColumns) ключа берем строку перед Подитоговой
             def tmpRowValue = rows.get(rows.size() - 1)
             def str = ''

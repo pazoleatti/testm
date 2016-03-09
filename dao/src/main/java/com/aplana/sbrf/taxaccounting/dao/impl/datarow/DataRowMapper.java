@@ -1,14 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.AutoNumerationColumn;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.ColumnType;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DataRowType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.NumerationType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -46,8 +39,8 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		DECIMAL_FORMAT = new DecimalFormat("#0.#", symbols);
 		DECIMAL_FORMAT.setParseBigDecimal(true);
 		DECIMAL_FORMAT.setDecimalSeparatorAlwaysShown(false);
-		DECIMAL_FORMAT.setMaximumIntegerDigits(19);
-		DECIMAL_FORMAT.setMaximumFractionDigits(19);
+		DECIMAL_FORMAT.setMaximumIntegerDigits(NumericColumn.MAX_LENGTH-NumericColumn.MAX_PRECISION);
+		DECIMAL_FORMAT.setMaximumFractionDigits(NumericColumn.MAX_PRECISION);
 	}
 
 	/**

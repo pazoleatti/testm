@@ -237,7 +237,7 @@ def calc19 (def row) {
 def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
-    totalRow.fix = 'Итого'
+    totalRow.fix = 'ИТОГО :'
     totalRow.getCell('fix').colSpan = 2
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
@@ -292,7 +292,8 @@ void importData() {
         }
         rowIndex++
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+        value = rowValues[INDEX_FOR_SKIP]?.trim()
+        if (value?.equalsIgnoreCase("Итого") || value?.equalsIgnoreCase("ИТОГО :")) {
             totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
 
             allValues.remove(rowValues)
