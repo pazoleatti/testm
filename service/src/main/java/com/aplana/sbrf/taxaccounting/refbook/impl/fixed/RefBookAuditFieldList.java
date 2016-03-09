@@ -49,8 +49,11 @@ public class RefBookAuditFieldList extends AbstractPermanentRefBook {
                 records.add(record);
             }
         } else {
-            for (AuditFieldList item : AuditFieldList.getSortedValues()) {
-                Long id = Long.valueOf(item.getId());
+			AuditFieldList[] values = AuditFieldList.getSortedValues();
+            for (int i = 0; i < values.length; i++)
+			{
+				AuditFieldList item = values[i];
+				Long id = Long.valueOf(item.getId());
 
                 Map<String, RefBookValue> record = refBook.createRecord();
                 record.get(RefBook.RECORD_ID_ALIAS).setValue(id);

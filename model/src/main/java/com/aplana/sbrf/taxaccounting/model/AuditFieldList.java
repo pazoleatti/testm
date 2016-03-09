@@ -23,10 +23,9 @@ public enum AuditFieldList {
     FORM_KIND(10, "Тип налоговой формы", 7),
     IP(11, "IP пользователя", 12);
 
-
     private long id;
     private String name;
-    private int ordering;
+    private Integer ordering;
 
     AuditFieldList(long id, String name, int ordering) {
         this.id = id;
@@ -50,11 +49,11 @@ public enum AuditFieldList {
         this.name = name;
     }
 
-    public int getOrdering() {
+    public Integer getOrdering() {
         return ordering;
     }
 
-    public void setOrdering(int ordering) {
+    public void setOrdering(Integer ordering) {
         this.ordering = ordering;
     }
 
@@ -72,11 +71,7 @@ public enum AuditFieldList {
         Arrays.sort(values, new Comparator<AuditFieldList>() {
             @Override
             public int compare(AuditFieldList o1, AuditFieldList o2) {
-                if (o1.getOrdering() > o2.getOrdering()) {
-                    return 1;
-                } else {
-                    return -1;
-                }
+				return o1.getOrdering().compareTo(o2.getOrdering());
             }
         });
         return values;
