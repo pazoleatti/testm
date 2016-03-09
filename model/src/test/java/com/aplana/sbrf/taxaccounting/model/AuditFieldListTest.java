@@ -25,6 +25,8 @@ public class AuditFieldListTest {
 		assertEquals(DECLARATION_TYPE, values[8]);
 		assertEquals(USER, values[9]);
 		assertEquals(ROLE, values[10]);
-		assertEquals(IP, values[11]);
+		assertEquals(USER_DEPARTMENT, values[11]);
+		assertEquals(IP, values[12]);
+		assertEquals(SERVER, values[13]);
 	}
 }

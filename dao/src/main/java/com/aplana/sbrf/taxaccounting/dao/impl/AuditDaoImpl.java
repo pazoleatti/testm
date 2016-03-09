@@ -606,10 +606,16 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             }
 
             if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.ROLE.getId()) ) {
-                ps.appendQuery(String.format(" OR lower(%sroles) LIKE lower(?)", prefix));
-                ps.addParam("%"+filter+"%");
-            }
+					|| logSystemFilter.getAuditFieldList().contains(AuditFieldList.ROLE.getId()) ) {
+				ps.appendQuery(String.format(" OR lower(%sroles) LIKE lower(?)", prefix));
+				ps.addParam("%"+filter+"%");
+			}
+
+			if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+					|| logSystemFilter.getAuditFieldList().contains(AuditFieldList.USER_DEPARTMENT.getId()) ) {
+				ps.appendQuery(String.format(" OR lower(%suser_department_name) LIKE lower(?)", prefix));
+				ps.addParam("%"+filter+"%");
+			}
 
             if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
                     || logSystemFilter.getAuditFieldList().contains(AuditFieldList.EVENT.getId()) ) {
@@ -634,6 +640,12 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 ps.appendQuery(String.format(" OR lower(%sip) LIKE lower(?)", prefix));
                 ps.addParam("%"+filter+"%");
             }
+
+			if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+					|| logSystemFilter.getAuditFieldList().contains(AuditFieldList.SERVER.getId()) ) {
+				ps.appendQuery(String.format(" OR lower(%sserver) LIKE lower(?)", prefix));
+				ps.addParam("%"+filter+"%");
+			}
 
             if (!logSystemFilter.getAuditFieldList().isEmpty())
                 ps.appendQuery(")");

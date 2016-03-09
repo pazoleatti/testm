@@ -18,10 +18,12 @@ public enum AuditFieldList {
     DEPARTMENT(5, "Подразделение", 5),
     USER(6, "Пользователь", 10),
     ROLE(7, "Роль пользователя", 11),
+	USER_DEPARTMENT(14, "Подразделение пользователя", 12),
     EVENT(8, "Событие", 2),
     NOTE(9, "Текст события", 3),
     FORM_KIND(10, "Тип налоговой формы", 7),
-    IP(11, "IP пользователя", 12);
+    IP(11, "IP пользователя", 13),
+	SERVER(13, "Сервер", 14);
 
     private long id;
     private String name;
