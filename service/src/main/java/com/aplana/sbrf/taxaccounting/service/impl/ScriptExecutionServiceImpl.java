@@ -210,14 +210,14 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                             try {
                                 declarationTemplateService.updateScript(declarationTemplate, logger);
                             } catch (ServiceLoggerException e) {
-                                logger.error("Макет %s \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.",
+                                logger.error("%s \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.",
                                         declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "Макет декларации" : "Макет уведомления",
                                         declarationTemplate.getName(), scriptName);
                             }
                             logger.info("Выполнен импорт скрипта для макета декларации формы \"%s\"", declarationTemplate.getName());
                         } else {
                             logger.error(LOCK_MESSAGE,
-                                    declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "декларации" : "уведомления",
+                                    declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "Макет декларации" : "Макет уведомления",
                                     declarationTemplate.getName(), lockUser);
                         }
 
