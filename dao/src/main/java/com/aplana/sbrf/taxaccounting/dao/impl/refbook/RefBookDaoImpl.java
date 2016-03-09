@@ -1660,20 +1660,22 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 for (int j = 0; j < uniqueAttributesValues.size(); j++) {
                     Pair<RefBookAttribute, RefBookValue> pair = uniqueAttributesValues.get(j);
                     RefBookAttribute attribute = pair.getFirst();
-                    sql.append(attribute.getAlias()).append(" = ? ");
 
                     /*************************************Добавление параметров****************************************/
                     if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                        sql.append("upper(").append(attribute.getAlias()).append(") = upper(?) ");
                         params.add(recordValues.get(attribute.getAlias()).getStringValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        params.add(recordValues.get(attribute.getAlias()).getReferenceValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                        params.add(recordValues.get(attribute.getAlias()).getNumberValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                        params.add(recordValues.get(attribute.getAlias()).getDateValue());
+                    } else {
+                        sql.append(attribute.getAlias()).append(" = ? ");
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                            params.add(recordValues.get(attribute.getAlias()).getReferenceValue());
+                        }
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                            params.add(recordValues.get(attribute.getAlias()).getNumberValue());
+                        }
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
+                            params.add(recordValues.get(attribute.getAlias()).getDateValue());
+                        }
                     }
                     /**************************************************************************************************/
 

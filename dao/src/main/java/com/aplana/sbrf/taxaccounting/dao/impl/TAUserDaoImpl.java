@@ -101,7 +101,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
     @Cacheable(value = "User", key = "'login_'+#login")
 	public int getUserIdByLogin(String login) {
 		try {
-			return getJdbcTemplate().queryForInt("select id from sec_user where lower(login) = ?", login.toLowerCase());
+			return getJdbcTemplate().queryForObject("select id from sec_user where lower(login) = lower(?)", new Object[] {login.toLowerCase()}, Integer.class);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Пользователь с login = " + login + " не найден. " + e.toString());
 		}
