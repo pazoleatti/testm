@@ -168,7 +168,7 @@ public class FormDataDaoTest {
 
     @Test
     public void getFormDataIdsTest() {
-        List<Long> list1 = Arrays.asList(1L, 11L, 12L, 13L, 1000L, 329L, 3291L, 3292L, 330L);
+        List<Long> list1 = Arrays.asList(1L, 11L, 12L, 13L, 1000L, 329L, 3291L, 3292L, 330L, 331L);
         List<Long> list2 = Arrays.asList(14L, 15L, 16L, 17L, 18L, 19L, 20L, 402L);
         assertEquals(list1, formDataDao.getFormDataIds(1, FormDataKind.SUMMARY, 1));
         assertEquals(list2, formDataDao.getFormDataIds(2, FormDataKind.PRIMARY, 1));
@@ -179,7 +179,7 @@ public class FormDataDaoTest {
         List<Integer> list = Arrays.asList(1, 11, 12, 13, 1000);
         List<Long> formDataIdList = formDataDao.getFormDataIds(Arrays.asList(TaxType.values()), list);
         assertArrayEquals(new Long[]{1L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L, 20L, 301L, 302L, 303L,
-                304L, 305L, 306L, 307L, 308L,  329L, 330L, 402L, 1000L, 3291L, 3292L}, formDataIdList.toArray());
+                304L, 305L, 306L, 307L, 308L,  329L, 330L, 331L, 402L, 1000L, 3291L, 3292L}, formDataIdList.toArray());
     }
 
     @Test
