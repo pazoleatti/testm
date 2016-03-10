@@ -1,10 +1,10 @@
 package form_template.deal.app_6_17.v2015
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -68,6 +68,10 @@ switch (formDataEvent) {
         importData()
         formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
         break
@@ -94,7 +98,7 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'regCountryCode', 'pr
 
 //Непустые атрибуты
 @Field
-def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'currencyCode', 'dealCountryCode', 'price', 'cost', 'dealDoneDate']
+def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'currencyCode', 'dealCountryCode', 'income', 'outcome', 'price', 'cost', 'dealDoneDate']
 
 // Группируемые атрибуты (графа 2, 6, 7, 10, 11)
 @Field
@@ -157,52 +161,49 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        // 1. Проверка на заполнение графы
+        // Проверка на заполнение графы
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // 2. Проверка на заполнение доходов и расходов
-        boolean noOne = (row.income == null && row.outcome == null)
-        boolean both = (row.income != null && row.outcome != null)
-        if (noOne) {
-            String msg1 = getColumnName(row, 'outcome')
-            String msg2 = getColumnName(row, 'income')
-            logger.error("Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
-        }
-        if (both) {
-            String msg1 = getColumnName(row, 'outcome')
-            String msg2 = getColumnName(row, 'income')
-            logger.error("Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
-        }
-
-        // 3. Проверка положительной суммы дохода/расхода
-        if (!noOne && !both) {
-            sum = (row.income != null) ? row.income : row.outcome
-            if (sum < 0) {
-                msg = (row.income != null) ? getColumnName(row, 'income') : getColumnName(row, 'outcome')
-                logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
-            }
-        }
-
-        // 4. Проверка цены и стоимости
-        if (!noOne && !both) {
-            boolean comparePrice = row.price && row.price != sum
-            boolean compareCost = row.cost && row.cost != sum
-            if (comparePrice && compareCost) {
-                msg = (row.income != null) ? getColumnName(row, 'income') : getColumnName(row, 'outcome')
-                String msg1 = getColumnName(row, 'price')
-                String msg2 = getColumnName(row, 'cost')
-                logger.error("Строка $rowNum: Значение графы «$msg1» и графы «$msg2» должно быть равно значению графы «$msg»!")
-            }
-        }
-
-        // 5. Проверка корректности даты договора
+        // Проверка корректности даты договора
         checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
-        // 6. Проверка корректности даты заключения сделки
+        // Проверка корректности даты заключения сделки
         checkDatePeriod(logger, row, 'dealDate', 'docDate', getReportPeriodEndDate(), true)
 
-        // 7. Проверка корректности даты совершения сделки
-        checkDatePeriod(logger, row, 'dealDoneDate', 'dealDate', getReportPeriodEndDate(), true)
+        if (row.income != null && row.outcome != null){
+            String msg1 = getColumnName(row, 'price')
+            String msg2 = getColumnName(row, 'income')
+            String msg3 = getColumnName(row, 'outcome')
+
+            // Проверка заполнения сумм доходов и расходов
+            if(row.income == 0 && row.outcome  == 0){
+                logger.error("Строка $rowNum: граф «$msg2», «$msg3» не должны одновременно быть равны «0»!");
+            }
+
+            // Проверка значения графы 14
+            if (row.income && row.outcome == 0 && row.price != row.income) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
+            } else if (row.income == 0 && row.outcome && row.price != row.outcome) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg3»!")
+            } else if (row.income && row.outcome && row.price != (row.income - row.outcome).abs()) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно модулю разности значений граф «$msg2» и «$msg3»!")
+            }
+            // TODO задал вопрос Сергею: "в 6.17 ЛП 4 не полная: нехватает общего ИНАЧЕ : проверяемая графа = null"
+
+            // Проверка значения графы 15
+            msg1 = getColumnName(row, 'cost')
+            if (row.income && row.outcome == 0 && row.cost != row.income) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
+            } else if (row.income == 0 && row.outcome && row.cost != row.outcome) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg3»!")
+            } else if (row.income && row.outcome && row.cost != (row.income - row.outcome).abs()) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно модулю разности значений граф «$msg2» и «$msg3»!")
+            }
+            // TODO задал вопрос Сергею: "в 6.17 ЛП 4 не полная: нехватает общего ИНАЧЕ : проверяемая графа = null"
+        }
+
+        // Проверка корректности даты совершения сделки
+        checkDatePeriodExt(logger, row, 'dealDoneDate', 'dealDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
     }
 }
 
@@ -210,20 +211,22 @@ void logicCheck() {
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (row in dataRows) {
-        // Расчет поля "Цена", "Стоимость"
-        if(row.income != null && row.outcome == null){
-            row.price = row.income
-            row.cost = row.income
-        }
-        else if(row.outcome != null && row.income == null){
-            row.price = row.outcome
-            row.cost = row.outcome
-
-        } else if(row.outcome == null && row.income == null){
-            row.price = null
-            row.cost = null
-        }
+        // Расчет поля "Цена"
+        row.price = calc1415(row)
+        // Расчет поля "Стоимость"
+        row.cost = calc1415(row)
     }
+}
+
+def BigDecimal calc1415(def row) {
+    if (row.income && row.outcome == 0) {
+        return row.income
+    } else if (row.income == 0 && row.outcome) {
+        return row.outcome
+    } else if (row.income && row.outcome) {
+        return (row.income - row.outcome).abs()
+    }
+    return null
 }
 
 // Получение импортируемых данных
@@ -427,6 +430,126 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.dealDoneDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+void importTransportData() {
+    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+
+    int COLUMN_COUNT = 16
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
+
+    String[] rowCells
+    int fileRowIndex = 2    // номер строки в файле (1, 2, ..)
+    int rowIndex = 0        // номер строки в НФ (1, 2, ..)
+    def newRows = []
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (rowCells == null || !isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                break
+            }
+            def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex, false)
+            if (newRow) {
+                newRows.add(newRow)
+            }
+        }
+    } finally {
+        reader.close()
+    }
+
+    // отображать ошибки переполнения разряда
+    showMessages(newRows, logger)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
+    }
+}
+
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return null
+    }
+
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+
+    def int colOffset = 1
+
+    if (!isTotal) {
+        def String iksrName = getColumnName(newRow, 'iksr')
+        def nameFromFile = pure(rowCells[2])
+        def recordId = getTcoRecordId(nameFromFile, pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+        // графа 2
+        newRow.name = recordId
+        // графа 5
+        newRow.docNumber = pure(rowCells[6])
+        // графа 6
+        newRow.docDate =  parseDate(pure(rowCells[7]), "dd.MM.yyyy", fileRowIndex, 7 + colOffset, logger, true)
+        // графа 7
+        newRow.dealNumber =pure(rowCells[8])
+        // графа 8
+        newRow.dealDate = parseDate(pure(rowCells[9]), "dd.MM.yyyy", fileRowIndex, 9 + colOffset, logger, true)
+        // графа 9
+        newRow.currencyCode = getRecordIdImport(15, 'CODE_2', pure(rowCells[10]), fileRowIndex, 10 + colOffset, false)
+        //графа 10
+        newRow.dealCountryCode = getRecordIdImport(15, 'CODE_2', pure(rowCells[11]), fileRowIndex, 11 + colOffset, false)
+        // графа 11
+        newRow.income = parseNumber(pure(rowCells[12]), fileRowIndex, 12 + colOffset, logger, true)
+        // графа 12
+        newRow.outcome = parseNumber(pure(rowCells[13]), fileRowIndex, 13 + colOffset, logger, true)
+        // графа 13
+        newRow.price = parseNumber(pure(rowCells[14]), fileRowIndex, 14 + colOffset, logger, true)
+        // графа 14
+        newRow.cost = parseNumber(pure(rowCells[15]), fileRowIndex, 15 + colOffset, logger, true)
+        // графа 15
+        newRow.dealDoneDate = parseDate(pure(rowCells[16]), "dd.MM.yyyy", fileRowIndex, 16 + colOffset, logger, true)
+    }
+
+    return newRow
+}
+
+String pure(String cell) {
+    return StringUtils.cleanString(cell)?.intern()
+}
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
 }
 
 // Сортировка групп и строк

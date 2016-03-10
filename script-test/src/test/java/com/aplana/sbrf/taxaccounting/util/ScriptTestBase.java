@@ -124,19 +124,20 @@ public abstract class ScriptTestBase {
      * в xls файле должно быть слева направо сверху вниз:
      * 1. для строк : string1, string2, ..., stringN
      * 2. для чисел : 1, 2, ..., N
-     * 3. для дат : 01.01.2015, 02.01.2015, ..., NN.NN.2015
+     * 3. для дат : 01.01.year, 02.01.year, ..., NN.NN.year
      * остальные типы не проверяются
      *
      * @param aliases  алиасы граф для проверки
      * @param rowCount ожидаемое количесвто строк в НФ
+     * @param year год для проверки дат
      * @throws java.text.ParseException
      */
-    protected void defaultCheckLoadData(List<String> aliases, int rowCount) {
+    protected void defaultCheckLoadData(List<String> aliases, int rowCount, String year) {
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         Calendar calendar = Calendar.getInstance();
         try {
-            calendar.setTime(sdf.parse("01.01.2015"));
+            calendar.setTime(sdf.parse("01.01."+year));
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -163,5 +164,9 @@ public abstract class ScriptTestBase {
             }
         }
         Assert.assertEquals(rowCount, dataRows.size());
+    }
+
+    protected void defaultCheckLoadData(List<String> aliases, int rowCount) {
+        defaultCheckLoadData(aliases, rowCount, "2015");
     }
 }
