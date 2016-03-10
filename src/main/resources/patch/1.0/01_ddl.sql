@@ -168,7 +168,7 @@ id number(9) not null,
 declaration_template_id number(9) not null,
 name varchar2(1000) not null,
 ord number(9) not null,
-alias varchar2(128),
+alias varchar2(128) not null,
 blob_data_id varchar2(36)
 );
  
