@@ -729,7 +729,10 @@ public class FormDataServiceImpl implements FormDataService {
     public FormData getFormData(TAUserInfo userInfo, long formDataId, boolean manual, Logger logger) {
         formDataAccessService.canRead(userInfo, formDataId);
         FormData formData = formDataDao.get(formDataId, manual);
-        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_LOAD, logger, null);
+        Map<String, Object> params = new HashMap<String, Object>();
+        ReportPeriod specialPeriod = new ReportPeriod();
+        params.put("specialPeriod", specialPeriod);
+        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_LOAD, logger, params);
         dataRowDao.refreshRefBookLinks(formData);
         return formData;
     }

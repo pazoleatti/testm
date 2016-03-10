@@ -39,6 +39,9 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
+    case FormDataEvent.AFTER_LOAD:
+        afterLoad()
+        break
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
@@ -485,4 +488,23 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.incomeCorrection = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+void afterLoad() {
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def year = reportPeriod.taxPeriod.year
+    def periodName = ""
+    switch (reportPeriod.order) {
+        case 1 : periodName = "первый квартал"
+            break
+        case 2 : periodName = "полугодие"
+            break
+        case 3 : periodName = "9 месяцев"
+            break
+        case 4 : periodName = "год"
+            break
+    }
+    specialPeriod.name = periodName
+    specialPeriod.calendarStartDate = Date.parse("dd.MM.yyyy", "01.01.$year")
+    specialPeriod.endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 }
