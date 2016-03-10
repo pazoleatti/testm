@@ -121,8 +121,8 @@
         <name>Количество</name>
         <order>13</order>
         <width>7</width>
-        <maxLength>9</maxLength>
-        <precision>2</precision>
+        <maxLength>11</maxLength>
+        <precision>4</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>

@@ -108,6 +108,7 @@ public final class ScriptUtils {
     public static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
     public static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
     public static final String CHECK_DATE_PERIOD = "Строка %d: Дата по графе «%s» должна принимать значение из диапазона: %s - %s!";
+    public static final String CHECK_DATE_PERIOD_EXT = "Строка %d: Дата по графе «%s» должна принимать значение из диапазона %s - %s и быть больше либо равна дате по графе «%s»!";
     @SuppressWarnings("unused")
     public static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна.";
     public static final String TRANSPORT_FILE_SUM_ERROR_1 = "Строка %d файла: Итоговое значение по графе «%s» (значение «%s») указано некорректно. Системой рассчитано значение «%s»";
@@ -1990,6 +1991,32 @@ public final class ScriptUtils {
                             getColumnName(row, startAlias),
                             formatDate(endDate, "dd.MM.yyyy")
                     ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+    }
+
+    /**
+     * Проверка нахождения даты в диапазоне и сравнение с другой графой
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param startAlias псевдоним графы даты начала периода
+     * @param endDate дата окончания периода текущей формы
+     * @param fatal фатально ли сообщение
+     */
+    public static void checkDatePeriodExt(Logger logger, DataRow<Cell> row, String alias, String startAlias, Date yearStartDate, Date endDate, boolean fatal) {
+        // дата проверяемой графы
+        Date docDate = row.getCell(alias).getDateValue();
+        // дата другой графы
+        Date startDate = row.getCell(startAlias).getDateValue();
+
+        if (docDate != null && startDate != null && (docDate.before(yearStartDate) || docDate.after(endDate) || docDate.before(startDate))) {
+            rowLog(logger, row, String.format(CHECK_DATE_PERIOD_EXT,
+                    row.getIndex(),
+                    getColumnName(row, alias),
+                    formatDate(yearStartDate, "dd.MM.yyyy"),
+                    formatDate(endDate, "dd.MM.yyyy"),
+                    getColumnName(row, startAlias)
+            ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
         }
     }
 

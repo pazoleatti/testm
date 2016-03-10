@@ -157,6 +157,9 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
+        // Проверка корректности даты договора
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
+
         // Проверка заполнения кода региона
         if (row.country == country643 && !row.region) {
             def msg = row.getCell('region').column.name
@@ -174,7 +177,13 @@ void logicCheck() {
             logger.error("Строка $rowNum: Должна быть заполнена графа «$msg1» или «$msg2»!")
         }
 
-        // 4. Проверка цены с учетом количества
+        // Проверка количества
+        if (row.count != null && row.count <= 0) {
+            def countName = row.getCell('count').column.name
+            logger.error("Строка $rowNum: Значение графы «$countName» должно быть больше «0»!")
+        }
+
+        // Проверка цены с учетом количества
         if (row.sum && row.count > 0 && row.price != round((BigDecimal) (row.sum / row.count), 2)) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('sum').column.name
@@ -183,7 +192,7 @@ void logicCheck() {
                     " если графа «$msg3» заполнена (значением > 0)!")
         }
 
-        // 5. Проверка цены без учета количества
+        // Проверка цены без учета количества
         if (row.sum != null && row.count == null && row.price != row.sum) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('sum').column.name
@@ -192,21 +201,18 @@ void logicCheck() {
                     " если графа «$msg3» не заполнена!")
         }
 
-        // 6. Проверка стоимости
+        // Проверка стоимости
         if (row.sum != null && row.cost != row.sum) {
             def msg1 = row.getCell('cost').column.name
             def msg2 = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
-        // 7. Проверка корректности даты договора
-        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
-
-        // 8. Проверка корректности даты совершения сделки
-        checkDatePeriod(logger, row, 'dealDoneDate', 'docDate', getReportPeriodEndDate(), true)
+        // Проверка корректности даты совершения сделки
+        checkDatePeriodExt(logger, row, 'dealDoneDate', 'docDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
     }
 
-    // 9. Проверка итоговых значений пофиксированной строке «Итого»
+    // Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
