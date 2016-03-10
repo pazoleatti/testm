@@ -1134,6 +1134,7 @@ public class FormDataServiceImpl implements FormDataService {
         for (String s : msgPull) {
             logger.info(s);
         }
+        checkSources(formData.getId(), formData.isManual(), userInfo, logger);
 
         //Удаление отчета НФ
         stateLogger.updateState("Удаление отчетов формы");
@@ -1149,7 +1150,6 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void checkCompose(final FormData formData, final TAUserInfo userInfo, Logger logger) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
         //1А. Отчетный период закрыт
         if (!departmentReportPeriod.isActive()) {
             throw new ServiceException("отчетный период закрыт, консолидация не может быть выполнена.");
