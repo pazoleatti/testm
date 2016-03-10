@@ -393,7 +393,7 @@ create table declaration_template (
   id       number(9) not null,
   status number(1) default 0 not null,
   version date not null,
-  name varchar2(600) not null,
+  name varchar2(1000) not null,
   create_script       clob,
   jrxml               varchar2(36),
   declaration_type_id number(9) not null,
@@ -410,6 +410,7 @@ comment on column declaration_template.XSD is 'XSD-схема';
 comment on column declaration_template.status is 'Статус версии (значения (-1, 0, 1, 2))';
 
 create sequence seq_declaration_template start with 10000;
+
 -----------------------------------------------------------------------------------------------------------------------------------
 create table declaration_data (
   id number(18) not null,
@@ -826,7 +827,7 @@ comment on column form_data_report.absolute is 'Режим вывода данн
 create table declaration_report
 (
 declaration_data_id number(18) not null,
-blob_data_id varchar2(36),
+blob_data_id varchar2(36) not null,
 type number(9) not null,
 subreport_id number(9)
 );
@@ -955,27 +956,6 @@ comment on column form_data_ref_book.record_id is 'Идентификатор з
 
 alter table form_data_ref_book add constraint form_data_ref_book_pk primary key (form_data_id, ref_book_id, record_id);
 --------------------------------------------------------------------------------------------------------
-create table log_clob_query 
-(
-id number(9) not null primary key, 
-form_template_id number(9), 
-sql_mode varchar2(10), 
-text_query clob, 
-log_date timestamp(6) default current_timestamp not null, 
-session_id number(18) default 0 not null);
-
-comment on table log_clob_query is 'Логирование DDL/DML запросов из ХП';
-comment on column log_clob_query.id is 'Идентификатор записи (seq_log_query)';
-comment on column log_clob_query.form_template_id is 'Идентификатор шаблона';
-comment on column log_clob_query.sql_mode is 'DDL/DML';
-comment on column log_clob_query.text_query is 'Текст запроса';
-comment on column log_clob_query.log_date is 'Дата/время начала обработки запроса';
-comment on column log_clob_query.session_id is 'Идентификатор сессии (seq_log_query_session)';
-
-create sequence seq_log_query start with 1;
-create sequence seq_log_query_session start with 1;
---------------------------------------------------------------------------------------------------------
-
 create table form_data_file
 (
 form_data_id number(18) not null,

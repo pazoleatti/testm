@@ -99,6 +99,8 @@ alter table form_column add constraint form_column_fk_attribute_id2 foreign key 
 alter table form_column add constraint form_column_fk_parent_id foreign key (parent_column_id) references form_column(id);
 alter table form_column add constraint form_column_chk_filt_parent check ((type='R' and ((parent_column_id is null) and (filter is not null)) or ((parent_column_id is not null) and (filter is null)) or ((parent_column_id is null) and (filter is null))) or (type<>'R'));
 alter table form_column add constraint form_column_chk_numrow check (numeration_row in (0, 1) or type <> 'A');
+alter table form_column add constraint form_column_unique_data_ord unique (form_template_id, data_ord);
+alter table form_column add constraint form_column_check_data_ord check (data_ord between 0 and 99);
 
 alter table department_type add constraint department_type_pk primary key (id);
 
@@ -231,7 +233,7 @@ alter table notification add constraint notification_fk_notify_role foreign key 
 alter table notification add constraint notification_chk_isread check (is_read in (0, 1));
 alter table notification add constraint notification_fk_blob_data_id foreign key (blob_data_id) references blob_data(id);
 alter table notification add constraint notification_chk_type check (type in (0, 1) and ((type = 0 and report_id is null) or type = 1));
-alter table notification add constraint notification_fk_report_id foreign key (report_id) references blob_data(id);
+alter table notification add constraint notification_fk_report_id foreign key (report_id) references blob_data (id) on delete set null;
 
 alter table event add constraint event_pk primary key (id);
 
@@ -332,3 +334,4 @@ create index i_notification_blob_data_id on notification(blob_data_id);
 create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
 create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 create index i_decl_subrep_blob_data_id on declaration_subreport(blob_data_id);
+create index i_notification_report_id on notification (report_id);
