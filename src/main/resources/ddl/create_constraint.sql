@@ -1,3 +1,5 @@
+--! Все закомментированные ограничения актуальны, но имеют Oracle-специфику, поэтому не могут быть использованы в unit-тестах.
+
 alter table form_kind add constraint form_kind_pk primary key (id);
 
 alter table tax_type add constraint tax_type_pk primary key(id);
@@ -10,8 +12,8 @@ create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, vers
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_fk_taxtype foreign key (tax_type) references tax_type(id);
 alter table form_type add constraint form_type_check_status check (status in (-1, 0, 1, 2));
-alter table form_type add constraint form_type_uniq_code unique(code);
 alter table form_type add constraint form_type_chk_is_ifrs check ((is_ifrs in (0,1) and tax_type='I') or (is_ifrs = 0 and tax_type<>'I'));
+--create unique index i_form_type_uniq_code on form_type (upper(code));
 
 alter table tax_period add constraint tax_period_pk primary key (id);
 alter table tax_period add constraint tax_period_fk_taxtype foreign key (tax_type) references tax_type(id);
