@@ -177,7 +177,7 @@ void logicCheck() {
 
             // Проверка заполнения сумм доходов и расходов
             if(row.income == 0 && row.outcome  == 0){
-                logger.error("Строка $rowNum: граф «$msg2», «$msg3» не должны одновременно быть равны «0»!");
+                logger.error("Строка $rowNum: Значения граф «$msg2», «$msg3» не должны одновременно быть равны «0»!");
             }
 
             // Проверка значения графы 14
@@ -188,7 +188,6 @@ void logicCheck() {
             } else if (row.income && row.outcome && row.price != (row.income - row.outcome).abs()) {
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно модулю разности значений граф «$msg2» и «$msg3»!")
             }
-            // TODO задал вопрос Сергею: "в 6.17 ЛП 4 не полная: нехватает общего ИНАЧЕ : проверяемая графа = null"
 
             // Проверка значения графы 15
             msg1 = getColumnName(row, 'cost')
@@ -199,7 +198,6 @@ void logicCheck() {
             } else if (row.income && row.outcome && row.cost != (row.income - row.outcome).abs()) {
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно модулю разности значений граф «$msg2» и «$msg3»!")
             }
-            // TODO задал вопрос Сергею: "в 6.17 ЛП 4 не полная: нехватает общего ИНАЧЕ : проверяемая графа = null"
         }
 
         // Проверка корректности даты совершения сделки
