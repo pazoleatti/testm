@@ -32,16 +32,16 @@ static void main(String[] args) {
             true  // скрипты
     ]
     String resourcePath = "./src/main/resources/com/aplana/sbrf/taxaccounting/"
-    String templatePath = "../src/main/resources/form_template/vat/vat_724_1_1/v2015/" // TODO поменять на путь до нужного макета
+    String templatePath = "../src/main/resources/form_template/income/reserve_debts_1/v2015/" // TODO поменять на путь до нужного макета
     def map = [ // TODO заполнить
                 // заполняем вручную
-                "%1%"  : '848',             // id типа НФ
-                "%2%"  : '(724.1.1) Корректировка сумм НДС и налоговых вычетов за прошедшие налоговые периоды', // имя типа НФ
-                "%3%"  : 'TaxType.VAT',     // вид налога
+                "%1%"  : '847',             // id типа НФ
+                "%2%"  : 'Сводный регистр налогового учета по формированию и использованию резерва по сомнительным долгам (с периода год 2015)', // имя типа НФ
+                "%3%"  : 'TaxType.INCOME',     // вид налога
                 "%4%"  : 'false',           // isIFRS
                 "%5%"  : '',                // имя ИФРС
-                "%26%" : '724.1.1',            // код НФ
-                "%6%"  : '848',             // id версии макета НФ
+                "%26%" : '',            // код НФ
+                "%6%"  : '847',             // id версии макета НФ
                 "%10%" : '01.01.2015',      // версия в формате 01.01.2015
                 "%11%" : 'false',           // ежемесячность
                 "%18%" : 'false',            // использование периода сравнения
@@ -49,7 +49,7 @@ static void main(String[] args) {
                 "%28%" : 'false'             // отображать кнопку "Обновить"
     ]
 
-    String outputFileName = "01_add_vat_724_1_1.txt" // TODO поменять имя выходного файла
+    String outputFileName = "add_reserve_debts_1.txt" // TODO поменять имя выходного файла
     def writer
     try {
         File templateFile = new File(resourcePath + "scriptExecution_template.txt")
@@ -111,8 +111,6 @@ static void main(String[] args) {
             sb.append("        formColumn.setOrder(${column.order})\n")
             sb.append("        formColumn.setName('${column.name.replaceAll(/"/, /\"/).replaceAll(/\n/, ' ').replaceAll(/ +/, ' ')}')\n")
             sb.append("        formColumn.setAlias('${column.alias}')\n")
-            // TODO метод "setColumnType" удален, так как выставление типа графы осуществляется в её конструкторе
-            sb.append("        formColumn.setColumnType(ColumnType.find{ it.title.equals('${column.columnType.title}')})\n")
             sb.append("        formColumn.setWidth(${column.getWidth()})\n")
             sb.append("        formColumn.setChecking(${column.checking})\n")
             switch (columnClassName) {

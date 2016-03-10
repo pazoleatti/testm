@@ -73,6 +73,7 @@ try {
     if (addColumns) {
         %13%
         formTemplate.getColumns().addAll(formColumns)
+        columnDaoImpl.calculateNewDataOrder(formColumns, [])
         columnDaoImpl.createFormColumns(formColumns, formTemplate)
 
 	  	referenceColumnMap.each { alias, parentAlias ->
