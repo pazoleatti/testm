@@ -51,18 +51,35 @@ alter table department_form_type drop column performer_dep_id;
 
 -----------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-13912 Изменение таблицы form_data_report для специфичных отчетов
-alter table form_data_report drop constraint form_data_rep_pk;
+set serveroutput on size 30000;
+begin
+	for x in (select data_type, nullable from user_tab_columns utc where table_name = 'FORM_DATA_REPORT' and column_name = 'TYPE') loop
+		if (x.data_type = 'NUMBER') then
+			begin
+				execute immediate 'alter table form_data_report drop constraint form_data_rep_pk';
 
-alter table form_data_report add type_num number(1);
-update form_data_report set type_num = type;
-alter table form_data_report drop column type;
-alter table form_data_report add type varchar2(50 char);
-comment on column form_data_report.type is 'Тип отчета (Excel/CSV/Специфичный отчет)';
+				execute immediate 'alter table form_data_report add type_num number(1)';
+				execute immediate 'update form_data_report set type_num = type';
+				execute immediate 'alter table form_data_report drop column type';
+				execute immediate 'alter table form_data_report add type varchar2(50 char)';
+				execute immediate 'comment on column form_data_report.type is ''Тип отчета (Excel/CSV/Специфичный отчет)''';
 
-update form_data_report set type = decode (type_num, 0, 'XLSM', 1, 'CSV');
-alter table form_data_report modify type not null;
-alter table form_data_report add constraint form_data_rep_pk primary key (form_data_id, type, manual, checking, absolute);
-alter table form_data_report drop column type_num;
+				execute immediate 'update form_data_report set type = decode (type_num, 0, ''XLSM'', 1, ''CSV'')';
+				execute immediate 'alter table form_data_report modify type not null';
+				execute immediate 'alter table form_data_report add constraint form_data_rep_pk primary key (form_data_id, type, manual, checking, absolute)';
+				execute immediate 'alter table form_data_report drop column type_num';
+			end;
+		end if;
+		if (x.data_type = 'VARCHAR2' and x.nullable = 'Y') then	
+			begin
+				delete from form_data_report where type is null;
+				dbms_output.put_line('ERROR: FORM_DATA_REPORT corrupted: '||sql%rowcount||' rows deleted');
+				execute immediate 'alter table form_data_report add constraint form_data_rep_pk primary key (form_data_id, type, manual, checking, absolute)';
+			end;	
+		end if;
+	end loop;
+end;
+/	
 
 -----------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14002: Новые поля в NOTIFICATION

@@ -178,7 +178,7 @@ void logicCheck() {
         // Проверка количества календарных дней
         if (row.period != null && row.period <= 0) {
             def msg1 = row.getCell('period').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть больше нуля!")
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть больше «0»!")
         }
 
         // Проверка базы года
