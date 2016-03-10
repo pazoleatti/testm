@@ -1,7 +1,5 @@
 package form_template.deal.app_6_18.v2015
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -119,7 +117,7 @@ def groupColumns = ['name', 'docNumber', 'docDate', 'dealFocus', 'foreignDeal']
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['name', 'dependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'signPhis',
-                       'metalName', 'foreignDeal', 'count', 'price', 'total', 'dealDoneDate']
+                       'metalName', 'foreignDeal', 'count', 'incomeSum', 'outcomeSum', 'price', 'total', 'dealDoneDate']
 
 @Field
 def totalColumns = ['count', 'incomeSum', 'outcomeSum', 'total']
@@ -275,37 +273,40 @@ void logicCheck() {
             rowError(logger, row, "Строка $rowNum: Графа «${getColumnName(row, 'count')}» должна быть заполнена значением «1»!")
         }
 
-        def msgIn = row.getCell('incomeSum').column.name
-        def msgOut = row.getCell('outcomeSum').column.name
+        if (row.incomeSum != null && row.outcomeSum != null){
+            String msg1 = getColumnName(row, 'price')
+            String msg2 = getColumnName(row, 'incomeSum')
+            String msg3 = getColumnName(row, 'outcomeSum')
 
-        // 9. Проверка суммы дохода/расхода
-        // 9a.	Должна быть заполнена одна из граф 25 или 26.
-        if ((row.incomeSum == null && row.outcomeSum == null) || (row.incomeSum != null && row.outcomeSum != null)) {
-            rowError(logger, row, "Строка $rowNum: Должна быть заполнена одна из граф «$msgIn» или «$msgOut»!")
-        } else {
-            // 9b.	Если заполнена одна из граф 25 или 26, то значение заполненной графы 25/26 должно быть больше или равно «0»
-            def sum
-            def alias
-            if (row.incomeSum != null) {
-                sum = row.incomeSum
-                alias = 'incomeSum'
-            } else {
-                sum = row.outcomeSum
-                alias = 'outcomeSum'
+            // Проверка заполнения сумм доходов и расходов
+            if(row.incomeSum == 0 && row.outcomeSum  == 0){
+                logger.error("Строка $rowNum: Значения граф «$msg2», «$msg3» не должны одновременно быть равны «0»!");
             }
-            if (sum < 0) {
-                rowError(logger, row, "Строка $rowNum: Значение графы «${getColumnName(row, alias)}» должно быть больше или равно «0»!")
+
+            // Проверка цены и стоимости
+            // Проверка цены
+            if (row.incomeSum && row.outcomeSum == 0 && row.price != row.incomeSum) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
+            } else if (row.incomeSum == 0 && row.outcomeSum && row.price != row.outcomeSum) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg3»!")
+            } else if (row.incomeSum && row.outcomeSum && row.price != (row.incomeSum - row.outcomeSum).abs()) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно модулю разности значений граф «$msg2» и «$msg3»!")
             }
-            // 10 Проверка цены и стоимости
-            ['price', 'total'].each {
-                if (row[it] != sum) {
-                    rowError(logger, row, "Строка $rowNum: Значение графы «${getColumnName(row, it)}» должно быть равно значению графы «${getColumnName(row, alias)}»!")
-                }
+
+            // Проверка цены и стоимости
+            // Проверка стоимости
+            msg1 = getColumnName(row, 'total')
+            if (row.incomeSum && row.outcomeSum == 0 && row.total != row.incomeSum) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
+            } else if (row.incomeSum == 0 && row.outcomeSum && row.total != row.outcomeSum) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg3»!")
+            } else if (row.incomeSum && row.outcomeSum && row.total != (row.incomeSum - row.outcomeSum).abs()) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно модулю разности значений граф «$msg2» и «$msg3»!")
             }
         }
 
-        // 11. Проверка корректности даты совершения сделки
-        checkDatePeriod(logger, row, 'dealDoneDate', 'dealDate', getReportPeriodEndDate(), true)
+        // Проверка корректности даты совершения сделки
+        checkDatePeriodExt(logger, row, 'dealDoneDate', 'dealDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
     }
 }
 
@@ -331,15 +332,22 @@ void calc() {
         row.foreignDeal = (row.countryCodeNumeric != row.countryCodeNumeric2) ? recYesId : recNoId
         // Расчет поля "Количество"
         row.count = 1
-        // графа 27 и 28
-        if (row.incomeSum != null && row.outcomeSum == null) {
-            row.price = row.incomeSum
-            row.total = row.incomeSum
-        } else if (row.incomeSum == null && row.outcomeSum != null) {
-            row.price = row.outcomeSum
-            row.total = row.outcomeSum
-        }
+        // графа 27
+        row.price = calc1415(row)
+        // графа 28
+        row.total = calc1415(row)
     }
+}
+
+def BigDecimal calc1415(def row) {
+    if (row.incomeSum && row.outcomeSum == 0) {
+        return row.incomeSum
+    } else if (row.incomeSum == 0 && row.outcomeSum) {
+        return row.outcomeSum
+    } else if (row.incomeSum && row.outcomeSum) {
+        return (row.incomeSum - row.outcomeSum).abs()
+    }
+    return null
 }
 
 // Получение импортируемых данных

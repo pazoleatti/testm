@@ -11,6 +11,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataCompositionServiceImpl;
+import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -21,6 +23,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -31,6 +35,7 @@ import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.mockito.Mockito.*;
 
@@ -1467,5 +1472,197 @@ public class FormDataServiceTest extends Assert{
         assertEquals(formDataService.getTaskName(ReportType.IMPORT_TF_FD, 102, null), "Импорт ТФ из каталога загрузки");
         assertEquals(formDataService.getTaskName(ReportType.EDIT_FILE_COMMENT, 102, null), "Прикрепление файлов формы и редактирование комментариев");
         assertEquals(formDataService.getTaskName(ReportType.SPECIFIC_REPORT, 102, null, "Report"), "Формирование специфического отчета \"Report\" формы");
+    }
+
+    @Test
+    public void compose1() {
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+        Logger logger = new Logger();
+
+        FormType formType = new FormType();
+        formType.setId(1);
+        formType.setName("Type1");
+        FormType formType2 = new FormType();
+        formType2.setId(2);
+        formType2.setName("РНУ");
+
+        FormTemplate formTemplate1 = new FormTemplate();
+        formTemplate1.setMonthly(false);
+        FormTemplate formTemplate2 = new FormTemplate();
+        formTemplate2.setMonthly(false);
+
+        when(formTemplateService.existFormTemplate(1, 2, true)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(2, 2, true)).thenReturn(true);
+        when(formTemplateService.getActiveFormTemplateId(1, 2)).thenReturn(1);
+        when(formTemplateService.getActiveFormTemplateId(2, 2)).thenReturn(2);
+        when(formTemplateService.get(1)).thenReturn(formTemplate1);
+        when(formTemplateService.get(2)).thenReturn(formTemplate2);
+
+        Department department1 = new Department();
+        department1.setName("Тестовое подразделение");
+        Department department2 = new Department();
+        department2.setName("Тестовое подразделение2");
+
+        ReportPeriod reportPeriod = new ReportPeriod();
+        TaxPeriod tp = new TaxPeriod();
+        tp.setYear(2015);
+        reportPeriod.setTaxPeriod(tp);
+        reportPeriod.setCalendarStartDate(new Date());
+        reportPeriod.setName("1 квартал");
+        reportPeriod.setId(2);
+        reportPeriod.setStartDate(new Date());
+        reportPeriod.setEndDate(new Date());
+        when(periodService.getReportPeriod(2)).thenReturn(reportPeriod);
+
+        DepartmentReportPeriod drp = new DepartmentReportPeriod();
+        drp.setId(1);
+        drp.setReportPeriod(reportPeriod);
+        drp.setCorrectionDate(new Date(0));
+        drp.setDepartmentId(1);
+        drp.setBalance(false);
+        drp.setActive(true);
+        DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+        drp1.setReportPeriod(reportPeriod);
+        DepartmentReportPeriod drp2 = new DepartmentReportPeriod();
+        drp1.setReportPeriod(reportPeriod);
+
+        FormData formData = new FormData();
+        formData.setId(1L);
+        formData.setReportPeriodId(2);
+        formData.setDepartmentId(1);
+
+        formData.setFormType(formType);
+        formData.setKind(FormDataKind.PRIMARY);
+        formData.setManual(false);
+        formData.setState(WorkflowState.ACCEPTED);
+        formData.setDepartmentReportPeriodId(1);
+        formData.setPeriodOrder(null);
+        formData.setAccruing(false);
+        formData.setDepartmentReportPeriodId(drp.getId());
+        when(formDataDao.get(1, false)).thenReturn(formData);
+        when(departmentReportPeriodService.get(formData.getDepartmentReportPeriodId())).thenReturn(drp);
+
+        ArrayList<DepartmentFormType> dftSources = new ArrayList<DepartmentFormType>();
+        DepartmentFormType dft1 = new DepartmentFormType();
+        dft1.setDepartmentId(1);
+        dft1.setFormTypeId(1);
+        dft1.setKind(FormDataKind.ADDITIONAL);
+        DepartmentFormType dft2 = new DepartmentFormType();
+        dft2.setDepartmentId(2);
+        dft2.setFormTypeId(2);
+        dft2.setKind(FormDataKind.CONSOLIDATED);
+        DepartmentFormType dft3 = new DepartmentFormType();
+        dft3.setDepartmentId(2);
+        dft3.setFormTypeId(2);
+        dft3.setKind(FormDataKind.PRIMARY);
+
+        when(departmentService.getDepartment(dft1.getDepartmentId())).thenReturn(department1);
+        when(departmentService.getDepartment(dft2.getDepartmentId())).thenReturn(department2);
+
+        dftSources.add(dft1);
+        dftSources.add(dft2);
+        dftSources.add(dft3);
+        when(departmentFormTypeDao.getFormSources(
+                formData.getDepartmentId(),
+                formData.getFormType().getId(),
+                formData.getKind(),
+                reportPeriod.getStartDate(),
+                reportPeriod.getEndDate())).thenReturn(dftSources);
+
+        List<Relation> sources = new ArrayList<Relation>();
+        List<Relation> sourcesAccepted = new ArrayList<Relation>();
+
+        Relation r1 = new Relation();
+        r1.setFullDepartmentName("Тестовое подразделение");
+        r1.setFormTypeName("РНУ");
+        r1.setFormDataKind(FormDataKind.CONSOLIDATED);
+        r1.setPeriodName("1 квартал");
+        r1.setYear(2015);
+        r1.setCorrectionDate(new Date(0));
+        r1.setCreated(true);
+        r1.setFormDataId(11L);
+        r1.setState(WorkflowState.CREATED);
+
+        Relation r2 = new Relation();
+        r2.setFullDepartmentName("Тестовое подразделение2");
+        r2.setFormTypeName("РНУ");
+        r2.setFormDataKind(FormDataKind.PRIMARY);
+        r2.setPeriodName("1 квартал");
+        r2.setYear(2015);
+        r2.setCorrectionDate(new Date(0));
+        r2.setCreated(false);
+
+        Relation r3 = new Relation();
+        r3.setFullDepartmentName("Тестовое подразделение");
+        r3.setFormTypeName("РНУ");
+        r3.setFormDataKind(FormDataKind.CONSOLIDATED);
+        r3.setPeriodName("1 квартал");
+        r3.setYear(2015);
+        r3.setCorrectionDate(null);
+        r3.setCreated(true);
+        r3.setFormDataId(11L);
+        r3.setState(WorkflowState.ACCEPTED);
+
+        sources.add(r1);
+        sources.add(r2);
+        sources.add(r3);
+
+        sourcesAccepted.add(r3);
+        when(sourceService.getSourcesInfo(formData, true, false, null, userInfo, logger)).thenReturn(sources);
+        when(sourceService.getSourcesInfo(formData, true, true, WorkflowState.ACCEPTED, userInfo, logger)).thenReturn(sourcesAccepted);
+
+        when(formDataDao.getWithoutRows(1L)).thenReturn(formData);
+
+        FormDataCompositionService formDataCompositionService = mock(FormDataCompositionServiceImpl.class);
+        ApplicationContext applicationContext = mock(ApplicationContext.class);
+        when(applicationContext.getBean(FormDataCompositionService.class)).thenReturn(formDataCompositionService);
+        ReflectionTestUtils.setField(formDataService, "applicationContext", applicationContext);
+
+        final List<Long> list = new CopyOnWriteArrayList<Long>();
+        doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                list.addAll((Set<Long>)invocation.getArguments()[1]);
+                return null;
+            }
+        }).when(sourceService).addFormDataConsolidationInfo(
+                anyLong(),
+                anyCollectionOf(Long.class));
+
+        formDataService.compose(formData, userInfo, logger, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+            }
+        });
+        assertEquals(1, list.size());
+        assertEquals(r3.getFormDataId(), list.get(0));
+        assertEquals(
+                "Выполнена консолидация данных из форм-источников:",
+                logger.getEntries().get(0).getMessage()
+        );
+        assertEquals(
+                "«Тестовое подразделение», «Консолидированная», «РНУ», «1 квартал»",
+                logger.getEntries().get(1).getMessage()
+        );
+        assertEquals(
+                "Для текущей формы следующие формы-источники имеют статус отличный от \"Принята\" (консолидация предусмотрена из форм-источников в статусе \"Принята\"):",
+                logger.getEntries().get(2).getMessage()
+        );
+        assertEquals(
+                "Тип: \"Консолидированная\", Вид: \"РНУ\", Подразделение: \"Тестовое подразделение\", Период: \"1 квартал 2015\", Дата сдачи корректировки: 01.01.1970, Версия: \"Абсолютные значения\"",
+                logger.getEntries().get(3).getMessage()
+        );
+        assertEquals(
+                "Для текущей формы следующие формы-источники не созданы:",
+                logger.getEntries().get(4).getMessage()
+        );
+        assertEquals(
+                "Тип: \"Первичная\", Вид: \"РНУ\", Подразделение: \"Тестовое подразделение2\", Период: \"1 квартал 2015\", Дата сдачи корректировки: 01.01.1970, Версия: \"Абсолютные значения\"",
+                logger.getEntries().get(5).getMessage()
+        );
     }
 }

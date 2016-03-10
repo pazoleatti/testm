@@ -1,3 +1,5 @@
+--! Все закомментированные ограничения актуальны, но имеют Oracle-специфику, поэтому не могут быть использованы в unit-тестах.
+
 alter table form_kind add constraint form_kind_pk primary key (id);
 
 alter table tax_type add constraint tax_type_pk primary key(id);
@@ -10,8 +12,8 @@ create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, vers
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_fk_taxtype foreign key (tax_type) references tax_type(id);
 alter table form_type add constraint form_type_check_status check (status in (-1, 0, 1, 2));
-alter table form_type add constraint form_type_uniq_code unique(code);
 alter table form_type add constraint form_type_chk_is_ifrs check ((is_ifrs in (0,1) and tax_type='I') or (is_ifrs = 0 and tax_type<>'I'));
+--create unique index i_form_type_uniq_code on form_type (upper(code));
 
 alter table tax_period add constraint tax_period_pk primary key (id);
 alter table tax_period add constraint tax_period_fk_taxtype foreign key (tax_type) references tax_type(id);
@@ -97,6 +99,8 @@ alter table form_column add constraint form_column_fk_attribute_id2 foreign key 
 alter table form_column add constraint form_column_fk_parent_id foreign key (parent_column_id) references form_column(id);
 alter table form_column add constraint form_column_chk_filt_parent check ((type='R' and ((parent_column_id is null) and (filter is not null)) or ((parent_column_id is not null) and (filter is null)) or ((parent_column_id is null) and (filter is null))) or (type<>'R'));
 alter table form_column add constraint form_column_chk_numrow check (numeration_row in (0, 1) or type <> 'A');
+alter table form_column add constraint form_column_unique_data_ord unique (form_template_id, data_ord);
+alter table form_column add constraint form_column_check_data_ord check (data_ord between 0 and 99);
 
 alter table department_type add constraint department_type_pk primary key (id);
 
@@ -229,7 +233,7 @@ alter table notification add constraint notification_fk_notify_role foreign key 
 alter table notification add constraint notification_chk_isread check (is_read in (0, 1));
 alter table notification add constraint notification_fk_blob_data_id foreign key (blob_data_id) references blob_data(id);
 alter table notification add constraint notification_chk_type check (type in (0, 1) and ((type = 0 and report_id is null) or type = 1));
-alter table notification add constraint notification_fk_report_id foreign key (report_id) references blob_data(id);
+alter table notification add constraint notification_fk_report_id foreign key (report_id) references blob_data (id) on delete set null;
 
 alter table event add constraint event_pk primary key (id);
 
@@ -330,3 +334,4 @@ create index i_notification_blob_data_id on notification(blob_data_id);
 create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
 create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 create index i_decl_subrep_blob_data_id on declaration_subreport(blob_data_id);
+create index i_notification_report_id on notification (report_id);

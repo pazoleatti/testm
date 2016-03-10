@@ -219,7 +219,7 @@ public class FormDataServiceImpl implements FormDataService {
 						check = signService.checkSign(fileName, dataFile.getAbsolutePath(), 0, logger);
                         if (check.getFirst()) {
                             for(String msg: check.getSecond()) {
-                                logger.error(msg);
+                                logger.info(msg);
                             }
                         } else {
                             for(String msg: check.getSecond()) {
@@ -729,7 +729,10 @@ public class FormDataServiceImpl implements FormDataService {
     public FormData getFormData(TAUserInfo userInfo, long formDataId, boolean manual, Logger logger) {
         formDataAccessService.canRead(userInfo, formDataId);
         FormData formData = formDataDao.get(formDataId, manual);
-        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_LOAD, logger, null);
+        Map<String, Object> params = new HashMap<String, Object>();
+        ReportPeriod specialPeriod = new ReportPeriod();
+        params.put("specialPeriod", specialPeriod);
+        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_LOAD, logger, params);
         dataRowDao.refreshRefBookLinks(formData);
         return formData;
     }
@@ -1134,6 +1137,7 @@ public class FormDataServiceImpl implements FormDataService {
         for (String s : msgPull) {
             logger.info(s);
         }
+        checkSources(formData.getId(), formData.isManual(), userInfo, logger);
 
         //Удаление отчета НФ
         stateLogger.updateState("Удаление отчетов формы");
@@ -1149,7 +1153,6 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void checkCompose(final FormData formData, final TAUserInfo userInfo, Logger logger) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
         //1А. Отчетный период закрыт
         if (!departmentReportPeriod.isActive()) {
             throw new ServiceException("отчетный период закрыт, консолидация не может быть выполнена.");

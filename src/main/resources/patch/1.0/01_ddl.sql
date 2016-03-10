@@ -168,7 +168,7 @@ id number(9) not null,
 declaration_template_id number(9) not null,
 name varchar2(1000) not null,
 ord number(9) not null,
-alias varchar2(128),
+alias varchar2(128) not null,
 blob_data_id varchar2(36)
 );
  
@@ -191,6 +191,156 @@ create index i_decl_subrep_blob_data_id on declaration_subreport(blob_data_id);
 alter table declaration_report add constraint decl_report_fk_decl_subreport foreign key (subreport_id) references declaration_subreport(id) on delete cascade;
 
 create sequence seq_declaration_subreport start with 1;
+----------------------------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-14930: 1.0 БД. Добавить проверку уникальности полей FORM_TYPE.CODE и DEPARTMENT.SBRF_CODE с учетом регистронезависимости.
+alter table form_type drop constraint form_type_uniq_code;
+create unique index i_form_type_uniq_code on form_type (upper(code));
+
+CREATE OR REPLACE TRIGGER "DEPARTMENT_BEFORE_INS_UPD"     
+  before insert or update on department
+  for each row
+declare
+  pragma autonomous_transaction;
+
+  vCurrentDepartmentID number(9) := :new.id;
+  vCurrentDepartmentType number(9) := :new.type;
+  vFormerDepartmentType number(9) := :old.type;
+  vCurrentDepartmentIsActive number(1) := :new.is_active;
+  vCurrentDepartmentSbrfCode varchar2(255) := :new.sbrf_code;
+
+  vParentDepartmentID number(9) := :new.parent_id;
+  vFormerParentDepartmentID number(9) := :old.parent_id;
+  vParentDepartmentIsActive number(1) := -1;
+  vParentDepartmentType number(9) := -1;
+
+  vTBHasChanged number(1) := -1;
+  vAmITheOnlyOne number(9) := -1;
+  vHasLinks number(9) := -1;
+  vHasActiveDescendant number(9) := -1;
+  vIsSbrfCodeUnique number(9) := -1;
+  vHasLoop number(1) := -1;
+begin
+  -- Получение данных о (новом) родителе
+  if vParentDepartmentID is not null then
+    select is_active, type into vParentDepartmentIsActive, vParentDepartmentType
+    from department
+    where id =  vParentDepartmentID;
+  end if;
+
+  -- Общие проверки при обновлении/добавлении записей
+  if vCurrentDepartmentIsActive = 1 and vParentDepartmentID is not null and vParentDepartmentIsActive <> 1 then
+     raise_application_error(-20101, 'Подразделение с признаком IS_ACTIVE=1 не может иметь родительское подразделение с признаком IS_ACTIVE=0');
+  end if;
+  -------------------------------------------------------------------
+  if updating('is_active') and vCurrentDepartmentIsActive = 0 then
+    select count(*) into vHasActiveDescendant
+    from department
+    where is_active = 1
+    start with parent_id = vCurrentDepartmentID
+    connect by parent_id = prior id;
+
+    if vHasActiveDescendant <> 0 then
+       raise_application_error(-20102, 'Неактивное подразделение не может иметь активные дочерние подразделения');
+    end if;
+  end if;
+
+  -------------------------------------------------------------------
+
+  if vCurrentDepartmentType = 1 and vParentDepartmentID is not null then
+     raise_application_error(-20103, 'Подразделение типа "Банк" не может иметь родительское подраздение');
+  end if;
+
+  -------------------------------------------------------------------
+
+  if vCurrentDepartmentType <> 1 and vParentDepartmentID is null then
+     raise_application_error(-20104, 'Все подразделения (за исключение типа "Банк") должны иметь родительское подраздение');
+  end if;
+
+  -------------------------------------------------------------------
+  select count(*) into vAmITheOnlyOne
+  from department
+  where id <>  vCurrentDepartmentID and type = 1;
+
+  if vCurrentDepartmentType = 1 and vAmITheOnlyOne <> 0  then
+     raise_application_error(-20105, 'Возможно существование только одного подразделения с типом "Банк"');
+  end if;
+
+  -------------------------------------------------------------------
+
+  if vCurrentDepartmentType = 2 and vParentDepartmentType <> 1 then
+     raise_application_error(-20106, 'Подразделение с "ТБ" должно иметь родительское подразделение с типом "Банк"');
+  end if;
+
+  -------------------------------------------------------------------
+  select count(distinct sbrf_code) into vIsSbrfCodeUnique
+  from department
+  where is_active = 1 and upper(sbrf_code) = upper(vCurrentDepartmentSbrfCode) and id <> vCurrentDepartmentID;
+
+  if vIsSbrfCodeUnique <> 0 then
+     raise_application_error(-20107, 'Значение атрибута "Код подразделения в нотации СБРФ" не уникально среди активных подразделений');
+  end if;
+
+  -------------------------------------------------------------------
+  if vFormerDepartmentType = 1 and vCurrentDepartmentType <> 1 then
+     raise_application_error(-20108, 'Для подразделения с типом "Банк" атрибут типа не может быть изменен');
+  end if;
+  -------------------------------------------------------------------
+  if updating('type') and vFormerDepartmentType = 2 and vCurrentDepartmentType <> 2  then
+    select count(*) into vHasLinks from department_report_period drp
+    join report_period rp on rp.id = drp.report_period_id
+    join tax_period tp on tp.id = rp.tax_period_id and tp.tax_type in ('P', 'T')
+    where drp.department_id = vCurrentDepartmentID;
+
+    if vHasLinks <> 0 then
+       raise_application_error(-20109, 'Операция смена типа для подразделение уровня "ТБ" недопустима, если существуют зависимые данные в DEPARTMENT_REPORT_PERIOD для налогов на транспорт и имущество');
+    end if;
+  end if;
+
+  -------------------------------------------------------------------
+  if updating('parent_id') and vParentDepartmentID<>vFormerParentDepartmentID then
+    select count(distinct id) into vTBHasChanged
+    from department
+    where type = 2
+    start with id in (vParentDepartmentID, vFormerParentDepartmentID)
+    connect by id = prior parent_id;
+
+    if vTBHasChanged > 1 then
+       raise_application_error(-20110, 'Подразделение не может быть перенесено в поддерево другого ТБ');
+    end if;
+  end if;
+
+  -------------------------------------------------------------------
+  if updating('type') and vFormerDepartmentType in (3, 4) and vCurrentDepartmentType not in (3, 4) then
+     select count(*) into vHasLinks
+     from sec_user
+     where department_id = vCurrentDepartmentID;
+
+     if vHasLinks <> 0 then
+        raise_application_error(-20111, 'Операции смена типа для подразделений с типами "ЦСКО, ПЦП", "Управление" недопустимы, если существуют связанные записи в SEC_USER');
+     end if;
+  end if;
+
+  -------------------------------------------------------------------
+  if updating('parent_id') and vParentDepartmentID<>vFormerParentDepartmentID then
+     select case when exists
+      (select 1
+      from department
+      where id = vParentDepartmentID
+      start with id = vCurrentDepartmentID
+      connect by nocycle parent_id = prior id) then 1 else 0 end into vHasLoop
+      from dual;
+
+      if vHasLoop = 1 then
+        raise_application_error(-20112, 'Подразделение не может входить в иерархию своих дочерних подразделений');
+     end if;
+
+  end if;
+
+
+  -------------------------------------------------------------------
+end DEPARTMENT_BEFORE_INS_UPD;
+/
+
 ----------------------------------------------------------------------------------------------------------------
 create or replace package FORM_DATA_PCKG is
   -- Запросы получения источников-приемников для налоговых форм

@@ -284,7 +284,7 @@ end if;
 end department_before_delete;
 /
 
-CREATE OR REPLACE TRIGGER "DEPARTMENT_BEFORE_INS_UPD"
+CREATE OR REPLACE TRIGGER "DEPARTMENT_BEFORE_INS_UPD"     
   before insert or update on department
   for each row
 declare
@@ -362,7 +362,7 @@ begin
   -------------------------------------------------------------------
   select count(distinct sbrf_code) into vIsSbrfCodeUnique
   from department
-  where is_active = 1 and sbrf_code = vCurrentDepartmentSbrfCode and id <> vCurrentDepartmentID;
+  where is_active = 1 and upper(sbrf_code) = upper(vCurrentDepartmentSbrfCode) and id <> vCurrentDepartmentID;
 
   if vIsSbrfCodeUnique <> 0 then
      raise_application_error(-20107, 'Значение атрибута "Код подразделения в нотации СБРФ" не уникально среди активных подразделений');
