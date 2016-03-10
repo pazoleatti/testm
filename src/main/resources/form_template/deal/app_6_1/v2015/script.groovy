@@ -173,7 +173,7 @@ void logicCheck() {
         }
 
         // 7. Проверка корректности даты совершения сделки
-        checkDatePeriod(logger, row, 'dealDoneDate', 'docDate', getReportPeriodEndDate(), true)
+        checkDatePeriodExt(logger, row, 'dealDoneDate', 'docDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
     }
 
     // 9. Проверка итоговых значений по фиксированной строке «Итого»
