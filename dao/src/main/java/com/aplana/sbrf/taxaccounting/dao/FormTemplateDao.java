@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionSegment;
@@ -162,12 +163,11 @@ public interface FormTemplateDao {
 
 	/**
 	 * Проверяет, есть ли в списке строковых значений, строка с длиной больше maxLength
-	 * @param formTemplateId по данному макету осуществляется поиск
-	 * @param columnId среди данных этого столбца
-	 * @param maxLength с данным значением сравниваем длину строк
+	 * @param formTemplateId идентификатор версии макета НФ
+	 * @param column проверяемая графа
 	 * @return true - есть длинные строки, false - нет
 	 */
-	boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength);
+	boolean checkExistLargeString(Long formTemplateId, Column column);
 
     /**
      * Метод для удаления таблиц НФ в новой структуре.

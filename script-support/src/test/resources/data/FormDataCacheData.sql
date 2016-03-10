@@ -120,44 +120,10 @@ INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, pr
 INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, data_ord)
 	values (4, 'Справочный столбец 2', 1, 2, 'referenceColumn2', 'R', 10, NULL, NULL, 0, 2, 3);
 
---создать таблицу
-CREATE TABLE form_data_1 (
-  id NUMBER(18) NOT NULL,
-	form_data_id NUMBER(18) NOT NULL,
-	temporary NUMBER(1) NOT NULL,
-	manual NUMBER(1) NOT NULL,
-	ord NUMBER(14) NOT NULL,
-	alias VARCHAR2(20),
-
-  c1 VARCHAR2(2000),
-	c1_style_id NUMBER(9),
-	c1_editable NUMBER(1) DEFAULT 0,
-	c1_colspan NUMBER(3),
-	c1_rowspan NUMBER(3),
-
-	c2 DECIMAL(27, 10),
-	c2_style_id NUMBER(9),
-	c2_editable NUMBER(1) DEFAULT 0,
-	c2_colspan NUMBER(3),
-	c2_rowspan NUMBER(3),
-
-	c3 DECIMAL(18),
-	c3_style_id NUMBER(9),
-	c3_editable NUMBER(1) DEFAULT 0,
-	c3_colspan NUMBER(3),
-	c3_rowspan NUMBER(3),
-
-	c4 DECIMAL(18),
-	c4_style_id NUMBER(9),
-	c4_editable NUMBER(1) DEFAULT 0,
-	c4_colspan NUMBER(3),
-	c4_rowspan NUMBER(3)
-);
-
 -- FormData
 INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (1, 1, 1, 1, 3, 0);
 
-INSERT INTO form_data_1(id, form_data_id, temporary, manual, ord, alias, c1, c2, c3, c4)
+INSERT INTO form_data_row(id, form_data_id, temporary, manual, ord, alias, c0, c1, c2, c3)
   SELECT 1, 1, 0, 0, 1, trim('testAlias'), trim('string cell 1'), 111, 1, 2 FROM DUAL UNION
   SELECT 2, 1, 0, 0, 2, null,              trim('string cell 2'), 222, 3, 4 FROM DUAL UNION
   SELECT 3, 1, 0, 0, 3, trim('alias 3'),   trim('string cell 3'), 333, 5, 6 FROM DUAL UNION

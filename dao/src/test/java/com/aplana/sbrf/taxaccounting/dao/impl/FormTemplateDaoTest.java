@@ -346,9 +346,15 @@ public class FormTemplateDaoTest {
 
 	@Test
 	public void checkExistLargeStringTest() {
-		Assert.assertTrue(formTemplateDao.checkExistLargeString(1, 1, 3));
-		Assert.assertTrue(formTemplateDao.checkExistLargeString(1, 1, 5));
-		Assert.assertFalse(formTemplateDao.checkExistLargeString(1, 1, 6));
-		Assert.assertFalse(formTemplateDao.checkExistLargeString(1, 1, 7));
+		StringColumn column = new StringColumn();
+		column.setDataOrder(0);
+		column.setMaxLength(3);
+		Assert.assertTrue(formTemplateDao.checkExistLargeString(1L, column));
+		column.setMaxLength(5);
+		Assert.assertTrue(formTemplateDao.checkExistLargeString(1L, column));
+		column.setMaxLength(6);
+		Assert.assertFalse(formTemplateDao.checkExistLargeString(1L, column));
+		column.setMaxLength(7);
+		Assert.assertFalse(formTemplateDao.checkExistLargeString(1L, column));
 	}
 }

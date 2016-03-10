@@ -300,7 +300,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             }
 
             /*if (ColumnType.STRING.equals(column.getColumnType()) && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
-				if (formTemplateDao.checkExistLargeString(formTemplateId, column.getId(), ((StringColumn) column).getMaxLength())) {
+				if (formTemplateDao.checkExistLargeString(formTemplate.getId(), column)) {
 					logger.error("Длина одного из существующих значений графы '" + column.getName() + "' больше указанной длины " + ((StringColumn) column).getPrevLength());
                 }
             }*/

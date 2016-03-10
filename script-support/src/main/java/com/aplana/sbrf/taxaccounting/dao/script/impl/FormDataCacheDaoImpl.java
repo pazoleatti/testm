@@ -32,7 +32,7 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
 
     private static final String REF_BOOK_VALUE_FOR_FORM_DATA =
 			"SELECT v.record_id, v.number_value, v.string_value, v.date_value, v.reference_value, a.type, a.precision, a.alias, a.ref_book_id " +
-			"FROM ref_book_value v join ref_book_attribute a ON a.id = v.attribute_id " +
+			"FROM ref_book_value v JOIN ref_book_attribute a ON a.id = v.attribute_id " +
             "WHERE record_id IN ";
 
     private class RefBookCacheMapper implements RowMapper<Pair<String, Pair<String, RefBookValue>>> {
@@ -52,7 +52,7 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
                     type = RefBookAttributeType.NUMBER;
                     BigDecimal val = rs.getBigDecimal("number_value");
                     if (val != null) {
-                        value = val.setScale(SqlUtils.getInteger(rs,"precision"));
+                        value = val.setScale(SqlUtils.getInteger(rs, "precision"));
                     }
                     break;
                 case 3:
@@ -61,7 +61,7 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
                     break;
                 case 4:
                     type = RefBookAttributeType.REFERENCE;
-                    value = SqlUtils.getLong(rs,"reference_value");
+                    value = SqlUtils.getLong(rs, "reference_value");
                     break;
             }
 
@@ -81,14 +81,13 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
 		StringBuilder sql = new StringBuilder("(");
 		int count = 0;
 		for (Column column : formData.getFormColumns()){
-			if (column.getColumnType() == ColumnType.REFBOOK) {
+			if (ColumnType.REFBOOK.equals(column.getColumnType())){
 				if (count++ > 0) {
 					sql.append(" UNION ALL\n");
 				}
-				sql.append("SELECT DISTINCT c");
-				sql.append(column.getId());
-				sql.append(" FROM form_data_");
-				sql.append(formData.getFormTemplateId());
+				sql.append("SELECT DISTINCT TO_NUMBER(c");
+				sql.append(column.getDataOrder());
+				sql.append(") FROM form_data_row");
 				sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual");
 			}
 		}
