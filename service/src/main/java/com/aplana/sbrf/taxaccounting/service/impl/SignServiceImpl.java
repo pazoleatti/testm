@@ -38,7 +38,7 @@ public class SignServiceImpl implements SignService {
     private static final String USER_ID_MSG = "ЭП файла «%s» проверена и подпись пользователя «%s» принята.";
     private static final String ERR_NO_SIGN_MSG = "В проверяемом файле «%s» отсутствует ЭП.";
     private static final String ERR_SIGN_NO_REG_MSG = "Идентификатор ЭП файла «%s» не зарегистрирован в БОК.";
-    private static final String ERR_OTHER_MSG = "ЭП файла «%s» не принята. Код ошибки «%s».";
+    private static final String ERR_OTHER_MSG = "ЭП файла «%s» не принята. Код ошибки «%s, %s».";
 
     private static final String pattern = "(ERROR:)(.+?)(, )(\\d+ )(.*)(, )(.*)";
 
@@ -104,8 +104,8 @@ public class SignServiceImpl implements SignService {
                             } else if (code.equals("ERR_SIGN_NO_REG")) {
                                 status.setMsg(String.format(ERR_SIGN_NO_REG_MSG, fileName));
                             } else {
-                                //String text = s.replaceAll(pattern, "$7");
-                                status.setMsg(String.format(ERR_OTHER_MSG, fileName, code));
+                                String text = s.replaceAll(pattern, "$7");
+                                status.setMsg(String.format(ERR_OTHER_MSG, fileName, code, text));
                             }
                         }
                     } while ((s = reader.readLine()) != null);

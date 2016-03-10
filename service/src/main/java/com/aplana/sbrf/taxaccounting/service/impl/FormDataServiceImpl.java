@@ -219,7 +219,7 @@ public class FormDataServiceImpl implements FormDataService {
 						check = signService.checkSign(fileName, dataFile.getAbsolutePath(), 0, logger);
                         if (check.getFirst()) {
                             for(String msg: check.getSecond()) {
-                                logger.error(msg);
+                                logger.info(msg);
                             }
                         } else {
                             for(String msg: check.getSecond()) {

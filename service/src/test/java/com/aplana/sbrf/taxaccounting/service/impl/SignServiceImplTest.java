@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.SignService;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -21,6 +22,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Set;
 
 import static org.mockito.Mockito.when;
 
@@ -31,6 +33,7 @@ public class SignServiceImplTest {
 
     private final String COMMON = ClassUtils.classPackageAsResourcePath(getClass()) + "/sign/";
     private final String DATA_FILE =  COMMON + "/dt/5101309D.rnu";
+    private final String DATA_FILE_BAD_SIGN =  COMMON + "/dt/5101310D.rnu";
     private final String DATA_XLS_FILE = COMMON + "/dt/260220AD.xls";
     private final String NON_ENC_FILE = COMMON + "/dt/non_enc";
     private final String ZIP_FILE = COMMON + "/dt/RNU00001.64";
@@ -72,40 +75,30 @@ public class SignServiceImplTest {
     public void testRNU() throws IOException, URISyntaxException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
-        /*try {
-            Field field = ClassLoader.class.getDeclaredField("usr_paths");
-            field.setAccessible(true);
-            String[] paths = (String[])field.get(null);
-            for (String path : paths) {
-                if (FULL_PATH_DLL.equals(path)) {
-                    break;
-                }
-            }
-            String[] tmp = new String[paths.length+1];
-            System.arraycopy(paths,0,tmp,0,paths.length);
-            tmp[paths.length] = FULL_PATH_DLL;
-            field.set(null,tmp);
-            System.setProperty("java.library.path", System.getProperty("java.library.path") + File.pathSeparator + FULL_PATH_DLL);
-        } catch (IllegalAccessException e) {
-            throw new ServiceException("Failed to get permissions to set library path");
-        } catch (NoSuchFieldException e) {
-            throw new ServiceException("Failed to get field handle to set library path");
-        }*/
-        Assert.assertTrue(signService.checkSign("dataFile.data", copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0, new Logger()).getFirst());
+        Pair<Boolean, Set<String>> pair = signService.checkSign("dataFile.data", copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0, new Logger());
+        Assert.assertTrue(pair.getFirst());
+        Assert.assertEquals(1, pair.getSecond().size());
+        Assert.assertTrue(pair.getSecond().contains("ЭП файла «dataFile.data» проверена и подпись пользователя «A0C80024uТестовыйключБикриптКСБ» принята."));
     }
 
     @Test
     public void testXls() throws IOException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
-        Assert.assertTrue(signService.checkSign("dataXlsFile.data", copyTmp(DATA_XLS_FILE, "dataXlsFile", ".data").getAbsolutePath(), 0, new Logger()).getFirst());
+        Pair<Boolean, Set<String>> pair = signService.checkSign("dataXlsFile.data", copyTmp(DATA_XLS_FILE, "dataXlsFile", ".data").getAbsolutePath(), 0, new Logger());
+        Assert.assertTrue(pair.getFirst());
+        Assert.assertEquals(1, pair.getSecond().size());
+        Assert.assertTrue(pair.getSecond().contains("ЭП файла «dataXlsFile.data» проверена и подпись пользователя «A0C80024uТестовыйключБикриптКСБ» принята."));
     }
 
     @Test
     public void testNonEncrypt() throws IOException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
-        Assert.assertFalse(signService.checkSign("non_enc.data", copyTmp(NON_ENC_FILE, "non_enc", ".data").getAbsolutePath(), 0, new Logger()).getFirst());
+        Pair<Boolean, Set<String>> pair = signService.checkSign("non_enc.data", copyTmp(NON_ENC_FILE, "non_enc", ".data").getAbsolutePath(), 0, new Logger());
+        Assert.assertFalse(pair.getFirst());
+        Assert.assertEquals(1, pair.getSecond().size());
+        Assert.assertTrue(pair.getSecond().contains("В проверяемом файле «non_enc.data» отсутствует ЭП."));
     }
 
     //Тест с новым подписанным архивом. False, нормальный результат, так как нет такой подписи в нашей БОК
@@ -113,7 +106,20 @@ public class SignServiceImplTest {
     public void testZip() throws IOException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
-        Assert.assertFalse(signService.checkSign("zip.data", copyTmp(ZIP_FILE, "zip", ".data").getAbsolutePath(), 0, new Logger()).getFirst());
+        Pair<Boolean, Set<String>> pair = signService.checkSign("zip.data", copyTmp(ZIP_FILE, "zip", ".data").getAbsolutePath(), 0, new Logger());
+        Assert.assertFalse(pair.getFirst());
+        Assert.assertEquals(1, pair.getSecond().size());
+        Assert.assertTrue(pair.getSecond().contains("Идентификатор ЭП файла «zip.data» не зарегистрирован в БОК."));
+    }
+
+    @Test
+    public void testBadSign() throws IOException {
+        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+            return;
+        Pair<Boolean, Set<String>> pair = signService.checkSign("dataFile.data", copyTmp(DATA_FILE_BAD_SIGN, "dataFile", ".data").getAbsolutePath(), 0, new Logger());
+        Assert.assertFalse(pair.getFirst());
+        Assert.assertEquals(1, pair.getSecond().size());
+        Assert.assertTrue(pair.getSecond().contains("ЭП файла «dataFile.data» не принята. Код ошибки «ERR_BAD_SIGN, Подпись неверна»."));
     }
 
     private static File copyTmp(String dataFilePath, String prefix, String suffix) throws IOException {
