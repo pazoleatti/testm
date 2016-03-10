@@ -169,6 +169,9 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$income» должно быть больше или равно «0»!")
         }
 
+        // Проверка корректности даты договора
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
+
         // Проверка заполнения кода региона
         if (row.country == country643 && !row.region) {
             def msg = row.getCell('region').column.name
@@ -209,11 +212,8 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$costName» должно быть равно значению графы «$income»!")
         }
 
-        // Проверка корректности даты договора
-        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
-
         // Проверка корректности даты совершения сделки
-        checkDatePeriod(logger, row, 'dealDoneDate', 'docDate', getReportPeriodEndDate(), true)
+        checkDatePeriodExt(logger, row, 'dealDoneDate', 'docDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
     }
     //Проверка итоговых значений по фиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
