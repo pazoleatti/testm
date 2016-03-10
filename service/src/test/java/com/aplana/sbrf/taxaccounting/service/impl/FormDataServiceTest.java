@@ -37,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -1349,8 +1350,7 @@ public class FormDataServiceTest extends Assert{
         assertEquals(4, specificReportTypes.size());
     }
 
-
-    //@Test
+    @Test
     public void createSpecificReport() throws IOException {
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
@@ -1407,6 +1407,24 @@ public class FormDataServiceTest extends Assert{
         ReportService reportService = mock(ReportService.class);
         ReflectionTestUtils.setField(formDataService, "reportService", reportService);
         BlobDataService blobDataService = mock(BlobDataService.class);
+
+        final List<String> strings = new ArrayList<String>();
+        when(blobDataService.create(anyString(), anyString())).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                String path = (String)invocation.getArguments()[0];
+                BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+                try {
+                    String s;
+                    while ((s = in.readLine()) != null) {
+                        strings.add(s);
+                    }
+                } finally {
+                    in.close();
+                }
+                return "uuid";
+            }
+        });
         ReflectionTestUtils.setField(formDataService, "blobDataService", blobDataService);
 
         String specificReportType = "Type1";
@@ -1415,22 +1433,8 @@ public class FormDataServiceTest extends Assert{
             public void updateState(String state) {
             }
         });
-
-        ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
-        verify(blobDataService, times(1)).create(inputStreamArgumentCaptor.capture(), anyString());
-        BufferedReader in = new BufferedReader(new InputStreamReader(inputStreamArgumentCaptor.getAllValues().get(0)));
-        try {
-            String s;
-            int rowCount = 0;
-            while ((s = in.readLine()) != null) {
-                if (rowCount == 0)
-                    assertEquals(s, specificReportType); // первая строка совпадает с названием отчета для тестового макета
-                rowCount++;
-            }
-            assertEquals(rowCount, 1); // должна быть одна строка в файле
-        } finally {
-            in.close();
-        }
+        assertEquals(strings.size(), 1);
+        assertEquals(strings.get(0), specificReportType);
     }
 
     @Test
@@ -1486,55 +1490,11 @@ public class FormDataServiceTest extends Assert{
         FormType formType = new FormType();
         formType.setId(1);
         formType.setName("Type1");
-        FormType formType2 = new FormType();
-        formType2.setId(2);
-        formType2.setName("РНУ");
-
-        FormTemplate formTemplate1 = new FormTemplate();
-        formTemplate1.setMonthly(false);
-        FormTemplate formTemplate2 = new FormTemplate();
-        formTemplate2.setMonthly(false);
-
-        when(formTemplateService.existFormTemplate(1, 2, true)).thenReturn(true);
-        when(formTemplateService.existFormTemplate(2, 2, true)).thenReturn(true);
-        when(formTemplateService.getActiveFormTemplateId(1, 2)).thenReturn(1);
-        when(formTemplateService.getActiveFormTemplateId(2, 2)).thenReturn(2);
-        when(formTemplateService.get(1)).thenReturn(formTemplate1);
-        when(formTemplateService.get(2)).thenReturn(formTemplate2);
-
-        Department department1 = new Department();
-        department1.setName("Тестовое подразделение");
-        Department department2 = new Department();
-        department2.setName("Тестовое подразделение2");
-
-        ReportPeriod reportPeriod = new ReportPeriod();
-        TaxPeriod tp = new TaxPeriod();
-        tp.setYear(2015);
-        reportPeriod.setTaxPeriod(tp);
-        reportPeriod.setCalendarStartDate(new Date());
-        reportPeriod.setName("1 квартал");
-        reportPeriod.setId(2);
-        reportPeriod.setStartDate(new Date());
-        reportPeriod.setEndDate(new Date());
-        when(periodService.getReportPeriod(2)).thenReturn(reportPeriod);
-
-        DepartmentReportPeriod drp = new DepartmentReportPeriod();
-        drp.setId(1);
-        drp.setReportPeriod(reportPeriod);
-        drp.setCorrectionDate(new Date(0));
-        drp.setDepartmentId(1);
-        drp.setBalance(false);
-        drp.setActive(true);
-        DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
-        drp1.setReportPeriod(reportPeriod);
-        DepartmentReportPeriod drp2 = new DepartmentReportPeriod();
-        drp1.setReportPeriod(reportPeriod);
 
         FormData formData = new FormData();
         formData.setId(1L);
         formData.setReportPeriodId(2);
         formData.setDepartmentId(1);
-
         formData.setFormType(formType);
         formData.setKind(FormDataKind.PRIMARY);
         formData.setManual(false);
@@ -1542,36 +1502,8 @@ public class FormDataServiceTest extends Assert{
         formData.setDepartmentReportPeriodId(1);
         formData.setPeriodOrder(null);
         formData.setAccruing(false);
-        formData.setDepartmentReportPeriodId(drp.getId());
+        formData.setDepartmentReportPeriodId(1);
         when(formDataDao.get(1, false)).thenReturn(formData);
-        when(departmentReportPeriodService.get(formData.getDepartmentReportPeriodId())).thenReturn(drp);
-
-        ArrayList<DepartmentFormType> dftSources = new ArrayList<DepartmentFormType>();
-        DepartmentFormType dft1 = new DepartmentFormType();
-        dft1.setDepartmentId(1);
-        dft1.setFormTypeId(1);
-        dft1.setKind(FormDataKind.ADDITIONAL);
-        DepartmentFormType dft2 = new DepartmentFormType();
-        dft2.setDepartmentId(2);
-        dft2.setFormTypeId(2);
-        dft2.setKind(FormDataKind.CONSOLIDATED);
-        DepartmentFormType dft3 = new DepartmentFormType();
-        dft3.setDepartmentId(2);
-        dft3.setFormTypeId(2);
-        dft3.setKind(FormDataKind.PRIMARY);
-
-        when(departmentService.getDepartment(dft1.getDepartmentId())).thenReturn(department1);
-        when(departmentService.getDepartment(dft2.getDepartmentId())).thenReturn(department2);
-
-        dftSources.add(dft1);
-        dftSources.add(dft2);
-        dftSources.add(dft3);
-        when(departmentFormTypeDao.getFormSources(
-                formData.getDepartmentId(),
-                formData.getFormType().getId(),
-                formData.getKind(),
-                reportPeriod.getStartDate(),
-                reportPeriod.getEndDate())).thenReturn(dftSources);
 
         List<Relation> sources = new ArrayList<Relation>();
         List<Relation> sourcesAccepted = new ArrayList<Relation>();
@@ -1664,5 +1596,167 @@ public class FormDataServiceTest extends Assert{
                 "Тип: \"Первичная\", Вид: \"РНУ\", Подразделение: \"Тестовое подразделение2\", Период: \"1 квартал 2015\", Дата сдачи корректировки: 01.01.1970, Версия: \"Абсолютные значения\"",
                 logger.getEntries().get(5).getMessage()
         );
+    }
+
+    @Test
+    public void getValueForCheckLimit1() {
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+
+        FormType formType = new FormType();
+        formType.setId(1);
+        formType.setName("Type1");
+
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(1);
+        formTemplate.setType(formType);
+        formTemplate.addColumn(new RefBookColumn());
+        formTemplate.addColumn(new NumericColumn());
+        formTemplate.addColumn(new NumericColumn());
+        formTemplate.addColumn(new StringColumn());
+        formTemplate.addColumn(new NumericColumn());
+
+        FormData formData = new FormData();
+        formData.setId(1L);
+        formData.setReportPeriodId(2);
+        formData.setDepartmentId(1);
+        formData.setFormType(formType);
+        formData.setKind(FormDataKind.PRIMARY);
+        formData.setManual(false);
+        formData.setState(WorkflowState.ACCEPTED);
+        formData.setDepartmentReportPeriodId(1);
+        formData.setPeriodOrder(null);
+        formData.setAccruing(false);
+        formData.setDepartmentReportPeriodId(1);
+        when(formDataDao.get(1, false)).thenReturn(formData);
+
+        when(dataRowDao.getRowCount(formData)).thenReturn(20);
+        when(formTemplateService.get(formData.getFormTemplateId())).thenReturn(formTemplate);
+
+        assertEquals(new Long(100L), formDataService.getValueForCheckLimit(userInfo, formData, ReportType.CHECK_FD, null, null, new Logger()));
+        assertEquals(new Long(100L), formDataService.getValueForCheckLimit(userInfo, formData, ReportType.MOVE_FD, null, null, new Logger()));
+        assertEquals(new Long(100L), formDataService.getValueForCheckLimit(userInfo, formData, ReportType.REFRESH_FD, null, null, new Logger()));
+        assertEquals(new Long(100L), formDataService.getValueForCheckLimit(userInfo, formData, ReportType.CALCULATE_FD, null, null, new Logger()));
+        assertEquals(new Long(100L), formDataService.getValueForCheckLimit(userInfo, formData, ReportType.EXCEL, null, null, new Logger()));
+        assertEquals(new Long(100L), formDataService.getValueForCheckLimit(userInfo, formData, ReportType.CSV, null, null, new Logger()));
+    }
+
+    @Test
+    public void getValueForCheckLimit2() {
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+
+        Logger logger = new Logger();
+
+        FormType formType = new FormType();
+        formType.setId(1);
+        formType.setName("Type1");
+
+        FormTemplate formTemplate1 = new FormTemplate();
+        formTemplate1.setId(10);
+        formTemplate1.setType(formType);
+        formTemplate1.addColumn(new RefBookColumn());
+        formTemplate1.addColumn(new NumericColumn());
+        formTemplate1.addColumn(new NumericColumn());
+        formTemplate1.addColumn(new StringColumn());
+        formTemplate1.addColumn(new NumericColumn());
+
+        FormTemplate formTemplate2 = new FormTemplate();
+        formTemplate2.setId(11);
+        formTemplate2.setType(formType);
+        formTemplate2.addColumn(new RefBookColumn());
+        formTemplate2.addColumn(new NumericColumn());
+
+        FormData formData = new FormData();
+        formData.setId(1L);
+        FormData formData1 = new FormData();
+        formData1.setId(10L);
+        formData1.setFormTemplateId(formTemplate1.getId());
+        FormData formData2 = new FormData();
+        formData2.setId(11L);
+        formData2.setFormTemplateId(formTemplate2.getId());
+
+        when(formDataDao.getWithoutRows(11)).thenReturn(formData1);
+        when(formDataDao.getWithoutRows(12)).thenReturn(formData2);
+        when(formTemplateService.get(formData1.getFormTemplateId())).thenReturn(formTemplate1);
+        when(formTemplateService.get(formData2.getFormTemplateId())).thenReturn(formTemplate2);
+
+        List<Relation> sourcesAccepted = new ArrayList<Relation>();
+        Relation r1 = new Relation();
+        r1.setFormDataId(11L);
+        Relation r2 = new Relation();
+        r2.setFormDataId(12L);
+        sourcesAccepted.add(r1);
+        sourcesAccepted.add(r2);
+        when(sourceService.getSourcesInfo(formData, true, true, WorkflowState.ACCEPTED, userInfo, logger)).thenReturn(sourcesAccepted);
+
+        when(dataRowDao.getRowCount(formData1)).thenReturn(10);
+        when(dataRowDao.getRowCount(formData2)).thenReturn(1);
+
+        assertEquals(new Long(52L), formDataService.getValueForCheckLimit(userInfo, formData, ReportType.CONSOLIDATE_FD, null, null, logger));
+    }
+
+    @Test
+    public void getValueForCheckLimit3() {
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+
+        Logger logger = new Logger();
+        FormData formData = new FormData();
+
+        BlobDataService blobDataService = mock(BlobDataService.class);
+        when(blobDataService.getLength("uuid1")).thenReturn(1200L);
+        ReflectionTestUtils.setField(formDataService, "blobDataService", blobDataService);
+
+        assertEquals(new Long(2L), formDataService.getValueForCheckLimit(userInfo, formData, ReportType.IMPORT_FD, null, "uuid1", logger));
+    }
+
+    @Test
+    public void getValueForCheckLimit4() {
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+
+        Logger logger = new Logger();
+        FormData formData = new FormData();
+
+        FormDataScriptingService formDataScriptingService = mock(FormDataScriptingService.class);
+        when(formDataScriptingService.executeScript(
+                eq(userInfo), eq(formData), eq(FormDataEvent.CALCULATE_TASK_COMPLEXITY), eq(logger), any(Map.class))).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Map<String, Object> exchangeParams = ((Map<String, Object>) invocation.getArguments()[4]);
+                ((ScriptTaskComplexityHolder) exchangeParams.get("taskComplexityHolder")).setValue(10L);
+                return null;
+            }
+        });
+        ReflectionTestUtils.setField(formDataService, "formDataScriptingService", formDataScriptingService);
+
+        assertEquals(new Long(10L), formDataService.getValueForCheckLimit(userInfo, formData, ReportType.SPECIFIC_REPORT, "report1", null, logger));
+    }
+
+    @Test(expected = ServiceException.class)
+    public void getValueForCheckLimit5() {
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+
+        Logger logger = new Logger();
+        FormData formData = new FormData();
+
+        formDataService.getValueForCheckLimit(userInfo, formData, ReportType.CSV_REF_BOOK, null, null, logger);
     }
 }

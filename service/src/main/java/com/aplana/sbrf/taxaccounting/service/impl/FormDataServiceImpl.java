@@ -1839,7 +1839,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public Long getValueForCheckLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid, Logger logger) {
+    public Long getValueForCheckLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String specificReportType, String uuid, Logger logger) {
         switch (reportType) {
             case CHECK_FD:
             case MOVE_FD:
@@ -1847,7 +1847,6 @@ public class FormDataServiceImpl implements FormDataService {
             case CALCULATE_FD:
             case EXCEL:
             case CSV:
-            case SPECIFIC_REPORT:
                 int rowCountReport = dataRowDao.getRowCount(formData);
                 int columnCountReport = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
                 return (long) (rowCountReport * columnCountReport);
@@ -1862,6 +1861,14 @@ public class FormDataServiceImpl implements FormDataService {
                 return cellCountSource;
             case IMPORT_FD:
                 return (long)Math.ceil(blobDataService.getLength(uuid) / 1024.);
+            case SPECIFIC_REPORT:
+                Map<String, Object> exchangeParams = new HashMap<String, Object>();
+                ScriptTaskComplexityHolder taskComplexityHolder = new ScriptTaskComplexityHolder();
+                taskComplexityHolder.setAlias(specificReportType);
+                taskComplexityHolder.setValue(0L);
+                exchangeParams.put("taskComplexityHolder", taskComplexityHolder);
+                formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CALCULATE_TASK_COMPLEXITY, logger, exchangeParams);
+                return taskComplexityHolder.getValue();
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }

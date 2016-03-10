@@ -47,16 +47,16 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, getReportType());
-        if (value == null) {
-            throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
-        }
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
 
-        String msg = String.format("xml файл %s имеет слишком большой размер(%s Кбайт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), value);
+        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, ddReportType);
+        if (value == null) {
+            throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
+        }
+        String msg = String.format("количество ячеек форм-источников(%s) превышает максимально допустимое(%s)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), value);
         return checkTask(getReportType(), value, declarationDataService.getTaskName(ddReportType, declarationTemplate.getType().getTaxType()), msg);
     }
 
