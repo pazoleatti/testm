@@ -106,6 +106,10 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
             @Override
             public void onValueChange(ValueChangeEvent<Integer> event) {
                 yearFrom.setTitle(event.getValue() != null ? event.getValue() + " год" : "");
+                if (event.getValue() != null)
+                    yearTo.setMinValue(event.getValue());
+                else
+                    yearTo.setMinValue(1970);
             }
         });
         yearTo.addValueChangeHandler(new ValueChangeHandler<Integer>() {
