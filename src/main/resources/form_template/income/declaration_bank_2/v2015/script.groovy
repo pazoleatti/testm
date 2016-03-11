@@ -859,8 +859,6 @@ void generateXML() {
     def sumAmortPerNmAL = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [20755]))
     /** РасхВнереалПрДО. Код строки декларации 201. */
     def rashVnerealPrDO = getLong(getRashVnerealPrDO(dataRowsComplexConsumption, dataRowsSimpleConsumption))
-    /** УбытРеалПравТр. Код строки декларации 203. Код вида расхода = 22695, 22700. */
-    def ubitRealPravTr = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [22695, 22700]))
     /** РасхЛиквОС. Код строки декларации 204. Код вида расхода = 22690. */
     def rashLikvOS = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [22690]))
     /** РасхШтраф. Код строки декларации 205. */
@@ -1142,6 +1140,7 @@ void generateXML() {
                                 ПриобРеалЦБ : priobrRealCB,
                                 СумОтклЦен : sumOtklCen,
                                 ПриобРеалЦБОрг : priobRealCBOrg,
+                                СумОтклЦенОрг : sumOtklCenOrg,
                                 РасхОпер32 : rashOper32,
                                 УбытПрошОбсл : ubitProshObsl,
                                 УбытРеалАмИм : ubitRealAmIm,
@@ -1181,7 +1180,7 @@ void generateXML() {
                                 РасхВнеРеалВс : rashVnerealVs,
                                 РасхВнереалПрДО : rashVnerealPrDO,
                                 РасхВнереалРзрв : empty,
-                                // УбытРеалПравТр : ubitRealPravTr, не заполняется с 2015 года
+                                УбытРеалПравТр : empty, // не заполняется с 2015
                                 РасхЛиквОС : rashLikvOS,
                                 РасхШтраф : rashShtraf,
                                 РасхРынЦБДД : rashRinCBDD)
