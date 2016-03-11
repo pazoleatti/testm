@@ -1300,8 +1300,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "allRecords as (select cr.id, cr.version as versionStart, nv.version - interval '1' day as versionEnd from currentRecord cr, nextVersion nv)\n" +
             "select distinct id,\n" +
             "case\n" +
-            "\twhen (versionEnd is not null and :versionTo > versionEnd) then 1\n" +
-            "\twhen ((versionEnd is null or :versionTo <= versionEnd) and :versionFrom < versionStart) then -1\n" +
+            "\twhen (versionEnd is not null and (:versionTo is null or :versionTo > versionEnd)) then 1\n" +
+            "\twhen (:versionFrom < versionStart) then -1\n" +
             "\telse 0\n" +
             "end as result\n" +
             "from allRecords";
@@ -3022,7 +3022,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final String GET_INACTIVE_RECORDS_IN_PERIOD = "select id, start_version as versionFrom, end_version as versionTo, \n" +
             "        case when status = -1 then 0\n" +
-            "             when ((next_version < :periodTo and :periodTo is not null and next_version is not null) or (:periodTo is null and next_version is null)) then 2 --дата окончания ограничивающего периода\n" +
+            "             when ((:periodTo is not null and next_version is not null and next_version < :periodTo) or (:periodTo is null and next_version is not null)) then 2 --дата окончания ограничивающего периода\n" +
             "             when ((end_version is not null and end_version < :periodFrom) or (:periodTo is not null and start_version > :periodTo)) then 1 end state                    \n" +
             "from   (\n" +
             "       select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by input.id order by rbr.version) - interval '1' DAY end_version, case when input.status = 0 then lead (rbr.version) over (partition by input.id, rbr.status order by rbr.version) end next_version \n" +

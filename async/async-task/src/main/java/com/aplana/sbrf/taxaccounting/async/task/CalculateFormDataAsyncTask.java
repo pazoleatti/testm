@@ -47,7 +47,7 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
                 manual,
                 logger);
 
-        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), null, logger);
+        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), null, null, logger);
         String msg = String.format("количество ячеек таблицы формы(%s) превышает максимально допустимое(%s)!", value, "%s");
         return checkTask(getReportType(), value, formDataService.getTaskName(getReportType(), formDataId, userInfo), msg);
     }

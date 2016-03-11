@@ -125,7 +125,7 @@ public class App_6_24Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата договора","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена» должно быть равно значению графы «Сумма расходов Банка, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Стоимость» должно быть равно значению графы «Сумма расходов Банка, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD_EXT, 1, "Дата совершения сделки", "01.01.2014", "31.12.2014", "Дата договора"), entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -171,6 +171,26 @@ public class App_6_24Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         checkLoadData(testHelper.getDataRowHelper().getAll());
     }
+
+    // Проверить загруженные данные
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
+
+        Assert.assertEquals(2, dataRows.size());
+    }
+
+    // Проверить расчеты
+    void checkAfterCalc(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(1, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(2, dataRows.size());
+    }
+
     void mockBeforeImport(){
         Long refbookId = 520L;
 
@@ -224,25 +244,5 @@ public class App_6_24Test extends ScriptTestBase {
                         return result;
                     }
                 });
-    }
-
-    // Проверить загруженные данные
-    void checkLoadData(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
-    }
-
-    // Проверить расчеты
-    void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(1, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
-
-
-        Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
-
-
-        Assert.assertEquals(2, dataRows.get(2).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(2, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
     }
 }

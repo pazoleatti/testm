@@ -139,15 +139,6 @@ public class App_6_1Test extends ScriptTestBase {
         row.getCell("cost").setValue(0, null);
         row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2014"), null);
 
-        DataRow<Cell> subTotalRow = formData.createDataRow();
-        dataRows.add(subTotalRow);
-        subTotalRow.setAlias("itg#1");
-        subTotalRow.setIndex(2);
-        subTotalRow.getCell("fix").setValue("Итого по \"A\"", null);
-        subTotalRow.getCell("sum").setValue(3, null);
-        testHelper.execute(FormDataEvent.CHECK);
-        Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
-
         // проверка суммы доходов;
         row.getCell("sum").setValue(0, null);
         row.getCell("price").setValue(0, null);
@@ -172,9 +163,7 @@ public class App_6_1Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         List<String> aliases = Arrays.asList("sum", "docNumber", "docDate", "price", "cost", "dealDoneDate");
-        // ожидается 5 строк: 4 из файла + 1 итоговая строка
-        int expected = 4 + 1;
-        defaultCheckLoadData(aliases, expected);
+        defaultCheckLoadData(aliases, 4);
 
         checkLogger();
         // "count", "name"
@@ -191,11 +180,40 @@ public class App_6_1Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         List<String> aliases = Arrays.asList("sum", "docNumber", "docDate", "price", "cost", "dealDoneDate");
-        // ожидается 5 строк
-        int expected = 5;
-        defaultCheckLoadData(aliases, expected);
+        defaultCheckLoadData(aliases, 4);
 
         checkLoadData(testHelper.getDataRowHelper().getAll());
+    }
+
+    // Проверить загруженные данные
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(1L, dataRows.get(1).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(2).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(3).getCell("name").getNumericValue().longValue());
+
+        Assert.assertEquals(0, dataRows.get(0).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(1).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(2, dataRows.get(2).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(3, dataRows.get(3).getCell("count").getNumericValue().intValue());
+    }
+
+    // Проверить расчеты
+    void checkAfterCalc(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(1, dataRows.get(0).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(1).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(2).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(3).getCell("count").getNumericValue().intValue());
+
+        Assert.assertEquals(1, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(4, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(7, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(10, dataRows.get(3).getCell("price").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(4, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(7, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(10, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
     }
 
     void mockBeforeImport(){
@@ -269,42 +287,6 @@ public class App_6_1Test extends ScriptTestBase {
                 return map;
             }
         });
-    }
-
-    // Проверить загруженные данные
-    void checkLoadData(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(1L, dataRows.get(1).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(2).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(3).getCell("name").getNumericValue().longValue());
-
-        Assert.assertEquals(0, dataRows.get(0).getCell("count").getNumericValue().intValue());
-        Assert.assertEquals(1, dataRows.get(1).getCell("count").getNumericValue().intValue());
-        Assert.assertEquals(2, dataRows.get(2).getCell("count").getNumericValue().intValue());
-        Assert.assertEquals(3, dataRows.get(3).getCell("count").getNumericValue().intValue());
-    }
-
-    // Проверить расчеты
-    void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(1, dataRows.get(0).getCell("count").getNumericValue().intValue());
-        Assert.assertEquals(1, dataRows.get(1).getCell("count").getNumericValue().intValue());
-        Assert.assertEquals(1, dataRows.get(2).getCell("count").getNumericValue().intValue());
-        Assert.assertEquals(1, dataRows.get(3).getCell("count").getNumericValue().intValue());
-
-        Assert.assertEquals(1, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(7, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(10, dataRows.get(3).getCell("price").getNumericValue().doubleValue(), 0);
-
-        Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(7, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(10, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
-
-        Assert.assertEquals(22, dataRows.get(4).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(4).getCell("count").getNumericValue().intValue());
-        Assert.assertEquals(22, dataRows.get(4).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(22, dataRows.get(4).getCell("cost").getNumericValue().doubleValue(), 0);
     }
 }
 

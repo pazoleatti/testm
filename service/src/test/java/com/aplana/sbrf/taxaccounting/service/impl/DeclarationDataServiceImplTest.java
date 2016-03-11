@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -500,4 +502,79 @@ public class DeclarationDataServiceImplTest {
         assertEquals(strings.get(0), specificReport.getReportAlias());
     }
 
+    @Test
+    public void getValueForCheckLimit() {
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setId(1L);
+
+        when(declarationDataDao.get(declarationData.getId())).thenReturn(declarationData);
+                when(reportService.getDec(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC)).thenReturn("uuid1");
+
+        BlobDataService blobDataService = mock(BlobDataService.class);
+        when(blobDataService.getLength("uuid1")).thenReturn(1200L);
+        ReflectionTestUtils.setField(declarationDataService, "blobDataService", blobDataService);
+
+        FormType formType = new FormType();
+        formType.setId(1);
+        formType.setName("Type1");
+
+        FormTemplate formTemplate1 = new FormTemplate();
+        formTemplate1.setId(10);
+        formTemplate1.setType(formType);
+        formTemplate1.addColumn(new RefBookColumn());
+        formTemplate1.addColumn(new NumericColumn());
+        formTemplate1.addColumn(new NumericColumn());
+        formTemplate1.addColumn(new StringColumn());
+        formTemplate1.addColumn(new NumericColumn());
+
+        FormData formData1 = new FormData();
+        formData1.setId(11L);
+        formData1.setFormTemplateId(formTemplate1.getId());
+        FormDataDao formDataDao = mock(FormDataDao.class);
+        when(formDataDao.getWithoutRows(11)).thenReturn(formData1);
+        ReflectionTestUtils.setField(declarationDataService, "formDataDao", formDataDao);
+
+        DataRowDao dataRowDao = mock(DataRowDao.class);
+        when(dataRowDao.getRowCount(formData1)).thenReturn(10);
+        ReflectionTestUtils.setField(declarationDataService, "dataRowDao", dataRowDao);
+
+        when(formTemplateService.get(formData1.getFormTemplateId())).thenReturn(formTemplate1);
+
+        ArrayList<Relation> sources = new ArrayList<Relation>();
+        Relation r1 = new Relation();
+        r1.setCreated(true);
+        r1.setFormDataId(formData1.getId());
+        r1.setState(WorkflowState.ACCEPTED);
+
+        Relation r2 = new Relation();
+        r2.setCreated(false);
+        sources.add(r1);
+        sources.add(r2);
+        when(sourceService.getDeclarationSourcesInfo(eq(declarationData), anyBoolean(), anyBoolean(), any(WorkflowState.class), eq(userInfo), any(Logger.class))).thenReturn(sources);
+
+        DeclarationDataScriptingService declarationDataScriptingService = mock(DeclarationDataScriptingService.class);
+        when(declarationDataScriptingService.executeScript(
+                eq(userInfo), eq(declarationData), eq(FormDataEvent.CALCULATE_TASK_COMPLEXITY), any(Logger.class), any(Map.class))).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Map<String, Object> exchangeParams = ((Map<String, Object>) invocation.getArguments()[4]);
+                ((ScriptTaskComplexityHolder) exchangeParams.get("taskComplexityHolder")).setValue(10L);
+                return null;
+            }
+        });
+        ReflectionTestUtils.setField(declarationDataService, "declarationDataScriptingService", declarationDataScriptingService);
+
+        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.PDF_DEC));
+        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.EXCEL_DEC));
+        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.ACCEPT_DEC));
+        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.CHECK_DEC));
+        assertEquals(new Long(50L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC));
+        assertEquals(new Long(10L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, new DeclarationSubreport(){{setAlias("alias1");}})));
+    }
 }

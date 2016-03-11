@@ -1182,17 +1182,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType) {
-        switch (reportType) {
+    public Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType reportType) {
+        switch (reportType.getReportType()) {
             case PDF_DEC:
             case EXCEL_DEC:
-            case SPECIFIC_REPORT_DEC:
-                String uuidXmlReport = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
-                if (uuidXmlReport != null) {
-                    return (long)Math.ceil(blobDataService.getLength(uuidXmlReport) / 1024.);
-                } else {
-                    return null;
-                }
             case ACCEPT_DEC:
             case CHECK_DEC:
                 String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
@@ -1205,6 +1198,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 long cellCountSource = 0;
                 DeclarationData declarationData = get(declarationDataId, userInfo);
                 for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, null, userInfo, new Logger())){
+                    System.out.println("getFormDataId: "+relation.getFormDataId());
                     if (relation.isCreated() && relation.getState() == WorkflowState.ACCEPTED) {
                         FormData formData = formDataDao.getWithoutRows(relation.getFormDataId());
                         int rowCountSource = dataRowDao.getRowCount(formData);
@@ -1213,8 +1207,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     }
                 }
                 return cellCountSource;
+            case SPECIFIC_REPORT_DEC:
+                Map<String, Object> exchangeParams = new HashMap<String, Object>();
+                ScriptTaskComplexityHolder taskComplexityHolder = new ScriptTaskComplexityHolder();
+                taskComplexityHolder.setAlias(reportType.getReportAlias());
+                taskComplexityHolder.setValue(0L);
+                exchangeParams.put("taskComplexityHolder", taskComplexityHolder);
+                declarationDataScriptingService.executeScript(userInfo, get(declarationDataId, userInfo), FormDataEvent.CALCULATE_TASK_COMPLEXITY, new Logger(), exchangeParams);
+                return taskComplexityHolder.getValue();
             default:
-                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
+                throw new ServiceException("Неверный тип отчета(%s)", reportType.getReportAlias());
         }
     }
 

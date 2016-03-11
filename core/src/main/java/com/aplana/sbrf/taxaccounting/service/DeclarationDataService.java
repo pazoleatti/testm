@@ -214,7 +214,7 @@ public interface DeclarationDataService {
 
     Long getTaskLimit(ReportType reportType);
 
-    Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType);
+    Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType reportType);
 
     /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего

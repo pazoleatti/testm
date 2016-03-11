@@ -32,24 +32,24 @@ static void main(String[] args) {
             true  // скрипты
     ]
     String resourcePath = "./src/main/resources/com/aplana/sbrf/taxaccounting/"
-    String templatePath = "../src/main/resources/form_template/etr/etr_4_16/v2015/" // TODO поменять на путь до нужного макета
+    String templatePath = "../src/main/resources/form_template/income/reserve_debts_1/v2015/" // TODO поменять на путь до нужного макета
     def map = [ // TODO заполнить
                 // заполняем вручную
-                "%1%"  : '716',             // id типа НФ
-                "%2%"  : 'Приложение 4-16. Доходы и расходы, не учитываемые для целей налогообложения по налогу на прибыль, и их влияние на финансовый результат', // имя типа НФ
-                "%3%"  : 'TaxType.ETR',     // вид налога
+                "%1%"  : '847',             // id типа НФ
+                "%2%"  : 'Сводный регистр налогового учета по формированию и использованию резерва по сомнительным долгам (с периода год 2015)', // имя типа НФ
+                "%3%"  : 'TaxType.INCOME',     // вид налога
                 "%4%"  : 'false',           // isIFRS
                 "%5%"  : '',                // имя ИФРС
-                "%26%" : '4-16',            // код НФ
-                "%6%"  : '716',             // id версии макета НФ
+                "%26%" : '',            // код НФ
+                "%6%"  : '847',             // id версии макета НФ
                 "%10%" : '01.01.2015',      // версия в формате 01.01.2015
                 "%11%" : 'false',           // ежемесячность
-                "%18%" : 'true',            // использование периода сравнения
-                "%27%" : 'true',            // признак расчета нарастающим итогом
-                "%28%" : 'true'             // отображать кнопку "Обновить"
+                "%18%" : 'false',            // использование периода сравнения
+                "%27%" : 'false',            // признак расчета нарастающим итогом
+                "%28%" : 'false'             // отображать кнопку "Обновить"
     ]
 
-    String outputFileName = "scriptExecution_etr_4_16.txt" // TODO поменять имя выходного файла
+    String outputFileName = "add_reserve_debts_1.txt" // TODO поменять имя выходного файла
     def writer
     try {
         File templateFile = new File(resourcePath + "scriptExecution_template.txt")
@@ -111,8 +111,6 @@ static void main(String[] args) {
             sb.append("        formColumn.setOrder(${column.order})\n")
             sb.append("        formColumn.setName('${column.name.replaceAll(/"/, /\"/).replaceAll(/\n/, ' ').replaceAll(/ +/, ' ')}')\n")
             sb.append("        formColumn.setAlias('${column.alias}')\n")
-            // TODO метод "setColumnType" удален, так как выставление типа графы осуществляется в её конструкторе
-            sb.append("        formColumn.setColumnType(ColumnType.find{ it.title.equals('${column.columnType.title}')})\n")
             sb.append("        formColumn.setWidth(${column.getWidth()})\n")
             sb.append("        formColumn.setChecking(${column.checking})\n")
             switch (columnClassName) {
@@ -130,7 +128,7 @@ static void main(String[] args) {
                     sb.append("        formColumn.setRefBookAttributeId(${((RefBookColumn)column).refBookAttributeId})\n")
                     sb.append("        formColumn.setRefBookAttributeId2(${((RefBookColumn)column).refBookAttributeId2})\n")
                     sb.append("        formColumn.setNameAttributeId(${((RefBookColumn)column).nameAttributeId})\n")
-                    sb.append("        formColumn.setFilter('${((RefBookColumn)column).filter ?: ''}' ?: null)\n")
+                    sb.append("        formColumn.setFilter(\"${((RefBookColumn)column).filter ?: ''}\" ?: null)\n")
                     break
                 case ReferenceColumn.class.simpleName :
                     sb.append("        formColumn.setParentAlias('${((ReferenceColumn)column).alias ?: ''}')\n")

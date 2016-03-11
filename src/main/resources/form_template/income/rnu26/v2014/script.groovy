@@ -1,5 +1,6 @@
 package form_template.income.rnu26.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -132,8 +133,13 @@ def nonEmptyColumns = ['issuer', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'r
 def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
+// Сортируемые атрибуты (графа 2)
 @Field
-def groupColumns = ['issuer']
+def sortColumns = ['issuer']
+
+// Группируемые атрибуты (графа 2, 5, 10)
+@Field
+def groupColumns = ['issuer', 'currency', 'signSecurity']
 
 // Дата окончания отчетного периода
 @Field
@@ -197,11 +203,9 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     deleteAllAliased(dataRows)
     // отсортировать/группировать
-    dataRows = sort(dataRows)
+    sortRows(dataRows, sortColumns)
     // данные предыдущего отчетного периода
     def prevDataRows = getPrevDataRows()
-    // список групп кодов классификации для которых надо будет посчитать суммы
-    def totalGroups = []
     def rowsMap = getTradeNumberObjectMap(prevDataRows)
     for (row in dataRows) {
         if (!getBalancePeriod() && !isConsolidated) {
@@ -222,30 +226,19 @@ void calc() {
             // графа 17
             row.reserveRecovery = calc17(row)
         }
-        // для подитоговых значений
-        def Integer issuerId = getSubAliasName(row)
-        if (issuerId != null && !totalGroups.contains(issuerId)) {
-            totalGroups.add(issuerId)
-        }
     }
     // добавить строку "итого"
-    dataRows.add(getCalcTotalRow(dataRows))
-    // добавить подитоговые значения
+    dataRows.add(getTotalRow(dataRows))
     updateIndexes(dataRows)
-    def i = 0
-    for (def Integer group : totalGroups) {
-        // получить строки группы
-        def rows = getGroupRows(dataRows, group)
-        // получить алиас для подитоговой строки по ГРН
-        def totalRowAlias = 'total' + group.toString()
-        // сформировать подитоговую строку ГРН с суммами
-        def subTotalRow = getCalcSubtotalsRow(rows, group, totalRowAlias)
-        // получить индекс последней строки в группе
-        def lastRowIndex = rows[rows.size() - 1].getIndex() + i
-        // вставить строку с итогами по ГРН
-        dataRows.add(lastRowIndex, subTotalRow)
-        i++
-    }
+
+    // Добавление подитогов
+    addAllAliased(dataRows, new ScriptUtils.CalcAliasRow() {
+        @Override
+        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
+            return calcItog(i, rows)
+        }
+    }, groupColumns)
+
     sortFormDataRows(false)
 }
 
@@ -262,8 +255,6 @@ void logicCheck() {
             totalSums[alias] = 0
         }
     }
-    // список групп кодов классификации для которых надо будет посчитать суммы
-    def totalGroups = []
     // данные предыдущего отчетного периода
     def prevDataRows = getPrevDataRows()
     def rowsMap = getTradeNumberObjectMap(prevDataRows)
@@ -347,32 +338,17 @@ void logicCheck() {
             needValue['reserveRecovery'] = calc17(row)
             checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
         }
-        // 18. Проверка итоговых значений по эмитентам
-        def Integer issuerId = getSubAliasName(row)
-        if (issuerId != null && !totalGroups.contains(issuerId)) {
-            totalGroups.add(issuerId)
-        }
         // 19. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
         totalColumns.each { alias ->
             totalSums[alias] += (row.getCell(alias).value ?: 0)
         }
     }
     // 18. Проверка подитоговых значений
-    for (def Integer group : totalGroups) {
-        // получить строки группы
-        def rows = getGroupRows(dataRows, group)
-        // получить алиас для подитоговой строки
-        String totalRowAlias = 'total' + group.toString()
-        // получить посчитанную строку с итогами
-        def subTotalRow = dataRows.find { totalRowAlias.equals(it.getAlias()) }
-        // сформировать подитоговую строку ГРН с суммами
-        def tmpRow = getCalcSubtotalsRow(rows, group, totalRowAlias)
-        // сравнить строки
-        if (subTotalRow == null || isDiffRow(subTotalRow, tmpRow, totalColumns)) {
-            def issuerName = getIssueName(group)
-            loggerError(subTotalRow, "Итоговые значения по эмитенту $issuerName рассчитаны неверно!")
-        }
-    }
+    // Проверка наличия всех фиксированных строк
+    // Проверка отсутствия лишних фиксированных строк
+    // Проверка итоговых значений по фиксированным строкам
+    checkItog(dataRows)
+
     // получение итоговой строки
     def totalRow = dataRows.find { 'total'.equals(it.getAlias()) }
     if (totalRow != null && prevDataRows) {
@@ -626,7 +602,7 @@ void importTransportData() {
     }
 
     // подсчет итогов
-    def totalRow = getCalcTotalRow(newRows)
+    def totalRow = getTotalRow(newRows)
     newRows.add(totalRow)
 
     showMessages(newRows, logger)
@@ -730,59 +706,32 @@ boolean isEmptyCells(def rowCells) {
 }
 
 /**
- * Поиск строк с одинаковым кодом классификации дохода.
+ * Получить подитоговую строку.
  *
- * @param dataRows строки формы
+ * @param rowNumber номер строки
  * @param issuer эмитент
+ * @param key ключ для сравнения подитоговых строк при импорте
  */
-def getGroupRows(def dataRows, def Integer issuer) {
-    def rows = []
-    dataRows.each { row ->
-        if (row.getAlias() == null && getSubAliasName(row) == issuer) {
-            rows.add(row)
-        }
-    }
-    return rows
+def getSubTotalRow(def rowNumber, def issuer, def key) {
+    def alias = 'total' + key.toString() + '#' + rowNumber
+    def title = (!issuer || 'null'.equals(issuer?.trim()) ? '"Эмитент не задан"' : issuer?.trim()) + ' Итог'
+    return getTotalRow(title, alias)
 }
 
 /** Получить общую итоговую строку с суммами. */
-def getCalcTotalRow(def dataRows) {
-    return getTotalRow(dataRows, 'Общий итог', 'total')
+def getTotalRow(def dataRows) {
+    def totalRow = getTotalRow('Общий итог', 'total')
+    calcTotalSum(dataRows, totalRow, totalColumns)
+    return totalRow
 }
 
 /**
- * Получить подитоговую строку.
+ * Сформировать итоговую строку.
  *
- * @param dataRows строки формы
- * @param issuer эмитент
- * @param totalRowAlias псевдоним сформированной строки
- */
-def getCalcSubtotalsRow(def dataRows, def Integer issuer, def totalRowAlias) {
-    def String title = getIssueName(issuer) + ' Итог'
-    return getTotalRow(dataRows, title, totalRowAlias)
-}
-
-def String getIssueName(def Integer issuer) {
-    String retStr = ""
-    for (def entry : mapIssuers) {
-        def key = entry.key
-        def value = entry.value
-        if (issuer.equals(value)) {
-            retStr = key.substring(0, key.indexOf("|"))
-            return (retStr.equals('null') ? '"Эмитент не задан"' : retStr)
-        }
-    }
-    return retStr
-}
-
-/**
- * Сформировать итоговую строку с суммами.
- *
- * @param dataRows строки формы
  * @param value эмитент
  * @param alias алиас сформированной строки
  */
-def getTotalRow(def dataRows, def value, def alias) {
+def getTotalRow(def value, def alias) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     newRow.setAlias(alias)
     newRow.fix = value
@@ -790,28 +739,7 @@ def getTotalRow(def dataRows, def value, def alias) {
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-    calcTotalSum(dataRows, newRow, totalColumns)
     return newRow
-}
-
-// Отсорировать данные (по графе 2, 4)
-def sort(def dataRows) {
-    dataRows.sort({ DataRow a, DataRow b ->
-        sortRow(groupColumns, a, b)
-    })
-    return dataRows
-}
-
-int sortRow(List<String> params, DataRow a, DataRow b) {
-    for (String param : params) {
-        def aD = a.getCell(param).value
-        def bD = b.getCell(param).value
-
-        if (aD != bD) {
-            return aD <=> bD
-        }
-    }
-    return 0
 }
 
 // Группирует данные по графе tradeNumber с сохранением одной из ссылок на соответствующую строку
@@ -853,35 +781,6 @@ def getRate(def row, def date) {
 def isRubleCurrency(def currencyCode) {
     return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
 }
-
-/**
- * Получение провайдера с использованием кеширования.
- *
- * @param providerId
- * @return
- */
-def getProvider(def long providerId) {
-    if (!providerCache.containsKey(providerId)) {
-        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
-    }
-    return providerCache.get(providerId)
-}
-
-def Integer getSubAliasName(def row) {
-    if (row.getAlias() != null) {
-        return -1
-    }
-    def String value = row.issuer + "|" + row.currency + "|" + row.signSecurity
-    if (!mapIssuers.containsKey(value)) {
-        mapIssuers.put(value, ++x)
-    }
-    return mapIssuers.get(value)
-}
-
-@Field
-def Map<String, Integer> mapIssuers = [:]
-@Field
-def x = 0
 
 void importData() {
     def tmpRow = formData.createDataRow()
@@ -929,19 +828,24 @@ void importData() {
         }
         rowIndex++
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == "Общий итог") {
+        if (rowValues[INDEX_FOR_SKIP]?.trim()?.equalsIgnoreCase("Общий итог")) {
             totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
 
             allValues.remove(rowValues)
             rowValues.clear()
             continue
-        } else if (rowValues[INDEX_FOR_SKIP].contains(" итог")) {
-            def subTotalRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
-            def index = (subTotalRow.fix ? subTotalRow.fix.indexOf(" итог") : 0)
-            def key = (index > 0 ? subTotalRow.fix.substring(0, index) : null)
-            if (key) {
-                totalRowFromFileMap[key] = subTotalRow
+        } else if (rowValues[INDEX_FOR_SKIP].toLowerCase().contains(" итог")) {
+            // для расчета уникального среди групп(groupColumns) ключа берем строку перед Подитоговой
+            def tmpRowValue = rows[-1]
+            def key = getKey(tmpRowValue)
+            def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
+
+            // наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
+            if (totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] == null) {
+                totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] = []
             }
+            totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]].add(subTotalRow)
+            rows.add(subTotalRow)
 
             allValues.remove(rowValues)
             rowValues.clear()
@@ -954,39 +858,34 @@ void importData() {
         allValues.remove(rowValues)
         rowValues.clear()
     }
+    updateIndexes(rows)
 
     // сравнение подитогов
-    updateIndexes(rows)
     if (!totalRowFromFileMap.isEmpty()) {
-        // итоговые значения по ГРН
-        def tmpLastIndex = 0
-        def i = 0
-        def index = 1
-        totalRowFromFileMap.each { issuer, subTotalRowFromFile ->
-            // получить строки группы
-            def groupRows = getGroupRows(rows, index)
-            // получить алиас для подитоговой строки по ГРН
-            def totalRowAlias = 'total' + index
-            // сформировать подитоговую строку ГРН с суммами
-            def subTotalRow = getCalcSubtotalsRow(groupRows, index, totalRowAlias)
-            // получить индекс последней строки в группе
-            def lastRowIndex = (groupRows.isEmpty() ? tmpLastIndex: groupRows[groupRows.size() - 1].getIndex() + i)
-            // вставить строку с итогами по ГРН
-            rows.add(lastRowIndex, subTotalRow)
-            i++
-            index++
-
-            subTotalRow.setIndex(lastRowIndex + 1)
-            tmpLastIndex = subTotalRow.getIndex()
-            if (subTotalRow.fix == ' итог') {
-                subTotalRow.fix = issuer + subTotalRow.fix
+        def tmpSubTotalRowsMap = calcSubTotalRowsMap(rows)
+        tmpSubTotalRowsMap.each { subTotalRow, groupValues ->
+            def totalRows = totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]]
+            if (totalRows) {
+                totalRows.each { totalRow ->
+                    compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
+                }
+                totalRowFromFileMap.remove(subTotalRow.getAlias().split('#')[0])
+            } else {
+                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, groupValues))
             }
-            compareSimpleTotalValues(subTotalRow, subTotalRowFromFile, groupRows, totalColumns, formData, logger, false)
+        }
+        if (!totalRowFromFileMap.isEmpty()) {
+            // для этих подитогов из файла нет групп
+            totalRowFromFileMap.each { key, totalRows ->
+                totalRows.each { totalRow ->
+                    rowWarning(logger, totalRow, String.format(GROUP_WRONG_ITOG_ROW, totalRow.getIndex()))
+                }
+            }
         }
     }
 
     // сравнение итогов
-    def totalRow = getCalcTotalRow(rows)
+    def totalRow = getTotalRow(rows)
     rows.add(totalRow)
     updateIndexes(rows)
     if (totalRowFromFile) {
@@ -1045,9 +944,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param colOffset отступ в колонках
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
- * @param isSubTotal подитоговая строка
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def isSubTotal = false) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -1059,13 +957,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
 
-    // графа fix
-    def colIndex = 1
-    if (isSubTotal) {
-        newRow.fix = values[colIndex]
-    }
     // графа 2
-    colIndex = 2
+    def colIndex = 2
     newRow.issuer = values[colIndex]
     // графа 3 - справочник 97 «Типы акции»
     colIndex = 3
@@ -1116,4 +1009,140 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     }
 
     return newRow
+}
+
+/**
+ * Получить новую подитоговую строку нф по значениям из экселя.
+ *
+ * @param key ключ для сравнения подитоговых строк при импорте
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewSubTotalRowFromXls(def key, def values, def colOffset, def fileRowIndex, def rowIndex) {
+    // графа fix
+    def title = values[1]
+    def name = title?.substring(0, title.toLowerCase().indexOf(' итог'))?.trim()
+
+    def newRow = getSubTotalRow(rowIndex, name, key)
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 6..9
+    def colIndex = 5
+    ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    // графа 14..17
+    colIndex = 13
+    ['costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    return newRow
+}
+
+// Получить посчитанные подитоговые строки
+def calcSubTotalRowsMap(def dataRows) {
+    def tmpRows = dataRows.findAll { !it.getAlias() }
+    // Добавление подитогов
+    addAllAliased(tmpRows, new ScriptUtils.CalcAliasRow() {
+        @Override
+        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
+            return calcItog(i, rows)
+        }
+    }, groupColumns)
+
+    // сформировать мапу (строка подитога -> значения группы)
+    def map = [:]
+    def prevRow = null
+    for (def row : tmpRows) {
+        if (!row.getAlias()) {
+            prevRow = row
+            continue
+        }
+        if (row.getAlias() && prevRow) {
+            map[row] = getValuesByGroupColumn(prevRow)
+        }
+    }
+
+    return map
+}
+
+// Расчет подитогового значения
+DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
+    def tmpRow = dataRows.get(i)
+    def key = getKey(tmpRow)
+    def newRow = getSubTotalRow(i, tmpRow?.issuer, key)
+
+    // Расчеты подитоговых значений
+    def rows = []
+    for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
+        rows.add(dataRows.get(j))
+    }
+    calcTotalSum(rows, newRow, totalColumns)
+
+    return newRow
+}
+
+// Проверки подитоговых сумм
+void checkItog(def dataRows) {
+    // Рассчитанные строки итогов
+    def testItogRowsMap = calcSubTotalRowsMap(dataRows)
+    // Имеющиеся строки итогов
+    def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
+    // все строки, кроме общего итога
+    def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
+    def testItogRows = testItogRowsMap.keySet().asList()
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
+        @Override
+        String getString(DataRow<Cell> row) {
+            return getValuesByGroupColumn(row)
+        }
+    }, new ScriptUtils.CheckGroupSum() {
+        @Override
+        String check(DataRow<Cell> row1, DataRow<Cell> row2) {
+            for (def alias : totalColumns) {
+                if (row1[alias] != row2[alias]) {
+                    return getColumnName(row1, alias)
+                }
+            }
+            return null
+        }
+    })
+}
+
+// Возвращает строку со значениями полей строки по которым идет группировка
+String getValuesByGroupColumn(DataRow row) {
+    def values = []
+    def tmp
+
+    // 2
+    tmp = (row.issuer != null ? row.issuer : 'графа 2 не задана')
+    values.add(tmp)
+
+    // 5
+    def currency = getRefBookValue(15L, row.currency)?.CODE_2?.value
+    tmp = (currency != null ? currency : 'графа 5 не задана')
+    values.add(tmp)
+
+    // 10
+    def signSecurity = getRefBookValue(62L, row.signSecurity)?.CODE?.value
+    tmp = (signSecurity != null ? signSecurity : 'графа 10 не задана')
+    values.add(tmp)
+
+    return values.join("; ")
+}
+
+/** Получить уникальный ключ группы. */
+def getKey(def row) {
+    def key = ''
+    groupColumns.each { def alias ->
+        key = key + (row[alias] != null ? row[alias] : "").toString()
+    }
+    return key.toLowerCase().hashCode()
 }

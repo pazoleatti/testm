@@ -729,7 +729,10 @@ public class FormDataServiceImpl implements FormDataService {
     public FormData getFormData(TAUserInfo userInfo, long formDataId, boolean manual, Logger logger) {
         formDataAccessService.canRead(userInfo, formDataId);
         FormData formData = formDataDao.get(formDataId, manual);
-        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_LOAD, logger, null);
+        Map<String, Object> params = new HashMap<String, Object>();
+        ReportPeriod specialPeriod = new ReportPeriod();
+        params.put("specialPeriod", specialPeriod);
+        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_LOAD, logger, params);
         dataRowDao.refreshRefBookLinks(formData);
         return formData;
     }
@@ -763,7 +766,7 @@ public class FormDataServiceImpl implements FormDataService {
                 } else {
                     formDataAccessService.canDelete(userInfo, formDataId);
                     sourceService.deleteFDConsolidationInfo(Arrays.asList(formDataId));
-                    formDataDao.delete(formData.getFormTemplateId(), formDataId);
+                    formDataDao.delete(formDataId);
                     interruptTask(formDataId, false, userInfo.getUser().getId(), reportType, "Удалена налоговая форма");
                     auditService.add(FormDataEvent.DELETE, userInfo, null, formData, "Форма удалена", null);
                 }
@@ -1839,7 +1842,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public Long getValueForCheckLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid, Logger logger) {
+    public Long getValueForCheckLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String specificReportType, String uuid, Logger logger) {
         switch (reportType) {
             case CHECK_FD:
             case MOVE_FD:
@@ -1847,7 +1850,6 @@ public class FormDataServiceImpl implements FormDataService {
             case CALCULATE_FD:
             case EXCEL:
             case CSV:
-            case SPECIFIC_REPORT:
                 int rowCountReport = dataRowDao.getRowCount(formData);
                 int columnCountReport = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
                 return (long) (rowCountReport * columnCountReport);
@@ -1862,6 +1864,14 @@ public class FormDataServiceImpl implements FormDataService {
                 return cellCountSource;
             case IMPORT_FD:
                 return (long)Math.ceil(blobDataService.getLength(uuid) / 1024.);
+            case SPECIFIC_REPORT:
+                Map<String, Object> exchangeParams = new HashMap<String, Object>();
+                ScriptTaskComplexityHolder taskComplexityHolder = new ScriptTaskComplexityHolder();
+                taskComplexityHolder.setAlias(specificReportType);
+                taskComplexityHolder.setValue(0L);
+                exchangeParams.put("taskComplexityHolder", taskComplexityHolder);
+                formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CALCULATE_TASK_COMPLEXITY, logger, exchangeParams);
+                return taskComplexityHolder.getValue();
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }

@@ -199,31 +199,6 @@ public class App_6_13Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD_EXT, 1, "Дата совершения сделки", "01.01.2014", "31.12.2014", "Дата договора"), entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
-
-        // 8. Проверка итоговых значений по фиксированной строке «Итого»
-        row.getCell("name").setValue(1L, null);
-        row.getCell("outcomeSum").setValue(1, null);
-        row.getCell("docNumber").setValue("string1", null);
-        row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
-        row.getCell("count").setValue(1, null);
-        row.getCell("price").setValue(1, null);
-        row.getCell("cost").setValue(1, null);
-        row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2014"), null);
-        DataRow<Cell> totalRow = formData.createDataRow();
-        totalRow.setIndex(2);
-        totalRow.setAlias("total");
-        dataRows.add(totalRow);
-        totalRow.getCell("outcomeSum").setValue(2, null);
-        totalRow.getCell("count").setValue(2, null);
-        totalRow.getCell("cost").setValue(2, null);
-        testHelper.execute(FormDataEvent.CHECK);
-        entries = testHelper.getLogger().getEntries();
-        i = 0;
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_TOTAL, "Сумма расходов Банка, руб."), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_TOTAL, "Количество сделок"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_TOTAL, "Стоимость"), entries.get(i++).getMessage());
-        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
-        testHelper.getLogger().clear();
     }
 
     // Расчет пустой (в импорте - расчет заполненной)
@@ -238,9 +213,6 @@ public class App_6_13Test extends ScriptTestBase {
         mockBeforeImport();
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        List<String> aliases = Arrays.asList("incomeSum", "outcomeSum", "docNumber", "docDate", "count", "price", "cost", "dealDoneDate");
-        int expected = 4; // ожидается 4 строк: 3 из файла + 1 итоговая строка
-        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
         checkLoadData(testHelper.getDataRowHelper().getAll());
     }
@@ -250,10 +222,46 @@ public class App_6_13Test extends ScriptTestBase {
         mockBeforeImport();
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        int expected = 4; // ожидается 4 строк: 3 из файла + 1 итоговая строка
-        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
         checkLoadData(testHelper.getDataRowHelper().getAll());
+    }
+
+    // Проверить загруженные данные
+    void checkLoadData(List<DataRow<Cell>> dataRows) throws ParseException {
+        // графа 2
+        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(2).getCell("name").getNumericValue().longValue());
+        // графа 5
+        Assert.assertEquals(1L, dataRows.get(0).getCell("outcomeSum").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("outcomeSum").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(2).getCell("outcomeSum").getNumericValue().longValue());
+        // графа 6
+        Assert.assertEquals("string1", dataRows.get(0).getCell("docNumber").getStringValue());
+        Assert.assertEquals("string2", dataRows.get(1).getCell("docNumber").getStringValue());
+        Assert.assertEquals("string3", dataRows.get(2).getCell("docNumber").getStringValue());
+        // графа 7
+        Assert.assertEquals(sdf.parse("01.01.2016"), dataRows.get(0).getCell("docDate").getDateValue());
+        Assert.assertEquals(sdf.parse("02.01.2016"), dataRows.get(1).getCell("docDate").getDateValue());
+        Assert.assertEquals(sdf.parse("03.01.2016"), dataRows.get(2).getCell("docDate").getDateValue());
+        // графа 8
+        Assert.assertEquals(11L, dataRows.get(0).getCell("count").getNumericValue().longValue());
+        Assert.assertEquals(22L, dataRows.get(1).getCell("count").getNumericValue().longValue());
+        Assert.assertEquals(33L, dataRows.get(2).getCell("count").getNumericValue().longValue());
+        // графа 9
+        Assert.assertEquals(111L, dataRows.get(0).getCell("price").getNumericValue().longValue());
+        Assert.assertEquals(222L, dataRows.get(1).getCell("price").getNumericValue().longValue());
+        Assert.assertEquals(333L, dataRows.get(2).getCell("price").getNumericValue().longValue());
+        // графа 10
+        Assert.assertEquals(1111L, dataRows.get(0).getCell("cost").getNumericValue().longValue());
+        Assert.assertEquals(2222L, dataRows.get(1).getCell("cost").getNumericValue().longValue());
+        Assert.assertEquals(3333L, dataRows.get(2).getCell("cost").getNumericValue().longValue());
+        // графа 11
+        Assert.assertEquals(sdf.parse("04.01.2016"), dataRows.get(0).getCell("dealDoneDate").getDateValue());
+        Assert.assertEquals(sdf.parse("05.01.2016"), dataRows.get(1).getCell("dealDoneDate").getDateValue());
+        Assert.assertEquals(sdf.parse("06.01.2016"), dataRows.get(2).getCell("dealDoneDate").getDateValue());
+
+        Assert.assertEquals(3, testHelper.getDataRowHelper().getAll().size());
     }
 
     void mockBeforeImport(){
@@ -309,42 +317,6 @@ public class App_6_13Test extends ScriptTestBase {
                         return result;
                     }
                 });
-    }
-
-    // Проверить загруженные данные
-    void checkLoadData(List<DataRow<Cell>> dataRows) throws ParseException {
-        // графа 2
-        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(2).getCell("name").getNumericValue().longValue());
-        // графа 5
-        Assert.assertEquals(1L, dataRows.get(0).getCell("outcomeSum").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("outcomeSum").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(2).getCell("outcomeSum").getNumericValue().longValue());
-        // графа 6
-        Assert.assertEquals("string1", dataRows.get(0).getCell("docNumber").getStringValue());
-        Assert.assertEquals("string2", dataRows.get(1).getCell("docNumber").getStringValue());
-        Assert.assertEquals("string3", dataRows.get(2).getCell("docNumber").getStringValue());
-        // графа 7
-        Assert.assertEquals(sdf.parse("01.01.2016"), dataRows.get(0).getCell("docDate").getDateValue());
-        Assert.assertEquals(sdf.parse("02.01.2016"), dataRows.get(1).getCell("docDate").getDateValue());
-        Assert.assertEquals(sdf.parse("03.01.2016"), dataRows.get(2).getCell("docDate").getDateValue());
-        // графа 8
-        Assert.assertEquals(11L, dataRows.get(0).getCell("count").getNumericValue().longValue());
-        Assert.assertEquals(22L, dataRows.get(1).getCell("count").getNumericValue().longValue());
-        Assert.assertEquals(33L, dataRows.get(2).getCell("count").getNumericValue().longValue());
-        // графа 9
-        Assert.assertEquals(111L, dataRows.get(0).getCell("price").getNumericValue().longValue());
-        Assert.assertEquals(222L, dataRows.get(1).getCell("price").getNumericValue().longValue());
-        Assert.assertEquals(333L, dataRows.get(2).getCell("price").getNumericValue().longValue());
-        // графа 10
-        Assert.assertEquals(1111L, dataRows.get(0).getCell("cost").getNumericValue().longValue());
-        Assert.assertEquals(2222L, dataRows.get(1).getCell("cost").getNumericValue().longValue());
-        Assert.assertEquals(3333L, dataRows.get(2).getCell("cost").getNumericValue().longValue());
-        // графа 11
-        Assert.assertEquals(sdf.parse("04.01.2016"), dataRows.get(0).getCell("dealDoneDate").getDateValue());
-        Assert.assertEquals(sdf.parse("05.01.2016"), dataRows.get(1).getCell("dealDoneDate").getDateValue());
-        Assert.assertEquals(sdf.parse("06.01.2016"), dataRows.get(2).getCell("dealDoneDate").getDateValue());
     }
 }
 

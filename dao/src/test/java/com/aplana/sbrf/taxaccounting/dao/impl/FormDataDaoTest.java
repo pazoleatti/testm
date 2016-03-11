@@ -131,12 +131,12 @@ public class FormDataDaoTest {
 
     @Test
     public void deleteTest() {
-        formDataDao.delete(1, 1);
+        formDataDao.delete(1);
     }
 
     @Test(expected = DaoException.class)
     public void deleteFailTest() {
-        formDataDao.delete(1, 1);
+        formDataDao.delete(1);
         formDataDao.get(1, false);
     }
 

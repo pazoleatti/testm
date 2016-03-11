@@ -720,14 +720,19 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
     }*/
 
-    private static final String COUNT_EXIST_LARGE_STRING = "SELECT COUNT(*) FROM form_data_%d WHERE length(c%d) > ?";
+    private static final String COUNT_EXIST_LARGE_STRING =
+			"SELECT COUNT(*) FROM form_data_row WHERE length(c%d) > :max_length AND" +
+			" form_data_id IN (SELECT id FROM form_data WHERE form_template_id = :form_template_id)";
 	@Override
-	public boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength) {
-        return getJdbcTemplate().queryForObject(
-                String.format(COUNT_EXIST_LARGE_STRING, formTemplateId, columnId),
-                new Object[]{maxLength},
-                new int[]{Types.INTEGER},
-                Integer.class) > 0;
+	public boolean checkExistLargeString(Long formTemplateId, Column column) {
+		if (!(ColumnType.STRING.equals(column.getColumnType()))) {
+			throw new IllegalArgumentException("Column must be an instance of \"StringColumn\" class");
+		}
+		String sql = String.format(COUNT_EXIST_LARGE_STRING, column.getDataOrder());
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("form_template_id", formTemplateId);
+		params.put("max_length", ((StringColumn) column).getMaxLength());
+		return getNamedParameterJdbcTemplate().queryForObject(sql, params, Integer.class) > 0;
 	}
 
     @Override

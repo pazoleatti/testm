@@ -50,7 +50,7 @@ public abstract class CheckDeclarationAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, getReportType());
+        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, DeclarationDataReportType.getDDReportTypeByReportType(getReportType()));
         if (value == null) {
             throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
         }

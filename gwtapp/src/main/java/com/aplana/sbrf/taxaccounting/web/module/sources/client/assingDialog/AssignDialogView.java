@@ -106,12 +106,16 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
             @Override
             public void onValueChange(ValueChangeEvent<Integer> event) {
                 yearFrom.setTitle(event.getValue() != null ? event.getValue() + " год" : "");
+                if (event.getValue() != null)
+                    yearTo.setMinValue(event.getValue());
+                else
+                    yearTo.setMinValue(1970);
             }
         });
         yearTo.addValueChangeHandler(new ValueChangeHandler<Integer>() {
             @Override
             public void onValueChange(ValueChangeEvent<Integer> event) {
-                yearTo.setTitle(event.getValue() != null ? event.getValue() + " год" : "");
+                yearTo.setTitle(yearTo.getValue() != null ? yearTo.getValue() + " год" : "");
             }
         });
     }
@@ -179,9 +183,11 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
         if (pi.getPeriodTo() != null) {
             periodTo.setValue(pi.getPeriodTo());
             yearTo.setValue(pi.getYearTo());
+            yearTo.setTitle("");
         } else {
             periodTo.setValue(null);
             yearTo.setValue(null);
+            yearTo.setTitle("");
             yearTo.setMinValue(pi.getYearFrom());
         }
     }

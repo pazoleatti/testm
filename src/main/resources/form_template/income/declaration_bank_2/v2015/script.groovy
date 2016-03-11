@@ -1552,29 +1552,33 @@ void generateXML() {
                                 Тип : type) {
                             //1..1
                             ФЛПолучДох(
-                                    ИННФЛ : innFL,
-                                    ИННИно : innIno,
-                                    СтатусНП : statusNP,
-                                    ДатаРожд : dataRozhd,
-                                    Гражд : grazhd,
-                                    КодВидДок : kodVidDok,
-                                    СерНомДок : serNomDok
+                                    (innFL ? [ИННФЛ: innFL] : [:]) +
+                                            (innIno ? [ИННИно: innIno] : [:]) +
+                                            [СтатусНП : statusNP,
+                                             ДатаРожд : dataRozhd,
+                                             Гражд    : grazhd,
+                                             КодВидДок: kodVidDok,
+                                             СерНомДок: serNomDok]
                             ) {
                                 // 1..1
                                 ФИО([Фамилия : surname, Имя : givenName] + (parentName != null ? [Отчество : parentName] : []))
                                 //0..1
-                                АдрМЖРФ(
-                                        (zipCode ? [Индекс : zipCode] : [:]) +
-                                                [КодРегион : subdivisionRF] +
-                                                (area? [Район : area] : [:]) +
-                                                (city ? [Город : city] : [:]) +
-                                                (region ? [НаселПункт : region] : [:]) +
-                                                (street ? [Улица : street] : [:]) +
-                                                (homeNumber ? [Дом : homeNumber] : [:]) +
-                                                (corpNumber ? [Корпус : corpNumber] : [:]) +
-                                                (apartment ? [Кварт : apartment] : [:]))
+                                if (subdivisionRF != null) {
+                                    АдрМЖРФ(
+                                            (zipCode ? [Индекс : zipCode] : [:]) +
+                                                    [КодРегион : subdivisionRF] +
+                                                    (area? [Район : area] : [:]) +
+                                                    (city ? [Город : city] : [:]) +
+                                                    (region ? [НаселПункт : region] : [:]) +
+                                                    (street ? [Улица : street] : [:]) +
+                                                    (homeNumber ? [Дом : homeNumber] : [:]) +
+                                                    (corpNumber ? [Корпус : corpNumber] : [:]) +
+                                                    (apartment ? [Кварт : apartment] : [:]))
+                                }
                                 //0..1
-                                АдрМЖИно(ОКСМ : oksm, АдрТекст : adrText)
+                                if (oksm != null || adrText) {
+                                    АдрМЖИно(ОКСМ : oksm, АдрТекст : adrText)
+                                }
                             }
                             //1..1
                             ДохНалПер(
@@ -1586,37 +1590,58 @@ void generateXML() {
                                             (nalUderzhLish != null ? [НалУдержЛиш : nalUderzhLish] : []) +
                                             (nalNeUderzh != null ? [НалНеУдерж : nalNeUderzh] : [])
                             )
+                            boolean isSprDohFL = (1..3).find { index_1 ->
+                                //КодДоход    040 (Код дохода) или СумДоход    041 (Сумма дохода) заполнены
+                                row["col_040_${index_1}"] != null || row["col_041_${index_1}"] != null
+                            } != null
+
                             //0..1
-                            СпрДохФЛ() {
-                                3.times{ index_1 ->
-                                    //КодДоход    040 (Код дохода)
-                                    def kodDohod040 = getRefBookValue(370, row["col_040_${index_1 + 1}"])?.CODE?.value
-                                    //СумДоход    041 (Сумма дохода)
-                                    def sumDohod041 = row["col_041_${index_1 + 1}"]
+                            if (isSprDohFL) {
+                                СпрДохФЛ() {
+                                    3.times{ index_1 ->
+                                        //КодДоход    040 (Код дохода)
+                                        def kodDohod040 = getRefBookValue(370, row["col_040_${index_1 + 1}"])?.CODE?.value
+                                        //СумДоход    041 (Сумма дохода)
+                                        def sumDohod041 = row["col_041_${index_1 + 1}"]
 
-                                    СумДох(КодДоход : kodDohod040, СумДоход : sumDohod041) {
-                                        5.times{ index_2 ->
-                                            //КодВычет    042 (Код вычета)
-                                            def kodVichet042 = getRefBookValue(350, row["col_042_${index_1 + 1}_${index_2 + 1}"])?.CODE?.value
-                                            //СумВычет    043 (Сумма вычета)
-                                            def sumVichet043 = row["col_043_${index_1 + 1}_${index_2 + 1}"]
+                                        // 0..n
+                                        if (kodDohod040 || sumDohod041 != null) {
+                                            СумДох(КодДоход : kodDohod040, СумДоход : sumDohod041) {
+                                                5.times{ index_2 ->
+                                                    //КодВычет    042 (Код вычета)
+                                                    def kodVichet042 = getRefBookValue(350, row["col_042_${index_1 + 1}_${index_2 + 1}"])?.CODE?.value
+                                                    //СумВычет    043 (Сумма вычета)
+                                                    def sumVichet043 = row["col_043_${index_1 + 1}_${index_2 + 1}"]
 
-                                            //1..n
-                                            СумВыч(КодВычет : kodVichet042, СумВычет : sumVichet043)
+                                                    //0..n
+                                                    if (kodVichet042 || sumVichet043 != null) {
+                                                        СумВыч(КодВычет : kodVichet042, СумВычет : sumVichet043)
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
 
+                            boolean isNalVichStand = (1..2).find { index_1 ->
+                                //КодВычет    051 (Код вычета) или СумВычет    052 (Сумма вычета) заполнены
+                                row["col_051_3_${index_1}"] != null || row["col_052_3_${index_1}"] != null
+                            } != null
+
                             //0..1
-                            НалВычСтанд() {
-                                2.times{ index_1 ->
-                                    //КодВычет    051 (Код вычета)
-                                    def kodVichet051 = getRefBookValue(350, row["col_051_3_${index_1 + 1}"])?.CODE?.value
-                                    //СумВычет    052 (Сумма вычета)
-                                    def sumVichet052 = row["col_052_3_${index_1 + 1}"]
-                                    //1..n
-                                    СумВыч(КодВычет : kodVichet051, СумВычет : sumVichet052)
+                            if (isNalVichStand) {
+                                НалВычСтанд() {
+                                    2.times{ index_1 ->
+                                        //КодВычет    051 (Код вычета)
+                                        def kodVichet051 = getRefBookValue(350, row["col_051_3_${index_1 + 1}"])?.CODE?.value
+                                        //СумВычет    052 (Сумма вычета)
+                                        def sumVichet052 = row["col_052_3_${index_1 + 1}"]
+                                        //0..n
+                                        if (kodVichet051 || sumVichet052 != null) {
+                                            СумВыч(КодВычет : kodVichet051, СумВычет : sumVichet052)
+                                        }
+                                    }
                                 }
                             }
                         }

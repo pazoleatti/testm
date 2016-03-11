@@ -31,6 +31,7 @@ public enum FormDataEvent implements Serializable {
     REFRESH(18, "Обновить"),
     CREATE_SPECIFIC_REPORT(19, "Сформировать специфичный отчет"),
     GET_SPECIFIC_REPORT_TYPES(20, "Получить список специфичных отчето"),
+    CALCULATE_TASK_COMPLEXITY(21, "Рассчитать сложно задачи формирования специфичных отчетов"),
 
 	MOVE_CREATED_TO_APPROVED(101, "Утвердить из \"Создана\""),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),

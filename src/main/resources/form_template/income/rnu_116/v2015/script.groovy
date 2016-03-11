@@ -43,6 +43,9 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
+    case FormDataEvent.AFTER_LOAD:
+        afterLoad()
+        break
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
@@ -240,21 +243,21 @@ void logicCheck() {
 
         // Проверка корректности суммы требований
         if (row.dealType != null && row.reqVolume != null && row.reqCourse != null && row.reqSum != null) {
-            if ((row.dealType == dealType1 || row.dealType == dealType2) && row.reqSum != calc17(row)) {
+            if (row.dealType == dealType3 && row.reqSum != calc17(row)) {
                 def msg = row.getCell('reqSum').column.name
                 def msg1 = row.getCell('reqVolume').column.name
                 def msg2 = row.getCell('reqCourse').column.name
-                logger.error("Строка $rowNum: Значение графы «$msg» должно равняться произведению «$msg1» и «$msg2»!")
+                logger.error("Строка $rowNum: Значение графы «$msg» должно равняться модулю произведения «$msg1» и «$msg2»!")
             }
         }
 
         // Проверка корректности суммы обязательств
         if (row.dealType != null && row.guarVolume != null && row.guarCourse != null && row.guarSum != null) {
-            if ((row.dealType == dealType2 || row.dealType == dealType3) && row.guarSum != calc18(row)) {
+            if (row.dealType == dealType3 && row.guarSum != calc18(row)) {
                 def msg = row.getCell('guarSum').column.name
                 def msg1 = row.getCell('guarVolume').column.name
                 def msg2 = row.getCell('guarCourse').column.name
-                logger.error("Строка $rowNum: Значение графы «$msg» должно равняться произведению «$msg1» и «$msg2»!")
+                logger.error("Строка $rowNum: Значение графы «$msg» должно равняться модулю произведения «$msg1» и «$msg2» со знаком «-»!")
             }
         }
 
@@ -325,14 +328,14 @@ def BigDecimal calc20(def row) {
 
 def BigDecimal calc17(def row) {
     if (row.reqVolume != null && row.reqCourse != null) {
-        return ScriptUtils.round(row.reqVolume * row.reqCourse, 2)
+        return ScriptUtils.round(row.reqVolume * row.reqCourse, 2).abs()
     }
     return null
 }
 
 def BigDecimal calc18(def row) {
     if (row.guarVolume != null && row.guarCourse != null) {
-        return ScriptUtils.round(row.guarVolume * row.guarCourse, 2)
+        return ScriptUtils.round(row.guarVolume * row.guarCourse, 2).abs().negate()
     }
     return null
 }
@@ -727,4 +730,23 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.outcomeDelta = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+void afterLoad() {
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def year = reportPeriod.taxPeriod.year
+    def periodName = ""
+    switch (reportPeriod.order) {
+        case 1 : periodName = "первый квартал"
+            break
+        case 2 : periodName = "полугодие"
+            break
+        case 3 : periodName = "9 месяцев"
+            break
+        case 4 : periodName = "год"
+            break
+    }
+    specialPeriod.name = periodName
+    specialPeriod.calendarStartDate = Date.parse("dd.MM.yyyy", "01.01.$year")
+    specialPeriod.endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 }

@@ -211,6 +211,14 @@ public class Rnu7Test extends ScriptTestBase {
         row3.getCell("ruble").setValue(17.3, null);
         dataRows.add(row3);
 
+        DataRow<Cell> row4 = formData.createDataRow();
+        row4.setAlias("total1#1");
+        row4.setIndex(4);
+        row4.getCell("helper").setValue("Итого по КНУ codeB", null);
+        row4.getCell("taxAccountingRuble").setValue(17.2 * 2, null);
+        row4.getCell("ruble").setValue(17.3 * 2, null);
+        dataRows.add(row4);
+
         testHelper.execute(FormDataEvent.CHECK);
 
         List<LogEntry> entries = testHelper.getLogger().getEntries();
@@ -226,8 +234,6 @@ public class Rnu7Test extends ScriptTestBase {
         Assert.assertEquals("Строка 3: Неверное значение граф: «Курс Банка России», «Сумма расхода, в налоговом учёте. Рубли», «Сумма расхода, в бухгалтерском учёте. Рубли»!", entries.get(i++).getMessage());
         Assert.assertEquals("Операция, указанная в строке 3, в налоговом учете за последние 3 года не проходила!", entries.get(i++).getMessage());
         Assert.assertEquals("Строки 2, 3 не уникальны в рамках текущей налоговой формы! По данным строкам значения следующих граф совпадают: «Балансовый счёт (номер)» (numberB), «Первичный документ. Номер» (строка15), «Первичный документ. Дата» (01.01.2014).", entries.get(i++).getMessage());
-        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма расхода, в налоговом учёте. Рубли»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма расхода, в бухгалтерском учёте. Рубли»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
 
         // ошибок быть не должно

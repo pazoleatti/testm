@@ -56,7 +56,7 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
                 manual,
                 logger);
 
-        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), uuid, logger);
+        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), null, uuid, logger);
         String msg = String.format("выбранный файл имеет слишком большой размер (%s Кбайт)!",  value);
         return checkTask(getReportType(), value, formDataService.getTaskName(getReportType(), formDataId, userInfo), msg);
     }

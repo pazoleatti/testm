@@ -314,11 +314,13 @@ void calc() {
 }
 
 void reCalcTotalRow(def dataRows, def totalRow) {
+    def isTaxPeriod = reportPeriodService.get(formData.reportPeriodId).order == 4
+
     totalRow.baseTaxOfRub = 0
     totalRow.taxSum = 0
     totalRow.taxSumOutside = 0
     totalRow.taxSumToReduction = 0
-    totalRow.everyMontherPaymentAfterPeriod = 0
+    totalRow.everyMontherPaymentAfterPeriod = (isTaxPeriod ? null : 0)
     totalRow.everyMonthForKvartalNextPeriod = 0
     for (row in dataRows) {
         if (row.getAlias() == 'total' || row.regionBank == centralId) {
@@ -328,13 +330,16 @@ void reCalcTotalRow(def dataRows, def totalRow) {
         totalRow.taxSum += row.taxSum ?: 0
         totalRow.taxSumOutside += row.taxSumOutside ?: 0
         totalRow.taxSumToReduction += row.taxSumToReduction ?: 0
-        totalRow.everyMontherPaymentAfterPeriod += row.everyMontherPaymentAfterPeriod ?: 0
+        if (!isTaxPeriod) {
+            totalRow.everyMontherPaymentAfterPeriod += row.everyMontherPaymentAfterPeriod ?: 0
+        }
         totalRow.everyMonthForKvartalNextPeriod += row.everyMonthForKvartalNextPeriod ?: 0
     }
 }
 
 void calcTotalRow(def dataRows, def totalRow) {
-    calcTotalSum(dataRows, totalRow, totalColumns)
+    def isTaxPeriod = reportPeriodService.get(formData.reportPeriodId).order == 4
+    calcTotalSum(dataRows, totalRow, isTaxPeriod ? (totalColumns - 'everyMontherPaymentAfterPeriod') : totalColumns)
     // графа 11
     totalRow.baseTaxOf = roundValue(dataRows.sum{ row ->
         String value = row.baseTaxOf
@@ -367,7 +372,10 @@ void calcCaTotalRow(def dataRows, def prevDataRows, def caTotalRow, def totalRow
                     // Принимает значение «графы 18» подразделения «Центральный аппарат»
                     tempValue = caRow.everyMontherPaymentAfterPeriod
                     break
-                default: // Период формы «полугодие / 9 месяцев / год»:
+                case 4: // Период формы "год"
+                    tempValue = null
+                    break
+                default: // Период формы «полугодие / 9 месяцев»:
                     // «Графа 18» = Значение «графы 18» подразделения «Центральный аппарат» + (Значение итоговой строки по «графе 18» - (Значение итоговой строки по «графе 14» - Значение итоговой строки по «графе 14» формы предыдущего периода))
                     def prevTaxSum = prevDataRows?.find {it.getAlias() == 'total'}?.taxSum ?: 0
                     tempValue = (caRow.everyMontherPaymentAfterPeriod ?: 0) + ((totalRow.everyMontherPaymentAfterPeriod ?: 0) - ((totalRow.taxSum ?: 0) - prevTaxSum))
@@ -770,7 +778,8 @@ void logicalCheckAfterCalc() {
         rowWarning(logger, caTotalRow, String.format("Строка %s: Итоговые значения рассчитаны неверно в графе «%s»!", caTotalRow.getIndex(), getColumnName(caTotalRow, alias)))
     }
 
-    errorColumns = (totalColumns + 'baseTaxOf').findAll { alias ->
+    def isTaxPeriod = reportPeriodService.get(formData.reportPeriodId).order == 4
+    errorColumns = ((isTaxPeriod ? (totalColumns - 'everyMontherPaymentAfterPeriod') : totalColumns) + 'baseTaxOf').findAll { alias ->
         totalRowTemp[alias] != totalRow[alias]
     }
     errorColumns.each { alias ->
@@ -891,7 +900,7 @@ void importData() {
     def caTotalRow
     def totalRow
 
-    // формирвание строк нф
+    // формирование строк нф
     for (def i = 0; i < allValuesCount; i++) {
         rowValues = allValues[0]
         fileRowIndex++
@@ -943,7 +952,8 @@ void importData() {
             totalRow.fix = 'Сбербанк России'
             totalRow.getCell('fix').colSpan = 5
             setTotalStyle(totalRow)
-            calcTotalSum(rows, totalRow, totalColumns)
+            def isTaxPeriod = reportPeriodService.get(formData.reportPeriodId).order == 4
+            calcTotalSum(rows, totalRow, isTaxPeriod ? (totalColumns - 'everyMontherPaymentAfterPeriod') : totalColumns)
             totalRow.baseTaxOf = roundValue(rows.sum { row ->
                 String value = row.baseTaxOf
                 (row.getAlias() == null && value?.isBigDecimal()) ? new BigDecimal(value) : BigDecimal.ZERO

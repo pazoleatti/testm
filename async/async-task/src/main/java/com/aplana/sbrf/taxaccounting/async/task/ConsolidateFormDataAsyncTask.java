@@ -63,7 +63,7 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
             throw new AsyncTaskException(new ServiceLoggerException(errorMsg,
                     logEntryService.save(logger.getEntries())));
         }
-        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), null, logger);
+        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), null, null, logger);
         String msg = String.format("сумма количества ячеек таблицы формы по всем формам источникам (%s) превышает максимально допустимое (%s)!", value, "%s");
         return checkTask(getReportType(), value, formDataService.getTaskName(getReportType(), formDataId, userInfo), msg);
     }
