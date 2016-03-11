@@ -235,7 +235,7 @@ void calc() {
     addAllAliased(dataRows, new ScriptUtils.CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
-            return calcItog(i, dataRows)
+            return calcItog(i, rows)
         }
     }, groupColumns)
 
