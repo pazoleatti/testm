@@ -1300,8 +1300,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "allRecords as (select cr.id, cr.version as versionStart, nv.version - interval '1' day as versionEnd from currentRecord cr, nextVersion nv)\n" +
             "select distinct id,\n" +
             "case\n" +
-            "\twhen (versionEnd is not null and :versionTo > versionEnd) then 1\n" +
-            "\twhen ((versionEnd is null or :versionTo <= versionEnd) and :versionFrom < versionStart) then -1\n" +
+            "\twhen (versionEnd is not null and (:versionTo is null or :versionTo > versionEnd)) then 1\n" +
+            "\twhen (:versionFrom < versionStart) then -1\n" +
             "\telse 0\n" +
             "end as result\n" +
             "from allRecords";
