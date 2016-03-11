@@ -207,10 +207,13 @@ public class App_6_3Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.IMPORT);
         checkLogger();
         checkLoadData(testHelper.getDataRowHelper().getAll());
+        Assert.assertEquals(1, testHelper.getDataRowHelper().getAll().size());
+
         // проверка расчетов
         testHelper.execute(FormDataEvent.CALCULATE);
         checkLogger();
         checkAfterCalc(testHelper.getDataRowHelper().getAll());
+        Assert.assertEquals(1, testHelper.getDataRowHelper().getAll().size());
     }
     @Test
     public void importTransportFileTest() {
@@ -218,6 +221,7 @@ public class App_6_3Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         checkLoadData(testHelper.getDataRowHelper().getAll());
+        Assert.assertEquals(2, testHelper.getDataRowHelper().getAll().size());
     }
 
     // Проверить загруженные данные
@@ -226,7 +230,6 @@ public class App_6_3Test extends ScriptTestBase {
         Assert.assertEquals(222, dataRows.get(0).getCell("sum").getNumericValue().longValue());
         Assert.assertEquals(222, dataRows.get(0).getCell("cost").getNumericValue().longValue());
         Assert.assertEquals(2, dataRows.get(0).getCell("count").getNumericValue().longValue());
-
     }
 
     // Проверить расчеты
