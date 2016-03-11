@@ -576,7 +576,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        return refBookDao.getInactiveRecordsInPeriod("department", recordIds, periodFrom, periodTo, true);
+        return refBookDepartmentDao.getInactiveRecords(recordIds);
     }
 
     /**
