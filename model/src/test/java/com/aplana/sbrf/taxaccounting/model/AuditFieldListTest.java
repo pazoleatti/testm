@@ -21,12 +21,11 @@ public class AuditFieldListTest {
 		assertEquals(DEPARTMENT, values[4]);
 		assertEquals(TYPE, values[5]);
 		assertEquals(FORM_KIND, values[6]);
-		assertEquals(FORM_TYPE, values[7]);
-		assertEquals(DECLARATION_TYPE, values[8]);
-		assertEquals(USER, values[9]);
-		assertEquals(ROLE, values[10]);
-		assertEquals(USER_DEPARTMENT, values[11]);
-		assertEquals(IP, values[12]);
-		assertEquals(SERVER, values[13]);
+		assertEquals(FORM_DECLARATION_TYPE, values[7]);
+		assertEquals(USER, values[8]);
+		assertEquals(ROLE, values[9]);
+		assertEquals(USER_DEPARTMENT, values[10]);
+		assertEquals(IP, values[11]);
+		assertEquals(SERVER, values[12]);
 	}
 }
