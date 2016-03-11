@@ -14,6 +14,6 @@
     <p><a href="/resources/help_uks.pdf">Руководство_пользователя "Учет КС"</a></p>
     <p>Обратитесь к администратору.</p>
     <!-- Завершение сеанса пользователя СУДИР -->
-    <p><a href="${pageContext.servletContext.contextPath}/pkmslogout">Завершить сеанс</a></p>
+    <p><a href="/pkmslogout">Завершить сеанс</a></p>
 </body>
 </html>
