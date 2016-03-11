@@ -102,7 +102,6 @@ public class App_6_21Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Итого стоимость без учета НДС, акцизов и пошлины, руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата совершения сделки"), entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 2 не задана; графа 5 не задана; графа 6 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -133,8 +132,7 @@ public class App_6_21Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Сумма расходов Банка по данным бухгалтерского учета, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» должно быть равно значению графы «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Итого стоимость без учета НДС, акцизов и пошлины, руб.» должно быть равно значению графы «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «A; string; 03.01.2989» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD_EXT, 1, "Дата совершения сделки", "01.01.2014", "31.12.2014", "Дата сделки"), entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -223,9 +221,7 @@ public class App_6_21Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.IMPORT);
 
         List<String> aliases = Arrays.asList("docNumber", "docDate", "dealNumber", "dealDate", "sum", "price", "cost", "dealDoneDate");
-        // ожидается 4 строки
-        int expected = 4;
-        defaultCheckLoadData(aliases, expected);
+        defaultCheckLoadData(aliases, 3);
 
         checkLoadData(testHelper.getDataRowHelper().getAll());
 
@@ -245,27 +241,14 @@ public class App_6_21Test extends ScriptTestBase {
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(1, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertNull(dataRows.get(1).getCell("price").getNumericValue());
-        Assert.assertEquals(4, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertNull(dataRows.get(3).getCell("price").getNumericValue());
-        Assert.assertEquals(7, dataRows.get(4).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertNull(dataRows.get(5).getCell("price").getNumericValue());
-        Assert.assertNull(dataRows.get(6).getCell("price").getNumericValue());
+        Assert.assertEquals(4, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(7, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
 
         Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(7, dataRows.get(4).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(7, dataRows.get(5).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(12, dataRows.get(6).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(4, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(7, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
 
-        Assert.assertEquals(1, dataRows.get(1).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(3).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(7, dataRows.get(5).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(12, dataRows.get(6).getCell("sum").getNumericValue().doubleValue(), 0);
-
-        Assert.assertEquals(7, dataRows.size());
+        Assert.assertEquals(3, dataRows.size());
     }
 }
 
