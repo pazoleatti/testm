@@ -350,7 +350,11 @@ public class RefBookVzlHistory implements RefBookDataProvider {
 
     @Override
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
-        throw new UnsupportedOperationException();
+        RefBookRecordVersion version = new RefBookRecordVersion();
+        version.setRecordId(uniqueRecordId);
+        version.setVersionStart(null);
+        version.setVersionEnd(null);
+        return version;
     }
 
     @Override
@@ -360,7 +364,7 @@ public class RefBookVzlHistory implements RefBookDataProvider {
 
     @Override
     public int getRecordVersionsCount(Long uniqueRecordId) {
-        throw new UnsupportedOperationException();
+        return 1;
     }
 
     @Override

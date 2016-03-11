@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
 
 import javax.validation.constraints.NotNull;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
