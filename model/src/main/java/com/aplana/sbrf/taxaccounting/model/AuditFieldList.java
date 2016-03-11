@@ -11,19 +11,18 @@ import java.util.Comparator;
 public enum AuditFieldList {
 
     ALL(1, "Все поля", 1),
-    FORM_TYPE(2, "Вид налоговой формы", 8),
-    DECLARATION_TYPE(3, "Вид декларации", 9),
+    FORM_DECLARATION_TYPE(3, "Вид налоговой формы/декларации", 8),
     TYPE(12, "Тип формы", 6),
     PERIOD(4, "Период", 4),
     DEPARTMENT(5, "Подразделение", 5),
-    USER(6, "Пользователь", 10),
-    ROLE(7, "Роль пользователя", 11),
-	USER_DEPARTMENT(14, "Подразделение пользователя", 12),
+    USER(6, "Пользователь", 9),
+    ROLE(7, "Роль пользователя", 10),
+	USER_DEPARTMENT(14, "Подразделение пользователя", 11),
     EVENT(8, "Событие", 2),
     NOTE(9, "Текст события", 3),
     FORM_KIND(10, "Тип налоговой формы", 7),
-    IP(11, "IP пользователя", 13),
-	SERVER(13, "Сервер", 14);
+    IP(11, "IP пользователя", 12),
+	SERVER(13, "Сервер", 13);
 
     private long id;
     private String name;
