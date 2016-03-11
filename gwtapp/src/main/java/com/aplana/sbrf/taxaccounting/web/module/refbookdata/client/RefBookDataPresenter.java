@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.AbstractEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
@@ -257,9 +258,13 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                 @Override
                                                 public void close() {
                                                     super.close();
-                                                    PlaceRequest.Builder builder = new PlaceRequest.Builder().nameToken(RefBookDataTokens.REFBOOK_DATA);
-                                                    builder.with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(prevRefBookId));
-                                                    placeManager.revealPlace(builder.build());
+                                                    if (prevRefBookId != null) {
+                                                        PlaceRequest.Builder builder = new PlaceRequest.Builder().nameToken(RefBookDataTokens.REFBOOK_DATA);
+                                                        builder.with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(prevRefBookId));
+                                                        placeManager.revealPlace(builder.build());
+                                                    } else {
+                                                        placeManager.revealPlace(new PlaceRequest(HomeNameTokens.homePage));
+                                                    }
                                                 }
                                             });
                                         }
