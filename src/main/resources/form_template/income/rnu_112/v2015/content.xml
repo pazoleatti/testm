@@ -115,9 +115,9 @@
         <columnType>NUMBER</columnType>
         <name>Ставка сделки, % годовых</name>
         <order>11</order>
-        <width>10</width>
-        <maxLength>5</maxLength>
-        <precision>2</precision>
+        <width>11</width>
+        <maxLength>21</maxLength>
+        <precision>18</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>dealLeftSum</alias>
@@ -192,9 +192,9 @@
         <columnType>NUMBER</columnType>
         <name>Отклонение от рыночной процентной ставки для целей налогообложения</name>
         <order>19</order>
-        <width>10</width>
-        <maxLength>5</maxLength>
-        <precision>2</precision>
+        <width>11</width>
+        <maxLength>21</maxLength>
+        <precision>18</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>incomeCorrection</alias>
