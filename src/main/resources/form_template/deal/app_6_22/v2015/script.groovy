@@ -173,12 +173,7 @@ void logicCheck() {
         }
 
         // Проверка корректности даты совершения сделки
-        if (row.dealDate && row.dealDoneDate && (row.dealDate > row.dealDoneDate || row.dealDoneDate > getReportPeriodEndDate())) {
-            def msg1 = row.getCell('dealDoneDate').column.name
-            def msg2 = row.getCell('dealDate').column.name
-            def msg3 = getReportPeriodEndDate().format('dd.MM.yyyy')
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2» и не больше $msg3!")
-        }
+        checkDatePeriodExt(logger, row, 'dealDoneDate', 'dealDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
     }
 }
 
