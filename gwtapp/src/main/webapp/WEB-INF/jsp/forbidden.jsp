@@ -10,8 +10,8 @@
 </head>
 <body>
     <h1>Ошибка 403 &mdash; Доступ запрещён!</h1>
-    <p><a href="/resources/help_un.pdf">Руководство_пользователя "Учет Налогов"</a></p>
-    <p><a href="/resources/help_uks.pdf">Руководство_пользователя "Учет КС"</a></p>
+    <p><a href="${pageContext.servletContext.contextPath}/resources/help_un.pdf">Руководство_пользователя "Учет Налогов"</a></p>
+    <p><a href="${pageContext.servletContext.contextPath}/resources/help_uks.pdf">Руководство_пользователя "Учет КС"</a></p>
     <p>Обратитесь к администратору.</p>
     <!-- Завершение сеанса пользователя СУДИР -->
     <p><a href="/pkmslogout">Завершить сеанс</a></p>
