@@ -119,4 +119,11 @@ public interface RefBookDepartmentDao {
     String getReportPeriodNameByDate(TaxType taxType, Date startDate);
 
     List<Long> isRecordsExist(List<Long> uniqueRecordIds);
+
+    /**
+     * Проверяет действуют ли записи справочника
+     * @param recordIds уникальные идентификаторы записей справочника
+     * @return список id записей при проверке которых были обнаружены ошибки + код ошибки
+     */
+    List<ReferenceCheckResult> getInactiveRecords(@NotNull List<Long> recordIds);
 }

@@ -3,22 +3,12 @@
     <fixedRows>false</fixedRows>
     <name>6.5. Приобретение услуг по техническому обслуживанию нежилых помещений</name>
     <fullName>6.5. Отчет в отношении расходов ПАО Сбербанк, связанных с приобретением услуг по предоставлению нежилых помещений в аренду</fullName>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>fix</alias>
-        <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>fix</name>
-        <order>1</order>
-        <width>0</width>
-        <maxLength>100</maxLength>
-        <prevLength>0</prevLength>
-    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <columnType>AUTO</columnType>
         <name>№ п/п</name>
-        <order>2</order>
+        <order>1</order>
         <width>4</width>
         <numerationType>SERIAL</numerationType>
     </columns>
@@ -27,7 +17,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Полное наименование юридического лица с указанием ОПФ</name>
-        <order>3</order>
+        <order>2</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>5201</nameAttributeId>
@@ -39,7 +29,7 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>ИНН/ КИО</name>
-        <order>4</order>
+        <order>3</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5218</refBookAttributeId>
@@ -49,7 +39,7 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Код страны по классификатору ОКСМ</name>
-        <order>5</order>
+        <order>4</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5204</refBookAttributeId>
@@ -59,7 +49,7 @@
         <alias>sum</alias>
         <checking>false</checking>
         <name>Сумма расходов Банка, руб.</name>
-        <order>6</order>
+        <order>5</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -68,7 +58,7 @@
         <alias>docNumber</alias>
         <checking>false</checking>
         <name>Номер договора</name>
-        <order>7</order>
+        <order>6</order>
         <width>5</width>
         <maxLength>128</maxLength>
         <prevLength>0</prevLength>
@@ -77,7 +67,7 @@
         <alias>docDate</alias>
         <checking>false</checking>
         <name>Дата договора</name>
-        <order>8</order>
+        <order>7</order>
         <width>6</width>
         <formatId>0</formatId>
     </columns>
@@ -85,7 +75,7 @@
         <alias>country</alias>
         <checking>false</checking>
         <name>Страна (код)</name>
-        <order>9</order>
+        <order>8</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>53</nameAttributeId>
@@ -95,7 +85,7 @@
         <alias>region</alias>
         <checking>false</checking>
         <name>Регион (код)</name>
-        <order>10</order>
+        <order>9</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>10</nameAttributeId>
@@ -105,7 +95,7 @@
         <alias>city</alias>
         <checking>false</checking>
         <name>Город</name>
-        <order>11</order>
+        <order>10</order>
         <width>5</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
@@ -114,7 +104,7 @@
         <alias>settlement</alias>
         <checking>false</checking>
         <name>Населенный пункт</name>
-        <order>12</order>
+        <order>11</order>
         <width>6</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
@@ -123,7 +113,7 @@
         <alias>count</alias>
         <checking>false</checking>
         <name>Количество</name>
-        <order>13</order>
+        <order>12</order>
         <width>7</width>
         <maxLength>11</maxLength>
         <precision>4</precision>
@@ -132,7 +122,7 @@
         <alias>price</alias>
         <checking>false</checking>
         <name>Цена</name>
-        <order>14</order>
+        <order>13</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -141,7 +131,7 @@
         <alias>cost</alias>
         <checking>false</checking>
         <name>Стоимость</name>
-        <order>15</order>
+        <order>14</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -150,7 +140,7 @@
         <alias>dealDoneDate</alias>
         <checking>false</checking>
         <name>Дата совершения сделки</name>
-        <order>16</order>
+        <order>15</order>
         <width>6</width>
         <formatId>0</formatId>
     </columns>
