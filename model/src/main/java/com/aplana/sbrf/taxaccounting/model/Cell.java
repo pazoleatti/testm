@@ -16,7 +16,7 @@ import java.util.List;
 public class Cell extends AbstractCell {
     private static final long serialVersionUID = -3684680064726678753L;
 	//todo надо задуматься о том, что происходит с датами на двух строчках ниже. Написать тесты
-	public static final Date DATE_1900 = new Date(0,0,1);
+	public static final Date DATE_1900 = new Date(0, 0, 1);
 	public static final Date DATE_9999 = new Date(9999 - 1900, 11, 31);
 
     private String stringValue;
@@ -24,14 +24,12 @@ public class Cell extends AbstractCell {
     private BigDecimal numericValue;
     private boolean editable;
     private boolean forceValue;
-
+	/** Разыменованное значение справочной(зависимой) графы */
     private String refBookDereference;
-
+	/** Стиль ячейки */
     private FormStyle style;
     /** Временный стиль ячейки. Используется только в режиме ручного ввода и не сохраняется в бд */
     private FormStyle clientStyle;
-
-    private List<FormStyle> formStyleList;
     /** Сообщение, формируемое при проверке ячеек */
     private String errorMessage;
     /** Включен ли режим проверки (true - записывать в ячейки, false - бросать исключение) */
@@ -48,9 +46,9 @@ public class Cell extends AbstractCell {
         super();
     }
 
-    public Cell(Column column, List<FormStyle> formStyleList) {
+    public Cell(Column column) {
         super(column);
-        this.formStyleList = formStyleList;
+        this.style = FormStyle.DEFAULT_STYLE;
     }
 
     @Override
@@ -244,7 +242,6 @@ public class Cell extends AbstractCell {
         return editable;
     }
 
-
     /**
      * Задаёт признак того, что ячейка допускает ввод значения пользователем
      *
@@ -254,7 +251,6 @@ public class Cell extends AbstractCell {
         this.editable = editable;
     }
 
-
     /**
      * Получить {@link FormStyle стиль}, связанный с ячейкой.
      * Если значение стиля равно null, то нужно использовать стиль по-умолчанию.
@@ -262,10 +258,6 @@ public class Cell extends AbstractCell {
      * @return стиль, связанный с ячейкой
      */
     public FormStyle getStyle() {
-        if (!ModelUtils.containsLink(formStyleList, style)) {
-            // Обнуляем отсутствующий стиль
-            style = null;
-        }
         return style;
     }
 
@@ -278,41 +270,20 @@ public class Cell extends AbstractCell {
      * @param styleAlias {@link FormStyle#getAlias() алиас стиля}, связанного с
      *                   ячейкой.
      */
-    public void setStyleAlias(String styleAlias) {
-        if (styleAlias == null) {
-            style = null;
-            return;
-        }
-        for (FormStyle formStyle : formStyleList) {
-            if (formStyle.getAlias() != null
-                    && formStyle.getAlias().equals(styleAlias)) {
-                style = formStyle;
-                return;
-            }
-        }
-        throw new IllegalArgumentException("Стиля с алиасом '" + styleAlias
-                + "' не существует в шаблоне");
+	@Deprecated
+    public void setStyleAlias(String styleAlias) { //todo style
     }
 
-
-    public void setStyleId(Integer styleId) {
-        if (styleId == null) {
-            style = null;
-            return;
-        }
-        for (FormStyle formStyle : formStyleList) {
-            if (formStyle.getAlias() != null
-                    && formStyle.getId().equals(styleId)) {
-                style = formStyle;
-                return;
-            }
-        }
-        throw new IllegalArgumentException("Стиля с id '" + styleId
-                + "' не существует в шаблоне");
+	@Deprecated
+    public void setStyleId(Integer styleId) { //todo style
     }
 
+	public void setStyle(FormStyle style) {
+		this.style = style;
+	}
 
-    public String getStyleAlias() {
+	@Deprecated
+    public String getStyleAlias() { //todo style
         return style != null ? style.getAlias() : null;
     }
 
@@ -338,21 +309,13 @@ public class Cell extends AbstractCell {
         this.refBookDereference = refBookDereference;
     }
 
-    /**
-     * Устанавливает цвет фона и шрифта. Использовать только в режиме ручного ввода для жесткого задания цвета ячеек!
-     * @param alias алиас для нового стиля
-     * @param fontColor цвет шрифта
-     * @param backColor цвет фона
-     */
-    public void setClientStyle(String alias, Color fontColor, Color backColor) {
-        if (formStyleList != null && !formStyleList.isEmpty()) {
-            clientStyle = new FormStyle();
-            clientStyle.setAlias(alias);
-            clientStyle.setBackColor(backColor);
-            clientStyle.setFontColor(fontColor);
-            formStyleList.add(clientStyle);
-        }
-    }
+	/**
+	 * Устанавливает цвет фона и шрифта. Использовать только в режиме ручного ввода для жесткого задания цвета ячеек!
+	 * @param clientStyle устанавливаемый клиенсткий стиль
+	 */
+	public void setClientStyle(FormStyle clientStyle) {
+		this.clientStyle = clientStyle;
+	}
 
     public FormStyle getClientStyle() {
         return clientStyle;
@@ -377,7 +340,7 @@ public class Cell extends AbstractCell {
 		sb.append("; dereference=").append(getRefBookDereference());
 		sb.append("; colspan=").append(getColSpan());
 		sb.append("; rowspan=").append(getRowSpan());
-		sb.append("; style=").append(getStyle());
+		sb.append("; style=").append(getStyle()); //todo style
 		sb.append("; editable=").append(isEditable());
 		sb.append('}');
 

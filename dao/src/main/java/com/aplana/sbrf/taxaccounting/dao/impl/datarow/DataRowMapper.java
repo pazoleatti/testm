@@ -127,7 +127,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 	@Override
 	public DataRow<Cell> mapRow(ResultSet rs, int rowNum) throws SQLException {
-		List<Cell> cells = FormDataUtils.createCells(formData.getFormColumns(), formData.getFormStyles());
+		List<Cell> cells = FormDataUtils.createCells(formData.getFormTemplate());
 		Integer previousRowNumber = formData.getPreviousRowNumber() != null ? formData.getPreviousRowNumber() : 0;
 		String alias = rs.getString("alias");
 		for (Cell cell : cells) {
@@ -176,7 +176,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 					}
 				} else {
 					String numStr = style.substring(1);
-					if (numStr.isEmpty()) { // хоть одна циферка должна быть
+					if (numStr.isEmpty()) { // хотя бы один символ должен быть
 						throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", value));
 					}
 					Integer num = Integer.valueOf(numStr);

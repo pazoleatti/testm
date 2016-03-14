@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DataRow.MapEntry;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
@@ -89,14 +90,13 @@ public final class FormDataUtils {
 	/**
 	 * Создает группу Cell 
 	 * 
-	 * @param columns
-	 * @param styles
+	 * @param formTemplate версия макета НФ, в которой хранится информация о стилях и столбцах
 	 * @return
 	 */
-	public static List<Cell> createCells(List<Column> columns, List<FormStyle> styles) {
+	public static List<Cell> createCells(FormTemplate formTemplate) {
 		List<Cell> cells = new ArrayList<Cell>();
-		for (Column column : columns) {
-			cells.add(new Cell(column, styles));
+		for (Column column : formTemplate.getColumns()) {
+			cells.add(new Cell(column));
 		}
 		return cells;
 	}

@@ -355,7 +355,11 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	public void onAddButton(ClickEvent event){
         try {
             if (!columns.isEmpty()){
-                rows.add(new DataRow<Cell>("Новый код", FormDataUtils.createCells(columns, styles)));
+				FormTemplate formTemplate = new FormTemplate();
+				formTemplate.getColumns().addAll(columns);
+				formTemplate.getStyles().addAll(styles);
+
+                rows.add(new DataRow<Cell>("Новый код", FormDataUtils.createCells(formTemplate)));
                 setRowsData(rows);
             }
         } catch (IllegalArgumentException e){

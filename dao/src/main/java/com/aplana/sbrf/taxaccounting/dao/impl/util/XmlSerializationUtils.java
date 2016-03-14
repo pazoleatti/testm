@@ -18,6 +18,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -248,43 +249,37 @@ public final class XmlSerializationUtils {
 	 * @throws XmlSerializationException
 	 *             любая ошибка
 	 */
-	public <T extends AbstractCell> List<DataRow<T>> deserialize(String str, List<Column> columns, List<FormStyle> styles, Class<T> clazz) {
+	public <T extends AbstractCell> List<DataRow<T>> deserialize(String str, FormTemplate formTemplate, Class<T> clazz) {
 		List<DataRow<T>> rows = new ArrayList<DataRow<T>>();
 
 		Document document = stringToDocument(str);
 		Element root = document.getDocumentElement();
 		NodeList nodeList = root.getElementsByTagName(TAG_ROW);
 		for (int i = 0; i < nodeList.getLength(); i++) {
-			DataRow<T> dataRow = (DataRow<T>) parseDataRow((Element) nodeList.item(i), columns, styles, clazz);
+			DataRow<T> dataRow = parseDataRow((Element) nodeList.item(i), formTemplate, clazz);
 			//Устанавливаем нумерацию строк в заголовках, так же как внутри таблицы. Необходимо для построения xlsm представления
 			dataRow.setIndex(i + 1);
 			rows.add(dataRow);
 		}
-
 		return rows;
 	}
 
 	/**
 	 * Разбирает строку данных
 	 * 
-	 * @param element
-	 *            елемент строки данных
-	 * @param columns
-	 *            список столбцов формы
+	 * @param element элемент строки данных
+	 * @param formTemplate список столбцов формы
 	 */
-	@SuppressWarnings("unchecked")
-	private <T extends AbstractCell> DataRow<T> parseDataRow(Element element, List<Column> columns, List<FormStyle> styles, Class<T> clazz) {
-		
+	private <T extends AbstractCell> DataRow<T> parseDataRow(Element element, FormTemplate formTemplate, Class<T> clazz) {
 		// Value
 		NodeList cells = element.getElementsByTagName(TAG_CELL);
 		
 		DataRow<T> dataRow = null;
 		if (Cell.class.equals(clazz)){
-			dataRow = new DataRow<T>((List<T>) FormDataUtils.createCells(columns, styles));
+			dataRow = new DataRow<T>((List<T>) FormDataUtils.createCells(formTemplate));
 		} else if (HeaderCell.class.equals(clazz)){ 
-			dataRow = new DataRow<T>((List<T>) FormDataUtils.createHeaderCells(columns));
+			dataRow = new DataRow<T>((List<T>) FormDataUtils.createHeaderCells(formTemplate.getColumns()));
 		}
-		
 		
 		for (int j = 0; j < cells.getLength(); j++) {
 			Node cellNode = cells.item(j);
@@ -300,7 +295,7 @@ public final class XmlSerializationUtils {
 
 			parseAbstractCell(cell, cellNode, columns, styles);
 			if (cell instanceof Cell){
-				parseCell((Cell)cell, cellNode, columns, styles);
+				parseCell((Cell)cell, cellNode, formTemplate);
 			} else if (cell instanceof HeaderCell){
 				parseHeaderCell((HeaderCell)cell, cellNode, columns, styles);
 			} else {
@@ -314,7 +309,6 @@ public final class XmlSerializationUtils {
 		if (aliasNode != null) {
 			dataRow.setAlias(aliasNode.getNodeValue());
 		}
-
 
 		return dataRow;
 	}
@@ -361,12 +355,10 @@ public final class XmlSerializationUtils {
 	 * 
 	 * @param cell
 	 * @param cellNode
-	 * @param columns
-	 * @param styles
+	 * @param formTemplate
 	 */
-	private void parseCell(Cell cell, Node cellNode, List<Column> columns, List<FormStyle> styles) {
-
-		NamedNodeMap attributes = cellNode.getAttributes();	
+	private void parseCell(Cell cell, Node cellNode, FormTemplate formTemplate) {
+		NamedNodeMap attributes = cellNode.getAttributes();
 
 		// String value
 		Node valueNode = attributes.getNamedItem(ATTR_STRING_VALUE);
@@ -398,8 +390,8 @@ public final class XmlSerializationUtils {
 
 		valueNode = attributes.getNamedItem(ATTR_STYLE_ALIAS);
 		if (valueNode != null) {
-			cell.setStyleAlias(
-					valueNode.getNodeValue());
+			FormStyle style = formTemplate.getStyle(valueNode.getNodeValue());
+			cell.setStyle(style);
 		}
 		valueNode = attributes.getNamedItem(ATTR_CELL_EDITABLE);
 		if (valueNode != null) {

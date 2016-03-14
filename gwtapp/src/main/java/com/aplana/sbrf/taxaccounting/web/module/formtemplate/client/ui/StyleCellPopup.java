@@ -108,9 +108,9 @@ public class StyleCellPopup extends Composite {
 		for (Cell cell : cells) {
 			cell.setEditable(editable.getValue());
 			if (styleAlias.getValue() != null) {
-				cell.setStyleAlias(styleAlias.getValue().getAlias());
+				cell.setStyle(styleAlias.getValue());
 			} else {
-				cell.setStyleAlias(null);
+				cell.setStyle(null);
 			}
 		}
 		parent.refresh();

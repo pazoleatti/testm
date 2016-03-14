@@ -99,7 +99,9 @@ public class RefBookHelperImplTest {
 	 * @return
 	 */
 	private DataRow<Cell> createDataRow(List<Column> columns) {
-		List<Cell> cells = FormDataUtils.createCells(columns, null);
+		FormTemplate formTemplate = new FormTemplate();
+		formTemplate.getColumns().addAll(columns);
+		List<Cell> cells = FormDataUtils.createCells(formTemplate);
 		return new DataRow<Cell>(cells);
 	}
 

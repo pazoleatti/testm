@@ -147,8 +147,10 @@ public class DiffServiceTest {
 
     @Test
     public void getRowAsStringTest() {
-        List<Column> columnList = getColumnList();
-        DataRow<Cell> dataRow = new DataRow<Cell>(FormDataUtils.createCells(columnList, null));
+        List<Column> columns = getColumnList();
+		FormTemplate formTemplate = new FormTemplate();
+		formTemplate.getColumns().addAll(columns);
+        DataRow<Cell> dataRow = new DataRow<Cell>(FormDataUtils.createCells(formTemplate));
 
         // Null-значения
         String string = diffService.getRowAsString(dataRow);
@@ -166,22 +168,27 @@ public class DiffServiceTest {
 
     @Test
     public void getDiffTest() {
-        List<FormStyle> formStyleList = new LinkedList<FormStyle>();
+        List<FormStyle> styles = new LinkedList<FormStyle>();
         FormStyle formStyle = new FormStyle();
         formStyle.setAlias(DiffService.STYLE_CHANGE);
-        formStyleList.add(formStyle);
+        styles.add(formStyle);
         formStyle = new FormStyle();
         formStyle.setAlias(DiffService.STYLE_NO_CHANGE);
-        formStyleList.add(formStyle);
+        styles.add(formStyle);
         formStyle = new FormStyle();
         formStyle.setAlias(DiffService.STYLE_INSERT);
-        formStyleList.add(formStyle);
+        styles.add(formStyle);
         formStyle = new FormStyle();
         formStyle.setAlias(DiffService.STYLE_DELETE);
-        formStyleList.add(formStyle);
-        List<Column> columnList = getColumnList();
-        DataRow<Cell> dataRow1 = new DataRow<Cell>(FormDataUtils.createCells(columnList, formStyleList));
-        DataRow<Cell> dataRow2 = new DataRow<Cell>(FormDataUtils.createCells(columnList, formStyleList));
+        styles.add(formStyle);
+        List<Column> columns = getColumnList();
+
+		FormTemplate formTemplate = new FormTemplate();
+		formTemplate.getColumns().addAll(columns);
+		formTemplate.getStyles().addAll(styles);
+
+        DataRow<Cell> dataRow1 = new DataRow<Cell>(FormDataUtils.createCells(formTemplate));
+        DataRow<Cell> dataRow2 = new DataRow<Cell>(FormDataUtils.createCells(formTemplate));
         Date date = new Date();
         dataRow1.getCell(ALIAS_1).setStringValue("str1");
         dataRow1.getCell(ALIAS_2).setNumericValue(BigDecimal.valueOf(1));
@@ -207,7 +214,7 @@ public class DiffServiceTest {
         List<String> styleList = new LinkedList<String>();
         for (String key : dataRow.keySet()) {
             Cell cell = dataRow.getCell(key);
-            styleList.add(cell.getStyleAlias());
+            styleList.add(cell.getStyle().getAlias());
         }
         Assert.assertEquals(DiffService.STYLE_NO_CHANGE, styleList.get(0));
         Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(1));

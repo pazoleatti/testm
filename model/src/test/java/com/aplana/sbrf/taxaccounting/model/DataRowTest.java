@@ -38,10 +38,10 @@ public class DataRowTest {
 		dateColumn.setAlias("date");
 		dateColumn.setId(3);
 		
-		List<Column> formColumns = new ArrayList<Column>(3);
-		formColumns.add(numericColumn);
-		formColumns.add(stringColumn);
-		formColumns.add(dateColumn);
+		List<Column> columns = new ArrayList<Column>(3);
+		columns.add(numericColumn);
+		columns.add(stringColumn);
+		columns.add(dateColumn);
 
 		FormStyle boldStyle = new FormStyle();
 		boldStyle.setAlias("bold");
@@ -51,13 +51,15 @@ public class DataRowTest {
 		italicStyle.setAlias("italic");
 		italicStyle.setItalic(true);
 		
-		List<FormStyle> formStyles = new ArrayList<FormStyle>(2);
-		formStyles.add(boldStyle);
-		formStyles.add(italicStyle);
+		List<FormStyle> styles = new ArrayList<FormStyle>(2);
+		styles.add(boldStyle);
+		styles.add(italicStyle);
+
+		FormTemplate formTemplate = new FormTemplate();
+		formTemplate.getColumns().addAll(columns);
+		formTemplate.getStyles().addAll(styles);
 		
-		
-		
-		DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(formColumns, formStyles));
+		DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(formTemplate));
 		return row;
 	}
 	

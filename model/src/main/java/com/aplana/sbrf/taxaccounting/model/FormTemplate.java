@@ -245,7 +245,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	public void addColumn(int position, Column column) {
 		columns.add(position, column);
 		for (DataRow<Cell> row : rows) {
-			row.addColumn(position, new Cell(column, styles));
+			row.addColumn(position, new Cell(column));
 		}
 		for (DataRow<HeaderCell> row : headers) {
 			row.addColumn(position,  createHeaderCell(column));
@@ -259,7 +259,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	public void addColumn(Column column) {
 		columns.add(column);
 		for (DataRow<Cell> row : rows) {
-			row.addColumn(new Cell(column, styles));
+			row.addColumn(new Cell(column));
 		}
 		for (DataRow<HeaderCell> row : headers) {
 			row.addColumn(createHeaderCell(column));
@@ -408,7 +408,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
         for (DataRow<Cell> row : dataRows) {
             cells.clear();
             for (String key : row.keySet()) {
-                Cell cell = new Cell(row.getCell(key).getColumn(),  formStyleList);
+                Cell cell = new Cell(row.getCell(key).getColumn());
                 cells.add(cell);
             }
             DataRow<Cell> newRow = new DataRow<Cell>(row.getAlias(), cells);
@@ -426,7 +426,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
                 newCell.setEditable(cell.isEditable());
                 newCell.setColSpan(cell.getColSpan());
                 newCell.setRowSpan(cell.getRowSpan());
-                newCell.setStyleAlias(cell.getStyleAlias());
+                newCell.setStyle(cell.getStyle());
             }
             clone.add(newRow);
         }

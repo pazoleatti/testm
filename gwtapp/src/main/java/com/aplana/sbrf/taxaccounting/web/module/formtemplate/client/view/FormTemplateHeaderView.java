@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
-
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
@@ -30,7 +29,6 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class FormTemplateHeaderView extends ViewWithUiHandlers<FormTemplateHeaderUiHandlers>
 		implements FormTemplateHeaderPresenter.MyView{

@@ -40,6 +40,7 @@ public class FormData extends IdentityObject<Long> {
 	private List<FormStyle> formStyles;
 
 	private List<DataRow<HeaderCell>> headers;
+	FormTemplate formTemplate;
 	private FormType formType;
 
 	private FormDataPerformer performer;
@@ -153,6 +154,7 @@ public class FormData extends IdentityObject<Long> {
 		this.formTemplateId = formTemplate.getId();
 		this.formType = formTemplate.getType();
 		this.formStyles = formTemplate.getStyles();
+		this.formTemplate = formTemplate;
 	}
 
 	public void setFormType(FormType formType) {
@@ -163,7 +165,11 @@ public class FormData extends IdentityObject<Long> {
 		return formTemplateId;
 	}
 
-    public void setFormTemplateId(int formTemplateId) {
+	public FormTemplate getFormTemplate() {
+		return formTemplate;
+	}
+
+	public void setFormTemplateId(int formTemplateId) {
         this.formTemplateId = formTemplateId;
     }
 
@@ -233,7 +239,7 @@ public class FormData extends IdentityObject<Long> {
      * @return
      */
     public DataRow<Cell> createDataRow(){
-        List<Cell> cells = FormDataUtils.createCells(formColumns, formStyles);
+        List<Cell> cells = FormDataUtils.createCells(formTemplate);
         return new DataRow<Cell>(cells);
     }
 
@@ -243,7 +249,7 @@ public class FormData extends IdentityObject<Long> {
 	 * @return
 	 */
 	public DataRow<Cell> createStoreMessagingDataRow(){
-		List<Cell> cells = FormDataUtils.createCells(formColumns, formStyles);
+		List<Cell> cells = FormDataUtils.createCells(formTemplate);
 		for (Cell cell : cells) {
 			cell.setCheckMode(true);
 		}

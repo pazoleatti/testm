@@ -228,7 +228,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                             }
                             //Переносим стиль с удаленного ячейке в столбце на ячейку в следующем столбце
                             com.aplana.sbrf.taxaccounting.model.Cell nextCell = dataRow.getCell(nextColumn.getAlias());
-                            nextCell.setStyleAlias(cell.getStyleAlias());
+                            nextCell.setStyle(cell.getStyle());
                             //Переносим объединение ячеек
                             if (cell.getColSpan() > 1) {
                                 //Уменьшаем объединение столбцов на 1, т.к скрытый столбец будет удален
@@ -533,11 +533,11 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
      * @return сти
      */
     private CellStyle getCellStyle(com.aplana.sbrf.taxaccounting.model.Cell dataRowCell, CellType type, String alias) {
-        if (dataRowCell.getStyleAlias() == null) {
+        if (dataRowCell.getStyle() == null) {
             return cellStyleBuilder.createCellStyle(type, alias);
         }
 
-        XSSFCellStyle cellStyle = (XSSFCellStyle) cellStyleBuilder.createCellStyle(type, alias, dataRowCell.getStyleAlias());
+        XSSFCellStyle cellStyle = (XSSFCellStyle) cellStyleBuilder.createCellStyle(type, alias, dataRowCell.getStyleAlias()); //todo style
 
         // фон
         XSSFColor bgColor = getColor(dataRowCell.getStyle().getBackColor());
@@ -547,7 +547,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
 
         // шрифт
-        Font font = getFont(dataRowCell.getStyleAlias(), dataRowCell);
+        Font font = getFont(dataRowCell.getStyleAlias(), dataRowCell); //todo style
         cellStyle.setFont(font);
 
         cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);

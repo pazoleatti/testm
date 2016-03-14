@@ -93,7 +93,7 @@ public class JAXBTest {
         formTemplate.setHeader("header_3");
         formTemplate.setScript("test_script");
         formTemplate.getColumns().addAll(columns);
-        DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate.getColumns(), formTemplate.getStyles()));
+        DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate));
         formTemplate.getRows().add(rows);
         DataRow<HeaderCell> headers1 = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));
         formTemplate.getHeaders().add(headers1);

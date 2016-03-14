@@ -163,15 +163,13 @@ public class TestScriptHelper {
             formTemplate.getRows().clear();
             String rowsString = readFile(path + ROWS_FILE_NAME, XML_ENCODING);
             if (rowsString != null && !rowsString.isEmpty()) {
-                formTemplate.getRows().addAll(xmlSerializationUtils.deserialize(rowsString,
-                        formTemplate.getColumns(), formTemplate.getStyles(), Cell.class));
+                formTemplate.getRows().addAll(xmlSerializationUtils.deserialize(rowsString, formTemplate, Cell.class));
             }
             // headers.xml
             formTemplate.getHeaders().clear();
             String headersString = readFile(path + HEADERS_FILE_NAME, XML_ENCODING);
             if (headersString != null && !headersString.isEmpty()) {
-                formTemplate.getHeaders().addAll(xmlSerializationUtils.deserialize(headersString,
-                        formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class));
+                formTemplate.getHeaders().addAll(xmlSerializationUtils.deserialize(headersString, formTemplate, HeaderCell.class));
             }
             if (isUsedInside) {
                 this.formTemplate = formTemplate;

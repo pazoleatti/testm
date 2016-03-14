@@ -129,7 +129,7 @@ public class FormTemplateDaoTest {
 	public void testSaveDataRows() {
 		FormTemplate formTemplate = formTemplateDao.get(1);
 		
-		DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate.getColumns(), formTemplate.getStyles()));
+		DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate));
 		formTemplate.getRows().add(rows);
 		
 		DataRow<HeaderCell> headers1 = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));

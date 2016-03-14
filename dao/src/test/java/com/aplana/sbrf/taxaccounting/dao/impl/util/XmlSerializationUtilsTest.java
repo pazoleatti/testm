@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 public class XmlSerializationUtilsTest {
 
 	private List<Column> columns;
+	private FormTemplate formTemplate;
 	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils
 			.getInstance();
 
@@ -41,6 +42,9 @@ public class XmlSerializationUtilsTest {
 		Column dateColumn = new DateColumn();
 		dateColumn.setAlias("dateColumn");
 		columns.add(dateColumn);
+
+		formTemplate = new FormTemplate();
+		formTemplate.getColumns().addAll(columns);
 	}
 
 	@Test
@@ -71,13 +75,14 @@ public class XmlSerializationUtilsTest {
 		fs = new FormStyle();
 		fs.setAlias("sa1");
 		styles.add(fs);
+
+		FormTemplate formTemplate = new FormTemplate();
+		formTemplate.getStyles().addAll(styles);
+		formTemplate.getColumns().addAll(columns);
 		
-		List<DataRow<Cell>> deserializedData = xmlSerializationUtils.deserialize(
-				string, columns, styles, Cell.class);
-		assertNotNull("The result of deserialization is null.",
-				deserializedData);
-		assertFalse("The result of deserialization is empty.",
-				deserializedData.isEmpty());
+		List<DataRow<Cell>> deserializedData = xmlSerializationUtils.deserialize(string, formTemplate, Cell.class);
+		assertNotNull("The result of deserialization is null.", deserializedData);
+		assertFalse("The result of deserialization is empty.", deserializedData.isEmpty());
 
 		// Check equals
 		assertTrue(
@@ -91,10 +96,9 @@ public class XmlSerializationUtilsTest {
 		fs = new FormStyle();
 		fs.setAlias("sa1");
 		styles.add(fs);
-		
+
 		try{
-			xmlSerializationUtils.deserialize(
-					string, columns, styles, Cell.class);
+			xmlSerializationUtils.deserialize(string, formTemplate, Cell.class);
 		} catch (IllegalArgumentException e){
 			return;
 		}
@@ -124,19 +128,17 @@ public class XmlSerializationUtilsTest {
 		fs = new FormStyle();
 		fs.setAlias("sa1");
 		styles.add(fs);
+
+		FormTemplate formTemplate = new FormTemplate();
+		formTemplate.getStyles().addAll(styles);
+		formTemplate.getColumns().addAll(columns);
 		
-		List<DataRow<HeaderCell>> deserializedData = xmlSerializationUtils.deserialize(
-				string, columns, styles, HeaderCell.class);
-		assertNotNull("The result of deserialization is null.",
-				deserializedData);
-		assertFalse("The result of deserialization is empty.",
-				deserializedData.isEmpty());
+		List<DataRow<HeaderCell>> deserializedData = xmlSerializationUtils.deserialize(string, formTemplate, HeaderCell.class);
+		assertNotNull("The result of deserialization is null.", deserializedData);
+		assertFalse("The result of deserialization is empty.", deserializedData.isEmpty());
 
 		// Check equals
-		assertTrue(
-				"The result of deserialization doesn't equals the initial data.",
-				equals(data, deserializedData));
-		
+		assertTrue("The result of deserialization doesn't equals the initial data.", equals(data, deserializedData));
 	}
 
 	public List<DataRow<Cell>> prepareDataCell() {
@@ -149,15 +151,17 @@ public class XmlSerializationUtilsTest {
 		fs.setAlias("sa1");
 		styles.add(fs);
 
+		FormTemplate formTemplate = new FormTemplate();
+		formTemplate.getColumns().addAll(columns);
+		formTemplate.getStyles().addAll(styles);
 		// Empty row
-		rows.add(new DataRow<Cell>(FormDataUtils.createCells(columns, styles)));
-
+		rows.add(new DataRow<Cell>(FormDataUtils.createCells(formTemplate)));
 		// Row with alias and order parameter
-		DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(columns, styles));
+		DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(formTemplate));
 		row.setAlias("alias");
 		rows.add(row);
 
-		row = new DataRow<Cell>("withColumns", FormDataUtils.createCells(columns, styles));
+		row = new DataRow<Cell>("withColumns", FormDataUtils.createCells(formTemplate));
 		row.put("stringColumn", "test тест");
 		row.put("numericColumn", new BigDecimal(1234.56));
 		row.put("dateColumn", new Date());
@@ -165,7 +169,7 @@ public class XmlSerializationUtilsTest {
 
 		row.getCell("stringColumn").setColSpan(2);
 		row.getCell("stringColumn").setRowSpan(3);
-		row.getCell("stringColumn").setStyleAlias("sa");
+		row.getCell("stringColumn").setStyle(formTemplate.getStyle("sa"));
 		row.getCell("stringColumn").setEditable(true);
 
 		return rows;

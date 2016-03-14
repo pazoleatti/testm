@@ -35,7 +35,7 @@ public class DataRowMapperTest {
 		style.setAlias("style");
 		style.setId(345);
 		styles.add(style);
-		return new Cell(null, styles);
+		return new Cell(null);
 	}
 
 	@Test

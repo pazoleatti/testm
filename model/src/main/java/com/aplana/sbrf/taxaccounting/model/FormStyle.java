@@ -10,10 +10,27 @@ import java.io.Serializable;
 public class FormStyle implements Serializable {
 	private static final long serialVersionUID = 7152539133796468066L;
 
+	/**
+	 * Стиль по умолчанию
+	 */
+	public static final FormStyle DEFAULT_STYLE = new FormStyle();
+	/**
+	 * Стиль для редактируемых ячеек в режиме ручного ввода
+	 */
+	public static final FormStyle MANUAL_EDITABLE_STYLE = new FormStyle() {{
+		setBackColor(Color.LIGHT_BLUE);
+	}};
+	/**
+	 * Стиль для НЕредактируемых ячеек в режиме ручного ввода
+	 */
+	public static final FormStyle MANUAL_READ_ONLY_STYLE = new FormStyle() {{
+		setBackColor(Color.WHITE);
+	}};
+
 	private Integer id;
 	private String alias;
-	private Color fontColor;
-	private Color backColor;
+	private Color fontColor = Color.BLACK; // цвет шрифта по умолчанию
+	private Color backColor = Color.WHITE; // цвет фона по умолчанию
 	private boolean italic = false;
 	private boolean bold = false;
 
@@ -112,5 +129,5 @@ public class FormStyle implements Serializable {
 	public void setBold(boolean bold) {
 		this.bold = bold;
 	}
-	
+
 }
