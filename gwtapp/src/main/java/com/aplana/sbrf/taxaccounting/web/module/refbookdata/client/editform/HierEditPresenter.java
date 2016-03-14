@@ -37,6 +37,7 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
 //            getView().fillInputFields(null);
             getView().updateRefBookPickerPeriod();
             getView().cleanFields();
+            getView().setVersionMode(true);
             setNeedToReload();
             return;
         }
