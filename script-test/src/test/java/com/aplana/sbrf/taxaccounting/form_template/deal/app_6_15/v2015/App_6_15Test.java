@@ -100,10 +100,11 @@ public class App_6_15Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Признак физической поставки драгоценного металла"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Признак внешнеторговой сделки"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Количество"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма доходов Банка по данным бухгалтерского учета, руб."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма расходов Банка по данным бухгалтерского учета, руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Цена (тариф) за единицу измерения без учета НДС, руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Итого стоимость без учета НДС, руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата совершения сделки"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Должна быть заполнена хотя бы одна из граф «Сумма расходов Банка по данным бухгалтерского учета, руб.», «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -112,8 +113,6 @@ public class App_6_15Test extends ScriptTestBase {
         //  Проверка даты заключения сделки
         //  Проверка «Количество»
         //  Проверка «Признак физической поставки драгоценного металла»
-        //  Заполнение граф (сумма дохода, расхода) - оба заполнены, оба = 0
-        //  Проверка цены и стоимости
         //  Проверка даты совершения сделки
         row.getCell("name").setValue(1L, null);
         row.getCell("dependence").setValue(1L, null);
@@ -140,10 +139,8 @@ public class App_6_15Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Дата заключения сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Признак физической поставки драгоценного металла» может содержать только одно из значений: ОМС, Физическая поставка!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Количество» должна быть заполнена значением «1»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение обеих граф «Сумма расходов Банка по данным бухгалтерского учета, руб.», «Сумма доходов Банка по данным бухгалтерского учета, руб.» должно быть неотрицательным, значение хотя бы одной из данных граф должно быть строго больше «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения без учета НДС, руб.» должно быть равно модулю разности значений граф «Сумма доходов Банка по данным бухгалтерского учета, руб.» и «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Итого стоимость без учета НДС, руб.» должно быть равно модулю разности значений граф «Сумма доходов Банка по данным бухгалтерского учета, руб.» и «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата заключения сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значения граф «Сумма доходов Банка по данным бухгалтерского учета, руб.», «Сумма расходов Банка по данным бухгалтерского учета, руб.» не должны одновременно быть равны «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD_EXT, 1, "Дата совершения сделки", "01.01.2014", "31.12.2014", "Дата заключения сделки"), entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
