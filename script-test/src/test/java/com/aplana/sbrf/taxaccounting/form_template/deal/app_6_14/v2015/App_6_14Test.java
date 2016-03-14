@@ -85,8 +85,7 @@ public class App_6_14Test extends ScriptTestBase {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
         // для попадания в ЛП:
-        // 1. Проверка на заполнение граф
-        // 2. Заполнение граф 13 и 14 (сумма дохода, расхода) - оба не заполнены
+        // Проверка на заполнение граф
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
         dataRows.add(row);

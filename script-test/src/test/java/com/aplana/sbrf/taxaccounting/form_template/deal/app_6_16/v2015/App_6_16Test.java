@@ -85,7 +85,6 @@ public class App_6_16Test extends ScriptTestBase {
 
         // для попадания в ЛП:
         // Проверка заполнения обязательных полей
-        // Проверка доходов и расходов (a)
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
         dataRows.add(row);
@@ -101,18 +100,18 @@ public class App_6_16Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Вид срочной сделки"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Код валюты по сделке"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Код страны происхождения предмета сделки по классификатору ОКСМ"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма доходов Банка по данным бухгалтерского учета, руб."), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма расходов Банка по данным бухгалтерского учета, руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Цена (тариф) за единицу измерения, руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Итого стоимость, руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата совершения сделки"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Должна быть заполнена хотя бы одна из граф «Сумма доходов Банка по данным бухгалтерского учета, руб.», «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         // для попадания в ЛП:
         // Проверка корректности даты договора
         // Проверка корректности даты заключения сделки
-        // Проверка доходов и расходов (b)
-        // Проверка цены и стоимости (a)
+        // Проверка заполнения сумм доходов и расходов
         // Проверка корректности даты совершения сделки
         row.getCell("name").setValue(1L, null);
         row.getCell("docNumber").setValue("docNumber", null);
@@ -122,7 +121,8 @@ public class App_6_16Test extends ScriptTestBase {
         row.getCell("dealType").setValue(1L, null);
         row.getCell("currencyCode").setValue(1L, null);
         row.getCell("countryDealCode").setValue(1L, null);
-        row.getCell("incomeSum").setValue(-1, null);
+        row.getCell("outcomeSum").setValue(0, null);
+        row.getCell("incomeSum").setValue(0, null);
         row.getCell("price").setValue(555, null);
         row.getCell("cost").setValue(555, null);
         row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2989"), null);
@@ -133,10 +133,8 @@ public class App_6_16Test extends ScriptTestBase {
         i = 0;
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата договора","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата заключения сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Сумма доходов Банка по данным бухгалтерского учета, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения, руб.» должно быть равно значению графы «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Итого стоимость, руб.» должно быть равно значению графы «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата заключения сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значения граф «Сумма доходов Банка по данным бухгалтерского учета, руб.», «Сумма расходов Банка по данным бухгалтерского учета, руб.» не должны одновременно быть равны «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD_EXT, 1, "Дата совершения сделки", "01.01.2014", "31.12.2014", "Дата заключения сделки"), entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -151,7 +149,6 @@ public class App_6_16Test extends ScriptTestBase {
 
         i = 0;
         testHelper.execute(FormDataEvent.CALCULATE);
-        testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }

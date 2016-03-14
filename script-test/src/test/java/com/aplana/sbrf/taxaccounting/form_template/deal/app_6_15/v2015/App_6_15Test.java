@@ -80,8 +80,6 @@ public class App_6_15Test extends ScriptTestBase {
 
         // для попадания в ЛП:
         // Проверка на заполнение граф
-        // Заполнение граф сумма дохода, расхода - оба не заполнены
-        // Проверка подитога
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
         dataRows.add(row);
@@ -108,12 +106,13 @@ public class App_6_15Test extends ScriptTestBase {
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        //  для попадания в ЛП:
-        //  Проверка даты договора
-        //  Проверка даты заключения сделки
-        //  Проверка «Количество»
-        //  Проверка «Признак физической поставки драгоценного металла»
-        //  Проверка даты совершения сделки
+        // для попадания в ЛП:
+        // Проверка даты договора
+        // Проверка даты заключения сделки
+        // Проверка «Количество»
+        // Проверка «Признак физической поставки драгоценного металла»
+        // Проверка заполнения сумм доходов и расходов
+        // Проверка даты совершения сделки
         row.getCell("name").setValue(1L, null);
         row.getCell("dependence").setValue(1L, null);
         row.getCell("docNumber").setValue("string", null);

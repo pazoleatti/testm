@@ -117,7 +117,7 @@
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>66</nameAttributeId>
-        <refBookAttributeId>64</refBookAttributeId>
+        <refBookAttributeId>65</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>countryDealCode</alias>
