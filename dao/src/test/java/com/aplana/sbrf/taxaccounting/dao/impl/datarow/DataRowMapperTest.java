@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.ColumnType;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -29,6 +30,12 @@ public class DataRowMapperTest {
 	private static final SimpleDateFormat SDF = DataRowMapper.SDF;
 	private static final double EPS = 1e-6;
 
+	private static final FormStyle testStyle = new FormStyle() {{
+		setFontColor(Color.BLACK);
+		setBackColor(Color.RED);
+		setBold(true);
+	}};
+
 	private Cell getTestCell() {
 		List<FormStyle> styles = new ArrayList<FormStyle>();
 		FormStyle style = new FormStyle();
@@ -39,42 +46,73 @@ public class DataRowMapperTest {
 	}
 
 	@Test
+	public void getStyleTest() {
+		FormStyle style = DataRowMapper.getStyle("0-1");
+		assertEquals(Color.BLACK, style.getFontColor());
+		assertEquals(Color.LIGHT_YELLOW, style.getBackColor());
+
+		style = DataRowMapper.getStyle("0-1b");
+		assertEquals(Color.BLACK, style.getFontColor());
+		assertEquals(Color.LIGHT_YELLOW, style.getBackColor());
+		assertFalse(style.isItalic());
+		assertTrue(style.isBold());
+
+		style = DataRowMapper.getStyle("11-10ib"); // переставил местами
+		assertEquals(Color.DARK_BLUE, style.getFontColor());
+		assertEquals(Color.RED, style.getBackColor());
+		assertTrue(style.isItalic());
+		assertTrue(style.isBold());
+
+		style = DataRowMapper.getStyle("1i1-b10"); // переставил местами
+		assertEquals(Color.DARK_BLUE, style.getFontColor());
+		assertEquals(Color.RED, style.getBackColor());
+		assertTrue(style.isItalic());
+		assertTrue(style.isBold());
+	}
+
+	@Test
 	public void parseCellStyleTest() {
 		Cell cell = getTestCell();
 
 		DataRowMapper.parseCellStyle(cell, "");
-		assertEquals(null, cell.getStyle());
-		assertEquals(false, cell.isEditable());
+		assertEquals(FormStyle.DEFAULT_STYLE, cell.getStyle());
+		assertFalse(cell.isEditable());
 		assertEquals(1, cell.getColSpan());
 		assertEquals(1, cell.getRowSpan());
 
 		DataRowMapper.parseCellStyle(cell, null);
-		assertEquals(null, cell.getStyle());
-		assertEquals(false, cell.isEditable());
+		assertEquals(FormStyle.DEFAULT_STYLE, cell.getStyle());
+		assertFalse(cell.isEditable());
 		assertEquals(1, cell.getColSpan());
 		assertEquals(1, cell.getRowSpan());
 
 		DataRowMapper.parseCellStyle(cell, "e");
-		assertEquals(null, cell.getStyle());
-		assertEquals(true, cell.isEditable());
+		assertEquals(FormStyle.DEFAULT_STYLE, cell.getStyle());
+		assertTrue(cell.isEditable());
 		assertEquals(1, cell.getColSpan());
 		assertEquals(1, cell.getRowSpan());
 
-		DataRowMapper.parseCellStyle(cell, "s345;e;r623;c932");
-		assertEquals(345, cell.getStyle().getId().intValue());
-		assertEquals(true, cell.isEditable());
+		DataRowMapper.parseCellStyle(cell, "s0-10b;e;r623;c932");
+		assertEquals(Color.BLACK, cell.getStyle().getFontColor());
+		assertEquals(Color.RED, cell.getStyle().getBackColor());
+		assertTrue(cell.getStyle().isBold());
+		assertFalse(cell.getStyle().isItalic());
+		assertTrue(cell.isEditable());
 		assertEquals(932, cell.getColSpan());
 		assertEquals(623, cell.getRowSpan());
 
 		DataRowMapper.parseCellStyle(cell, "c34;r2");
-		assertEquals(null, cell.getStyle());
-		assertEquals(false, cell.isEditable());
+		assertEquals(FormStyle.DEFAULT_STYLE, cell.getStyle());
+		assertFalse(cell.isEditable());
 		assertEquals(34, cell.getColSpan());
 		assertEquals(2, cell.getRowSpan());
 
-		DataRowMapper.parseCellStyle(cell, "s345");
-		assertEquals(345, cell.getStyle().getId().intValue());
-		assertEquals(false, cell.isEditable());
+		DataRowMapper.parseCellStyle(cell, "s0-10b");
+		assertEquals(Color.BLACK, cell.getStyle().getFontColor());
+		assertEquals(Color.RED, cell.getStyle().getBackColor());
+		assertTrue(cell.getStyle().isBold());
+		assertFalse(cell.getStyle().isItalic());
+		assertFalse(cell.isEditable());
 		assertEquals(1, cell.getColSpan());
 		assertEquals(1, cell.getRowSpan());
 	}
@@ -94,31 +132,31 @@ public class DataRowMapperTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void parseCellStyleTest4() {
 		Cell cell = getTestCell();
-		DataRowMapper.parseCellStyle(cell, "s345;r");
+		DataRowMapper.parseCellStyle(cell, "s0-1;r");
 	}
 
 	@Test(expected = NumberFormatException.class)
 	public void parseCellStyleTest5() {
 		Cell cell = getTestCell();
-		DataRowMapper.parseCellStyle(cell, "s3 5;e ;r 4; c7");
+		DataRowMapper.parseCellStyle(cell, "r 4;s0-1;e ; c7");
 	}
 
 	@Test
 	public void formatCellStyleTest() {
 		Cell cell = getTestCell();
 		assertNull(DataRowMapper.formatCellStyle(cell));
-		cell.setStyleId(345);
-		assertEquals("s345", DataRowMapper.formatCellStyle(cell));
+		cell.setStyle(testStyle);
+		assertEquals("s0-10b", DataRowMapper.formatCellStyle(cell));
 		cell.setEditable(true);
-		assertEquals("s345;e", DataRowMapper.formatCellStyle(cell));
+		assertEquals("s0-10b;e", DataRowMapper.formatCellStyle(cell));
 		cell.setRowSpan(2);
-		assertEquals("s345;e;r2", DataRowMapper.formatCellStyle(cell));
+		assertEquals("s0-10b;e;r2", DataRowMapper.formatCellStyle(cell));
 		cell.setColSpan(56);
-		assertEquals("s345;e;c56;r2", DataRowMapper.formatCellStyle(cell));
+		assertEquals("s0-10b;e;c56;r2", DataRowMapper.formatCellStyle(cell));
 		cell.setColSpan(1);
-		assertEquals("s345;e;r2", DataRowMapper.formatCellStyle(cell));
+		assertEquals("s0-10b;e;r2", DataRowMapper.formatCellStyle(cell));
 		cell.setEditable(false);
-		assertEquals("s345;r2", DataRowMapper.formatCellStyle(cell));
+		assertEquals("s0-10b;r2", DataRowMapper.formatCellStyle(cell));
 	}
 
 	@Test

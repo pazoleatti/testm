@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DiffService;
+import com.aplana.sbrf.taxaccounting.service.StyleService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -170,16 +171,16 @@ public class DiffServiceTest {
     public void getDiffTest() {
         List<FormStyle> styles = new LinkedList<FormStyle>();
         FormStyle formStyle = new FormStyle();
-        formStyle.setAlias(DiffService.STYLE_CHANGE);
+        formStyle.setAlias(StyleService.STYLE_CHANGE);
         styles.add(formStyle);
         formStyle = new FormStyle();
-        formStyle.setAlias(DiffService.STYLE_NO_CHANGE);
+        formStyle.setAlias(StyleService.STYLE_NO_CHANGE);
         styles.add(formStyle);
         formStyle = new FormStyle();
-        formStyle.setAlias(DiffService.STYLE_INSERT);
+        formStyle.setAlias(StyleService.STYLE_INSERT);
         styles.add(formStyle);
         formStyle = new FormStyle();
-        formStyle.setAlias(DiffService.STYLE_DELETE);
+        formStyle.setAlias(StyleService.STYLE_DELETE);
         styles.add(formStyle);
         List<Column> columns = getColumnList();
 
@@ -214,13 +215,13 @@ public class DiffServiceTest {
         List<String> styleList = new LinkedList<String>();
         for (String key : dataRow.keySet()) {
             Cell cell = dataRow.getCell(key);
-            styleList.add(cell.getStyle().getAlias());
+            styleList.add(cell.getStyleAlias());
         }
-        Assert.assertEquals(DiffService.STYLE_NO_CHANGE, styleList.get(0));
-        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(1));
-        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(2));
-        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(3));
-        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(4));
+        Assert.assertEquals(StyleService.STYLE_NO_CHANGE, styleList.get(0));
+        Assert.assertEquals(StyleService.STYLE_CHANGE, styleList.get(1));
+        Assert.assertEquals(StyleService.STYLE_CHANGE, styleList.get(2));
+        Assert.assertEquals(StyleService.STYLE_CHANGE, styleList.get(3));
+        Assert.assertEquals(StyleService.STYLE_CHANGE, styleList.get(4));
     }
 
     // Тестовые графы

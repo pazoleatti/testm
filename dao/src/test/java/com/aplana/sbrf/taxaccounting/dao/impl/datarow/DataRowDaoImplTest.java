@@ -28,7 +28,7 @@ import java.util.Map;
 import static com.aplana.sbrf.taxaccounting.model.DataRowType.AUTO;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "DataRowDaoImplTest.xml" })
+@ContextConfiguration({"DataRowDaoImplTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class DataRowDaoImplTest extends Assert {

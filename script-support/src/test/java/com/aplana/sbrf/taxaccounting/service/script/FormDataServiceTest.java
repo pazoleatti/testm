@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.StyleService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -97,6 +98,9 @@ public class FormDataServiceTest {
 
         SourceService sourceService = mock(SourceService.class);
         ReflectionTestUtils.setField(formDataService, "sourceService", sourceService);
+
+		StyleService styleService = mock(StyleService.class);
+		ReflectionTestUtils.setField(formDataService, "styleService", styleService);
     }
 
     @Test

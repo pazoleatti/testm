@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DiffService;
+import com.aplana.sbrf.taxaccounting.service.StyleService;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -22,6 +23,8 @@ public class DiffServiceImpl implements DiffService {
 
     @Autowired
     private RefBookHelper refBookHelper;
+	@Autowired
+	private StyleService styleService;
 
     @Override
     public List<Diff> computeDiff(List<String> original, List<String> revised) {
@@ -173,16 +176,16 @@ public class DiffServiceImpl implements DiffService {
 
         if (diffType == null) {
             // Строка не изменилась
-            rowStyle(dataRow, STYLE_NO_CHANGE);
+            rowStyle(dataRow, styleService.get(StyleService.STYLE_NO_CHANGE));
             return;
         }
 
         switch (diffType) {
             case INSERT:
-                rowStyle(dataRow, STYLE_INSERT);
+                rowStyle(dataRow, styleService.get(StyleService.STYLE_INSERT));
                 return;
             case DELETE:
-                rowStyle(dataRow, STYLE_DELETE);
+                rowStyle(dataRow, styleService.get(StyleService.STYLE_DELETE));
                 return;
             case CHANGE:
                 for (String key : dataRow.keySet()) {
@@ -191,7 +194,7 @@ public class DiffServiceImpl implements DiffService {
                     Cell cell = dataRow.getCell(key);
                     // Стиль
                     if (isValueChanged(originalCell.getValue(), revisedCell.getValue())) {
-                        cell.setStyleAlias(STYLE_CHANGE);
+                        cell.setStyle(styleService.get(StyleService.STYLE_CHANGE));
                     } else {
                         // Если ячейки являются зависимыми, то необходимо сравнить их родительские графы
                         if (originalCell.getColumn().getColumnType() == ColumnType.REFERENCE
@@ -209,7 +212,7 @@ public class DiffServiceImpl implements DiffService {
                             if (!isValueChanged(originalParentCell.getValue(), revisedParentCell.getValue())) {
                                 // Если у зависимой графы не поменялось значение родительской графы, то зависимая графа
                                 // тоже считается не измененной
-                                cell.setStyleAlias(STYLE_NO_CHANGE);
+                                cell.setStyle(styleService.get(StyleService.STYLE_NO_CHANGE));
                             } else {
                                 // Родительская графа изменилась, нужно сравнить разыменованные значения
                                 String originalDereference = null;
@@ -253,13 +256,13 @@ public class DiffServiceImpl implements DiffService {
                                     }
                                 }
                                 if (isValueChanged(originalDereference, revisedDereference)) {
-                                    cell.setStyleAlias(STYLE_CHANGE);
+                                    cell.setStyle(styleService.get(StyleService.STYLE_CHANGE));
                                 } else {
-                                    cell.setStyleAlias(STYLE_NO_CHANGE);
+                                    cell.setStyle(styleService.get(StyleService.STYLE_NO_CHANGE));
                                 }
                             }
                         } else {
-                            cell.setStyleAlias(STYLE_NO_CHANGE);
+                            cell.setStyle(styleService.get(StyleService.STYLE_NO_CHANGE));
                         }
                     }
                     // Значение
@@ -314,10 +317,10 @@ public class DiffServiceImpl implements DiffService {
     /**
      * Общий стиль для всей строки
      */
-    private void rowStyle( DataRow<Cell> dataRow, String alias) {
+    private void rowStyle(DataRow<Cell> dataRow, FormStyle style) {
         for (String key : dataRow.keySet()) {
             Cell cell = dataRow.getCell(key);
-            cell.setStyleAlias(alias);
+            cell.setStyle(style);
         }
     }
 

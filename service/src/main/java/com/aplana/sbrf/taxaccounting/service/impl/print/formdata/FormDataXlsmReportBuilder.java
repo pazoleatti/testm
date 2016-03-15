@@ -533,11 +533,11 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
      * @return сти
      */
     private CellStyle getCellStyle(com.aplana.sbrf.taxaccounting.model.Cell dataRowCell, CellType type, String alias) {
-        if (dataRowCell.getStyle() == null) {
+        if (FormStyle.DEFAULT_STYLE.equals(dataRowCell.getStyle())) {
             return cellStyleBuilder.createCellStyle(type, alias);
         }
 
-        XSSFCellStyle cellStyle = (XSSFCellStyle) cellStyleBuilder.createCellStyle(type, alias, dataRowCell.getStyleAlias()); //todo style
+        XSSFCellStyle cellStyle = (XSSFCellStyle) cellStyleBuilder.createCellStyle(type, alias, dataRowCell.getStyleAlias());
 
         // фон
         XSSFColor bgColor = getColor(dataRowCell.getStyle().getBackColor());
@@ -547,7 +547,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
 
         // шрифт
-        Font font = getFont(dataRowCell.getStyleAlias(), dataRowCell); //todo style
+        Font font = getFont(dataRowCell.getStyleAlias(), dataRowCell);
         cellStyle.setFont(font);
 
         cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
@@ -579,7 +579,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             if (color != null) {
                 font.setColor(color);
             }
-
             fontMap.put(alias, font);
         }
         return fontMap.get(alias);

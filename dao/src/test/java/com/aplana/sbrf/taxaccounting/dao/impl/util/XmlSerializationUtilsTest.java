@@ -88,21 +88,6 @@ public class XmlSerializationUtilsTest {
 		assertTrue(
 				"The result of deserialization doesn't equals the initial data.",
 				equals(data, deserializedData));
-		
-		styles = new ArrayList<FormStyle>();
-		fs = new FormStyle();
-		fs.setAlias("saa");
-		styles.add(fs);
-		fs = new FormStyle();
-		fs.setAlias("sa1");
-		styles.add(fs);
-
-		try{
-			xmlSerializationUtils.deserialize(string, formTemplate, Cell.class);
-		} catch (IllegalArgumentException e){
-			return;
-		}
-		Assert.fail("Должно всплыть исключение о том что стиль не найден в шаблоне");
 	}
 	
 	@Test
@@ -245,13 +230,13 @@ public class XmlSerializationUtilsTest {
 			Cell ccell2 = (Cell) cell2;
 			assertEquals(ccell1.isEditable(), ccell2.isEditable());
 	
-			if (ccell1.getStyle() == null && ccell2.getStyle() != null){
+			if (FormStyle.DEFAULT_STYLE.equals(ccell1.getStyle()) && !FormStyle.DEFAULT_STYLE.equals(ccell2.getStyle())){
 					fail();
 			}
-			if (ccell1.getStyle() != null && ccell2.getStyle() == null){
+			if (!FormStyle.DEFAULT_STYLE.equals(ccell1.getStyle()) && FormStyle.DEFAULT_STYLE.equals(ccell2.getStyle())){
 				fail();
 			}
-			assertEquals(ccell1.getStyle().getAlias(), ccell2.getStyle().getAlias());
+			assertEquals(ccell1.getStyleAlias(), ccell2.getStyleAlias());
 		}
 	}
 

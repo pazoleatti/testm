@@ -173,9 +173,8 @@ public final class XmlSerializationUtils {
 		}
 		element.setAttribute(ATTR_COLSPAN, String.valueOf(cell.getColSpan()));
 		element.setAttribute(ATTR_ROWSPAN, String.valueOf(cell.getRowSpan()));
-		if (cell.getStyle() != null) {
-			element.setAttribute(ATTR_STYLE_ALIAS,
-					String.valueOf(cell.getStyle().getAlias()));
+		if (!FormStyle.DEFAULT_STYLE.equals(cell.getStyle())) {
+			element.setAttribute(ATTR_STYLE_ALIAS, String.valueOf(cell.getStyleAlias()));
 		}
 		if (cell.isEditable()){
 			element.setAttribute(ATTR_CELL_EDITABLE,
@@ -241,13 +240,9 @@ public final class XmlSerializationUtils {
 	/**
 	 * Десериализует из XML-строки строки банковской формы.
 	 * 
-	 * @param str
-	 *            XML-строка
-	 * @param columns
-	 *            список столбцов формы
-	 * @return список строк формы
-	 * @throws XmlSerializationException
-	 *             любая ошибка
+	 * @param str XML-строка
+	 * @param formTemplate версия макета НФ
+	 * @return список строк формы @throws XmlSerializationException любая ошибка
 	 */
 	public <T extends AbstractCell> List<DataRow<T>> deserialize(String str, FormTemplate formTemplate, Class<T> clazz) {
 		List<DataRow<T>> rows = new ArrayList<DataRow<T>>();
@@ -293,11 +288,11 @@ public final class XmlSerializationUtils {
 			AbstractCell cell = dataRow.getCell(columnAlias);
 			
 
-			parseAbstractCell(cell, cellNode, columns, styles);
+			parseAbstractCell(cell, cellNode, formTemplate.getColumns(), formTemplate.getStyles());
 			if (cell instanceof Cell){
 				parseCell((Cell)cell, cellNode, formTemplate);
 			} else if (cell instanceof HeaderCell){
-				parseHeaderCell((HeaderCell)cell, cellNode, columns, styles);
+				parseHeaderCell((HeaderCell)cell, cellNode, formTemplate.getColumns(), formTemplate.getStyles());
 			} else {
 				throw new XmlSerializationException("Неподдерживается ячейка типа " + cell.getClass().getName());
 			}
@@ -389,7 +384,7 @@ public final class XmlSerializationUtils {
 		}
 
 		valueNode = attributes.getNamedItem(ATTR_STYLE_ALIAS);
-		if (valueNode != null) {
+		if (valueNode != null && valueNode.getNodeValue() != null) {
 			FormStyle style = formTemplate.getStyle(valueNode.getNodeValue());
 			cell.setStyle(style);
 		}

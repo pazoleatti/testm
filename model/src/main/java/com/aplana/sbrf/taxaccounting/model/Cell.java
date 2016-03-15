@@ -261,29 +261,19 @@ public class Cell extends AbstractCell {
         return style;
     }
 
-    /**
-     * Задать {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой.
-     * Стиль с таким алиасом должен быть определён в
-     * {@link FormTemplate#getStyles() коллекции стилей}, связанных с шаблоном
-     * налоговой формы
-     *
-     * @param styleAlias {@link FormStyle#getAlias() алиас стиля}, связанного с
-     *                   ячейкой.
-     */
-	@Deprecated
-    public void setStyleAlias(String styleAlias) { //todo style
-    }
-
-	@Deprecated
-    public void setStyleId(Integer styleId) { //todo style
-    }
-
+	/**
+	 * Задает стиль для ячейки
+	 * @param style
+	 */
 	public void setStyle(FormStyle style) {
-		this.style = style;
+		if (style == null) {
+			this.style = FormStyle.DEFAULT_STYLE;
+		} else {
+			this.style = style;
+		}
 	}
 
-	@Deprecated
-    public String getStyleAlias() { //todo style
+    public String getStyleAlias() {
         return style != null ? style.getAlias() : null;
     }
 
@@ -340,7 +330,7 @@ public class Cell extends AbstractCell {
 		sb.append("; dereference=").append(getRefBookDereference());
 		sb.append("; colspan=").append(getColSpan());
 		sb.append("; rowspan=").append(getRowSpan());
-		sb.append("; style=").append(getStyle()); //todo style
+		sb.append("; style=").append(getStyleAlias());
 		sb.append("; editable=").append(isEditable());
 		sb.append('}');
 

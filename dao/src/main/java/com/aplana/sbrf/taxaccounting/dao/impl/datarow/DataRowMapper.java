@@ -28,6 +28,16 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 	private static final Log LOG = LogFactory.getLog(DataRowMapper.class);
 
+	private static final char STYLE_CODE = 's';
+	private static final char COLSPAN_CODE = 'c';
+	private static final char ROWSPAN_CODE = 'r';
+	private static final char EDITABLE_CODE = 'e';
+
+	private static final String COLUMN_PREFIX = "c";
+	private static final char COLOR_SEPARATOR = '-';
+	private static final char STYLE_BOLD = 'b';
+	private static final char STYLE_ITALIC = 'i';
+	private static final String STYLE_PARSING_ERROR_MESSAGE = "Строка с описанием стиля \"%s\" не может быть обработана";
 	private static final char STYLE_SEPARATOR = ';';
 	static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 	private static final char DECIMAL_SEPARATOR = '.';
@@ -47,6 +57,10 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * Признак участия фиксированной строки в автонумерации
 	 */
 	public final static String ALIASED_WITH_AUTO_NUMERATION_AFFIX = "{wan}";
+	/**
+	 * Статический кэш стилей, чтобы не создавать много одинаковых объектов-стилей
+	 */
+	private final static Map<String, FormStyle> styleCache = new HashMap<String, FormStyle>();
 
 	private FormData formData;
 
@@ -117,7 +131,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	static Map<Integer, String[]> getColumnNames(FormData formData) {
 		Map<Integer, String[]> columnNames = new HashMap<Integer, String[]>();
 		for (Column column : formData.getFormColumns()){
-			StringBuilder sb = new StringBuilder("c");
+			StringBuilder sb = new StringBuilder(COLUMN_PREFIX);
 			columnNames.put(column.getId(), new String[]{
 					(sb.append(column.getDataOrder()).toString()).intern(),
 					(sb.append("_style").toString()).intern()});
@@ -142,10 +156,10 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 					cell.setValue(numeration, rowNum);
 				}
 			} else {
-				cell.setValue(parseCellValue(column.getColumnType(), rs.getString("c" + column.getDataOrder())), rowNum);
+				cell.setValue(parseCellValue(column.getColumnType(), rs.getString(COLUMN_PREFIX + column.getDataOrder())), rowNum);
 			}
 			// чтение стилей
-			parseCellStyle(cell, rs.getString("c" + column.getDataOrder() + "_style"));
+			parseCellStyle(cell, rs.getString(COLUMN_PREFIX + column.getDataOrder() + "_style"));
 		}
 		DataRow<Cell> dataRow = new DataRow<Cell>(alias, cells);
 		dataRow.setId(SqlUtils.getLong(rs, "id"));
@@ -160,7 +174,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 */
 	static final void parseCellStyle(Cell cell, String value) {
 		// значения по умолчанию
-		cell.setStyleId(null);
+		cell.setStyle(FormStyle.DEFAULT_STYLE);
 		cell.setEditable(false);
 		cell.setColSpan(1);
 		cell.setRowSpan(1);
@@ -169,11 +183,17 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			String[] styles = StringUtils.split(value, STYLE_SEPARATOR);
 			for (String style : styles) {
 				char ch = style.charAt(0);
-				if (ch == 'e') {
+				if (ch == EDITABLE_CODE) {
 					cell.setEditable(true);
 					if (style.length() != 1) { // никаких цифр быть не должно после буквы "e"
 						throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", value));
 					}
+				} else if (ch == STYLE_CODE) {
+					String styleString = style.substring(1);
+					if (styleString.isEmpty()) { // не может быт пустым
+						throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", value));
+					}
+					cell.setStyle(getStyle(styleString));
 				} else {
 					String numStr = style.substring(1);
 					if (numStr.isEmpty()) { // хотя бы один символ должен быть
@@ -181,13 +201,10 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 					}
 					Integer num = Integer.valueOf(numStr);
 					switch (ch) {
-						case 's':
-							cell.setStyleId(num);
-							break;
-						case 'c':
+						case COLSPAN_CODE:
 							cell.setColSpan(num);
 							break;
-						case 'r':
+						case ROWSPAN_CODE:
 							cell.setRowSpan(num);
 							break;
 					}
@@ -203,17 +220,28 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 */
 	static final String formatCellStyle(Cell cell) {
 		StringBuilder sb = new StringBuilder();
-		if (cell.getStyle() != null) {
-			sb.append('s').append(cell.getStyle().getId()).append(STYLE_SEPARATOR);
+		FormStyle style = cell.getStyle();
+		if (style != null && !FormStyle.DEFAULT_STYLE.equals(style)) {
+			sb.append(STYLE_CODE)
+				.append(style.getFontColor().getId())
+				.append(COLOR_SEPARATOR)
+				.append(style.getBackColor().getId());
+			if (style.isItalic()) {
+				sb.append(STYLE_ITALIC);
+			}
+			if (style.isBold()) {
+				sb.append(STYLE_BOLD);
+			}
+			sb.append(STYLE_SEPARATOR);
 		}
 		if (cell.isEditable()) {
-			sb.append('e').append(STYLE_SEPARATOR);
+			sb.append(EDITABLE_CODE).append(STYLE_SEPARATOR);
 		}
 		if (cell.getColSpan() > 1) {
-			sb.append('c').append(cell.getColSpan()).append(STYLE_SEPARATOR);
+			sb.append(COLSPAN_CODE).append(cell.getColSpan()).append(STYLE_SEPARATOR);
 		}
 		if (cell.getRowSpan() > 1) {
-			sb.append('r').append(cell.getRowSpan()).append(STYLE_SEPARATOR);
+			sb.append(ROWSPAN_CODE).append(cell.getRowSpan()).append(STYLE_SEPARATOR);
 		}
 		if (sb.length() > 0) {
 			return sb.substring(0, sb.length() - 1);
@@ -250,10 +278,56 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 					default:
 						return null;
 				}
-			} catch (ParseException e) {
+			} catch (Exception e) {
 				throw new IllegalArgumentException(String.format("Значение \"%s\" не является типом %s", value, columnType.name()), e);
 			}
 		}
+	}
+
+	/**
+	 * Осуществляет разбор строки стиля, работает с кэшем стилей
+	 * @param styleString
+	 * @return
+	 */
+	static final FormStyle getStyle(String styleString) {
+		if (styleCache.containsKey(styleString)) {
+			return styleCache.get(styleString);
+		}
+		FormStyle style = new FormStyle();
+		StringBuilder fontColor = new StringBuilder();
+		StringBuilder backColor = new StringBuilder();
+		boolean fontScan = true; // флаг. true - поиск цвета шрифта, false - поиск цвета фона
+		for (int i = 0; i < styleString.length(); i++) {
+			char ch = styleString.charAt(i);
+			switch (ch) {
+				case STYLE_BOLD:
+					style.setBold(true);
+					break;
+				case STYLE_ITALIC:
+					style.setItalic(true);
+					break;
+				case COLOR_SEPARATOR:
+					if (fontColor.length() == 0) {
+						throw new IllegalArgumentException(String.format(STYLE_PARSING_ERROR_MESSAGE, styleString));
+					}
+					style.setFontColor(Color.getById(Integer.valueOf(fontColor.toString())));
+					fontScan = false;
+					break;
+				default:
+					if (fontScan) {
+						fontColor.append(ch);
+					} else {
+						backColor.append(ch);
+					}
+			}
+		}
+		if (backColor.length() == 0) {
+			throw new IllegalArgumentException(String.format(STYLE_PARSING_ERROR_MESSAGE, styleString));
+		}
+		style.setBackColor(Color.getById(Integer.valueOf(backColor.toString())));
+		// добавление в кэш
+		styleCache.put(styleString, style);
+		return style;
 	}
 
 	public static String formatCellValue(Cell cell) {

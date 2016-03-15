@@ -79,6 +79,9 @@ public class FormStyle implements Serializable {
 	 * @param fontColor цвет шрифта, если null, то будет использоваться значение по-умолчанию
 	 */
 	public void setFontColor(Color fontColor) {
+		if (fontColor == null) {
+			throw new NullPointerException("Color must not be null");
+		}
 		this.fontColor = fontColor;
 	}
 	
@@ -95,6 +98,9 @@ public class FormStyle implements Serializable {
 	 * @param backColor цвет фона, если null, то будет использоваться значение по-умолчанию
 	 */
 	public void setBackColor(Color backColor) {
+		if (backColor == null) {
+			throw new NullPointerException("Color must not be null");
+		}
 		this.backColor = backColor;
 	}
 	
@@ -130,4 +136,28 @@ public class FormStyle implements Serializable {
 		this.bold = bold;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		FormStyle formStyle = (FormStyle) o;
+
+		if (italic != formStyle.italic) return false;
+		if (bold != formStyle.bold) return false;
+		if (alias != null ? !alias.equals(formStyle.alias) : formStyle.alias != null) return false;
+		if (fontColor != formStyle.fontColor) return false;
+		return backColor == formStyle.backColor;
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = alias != null ? alias.hashCode() : 0;
+		result = 31 * result + fontColor.hashCode();
+		result = 31 * result + backColor.hashCode();
+		result = 31 * result + (italic ? 1 : 0);
+		result = 31 * result + (bold ? 1 : 0);
+		return result;
+	}
 }

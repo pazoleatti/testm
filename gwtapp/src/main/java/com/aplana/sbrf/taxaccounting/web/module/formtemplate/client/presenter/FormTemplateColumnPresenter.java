@@ -183,7 +183,7 @@ public class FormTemplateColumnPresenter
             Cell cell = row.getCell(oldColumn.getAlias());
             colSpansRows.add(cell.getColSpan());
             rowSpansRows.add(cell.getRowSpan());
-            styleAliasRows.add(cell.getStyleAlias()); //todo style
+            styleAliasRows.add(cell.getStyleAlias());
             editableRows.add(cell.isEditable());
         }
         // собрать значения ячеек шапки
