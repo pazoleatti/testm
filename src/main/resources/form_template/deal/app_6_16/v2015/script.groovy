@@ -84,7 +84,7 @@ def groupColumns = ['name', 'docNumber', 'docDate', 'dealType']
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealType', 'currencyCode',
-                       'countryDealCode', 'price', 'cost', 'dealDoneDate']
+                       'countryDealCode', 'incomeSum', 'outcomeSum', 'price', 'cost', 'dealDoneDate']
 
 @Field
 def totalColumns = ['incomeSum', 'outcomeSum', 'cost']
@@ -153,63 +153,39 @@ void logicCheck() {
         // Проверка корректности даты заключения сделки
         checkDatePeriod(logger, row, 'dealDate', 'docDate', getReportPeriodEndDate(), true)
 
-        // Проверка доходов и расходов
-        boolean noOne = (row.incomeSum == null && row.outcomeSum == null)
-        boolean both = (row.incomeSum != null && row.outcomeSum != null)
-        if (noOne) {
-            String msg1 = getColumnName(row, 'incomeSum')
-            String msg2 = getColumnName(row, 'outcomeSum')
-            logger.error("Строка $rowNum: Должна быть заполнена хотя бы одна из граф «$msg1», «$msg2»!")
-        }
-
-        // Проверка положительной суммы дохода/расхода
-        if (!noOne && !both) {
-            sum = (row.incomeSum != null) ? row.incomeSum : row.outcomeSum
-            if (sum < 0) {
-                msg = (row.incomeSum != null) ? getColumnName(row, 'incomeSum') : getColumnName(row, 'outcomeSum')
-                logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
-            }
-        }
-        if (both) {
-            if (row.incomeSum < 0 || row.outcomeSum < 0 || (row.outcomeSum <= 0 && row.outcomeSum <= 0)) {
-                String msg1 = getColumnName(row, 'incomeSum')
-                String msg2 = getColumnName(row, 'outcomeSum')
-                logger.error("Строка $rowNum: Значение обеих граф «$msg1», «$msg2» должно быть неотрицательным, значение хотя бы одной из данных граф должно быть строго больше «0»!")
-            }
-        }
-
-        // Проверка цены и стоимости
-        if (!noOne && !both) {
-            boolean comparePrice = row.price && row.price != sum
-            boolean compareCost = row.cost && row.cost != sum
-            msg = (row.incomeSum != null) ? getColumnName(row, 'incomeSum') : getColumnName(row, 'outcomeSum')
+        if (row.incomeSum != null && row.outcomeSum != null) {
             String msg1 = getColumnName(row, 'price')
-            String msg2 = getColumnName(row, 'cost')
-            if (comparePrice) {
-                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg»!")
+            String msg2 = getColumnName(row, 'incomeSum')
+            String msg3 = getColumnName(row, 'outcomeSum')
+
+            // Проверка заполнения сумм доходов и расходов
+            if (row.incomeSum == 0 && row.outcomeSum == 0) {
+                logger.error("Строка $rowNum: Значения граф «$msg2», «$msg3» не должны одновременно быть равны «0»!");
             }
-            if (compareCost) {
-                logger.error("Строка $rowNum: Значение графы «$msg2» должно быть равно значению графы «$msg»!")
+
+            // Проверка цены и стоимости
+            // Проверка цены
+            if (row.incomeSum && row.outcomeSum == 0 && row.price != row.incomeSum) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
+            } else if (row.incomeSum == 0 && row.outcomeSum && row.price != row.outcomeSum) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg3»!")
+            } else if (row.incomeSum && row.outcomeSum && row.price != (row.incomeSum - row.outcomeSum).abs()) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно модулю разности значений граф «$msg2» и «$msg3»!")
             }
-        }
-        if (both) {
-            absSum = (row.incomeSum - row.outcomeSum).abs()
-            boolean comparePrice = row.price && row.price != absSum
-            boolean compareCost = row.cost && row.cost != absSum
-            String msg1 = getColumnName(row, 'price')
-            String msg2 = getColumnName(row, 'cost')
-            String msg3 = getColumnName(row, 'incomeSum')
-            String msg4 = getColumnName(row, 'outcomeSum')
-            if (comparePrice) {
-                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно модулю разности значений граф «$msg3» и «$msg4»!")
-            }
-            if (compareCost) {
-                logger.error("Строка $rowNum: Значение графы «$msg2» должно быть равно модулю разности значений граф «$msg3» и «$msg4»!")
+
+            // Проверка стоимости
+            msg1 = getColumnName(row, 'cost')
+            if (row.incomeSum && row.outcomeSum == 0 && row.cost != row.incomeSum) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
+            } else if (row.incomeSum == 0 && row.outcomeSum && row.cost != row.outcomeSum) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg3»!")
+            } else if (row.incomeSum && row.outcomeSum && row.cost != (row.incomeSum - row.outcomeSum).abs()) {
+                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно модулю разности значений граф «$msg2» и «$msg3»!")
             }
         }
 
         // Проверка корректности даты совершения сделки
-        checkDatePeriod(logger, row, 'dealDoneDate', 'dealDate', getReportPeriodEndDate(), true)
+        checkDatePeriodExt(logger, row, 'dealDoneDate', 'dealDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
     }
 }
 
@@ -219,14 +195,21 @@ void calc() {
 
     for (row in dataRows) {
         // Расчет поля "Цена"
-        if (row.incomeSum != null && row.outcomeSum != null) {
-            row.price = (row.incomeSum - row.outcomeSum).abs()
-        } else {
-            row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
-        }
-        // Расчет поля "Итого"
-        row.cost = row.price
+        row.price = calc1516(row)
+        // Расчет поля "Стоимость"
+        row.cost = calc1516(row)
     }
+}
+
+def BigDecimal calc1516(def row) {
+    if (row.incomeSum && row.outcomeSum == 0) {
+        return row.incomeSum
+    } else if (row.incomeSum == 0 && row.outcomeSum) {
+        return row.outcomeSum
+    } else if (row.incomeSum && row.outcomeSum) {
+        return (row.incomeSum - row.outcomeSum).abs()
+    }
+    return null
 }
 
 // Получение импортируемых данных
@@ -409,7 +392,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 10
-    newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    newRow.currencyCode = getRecordIdImport(15, 'CODE_2', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 11

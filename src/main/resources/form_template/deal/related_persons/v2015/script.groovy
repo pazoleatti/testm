@@ -208,7 +208,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 //  - если для какой-нибудь записи нет строки в форме, то добавляется новая строка, и если такая же строка есть в предыдущей форме то берется ее "цвет/категория", иначе цвет по умолчанию
 //  - если для какой-то строки формы нет уже записи в справочнике, то удалить эту строку из формы
 void refresh() {
-    if (formData.state != WorkflowState.CREATED) {
+    if (formData.state == WorkflowState.ACCEPTED) {
         return
     }
 

@@ -165,7 +165,7 @@
         <name>Итого объем доходов и расходов, руб.</name>
         <order>16</order>
         <width>9</width>
-        <maxLength>15</maxLength>
+        <maxLength>17</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -187,7 +187,7 @@
         <name>Ожидаемый объем доходов и расходов за отчетный Налоговый период, руб.</name>
         <order>18</order>
         <width>9</width>
-        <maxLength>15</maxLength>
+        <maxLength>17</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -197,7 +197,7 @@
         <name>Скорректированный ожидаемый объем доходов и расходов, руб.</name>
         <order>19</order>
         <width>9</width>
-        <maxLength>15</maxLength>
+        <maxLength>17</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">

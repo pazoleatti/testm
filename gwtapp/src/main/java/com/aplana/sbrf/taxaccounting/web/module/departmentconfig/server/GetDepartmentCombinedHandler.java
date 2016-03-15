@@ -242,9 +242,14 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         }
 
         // Заполняем период действия настроек
-        RefBookRecordVersion version = provider.getRecordVersionInfo(depCombined.getRecordId());
-        result.setConfigStartDate(version.getVersionStart());
-        result.setConfigEndDate(version.getVersionEnd());
+        if (depCombined.getRecordId()!= null) {
+            RefBookRecordVersion version = provider.getRecordVersionInfo(depCombined.getRecordId());
+            result.setConfigStartDate(version.getVersionStart());
+            result.setConfigEndDate(version.getVersionEnd());
+        } else {
+            result.setConfigStartDate(reportPeriod.getCalendarStartDate());
+            result.setConfigEndDate(provider.getNextVersion(addDayToDate(reportPeriod.getEndDate(), -1), filter));
+        }
         return result;
     }
 

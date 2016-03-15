@@ -416,9 +416,21 @@ public class PeriodServiceImpl implements PeriodService {
 	@Override
 	public void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user) {
         //Проверка форм не относится к этой постановке
-        List<Integer> departmentIds = departmentService.getBADepartmentIds(user.getUser());
+        List<Integer> departmentIds = new ArrayList<Integer>();
         DepartmentReportPeriod drp = departmentReportPeriodService.get(drpId);
 
+        switch (taxType) {
+            case PROPERTY:
+            case TRANSPORT:
+                departmentIds = departmentService.getAllChildrenIds(drpId);
+                break;
+            case INCOME:
+            case DEAL:
+            case VAT:
+            case ETR:
+                departmentIds = departmentService.getBADepartmentIds(user.getUser());
+                break;
+        }
         //Check forms
         FormDataFilter dataFilter = new FormDataFilter();
         if (drp.getCorrectionDate() != null) {
@@ -628,9 +640,9 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     /**
-     * Получить упорядоченный список месяцев соответствующий налоговому периоду с кодом code.
-     * @param code код налогового периода
-     * @return список месяцев в налоговом периоде.
+     * Получить упорядоченный список месяцев соответствующий
+     * @param refBookValueMap
+     * @return список месяцев в налоговом периоде
      */
     private List<Months> getReportPeriodMonthList(Map<String, RefBookValue> refBookValueMap) {
         int start;
