@@ -113,7 +113,7 @@ public interface RefBookHelper {
      * @param refBookPage
      * @return
      */
-    Map<Long, Map<Long, String>> dereferenceValues(RefBook refBook, List<Map<String, RefBookValue>> refBookPage);
+    Map<Long, Map<Long, String>> dereferenceValues(RefBook refBook, List<Map<String, RefBookValue>> refBookPage, boolean includeAttrId2);
 
     /**
      * Разыменовывание ссылок, возвращает мапу: attrId: Pair<refBookAttribute, Map<referenceId, refBookValue>>

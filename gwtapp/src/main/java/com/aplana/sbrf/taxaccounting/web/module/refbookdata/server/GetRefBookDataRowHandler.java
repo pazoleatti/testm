@@ -131,7 +131,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 		}
 		List<RefBookAttribute> attributes = refBook.getAttributes();
 		// разыменовывание ссылок
-		Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage);
+		Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage, false);
 
         for (Map<String, RefBookValue> record : refBookPage) {
             Map<String, String> tableRowData = new HashMap<String, String>();

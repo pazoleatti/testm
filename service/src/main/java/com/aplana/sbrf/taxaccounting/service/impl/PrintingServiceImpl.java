@@ -291,7 +291,7 @@ public class PrintingServiceImpl implements PrintingService {
             pagingParams.setCount(refBookDataProvider.getRecordsCount(version, filter));
             List<Map<String, RefBookValue>> refBookPage = refBookDataProvider.getRecords(version,
                     pagingParams, filter, sortAttribute, isSortAscending);
-            Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage);
+            Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage, false);
             RefBookCSVReportBuilder refBookCSVReportBuilder;
             if (!refBook.isHierarchic()) {
                 refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, refBookPage, dereferenceValues, sortAttribute);
@@ -314,7 +314,7 @@ public class PrintingServiceImpl implements PrintingService {
                             parentRecords.add(parentRecord);
                         }
                     }
-                    Map<Long, Map<Long, String>> dereferenceParentValues = refBookHelper.dereferenceValues(refBook, parentRecords);
+                    Map<Long, Map<Long, String>> dereferenceParentValues = refBookHelper.dereferenceValues(refBook, parentRecords, false);
                     dereferenceValues.putAll(dereferenceParentValues);
                     refBookPage = parentRecords;
                 } while(!refBookPage.isEmpty());

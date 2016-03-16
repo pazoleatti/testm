@@ -4,17 +4,18 @@ import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookCache;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,8 @@ public class RefBookHelperImpl implements RefBookHelper {
     private PeriodService periodService;
     @Autowired
     LogEntryService logEntryService;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private final static SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -556,27 +559,49 @@ public class RefBookHelperImpl implements RefBookHelper {
         return recordVersion;
     }
 
-    public Map<Long, Map<Long, String>> dereferenceValues(RefBook refBook, List<Map<String, RefBookValue>> refBookPage) {
+    @Override
+    public Map<Long, Map<Long, String>> dereferenceValues(RefBook refBook, List<Map<String, RefBookValue>> refBookPage, boolean includeAttrId2) {
+        final RefBookCache refBookCacher = (RefBookCache) applicationContext.getBean(RefBookCache.class);
         Map<Long, Map<Long, String>> dereferenceValues = new HashMap<Long, Map<Long, String>>(); // Map<attrId, Map<referenceId, value>>
         if (refBookPage.isEmpty()) {
             return dereferenceValues;
         }
         List<RefBookAttribute> attributes = refBook.getAttributes();
+        // кэшируем список дополнительных атрибутов(если есть) для каждого атрибута
+        Map<Long, List<Long>> attrId2Map = getAttrToListAttrId2Map(attributes);
+        Map<Long, Map<Long, Set<Long>>> attributesMap = new HashMap<Long, Map<Long, Set<Long>>>();
+
         // разыменовывание ссылок
         for (RefBookAttribute attribute : attributes) {
             if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType())) {
                 // сбор всех ссылок
+                Long id = attribute.getId();
                 String alias = attribute.getAlias();
                 Set<Long> recordIds = new HashSet<Long>();
                 for (Map<String, RefBookValue> record : refBookPage) {
                     RefBookValue value = record.get(alias);
                     if (value != null && !value.isEmpty()) {
                         recordIds.add(value.getReferenceValue());
+                        if (includeAttrId2) {
+                            //Получаем связки для атрибутов второго уровня
+                            if (attrId2Map.get(id) != null) {
+                                for (Long id2 : attrId2Map.get(id)) {
+                                    Long refBookId2 = refBookCacher.getByAttribute(id2).getId();
+                                    //attributeIds.add(id2);
+                                    if (!attributesMap.containsKey(refBookId2)) {
+                                        attributesMap.put(refBookId2, new HashMap<Long, Set<Long>>());
+                                    }
+                                    if (!attributesMap.get(refBookId2).containsKey(id2))
+                                        attributesMap.get(refBookId2).put(id2, new HashSet<Long>());
+                                    attributesMap.get(refBookId2).get(id2).add(value.getReferenceValue());
+                                }
+                            }
+                        }
                     }
                 }
                 // групповое разыменование, если есть что разыменовывать
                 if (!recordIds.isEmpty()) {
-                    RefBookDataProvider provider = refBookFactory.getDataProvider(attribute.getRefBookId());
+                    RefBookDataProvider provider = refBookCacher.getDataProvider(attribute.getRefBookId());
                     Map<Long, RefBookValue> values = provider.dereferenceValues(attribute.getRefBookAttributeId(), recordIds);
                     if (values != null && !values.isEmpty()) {
                         Map<Long, String> stringValues = new HashMap<Long, String>();
@@ -584,6 +609,23 @@ public class RefBookHelperImpl implements RefBookHelper {
                             stringValues.put(entry.getKey(), String.valueOf(entry.getValue()));
                         }
                         dereferenceValues.put(attribute.getId(), stringValues);
+                    }
+                }
+                if (includeAttrId2) {
+                    for (Map.Entry<Long, Map<Long, Set<Long>>> entry : attributesMap.entrySet()) {
+                        RefBookDataProvider provider = refBookCacher.getDataProvider(entry.getKey());
+                        for (Map.Entry<Long, Set<Long>> entryAttr : entry.getValue().entrySet()) {
+                            if (entryAttr.getValue() != null && !entryAttr.getValue().isEmpty()) {
+                                Map<Long, RefBookValue> values = provider.dereferenceValues(entryAttr.getKey(), entryAttr.getValue());
+                                if (values != null && !values.isEmpty()) {
+                                    Map<Long, String> stringValues = new HashMap<Long, String>();
+                                    for (Map.Entry<Long, RefBookValue> entry2 : values.entrySet()) {
+                                        stringValues.put(entry2.getKey(), String.valueOf(entry2.getValue()));
+                                    }
+                                    dereferenceValues.put(entryAttr.getKey(), stringValues);
+                                }
+                            }
+                        }
                     }
                 }
             }
