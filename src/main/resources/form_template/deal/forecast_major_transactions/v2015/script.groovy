@@ -2,6 +2,8 @@ package form_template.deal.forecast_major_transactions.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -40,7 +42,14 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        importData()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
 }
+
+@Field
+def allColumns = ['rowNum', 'ikksr', 'name', 'transactionName', 'sum']
 
 // Редактируемые атрибуты
 @Field
@@ -68,6 +77,9 @@ Calendar calendarStartDate = null
 
 @Field
 def refBookCache = [:]
+
+@Field
+def recordCache = [:]
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -168,4 +180,132 @@ void logicCheck() {
 
     // 4. Проверка наличия формы предыдущего периода
     getFormDataPrevPeriod(true)
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 5
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_END_VALUE = null
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+
+    def headerMapping = [
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][1]) : 'Информация о лице']),
+            ([(headerRows[0][3]) : 'Информация о сделке']),
+            ([(headerRows[1][1]) : getColumnName(tmpRow, 'ikksr')]),
+            ([(headerRows[1][2]) : getColumnName(tmpRow, 'name')]),
+            ([(headerRows[1][3]) : getColumnName(tmpRow, 'transactionName')]),
+            ([(headerRows[1][4]) : getColumnName(tmpRow, 'sum')])
+    ]
+    (1..5).each {
+        headerMapping.add(([(headerRows[2][it - 1]): it.toString()]))
+    }
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+
+    // графа 2
+    def colIndex = 1
+    def recordId = getTcoRecordId(values[2], values[1], getColumnName(newRow, 'ikksr'), fileRowIndex, colIndex, getReportPeriodEndDate(), true, logger, refBookFactory, recordCache)
+    def map = getRefBookValue(520, recordId)
+    newRow.ikksr = recordId
+    colIndex++
+
+    // графа 3
+    if (map != null) {
+        formDataService.checkReferenceValue(520, values[colIndex], map.NAME?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+    }
+
+    // графа 4
+    colIndex++
+    newRow.transactionName = values[colIndex]
+
+    // графа 5
+    colIndex++
+    newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    return newRow
 }

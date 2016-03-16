@@ -39,19 +39,10 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	private static final char STYLE_ITALIC = 'i';
 	private static final String STYLE_PARSING_ERROR_MESSAGE = "Строка с описанием стиля \"%s\" не может быть обработана";
 	private static final char STYLE_SEPARATOR = ';';
-	static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 	private static final char DECIMAL_SEPARATOR = '.';
 	private static final char WRONG_DECIMAL_SEPARATOR = ',';
-	private static final DecimalFormat DECIMAL_FORMAT;
-	static{
-		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-		symbols.setDecimalSeparator(DECIMAL_SEPARATOR);
-		DECIMAL_FORMAT = new DecimalFormat("#0.#", symbols);
-		DECIMAL_FORMAT.setParseBigDecimal(true);
-		DECIMAL_FORMAT.setDecimalSeparatorAlwaysShown(false);
-		DECIMAL_FORMAT.setMaximumIntegerDigits(NumericColumn.MAX_LENGTH-NumericColumn.MAX_PRECISION);
-		DECIMAL_FORMAT.setMaximumFractionDigits(NumericColumn.MAX_PRECISION);
-	}
+    private SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+	private DecimalFormat decimalFormat;
 
 	/**
 	 * Признак участия фиксированной строки в автонумерации
@@ -66,6 +57,13 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 	public DataRowMapper(FormData formData) {
 		this.formData = formData;
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator(DECIMAL_SEPARATOR);
+        decimalFormat = new DecimalFormat("#0.#", symbols);
+        decimalFormat.setParseBigDecimal(true);
+        decimalFormat.setDecimalSeparatorAlwaysShown(false);
+        decimalFormat.setMaximumIntegerDigits(NumericColumn.MAX_LENGTH-NumericColumn.MAX_PRECISION);
+        decimalFormat.setMaximumFractionDigits(NumericColumn.MAX_PRECISION);
 	}
 
 	/**
@@ -256,7 +254,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @return
 	 * @throws SQLException
 	 */
-	static final Object parseCellValue(ColumnType columnType, String value) {
+	final Object parseCellValue(ColumnType columnType, String value) {
 		if (value == null) {
 			return null;
 		} else {
@@ -265,16 +263,16 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 					case STRING:
 						return value;
 					case DATE:
-						return SDF.parse(value);
+						return sdf.parse(value);
 					case NUMBER:
 						String cleanValue = value.replace(WRONG_DECIMAL_SEPARATOR, DECIMAL_SEPARATOR);
-						return DECIMAL_FORMAT.parse(cleanValue);
+						return decimalFormat.parse(cleanValue);
 					case REFBOOK:
 						// только целые числа
 						if (value.indexOf(WRONG_DECIMAL_SEPARATOR) + value.indexOf(DECIMAL_SEPARATOR) != -2) {
 							throw new IllegalArgumentException(String.format("Значение \"%s\" не является типом %s", value, columnType.name()));
 						}
-						return DECIMAL_FORMAT.parse(value).longValue();
+						return decimalFormat.parse(value).longValue();
 					default:
 						return null;
 				}
@@ -330,7 +328,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		return style;
 	}
 
-	public static String formatCellValue(Cell cell) {
+	public String formatCellValue(Cell cell) {
 		return formatCellValue(cell.getColumn().getColumnType(), cell.getValue());
 	}
 
@@ -340,7 +338,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @param value
 	 * @return
 	 */
-	 static final String formatCellValue(ColumnType columnType, Object value) {
+	 final String formatCellValue(ColumnType columnType, Object value) {
 		if (value == null) {
 			return null;
 		} else {
@@ -348,10 +346,10 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 				case STRING:
 					return value.toString();
 				case DATE:
-					return SDF.format(value);
+					return sdf.format(value);
 				case NUMBER:
 				case REFBOOK:
-					return DECIMAL_FORMAT.format(value);
+					return decimalFormat.format(value);
 				default:
 					return null;
 			}

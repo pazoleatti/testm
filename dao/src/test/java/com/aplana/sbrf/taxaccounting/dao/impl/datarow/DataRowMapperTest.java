@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 
 public class DataRowMapperTest {
 
-	private static final SimpleDateFormat SDF = DataRowMapper.SDF;
+	private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 	private static final double EPS = 1e-6;
 
 	private static final FormStyle testStyle = new FormStyle() {{
@@ -189,43 +189,44 @@ public class DataRowMapperTest {
 
 	@Test
 	public void parseCellValueTest() {
-		assertNull(DataRowMapper.parseCellValue(ColumnType.STRING, null));
-		assertEquals("31.12.2016 12:21:59", SDF.format((Date) DataRowMapper.parseCellValue(ColumnType.DATE, "31.12.2016 12:21:59")));
-		assertEquals("All 7 tests passed ", DataRowMapper.parseCellValue(ColumnType.STRING, "All 7 tests passed "));
-		assertEquals("", DataRowMapper.parseCellValue(ColumnType.STRING, ""));
-		assertEquals(567L, DataRowMapper.parseCellValue(ColumnType.REFBOOK, "567"));
-		assertNull(DataRowMapper.parseCellValue(ColumnType.REFBOOK, null));
-		assertNull(DataRowMapper.parseCellValue(ColumnType.REFERENCE, "asd"));
-		assertNull(DataRowMapper.parseCellValue(ColumnType.AUTO, "asd"));
+        DataRowMapper dataRowMapper = new DataRowMapper(new FormData());
+		assertNull(dataRowMapper.parseCellValue(ColumnType.STRING, null));
+		assertEquals("31.12.2016 12:21:59", SDF.format((Date) dataRowMapper.parseCellValue(ColumnType.DATE, "31.12.2016 12:21:59")));
+		assertEquals("All 7 tests passed ", dataRowMapper.parseCellValue(ColumnType.STRING, "All 7 tests passed "));
+		assertEquals("", dataRowMapper.parseCellValue(ColumnType.STRING, ""));
+		assertEquals(567L, dataRowMapper.parseCellValue(ColumnType.REFBOOK, "567"));
+		assertNull(dataRowMapper.parseCellValue(ColumnType.REFBOOK, null));
+		assertNull(dataRowMapper.parseCellValue(ColumnType.REFERENCE, "asd"));
+		assertNull(dataRowMapper.parseCellValue(ColumnType.AUTO, "asd"));
 
-		assertNumberEquals(2.1, DataRowMapper.parseCellValue(ColumnType.NUMBER, "2.1"));
-		assertNumberEquals(2.1, DataRowMapper.parseCellValue(ColumnType.NUMBER, "2,1"));
-		assertNumberEquals(0.1123, DataRowMapper.parseCellValue(ColumnType.NUMBER, "0.1123"));
-		assertNumberEquals(1234567890123456789.1234567890123456789, DataRowMapper.parseCellValue(ColumnType.NUMBER, "1234567890123456789.1234567890123456789"));
-		assertNumberEquals(-1234567890123456789.1234567890123456789, DataRowMapper.parseCellValue(ColumnType.NUMBER, "-1234567890123456789.1234567890123456789"));
-		assertNumberEquals(4564523.3, DataRowMapper.parseCellValue(ColumnType.NUMBER, "4564523,3"));
-		assertNumberEquals(924, DataRowMapper.parseCellValue(ColumnType.NUMBER, "924"));
-		assertNumberEquals(.123, DataRowMapper.parseCellValue(ColumnType.NUMBER, ".123"));
-		assertNumberEquals(0.123, DataRowMapper.parseCellValue(ColumnType.NUMBER, "0.123"));
-		assertNumberEquals(0, DataRowMapper.parseCellValue(ColumnType.NUMBER, "0"));
-		assertNumberEquals(0, DataRowMapper.parseCellValue(ColumnType.NUMBER, ".0"));
-		assertNumberEquals(0, DataRowMapper.parseCellValue(ColumnType.NUMBER, "-.0"));
-		assertNumberEquals(-23243466.423, DataRowMapper.parseCellValue(ColumnType.NUMBER, "-23243466.423"));
+		assertNumberEquals(2.1, dataRowMapper.parseCellValue(ColumnType.NUMBER, "2.1"));
+		assertNumberEquals(2.1, dataRowMapper.parseCellValue(ColumnType.NUMBER, "2,1"));
+		assertNumberEquals(0.1123, dataRowMapper.parseCellValue(ColumnType.NUMBER, "0.1123"));
+		assertNumberEquals(1234567890123456789.1234567890123456789, dataRowMapper.parseCellValue(ColumnType.NUMBER, "1234567890123456789.1234567890123456789"));
+		assertNumberEquals(-1234567890123456789.1234567890123456789, dataRowMapper.parseCellValue(ColumnType.NUMBER, "-1234567890123456789.1234567890123456789"));
+		assertNumberEquals(4564523.3, dataRowMapper.parseCellValue(ColumnType.NUMBER, "4564523,3"));
+		assertNumberEquals(924, dataRowMapper.parseCellValue(ColumnType.NUMBER, "924"));
+		assertNumberEquals(.123, dataRowMapper.parseCellValue(ColumnType.NUMBER, ".123"));
+		assertNumberEquals(0.123, dataRowMapper.parseCellValue(ColumnType.NUMBER, "0.123"));
+		assertNumberEquals(0, dataRowMapper.parseCellValue(ColumnType.NUMBER, "0"));
+		assertNumberEquals(0, dataRowMapper.parseCellValue(ColumnType.NUMBER, ".0"));
+		assertNumberEquals(0, dataRowMapper.parseCellValue(ColumnType.NUMBER, "-.0"));
+		assertNumberEquals(-23243466.423, dataRowMapper.parseCellValue(ColumnType.NUMBER, "-23243466.423"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void parseCellValueTest2() {
-		DataRowMapper.parseCellValue(ColumnType.DATE, "asd");
+        new DataRowMapper(new FormData()).parseCellValue(ColumnType.DATE, "asd");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void parseCellValueTest3() {
-		DataRowMapper.parseCellValue(ColumnType.REFBOOK, "567.23");
+        new DataRowMapper(new FormData()).parseCellValue(ColumnType.REFBOOK, "567.23");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void parseCellValueTest4() {
-		DataRowMapper.parseCellValue(ColumnType.NUMBER, "jrdfvSfd");
+        new DataRowMapper(new FormData()).parseCellValue(ColumnType.NUMBER, "jrdfvSfd");
 	}
 
 	private void assertNumberEquals(double expected, Object value) {
@@ -236,13 +237,14 @@ public class DataRowMapperTest {
 
 	@Test
 	public void formatCellValueTest() throws ParseException {
-		assertNull(DataRowMapper.formatCellValue(ColumnType.AUTO, null));
-		assertNull(DataRowMapper.formatCellValue(ColumnType.REFERENCE, 5L));
-		assertNull(DataRowMapper.formatCellValue(ColumnType.STRING, null));
-		assertEquals(" qww rt ds", DataRowMapper.formatCellValue(ColumnType.STRING, " qww rt ds"));
-		assertEquals("31.12.2016 12:21:59", DataRowMapper.formatCellValue(ColumnType.DATE, SDF.parse("31.12.2016 12:21:59")));
-		assertEquals("472", DataRowMapper.formatCellValue(ColumnType.REFBOOK, 472L));
-		assertEquals("34523.12366", DataRowMapper.formatCellValue(ColumnType.NUMBER, BigDecimal.valueOf(34523.12366)));
-		assertEquals("34523.12", DataRowMapper.formatCellValue(ColumnType.NUMBER, BigDecimal.valueOf(34523.120)));
+        DataRowMapper dataRowMapper = new DataRowMapper(new FormData());
+        assertNull(dataRowMapper.formatCellValue(ColumnType.AUTO, null));
+		assertNull(dataRowMapper.formatCellValue(ColumnType.REFERENCE, 5L));
+		assertNull(dataRowMapper.formatCellValue(ColumnType.STRING, null));
+		assertEquals(" qww rt ds", dataRowMapper.formatCellValue(ColumnType.STRING, " qww rt ds"));
+		assertEquals("31.12.2016 12:21:59", dataRowMapper.formatCellValue(ColumnType.DATE, SDF.parse("31.12.2016 12:21:59")));
+		assertEquals("472", dataRowMapper.formatCellValue(ColumnType.REFBOOK, 472L));
+		assertEquals("34523.12366", dataRowMapper.formatCellValue(ColumnType.NUMBER, BigDecimal.valueOf(34523.12366)));
+		assertEquals("34523.12", dataRowMapper.formatCellValue(ColumnType.NUMBER, BigDecimal.valueOf(34523.120)));
 	}
 }
