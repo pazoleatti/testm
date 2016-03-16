@@ -2,7 +2,7 @@
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (540,'Вид корректировки',1,0,0,null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5401, 540, 'Код', 		'CODE', 2, 1, null, null, 1, 0, 	5, 1, 1, 1, 	null, 0, 1);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5402, 540, 'Название корректировки', 	'NAME', 1, 2, null, null, 1, null, 	20, 1, 2, null, null, 0, 255);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5402, 540, 'Название корректировки', 	'NAME', 1, 2, null, null, 1, null, 	20, 0, 2, null, null, 0, 255);
 
 insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 540, to_date('01.01.2015', 'DD.MM.YYYY'), 0);	
 	insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 5401, 1);	
