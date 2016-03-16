@@ -30,6 +30,14 @@ public class Cell extends AbstractCell {
     private FormStyle style;
     /** Временный стиль ячейки. Используется только в режиме ручного ввода и не сохраняется в бд */
     private FormStyle clientStyle;
+	/**
+	 * Список стилей версии макета НФ
+	 *
+	 * Поле помечено аннотацией @Deprecated, так как в дальнейшем планируется отказаться
+	 * от стилей в рамках макетов НФ
+	 */
+	@Deprecated
+    private List<FormStyle> formStyleList;
     /** Сообщение, формируемое при проверке ячеек */
     private String errorMessage;
     /** Включен ли режим проверки (true - записывать в ячейки, false - бросать исключение) */
@@ -46,9 +54,10 @@ public class Cell extends AbstractCell {
         super();
     }
 
-    public Cell(Column column) {
+    public Cell(Column column, List<FormStyle> formStyleList) {
         super(column);
         this.style = FormStyle.DEFAULT_STYLE;
+		this.formStyleList = formStyleList;
     }
 
     @Override
@@ -260,6 +269,33 @@ public class Cell extends AbstractCell {
     public FormStyle getStyle() {
         return style;
     }
+
+	/**
+	 * Задать {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой.
+	 * Стиль с таким алиасом должен быть определён в
+	 * {@link FormTemplate#getStyles() коллекции стилей}, связанных с шаблоном
+	 * налоговой формы
+	 *
+	 * Метод помечен аннотацией @Deprecated, так как в дальнейшем планируется отказаться
+	 * от стилей в рамках макетов НФ
+	 *
+	 * @param styleAlias {@link FormStyle#getAlias() алиас стиля}, связанного с
+	 *                   ячейкой.
+	 */
+	@Deprecated
+	public void setStyleAlias(String styleAlias) {
+		if (styleAlias == null) {
+			style = null;
+			return;
+		}
+		for (FormStyle formStyle : formStyleList) {
+			if (formStyle.getAlias() != null && formStyle.getAlias().equals(styleAlias)) {
+				setStyle(formStyle);
+				return;
+			}
+		}
+		throw new IllegalArgumentException("Стиля с алиасом '" + styleAlias + "' не существует в шаблоне");
+	}
 
 	/**
 	 * Задает стиль для ячейки

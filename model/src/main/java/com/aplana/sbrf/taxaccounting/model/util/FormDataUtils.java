@@ -96,7 +96,7 @@ public final class FormDataUtils {
 	public static List<Cell> createCells(FormTemplate formTemplate) {
 		List<Cell> cells = new ArrayList<Cell>();
 		for (Column column : formTemplate.getColumns()) {
-			cells.add(new Cell(column));
+			cells.add(new Cell(column, formTemplate.getStyles()));
 		}
 		return cells;
 	}

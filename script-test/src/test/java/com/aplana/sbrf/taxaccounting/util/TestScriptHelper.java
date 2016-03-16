@@ -10,9 +10,11 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.StyleService;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
@@ -21,6 +23,8 @@ import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Map;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Хэлпер для работы со скриптами НФ в тестовом режиме
@@ -114,6 +118,9 @@ public class TestScriptHelper {
      */
     private void initMock() {
         formDataService = mockHelper.mockFormDataService();
+		StyleService styleService = mock(StyleService.class);
+		ReflectionTestUtils.setField(formDataService, "styleService", styleService);
+
         departmentFormTypeService = mockHelper.mockDepartmentFormTypeService();
         reportPeriodService = mockHelper.mockReportPeriodService();
         departmentService = mockHelper.mockDepartmentService();
