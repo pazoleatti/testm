@@ -13,19 +13,15 @@ public class FormStyle implements Serializable {
 	/**
 	 * Стиль по умолчанию
 	 */
-	public static final FormStyle DEFAULT_STYLE = new FormStyle();
+	public static final FormStyle DEFAULT_STYLE = new FormStyle("default", Color.BLACK, Color.WHITE, false, false);
 	/**
 	 * Стиль для редактируемых ячеек в режиме ручного ввода
 	 */
-	public static final FormStyle MANUAL_EDITABLE_STYLE = new FormStyle() {{
-		setBackColor(Color.LIGHT_BLUE);
-	}};
+	public static final FormStyle MANUAL_EDITABLE_STYLE = new FormStyle("manual_editable", Color.BLACK, Color.LIGHT_BLUE, false, false);
 	/**
 	 * Стиль для НЕредактируемых ячеек в режиме ручного ввода
 	 */
-	public static final FormStyle MANUAL_READ_ONLY_STYLE = new FormStyle() {{
-		setBackColor(Color.WHITE);
-	}};
+	public static final FormStyle MANUAL_READ_ONLY_STYLE = new FormStyle("manual_read_only", Color.BLACK, Color.WHITE, false, false);
 
 	private Integer id;
 	private String alias;
@@ -33,6 +29,19 @@ public class FormStyle implements Serializable {
 	private Color backColor = Color.WHITE; // цвет фона по умолчанию
 	private boolean italic = false;
 	private boolean bold = false;
+
+	public FormStyle() {
+		super();
+	}
+
+	public FormStyle(String alias, Color fontColor, Color backColor, boolean italic, boolean bold) {
+		super();
+		setAlias(alias);
+		setFontColor(fontColor);
+		setBackColor(backColor);
+		setItalic(italic);
+		setBold(bold);
+	}
 
 	/**
 	 * Идентификатор записи в БД, если null, то стиль еще не был сохранён в БД

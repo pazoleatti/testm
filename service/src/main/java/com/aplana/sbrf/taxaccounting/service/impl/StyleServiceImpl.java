@@ -19,38 +19,23 @@ public class StyleServiceImpl implements StyleService {
 	@Override
 	public FormStyle get(String alias) {
 		if (STYLE_NO_CHANGE.equals(alias)) {
-			return new FormStyle() {{
-				setBackColor(Color.GREY);
-			}};
+			return new FormStyle(StyleService.STYLE_NO_CHANGE, Color.BLACK, Color.GREY, false, false);
 		}
 		if (STYLE_INSERT.equals(alias)) {
-			return new FormStyle() {{
-				setBackColor(Color.PALE_GREEN);
-			}};
+			return new FormStyle(StyleService.STYLE_INSERT, Color.BLACK, Color.PALE_GREEN, false, false);
 		}
 		if (STYLE_DELETE.equals(alias)) {
-			return new FormStyle() {{
-				setBackColor(Color.LIGHT_CORAL);
-			}};
+			return new FormStyle(StyleService.STYLE_DELETE, Color.BLACK, Color.LIGHT_CORAL, false, false);
 		}
 		if (STYLE_CHANGE.equals(alias)) {
-			return new FormStyle() {{
-				setFontColor(Color.RED);
-				setBold(true);
-			}};
+			return new FormStyle(StyleService.STYLE_CHANGE, Color.RED, Color.WHITE, false, true);
 		}
 		if (EDITABLE_CELL_STYLE.equals(alias)) {
-			return new FormStyle() {{
-				setBackColor(Color.LIGHT_BLUE);
-			}};
+			return new FormStyle(StyleService.EDITABLE_CELL_STYLE, Color.BLACK, Color.LIGHT_BLUE, false, false);
 		}
 		if (AUTO_FILL_CELL_STYLE.equals(alias)) {
-			return new FormStyle() {{
-				setFontColor(Color.DARK_GREEN);
-				setBold(true);
-			}};
+			return new FormStyle(StyleService.AUTO_FILL_CELL_STYLE, Color.DARK_GREEN, Color.WHITE, false, true);
 		}
 		return null;
 	}
-
 }

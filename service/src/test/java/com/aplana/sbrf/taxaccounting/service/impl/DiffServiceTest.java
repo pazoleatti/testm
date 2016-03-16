@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class DiffServiceTest {
     private final DiffService diffService = new DiffServiceImpl();
@@ -35,6 +36,15 @@ public class DiffServiceTest {
     @Before
     public void init() {
         ReflectionTestUtils.setField(diffService, "refBookHelper", mock(RefBookHelper.class));
+
+		StyleService styleService = mock(StyleService.class);
+		when(styleService.get(StyleService.STYLE_NO_CHANGE)).thenReturn(new FormStyle(StyleService.STYLE_NO_CHANGE, Color.BLACK, Color.GREY, false, false));
+		when(styleService.get(StyleService.STYLE_INSERT)).thenReturn(new FormStyle(StyleService.STYLE_INSERT, Color.BLACK, Color.PALE_GREEN, false, false));
+		when(styleService.get(StyleService.STYLE_DELETE)).thenReturn(new FormStyle(StyleService.STYLE_DELETE, Color.BLACK, Color.LIGHT_CORAL, false, false));
+		when(styleService.get(StyleService.STYLE_CHANGE)).thenReturn(new FormStyle(StyleService.STYLE_CHANGE, Color.RED, Color.WHITE, false, true));
+		when(styleService.get(StyleService.EDITABLE_CELL_STYLE)).thenReturn(new FormStyle(StyleService.EDITABLE_CELL_STYLE, Color.BLACK, Color.LIGHT_BLUE, false, false));
+		when(styleService.get(StyleService.AUTO_FILL_CELL_STYLE)).thenReturn(new FormStyle(StyleService.AUTO_FILL_CELL_STYLE, Color.DARK_GREEN, Color.WHITE, false, true));
+		ReflectionTestUtils.setField(diffService, "styleService", styleService);
     }
 
     @Test

@@ -69,6 +69,11 @@ public class DataRowServiceImplTest {
         column5.setParentId(4);
         column5.setOrder(5);
         columnList.addAll(Arrays.asList(column1, column2, column3, column4, column5));
+
+		FormTemplate formTemplate = new FormTemplate();
+		formTemplate.setId(1);
+		formTemplate.getColumns().addAll(columnList);
+		formData.initFormTemplateParams(formTemplate);
         formData.setFormColumns(columnList);
 
         FormDataDao formDataDao = Mockito.mock(FormDataDao.class);
