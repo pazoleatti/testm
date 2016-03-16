@@ -21,7 +21,7 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (541,'Коды основания отнесения сделки к контролируемой',1,0,0,null);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5411, 541, 'Код', 		'CODE', 1, 1, null, null, 1, null, 	5, 1, 1, 1, 	null, 0, 3);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5412, 541, 'Наименование', 	'NAME', 1, 2, null, null, 1, null, 	20, 1, 2, null, null, 0, 1000);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5412, 541, 'Наименование', 	'NAME', 1, 2, null, null, 1, null, 	20, 1, 0, null, null, 0, 1000);
 
 insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 541, to_date('01.01.2015', 'DD.MM.YYYY'), 0);
  	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5411, '121');
