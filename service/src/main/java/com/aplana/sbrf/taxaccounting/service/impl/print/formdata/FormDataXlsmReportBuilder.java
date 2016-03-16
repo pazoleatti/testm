@@ -606,6 +606,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         c = r.getCell(ar.getFirstCell().getCol());
         CellStyle cs = c.getCellStyle();
         cs.setWrapText(true);
+        CellStyle csFio = c.getCellStyle();
+        csFio.setWrapText(false);
 
         int cellSignPosition = columns.size() / 2;
 
@@ -635,7 +637,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 crsFio.setCellValue("(" + data.getSigners().get(i).getName() + ")");
                 crsP.setCellStyle(cs);
                 crsS.setCellStyle(cs);
-                crsFio.setCellStyle(cs);
+                crsFio.setCellStyle(csFio);
                 rowNumber++;
             }
         }
