@@ -437,8 +437,17 @@ void save(def dataRows) {
     }
 }
 
+// TODO (SBRFACCTAX-15074) убрать
+void checkTFLocal(BufferedInputStream inputStream, String fileName) {
+    checkBeforeGetXml(inputStream, fileName);
+    if (fileName != null && !fileName.toLowerCase().endsWith(".rnu")) {
+        throw new ServiceException("Выбранный файл не соответствует формату rnu!");
+    }
+}
+
 void importTransportData() {
-    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+    // TODO (SBRFACCTAX-15074) заменить на "ScriptUtils.checkTF(ImportInputStream, UploadFileName)"
+    checkTFLocal(ImportInputStream, UploadFileName)
 
     int COLUMN_COUNT = 16
     def DEFAULT_CHARSET = "cp866"
