@@ -143,6 +143,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
                 if (extension != null && !ext.equals(extension)) {
                     event.cancel();
                     Dialog.errorMessage("Необходимо расширение файла " + extension);
+                    EndLoadFileEvent.fire(FileUploadWidget.this, null, false);
                 }
             }
         });

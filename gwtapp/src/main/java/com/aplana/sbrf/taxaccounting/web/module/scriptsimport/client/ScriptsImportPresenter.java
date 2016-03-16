@@ -37,11 +37,6 @@ public class ScriptsImportPresenter extends Presenter<ScriptsImportPresenter.MyV
         getView().setUiHandlers(this);
     }
 
-    @Override
-    public void onStartLoad() {
-        LockInteractionEvent.fire(this, true);
-    }
-
     @ProxyStandard
     @NameToken(ScriptsImportTokens.SCRIPTS_IMPORT)
     public interface MyProxy extends ProxyPlace<ScriptsImportPresenter> {
@@ -72,7 +67,6 @@ public class ScriptsImportPresenter extends Presenter<ScriptsImportPresenter.MyV
                     public void onSuccess(ScriptsImportResult result) {
                         if (result.getUuid() != null) {
                             LogAddEvent.fire(ScriptsImportPresenter.this, result.getUuid());
-                            onEndLoad();
                         }
                     }
 
@@ -87,7 +81,13 @@ public class ScriptsImportPresenter extends Presenter<ScriptsImportPresenter.MyV
         getView().addImportHandler(importHandler);
     }
 
-    private void onEndLoad() {
+    @Override
+    public void onStartLoad() {
+        LockInteractionEvent.fire(this, true);
+    }
+
+    @Override
+    public void onEndLoad() {
         LockInteractionEvent.fire(this, false);
     }
 }
