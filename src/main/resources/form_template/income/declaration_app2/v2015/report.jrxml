@@ -10111,7 +10111,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Arial" size="8" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Расшифровка Справки о доходах физического листа №  ]]></text>
+				<text><![CDATA[Расшифровка Справки о доходах физического лица №  ]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="285" y="97" width="15" height="19"/>

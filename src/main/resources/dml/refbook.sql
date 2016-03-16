@@ -147,6 +147,9 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (520, 'Участники ТЦО',1,0,0,null);
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id, is_versioned, table_name) values (521, 'История изменения категории ВЗЛ', 0, 0, 0, null, 0, 'REF_BOOK_VZL_HISTORY');
 
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (540,'Вид корректировки',1,0,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (541,'Коды основания отнесения сделки к контролируемой',1,0,0,null);
+
 UPDATE ref_book SET is_versioned = 0 WHERE id IN (30, 93, 207, 95, 74, 103, 94, 105, 104, 108, 204, 205, 400, 401, 206, 310, 330, 510, 511);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (0,0,'Тестовое наименование','NAME',1,1,null,null,1,null,10,0,0,null,null,0,2000);
@@ -766,14 +769,22 @@ insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, referenc
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5213,520,'Специальный налоговый статус','TAX_STATUS',4,15,511,5111,1,null,10,0,0,null,null,0,null);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5214,520,'Критерий взаимозависимости','DEP_CRITERION',4,16,512,5121,1,null,10,0,0,null,null,0,null);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5216,520,'ИД в АС "Cтатотчетность"','STATREPORT_ID',1,17,null,null,1,null,30,0,0,null,null,0,256);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5217,520,'IKKSR','IKKSR',1,18,null,null,0,null,30,0,2,null,null,0,50);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5218,520,'IKSR','IKSR',1,19,null,null,0,null,30,0,3,null,null,0,50);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5217,520,'IKKSR','IKKSR',1,18,null,null,0,null,30,0,0,null,null,0,50);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5218,520,'IKSR','IKSR',1,19,null,null,0,null,30,0,0,null,null,0,50);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5220,520,'InnKio','INNKIO',1,20,null,null,0,null,10,0,0,null,null,0, 10);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5221,520,'RSK','RSK',1,21,null,null,0,null,10,0,0,null,null,0,50);
 
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5230, 521, 'ВЗЛ',            'JUR_PERSON',    4,  1,  520,  5201,  1,  null,  10,  1,  0,  null,  null,  0,  null);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5231, 521, 'Категория ВЗЛ',        'CATEGORY',      4,  2,  506,  5061,  1,  null,  10,  1,  0,  null,  null,  0,  null);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5232, 521, 'Код формы',           'FORM_DATA_ID',   2,   3,   null,   null,   1,   0,     10, 1,   0,   null,   null,   0,   18);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5233, 521, 'Дата изменения',        'CHANGE_DATE',    3,  4,  null,  null,  1,  null,  10,  1,  0,  null,  1,    0,  null);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5234, 521, 'Код состояния',         'STATE',       2,   5,   null,   null,   1,   0,     10, 1,   0,   null,   null,   0,   9);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5401, 540, 'Код', 		'CODE', 2, 1, null, null, 1, 0, 	5, 1, 1, 1, 	null, 0, 1);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5402, 540, 'Название корректировки', 	'NAME', 1, 2, null, null, 1, null, 	20, 0, 2, null, null, 0, 255);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5411, 541, 'Код', 		'CODE', 1, 1, null, null, 1, null, 	5, 1, 1, 1, 	null, 0, 3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5412, 541, 'Наименование', 	'NAME', 1, 2, null, null, 1, null, 	20, 1, 0, null, null, 0, 1000);
 
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_attribute_id;

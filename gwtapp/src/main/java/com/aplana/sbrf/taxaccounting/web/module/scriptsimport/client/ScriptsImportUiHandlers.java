@@ -7,4 +7,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
  */
 public interface ScriptsImportUiHandlers extends UiHandlers {
     void onStartLoad();
+    void onEndLoad();
 }

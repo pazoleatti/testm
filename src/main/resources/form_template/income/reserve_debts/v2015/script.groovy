@@ -12,6 +12,7 @@ import groovy.transform.Field
 /**
  * Форма "Сводный регистр налогового учета по формированию и использованию резерва по сомнительным долгам".
  * Эта форма первичная, не сводная.
+ * действует до конца 2015 года
  * Очень похожа на РНУ-30.
  *
  * formTemplateId=10618
@@ -556,8 +557,17 @@ void sortFormDataRows(def saveInDB = true) {
     }
 }
 
+// TODO (SBRFACCTAX-15074) убрать
+void checkTFLocal(BufferedInputStream inputStream, String fileName) {
+    checkBeforeGetXml(inputStream, fileName);
+    if (fileName != null && !fileName.toLowerCase().endsWith(".rnu")) {
+        throw new ServiceException("Выбранный файл не соответствует формату rnu!");
+    }
+}
+
 void importTransportData() {
-    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+    // TODO (SBRFACCTAX-15074) заменить на "ScriptUtils.checkTF(ImportInputStream, UploadFileName)"
+    checkTFLocal(ImportInputStream, UploadFileName)
 
     int COLUMN_COUNT = 14
     def DEFAULT_CHARSET = "cp866"

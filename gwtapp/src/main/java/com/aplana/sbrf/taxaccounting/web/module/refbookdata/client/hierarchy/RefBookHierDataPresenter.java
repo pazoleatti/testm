@@ -206,12 +206,13 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                                 Dialog.errorMessage("Удаление записи справочника",
                                         "Обнаружены фатальные ошибки!");
                             } else {
-                                //editPresenter.show(null);
-                                ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);
-                                /*editPresenter.clean();
-                                editPresenter.setNeedToReload();*/
                                 getView().deleteItem(selected);
                                 getView().setSelection(parentRefBookItem);
+                                if (parentRefBookItem == null)
+                                    ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);
+                                //editPresenter.show(null);
+                                /*editPresenter.clean();
+                                editPresenter.setNeedToReload();*/
                             }
                         }
                     }, this));
