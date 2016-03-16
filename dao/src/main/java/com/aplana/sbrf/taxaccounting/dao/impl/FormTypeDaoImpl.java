@@ -2,12 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -82,14 +78,19 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
     @Override
     public List<Integer> getByFilter(TemplateFilter filter) {
         try {
-            StringBuilder query = new StringBuilder("select id from form_type where status = 0");
+            PreparedStatementData ps = new PreparedStatementData();
+            ps.appendQuery("select id from form_type where status = 0");
             if (filter.getTaxType() != null) {
-                query.append(" and tax_type = \'").append(filter.getTaxType().getCode()).append("\'");
+                ps.appendQuery(" and tax_type = ?");
+                ps.addParam(filter.getTaxType().getCode());
             }
             if (!filter.getSearchText().isEmpty()) {
-                query.append(" and LOWER(name) like \'%").append(filter.getSearchText().toLowerCase()).append("%\'");
+                ps.appendQuery(" and LOWER(name) like LOWER(?)");
+                ps.addParam("%"+filter.getSearchText().toLowerCase()+"%");
             }
-            return getJdbcTemplate().queryForList(query.toString(), Integer.class);
+            return getJdbcTemplate().queryForList(ps.getQuery().toString(),
+                    ps.getParams().toArray(),
+                    Integer.class);
         } catch (DataAccessException e) {
 			LOG.error("Ошибка при получении данных НФ по фильтру", e);
             throw new DaoException("Ошибка при получении данных НФ по фильтру", e);

@@ -2,11 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -121,14 +117,19 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 
     @Override
     public List<Integer> getByFilter(TemplateFilter filter) {
-        StringBuilder query = new StringBuilder("select id from declaration_type where status = 0");
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery("select id from declaration_type where status = 0");
         if (filter.getTaxType() != null) {
-            query.append(" and TAX_TYPE = \'").append(filter.getTaxType().getCode()).append("\'");
+            ps.appendQuery(" and TAX_TYPE = ?");
+            ps.addParam(filter.getTaxType().getCode());
         }
         if (!filter.getSearchText().isEmpty()) {
-            query.append(" and LOWER(name) LIKE \'%").append(filter.getSearchText().toLowerCase()).append("%\'");
+            ps.appendQuery(" and LOWER(name) like LOWER(?)");
+            ps.addParam("%"+filter.getSearchText().toLowerCase()+"%");
         }
-        return getJdbcTemplate().queryForList(query.toString(), Integer.class);
+        return getJdbcTemplate().queryForList(ps.getQuery().toString(),
+                ps.getParams().toArray(),
+                Integer.class);
     }
 
 	@Override
