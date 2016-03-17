@@ -141,10 +141,10 @@ alter table form_data_row add constraint form_data_row_unq unique (FORM_DATA_ID,
 alter table form_data_row add constraint form_data_row_chk_temp check (TEMPORARY in (0, 1)) ;
 alter table form_data_row add constraint form_data_row_chk_manual check (MANUAL in (0, 1)) ;
 
-create or replace function get_style (style_id number, editable number, colspan number, rowspan number) return varchar2 is
+create or replace function get_style (style_id varchar2, editable number, colspan number, rowspan number) return varchar2 is
 res varchar2(100);
 begin
-    res := TRIM(TRAILING ';' FROM (CASE WHEN NOT style_id IS NULL THEN 's' || style_id || ';' END ||
+    res := TRIM(TRAILING ';' FROM (CASE WHEN NOT style_id IS NULL THEN style_id || ';' END ||
                     CASE WHEN editable = 1 THEN 'e;' END ||
                     CASE WHEN NOT colspan IS NULL AND colspan <> 1 THEN 'c' || colspan || ';' END ||
                     CASE WHEN NOT rowspan IS NULL AND rowspan <> 1 THEN 'r' || rowspan END));
@@ -173,11 +173,13 @@ truncate table log_clob_query;
 
 --Перенос данных
 declare 
-query_stmt varchar2(32767) := '';
-insert_header varchar2(32767) := '';
-insert_body varchar2(32767) := '';
-v_session_id number(18);
-cnt_rows number(18);
+	query_stmt varchar2(32767) := '';
+	insert_header varchar2(32767) := '';
+	insert_body varchar2(32767) := '';
+	v_session_id number(18);
+	cnt_rows number(18);
+	decode_str varchar2(512);
+	decode_stmt varchar2(512);
 begin
   --Получить идентификатор текущей сессии для логирования
 	    select seq_log_query_session.nextval into v_session_id from dual;
@@ -190,9 +192,15 @@ begin
       elsif (x.table_name is not null) then          
          insert_header := 'insert into form_data_row (id, form_data_id, temporary, manual, ord, alias';
          insert_body := 'select id, form_data_id, temporary, manual, ord, alias';
+		 
+		 decode_str := 'select listagg('', ''|| id || '', ''''s'' || fs.font_color ||''-''||fs.back_color||case when italic = 1 then ''i'' end || case when bold = 1 then ''b'' end || '''''''') within group (order by id) || '', '''''''')'' as style from form_style fs where form_template_id = '||x.id;
+		 execute immediate decode_str into decode_stmt;
+		 
+		 if (decode_stmt = ', '''')') then decode_stmt := ', '''', '''', '''')'; end if;
+		 
          for y in (select id, data_ord from form_column fc where fc.form_template_id = x.id order by data_ord) loop
 			insert_header := insert_header || ', C' || y.data_ord || ', C'||y.data_ord||'_style';
-            insert_body := insert_body || ', C' || y.id ||'  AS c'||y.data_ord ||', get_style(C'|| y.id ||'_style_id, C'|| y.id ||'_editable, C'|| y.id ||'_colspan, C'|| y.id ||'_rowspan) as C'||y.data_ord||'_style';  	
+            insert_body := insert_body || ', C' || y.id ||'  AS c'||y.data_ord ||', get_style(decode(C'|| y.id ||'_style_id' || decode_stmt||', C'|| y.id ||'_editable, C'|| y.id ||'_colspan, C'|| y.id ||'_rowspan) as C'||y.data_ord||'_style';  	
 		 end loop;
          insert_body := insert_body || ' from '||x.table_name ||' t where exists (select 1 from form_data fd where fd.id = t.form_data_id) and temporary = 0';
 		 insert_header := insert_header || ')';
@@ -200,7 +208,8 @@ begin
       
       query_stmt := insert_header || insert_body;
 	  if (query_stmt is not null) then
-		  insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, x.id, 'DDL', query_stmt, v_session_id);       
+		  insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, x.id, 'DDL', query_stmt, v_session_id); 
+		  commit;		  
 		  execute immediate query_stmt;
 		  cnt_rows := sql%rowcount;
 		  update log_clob_query set rows_affected = cnt_rows where form_template_id = x.id;
@@ -216,6 +225,8 @@ begin
   end loop;
 end;
 /
+
+select sum(rows_affected), max(total_duration_min) from v_log_clob_query;
 
 drop procedure create_form_data_nnn;
 drop sequence seq_form_data_nnn;
