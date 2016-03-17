@@ -178,7 +178,7 @@ def BigDecimal calc16(def row) {
 
 def BigDecimal calc18(def row) {
     // Графа 18 = Графа 16 * 4/3
-    return (row.sum6 ?: 0) * (4/3)
+    return (row.sum6 ?: 0) * 4/3
 }
 
 def BigDecimal calc19(def row) {

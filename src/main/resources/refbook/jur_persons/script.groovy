@@ -4,6 +4,8 @@
 package refbook.jur_persons
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -239,6 +241,33 @@ void save() {
             }
         }
         it.put("IKSR", new RefBookValue(RefBookAttributeType.STRING, iksr))
+
+        // Алгоритм заполнения поля «INNKIO»:
+        def innKio
+        if (orgCode == 1) {
+            if (inn) {
+                innKio = inn
+            }
+        } else if (orgCode == 2) {
+            if (kio) {
+                innKio = kio
+            }
+        }
+        it.put("INNKIO", new RefBookValue(RefBookAttributeType.STRING, innKio))
+
+        // Алгоритм заполнения поля «RSK»:
+        def rsk
+        // if (orgCode == 1) { то не заполняется
+        if (orgCode == 2) {
+            if (regNum) {
+                rsk = regNum
+            } else if (taxCodeIncorporation) {
+                rsk = taxCodeIncorporation
+            } else if (swift) {
+                rsk = swift
+            }
+        }
+        it.put("RSK", new RefBookValue(RefBookAttributeType.STRING, rsk))
     }
 }
 

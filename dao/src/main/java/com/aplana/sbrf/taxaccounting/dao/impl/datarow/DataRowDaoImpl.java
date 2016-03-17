@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
@@ -243,6 +242,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
     }
 
 	private void insertRows(FormData formData, int index, List<DataRow<Cell>> rows, DataRowType dataRowType) {
+        DataRowMapper dataRowMapper = new DataRowMapper(formData);
 		int size = getRowCount(formData);
 		if (index < 1 || index > size + 1) {
 			throw new IllegalArgumentException(String.format("Вставка записей допустима только в диапазоне индексов [1; %s]. index = %s", size + 1, index));
@@ -290,8 +290,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			for (Column column : formData.getFormColumns()) {
 				String[] names = columnNames.get(column.getId());
 				Cell cell = row.getCell(column.getAlias());
-				values.put(names[COL_VALUE_IDX], DataRowMapper.formatCellValue(cell));
-				values.put(names[COL_STYLE_IDX], DataRowMapper.formatCellStyle(cell));
+				values.put(names[COL_VALUE_IDX], dataRowMapper.formatCellValue(cell));
+				values.put(names[COL_STYLE_IDX], dataRowMapper.formatCellStyle(cell));
 			}
 			params.add(values);
 		}
@@ -320,7 +320,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public void updateRows(FormData formData, Collection<DataRow<Cell>> rows) {
-		StringBuilder sql = new StringBuilder("UPDATE form_data_row");
+        DataRowMapper dataRowMapper = new DataRowMapper(formData);
+        StringBuilder sql = new StringBuilder("UPDATE form_data_row");
 		sql.append(" SET alias = :alias");
 
 		Map<Integer, String[]> columnNames = DataRowMapper.getColumnNames(formData);
@@ -343,8 +344,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			for (Column column : formData.getFormColumns()) {
 				String[] names = columnNames.get(column.getId());
 				Cell cell = row.getCell(column.getAlias());
-				values.put(names[COL_VALUE_IDX], DataRowMapper.formatCellValue(cell));
-				values.put(names[COL_STYLE_IDX], DataRowMapper.formatCellStyle(cell));
+				values.put(names[COL_VALUE_IDX], dataRowMapper.formatCellValue(cell));
+				values.put(names[COL_STYLE_IDX], dataRowMapper.formatCellStyle(cell));
 			}
 			params.add(values);
 		}
