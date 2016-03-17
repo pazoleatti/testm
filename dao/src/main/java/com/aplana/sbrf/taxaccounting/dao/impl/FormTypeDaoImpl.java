@@ -82,7 +82,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
             ps.appendQuery("select id from form_type where status = 0");
             if (filter.getTaxType() != null) {
                 ps.appendQuery(" and tax_type = ?");
-                ps.addParam(filter.getTaxType().getCode());
+                ps.addParam(String.valueOf(filter.getTaxType().getCode()));
             }
             if (!filter.getSearchText().isEmpty()) {
                 ps.appendQuery(" and LOWER(name) like LOWER(?)");

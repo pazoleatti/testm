@@ -121,7 +121,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         ps.appendQuery("select id from declaration_type where status = 0");
         if (filter.getTaxType() != null) {
             ps.appendQuery(" and TAX_TYPE = ?");
-            ps.addParam(filter.getTaxType().getCode());
+            ps.addParam(String.valueOf(filter.getTaxType().getCode()));
         }
         if (!filter.getSearchText().isEmpty()) {
             ps.appendQuery(" and LOWER(name) like LOWER(?)");
