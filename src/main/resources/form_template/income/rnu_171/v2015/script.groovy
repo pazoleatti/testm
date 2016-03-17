@@ -39,7 +39,7 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.AFTER_LOAD:
-        afterLoad()
+        // afterLoad() TODO убрал в 0.9.3, вернуть в 1.0
         break
     case FormDataEvent.CALCULATE:
         calc()
