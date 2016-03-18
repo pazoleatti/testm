@@ -3,7 +3,22 @@ package form_template.deal.app_4_2.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.XlsxReportMetadata
 import groovy.transform.Field
+import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.ss.usermodel.DataFormat
+import org.apache.poi.ss.usermodel.Font
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.ss.usermodel.WorkbookFactory
+import org.apache.poi.ss.util.AreaReference
+import org.apache.poi.ss.util.CellRangeAddress
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.apache.poi.xssf.usermodel.XSSFColor
+import org.springframework.util.ClassUtils
 
 /**
  * 803 - Приложение 4.2. Отчет в отношении доходов и расходов Банка по сделкам с ВЗЛ, РОЗ, НЛ по итогам окончания Налогового периода
@@ -63,6 +78,12 @@ switch (formDataEvent) {
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
+        break
+    case FormDataEvent.GET_SPECIFIC_REPORT_TYPES:
+        specificReportType.add("Контролируемые лица")
+        break
+    case FormDataEvent.CREATE_SPECIFIC_REPORT:
+        createSpecificReport()
         break
 }
 
@@ -927,3 +948,369 @@ def getReportPeriodByTaxType(def taxType) {
     }
     return reportPeriodIdsMap[taxType]
 }
+
+@Field
+Workbook workBook = null
+@Field
+Sheet sheet = null
+
+/** Специфический отчет "Контролируемые лица" XLSM*/
+void createSpecificReport() {
+    // для работы с эксель
+    String TEMPLATE = ClassUtils.classPackageAsResourcePath(FormDataXlsmReportBuilder.class)+ "/acctax.xlsm"
+    InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE)
+    workBook = WorkbookFactory.create(templeteInputStream)
+    sheet = workBook.getSheetAt(0)
+    Row tmpRow
+    Cell cell
+    CellRangeAddress region
+    def rowIndex = 0
+
+    // очистить шаблон
+    clearSheet()
+
+    // заголовок
+    tmpRow = sheet.createRow(rowIndex)
+    cell = tmpRow.createCell(0)
+    cell.setCellValue("Налоговый период: " + (reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.year ?: ''))
+    cell.setCellStyle(getCellStyle(StyleType.ROW_1))
+    // объединение трех ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 0, 2)
+    sheet.addMergedRegion(region)
+
+    def dateStr = new Date()?.format('dd.MM.yyyy') ?: ''
+    rowIndex++
+    tmpRow = sheet.createRow(rowIndex)
+    cell = tmpRow.createCell(0)
+    cell.setCellValue("Дата составления отчета: $dateStr")
+    cell.setCellStyle(getCellStyle(StyleType.ROW_2))
+
+    // объединение трех ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 0, 2)
+    sheet.addMergedRegion(region)
+
+    // пустая строка
+    rowIndex++
+    sheet.createRow(rowIndex)
+
+    rowIndex++
+    tmpRow = sheet.createRow(rowIndex)
+    tmpRow.setHeightInPoints(42.75)
+    cell = tmpRow.createCell(0)
+    cell.setCellValue("Отчет в отношении Взаимозависимых лиц / Резидентов Оффшорных зон / Независимых лиц, с которыми совершались Внешнеторговые сделки, все сделки с которыми признаются Контролируемыми сделками по итогам окончания Налогового периода")
+    cell.setCellStyle(getCellStyle(StyleType.TITLE))
+
+    // объединение трех ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 0, 2)
+    sheet.addMergedRegion(region)
+
+    // пустая строка
+    rowIndex++
+    sheet.createRow(rowIndex)
+
+    // шапка
+    rowIndex++
+    def tmpDataRow = formData.createDataRow()
+    def columnAliases = ['rowNumber', 'name', 'ikksr']
+    def columnNames = columnAliases.collect { getColumnName(tmpDataRow, it) }
+    addNewRowInXlsm(rowIndex, columnNames, StyleType.HEADER)
+
+    // нумерация
+    rowIndex++
+    def columnNum = (1..3).collect { 'гр. ' + it.toString() }
+    addNewRowInXlsm(rowIndex, columnNum, StyleType.NUMERATION)
+
+    // задать ширину столбцов (в символах)
+    def widths = [
+            6,  // rowNumber
+            43, // name
+            39  // ikksr
+    ]
+    for (int i = 0; i < widths.size(); i++) {
+        int width = widths[i] * 256 // умножить на 256, т.к. 1 единица ширины в poi = 1/256 ширины символа
+        sheet.setColumnWidth(i, width)
+    }
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    dataRows.sort { row ->
+        getRefBookValue(520L, row.name)?.NAME?.value?.toLowerCase()
+    }
+    int count = 0
+    for (def row : dataRows) {
+        if (row.sign != getRecYesId()) {
+            continue
+        }
+        rowIndex++
+        def values = getXlsRowValues(++count, row.name)
+        // добавить значения
+        addNewRowInXlsm(rowIndex, values, StyleType.DATA)
+    }
+
+    // область печати
+    setPrintSetup(rowIndex, widths.size())
+
+    workBook.write(scriptSpecificReportHolder.getFileOutputStream())
+
+    // название файла
+    scriptSpecificReportHolder.setFileName("Контролируемые лица.xlsm")
+}
+
+def getXlsRowValues(def count, def recordId) {
+    def values = []
+
+    values.add(count)
+
+    // 2. name
+    def record520 = getRefBookValue(520L, recordId)
+    values.add(record520?.NAME?.value)
+
+    // 3. ikksr
+    def ikksr = record520?.IKKSR?.value
+    values.add(ikksr)
+
+    return values
+}
+
+/** Очистить шаблон, т.к в нем есть значения, поименованные ячейки, стили и т.д. */
+void clearSheet() {
+    // убрать объединения
+    def count = sheet.getNumMergedRegions()
+    for (int i = count - 1; i >= 0; i--) {
+        sheet.removeMergedRegion(i)
+    }
+
+    // очистить ячейки
+    def addRowCount = 0
+    int maxColumnNum = 0
+    for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i++) {
+        Row row = sheet.getRow(i)
+        if (!row) {
+            continue
+        }
+        if (row.getLastCellNum() > maxColumnNum) {
+            maxColumnNum = row.getLastCellNum()
+        }
+        sheet.removeRow(row)
+        // добавить новую строку что б не удалился макрос после удаления всех строк (две строки используются макросом)
+        if (addRowCount < 2) {
+            Row tmp = sheet.createRow(i)
+            tmp.createCell(2).setCellValue(' ')
+            addRowCount++
+        }
+    }
+    // поправить ширину столбцов
+    int width = (sheet.getDefaultColumnWidth() + 1) * 256
+    for (int i = 0; i <= maxColumnNum; i++) {
+        sheet.setColumnWidth(i, width)
+    }
+
+    // удалить именованные ячейки
+    def cellNames = [
+            XlsxReportMetadata.RANGE_DATE_CREATE,
+            XlsxReportMetadata.RANGE_REPORT_CODE,
+            XlsxReportMetadata.RANGE_REPORT_PERIOD,
+            XlsxReportMetadata.RANGE_REPORT_NAME,
+            XlsxReportMetadata.RANGE_SUBDIVISION,
+            // XlsxReportMetadata.RANGE_POSITION, // используется макросом
+            XlsxReportMetadata.RANGE_SUBDIVISION_SIGN,
+            XlsxReportMetadata.RANGE_FIO,
+    ]
+    cellNames.each { name ->
+        workBook.removeName(name)
+    }
+
+    // сместить XlsxReportMetadata.RANGE_POSITION в начало листа, что бы макрос не смещал границы страницы в конце таблицы
+    AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula())
+    def startRow = ar.getFirstCell().getRow()
+    sheet.shiftRows(startRow, startRow + 1, -startRow)
+}
+
+/**
+ * Задать область печати.
+ * Взято отсюда FormDataXlsmReportBuilder.setPrintSetup(...)
+ *
+ * @param rowCount количество строк для области печти (количество используемых строк)
+ * @param columnCount количество столбцов для области печти (количество используемых столбцов)
+ */
+void setPrintSetup(def rowCount, def columnCount) {
+    workBook.setPrintArea(0, 0, columnCount, 0, rowCount)
+    sheet.setFitToPage(true)
+    sheet.setAutobreaks(true)
+    sheet.getPrintSetup().setFitHeight((short) 0)
+    sheet.getPrintSetup().setFitWidth((short) 1)
+}
+
+@Field
+def cellStyleMap = [:]
+
+enum StyleType {
+    ROW_1,        // строка 1
+    ROW_2,        // строка 2
+    TITLE,        // строка 4
+    HEADER,       // шапка
+    NUMERATION,   // нумерация
+    DATA,         // данные
+    DATA_CENTER,  // данные (по центру)
+    BOLT,         // жирный
+    DATE,         // дата
+    GROUP_HEADER, // заголовок
+}
+
+CellStyle getCellStyle(StyleType styleType, def rowNF = null) {
+    def subAlias = (rowNF ? rowNF.getCell('name').getStyle().getAlias() : '')
+    def alias = styleType.name() + subAlias
+    if (cellStyleMap.containsKey(alias)) {
+        return cellStyleMap.get(alias)
+    }
+    CellStyle style = workBook.createCellStyle()
+    switch (styleType) {
+        case StyleType.ROW_1 :
+            style.setWrapText(true)
+            style.setVerticalAlignment(CellStyle.VERTICAL_BOTTOM)
+            style.setAlignment(CellStyle.ALIGN_LEFT)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_NORMAL)
+            font.setFontHeightInPoints(10 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+        case StyleType.ROW_2 :
+            style.setWrapText(true)
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER)
+            style.setAlignment(CellStyle.ALIGN_LEFT)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_NORMAL)
+            font.setFontHeightInPoints(10 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+        case StyleType.TITLE :
+            style.setWrapText(true)
+            style.setVerticalAlignment(CellStyle.VERTICAL_TOP)
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(10 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+        case StyleType.HEADER :
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER)
+            style.setBorderRight(CellStyle.BORDER_THIN)
+            style.setBorderLeft(CellStyle.BORDER_THIN)
+            style.setBorderBottom(CellStyle.BORDER_THIN)
+            style.setBorderTop(CellStyle.BORDER_THIN)
+            style.setWrapText(true)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(9 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+        case StyleType.NUMERATION :
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+            style.setVerticalAlignment(CellStyle.VERTICAL_BOTTOM)
+            style.setBorderRight(CellStyle.BORDER_THIN)
+            style.setBorderLeft(CellStyle.BORDER_THIN)
+            style.setBorderBottom(CellStyle.BORDER_THIN)
+            style.setBorderTop(CellStyle.BORDER_THIN)
+            style.setWrapText(true)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(8 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+        case StyleType.DATA_CENTER :
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+        case StyleType.DATA :
+            style.setBorderRight(CellStyle.BORDER_THIN)
+            style.setBorderLeft(CellStyle.BORDER_THIN)
+            style.setBorderBottom(CellStyle.BORDER_THIN)
+            style.setBorderTop(CellStyle.BORDER_THIN)
+            style.setWrapText(true)
+
+            Font font = workBook.createFont()
+            font.setFontHeightInPoints(8 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+        case StyleType.BOLT :
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(8 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+        case StyleType.DATE :
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+            style.setBorderRight(CellStyle.BORDER_THIN)
+            style.setBorderLeft(CellStyle.BORDER_THIN)
+            style.setBorderBottom(CellStyle.BORDER_THIN)
+            style.setBorderTop(CellStyle.BORDER_THIN)
+            style.setWrapText(true)
+
+            Font font = workBook.createFont()
+            font.setFontHeightInPoints(8 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+
+            DataFormat dataFormat = workBook.createDataFormat()
+            style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()))
+            break
+        case StyleType.GROUP_HEADER :
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER)
+            style.setWrapText(true)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(11 as short)
+            font.setFontName('Arial')
+            font.setItalic(true)
+            style.setFont(font)
+            break
+    }
+    // заливка для данных и дат
+    if (rowNF && styleType in [StyleType.DATE, StyleType.DATA, StyleType.DATA_CENTER]) {
+        XSSFCellStyle tmpStyle = (XSSFCellStyle) style
+        XSSFColor color = getColor(rowNF.getCell('name').getStyle().getBackColor())
+        tmpStyle.setFillForegroundColor(color)
+        tmpStyle.setFillBackgroundColor(color)
+        tmpStyle.setFillPattern(CellStyle.SOLID_FOREGROUND)
+    }
+    cellStyleMap.put(alias, style)
+    return style
+}
+
+/**
+ * Добавить новую строку в эксель и заполнить данными.
+ *
+ * @param sheet лист эксель
+ * @param rowIndex номер строк (0..n)
+ * @param values список строковых значении
+ */
+Row addNewRowInXlsm(int rowIndex, def values, StyleType styleType = null) {
+    Row newRow = sheet.createRow(rowIndex)
+    def cellIndex = 0
+    for (def value : values) {
+        Cell cell = newRow.createCell(cellIndex)
+        cell.setCellValue(value)
+
+        // стили
+        if (styleType) {
+            CellStyle cellStyle = getCellStyle(styleType)
+            cell.setCellStyle(cellStyle)
+        }
+        cellIndex++
+    }
+    return newRow
+}
+
