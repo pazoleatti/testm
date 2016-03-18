@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -921,13 +922,17 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(String tableName, Long refBookId, Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         RefBook refBook = refBookDao.get(refBookId);
+        RefBook refBookClone = SerializationUtils.clone(refBook);
+        refBookClone.setAttributes(new ArrayList<RefBookAttribute>());
+        refBookClone.getAttributes().addAll(refBook.getAttributes());
+
         // Получение количества данных в справочнике
-        PreparedStatementData ps = getSimpleQuery(tableName, refBook, recordId, null, null, sortAttribute, filter, pagingParams, false, null, false);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBookClone, recordId, null, null, sortAttribute, filter, pagingParams, false, null, false);
         Integer recordsCount = refBookDao.getRecordsCount(ps);
 
-        ps = getSimpleQuery(tableName, refBook, recordId, null, null, sortAttribute, filter, pagingParams, false, null, false);
-        refBook.addAttribute(RefBook.getVersionFromAttribute());
-        refBook.addAttribute(RefBook.getVersionToAttribute());
+        ps = getSimpleQuery(tableName, refBookClone, recordId, null, null, sortAttribute, filter, pagingParams, false, null, false);
+        refBookClone.addAttribute(RefBook.getVersionFromAttribute());
+        refBookClone.addAttribute(RefBook.getVersionToAttribute());
 
         List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
