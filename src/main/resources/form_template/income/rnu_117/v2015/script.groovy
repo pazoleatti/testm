@@ -388,9 +388,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 4
+    if (map != null) {
+        def expectedValues = [ map.INN?.value, map.REG_NUM?.value, map.TAX_CODE_INCORPORATION?.value, map.SWIFT?.value, map.KIO?.value ]
+        expectedValues = expectedValues.unique().findAll{ it != null && it != '' }
+        formDataService.checkReferenceValue(values[colIndex], expectedValues, getColumnName(newRow, 'iksr'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
+    }
     colIndex++
 
-    //
     // графа 5
     newRow.code = values[colIndex]
     colIndex++
