@@ -387,7 +387,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 3
     if (map != null) {
-        formDataService.checkReferenceValue(520, values[colIndex], map.IKSR?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        def expectedValues = [ map.INN?.value, map.REG_NUM?.value, map.TAX_CODE_INCORPORATION?.value, map.SWIFT?.value, map.KIO?.value ]
+        expectedValues = expectedValues.unique().findAll{ it != null && it != '' }
+        formDataService.checkReferenceValue(values[colIndex], expectedValues, getColumnName(newRow, 'iksr'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
 
@@ -530,17 +532,31 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         def String iksrName = getColumnName(newRow, 'iksr')
         def nameFromFile = pure(rowCells[2])
         def recordId = getTcoRecordId(nameFromFile,  pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+        def map = getRefBookValue(520, recordId)
 
         // графа 2
         newRow.name = recordId
+        // графа 3
+        if (map != null) {
+            def expectedValues = [ map.INN?.value, map.REG_NUM?.value, map.TAX_CODE_INCORPORATION?.value, map.SWIFT?.value, map.KIO?.value ]
+            expectedValues = expectedValues.unique().findAll{ it != null && it != '' }
+            formDataService.checkReferenceValue(pure(rowCells[3]), expectedValues, getColumnName(newRow, 'iksr'), map.NAME.value, fileRowIndex, 3 + colOffset, logger, false)
+        }
+        // графа 4
+        if (map != null) {
+            def countryMap = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
+            if (countryMap != null) {
+                formDataService.checkReferenceValue(pure(rowCells[4]), [countryMap.CODE?.stringValue], getColumnName(newRow, 'countryCode'), map.NAME.value, fileRowIndex, 4 + colOffset, logger, false)
+            }
+        }
         // графа 5
         newRow.docNumber = pure(rowCells[5])
         // графа 6
         newRow.docDate = parseDate(pure(rowCells[6]), "dd.MM.yyyy", fileRowIndex, 6 + colOffset, logger, true)
         // графа 7
-        newRow.okeiCode = getRecordIdImport(12, 'CODE', pure(rowCells[10]), fileRowIndex, 10 + colOffset, false)
+        newRow.okeiCode = getRecordIdImport(12, 'CODE', pure(rowCells[7]), fileRowIndex, 7 + colOffset, false)
         // графа 11
-        newRow.dealDoneDate = parseDate(pure(rowCells[11]), "dd.MM.yyyy", fileRowIndex, 11 + colOffset, logger, true)
+        newRow.dealDoneDate = parseDate(pure(rowCells[12]), "dd.MM.yyyy", fileRowIndex, 12 + colOffset, logger, true)
         // графа 9
         newRow.price =parseNumber(pure(rowCells[9]), fileRowIndex, 9 + colOffset, logger, true)
     }
@@ -549,7 +565,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 9
     newRow.finResult = parseNumber(pure(rowCells[9]), fileRowIndex, 9 + colOffset, logger, true)
     // графа 11
-    newRow.cost = parseNumber(pure(rowCells[10]), fileRowIndex, 10 + colOffset, logger, true)
+    newRow.cost = parseNumber(pure(rowCells[11]), fileRowIndex, 11 + colOffset, logger, true)
 
     return newRow
 }
