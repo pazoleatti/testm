@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.ViewWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaPresenter;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -212,7 +213,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     @Override
     public void onFind() {
-        getData();
+        getData(null);
     }
 
 
@@ -274,7 +275,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                         .defaultCallback(new AbstractCallback<DeleteConfigPropertyResult>() {
                                                             @Override
                                                             public void onSuccess(DeleteConfigPropertyResult result) {
-                                                                getData();
+                                                                getData(null);
                                                                 LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
 
                                                             }
@@ -295,7 +296,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                         public void yes() {
                             getView().setEditMode(false);
                             getView().setIsFormModified(false);
-                            getData();
+                            getData(null);
                         }
                     });
         } else {
@@ -303,8 +304,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         }
     }
 
-
-    private void getData() {
+    private void getData(String uuid) {
         LogCleanEvent.fire(DepartmentConfigPropertyPresenter.this);
         if (getView().getReportPeriodId() == null || getView().getDepartmentId() == null)
             return;
@@ -313,7 +313,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         action.setSlaveRefBookId(getCurrentTableRefBookId());
         action.setReportPeriodId(getView().getReportPeriodId());
         action.setDepartmentId(getView().getDepartmentId());
-
+        action.setOldUUID(uuid);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetRefBookValuesResult>() {
                     @Override
@@ -435,7 +435,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
                                                     LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
                                                 } else {
-                                                    getData();
+                                                    getData(result.getUuid());
                                                     LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
                                                     if (result.getErrorMsg() != null) {
                                                         Dialog.errorMessage(result.getErrorMsg());
@@ -455,13 +455,13 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                 @Override
                                                 public void no() {
                                                     super.no();
-                                                    getData();
+                                                    getData(null);
                                                 }
 
                                                 @Override
                                                 public void close() {
                                                     super.close();
-                                                    getData();
+                                                    getData(null);
                                                 }
 
                                                 @Override
@@ -531,7 +531,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                 getView().setReportPeriods(result.getReportPeriods() == null
                                         ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods());
                              //   createTableColumns();
-                                getData();
+                                getData(null);
                                 if (getView().getReportPeriodId() != null && getView().getDepartmentId() != null) {
                                     getRefBookPeriod(getView().getReportPeriodId(), getView().getDepartmentId());
                                 }

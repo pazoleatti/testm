@@ -51,7 +51,7 @@ public interface DepartmentConfigUiHandlers extends UiHandlers {
      * @param taxType
      * @param reportPeriodId
      */
-    void reloadDepartmentParams(Integer departmentId, TaxType taxType, Integer reportPeriodId);
+    void reloadDepartmentParams(Integer departmentId, TaxType taxType, Integer reportPeriodId, String uuid);
 
     /**
      * Перезагрузка дерева подразделений

@@ -105,7 +105,7 @@ public class RefBookHelperImpl implements RefBookHelper {
                                                                     link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()));
                                                 } else {
-                                                    logger.info(msg,
+                                                    logger.warn(msg,
                                                             link.getIndex() != null ? link.getIndex() :
                                                                     link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()));
@@ -127,7 +127,7 @@ public class RefBookHelperImpl implements RefBookHelper {
                                                             link.getVersionTo() != null ? SDF.format(link.getVersionTo()) : "-"
                                                     );
                                                 } else {
-                                                    logger.info(msg,
+                                                    logger.warn(msg,
                                                             link.getIndex() != null ? link.getIndex() :
                                                                     link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()),
@@ -141,25 +141,19 @@ public class RefBookHelperImpl implements RefBookHelper {
                                                 break;
                                             }
                                             case NOT_LAST: {
-                                                String msg;
+                                                String msg = buildMsg("Поле \"%s\" содержит ссылку на версию записи справочника, которая не является последней действующей в отчетном периоде настроек (с %s по %s)!", link);
                                                 if (mode == CHECK_REFERENCES_MODE.REFBOOK) {
-                                                    msg = "\"%s\": Выбранная версия записи справочника не является последней действующей в периоде сохраняемой версии (с %s по %s)!";
-                                                    if (link.getSpecialId() != null) {
-                                                        //Если проверка выполняется для нескольких записей справочника (например при импорте справочника), то формируем специальное имя для каждой записи
-                                                        msg = "Запись \"%s\", " + msg;
-                                                    } else {
-                                                        msg = "%s" + msg;
-                                                    }
                                                     logger.warn(msg,
-                                                            link.getSpecialId() != null ? link.getSpecialId() : "",
+                                                            link.getIndex() != null ? link.getIndex() :
+                                                                    link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()),
                                                             SDF.format(versionFrom),
                                                             versionTo != null ? SDF.format(versionTo) : "-"
                                                     );
                                                 } else {
-                                                    msg = "Строка %s: Поле \"%s\" содержит ссылку на версию записи справочника, которая не является последней действующей в отчетном периоде настроек (с %s по %s)!";
                                                     logger.warn(msg,
-                                                            link.getIndex(),
+                                                            link.getIndex() != null ? link.getIndex() :
+                                                                    link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()),
                                                             SDF.format(versionFrom),
                                                             versionTo != null ? SDF.format(versionTo) : "-"

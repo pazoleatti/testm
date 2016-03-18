@@ -86,10 +86,12 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         result.setTableValues(convert(paramsSlave, getRefBookValuesAction.getSlaveRefBookId(), true));
 
         //Проверяем справочные значения для полученной таблицы
-        checkReferenceValues(refBook, result.getTableValues(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
-        if (logger.getMainMsg() != null) {
-            result.setUuid(logEntryService.save(logger.getEntries()));
-            result.setErrorMsg(logger.getMainMsg());
+        if (getRefBookValuesAction.getOldUUID() == null) {
+            checkReferenceValues(refBook, result.getTableValues(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
+            if (logger.getMainMsg() != null) {
+                result.setUuid(logEntryService.save(logger.getEntries()));
+                result.setErrorMsg(logger.getMainMsg());
+            }
         }
 
         // Заполняем период действия настроек

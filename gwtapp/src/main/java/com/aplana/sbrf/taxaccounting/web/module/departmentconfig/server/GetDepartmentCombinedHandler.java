@@ -227,7 +227,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         result.setRbTextValues(rbTextValues);
 
-        if (paramsMap != null) {
+        if (paramsMap != null && action.getOldUUID() == null) {
             //Проверяем справочные значения
             checkReferenceValues(provider, rbFactory.get(parentRefBookId), paramsMap, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
             if (logger.getMainMsg() != null) {

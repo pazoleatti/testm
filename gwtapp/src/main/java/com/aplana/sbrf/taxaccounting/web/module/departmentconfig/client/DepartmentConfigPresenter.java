@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.AddLogAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.AddLogResult;
+import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaPresenter;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -92,7 +93,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         /**
          * Перезагрузка параметров подразделения
          */
-        void reloadDepartmentParams();
+        void reloadDepartmentParams(String uuid);
 
         /**
          * Исходное состояние формы
@@ -196,7 +197,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                             public void onSuccess(SaveDepartmentCombinedResult result) {
                                                 LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
                                                 if (!result.isHasError()) {
-                                                    getView().reloadDepartmentParams();
+                                                    getView().reloadDepartmentParams(result.getUuid());
                                                 }
                                                 if (result.getErrorMsg() != null) {
                                                     Dialog.errorMessage(result.getErrorMsg());
@@ -282,7 +283,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                                                         @Override
                                                                         public void onSuccess(DeleteDepartmentCombinedResult result) {
                                                                             LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
-                                                                            getView().reloadDepartmentParams();
+                                                                            getView().reloadDepartmentParams(null);
                                                                         }
                                                                     }, DepartmentConfigPresenter.this));
                                                             getView().update();
@@ -318,7 +319,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
-    public void reloadDepartmentParams(Integer departmentId, TaxType taxType, Integer reportPeriodId) {
+    public void reloadDepartmentParams(Integer departmentId, TaxType taxType, Integer reportPeriodId, final String uuid) {
         LogCleanEvent.fire(DepartmentConfigPresenter.this);
 
         if (departmentId == null || taxType == null || reportPeriodId == null) {
@@ -330,6 +331,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         action.setDepartmentId(departmentId);
         action.setTaxType(taxType);
         action.setReportPeriodId(reportPeriodId);
+        action.setOldUUID(uuid);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetDepartmentCombinedResult>() {
                     @Override
@@ -386,7 +388,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 getView().setReportPeriods(result.getReportPeriods() == null
                                         ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods());
 
-                                reloadDepartmentParams(getView().getCurrentDepartmentId(), getView().getTaxType(), getView().getCurrentReportPeriodId());
+                                reloadDepartmentParams(getView().getCurrentDepartmentId(), getView().getTaxType(), getView().getCurrentReportPeriodId(), null);
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
     }

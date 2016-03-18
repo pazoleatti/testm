@@ -3,10 +3,11 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetRefBookValuesAction extends UnsecuredActionImpl<GetRefBookValuesResult> {
-    Long refBookId;
-    Long slaveRefBookId;
-    Integer reportPeriodId;
-    Integer departmentId;
+    private Long refBookId;
+    private Long slaveRefBookId;
+    private Integer reportPeriodId;
+    private Integer departmentId;
+    private String oldUUID;
 
     public Long getRefBookId() {
         return refBookId;
@@ -38,5 +39,13 @@ public class GetRefBookValuesAction extends UnsecuredActionImpl<GetRefBookValues
 
     public void setSlaveRefBookId(Long slaveRefBookId) {
         this.slaveRefBookId = slaveRefBookId;
+    }
+
+    public String getOldUUID() {
+        return oldUUID;
+    }
+
+    public void setOldUUID(String oldUUID) {
+        this.oldUUID = oldUUID;
     }
 }

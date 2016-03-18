@@ -152,7 +152,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
             Logger logger = new Logger();
             /** Проверка существования справочных атрибутов */
-            checkReferenceValues(provider, refBook, paramsMap, period.getCalendarStartDate(), period.getEndDate(), logger);
+            //checkReferenceValues(provider, refBook, paramsMap, period.getCalendarStartDate(), period.getEndDate(), logger);
             if (logger.getMainMsg() != null) {
                 result.setUuid(logEntryService.save(logger.getEntries()));
                 result.setErrorMsg(logger.getMainMsg());

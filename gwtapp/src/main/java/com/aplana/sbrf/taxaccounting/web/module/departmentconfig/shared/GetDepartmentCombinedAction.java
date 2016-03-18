@@ -19,6 +19,8 @@ public class GetDepartmentCombinedAction extends UnsecuredActionImpl<GetDepartme
     // Выбранный отчетный период
     private Integer reportPeriodId;
 
+    private String oldUUID;
+
     public Integer getDepartmentId() {
         return departmentId;
     }
@@ -41,6 +43,14 @@ public class GetDepartmentCombinedAction extends UnsecuredActionImpl<GetDepartme
 
     public void setReportPeriodId(Integer reportPeriodId) {
         this.reportPeriodId = reportPeriodId;
+    }
+
+    public String getOldUUID() {
+        return oldUUID;
+    }
+
+    public void setOldUUID(String oldUUID) {
+        this.oldUUID = oldUUID;
     }
 
     @Override
