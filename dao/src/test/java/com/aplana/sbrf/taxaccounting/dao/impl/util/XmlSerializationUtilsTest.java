@@ -85,9 +85,7 @@ public class XmlSerializationUtilsTest {
 		assertFalse("The result of deserialization is empty.", deserializedData.isEmpty());
 
 		// Check equals
-		assertTrue(
-				"The result of deserialization doesn't equals the initial data.",
-				equals(data, deserializedData));
+		assertTrue("The result of deserialization doesn't equals the initial data.", equals(data, deserializedData));
 	}
 	
 	@Test
@@ -220,36 +218,29 @@ public class XmlSerializationUtilsTest {
 	 * @return
 	 */
 	private <T extends AbstractCell> void assertEqualsCell(T cell1, T cell2) {
-		
 		assertEquals(cell1.getClass(), cell2.getClass());
 		assertEquals(cell1.getColSpan(), cell2.getColSpan());
 		assertEquals(cell1.getRowSpan(), cell2.getRowSpan());
-			
 		if (Cell.class.equals(cell1)){
 			Cell ccell1 = (Cell) cell1;
 			Cell ccell2 = (Cell) cell2;
 			assertEquals(ccell1.isEditable(), ccell2.isEditable());
-	
 			if (FormStyle.DEFAULT_STYLE.equals(ccell1.getStyle()) && !FormStyle.DEFAULT_STYLE.equals(ccell2.getStyle())){
-					fail();
+				fail();
 			}
 			if (!FormStyle.DEFAULT_STYLE.equals(ccell1.getStyle()) && FormStyle.DEFAULT_STYLE.equals(ccell2.getStyle())){
 				fail();
 			}
-			assertEquals(ccell1.getStyleAlias(), ccell2.getStyleAlias());
+			assertEquals(ccell1.getStyle(), ccell2.getStyle());
 		}
 	}
 
 	private <T extends AbstractCell> void assertEqualsDataRow(DataRow<T> row1, DataRow<T> row2) {
-
-
 		if (row1 == null || row2 == null) {
 			fail();
 		}
-
 		assertEquals(row1.getAlias(), row2.getAlias());
 		assertEquals(row1.size(), row2.size());
-
 
 		for (String key : row1.keySet()) {
 			T cell1 = row1.getCell(key);
@@ -263,28 +254,21 @@ public class XmlSerializationUtilsTest {
 				if (val1 instanceof Date) {
 					Calendar c1 = Calendar.getInstance();
 					Calendar c2 = Calendar.getInstance();
-
 					c1.setTime((Date) val1);
 					c2.setTime((Date) val2);
-
 					if (c1.get(Calendar.YEAR) != c2.get(Calendar.YEAR)) {
 						fail();
 					}
-
 					if (c1.get(Calendar.MONTH) != c2.get(Calendar.MONTH)) {
 						fail();
 					}
-
 					if (c1.get(Calendar.DATE) != c2.get(Calendar.DATE)) {
 						fail();
 					}
 				} else {
 					assertEquals(val1, val2);
 				}
-
 				assertEqualsCell(cell1, cell2);
-				
-
 			} else if (val1 != null && val2 == null) {
 				fail(String.valueOf(val1));
 			} else if (val1 == null && val2 != null){

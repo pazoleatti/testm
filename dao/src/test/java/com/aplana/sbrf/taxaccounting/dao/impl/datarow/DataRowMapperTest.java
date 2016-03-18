@@ -1,12 +1,17 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
+import com.aplana.sbrf.taxaccounting.model.AutoNumerationColumn;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
+import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import org.junit.Test;
 
@@ -43,31 +48,6 @@ public class DataRowMapperTest {
 		style.setId(345);
 		styles.add(style);
 		return new Cell(null, styles);
-	}
-
-	@Test
-	public void getStyleTest() {
-		FormStyle style = DataRowMapper.getStyle("0-1");
-		assertEquals(Color.BLACK, style.getFontColor());
-		assertEquals(Color.LIGHT_YELLOW, style.getBackColor());
-
-		style = DataRowMapper.getStyle("0-1b");
-		assertEquals(Color.BLACK, style.getFontColor());
-		assertEquals(Color.LIGHT_YELLOW, style.getBackColor());
-		assertFalse(style.isItalic());
-		assertTrue(style.isBold());
-
-		style = DataRowMapper.getStyle("11-10ib"); // переставил местами
-		assertEquals(Color.DARK_BLUE, style.getFontColor());
-		assertEquals(Color.RED, style.getBackColor());
-		assertTrue(style.isItalic());
-		assertTrue(style.isBold());
-
-		style = DataRowMapper.getStyle("1i1-b10"); // переставил местами
-		assertEquals(Color.DARK_BLUE, style.getFontColor());
-		assertEquals(Color.RED, style.getBackColor());
-		assertTrue(style.isItalic());
-		assertTrue(style.isBold());
 	}
 
 	@Test
@@ -238,13 +218,39 @@ public class DataRowMapperTest {
 	@Test
 	public void formatCellValueTest() throws ParseException {
         DataRowMapper dataRowMapper = new DataRowMapper(new FormData());
-        assertNull(dataRowMapper.formatCellValue(ColumnType.AUTO, null));
-		assertNull(dataRowMapper.formatCellValue(ColumnType.REFERENCE, 5L));
-		assertNull(dataRowMapper.formatCellValue(ColumnType.STRING, null));
-		assertEquals(" qww rt ds", dataRowMapper.formatCellValue(ColumnType.STRING, " qww rt ds"));
-		assertEquals("31.12.2016 12:21:59", dataRowMapper.formatCellValue(ColumnType.DATE, SDF.parse("31.12.2016 12:21:59")));
-		assertEquals("472", dataRowMapper.formatCellValue(ColumnType.REFBOOK, 472L));
-		assertEquals("34523.12366", dataRowMapper.formatCellValue(ColumnType.NUMBER, BigDecimal.valueOf(34523.12366)));
-		assertEquals("34523.12", dataRowMapper.formatCellValue(ColumnType.NUMBER, BigDecimal.valueOf(34523.120)));
+		Cell cell = new Cell();
+
+		Column column = new AutoNumerationColumn();
+		cell.setColumn(column);
+		cell.setValue(null, null);
+        assertNull(dataRowMapper.formatCellValue(cell));
+
+		column = new StringColumn();
+		cell.setColumn(column);
+		cell.setValue(null, null);
+		assertNull(dataRowMapper.formatCellValue(cell));
+
+		cell.setValue(" qww rt ds", null);
+		assertEquals(" qww rt ds", dataRowMapper.formatCellValue(cell));
+
+		column = new DateColumn();
+		cell.setColumn(column);
+		cell.setValue(SDF.parse("31.12.2016 12:21:59"), null);
+		assertEquals("31.12.2016 12:21:59", dataRowMapper.formatCellValue(cell));
+
+		column = new RefBookColumn();
+		cell.setColumn(column);
+		cell.setValue(472L, null);
+		assertEquals("472", dataRowMapper.formatCellValue(cell));
+
+		column = new NumericColumn();
+		((NumericColumn) column).setPrecision(5);
+		cell.setColumn(column);
+		cell.setValue(BigDecimal.valueOf(34523.12366), null);
+		assertEquals("34523.12366", dataRowMapper.formatCellValue(cell));
+
+		((NumericColumn) column).setPrecision(2);
+		cell.setValue(BigDecimal.valueOf(34523.120), null);
+		assertEquals("34523.12", dataRowMapper.formatCellValue(cell));
 	}
 }

@@ -174,11 +174,10 @@ public final class XmlSerializationUtils {
 		element.setAttribute(ATTR_COLSPAN, String.valueOf(cell.getColSpan()));
 		element.setAttribute(ATTR_ROWSPAN, String.valueOf(cell.getRowSpan()));
 		if (!FormStyle.DEFAULT_STYLE.equals(cell.getStyle())) {
-			element.setAttribute(ATTR_STYLE_ALIAS, String.valueOf(cell.getStyleAlias()));
+			element.setAttribute(ATTR_STYLE_ALIAS, cell.getStyle().toString());
 		}
 		if (cell.isEditable()){
-			element.setAttribute(ATTR_CELL_EDITABLE,
-					String.valueOf(true));
+			element.setAttribute(ATTR_CELL_EDITABLE, String.valueOf(true));
 		}
 		return element;
 	}
@@ -350,17 +349,14 @@ public final class XmlSerializationUtils {
 	 * 
 	 * @param cell
 	 * @param cellNode
-	 * @param formTemplate
 	 */
 	private void parseCell(Cell cell, Node cellNode, FormTemplate formTemplate) {
 		NamedNodeMap attributes = cellNode.getAttributes();
-
 		// String value
 		Node valueNode = attributes.getNamedItem(ATTR_STRING_VALUE);
 		if (valueNode != null) {
 			cell.setValue(valueNode.getNodeValue(), null);
 		}
-
 		// Date value
 		valueNode = attributes.getNamedItem(ATTR_DATE_VALUE);
 		if (valueNode != null) {
@@ -371,7 +367,6 @@ public final class XmlSerializationUtils {
 				throw new XmlSerializationException(e);
 			}
 		}
-
 		// Numeric value
 		valueNode = attributes.getNamedItem(ATTR_NUMERIC_VALUE);
 		if (valueNode != null) {
@@ -382,11 +377,18 @@ public final class XmlSerializationUtils {
 				throw new XmlSerializationException(e);
 			}
 		}
-
 		valueNode = attributes.getNamedItem(ATTR_STYLE_ALIAS);
 		if (valueNode != null && valueNode.getNodeValue() != null) {
-			FormStyle style = formTemplate.getStyle(valueNode.getNodeValue());
-			cell.setStyle(style);
+			String styleString = valueNode.getNodeValue();
+			if(styleString.length() > 0) {
+				FormStyle style;
+				if (styleString.charAt(0) == FormStyle.STYLE_CODE && styleString.length() > 3) {
+					style = FormStyle.valueOf((valueNode.getNodeValue()));
+				} else {
+					style = formTemplate.getStyle(valueNode.getNodeValue());
+				}
+				cell.setStyle(style);
+			}
 		}
 		valueNode = attributes.getNamedItem(ATTR_CELL_EDITABLE);
 		if (valueNode != null) {

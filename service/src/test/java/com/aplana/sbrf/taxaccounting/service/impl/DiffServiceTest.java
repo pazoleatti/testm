@@ -33,11 +33,12 @@ public class DiffServiceTest {
     private static final String ALIAS_4 = "column4";
     private static final String ALIAS_5 = "column5";
 
+	private StyleService styleService;
+
     @Before
     public void init() {
         ReflectionTestUtils.setField(diffService, "refBookHelper", mock(RefBookHelper.class));
-
-		StyleService styleService = mock(StyleService.class);
+		styleService = mock(StyleService.class);
 		when(styleService.get(StyleService.STYLE_NO_CHANGE)).thenReturn(new FormStyle(StyleService.STYLE_NO_CHANGE, Color.BLACK, Color.GREY, false, false));
 		when(styleService.get(StyleService.STYLE_INSERT)).thenReturn(new FormStyle(StyleService.STYLE_INSERT, Color.BLACK, Color.PALE_GREEN, false, false));
 		when(styleService.get(StyleService.STYLE_DELETE)).thenReturn(new FormStyle(StyleService.STYLE_DELETE, Color.BLACK, Color.LIGHT_CORAL, false, false));
@@ -225,13 +226,13 @@ public class DiffServiceTest {
         List<String> styleList = new LinkedList<String>();
         for (String key : dataRow.keySet()) {
             Cell cell = dataRow.getCell(key);
-            styleList.add(cell.getStyleAlias());
+            styleList.add(cell.getStyle().toString());
         }
-        Assert.assertEquals(StyleService.STYLE_NO_CHANGE, styleList.get(0));
-        Assert.assertEquals(StyleService.STYLE_CHANGE, styleList.get(1));
-        Assert.assertEquals(StyleService.STYLE_CHANGE, styleList.get(2));
-        Assert.assertEquals(StyleService.STYLE_CHANGE, styleList.get(3));
-        Assert.assertEquals(StyleService.STYLE_CHANGE, styleList.get(4));
+        Assert.assertEquals(styleService.get(StyleService.STYLE_NO_CHANGE).toString(), styleList.get(0));
+        Assert.assertEquals(styleService.get(StyleService.STYLE_CHANGE).toString(), styleList.get(1));
+        Assert.assertEquals(styleService.get(StyleService.STYLE_CHANGE).toString(), styleList.get(2));
+        Assert.assertEquals(styleService.get(StyleService.STYLE_CHANGE).toString(), styleList.get(3));
+        Assert.assertEquals(styleService.get(StyleService.STYLE_CHANGE).toString(), styleList.get(4));
     }
 
     // Тестовые графы

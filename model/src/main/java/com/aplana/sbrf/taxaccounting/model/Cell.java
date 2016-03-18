@@ -309,10 +309,6 @@ public class Cell extends AbstractCell {
 		}
 	}
 
-    public String getStyleAlias() {
-        return style != null ? style.getAlias() : null;
-    }
-
     /**
      * Возвращает разименованное значение справочника
      * !!! Используется только в GUI
@@ -366,7 +362,7 @@ public class Cell extends AbstractCell {
 		sb.append("; dereference=").append(getRefBookDereference());
 		sb.append("; colspan=").append(getColSpan());
 		sb.append("; rowspan=").append(getRowSpan());
-		sb.append("; style=").append(getStyleAlias());
+		sb.append("; style=").append(getStyle().toString());
 		sb.append("; editable=").append(isEditable());
 		sb.append('}');
 

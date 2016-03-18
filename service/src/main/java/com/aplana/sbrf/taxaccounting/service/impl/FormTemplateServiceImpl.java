@@ -319,7 +319,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 	private void validateFormStyles(List<FormStyle> styles, Logger logger) {
 		checkSet.clear();
-
 		for (FormStyle style : styles) {
 			if (!checkSet.add(style.getAlias())) {
 				logger.error(
@@ -328,7 +327,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                         )
                 );
 			}
-
 			if (style.getAlias() != null && style.getAlias().getBytes().length > FORM_STYLE_ALIAS_MAX_VALUE) {
 				logger.error("значение для алиаса стиля \"" + style.getAlias() +
 						"\" слишком велико (фактическое: " + style.getAlias().getBytes().length +

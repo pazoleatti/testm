@@ -18,6 +18,17 @@ public class StyleServiceImpl implements StyleService {
 
 	@Override
 	public FormStyle get(String alias) {
+		// встроенные стили
+		if (FormStyle.DEFAULT_STYLE.getAlias().equals(alias)) {
+			return FormStyle.DEFAULT_STYLE;
+		}
+		if (FormStyle.MANUAL_EDITABLE_STYLE.getAlias().equals(alias)) {
+			return FormStyle.MANUAL_EDITABLE_STYLE;
+		}
+		if (FormStyle.MANUAL_READ_ONLY_STYLE.getAlias().equals(alias)) {
+			return FormStyle.MANUAL_READ_ONLY_STYLE;
+		}
+		// стили из "бд"
 		if (STYLE_NO_CHANGE.equals(alias)) {
 			return new FormStyle(StyleService.STYLE_NO_CHANGE, Color.BLACK, Color.GREY, false, false);
 		}

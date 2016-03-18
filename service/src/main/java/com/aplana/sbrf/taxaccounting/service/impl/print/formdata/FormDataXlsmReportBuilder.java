@@ -1,7 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.formdata;
 
 import com.aplana.sbrf.taxaccounting.model.Color;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DateColumn;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataReport;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.Months;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -10,7 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
@@ -23,7 +40,13 @@ import org.springframework.util.ClassUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  *
@@ -52,7 +75,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         BIGDECIMAL,
         NUMERATION,
         EMPTY ,
-        DEFAULT
+		HEADER
     }
 
     private final class CellStyleBuilder{
@@ -61,83 +84,96 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         private CellStyleBuilder() {
             for (Column column : columns){
-                this.createCellStyle(CellType.DEFAULT, column.getAlias() + "_header");
+                this.getCellStyle(CellType.HEADER, column.getAlias() + "_header");
             }
         }
 
         /**
          * Получить стиль для ячейки excel'я.
          *
-         * @param value тип ячейки (дата, число, строка, ...)
-         * @param alias алиас столбца
+         * @param cellType тип ячейки (дата, число, строка, ...)
+         * @param columnAlias алиас столбца
          */
-        public CellStyle createCellStyle(CellType value, String alias) {
-            return createCellStyle(value, alias, null);
+        public CellStyle getCellStyle(CellType cellType, String columnAlias) {
+            return getCellStyle(cellType, columnAlias, null);
         }
 
         /**
          * Получить стиль для ячейки excel'я.
          *
-         * @param value тип ячейки (дата, число, строка, ...)
-         * @param alias алиас столбца
-         * @param subKey дополнительное значение для ключа (что бы получить стили дельт)
+         * @param cellType тип ячейки (дата, число, строка, ...)
+         * @param columnAlias алиас столбца
+         * @param formStyle стиль ячейки
          */
-        public CellStyle createCellStyle(CellType value, String alias, String subKey){
-            String key = alias + (subKey != null && !subKey.isEmpty() ? subKey : "");
-            if (cellStyleMap.containsKey(key))
-                return cellStyleMap.get(key);
+        public CellStyle getCellStyle(CellType cellType, String columnAlias, FormStyle formStyle){
+            String cacheKey = columnAlias + (formStyle != null ? formStyle.toString() : "");
+            if (cellStyleMap.containsKey(cacheKey)) {
+				return cellStyleMap.get(cacheKey);
+			}
             DataFormat dataFormat = workBook.createDataFormat();
             Column currColumn;
-            CellStyle style = workBook.createCellStyle();
-            style.setBorderRight(CellStyle.BORDER_THIN);
-            style.setBorderLeft(CellStyle.BORDER_THIN);
-            style.setBorderBottom(CellStyle.BORDER_THIN);
-            style.setBorderTop(CellStyle.BORDER_THIN);
+            CellStyle cellStyle = workBook.createCellStyle();
+            cellStyle.setBorderRight(CellStyle.BORDER_THIN);
+            cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+            cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
+            cellStyle.setBorderTop(CellStyle.BORDER_THIN);
 
-            switch (value){
+            switch (cellType){
                 case DATE:
-                    style.setAlignment(CellStyle.ALIGN_CENTER);
-                    currColumn = formTemplate.getColumn(alias);
+                    cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+                    currColumn = formTemplate.getColumn(columnAlias);
                     if(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat().isEmpty()){
-                        style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()));
+                        cellStyle.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()));
                     } else{
-                        style.setDataFormat(dataFormat.getFormat(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat()));
+                        cellStyle.setDataFormat(dataFormat.getFormat(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat()));
                     }
                     break;
                 case BIGDECIMAL:
-                    currColumn = formTemplate.getColumn(alias);
-                    style.setAlignment(CellStyle.ALIGN_RIGHT);
-                    style.setWrapText(true);
-                    style.setAlignment(CellStyle.ALIGN_RIGHT);
-                    style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.getPrecision(((NumericColumn) currColumn).getPrecision())));
+                    currColumn = formTemplate.getColumn(columnAlias);
+                    cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+                    cellStyle.setWrapText(true);
+                    cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+                    cellStyle.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.getPrecision(((NumericColumn) currColumn).getPrecision())));
                     break;
                 case NUMERATION:
-                    style.setAlignment(CellStyle.ALIGN_RIGHT);
-                    style.setWrapText(true);
-                    style.setAlignment(CellStyle.ALIGN_RIGHT);
+                    cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+                    cellStyle.setWrapText(true);
+                    cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
                     break;
                 case STRING:
-                    style.setAlignment(CellStyle.ALIGN_LEFT);
-                    style.setWrapText(true);
+                    cellStyle.setAlignment(CellStyle.ALIGN_LEFT);
+                    cellStyle.setWrapText(true);
                     break;
                 case EMPTY:
-                    style.setAlignment(CellStyle.ALIGN_CENTER);
+                    cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
                     break;
-                case DEFAULT:
-                    style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.index);
-                    style.setFillBackgroundColor(IndexedColors.GREY_25_PERCENT.index);
-                    style.setFillPattern(CellStyle.SOLID_FOREGROUND);
-                    style.setAlignment(CellStyle.ALIGN_CENTER);
-                    style.setWrapText(true);
-                    style.setBorderBottom(CellStyle.BORDER_THICK);
-                    style.setBorderTop(CellStyle.BORDER_THICK);
-                    style.setBorderRight(CellStyle.BORDER_THICK);
-                    style.setBorderLeft(CellStyle.BORDER_THICK);
+                case HEADER: // для заголовков
+                    cellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.index);
+                    cellStyle.setFillBackgroundColor(IndexedColors.GREY_25_PERCENT.index);
+                    cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+                    cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+                    cellStyle.setWrapText(true);
+                    cellStyle.setBorderBottom(CellStyle.BORDER_THICK);
+                    cellStyle.setBorderTop(CellStyle.BORDER_THICK);
+                    cellStyle.setBorderRight(CellStyle.BORDER_THICK);
+                    cellStyle.setBorderLeft(CellStyle.BORDER_THICK);
                     break;
             }
-
-            cellStyleMap.put(key, style);
-            return style;
+			if (formStyle != null) {
+				// фон
+				XSSFColor bgColor = getColor(formStyle.getBackColor());
+				if (bgColor != null) {
+					((XSSFCellStyle) cellStyle).setFillForegroundColor(bgColor);
+					((XSSFCellStyle) cellStyle).setFillBackgroundColor(bgColor);
+					// сплошная заливка фона
+					cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				}
+				// шрифт
+				Font font = getFont(formStyle);
+				cellStyle.setFont(font);
+			}
+            cellStyleMap.put(cacheKey, cellStyle);
+            return cellStyle;
         }
     }
 
@@ -416,9 +452,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected void createTableHeaders(){
-        //Поскольку имеется шаблон с выставленными алиасами, то чтобы не записать данные в ячейку с алиасом
-        //делаем проверку на то, что сумма начала записи таблицы и кол-ва строк не превышает номер строки с алиасом
-        //и если превышает,то сдвигаем
+        // Поскольку имеется шаблон с выставленными алиасами, то чтобы не записать данные в ячейку с алиасом
+        // делаем проверку на то, что сумма начала записи таблицы и кол-ва строк не превышает номер строки с алиасом
+        // и если превышает, то сдвигаем
         AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
         Row r = sheet.getRow(ar.getFirstCell().getRow());
         if (rowNumber + headers.size() >= r.getRowNum()){
@@ -437,7 +473,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 }
                 HeaderCell headerCell = headerCellDataRow.getCell(column.getAlias());
                 Cell workBookcell = mergedDataCells(headerCellDataRow.getCell(column.getAlias()), row, i, true);
-                workBookcell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DEFAULT, column.getAlias() + "_header"));
+                workBookcell.setCellStyle(cellStyleBuilder.getCellStyle(CellType.HEADER, column.getAlias() + "_header"));
                 workBookcell.setCellValue(String.valueOf(headerCell.getValue()));
                 if(headerCell.getColSpan() > 1){
                     i = i + headerCell.getColSpan() - 1;
@@ -452,32 +488,35 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     protected void createDataForTable() {
         rowNumber = (rowNumber > sheet.getLastRowNum() ? sheet.getLastRowNum() : rowNumber);//if we have empty strings
         sheet.shiftRows(rowNumber, sheet.getLastRowNum(), dataRows.size() + 2);
+		// перебираем строки
         for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow : dataRows) {
             Row row = sheet.getRow(rowNumber) != null ? sheet.getRow(rowNumber++) : sheet.createRow(rowNumber++);
-
+			// перебираем столбцы
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
                 if ((column.isChecking() && !isShowChecked)) {
                     continue;
                 }
-                if (column.getWidth() == 0 && column.getAlias() != null) {
+				String columnAlias = column.getAlias();
+				FormStyle formStyle = dataRow.getCell(columnAlias).getStyle();
+                if (column.getWidth() == 0 && columnAlias != null) {
                     if (columns.size() == i + 1)
                         continue;
-                    Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, i, false);
-                    CellStyle cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.STRING, column.getAlias());
+                    Cell cell = mergedDataCells(dataRow.getCell(columnAlias), row, i, false);
+                    CellStyle cellStyle = getCellStyle(formStyle, CellType.STRING, columnAlias);
                     cell.setCellStyle(cellStyle);
-                    cell.setCellValue((String) dataRow.get(column.getAlias()));
-                    if (dataRow.getCell(column.getAlias()).getColSpan() > 1)
-                        i = i + dataRow.getCell(column.getAlias()).getColSpan() - 1;
+                    cell.setCellValue((String) dataRow.get(columnAlias));
+                    if (dataRow.getCell(columnAlias).getColSpan() > 1)
+                        i = i + dataRow.getCell(columnAlias).getColSpan() - 1;
                     continue;
                 }
-                Object obj = dataRow.get(column.getAlias());
-                Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, i, false);
+                Object obj = dataRow.get(columnAlias);
+                Cell cell = mergedDataCells(dataRow.getCell(columnAlias), row, i, false);
                 CellStyle cellStyle;
-                if (!dataRow.getCell(column.getAlias()).isForceValue()) {
+                if (!dataRow.getCell(columnAlias).isForceValue()) {
                     if (ColumnType.STRING.equals(column.getColumnType())) {
                         String str = (String) obj;
-                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.STRING, column.getAlias());
+                        cellStyle = getCellStyle(formStyle, CellType.STRING, columnAlias);
                         cell.setCellStyle(cellStyle);
                         cell.setCellValue(str);
                     } else if (ColumnType.DATE.equals(column.getColumnType())) {
@@ -486,11 +525,11 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                             cell.setCellValue(date);
                         else
                             cell.setCellValue("");
-                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.DATE, column.getAlias());
+                        cellStyle = getCellStyle(formStyle, CellType.DATE, columnAlias);
                         cell.setCellStyle(cellStyle);
                     } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
                         BigDecimal bd = (BigDecimal) obj;
-                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.BIGDECIMAL, column.getAlias());
+                        cellStyle = getCellStyle(formStyle, CellType.BIGDECIMAL, columnAlias);
                         cell.setCellStyle(cellStyle);
                         cell.setCellType(Cell.CELL_TYPE_NUMERIC);
 
@@ -499,27 +538,27 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                         }
                     } else if (ColumnType.AUTO.equals(column.getColumnType())) {
                         Long bd = (Long) obj;
-                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.NUMERATION, column.getAlias());
+                        cellStyle = getCellStyle(formStyle, CellType.NUMERATION, columnAlias);
                         cell.setCellStyle(cellStyle);
 
                         cell.setCellValue(bd != null ? String.valueOf(bd) : "");
                     } else if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
-                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.STRING, column.getAlias());
+                        cellStyle = getCellStyle(formStyle, CellType.STRING, columnAlias);
                         cell.setCellStyle(cellStyle);
-                        cell.setCellValue(dataRow.getCell(column.getAlias()).getRefBookDereference());
+                        cell.setCellValue(dataRow.getCell(columnAlias).getRefBookDereference());
                     } else if (obj == null) {
-                        cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.EMPTY, column.getAlias());
+                        cellStyle = getCellStyle(formStyle, CellType.EMPTY, columnAlias);
                         cell.setCellStyle(cellStyle);
                         cell.setCellValue("");
                     }
                 } else {
                     String str = (String) obj;
-                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.STRING, column.getAlias());
+                    cellStyle = getCellStyle(formStyle, CellType.STRING, columnAlias);
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue(str);
                 }
-                if (dataRow.getCell(column.getAlias()).getColSpan() > 1)
-                    i = i + dataRow.getCell(column.getAlias()).getColSpan() - 1;
+                if (dataRow.getCell(columnAlias).getColSpan() > 1)
+                    i = i + dataRow.getCell(columnAlias).getColSpan() - 1;
             }
         }
     }
@@ -527,32 +566,13 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     /**
      * Получить стиль для ячейки excel'я по типу и стилю ячейки формы.
      *
-     * @param dataRowCell ячека формы
-     * @param type тип ячейки
-     * @param alias стиль ячейки
-     * @return сти
+     * @param formStyle стиль ячейки формы
+     * @param cellType тип ячейки
+     * @param columnAlias алиас столбца
+     * @return
      */
-    private CellStyle getCellStyle(com.aplana.sbrf.taxaccounting.model.Cell dataRowCell, CellType type, String alias) {
-        if (FormStyle.DEFAULT_STYLE.equals(dataRowCell.getStyle())) {
-            return cellStyleBuilder.createCellStyle(type, alias);
-        }
-
-        XSSFCellStyle cellStyle = (XSSFCellStyle) cellStyleBuilder.createCellStyle(type, alias, dataRowCell.getStyleAlias());
-
-        // фон
-        XSSFColor bgColor = getColor(dataRowCell.getStyle().getBackColor());
-        if (bgColor != null) {
-            cellStyle.setFillForegroundColor(bgColor);
-            cellStyle.setFillBackgroundColor(bgColor);
-        }
-
-        // шрифт
-        Font font = getFont(dataRowCell.getStyleAlias(), dataRowCell);
-        cellStyle.setFont(font);
-
-        cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-
-        return cellStyle;
+    private CellStyle getCellStyle(FormStyle formStyle, CellType cellType, String columnAlias) {
+        return cellStyleBuilder.getCellStyle(cellType, columnAlias, formStyle);
     }
 
     /** Получить цвет по rgb. */
@@ -565,23 +585,22 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     }
 
     /** Получить шрифт по алиасу стиля. */
-    private XSSFFont getFont(String alias, com.aplana.sbrf.taxaccounting.model.Cell cell) {
-        if (!fontMap.containsKey(alias)) {
+    private XSSFFont getFont(FormStyle formStyle) {
+		String cacheKey = formStyle.toString();
+        if (!fontMap.containsKey(cacheKey)) {
             XSSFFont font = (XSSFFont) workBook.createFont();
             // жирность
-            font.setBold(cell.getStyle().isBold());
-
+            font.setBold(formStyle.isBold());
             // курсив
-            font.setItalic(cell.getStyle().isItalic());
-
+            font.setItalic(formStyle.isItalic());
             // цвет шрифта
-            XSSFColor color = getColor(cell.getStyle().getFontColor());
+            XSSFColor color = getColor(formStyle.getFontColor());
             if (color != null) {
                 font.setColor(color);
             }
-            fontMap.put(alias, font);
+            fontMap.put(cacheKey, font);
         }
-        return fontMap.get(alias);
+        return fontMap.get(cacheKey);
     }
 
     @Override
@@ -674,7 +693,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     /*
     * Merge rows with data. Depend on fields from com.aplana.sbrf.taxaccounting.model.Cell rowSpan and colSpan.
     */
-    private Cell mergedDataCells(AbstractCell cell,Row currRow, int currColumn, boolean isHeader){
+    private Cell mergedDataCells(AbstractCell cell, Row currRow, int currColumn, boolean isHeader){
         Cell currCell;
         if(cell != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)){
             if(currColumn + cell.getColSpan() > columns.size()){

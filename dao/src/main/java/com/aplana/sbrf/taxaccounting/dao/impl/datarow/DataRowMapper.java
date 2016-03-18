@@ -28,16 +28,11 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 	private static final Log LOG = LogFactory.getLog(DataRowMapper.class);
 
-	private static final char STYLE_CODE = 's';
 	private static final char COLSPAN_CODE = 'c';
 	private static final char ROWSPAN_CODE = 'r';
 	private static final char EDITABLE_CODE = 'e';
 
 	private static final String COLUMN_PREFIX = "c";
-	private static final char COLOR_SEPARATOR = '-';
-	private static final char STYLE_BOLD = 'b';
-	private static final char STYLE_ITALIC = 'i';
-	private static final String STYLE_PARSING_ERROR_MESSAGE = "Строка с описанием стиля \"%s\" не может быть обработана";
 	private static final char STYLE_SEPARATOR = ';';
 	private static final char DECIMAL_SEPARATOR = '.';
 	private static final char WRONG_DECIMAL_SEPARATOR = ',';
@@ -179,21 +174,20 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		// разбираем стили
 	 	if (value != null && !value.isEmpty()) {
 			String[] styles = StringUtils.split(value, STYLE_SEPARATOR);
-			for (String style : styles) {
-				char ch = style.charAt(0);
+			for (String styleString : styles) {
+				char ch = styleString.charAt(0);
 				if (ch == EDITABLE_CODE) {
 					cell.setEditable(true);
-					if (style.length() != 1) { // никаких цифр быть не должно после буквы "e"
+					if (styleString.length() != 1) { // никаких цифр быть не должно после буквы "e"
 						throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", value));
 					}
-				} else if (ch == STYLE_CODE) {
-					String styleString = style.substring(1);
-					if (styleString.isEmpty()) { // не может быт пустым
-						throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", value));
+				} else if (ch == FormStyle.STYLE_CODE) {
+					if (!styleCache.containsKey(styleString)) {
+						styleCache.put(styleString, FormStyle.valueOf(styleString));
 					}
-					cell.setStyle(getStyle(styleString));
+					cell.setStyle(styleCache.get(styleString));
 				} else {
-					String numStr = style.substring(1);
+					String numStr = styleString.substring(1);
 					if (numStr.isEmpty()) { // хотя бы один символ должен быть
 						throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", value));
 					}
@@ -217,20 +211,10 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @return
 	 */
 	static final String formatCellStyle(Cell cell) {
+		FormStyle formStyle = cell.getStyle();
 		StringBuilder sb = new StringBuilder();
-		FormStyle style = cell.getStyle();
-		if (style != null && !FormStyle.DEFAULT_STYLE.equals(style)) {
-			sb.append(STYLE_CODE)
-				.append(style.getFontColor().getId())
-				.append(COLOR_SEPARATOR)
-				.append(style.getBackColor().getId());
-			if (style.isItalic()) {
-				sb.append(STYLE_ITALIC);
-			}
-			if (style.isBold()) {
-				sb.append(STYLE_BOLD);
-			}
-			sb.append(STYLE_SEPARATOR);
+		if (!FormStyle.DEFAULT_STYLE.equals(formStyle)) {
+			sb.append(formStyle.toString()).append(STYLE_SEPARATOR);
 		}
 		if (cell.isEditable()) {
 			sb.append(EDITABLE_CODE).append(STYLE_SEPARATOR);
@@ -254,7 +238,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @return
 	 * @throws SQLException
 	 */
-	final Object parseCellValue(ColumnType columnType, String value) {
+	Object parseCellValue(ColumnType columnType, String value) {
 		if (value == null) {
 			return null;
 		} else {
@@ -283,66 +267,16 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	}
 
 	/**
-	 * Осуществляет разбор строки стиля, работает с кэшем стилей
-	 * @param styleString
+	 * Преобразование значения ячейки в строку
+	 * @param cell
 	 * @return
 	 */
-	static final FormStyle getStyle(String styleString) {
-		if (styleCache.containsKey(styleString)) {
-			return styleCache.get(styleString);
-		}
-		FormStyle style = new FormStyle();
-		StringBuilder fontColor = new StringBuilder();
-		StringBuilder backColor = new StringBuilder();
-		boolean fontScan = true; // флаг. true - поиск цвета шрифта, false - поиск цвета фона
-		for (int i = 0; i < styleString.length(); i++) {
-			char ch = styleString.charAt(i);
-			switch (ch) {
-				case STYLE_BOLD:
-					style.setBold(true);
-					break;
-				case STYLE_ITALIC:
-					style.setItalic(true);
-					break;
-				case COLOR_SEPARATOR:
-					if (fontColor.length() == 0) {
-						throw new IllegalArgumentException(String.format(STYLE_PARSING_ERROR_MESSAGE, styleString));
-					}
-					style.setFontColor(Color.getById(Integer.valueOf(fontColor.toString())));
-					fontScan = false;
-					break;
-				default:
-					if (fontScan) {
-						fontColor.append(ch);
-					} else {
-						backColor.append(ch);
-					}
-			}
-		}
-		if (backColor.length() == 0) {
-			throw new IllegalArgumentException(String.format(STYLE_PARSING_ERROR_MESSAGE, styleString));
-		}
-		style.setBackColor(Color.getById(Integer.valueOf(backColor.toString())));
-		// добавление в кэш
-		styleCache.put(styleString, style);
-		return style;
-	}
-
-	public String formatCellValue(Cell cell) {
-		return formatCellValue(cell.getColumn().getColumnType(), cell.getValue());
-	}
-
-	/**
-	 * Запись значения ячейки. Преобразование значения конкретного типа в строку
-	 * @param columnType
-	 * @param value
-	 * @return
-	 */
-	 final String formatCellValue(ColumnType columnType, Object value) {
+	String formatCellValue(Cell cell) {
+		Object value = cell.getValue();
 		if (value == null) {
 			return null;
 		} else {
-			switch (columnType) {
+			switch (cell.getColumn().getColumnType()) {
 				case STRING:
 					return value.toString();
 				case DATE:

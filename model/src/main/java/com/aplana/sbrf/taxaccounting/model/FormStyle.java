@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import javax.validation.Valid;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 
@@ -9,6 +10,12 @@ import java.io.Serializable;
  */
 public class FormStyle implements Serializable {
 	private static final long serialVersionUID = 7152539133796468066L;
+
+	public static final char STYLE_CODE = 's';
+	private static final char STYLE_BOLD = 'b';
+	private static final char STYLE_ITALIC = 'i';
+	private static final char COLOR_SEPARATOR = '-';
+	private static final String STYLE_PARSING_ERROR_MESSAGE = "Строка с описанием стиля \"%s\" не может быть обработана";
 
 	/**
 	 * Стиль по умолчанию
@@ -154,7 +161,7 @@ public class FormStyle implements Serializable {
 
 		if (italic != formStyle.italic) return false;
 		if (bold != formStyle.bold) return false;
-		if (alias != null ? !alias.equals(formStyle.alias) : formStyle.alias != null) return false;
+		if (alias != null ? !alias.equals(formStyle.alias) : formStyle.alias != null) return false; //todo удалить
 		if (fontColor != formStyle.fontColor) return false;
 		return backColor == formStyle.backColor;
 
@@ -168,5 +175,65 @@ public class FormStyle implements Serializable {
 		result = 31 * result + (italic ? 1 : 0);
 		result = 31 * result + (bold ? 1 : 0);
 		return result;
+	}
+
+	/**
+	 * Осуществляет разбор строки стиля, работает с кэшем стилей
+	 * @param styleString
+	 * @return
+	 */
+	public static final FormStyle valueOf(String styleString) {
+		if (styleString.length() < 4 || styleString.charAt(0) != STYLE_CODE) { // минимально возможное число символов = 4: "sN-N"
+			throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", styleString));
+		}
+		FormStyle formStyle = new FormStyle();
+		StringBuilder fontColor = new StringBuilder();
+		StringBuilder backColor = new StringBuilder();
+		boolean fontScan = true; // флаг. true - поиск цвета шрифта, false - поиск цвета фона
+		for (int i = 1; i < styleString.length(); i++) {
+			char ch = styleString.charAt(i);
+			switch (ch) {
+				case STYLE_BOLD:
+					formStyle.setBold(true);
+					break;
+				case STYLE_ITALIC:
+					formStyle.setItalic(true);
+					break;
+				case COLOR_SEPARATOR:
+					if (fontColor.length() == 0) {
+						throw new IllegalArgumentException(String.format(STYLE_PARSING_ERROR_MESSAGE, styleString));
+					}
+					formStyle.setFontColor(Color.getById(Integer.valueOf(fontColor.toString())));
+					fontScan = false;
+					break;
+				default:
+					if (fontScan) {
+						fontColor.append(ch);
+					} else {
+						backColor.append(ch);
+					}
+			}
+		}
+		if (backColor.length() == 0) {
+			throw new IllegalArgumentException(String.format(STYLE_PARSING_ERROR_MESSAGE, styleString));
+		}
+		formStyle.setBackColor(Color.getById(Integer.valueOf(backColor.toString())));
+		return formStyle;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(STYLE_CODE)
+				.append(getFontColor().getId())
+				.append(COLOR_SEPARATOR)
+				.append(getBackColor().getId());
+		if (isItalic()) {
+			sb.append(STYLE_ITALIC);
+		}
+		if (isBold()) {
+			sb.append(STYLE_BOLD);
+		}
+		return sb.toString();
 	}
 }
