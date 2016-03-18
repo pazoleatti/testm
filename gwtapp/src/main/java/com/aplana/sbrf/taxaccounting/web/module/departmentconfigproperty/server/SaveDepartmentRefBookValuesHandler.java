@@ -64,11 +64,11 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
 
         /** Проверка существования справочных атрибутов */
-        //checkReferenceValues(slaveRefBook, action.getRows(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
+        /*checkReferenceValues(slaveRefBook, action.getRows(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
         if (logger.getMainMsg() != null) {
             result.setUuid(logEntryService.save(logger.getEntries()));
             result.setErrorMsg(logger.getMainMsg());
-        }
+        }*/
 
         /** Специфичные проверки для настроек подразделений */
         Pattern innPattern = Pattern.compile(RefBookUtils.INN_JUR_PATTERN);
@@ -156,6 +156,9 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
             result.setHasFatalError(true);
             result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.COMMON_ERROR);
             logger.error(e.getMessage());
+        }
+        if (logger.getMainMsg() != null) {
+            result.setErrorMsg(logger.getMainMsg());
         }
 
         String departmentName = departmentService.getDepartment(action.getDepartmentId()).getName();

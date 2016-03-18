@@ -152,11 +152,11 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
             Logger logger = new Logger();
             /** Проверка существования справочных атрибутов */
-            //checkReferenceValues(provider, refBook, paramsMap, period.getCalendarStartDate(), period.getEndDate(), logger);
+            /*checkReferenceValues(provider, refBook, paramsMap, period.getCalendarStartDate(), period.getEndDate(), logger);
             if (logger.getMainMsg() != null) {
                 result.setUuid(logEntryService.save(logger.getEntries()));
                 result.setErrorMsg(logger.getMainMsg());
-            }
+            }*/
 
             logger.setTaUserInfo(securityService.currentUserInfo());
             RefBookRecord record = new RefBookRecord();
@@ -228,6 +228,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             } else {
                 provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), null, paramsMap);
                 recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
+            }
+            if (logger.getMainMsg() != null) {
+                result.setErrorMsg(logger.getMainMsg());
             }
 
             String departmentName = departmentService.getDepartment(action.getDepartment()).getName();
