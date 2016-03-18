@@ -326,7 +326,7 @@ void logicCheck() {
         // всего три группы колонок
         (1..3).each { colGroupNum ->
             if (getSumGroupCol(row, colGroupNum) > roundValue(row["col_041_${colGroupNum}"] ?: 0)) {
-                def key = (messageMap.keySet())[colGroupNum - 1]
+                String key = (messageMap.keySet().asList())[colGroupNum - 1]
                 logger.warn(errorMsg1, key, messageMap[key])
             }
         }
@@ -338,7 +338,7 @@ void logicCheck() {
             def notEmpty042_043 = isNotEmpty042_043(row, colGroupNum)
             def filled040_041 = isFilled040_041(row, colGroupNum)
             def empty040_041 = isEmpty040_041(row, colGroupNum)
-            def key = (messageMap.keySet())[colGroupNum - 1]
+            def key = (messageMap.keySet().asList())[colGroupNum - 1]
             if (notEmpty042_043 && !filled040_041) {
                 logger.error(errorMsg + "Если заполнена хотя бы одна из граф %s («042 (Код вычета)», «043 (Сумма вычета)»), то должна быть заполнена графа %s («040 (Код дохода)», «041 (Сумма дохода)»)!", key, messageMap[key])
             }
