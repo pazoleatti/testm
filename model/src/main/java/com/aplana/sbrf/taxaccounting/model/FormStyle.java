@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import javax.validation.Valid;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 
@@ -15,7 +14,7 @@ public class FormStyle implements Serializable {
 	private static final char STYLE_BOLD = 'b';
 	private static final char STYLE_ITALIC = 'i';
 	private static final char COLOR_SEPARATOR = '-';
-	private static final String STYLE_PARSING_ERROR_MESSAGE = "Строка с описанием стиля \"%s\" не может быть обработана";
+	private static final String STYLE_PARSING_ERROR_MESSAGE = "Ошибка чтения стилей ячейки ";
 
 	/**
 	 * Стиль по умолчанию
@@ -184,7 +183,7 @@ public class FormStyle implements Serializable {
 	 */
 	public static final FormStyle valueOf(String styleString) {
 		if (styleString.length() < 4 || styleString.charAt(0) != STYLE_CODE) { // минимально возможное число символов = 4: "sN-N"
-			throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", styleString));
+			throw new IllegalArgumentException(STYLE_PARSING_ERROR_MESSAGE + '"' + styleString + '"');
 		}
 		FormStyle formStyle = new FormStyle();
 		StringBuilder fontColor = new StringBuilder();
@@ -201,7 +200,7 @@ public class FormStyle implements Serializable {
 					break;
 				case COLOR_SEPARATOR:
 					if (fontColor.length() == 0) {
-						throw new IllegalArgumentException(String.format(STYLE_PARSING_ERROR_MESSAGE, styleString));
+						throw new IllegalArgumentException(STYLE_PARSING_ERROR_MESSAGE + '"' + styleString + '"');
 					}
 					formStyle.setFontColor(Color.getById(Integer.valueOf(fontColor.toString())));
 					fontScan = false;
@@ -215,7 +214,7 @@ public class FormStyle implements Serializable {
 			}
 		}
 		if (backColor.length() == 0) {
-			throw new IllegalArgumentException(String.format(STYLE_PARSING_ERROR_MESSAGE, styleString));
+			throw new IllegalArgumentException(STYLE_PARSING_ERROR_MESSAGE + '"' + styleString + '"');
 		}
 		formStyle.setBackColor(Color.getById(Integer.valueOf(backColor.toString())));
 		return formStyle;

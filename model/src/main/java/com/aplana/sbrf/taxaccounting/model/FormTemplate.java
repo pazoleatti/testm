@@ -291,6 +291,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	 * @throws IllegalArgumentException
 	 *             если
 	 */
+	@Deprecated // планируется удалить стили из макетов
 	public FormStyle getStyle(String alias) {
 		if (alias == null) {
 			throw new IllegalArgumentException("Style alias cannot be null");
