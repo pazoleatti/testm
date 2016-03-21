@@ -132,9 +132,12 @@ def allColumns = ['number', 'fix', 'issuer', 'regNumber', 'tradeNumber', 'curren
 def editableColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current', 'cost', 'signSecurity',
                        'marketQuotation', 'rubCourse', 'costOnMarketQuotation', 'reserveCalcValue']
 
-// Группируемые атрибуты (графа 2, 3, 4)
+// Группируемые атрибуты (графа 2, 3)
 @Field
-def groupColumns = ['issuer', 'regNumber', 'tradeNumber']
+def groupColumns = ['issuer', 'regNumber']
+
+//@Field сортировка совпадает с порядком граф
+//def sortColumns = ['issuer', 'regNumber', 'tradeNumber']
 
 // Проверяемые на пустые значения атрибуты (графа 1..5, 8, 13..17)
 @Field
@@ -235,7 +238,7 @@ void calc() {
     // добавить строку "итого"
     dataRows.add(getCalcTotalRow(dataRows))
 
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 def logicCheck() {

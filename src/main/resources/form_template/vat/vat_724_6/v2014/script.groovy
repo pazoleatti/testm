@@ -239,11 +239,12 @@ void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
+    def columns = sortColumns + (allColumns - sortColumns)
     boolean isGroups = dataRows.find { it.getAlias() != null && it.getAlias().startsWith("head_") } != null
     if (!isGroups) {
         def totalRow = dataRows.find { it.getAlias() != null && it.getAlias().equals('total')}
         dataRows.remove(totalRow)
-        sortRows(dataRows, sortColumns)
+        sortRows(dataRows, columns)
         dataRows.add(totalRow)
 
     } else {
@@ -272,7 +273,7 @@ void sortFormDataRows(def saveInDB = true) {
                 // Массовое разыменование строк НФ
                 def columnList = headRow.keySet().collect { headRow.getCell(it).getColumn() }
                 refBookService.dataRowsDereference(logger, rows, columnList)
-                sortRows(rows, sortColumns)
+                sortRows(rows, columns)
             } else {
                 logger.warn("Ошибка при сортировке. Нарушена структура налоговой формы. Отсутствуют строки заголовоков/итогов по подразделениям.")
             }

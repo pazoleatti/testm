@@ -355,7 +355,7 @@ void sortFormDataRows(def saveInDB = true) {
         def columnList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
         refBookService.dataRowsDereference(logger, sectionsRows, columnList)
 
-        sortRows(sectionsRows, sortColumns)
+        sortRows(sectionsRows, sortColumns + (allColumns - sortColumns))
     }
 
     if (saveInDB) {

@@ -133,13 +133,13 @@ def nonEmptyColumns = ['issuer', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'r
 def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
-// Сортируемые атрибуты (графа 2)
+// Сортируемые атрибуты (графа 2, 4)
 @Field
-def sortColumns = ['issuer']
+def sortColumns = ['issuer', 'tradeNumber']
 
-// Группируемые атрибуты (графа 2, 5, 10)
+// Группируемые атрибуты (графа 2)
 @Field
-def groupColumns = ['issuer', 'currency', 'signSecurity']
+def groupColumns = ['issuer']
 
 // Дата окончания отчетного периода
 @Field
@@ -203,7 +203,7 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     deleteAllAliased(dataRows)
     // отсортировать/группировать
-    sortRows(dataRows, sortColumns)
+    sortRows(dataRows, groupColumns)
     // данные предыдущего отчетного периода
     def prevDataRows = getPrevDataRows()
     def rowsMap = getTradeNumberObjectMap(prevDataRows)
@@ -239,7 +239,7 @@ void calc() {
         }
     }, groupColumns)
 
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 // Логические проверки
@@ -542,7 +542,29 @@ def getBalancePeriod() {
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (внутри групп)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    def newRows = []
+    def tempRows = []
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            if (!tempRows.isEmpty()) {
+                sortRows(tempRows, columns)
+                newRows.addAll(tempRows)
+                tempRows = []
+            }
+            newRows.add(row)
+            continue
+        }
+        tempRows.add(row)
+    }
+    if (!tempRows.isEmpty()) {
+        sortRows(tempRows, columns)
+        newRows.addAll(tempRows)
+    }
+    dataRowHelper.setAllCached(newRows)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {

@@ -92,6 +92,9 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
+@Field
+def allColumns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', '']
+
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'accountingCurrency']
@@ -106,9 +109,12 @@ def nonEmptyColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyCode', '
 @Field
 def totalColumns = ['taxAccountingRuble', 'ruble']
 
-// графа 4
+// графа 2
 @Field
-def groupColumns = ['code']
+def groupColumns = ['kny']
+
+@Field
+def sortColumns = ['kny', 'code', 'date']
 
 // дата начала периода
 @Field
@@ -150,11 +156,8 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRows.sort { getKnu(it.code) }
-
-        dataRows.eachWithIndex { row, index ->
-            row.setIndex(index + 1)
-        }
+        refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
+        sortRows(dataRows, groupColumns)
 
         if (!isBalancePeriod() && formDataEvent != FormDataEvent.IMPORT) {
             for (row in dataRows) {
@@ -175,7 +178,7 @@ void calc() {
 
     dataRows.add(getTotalRow(dataRows))
 
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 def BigDecimal calc8(DataRow row) {
@@ -541,6 +544,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
         if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', pure(rowCells[2]), reportPeriodEndDate, fileRowIndex, 2, logger, false)) {
             newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            newRow.getCell('kny').setRefBookDereference(pure(rowCells[2]))
         }
         // графа 5
         newRow.docNumber = pure(rowCells[5])
@@ -567,7 +571,29 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), dataRows.find { it.getAlias() == 'total' }, true)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (внутри групп)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    def newRows = []
+    def tempRows = []
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            if (!tempRows.isEmpty()) {
+                sortRows(tempRows, columns)
+                newRows.addAll(tempRows)
+                tempRows = []
+            }
+            newRows.add(row)
+            continue
+        }
+        tempRows.add(row)
+    }
+    if (!tempRows.isEmpty()) {
+        sortRows(tempRows, columns)
+        newRows.addAll(tempRows)
+    }
+    dataRowHelper.setAllCached(newRows)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
