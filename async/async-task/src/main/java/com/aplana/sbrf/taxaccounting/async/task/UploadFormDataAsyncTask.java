@@ -75,7 +75,7 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
 
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         BlobData blobData = blobDataService.get(uuid);
-        logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
+        logger.info("Загрузка данных из файла: \"%s\"", blobData.getName());
         //Парсит загруженный в фаловое хранилище xls-файл
         formDataService.importFormData(logger, userInfo,
                 formData.getId(), formData.isManual(), blobData.getInputStream(), blobData.getName(), new LockStateLogger() {
