@@ -566,16 +566,9 @@ void importTransportData() {
     def mapRows = [:]
 
     try {
-        // пропускаем заголовок
-        rowCells = reader.readNext()
-        if (isEmptyCells(rowCells)) {
-            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
-        }
-        // пропускаем пустую строку
-        rowCells = reader.readNext()
-        if (rowCells == null || !isEmptyCells(rowCells)) {
-            logger.error('Вторая строка должна быть пустой')
-        }
+        // проверить первые строки тф - заголовок и пустая строка
+        checkFirstRowsTF(reader, logger)
+
         // грузим основные данные
         while ((rowCells = reader.readNext()) != null) {
             fileRowIndex++
@@ -735,10 +728,6 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
 String pure(String cell) {
     return StringUtils.cleanString(cell).intern()
-}
-
-boolean isEmptyCells(def rowCells) {
-    return rowCells.length == 1 && rowCells[0] == ''
 }
 
 void importData() {

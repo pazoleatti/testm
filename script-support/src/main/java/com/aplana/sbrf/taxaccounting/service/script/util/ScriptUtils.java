@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.util;
 
+import au.com.bytecode.opencsv.CSVReader;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -2325,5 +2326,23 @@ public final class ScriptUtils {
             }
             return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(value);
         }
+    }
+
+    /** Проверка заголовка и второй пустой строки тф. */
+    public static void checkFirstRowsTF(CSVReader reader, Logger logger) throws IOException {
+        // заголовок
+        String[] rowCells = reader.readNext();
+        if (rowCells != null && isEmptyCells(rowCells)) {
+            logger.error("Первой строкой должен идти заголовок, а не пустая строка");
+        }
+        // пустая строка
+        rowCells = reader.readNext();
+        if (rowCells != null && !isEmptyCells(rowCells)) {
+            logger.error("Вторая строка должна быть пустой");
+        }
+    }
+
+    public static boolean isEmptyCells(String[] rowCells) {
+        return rowCells.length == 1 && "".equals(rowCells[0]);
     }
 }
