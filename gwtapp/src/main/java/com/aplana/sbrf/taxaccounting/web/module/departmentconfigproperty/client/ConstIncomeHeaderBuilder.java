@@ -84,7 +84,7 @@ public class ConstIncomeHeaderBuilder extends AbstractHeaderOrFooterBuilder impl
 
         buildHeader(tr, new TextHeader("КПП реорганизованного обособленного подразделения"), 0, 0, true);
 
-        buildHeader(tr, new TextHeader("Признак лица подписавшего документ"), 0, 0, true);
+        buildHeader(tr, new TextHeader("Признак лица, подписавшего документ"), 0, 0, true);
 
         buildHeader(tr, new TextHeader("Фамилия подписанта"), 0, 0, true);
 

@@ -98,7 +98,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                 logger.error("Поля \"Наименование документа представителя\", " +
                         "\"Наименование организации представителя\" " +
                         "должны заполняться только в том случае, если " +
-                        "поле \"Признак лица подписавшего документ\" равно значению \"2\" (представитель налогоплательщика)");
+                        "поле \"Признак лица, подписавшего документ\" равно значению \"2\" (представитель налогоплательщика)");
                 result.setHasFatalError(true);
                 result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.INCORRECT_FIELDS);
                 break;
