@@ -201,7 +201,26 @@ void logicCheck() {
         }
 
         // Проверка корректности даты совершения сделки
-        checkDatePeriodExt(logger, row, 'dealDoneDate', 'dealDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
+        // TODO (SBRFACCTAX-15094) заменить на checkDatePeriodExt
+        checkDatePeriodExtLocal(logger, row, 'dealDoneDate', 'dealDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
+    }
+}
+
+// TODO (SBRFACCTAX-15094) удалить
+void checkDatePeriodExtLocal(logger, row, String alias, String startAlias, Date yearStartDate, Date endDate, boolean fatal) {
+    // дата проверяемой графы
+    Date docDate = row.getCell(alias).getDateValue();
+    // дата другой графы
+    Date startDate = row.getCell(startAlias).getDateValue();
+
+    if (docDate != null && startDate != null && (docDate.before(yearStartDate) || docDate.after(endDate) || docDate.before(startDate))) {
+        logger.error(String.format("Строка %d: Дата по графе «%s» должна принимать значение из диапазона %s - %s и быть больше либо равна дате по графе «%s»!",
+                row.getIndex(),
+                getColumnName(row, alias),
+                formatDate(yearStartDate, "dd.MM.yyyy"),
+                formatDate(endDate, "dd.MM.yyyy"),
+                getColumnName(row, startAlias)
+        ));
     }
 }
 
@@ -363,7 +382,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 3
     if (map != null) {
-        formDataService.checkReferenceValue(520, values[colIndex], map.IKSR?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        def expectedValues = [ map.INN?.value, map.REG_NUM?.value, map.TAX_CODE_INCORPORATION?.value, map.SWIFT?.value, map.KIO?.value ]
+        expectedValues = expectedValues.unique().findAll{ it != null && it != '' }
+        formDataService.checkReferenceValue(values[colIndex], expectedValues, getColumnName(newRow, 'iksr'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
 
@@ -378,7 +399,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     }
     colIndex++
 
-    // графа 4.2                               `
+    // графа 4.2
     if (countryMap != null) {
         formDataService.checkReferenceValue(values[colIndex], [countryMap.CODE?.stringValue], getColumnName(newRow, 'regCountryCode'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
     }
@@ -430,8 +451,17 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 
+// TODO (SBRFACCTAX-15074) убрать
+void checkTFLocal(BufferedInputStream inputStream, String fileName) {
+    checkBeforeGetXml(inputStream, fileName);
+    if (fileName != null && !fileName.toLowerCase().endsWith(".rnu")) {
+        throw new ServiceException("Выбранный файл не соответствует формату rnu!");
+    }
+}
+
 void importTransportData() {
-    ScriptUtils.checkTF(ImportInputStream, UploadFileName)
+    // TODO (SBRFACCTAX-15074) заменить на "ScriptUtils.checkTF(ImportInputStream, UploadFileName)"
+    checkTFLocal(ImportInputStream, UploadFileName)
 
     int COLUMN_COUNT = 16
     def DEFAULT_CHARSET = "cp866"
@@ -513,8 +543,28 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         def String iksrName = getColumnName(newRow, 'iksr')
         def nameFromFile = pure(rowCells[2])
         def recordId = getTcoRecordId(nameFromFile, pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+        def map = getRefBookValue(520, recordId)
         // графа 2
         newRow.name = recordId
+        // графа 3
+        if (map != null) {
+            def expectedValues = [ map.INN?.value, map.REG_NUM?.value, map.TAX_CODE_INCORPORATION?.value, map.SWIFT?.value, map.KIO?.value ]
+            expectedValues = expectedValues.unique().findAll{ it != null && it != '' }
+            formDataService.checkReferenceValue(rowCells[3], expectedValues, getColumnName(newRow, 'iksr'), map.NAME.value, fileRowIndex, 3 + colOffset, logger, false)
+        }
+        // графа 4.1
+        def countryMap = null
+        if (map != null) {
+            countryMap = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
+            if (countryMap != null) {
+                def expectedValues = [countryMap.NAME?.stringValue, countryMap.FULLNAME?.stringValue]
+                formDataService.checkReferenceValue(rowCells[4], expectedValues, getColumnName(newRow, 'countryName'), map.NAME.value, fileRowIndex, 4 + colOffset, logger, false)
+            }
+        }
+        // графа 4.2
+        if (countryMap != null) {
+            formDataService.checkReferenceValue(rowCells[5], [countryMap.CODE?.stringValue], getColumnName(newRow, 'regCountryCode'), map.NAME.value, fileRowIndex, 5 + colOffset, logger, false)
+        }
         // графа 5
         newRow.docNumber = pure(rowCells[6])
         // графа 6
@@ -526,7 +576,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         // графа 9
         newRow.currencyCode = getRecordIdImport(15, 'CODE_2', pure(rowCells[10]), fileRowIndex, 10 + colOffset, false)
         //графа 10
-        newRow.dealCountryCode = getRecordIdImport(15, 'CODE_2', pure(rowCells[11]), fileRowIndex, 11 + colOffset, false)
+        newRow.dealCountryCode = getRecordIdImport(10, 'CODE_2', pure(rowCells[11]), fileRowIndex, 11 + colOffset, false)
         // графа 11
         newRow.income = parseNumber(pure(rowCells[12]), fileRowIndex, 12 + colOffset, logger, true)
         // графа 12

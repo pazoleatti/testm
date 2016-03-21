@@ -267,9 +267,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	}
 
 	@Override
-	public void reloadDepartmentParams() {
+	public void reloadDepartmentParams(String uuid) {
 		getUiHandlers().reloadDepartmentParams(currentDepartmentId, currentTaxType,
-				currentReportPeriodId == null ? null : currentReportPeriodId);
+				currentReportPeriodId == null ? null : currentReportPeriodId, uuid);
 	}
 
     @Override
@@ -338,7 +338,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	public void onFind(ClickEvent event) {
         if (departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty() &&
                 periodPickerPopup.getValue() != null && !periodPickerPopup.getValue().isEmpty()) {
-            reloadDepartmentParams();
+            reloadDepartmentParams(null);
         } else {
             Dialog.errorMessage("Не заполнены обязательные поля", "Для поиска должно быть заполнено поле \"Подразделение\" и \"Период\"");
         }

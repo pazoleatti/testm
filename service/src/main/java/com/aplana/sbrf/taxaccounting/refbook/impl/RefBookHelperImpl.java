@@ -89,7 +89,7 @@ public class RefBookHelperImpl implements RefBookHelper {
                     for (Map.Entry<Date, List<Long>> ids : idsByVersionEnd.entrySet()) {
                         Date versionTo = ids.getKey();
                         List<ReferenceCheckResult> inactiveRecords = provider.getInactiveRecordsInPeriod(ids.getValue(), versionFrom, versionTo);
-                        errorCount = inactiveRecords.size();
+                        errorCount += inactiveRecords.size();
                         if (!inactiveRecords.isEmpty()) {
                             for (ReferenceCheckResult inactiveRecord : inactiveRecords) {
                                 //ищем информацию по плохим записям и формируем сообщение по каждой
@@ -97,7 +97,7 @@ public class RefBookHelperImpl implements RefBookHelper {
                                     if (inactiveRecord.getRecordId().equals(link.getReferenceValue())) {
                                         switch (inactiveRecord.getResult()) {
                                             case NOT_EXISTS: {
-                                                String msg = buildMsg("Поле \"%s\": содержит ссылку на несуществующую версию записи справочника!", link);
+                                                String msg = buildMsg("Поле \"%s\" содержит ссылку на несуществующую версию записи справочника!", link);
                                                 if (mode == CHECK_REFERENCES_MODE.REFBOOK) {
                                                     hasFatalError = true;
                                                     logger.error(msg,
@@ -105,7 +105,7 @@ public class RefBookHelperImpl implements RefBookHelper {
                                                                     link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()));
                                                 } else {
-                                                    logger.info(msg,
+                                                    logger.warn(msg,
                                                             link.getIndex() != null ? link.getIndex() :
                                                                     link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()));
@@ -113,27 +113,23 @@ public class RefBookHelperImpl implements RefBookHelper {
                                                 break;
                                             }
                                             case NOT_CROSS: {
-                                                String msg = buildMsg("Поле \"%s\" содержит ссылку на версию записи справочника, период которой (с %s по %s) не пересекается %s (с %s по %s)!", link);
+                                                String msg;
                                                 if (mode == CHECK_REFERENCES_MODE.REFBOOK) {
+                                                    msg = buildMsg("\"%s\": Период актуальности выбранного значения не пересекается с периодом актуальности версии!", link);
                                                     hasFatalError = true;
                                                     logger.error(msg,
                                                             link.getIndex() != null ? link.getIndex() :
                                                                     link.getSpecialId() != null ? link.getSpecialId() : "",
-                                                            aliases.get(link.getAttributeAlias()),
-                                                            SDF.format(inactiveRecord.getVersionFrom()),
-                                                            inactiveRecord.getVersionTo() != null ? SDF.format(inactiveRecord.getVersionTo()) : "-",
-                                                            "с периодом актуальности версии",
-                                                            SDF.format(link.getVersionFrom()),
-                                                            link.getVersionTo() != null ? SDF.format(link.getVersionTo()) : "-"
+                                                            aliases.get(link.getAttributeAlias())
                                                     );
                                                 } else {
-                                                    logger.info(msg,
+                                                    msg = buildMsg("Поле \"%s\" содержит ссылку на версию записи справочника, период которой (с %s по %s) не пересекается с отчетным периодом настроек (с %s по %s)!", link);
+                                                    logger.warn(msg,
                                                             link.getIndex() != null ? link.getIndex() :
                                                                     link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()),
                                                             SDF.format(inactiveRecord.getVersionFrom()),
                                                             inactiveRecord.getVersionTo() != null ? SDF.format(inactiveRecord.getVersionTo()) : "-",
-                                                            "с отчетным периодом настроек",
                                                             SDF.format(link.getVersionFrom()),
                                                             link.getVersionTo() != null ? SDF.format(link.getVersionTo()) : "-"
                                                     );
@@ -143,23 +139,19 @@ public class RefBookHelperImpl implements RefBookHelper {
                                             case NOT_LAST: {
                                                 String msg;
                                                 if (mode == CHECK_REFERENCES_MODE.REFBOOK) {
-                                                    msg = "\"%s\": Выбранная версия записи справочника не является последней действующей в периоде сохраняемой версии (с %s по %s)!";
-                                                    if (link.getSpecialId() != null) {
-                                                        //Если проверка выполняется для нескольких записей справочника (например при импорте справочника), то формируем специальное имя для каждой записи
-                                                        msg = "Запись \"%s\", " + msg;
-                                                    } else {
-                                                        msg = "%s" + msg;
-                                                    }
+                                                    msg = buildMsg("\"%s\": Выбранная версия записи справочника не является последней действующей в периоде сохраняемой версии (с %s по %s)!", link);
                                                     logger.warn(msg,
-                                                            link.getSpecialId() != null ? link.getSpecialId() : "",
+                                                            link.getIndex() != null ? link.getIndex() :
+                                                                    link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()),
                                                             SDF.format(versionFrom),
                                                             versionTo != null ? SDF.format(versionTo) : "-"
                                                     );
                                                 } else {
-                                                    msg = "Строка %s: Поле \"%s\" содержит ссылку на версию записи справочника, которая не является последней действующей в отчетном периоде настроек (с %s по %s)!";
+                                                    msg = buildMsg("Поле \"%s\" содержит ссылку на версию записи справочника, которая не является последней действующей в отчетном периоде настроек (с %s по %s)!", link);
                                                     logger.warn(msg,
-                                                            link.getIndex(),
+                                                            link.getIndex() != null ? link.getIndex() :
+                                                                    link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()),
                                                             SDF.format(versionFrom),
                                                             versionTo != null ? SDF.format(versionTo) : "-"
@@ -193,7 +185,7 @@ public class RefBookHelperImpl implements RefBookHelper {
 
     private String buildMsg(String msg, RefBookLinkModel link) {
         if (link.getIndex() != null) {
-            msg = "Строка %s, " + msg;
+            msg = "Строка %s: " + msg;
         } else if (link.getSpecialId() != null) {
             //Если проверка выполняется для нескольких записей справочника (например при импорте справочника), то формируем специальное имя для каждой записи
             msg = "Запись \"%s\", " + msg;

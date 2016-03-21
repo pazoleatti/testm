@@ -295,7 +295,7 @@
 
                                     <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle">
                                         <g:cell width="1%" height="22px">
-                                            <g:Label text="Признак лица подписавшего документ:" addStyleNames="{style.rightLabels}"/>
+                                            <g:Label text="Признак лица, подписавшего документ:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
                                             <r:RefBookPickerWidget ui:field="signatoryId" attributeIdInt="213"

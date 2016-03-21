@@ -379,6 +379,14 @@ public class RefBookUniversal implements RefBookDataProvider {
                     uniqueAliases.add(attribute.getAlias());
                 }
             }
+            boolean isDepartmentConfigTable = false;
+            Integer i = null;
+            if (Arrays.asList(RefBook.WithTable.INCOME.getTableRefBookId(),
+                    RefBook.WithTable.PROPERTY.getTableRefBookId(),
+                    RefBook.WithTable.TRANSPORT.getTableRefBookId()).contains(refBook.getId())) {
+                isDepartmentConfigTable = true;
+                i = 1;
+            }
             //Группируем ссылки по провайдерам
             for (RefBookRecord record : records) {
                 Map<String, RefBookValue> values = record.getValues();
@@ -423,11 +431,19 @@ public class RefBookUniversal implements RefBookDataProvider {
                                 }
                             }
                         }
-                        references.get(provider).add(new RefBookLinkModel(null, attribute.getAlias(), id, specialId != null ? specialId.toString() : null, versionFrom, record.getVersionTo()));
+                        references.get(provider).add(new RefBookLinkModel(i, attribute.getAlias(), id, specialId != null ? specialId.toString() : null, versionFrom, record.getVersionTo()));
                     }
                 }
+                if (isDepartmentConfigTable) i++;
             }
-            refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.REFBOOK, logger);
+            if (Arrays.asList(RefBook.WithTable.INCOME.getRefBookId(), RefBook.WithTable.INCOME.getTableRefBookId(),
+                    RefBook.WithTable.PROPERTY.getRefBookId(), RefBook.WithTable.PROPERTY.getTableRefBookId(),
+                    RefBook.WithTable.TRANSPORT.getRefBookId(), RefBook.WithTable.TRANSPORT.getTableRefBookId(),
+                    RefBook.DEPARTMENT_CONFIG_DEAL, RefBook.DEPARTMENT_CONFIG_VAT).contains(refBook.getId())) {
+                refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
+            } else {
+                refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.REFBOOK, logger);
+            }
         }
     }
 

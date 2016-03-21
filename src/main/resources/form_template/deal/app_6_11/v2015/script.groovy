@@ -390,7 +390,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 5
     if (map != null) {
-        formDataService.checkReferenceValue(520, values[colIndex], map.IKSR?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        def expectedValues = [ map.INN?.value, map.REG_NUM?.value, map.TAX_CODE_INCORPORATION?.value, map.SWIFT?.value, map.KIO?.value ]
+        expectedValues = expectedValues.unique().findAll{ it != null && it != '' }
+        formDataService.checkReferenceValue(values[colIndex], expectedValues, getColumnName(newRow, 'iksr'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
 
@@ -405,7 +407,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     }
     colIndex++
 
-    // графа 6.2                               `
+    // графа 6.2
     if (countryMap != null) {
         formDataService.checkReferenceValue(values[colIndex], [countryMap.CODE?.stringValue], getColumnName(newRow, 'countryCode'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
     }
@@ -549,12 +551,32 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         def String iksrName = getColumnName(newRow, 'iksr')
         def nameFromFile = pure(rowCells[3])
         def recordId = getTcoRecordId(nameFromFile, pure(rowCells[5]), iksrName, fileRowIndex, 3, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+        def map = getRefBookValue(520, recordId)
         // графа 2
         newRow.dealDate = parseDate(pure(rowCells[2]), "dd.MM.yyyy", fileRowIndex, 2 + colOffset, logger, true)
         // графа 3
         newRow.name = recordId
         // графа 4
         newRow.dealMode = getRecordIdImport(14, 'MODE', pure(rowCells[4]), fileRowIndex, 4 + colOffset, false)
+        // графа 5
+        if (map != null) {
+            def expectedValues = [ map.INN?.value, map.REG_NUM?.value, map.TAX_CODE_INCORPORATION?.value, map.SWIFT?.value, map.KIO?.value ]
+            expectedValues = expectedValues.unique().findAll{ it != null && it != '' }
+            formDataService.checkReferenceValue(pure(rowCells[5]), expectedValues, getColumnName(newRow, 'iksr'), map.NAME.value, fileRowIndex, 5 + colOffset, logger, false)
+        }
+        def countryMap
+        // графа 6.1
+        if (map != null) {
+            countryMap = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
+            if (countryMap != null) {
+                def expectedValues = [countryMap.NAME?.stringValue, countryMap.FULLNAME?.stringValue]
+                formDataService.checkReferenceValue(pure(rowCells[6]), expectedValues, getColumnName(newRow, 'countryName'), map.NAME.value, fileRowIndex, 6 + colOffset, logger, false)
+            }
+        }
+        // графа 6.2
+        if (countryMap != null) {
+            formDataService.checkReferenceValue(pure(rowCells[7]), [countryMap.CODE?.stringValue], getColumnName(newRow, 'countryCode'), map.NAME.value, fileRowIndex, 7 + colOffset, logger, false)
+        }
         // графа 9
         newRow.currencyCode = getRecordIdImport(15, 'CODE', pure(rowCells[9]), fileRowIndex, 9 + colOffset, false)
         // графа 10
