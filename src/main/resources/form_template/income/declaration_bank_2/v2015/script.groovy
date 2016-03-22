@@ -1699,13 +1699,13 @@ void generateXML() {
                     def nalNeUderzh = BigDecimal.ZERO
 
                     dataRows.each { def row ->
-                        sumDohObsh.add(row.income ?: BigDecimal.ZERO)
-                        sumVichObsh.add(row.deduction ?: BigDecimal.ZERO)
-                        nalIschislApp2.add(row.calculated ?: BigDecimal.ZERO)
-                        nalUderzh.add(row.withheld ?: BigDecimal.ZERO)
-                        nalUplach.add(row.listed ?: BigDecimal.ZERO)
-                        nalUderzhLish.add(row.withheldAgent ?: BigDecimal.ZERO)
-                        nalNeUderzh.add(row.nonWithheldAgent ?: BigDecimal.ZERO)
+                        sumDohObsh = sumDohObsh.add(row.income ?: BigDecimal.ZERO)
+                        sumVichObsh = sumVichObsh.add(row.deduction ?: BigDecimal.ZERO)
+                        nalIschislApp2 = nalIschislApp2.add(row.calculated ?: BigDecimal.ZERO)
+                        nalUderzh = nalUderzh.add(row.withheld ?: BigDecimal.ZERO)
+                        nalUplach = nalUplach.add(row.listed ?: BigDecimal.ZERO)
+                        nalUderzhLish = nalUderzhLish.add(row.withheldAgent ?: BigDecimal.ZERO)
+                        nalNeUderzh = nalNeUderzh.add(row.nonWithheldAgent ?: BigDecimal.ZERO)
                     }
                     nalBazaApp2 = sumDohObsh - sumVichObsh
 
