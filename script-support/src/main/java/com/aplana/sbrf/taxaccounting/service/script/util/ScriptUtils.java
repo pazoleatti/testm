@@ -91,6 +91,8 @@ public final class ScriptUtils {
             "Количество граф менее ожидаемого!";
     public static final String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
             "Количество строк в заголовке менее ожидаемого!";
+    public static final String WRONG_HEADER_START = "Не удалось распознать заголовок таблицы. " +
+            "Проверьте, что название первой графы в файле совпадает с названием первой графы в форме";
     public static final String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
     public static final String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
     public static final String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
@@ -909,6 +911,21 @@ public final class ScriptUtils {
         if (currentRowSize < referenceRowSize) {
             throw new ServiceException(WRONG_HEADER_ROW_SIZE);
         }
+    }
+
+    /**
+     * Проверка заголовка импортируемого файла на его (заголовка) существование и соответствие размерности
+     *
+     * @param headerRows   - список значений в шапке
+     * @param referenceColSize - количество ожидаемых столбцов
+     * @param referenceRowSize - количество ожидаемых строк
+     */
+    @SuppressWarnings("unused")
+    public static void checkHeaderSize(List<List<String>> headerRows, int referenceColSize, int referenceRowSize) {
+        if (headerRows.isEmpty()) {
+            throw new ServiceException(WRONG_HEADER_START);
+        }
+        checkHeaderSize(headerRows.get(headerRows.size() - 1).size(), headerRows.size(), referenceColSize, referenceRowSize);
     }
 
     /**
