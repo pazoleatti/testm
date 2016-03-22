@@ -272,7 +272,7 @@ void logicCheck() {
         } else if (row.consumptionSum && !row.incomeSum && row.priceOne != row.consumptionSum) {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
         } else if (row.consumptionSum && row.incomeSum && row.priceOne != (row.incomeSum - row.consumptionSum).abs()) {
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно модулю разности значений граф «$msgIn» и «$msgOut»!")
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разности значений граф «$msgIn» и «$msgOut» по модулю!")
         }
 
         // Проверка количества
