@@ -1861,11 +1861,11 @@ void generateXML() {
                     //Тип         Тип
                     def type = String.format("%02d", reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId))
 
+                    def groupsApp2 = [:]
                     if (dataRowsApp2) {
                         fillRecordsMap([4L, 10L, 350L, 360L, 370L])
+                        groupsApp2 = groupRows(dataRowsApp2)
                     }
-
-                    def groupsApp2 = groupRows(dataRowsApp2)
 
                     if (!isCFOApp2) {
                         generateApp2(builder, dataRowsApp2, isCFOApp2, null, dataSprav, type)
@@ -1892,8 +1892,8 @@ def groupRows (def dataRows) {
     def resultMap = [:]
     dataRows.each { row ->
         def key = groupColumns.sum { alias ->
-            row[alias] as String
-        }?.toLowerCase()?.hashCode() as String
+            String.valueOf(row[alias])
+        }?.toLowerCase()?.hashCode()?.toString()
         if (resultMap[key] == null) {
             resultMap[key] = []
         }
