@@ -48,6 +48,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	private static final List<Integer> PRECISION_LIST = new ArrayList<Integer>();
 	private static final List<Formats> DATE_FORMAT_LIST = new ArrayList<Formats>();
     private static final List<AutoNumerationColumn> AUTO_NUMERATION_LIST = new ArrayList<AutoNumerationColumn>();
+    private static int columnIndex;
 
 	static {
 		for(int i = 0; i <= NumericColumn.MAX_PRECISION; i++) {
@@ -341,7 +342,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             stringMaxLengthBox.getElement().getStyle().clearBorderColor();
         }
 
-        StringColumn column = ((StringColumn) columns.get(columnListBox.getSelectedIndex()));
+        StringColumn column = ((StringColumn) columns.get(columnIndex));
         column.setPrevLength(column.getMaxLength());
         column.setMaxLength(stringMaxLengthBox.getValue());
 	}
@@ -367,7 +368,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
     @UiHandler("refBookBox")
 	public void onRefBookBox(ValueChangeEvent<RefBook> event) {
-        Column currentColumn = columns.get(columnListBox.getSelectedIndex());
+        Column currentColumn = columns.get(columnIndex);
         if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
             ((RefBookColumn) currentColumn).setRefBookAttributeId(event.getValue().getAttributes().get(0).getId());
         } else if (ColumnType.REFERENCE.equals(currentColumn.getColumnType())) {
@@ -383,7 +384,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         if (event.getValue()==null){
             return;
         }
-        Column currentColumn = columns.get(columnListBox.getSelectedIndex());
+        Column currentColumn = columns.get(columnIndex);
         if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
             ((RefBookColumn) currentColumn).setRefBookAttributeId(event.getValue().getId());
         } else if (ColumnType.REFERENCE.equals(currentColumn.getColumnType())) {
@@ -408,7 +409,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
     @UiHandler("refBookAttrRefBox")
     public void onRefBookAttrRefBox(ValueChangeEvent<RefBookAttribute> event) {
-        Column currentColumn = columns.get(columnListBox.getSelectedIndex());
+        Column currentColumn = columns.get(columnIndex);
         if (ColumnType.REFERENCE.equals(currentColumn.getColumnType())) {
             ((ReferenceColumn) currentColumn).setRefBookAttributeId2(event.getValue().getId());
         } else if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
@@ -418,12 +419,12 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
     @UiHandler("refBookAttrFilterArea")
     public void onRefBookAttrFilterArea(KeyUpEvent event) {
-        ((FilterColumn) columns.get(columnListBox.getSelectedIndex())).setFilter(refBookAttrFilterArea.getValue());
+        ((FilterColumn) columns.get(columnIndex)).setFilter(refBookAttrFilterArea.getValue());
     }
 
     @UiHandler("refBooktAttrParentBox")
     public void onRefBooktAttrParentBox(ValueChangeEvent<Column> event) {
-        ReferenceColumn currentColumn = ((ReferenceColumn) columns.get(columnListBox.getSelectedIndex()));
+        ReferenceColumn currentColumn = ((ReferenceColumn) columns.get(columnIndex));
         RefBookColumn parentColumn = (RefBookColumn)event.getValue();
         // Обновление списка отобр. атрибутов
         RefBook parentRefBook = getUiHandlers().getRefBook(getUiHandlers().getRefBookByAttributeId(
@@ -438,7 +439,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
     @UiHandler("autoNumerationBox")
     public void onAutoNumerationBox(ValueChangeEvent<AutoNumerationColumn> event) {
-        ((AutoNumerationColumn) columns.get(columnListBox.getSelectedIndex())).setNumerationType(event.getValue().getNumerationType());
+        ((AutoNumerationColumn) columns.get(columnIndex)).setNumerationType(event.getValue().getNumerationType());
     }
 
 	@Override
@@ -682,6 +683,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	}
 
 	private void setColumnAttributeEditor(int index) {
+        columnIndex = index;
 		flush();
 		columnAttributeEditor.setValue(columns.get(index));
 	}
@@ -778,7 +780,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
     }
     
     private void setNumValueRestrictions(int unscaledValue, int scale){
-        ((NumericColumn) columns.get(columnListBox.getSelectedIndex())).setMaxLength(unscaledValue);
-        ((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setPrecision(scale);
+        ((NumericColumn) columns.get(columnIndex)).setMaxLength(unscaledValue);
+        ((NumericColumn) columns.get(columnIndex)).setPrecision(scale);
     }
 }

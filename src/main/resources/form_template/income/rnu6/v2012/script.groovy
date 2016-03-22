@@ -92,6 +92,10 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
+@Field
+def allColumns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency',
+                  'taxAccountingRuble', 'accountingCurrency', 'ruble']
+
 // Редактируемые атрибуты
 @Field
 def balanceEditableColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
@@ -110,9 +114,12 @@ def nonEmptyColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyCode', '
 @Field
 def totalColumns = ['taxAccountingRuble', 'ruble']
 
-// графа 4
+// графа 2
 @Field
-def groupColumns = ['code']
+def groupColumns = ['kny']
+
+@Field
+def sortColumns = ['kny', 'code', 'date']
 
 // дата начала периода
 @Field
@@ -167,11 +174,9 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRows.sort { getKnu(it.code) }
+        refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
+        sortRows(dataRows, groupColumns)
 
-        dataRows.eachWithIndex { row, index ->
-            row.setIndex(index + 1)
-        }
         if (!isBalancePeriod() && formDataEvent != FormDataEvent.IMPORT) {
             for (row in dataRows) {
                 row.rateOfTheBankOfRussia = calc8(row)
@@ -191,7 +196,7 @@ void calc() {
 
     dataRows.add(getTotalRow(dataRows))
 
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 def BigDecimal calc8(DataRow row) {
@@ -568,7 +573,29 @@ void importTransportData() {
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (внутри групп)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    def newRows = []
+    def tempRows = []
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            if (!tempRows.isEmpty()) {
+                sortRows(tempRows, columns)
+                newRows.addAll(tempRows)
+                tempRows = []
+            }
+            newRows.add(row)
+            continue
+        }
+        tempRows.add(row)
+    }
+    if (!tempRows.isEmpty()) {
+        sortRows(tempRows, columns)
+        newRows.addAll(tempRows)
+    }
+    dataRowHelper.setAllCached(newRows)
+
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
@@ -593,7 +620,7 @@ def getSubTotalRows(def dataRows) {
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
 def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal = false) {
-    def newRow = formData.createStoreMessagingDataRow()
+    DataRow<Cell> newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
@@ -620,6 +647,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         colIndex = 2
         if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', pure(rowCells[colIndex]), getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
             newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            newRow.getCell('kny').setRefBookDereference(pure(rowCells[2]))
         }
     }
 
@@ -979,9 +1007,6 @@ String getValuesByGroupColumn(DataRow row) {
 
 /** Получить уникальный ключ группы. */
 def getKey(def row) {
-    def key = ''
-    groupColumns.each { def alias ->
-        key = key + (row[alias] != null ? row[alias] : "").toString()
-    }
+    def key = getKnu(row.code) ?: ''
     return key.toLowerCase().hashCode()
 }

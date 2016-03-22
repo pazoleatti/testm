@@ -479,10 +479,15 @@ public final class ScriptUtils {
      * @param groupColumns
      * @return
      */
-    public static boolean isDiffRow(DataRow row, DataRow nextRow, List<String> groupColumns) {
+    public static boolean isDiffRow(DataRow<Cell> row, DataRow<Cell> nextRow, List<String> groupColumns) {
         for (String alias : groupColumns) {
-            Object v1 = row.getCell(alias).getValue();
-            Object v2 = nextRow.getCell(alias).getValue();
+            boolean isRefBook = Arrays.asList(ColumnType.REFBOOK, ColumnType.REFERENCE).contains(row.getCell(alias).getColumn().getColumnType());
+            Object v1 = isRefBook ? row.getCell(alias).getRefBookDereference() : row.getCell(alias).getValue();
+            Object v2 = isRefBook ? nextRow.getCell(alias).getRefBookDereference() : nextRow.getCell(alias).getValue();
+            if (v1 == null && v2 == null) {
+                v1 = row.getCell(alias).getValue();
+                v2 = nextRow.getCell(alias).getValue();
+            }
             if (v1 == null && v2 == null) {
                 continue;
             }

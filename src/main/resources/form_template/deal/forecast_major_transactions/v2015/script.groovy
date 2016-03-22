@@ -4,6 +4,9 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 
 /**
@@ -80,6 +83,9 @@ def refBookCache = [:]
 
 @Field
 def recordCache = [:]
+
+@Field
+def providerCache = [:]
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -289,8 +295,19 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 2
     def colIndex = 1
-    def recordId = getTcoRecordId(values[2], values[1], getColumnName(newRow, 'ikksr'), fileRowIndex, colIndex, getReportPeriodEndDate(), true, logger, refBookFactory, recordCache)
-    def map = getRefBookValue(520, recordId)
+    def ikksr = values[1]
+    def recordId = null
+    def map = null
+    if (ikksr?.contains('/')) {
+        def parts = ikksr.split(' / ')
+        def filter = "INN = '${parts[0]}' AND KPP = '${parts[1]}'"
+        map = getRefBookRecord(520L, getReportPeriodEndDate(), filter)
+        recordId = map?.record_id?.value
+    }
+    if (recordId == null){
+        recordId = getTcoRecordId(values[2], ikksr, getColumnName(newRow, 'ikksr'), fileRowIndex, colIndex, getReportPeriodEndDate(), true, logger, refBookFactory, recordCache)
+        map = getRefBookValue(520, recordId)
+    }
     newRow.ikksr = recordId
     colIndex++
 
@@ -308,4 +325,35 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+def getRefBookRecord(def refBookId, def date, def filter) {
+    String dateStr = date?.format('dd.MM.yyyy')
+    if (recordCache.containsKey(refBookId)) {
+        Long recordId = recordCache.get(refBookId).get(dateStr + filter);
+        if (recordId != null) {
+            // Нашли в кэше
+            if (refBookCache != null) {
+                return refBookCache.get(getRefBookCacheKey(refBookId, recordId));
+            } else {
+                Map<String, RefBookValue> retVal = new HashMap<String, RefBookValue>();
+                retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId));
+                return retVal;
+            }
+        }
+    } else {
+        recordCache.put(refBookId, new HashMap<String, Long>());
+    }
+    def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
+    def records = provider.getRecords(date, null, filter, null)
+    if (records.size() == 1) {
+        Map<String, RefBookValue> retVal = records[0]
+        Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+        recordCache.get(refBookId).put(dateStr + filter, recordId);
+        if (refBookCache != null) {
+            refBookCache.put(getRefBookCacheKey(refBookId, recordId), retVal);
+        }
+        return retVal
+    }
+    return null
 }

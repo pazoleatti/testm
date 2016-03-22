@@ -17,7 +17,6 @@ import groovy.transform.Field
 
 // rowNumber        - № п/п
 // dealDate         - Дата сделки (поставки)
-// dealDate         - Дата сделки (поставки)
 // name             - Наименование контрагента и ОПФ
 // dealMode         - Режим переговорных сделок
 // iksr             - ИНН/КИО контрагента
@@ -195,25 +194,15 @@ void logicCheck() {
         // 5. Проверка количества бумаг
         if (row.count != null && row.count <= 0) {
             def msg = row.getCell('count').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше нуля!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
-        // 5. Проверка цены сделки
+        // 6. Проверка цены сделки
         if (row.price != null && row.count && row.price != round((BigDecimal) (row.sum / row.count), 2)) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('sum').column.name
             def msg3 = row.getCell('count').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно отношению значений граф «$msg2» и «$msg3»!")
-        }
-
-        // 6. Проверка положительной суммы
-        if (row.currencySum && row.currencySum < 0) {
-            def msg = row.getCell('currencySum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
-        }
-        if (row.sum && row.sum < 0) {
-            def msg = row.getCell('sum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
     }
 }
@@ -543,6 +532,9 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     editableColumns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
 
     def int colOffset = 1

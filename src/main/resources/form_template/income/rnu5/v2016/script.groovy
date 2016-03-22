@@ -79,6 +79,9 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
+@Field
+def allColumns = ['code', 'number', 'name', 'sum']
+
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['number', 'sum']
@@ -86,6 +89,9 @@ def editableColumns = ['number', 'sum']
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['number', 'sum']
+
+@Field
+def sortColumns = ['code', 'number']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -140,17 +146,12 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (!dataRows.isEmpty()) {
-
         // Удаление подитогов
         deleteAllAliased(dataRows)
-
-        // сортируем по кодам
-        dataRows.sort { getKnu(it.number) }
     }
 
     dataRows.add(calcTotalRow(dataRows))
-
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 def calcTotalRow(def dataRows) {
@@ -186,23 +187,6 @@ void logicCheck() {
 
     // 5. Арифметическая проверка итогового значения по всем строкам для «Графы 5»
     checkTotalSum(dataRows, totalColumns, logger, true)
-}
-
-// Получить новую строку подитога
-def getNewRow(def alias, def sum) {
-    def newRow = formData.createDataRow()
-    newRow.setAlias('total' + alias)
-    newRow.sum = sum
-    newRow.fix = 'Итого по КНУ ' + alias
-    newRow.getCell('fix').colSpan = 4
-    ['rowNumber', 'fix', 'sum'].each {
-        newRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    return newRow
-}
-
-def String getKnu(def code) {
-    return getRefBookValue(27, code)?.CODE?.stringValue
 }
 
 /**
@@ -247,7 +231,10 @@ void consolidation() {
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (без подитогов)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    sortRows(dataRows, columns)
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {

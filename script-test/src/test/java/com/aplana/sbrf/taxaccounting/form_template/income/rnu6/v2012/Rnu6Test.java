@@ -192,7 +192,6 @@ public class Rnu6Test extends ScriptTestBase {
         int expected = 2 + 2 + 1; // в источнике 2 строки (без итогов и подитогов) + по 1 подитогу на строку + 1 итоговая строка
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();

@@ -137,8 +137,6 @@ public class App_6_11Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата договора","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата (заключения) сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена за 1 шт., руб.» должно быть равно отношению значений граф «Сумма сделки (с учетом НКД), руб.» и «Количество бумаг по сделке, шт.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Сумма сделки (с учетом НКД), в валюте расчетов» должно быть больше или равно «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Сумма сделки (с учетом НКД), руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -156,7 +154,7 @@ public class App_6_11Test extends ScriptTestBase {
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Количество бумаг по сделке, шт.» должно быть больше нуля!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Количество бумаг по сделке, шт.» должно быть больше «0»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

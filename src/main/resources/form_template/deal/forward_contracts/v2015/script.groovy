@@ -162,17 +162,19 @@ void logicCheck() {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
+        // Проверка заполнения сумм доходов и расходов
+        if (!incomeSumCell.value && !outcomeSumCell.value) {
+            rowError(logger, row, "Строка $rowNum: В одной из граф «$msgIn», «$msgOut» должно быть указано значение, отличное от «0»!")
+        }
+
         // Проверка доходов/расходов и стоимости
         def msgPrice = row.getCell('price').column.name
-        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            if ((row.price ?: 0).abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
-                rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разнице значений граф «$msgIn» и «$msgOut» по модулю!")
-        } else if (incomeSumCell.value != null) {
-            if (row.price != incomeSumCell.value)
-                rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
-        } else if (outcomeSumCell.value != null) {
-            if (row.price != outcomeSumCell.value)
-                rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
+        if (row.incomeSum && !row.outcomeSum && row.price != row.incomeSum) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
+        } else if (row.outcomeSum && !row.incomeSum && row.price != row.outcomeSum) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
+        } else if (row.outcomeSum && row.incomeSum && row.price != (row.incomeSum - row.outcomeSum).abs()) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разности значений граф «$msgIn» и «$msgOut» по модулю!")
         }
 
         // Корректность дат сделки
@@ -254,10 +256,13 @@ void calc() {
 
     for (row in dataRows) {
         // Расчет поля "Цена"
-        if (row.incomeSum != null && row.outcomeSum != null) {
+        row.price = null
+        if (row.incomeSum && !row.outcomeSum) {
+            row.price = row.incomeSum
+        } else if (row.outcomeSum && !row.incomeSum) {
+            row.price = row.outcomeSum
+        } else if (row.outcomeSum && row.incomeSum) {
             row.price = (row.incomeSum - row.outcomeSum).abs()
-        } else {
-            row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         }
         // Расчет поля "Итого"
         row.total = row.price

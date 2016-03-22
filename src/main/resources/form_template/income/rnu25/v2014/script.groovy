@@ -118,9 +118,9 @@ def editableColumns = ['regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurren
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Сортируемые атрибуты (графа 2, 3)
-@Field
-def sortColumns = ['regNumber', 'tradeNumber']
+// Сортируемые атрибуты (графа 2, 3) совпадают с порядком граф
+//@Field
+//def sortColumns = ['regNumber', 'tradeNumber']
 
 // Группируемые атрибуты (графа 2)
 @Field
@@ -176,12 +176,8 @@ void calc() {
     // удалить строку "итого" и "итого по ГРН: ..."
     deleteAllAliased(dataRows)
 
-    def isImport = (formDataEvent == FormDataEvent.IMPORT)
-
     // отсортировать/группировать
-    if (!isImport) {
-        sortRows(dataRows, sortColumns)
-    }
+    sortRows(dataRows, groupColumns)
 
     // строки предыдущего периода
     def prevDataRows = getPrevDataRows()
@@ -589,6 +585,7 @@ def loggerError(def row, def msg) {
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
+    // совпадает с порядком граф
     sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
     dataRowHelper.saveSort()
 }

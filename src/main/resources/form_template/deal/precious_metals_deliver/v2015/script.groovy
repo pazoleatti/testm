@@ -260,22 +260,19 @@ void logicCheck() {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg14» не соответствует сведениям о стране отправке и о стране доставки драгоценных металлов!")
         }
 
-        // Проверка доходов и расходов
-        if (incomeSumCell.value  == null && outcomeSumCell.value == null) {
-            rowError(logger, row, "Строка $rowNum: Графа «$msgIn» должна быть заполнена, если не заполнена графа «$msgOut»!")
+        // Проверка заполнения сумм доходов и расходов
+        if (!incomeSumCell.value && !outcomeSumCell.value) {
+            rowError(logger, row, "Строка $rowNum: В одной из граф «$msgIn», «$msgOut» должно быть указано значение, отличное от «0»!")
         }
 
         // Проверка доходов/расходов и стоимости
         def msgPrice = row.getCell('priceOne').column.name
-        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            if ((row.priceOne ?: 0).abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
-                rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разнице значений граф «$msgIn» и «$msgOut» по модулю!")
-        } else if (incomeSumCell.value != null) {
-            if (row.priceOne != incomeSumCell.value)
-                rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
-        } else if (outcomeSumCell.value != null) {
-            if (row.priceOne != outcomeSumCell.value)
-                rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
+        if (row.incomeSum && !row.consumptionSum && row.priceOne != row.incomeSum) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
+        } else if (row.consumptionSum && !row.incomeSum && row.priceOne != row.consumptionSum) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
+        } else if (row.consumptionSum && row.incomeSum && row.priceOne != (row.incomeSum - row.consumptionSum).abs()) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разности значений граф «$msgIn» и «$msgOut» по модулю!")
         }
 
         // Проверка количества
@@ -372,19 +369,17 @@ void calc() {
         // Количество
         row.count = 1
 
-        // Графы 27 и 28 из 25 и 26
-        incomeSum = row.incomeSum
-        consumptionSum = row.consumptionSum
-        if (incomeSum != null && consumptionSum == null) {
-            row.priceOne = incomeSum
-        } else if (incomeSum == null && consumptionSum != null) {
-            row.priceOne = consumptionSum
-        } else if (incomeSum != null && consumptionSum != null) {
-            row.priceOne = Math.abs(incomeSum - consumptionSum)
-        } else {
-            row.priceOne = null
+        // Цена (тариф) за единицу измерения без учета НДС, руб.
+        row.priceOne = null
+        if (row.incomeSum && !row.consumptionSum) {
+            row.priceOne = row.incomeSum
+        } else if (row.consumptionSum && !row.incomeSum) {
+            row.priceOne = row.consumptionSum
+        } else if (row.consumptionSum && row.incomeSum) {
+            row.priceOne = (row.incomeSum - row.consumptionSum).abs()
         }
 
+        // Итого стоимость без учета НДС, руб.
         row.totalNds = row.priceOne
 
         // Признак физической поставки
