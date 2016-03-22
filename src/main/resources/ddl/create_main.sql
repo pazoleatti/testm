@@ -105,7 +105,6 @@ comment on column form_template.updating is 'Отображать кнопку "
 create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table form_style (
-  id					     number(9) not null,
   alias				     varchar2(80) not null,
   form_template_id number(9) not null,
   font_color			 number(3) null,
@@ -114,7 +113,6 @@ create table form_style (
   bold				     number(1) not null
 );
 comment on table form_style is 'Стили ячеек в налоговой форме';
-comment on column form_style.id is 'Первичный ключ';
 comment on column form_style.alias is 'Алиас стиля';
 comment on column form_style.form_template_id is 'Идентификатор шаблона налоговой формы';
 comment on column form_style.font_color is 'Код цвета шрифта';

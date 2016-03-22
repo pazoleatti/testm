@@ -1,4 +1,4 @@
---! Все закомментированные ограничения актуальны, но имеют Oracle-специфику, поэтому не могут быть использованы в unit-тестах.
+--! пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ Oracle-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ unit-пїЅпїЅпїЅпїЅпїЅпїЅ.
 
 alter table form_kind add constraint form_kind_pk primary key (id);
 
@@ -37,7 +37,7 @@ alter table color add constraint color_chk_rgb_limits check ((r between 0 and 25
 alter table form_style add constraint form_style_fk_font_color foreign key(font_color) references color(id);
 alter table form_style add constraint form_style_fk_back_color foreign key(back_color) references color(id);
 
-alter table form_style add constraint form_style_pk primary key (id);
+alter table form_style add constraint form_style_pk primary key (form_template_id, alias);
 alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template(id) on delete cascade;
 alter table form_style add constraint form_style_chk_font_color check (font_color in (0,1,2,3,4,5,6,7,8,9,10,11,12,13));
 alter table form_style add constraint form_style_chk_back_color check (back_color in (0,1,2,3,4,5,6,7,8,9,10,11,12,13));
@@ -320,7 +320,6 @@ create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
 create index i_ref_book_value_string on ref_book_value(string_value);
 create index i_ref_book_oktmo_code on ref_book_oktmo(code);
-create index i_form_style_form_template_id on form_style(form_template_id);
 create index i_form_column_form_template_id on form_column(form_template_id);
 create index i_decl_data_dep_rep_per_id on declaration_data (department_report_period_id);
 create index i_ifrs_data_blob_data_id on ifrs_data(blob_data_id);
