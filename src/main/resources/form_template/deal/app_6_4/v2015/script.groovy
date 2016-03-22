@@ -508,6 +508,9 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
 
     def int colOffset = 1
 
