@@ -1131,3 +1131,11 @@ CREATE TABLE form_data_row (
 );
 CREATE SEQUENCE seq_form_data_row START WITH 10000;
 --------------------------------------------------------------------------------------------------------
+CREATE TABLE style (
+  alias				     VARCHAR2(50 CHAR) NOT NULL,
+  font_color			 NUMBER(3) NULL,
+  back_color			 NUMBER(3) NULL,
+  italic				   NUMBER(1) NOT NULL,
+  bold				     NUMBER(1) NOT NULL
+);
+--------------------------------------------------------------------------------------------------------
