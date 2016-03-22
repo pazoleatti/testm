@@ -173,7 +173,7 @@ void logicCheck() {
         } else if (row.outcomeSum && !row.incomeSum && row.price != row.outcomeSum) {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
         } else if (row.outcomeSum && row.incomeSum && row.price != (row.incomeSum - row.outcomeSum).abs()) {
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно модулю разности значений граф «$msgIn» и «$msgOut»!")
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разности значений граф «$msgIn» и «$msgOut» по модулю!")
         }
 
         // Проверка корректности стоимости сделки

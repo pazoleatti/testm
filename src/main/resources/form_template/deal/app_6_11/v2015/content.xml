@@ -151,8 +151,8 @@
         <name>Количество бумаг по сделке, шт.</name>
         <order>16</order>
         <width>10</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>25</maxLength>
+        <precision>10</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
