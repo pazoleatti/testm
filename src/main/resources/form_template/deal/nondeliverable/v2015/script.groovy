@@ -157,9 +157,9 @@ void logicCheck() {
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
 
-        // Проверка доходов и расходов
-        if (outcomeSumCell.value == null && incomeSumCell.value  == null) {
-            rowError(logger, row, "Строка $rowNum: Графа «$msgIn» должна быть заполнена, если не заполнена графа «$msgOut»!")
+        // Проверка заполнения сумм доходов и расходов
+        if (!incomeSumCell.value && !outcomeSumCell.value) {
+            rowError(logger, row, "Строка $rowNum: В одной из граф «$msgIn», «$msgOut» должно быть указано значение, отличное от «0»!")
         }
 
         // Корректность даты заключения сделки
@@ -171,15 +171,12 @@ void logicCheck() {
 
         // Проверка доходов/расходов и стоимости
         def msgPrice = row.getCell('price').column.name
-        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            if ((row.price ?: 0).abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
-                rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разнице значений граф «$msgIn» и «$msgOut» по модулю!")
-        } else if (incomeSumCell.value != null) {
-            if (row.price != incomeSumCell.value)
-                rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
-        } else if (outcomeSumCell.value != null) {
-            if (row.price != outcomeSumCell.value)
-                rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
+        if (row.incomeSum && !row.consumptionSum && row.price != row.incomeSum) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
+        } else if (row.consumptionSum && !row.incomeSum && row.price != row.consumptionSum) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
+        } else if (row.consumptionSum && row.incomeSum && row.price != (row.incomeSum - row.consumptionSum).abs()) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разности значений граф «$msgIn» и «$msgOut» по модулю!")
         }
 
         // Проверка стоимости сделки
@@ -268,20 +265,17 @@ void calc() {
     sortRows(dataRows, groupColumns)
 
     for (row in dataRows) {
-        // Графы 13 и 14 из 11 и 12
-        incomeSum = row.incomeSum
-        consumptionSum = row.consumptionSum
-
-        if (incomeSum != null && consumptionSum == null) {
-            row.price = incomeSum
-            row.cost = row.price
-        } else if (incomeSum == null && consumptionSum != null) {
-            row.price = consumptionSum
-            row.cost = row.price
-        } else if (incomeSum != null && consumptionSum != null) {
-            row.price = (consumptionSum - incomeSum).abs()
-            row.cost = row.price
+        // Цена (тариф) за единицу измерения, руб.
+        row.price = null
+        if (row.incomeSum && !row.consumptionSum) {
+            row.price = row.incomeSum
+        } else if (row.consumptionSum && !row.incomeSum) {
+            row.price = row.consumptionSum
+        } else if (row.consumptionSum && row.incomeSum) {
+            row.price = (row.incomeSum - row.consumptionSum).abs()
         }
+        // Итого стоимость, руб.
+        row.cost = row.price
     }
 
     // Добавление подитов
