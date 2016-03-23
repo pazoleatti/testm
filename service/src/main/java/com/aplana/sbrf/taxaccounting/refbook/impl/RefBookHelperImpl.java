@@ -321,8 +321,10 @@ public class RefBookHelperImpl implements RefBookHelper {
                 cell.setRefBookDereference(attribute.getFormat() != null ?
                         (new SimpleDateFormat(attribute.getFormat().getFormat())).format(refBookValue.getDateValue()) :
                         String.valueOf(refBookValue));
+                cell.setRefBookValue(refBookValue);
             } else {
                 cell.setRefBookDereference(refBookValue == null ? "" : String.valueOf(refBookValue));
+                cell.setRefBookValue(refBookValue);
             }
 		}
 	}

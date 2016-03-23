@@ -1,21 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.formdata;
 
-import com.aplana.sbrf.taxaccounting.model.Color;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.ColumnType;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DateColumn;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataReport;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.Months;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.logging.Log;
@@ -75,7 +63,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         BIGDECIMAL,
         NUMERATION,
         EMPTY ,
-		HEADER
+		HEADER,
+        REFBOOK
     }
 
     private final class CellStyleBuilder{
@@ -157,6 +146,36 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     cellStyle.setBorderTop(CellStyle.BORDER_THICK);
                     cellStyle.setBorderRight(CellStyle.BORDER_THICK);
                     cellStyle.setBorderLeft(CellStyle.BORDER_THICK);
+                    break;
+                case REFBOOK:
+                    currColumn = formTemplate.getColumn(columnAlias);
+                    RefBookAttribute refBookAttribute;
+                    if (currColumn instanceof RefBookColumn) {
+                        refBookAttribute = ((RefBookColumn)currColumn).getRefBookAttribute();
+                    } else {
+                        refBookAttribute = ((ReferenceColumn)currColumn).getRefBookAttribute();
+                    }
+                    switch (refBookAttribute.getAttributeType()) {
+                        case STRING:
+                            cellStyle.setAlignment(CellStyle.ALIGN_LEFT);
+                            cellStyle.setWrapText(true);
+                            break;
+                        case DATE:
+                            cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+                            if(refBookAttribute.getFormat() == null){
+                                cellStyle.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()));
+                            } else{
+                                cellStyle.setDataFormat(dataFormat.getFormat(refBookAttribute.getFormat().getFormat()));
+                            }
+                            break;
+                        case NUMBER:
+                            cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+                            cellStyle.setWrapText(true);
+                            cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+                            cellStyle.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.getPrecision(refBookAttribute.getPrecision())));
+                            break;
+
+                    }
                     break;
             }
 			if (formStyle != null) {
@@ -543,9 +562,35 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
                         cell.setCellValue(bd != null ? String.valueOf(bd) : "");
                     } else if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
-                        cellStyle = getCellStyle(formStyle, CellType.STRING, columnAlias);
+                        RefBookValue refBookValue = dataRow.getCell(columnAlias).getRefBookValue();
+                        cellStyle = getCellStyle(formStyle, CellType.REFBOOK, columnAlias);
                         cell.setCellStyle(cellStyle);
-                        cell.setCellValue(dataRow.getCell(columnAlias).getRefBookDereference());
+                        if (refBookValue != null) {
+                            switch (refBookValue.getAttributeType()) {
+                                case DATE:
+                                    Date date = refBookValue.getDateValue();
+                                    if (date != null)
+                                        cell.setCellValue(date);
+                                    else
+                                        cell.setCellValue("");
+                                    break;
+                                case NUMBER:
+                                    RefBookAttribute refBookAttribute;
+                                    if (ColumnType.REFBOOK.equals(column.getColumnType())) {
+                                        refBookAttribute = ((RefBookColumn)column).getRefBookAttribute();
+                                    } else {
+                                        refBookAttribute = ((ReferenceColumn)column).getRefBookAttribute();
+                                    }
+                                    Number bd = refBookValue.getNumberValue();
+                                    if (bd != null){
+                                        cell.setCellValue(refBookAttribute.getPrecision() >0 ? Double.parseDouble(bd.toString()) : bd.longValue());
+                                    }
+                                    break;
+                                default:
+                                    cell.setCellValue(dataRow.getCell(columnAlias).getRefBookDereference());
+                                    break;
+                            }
+                        }
                     } else if (obj == null) {
                         cellStyle = getCellStyle(formStyle, CellType.EMPTY, columnAlias);
                         cell.setCellStyle(cellStyle);

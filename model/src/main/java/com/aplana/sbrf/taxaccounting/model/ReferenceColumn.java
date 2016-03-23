@@ -27,7 +27,7 @@ public class ReferenceColumn extends Column {
 
     private RefBookAttribute refBookAttribute;
 
-    private ColumnFormatter formatter;
+    transient private ColumnFormatter formatter;
 
 	public ReferenceColumn() {
 		columnType = ColumnType.REFERENCE;

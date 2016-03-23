@@ -31,7 +31,7 @@ public class NumericColumn extends Column implements Serializable {
 
 	private int maxLength = MAX_LENGTH;
 
-	private ColumnFormatter formatter;
+    transient private ColumnFormatter formatter;
 
 	public NumericColumn() {
 		columnType = ColumnType.NUMBER;

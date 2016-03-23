@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,7 +28,10 @@ public class Cell extends AbstractCell {
     private boolean forceValue;
 	/** Разыменованное значение справочной(зависимой) графы */
     private String refBookDereference;
-	/** Стиль ячейки */
+    /** Исходное значение справочной(зависимой) графы */
+    transient private RefBookValue refBookValue;
+
+    /** Стиль ячейки */
     private FormStyle style;
     /** Временный стиль ячейки. Используется только в режиме ручного ввода и не сохраняется в бд */
     private FormStyle clientStyle;
@@ -331,7 +336,15 @@ public class Cell extends AbstractCell {
         this.refBookDereference = refBookDereference;
     }
 
-	/**
+    public RefBookValue getRefBookValue() {
+        return refBookValue;
+    }
+
+    public void setRefBookValue(RefBookValue refBookValue) {
+        this.refBookValue = refBookValue;
+    }
+
+    /**
 	 * Устанавливает цвет фона и шрифта. Использовать только в режиме ручного ввода для жесткого задания цвета ячеек!
 	 * @param clientStyle устанавливаемый клиенсткий стиль
 	 */

@@ -25,7 +25,7 @@ public class RefBookColumn extends FilterColumn {
 
     private RefBookAttribute refBookAttribute;
 
-    private ColumnFormatter formatter;
+    transient private ColumnFormatter formatter;
 
     private static ValidationStrategy validationStrategy = new ValidationStrategy() {
 		@Override
