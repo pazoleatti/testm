@@ -157,15 +157,15 @@ void generateXML() {
             // Титульный лист - конец
 
             Прибыль() {
-                // берем первые 500 строк (по 2 листа декларации на строку источника)
-                if (dataRowsApp2 != null && dataRowsApp2.size() >= 500) {
-                    dataRowsApp2 = dataRowsApp2[0..499]
-                }
                 // Приложение №2
                 // сортируем по ФИО, потом по остальным полям
                 if (isCFOApp2 && dataRowsApp2 != null) {
                     def sortColumns = ['surname', 'name', 'patronymic', 'innRF', 'inn', 'taxRate']
                     sortRows(dataRowsApp2, sortColumns)
+                }
+                // берем первые 500 строк (по 2 листа декларации на строку источника)
+                if (dataRowsApp2 != null && dataRowsApp2.size() >= 500) {
+                    dataRowsApp2 = dataRowsApp2[0..499]
                 }
 
                 //ДатаСправ   Дата составления
