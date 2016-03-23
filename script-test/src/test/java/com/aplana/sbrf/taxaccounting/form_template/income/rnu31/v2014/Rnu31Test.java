@@ -82,20 +82,15 @@ public class Rnu31Test extends ScriptTestBase {
     // Проверка с данными
     @Test
     public void check1Test() {
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu31//v2014//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
 
         // для попадания в ЛП:
         // 1. Проверка обязательных полей
-        DataRow<Cell> row = formData.createDataRow();
-        row.setIndex(1);
-        row.setAlias("total");
-        dataRows.add(row);
+        DataRow<Cell> row = dataRows.get(0);//formData.createDataRow();
 
         // для попадания в ЛП:
-        // 1. Проверка обязательных полей
+        // Проверка обязательных полей
         int i = 0;
         testHelper.execute(FormDataEvent.CHECK);
 
@@ -113,7 +108,7 @@ public class Rnu31Test extends ScriptTestBase {
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        // Проверка расчётных граф
+        // Для прохождения ЛП
         i = 0;
         row.getCell("ofz").setValue(1L, null);
         row.getCell("municipalBonds").setValue(1L, null);
@@ -126,8 +121,9 @@ public class Rnu31Test extends ScriptTestBase {
         row.getCell("itherEurobonds").setValue(1L, null);
         row.getCell("corporateBonds").setValue(1L, null);
         testHelper.execute(FormDataEvent.CHECK);
-        //Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
-        //testHelper.getLogger().clear();
+        Assert.assertEquals(String.format("Нарушена уникальность номера по порядку!"), entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
     }
 
 
