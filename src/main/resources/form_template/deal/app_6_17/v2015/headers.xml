@@ -20,14 +20,14 @@
         </row>
         <row alias="">
             <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
-            <cell alias="name" colSpan="1" rowSpan="1" value="Полное наименование юридического лица с указанием ОПФ"/>
+            <cell alias="name" colSpan="1" rowSpan="1" value="Полное наименование с указанием ОПФ"/>
             <cell alias="iksr" colSpan="1" rowSpan="1" value="ИНН/ КИО"/>
             <cell alias="countryName" colSpan="1" rowSpan="1" value="Наименование страны регистрации"/>
             <cell alias="regCountryCode" colSpan="1" rowSpan="1" value="Код страны регистрации по классификатору ОКСМ"/>
             <cell alias="docNumber" colSpan="1" rowSpan="1" value="Номер договора"/>
             <cell alias="docDate" colSpan="1" rowSpan="1" value="Дата договора"/>
             <cell alias="dealNumber" colSpan="1" rowSpan="1" value="Номер сделки"/>
-            <cell alias="dealDate" colSpan="1" rowSpan="1" value="Дата заключения сделки"/>
+            <cell alias="dealDate" colSpan="1" rowSpan="1" value="Дата  заключения сделки"/>
             <cell alias="currencyCode" colSpan="1" rowSpan="1" value="Код валюты по сделке"/>
             <cell alias="dealCountryCode" colSpan="1" rowSpan="1" value="Код страны происхождения предмета сделки по классификатору ОКСМ"/>
             <cell alias="income" colSpan="1" rowSpan="1" value="Сумма доходов Банка по данным бухгалтерского учета, руб."/>
