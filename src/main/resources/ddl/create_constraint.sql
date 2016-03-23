@@ -1,4 +1,4 @@
---! ��� ������������������ ����������� ���������, �� ����� Oracle-���������, ������� �� ����� ���� ������������ � unit-������.
+--! Все закомментированные ограничения актуальны, но имеют Oracle-специфику, поэтому не могут быть использованы в unit-тестах.
 
 alter table form_kind add constraint form_kind_pk primary key (id);
 
@@ -43,6 +43,12 @@ alter table form_style add constraint form_style_chk_font_color check (font_colo
 alter table form_style add constraint form_style_chk_back_color check (back_color in (0,1,2,3,4,5,6,7,8,9,10,11,12,13));
 alter table form_style add constraint form_style_chk_italic check (italic in (0,1));
 alter table form_style add constraint form_style_chk_bold check (bold in (0,1));
+
+alter table style add constraint style_pk primary key(alias);
+alter table style add constraint style_fk_color_font foreign key(font_color) references color(id);
+alter table style add constraint style_fk_color_back foreign key(back_color) references color(id);
+alter table style add constraint style_chk_italic check(italic in (0, 1));
+alter table style add constraint style_chk_bold check(bold in (0, 1));
 
 alter table blob_data add constraint blob_data_pk primary key(id);
 

@@ -82,52 +82,51 @@ public class Rnu31Test extends ScriptTestBase {
     // Проверка с данными
     @Test
     public void check1Test() {
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu31//v2014//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
+        String msg;
+        DataRow<Cell> row = dataRows.get(0);
 
         // для попадания в ЛП:
-        // 1. Проверка обязательных полей
-        DataRow<Cell> row = formData.createDataRow();
-        row.setIndex(1);
-        row.setAlias("total");
-        dataRows.add(row);
-
-        // для попадания в ЛП:
-        // 1. Проверка обязательных полей
+        // Проверка обязательных полей
         int i = 0;
         testHelper.execute(FormDataEvent.CHECK);
 
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Ставка налога на прибыль 15%. ОФЗ"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Ставка налога на прибыль 15%. Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Ставка налога на прибыль 15%. Государственные облигации Республики Беларусь"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Ставка налога на прибыль 15%. Ипотечные облигации, выпущенные после 1 января 2007 года"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Ставка налога на прибыль 9%. Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3 лет"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Ставка налога на прибыль 9%. Ипотечные облигации, выпущенные до 1 января 2007 года"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Ставка налога на прибыль 0%. ОВГВЗ"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Ставка налога на прибыль 20%. Еврооблигации РФ"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Ставка налога на прибыль 20%. Прочие еврооблигации"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Ставка налога на прибыль 20%. Корпоративные облигации"), entries.get(i++).getMessage());
+        String [] nonEmptyColumns = {"ofz", "municipalBonds", "governmentBonds", "mortgageBonds", "municipalBondsBefore",
+                "rtgageBondsBefore", "ovgvz", "eurobondsRF", "itherEurobonds", "corporateBonds"};
+        for (String column : nonEmptyColumns) {
+            msg = String.format(ScriptUtils.WRONG_NON_EMPTY, row.getIndex(), row.getCell(column).getColumn().getName());
+            Assert.assertEquals(msg, entries.get(i++).getMessage());
+        }
         Assert.assertEquals(String.format("Нарушена уникальность номера по порядку!"), entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        // Проверка расчётных граф
+        // Для проверки неотрицательности
         i = 0;
-        row.getCell("ofz").setValue(1L, null);
-        row.getCell("municipalBonds").setValue(1L, null);
-        row.getCell("governmentBonds").setValue(1L, null);
-        row.getCell("mortgageBonds").setValue(1L, null);
-        row.getCell("municipalBondsBefore").setValue(1L, null);
-        row.getCell("rtgageBondsBefore").setValue(1L, null);
-        row.getCell("ovgvz").setValue(1L, null);
-        row.getCell("eurobondsRF").setValue(1L, null);
-        row.getCell("itherEurobonds").setValue(1L, null);
-        row.getCell("corporateBonds").setValue(1L, null);
+        String [] nonEmptyColumns1 = {"ofz", "municipalBonds", "mortgageBonds", "municipalBondsBefore", "rtgageBondsBefore", "corporateBonds",
+                "governmentBonds", "ovgvz", "eurobondsRF", "itherEurobonds"};
+        for (String column : nonEmptyColumns1) {
+            row.getCell(column).setValue(-1L, null);
+        }
         testHelper.execute(FormDataEvent.CHECK);
-        //Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
-        //testHelper.getLogger().clear();
+        Assert.assertEquals(String.format("Нарушена уникальность номера по порядку!"), entries.get(i++).getMessage());
+        for (String column : nonEmptyColumns1) {
+            msg = String.format("Значение графы «%s» по строке %s отрицательное!", row.getCell(column).getColumn().getName(), row.getIndex());
+            Assert.assertEquals(msg, entries.get(i++).getMessage());
+        }
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        // Для прохождения ЛП
+        i = 0;
+        for (String column : nonEmptyColumns1) {
+            row.getCell(column).setValue(1L, null);
+        }
+        testHelper.execute(FormDataEvent.CHECK);
+        Assert.assertEquals(String.format("Нарушена уникальность номера по порядку!"), entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
     }
 
 

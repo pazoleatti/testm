@@ -1133,7 +1133,14 @@ CREATE TABLE style (
   alias				     VARCHAR2(50 CHAR) NOT NULL,
   font_color			 NUMBER(3) NULL,
   back_color			 NUMBER(3) NULL,
-  italic				   NUMBER(1) NOT NULL,
+  italic				 NUMBER(1) NOT NULL,
   bold				     NUMBER(1) NOT NULL
 );
+
+comment on table style is 'Стили ячеек в налоговой форме';
+comment on column style.alias is 'Алиас стиля';
+comment on column style.font_color is 'Код цвета шрифта';
+comment on column style.back_color is 'Код цвета фона';
+comment on column style.italic is 'Признак использования курсива';
+comment on column style.bold is 'Признак жирного шрифта';
 --------------------------------------------------------------------------------------------------------

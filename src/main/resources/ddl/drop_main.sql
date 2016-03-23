@@ -1,3 +1,4 @@
+drop table style;
 drop index i_ref_book_oktmo_code;
 drop index i_ref_book_oktmo_record_id;
 drop index i_ref_book_value_string;
