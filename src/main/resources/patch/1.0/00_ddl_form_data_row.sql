@@ -239,6 +239,50 @@ drop table log_clob_query;
 drop sequence seq_log_query;
 drop sequence seq_log_query_session; 
 
+--https://jira.aplana.com/browse/SBRFACCTAX-15119: Удалить из таблицы FORM_STYLE поле ID
+alter table form_style drop constraint form_style_pk;
+alter table form_style drop constraint form_style_uniq_alias;
+alter table form_style drop column id;
+alter table form_style add constraint form_style_pk primary key (form_template_id, alias);
+
+--https://jira.aplana.com/browse/SBRFACCTAX-15121: Создать таблицу STYLE
+create table style (
+  alias				     varchar2(50 char) not null,
+  font_color			 number(3) null,   
+  back_color			 number(3) null,  
+  italic				 number(1) not null,
+  bold				     number(1) not null
+);
+comment on table style is 'Стили ячеек в налоговой форме';
+comment on column style.alias is 'Алиас стиля';
+comment on column style.font_color is 'Код цвета шрифта';
+comment on column style.back_color is 'Код цвета фона';
+comment on column style.italic is 'Признак использования курсива';
+comment on column style.bold is 'Признак жирного шрифта';
+
+alter table style add constraint style_pk primary key(alias);
+alter table style add constraint style_fk_color_font foreign key(font_color) references color(id);
+alter table style add constraint style_fk_color_back foreign key(back_color) references color(id);
+alter table style add constraint style_chk_italic check(italic in (0, 1));
+alter table style add constraint style_chk_bold check(bold in (0, 1));
+
+MERGE INTO style t USING (
+    SELECT 'Автозаполняемая' ALIAS, 13 FONT_COLOR, 4 BACK_COLOR, 0 ITALIC, 1 BOLD FROM DUAL UNION ALL
+    SELECT 'Контрольные суммы' ALIAS, 0 FONT_COLOR, 2 BACK_COLOR, 0 ITALIC, 1 BOLD FROM DUAL UNION ALL
+    SELECT 'Корректировка-без изменений' ALIAS, 0 FONT_COLOR, 6 BACK_COLOR, 0 ITALIC, 0 BOLD FROM DUAL UNION ALL
+    SELECT 'Корректировка-добавлено' ALIAS, 0 FONT_COLOR, 12 BACK_COLOR, 0 ITALIC, 0 BOLD FROM DUAL UNION ALL
+    SELECT 'Корректировка-изменено' ALIAS, 10 FONT_COLOR, 4 BACK_COLOR, 0 ITALIC, 1 BOLD FROM DUAL UNION ALL
+    SELECT 'Корректировка-удалено' ALIAS, 0 FONT_COLOR, 8 BACK_COLOR, 0 ITALIC, 0 BOLD FROM DUAL UNION ALL
+    SELECT 'Редактируемая' ALIAS, 0 FONT_COLOR, 3 BACK_COLOR, 0 ITALIC, 0 BOLD FROM DUAL) s ON
+    (t.alias = s.alias)
+WHEN MATCHED THEN UPDATE SET 
+    t.FONT_COLOR = s.FONT_COLOR,
+    t.BACK_COLOR = s.BACK_COLOR,
+    t.ITALIC = s.ITALIC,
+    t.BOLD = s.BOLD
+WHEN NOT MATCHED THEN INSERT (t.alias, t.font_color, t.back_color, t.italic, t.bold)
+VALUES
+    (s.alias, s.font_color, s.back_color, s.italic, s.bold);
 
 COMMIT;
 EXIT;
