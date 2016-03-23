@@ -157,121 +157,297 @@ void generateXML() {
             // Титульный лист - конец
 
             Прибыль() {
-                // берем первые 500 строк (по 2 листа декларации на строку источника)
-                if (dataRowsApp2 != null && dataRowsApp2.size() >= 500) {
-                    dataRowsApp2 = dataRowsApp2[0..499]
-                }
                 // Приложение №2
                 // сортируем по ФИО, потом по остальным полям
                 if (isCFOApp2 && dataRowsApp2 != null) {
                     def sortColumns = ['surname', 'name', 'patronymic', 'innRF', 'inn', 'taxRate']
                     sortRows(dataRowsApp2, sortColumns)
                 }
-
-                //ДатаСправ   Дата составления
-                def dataSprav = (docDate != null ? docDate : new Date()).format("dd.MM.yyyy")
-                //Тип         Тип
-                def type = String.format("%02d", reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId))
-
-                if (dataRowsApp2) {
-                    fillRecordsMap([4L, 10L, 350L, 360L, 370L])
+                // берем первые 500 строк (по 2 листа декларации на строку источника)
+                if (dataRowsApp2 != null && dataRowsApp2.size() >= 500) {
+                    dataRowsApp2 = dataRowsApp2[0..499]
                 }
 
-                def index = 0
-                for (def row : dataRowsApp2) {
+                // closure для формирования по-старинке
+                def generateApp2 = { MarkupBuilder innerBuilder, def dataRows, boolean isCFO, Integer index, def dataSprav, def type ->
+                    for (def row : dataRows) {
+                        //НомерСправ  Справка №
+                        def nomerSprav = isCFO ? index : row.refNum
+                        //ИННФЛ       ИНН
+                        def innFL = row.innRF
+                        //ИННИно       ИНН
+                        def innIno = row.inn
+                        //Фамилия     Фамилия
+                        def surname = row.surname
+                        //Имя         Имя
+                        def givenName = row.name
+                        //Отчество    Отчество
+                        def parentName = row.patronymic
+                        //СтатусНП    Статус налогоплательщика
+                        def statusNP = row.status
+                        //ДатаРожд    Дата рождения
+                        def dataRozhd = row.birthday?.format('dd.MM.yyyy')
+                        //Гражд       Гражданство (код страны)
+                        def grazhd = getRefBookValue(10, row.citizenship)?.CODE?.value
+                        //КодВидДок   Код вида документа, удостоверяющего личность
+                        def kodVidDok = getRefBookValue(360, row.code)?.CODE?.value
+                        //СерНомДок   Серия и номер документа
+                        def serNomDok = row.series
+                        //Индекс      Почтовый индекс
+                        def zipCode = row.postcode
+                        //КодРегион   Регион (код)
+                        def subdivisionRF = getRefBookValue(4, row.region)?.CODE?.value
+                        //Район       Район
+                        def area = row.district
+                        //Город       Город
+                        def city = row.city
+                        //НаселПункт  Населенный пункт (село, поселок)
+                        def region = row.locality
+                        //Улица       Улица (проспект, переулок)
+                        def street = row.street
+                        //Дом         Номер дома (владения)
+                        def homeNumber = row.house
+                        //Корпус      Номер корпуса (строения)
+                        def corpNumber = row.housing
+                        //Кварт       Номер квартиры
+                        def apartment = row.apartment
+                        //ОКСМ        Код страны
+                        def oksm = getRefBookValue(10, row.country)?.CODE?.value
+                        //АдрТекст    Адрес места жительства за пределами Российской Федерации
+                        def adrText = row.address
+                        //Ставка      Налоговая ставка
+                        def stavka = row.taxRate
+                        //СумДохОбщ   Общая сумма дохода
+                        def sumDohObsh = row.income
+                        //СумВычОбщ   Общая сумма вычетов
+                        def sumVichObsh = row.deduction
+                        //НалБаза     Налоговая база
+                        def nalBazaApp2 = row.taxBase
+                        //НалИсчисл   Сумма налога исчисленная
+                        def nalIschislApp2 = row.calculated
+                        //НалУдерж    Сумма налога удержанная
+                        def nalUderzh = row.withheld
+                        //НалУплач Сумма налога перечисленная
+                        def nalUplach = row.listed
+                        //НалУдержЛиш Сумма налога, излишне удержанная налоговым агентом
+                        def nalUderzhLish = row.withheldAgent
+                        //НалНеУдерж  Сумма налога, не удержанная налоговым агентом
+                        def nalNeUderzh = row.nonWithheldAgent
+
+                        // 0..n
+                        innerBuilder.СведДохФЛ(
+                                НомерСправ : nomerSprav,
+                                ДатаСправ : dataSprav,
+                                Тип : type) {
+                            //1..1
+                            ФЛПолучДох(
+                                    (innFL ? [ИННФЛ: innFL] : [:]) +
+                                            (innIno ? [ИННИно: innIno] : [:]) +
+                                            [СтатусНП : statusNP,
+                                             ДатаРожд : dataRozhd,
+                                             Гражд    : grazhd,
+                                             КодВидДок: kodVidDok,
+                                             СерНомДок: serNomDok]
+                            ) {
+                                // 1..1
+                                ФИО([Фамилия : surname, Имя : givenName] + (parentName != null ? [Отчество : parentName] : []))
+                                //0..1
+                                if (subdivisionRF != null) {
+                                    АдрМЖРФ(
+                                            (zipCode ? [Индекс : zipCode] : [:]) +
+                                                    [КодРегион : subdivisionRF] +
+                                                    (area? [Район : area] : [:]) +
+                                                    (city ? [Город : city] : [:]) +
+                                                    (region ? [НаселПункт : region] : [:]) +
+                                                    (street ? [Улица : street] : [:]) +
+                                                    (homeNumber ? [Дом : homeNumber] : [:]) +
+                                                    (corpNumber ? [Корпус : corpNumber] : [:]) +
+                                                    (apartment ? [Кварт : apartment] : [:]))
+                                }
+                                //0..1
+                                if (oksm != null || adrText) {
+                                    АдрМЖИно(ОКСМ : oksm, АдрТекст : adrText)
+                                }
+                            }
+                            //1..1
+                            ДохНалПер(
+                                    [Ставка : stavka, СумДохОбщ : sumDohObsh] +
+                                            (sumVichObsh != null ? [СумВычОбщ : sumVichObsh] : []) +
+                                            [НалБаза : nalBazaApp2, НалИсчисл : nalIschislApp2] +
+                                            (nalUderzh != null ? [НалУдерж : nalUderzh] : []) +
+                                            (nalUplach != null ? [НалУплач : nalUplach] : []) +
+                                            (nalUderzhLish != null ? [НалУдержЛиш : nalUderzhLish] : []) +
+                                            (nalNeUderzh != null ? [НалНеУдерж : nalNeUderzh] : [])
+                            )
+                            boolean isSprDohFL = (1..3).find { index_1 ->
+                                //КодДоход    040 (Код дохода) или СумДоход    041 (Сумма дохода) заполнены
+                                row["col_040_${index_1}"] != null || row["col_041_${index_1}"] != null
+                            } != null
+
+                            //0..1
+                            if (isSprDohFL) {
+                                СпрДохФЛ() {
+                                    3.times{ index_1 ->
+                                        //КодДоход    040 (Код дохода)
+                                        def kodDohod040 = getRefBookValue(370, row["col_040_${index_1 + 1}"])?.CODE?.value
+                                        //СумДоход    041 (Сумма дохода)
+                                        def sumDohod041 = row["col_041_${index_1 + 1}"]
+
+                                        // 0..n
+                                        if (kodDohod040 || sumDohod041 != null) {
+                                            СумДох(КодДоход : kodDohod040, СумДоход : sumDohod041) {
+                                                5.times{ index_2 ->
+                                                    //КодВычет    042 (Код вычета)
+                                                    def kodVichet042 = getRefBookValue(350, row["col_042_${index_1 + 1}_${index_2 + 1}"])?.CODE?.value
+                                                    //СумВычет    043 (Сумма вычета)
+                                                    def sumVichet043 = row["col_043_${index_1 + 1}_${index_2 + 1}"]
+
+                                                    //0..n
+                                                    if (kodVichet042 || sumVichet043 != null) {
+                                                        СумВыч(КодВычет : kodVichet042, СумВычет : sumVichet043)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            boolean isNalVichStand = (1..2).find { index_1 ->
+                                //КодВычет    051 (Код вычета) или СумВычет    052 (Сумма вычета) заполнены
+                                row["col_051_3_${index_1}"] != null || row["col_052_3_${index_1}"] != null
+                            } != null
+
+                            //0..1
+                            if (isNalVichStand) {
+                                НалВычСтанд() {
+                                    2.times{ index_1 ->
+                                        //КодВычет    051 (Код вычета)
+                                        def kodVichet051 = getRefBookValue(350, row["col_051_3_${index_1 + 1}"])?.CODE?.value
+                                        //СумВычет    052 (Сумма вычета)
+                                        def sumVichet052 = row["col_052_3_${index_1 + 1}"]
+                                        //0..n
+                                        if (kodVichet051 || sumVichet052 != null) {
+                                            СумВыч(КодВычет : kodVichet051, СумВычет : sumVichet052)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // closure для формирования по-новому
+                def generateApp2CFO = { MarkupBuilder innerBuilder, def dataRows, Integer index, def dataSprav, def type ->
+                    def dataRow = dataRows[0]
                     //НомерСправ  Справка №
-                    def nomerSprav = isCFOApp2 ? (++index) : row.refNum
+                    def nomerSprav = index
                     //ИННФЛ       ИНН
-                    def innFL = row.innRF
+                    def innFL = dataRow.innRF
                     //ИННИно       ИНН
-                    def innIno = row.inn
+                    def innIno = dataRow.inn
                     //Фамилия     Фамилия
-                    def surname = row.surname
+                    def surname = dataRow.surname
                     //Имя         Имя
-                    def givenName = row.name
+                    def givenName = dataRow.name
                     //Отчество    Отчество
-                    def parentName = row.patronymic
+                    def parentName = dataRow.patronymic
                     //СтатусНП    Статус налогоплательщика
-                    def statusNP = row.status
+                    def statusNP = dataRow.status
                     //ДатаРожд    Дата рождения
-                    def dataRozhd = row.birthday?.format('dd.MM.yyyy')
+                    def dataRozhd = dataRow.birthday?.format('dd.MM.yyyy')
                     //Гражд       Гражданство (код страны)
-                    def grazhd = getRefBookValue(10, row.citizenship)?.CODE?.value
+                    def grazhd = getRefBookValue(10, dataRow.citizenship)?.CODE?.value
                     //КодВидДок   Код вида документа, удостоверяющего личность
-                    def kodVidDok = getRefBookValue(360, row.code)?.CODE?.value
+                    def kodVidDok = getRefBookValue(360, dataRow.code)?.CODE?.value
                     //СерНомДок   Серия и номер документа
-                    def serNomDok = row.series
+                    def serNomDok = dataRow.series
                     //Индекс      Почтовый индекс
-                    def zipCode = row.postcode
+                    def zipCode = dataRow.postcode
                     //КодРегион   Регион (код)
-                    def subdivisionRF = getRefBookValue(4, row.region)?.CODE?.value
+                    def subdivisionRF = getRefBookValue(4, dataRow.region)?.CODE?.value
                     //Район       Район
-                    def area = row.district
+                    def area = dataRow.district
                     //Город       Город
-                    def city = row.city
+                    def city = dataRow.city
                     //НаселПункт  Населенный пункт (село, поселок)
-                    def region = row.locality
+                    def region = dataRow.locality
                     //Улица       Улица (проспект, переулок)
-                    def street = row.street
+                    def street = dataRow.street
                     //Дом         Номер дома (владения)
-                    def homeNumber = row.house
+                    def homeNumber = dataRow.house
                     //Корпус      Номер корпуса (строения)
-                    def corpNumber = row.housing
+                    def corpNumber = dataRow.housing
                     //Кварт       Номер квартиры
-                    def apartment = row.apartment
+                    def apartment = dataRow.apartment
                     //ОКСМ        Код страны
-                    def oksm = getRefBookValue(10, row.country)?.CODE?.value
+                    def oksm = getRefBookValue(10, dataRow.country)?.CODE?.value
                     //АдрТекст    Адрес места жительства за пределами Российской Федерации
-                    def adrText = row.address
+                    def adrText = dataRow.address
                     //Ставка      Налоговая ставка
-                    def stavka = row.taxRate
+                    def stavka = dataRow.taxRate
+
                     //СумДохОбщ   Общая сумма дохода
-                    def sumDohObsh = row.income
+                    def sumDohObsh = BigDecimal.ZERO
                     //СумВычОбщ   Общая сумма вычетов
-                    def sumVichObsh = row.deduction
+                    def sumVichObsh = BigDecimal.ZERO
                     //НалБаза     Налоговая база
-                    def nalBazaApp2 = row.taxBase
+                    def nalBazaApp2 = BigDecimal.ZERO
                     //НалИсчисл   Сумма налога исчисленная
-                    def nalIschislApp2 = row.calculated
+                    def nalIschislApp2 = BigDecimal.ZERO
                     //НалУдерж    Сумма налога удержанная
-                    def nalUderzh = row.withheld
+                    def nalUderzh = BigDecimal.ZERO
                     //НалУплач Сумма налога перечисленная
-                    def nalUplach = row.listed
+                    def nalUplach = BigDecimal.ZERO
                     //НалУдержЛиш Сумма налога, излишне удержанная налоговым агентом
-                    def nalUderzhLish = row.withheldAgent
+                    def nalUderzhLish = BigDecimal.ZERO
                     //НалНеУдерж  Сумма налога, не удержанная налоговым агентом
-                    def nalNeUderzh = row.nonWithheldAgent
+                    def nalNeUderzh = BigDecimal.ZERO
+
+                    dataRows.each { def row ->
+                        sumDohObsh = sumDohObsh.add(row.income ?: BigDecimal.ZERO)
+                        sumVichObsh = sumVichObsh.add(row.deduction ?: BigDecimal.ZERO)
+                        nalIschislApp2 = nalIschislApp2.add(row.calculated ?: BigDecimal.ZERO)
+                        nalUderzh = nalUderzh.add(row.withheld ?: BigDecimal.ZERO)
+                        nalUplach = nalUplach.add(row.listed ?: BigDecimal.ZERO)
+                        nalUderzhLish = nalUderzhLish.add(row.withheldAgent ?: BigDecimal.ZERO)
+                        nalNeUderzh = nalNeUderzh.add(row.nonWithheldAgent ?: BigDecimal.ZERO)
+                    }
+                    nalBazaApp2 = sumDohObsh - sumVichObsh
 
                     // 0..n
-                    СведДохФЛ(
+                    innerBuilder.СведДохФЛ(
                             НомерСправ : nomerSprav,
                             ДатаСправ : dataSprav,
                             Тип : type) {
                         //1..1
                         ФЛПолучДох(
-                                ИННФЛ : innFL,
-                                ИННИно : innIno,
-                                СтатусНП : statusNP,
-                                ДатаРожд : dataRozhd,
-                                Гражд : grazhd,
-                                КодВидДок : kodVidDok,
-                                СерНомДок : serNomDok
+                                (innFL ? [ИННФЛ: innFL] : [:]) +
+                                        (innIno ? [ИННИно: innIno] : [:]) +
+                                        [СтатусНП : statusNP,
+                                         ДатаРожд : dataRozhd,
+                                         Гражд    : grazhd,
+                                         КодВидДок: kodVidDok,
+                                         СерНомДок: serNomDok]
                         ) {
                             // 1..1
                             ФИО([Фамилия : surname, Имя : givenName] + (parentName != null ? [Отчество : parentName] : []))
                             //0..1
-                            АдрМЖРФ(
-                                    (zipCode ? [Индекс : zipCode] : [:]) +
-                                            [КодРегион : subdivisionRF] +
-                                            (area? [Район : area] : [:]) +
-                                            (city ? [Город : city] : [:]) +
-                                            (region ? [НаселПункт : region] : [:]) +
-                                            (street ? [Улица : street] : [:]) +
-                                            (homeNumber ? [Дом : homeNumber] : [:]) +
-                                            (corpNumber ? [Корпус : corpNumber] : [:]) +
-                                            (apartment ? [Кварт : apartment] : [:]))
+                            if (subdivisionRF != null) {
+                                АдрМЖРФ(
+                                        (zipCode ? [Индекс : zipCode] : [:]) +
+                                                [КодРегион : subdivisionRF] +
+                                                (area? [Район : area] : [:]) +
+                                                (city ? [Город : city] : [:]) +
+                                                (region ? [НаселПункт : region] : [:]) +
+                                                (street ? [Улица : street] : [:]) +
+                                                (homeNumber ? [Дом : homeNumber] : [:]) +
+                                                (corpNumber ? [Корпус : corpNumber] : [:]) +
+                                                (apartment ? [Кварт : apartment] : [:]))
+                            }
                             //0..1
-                            АдрМЖИно(ОКСМ : oksm, АдрТекст : adrText)
+                            if (oksm != null || adrText) {
+                                АдрМЖИно(ОКСМ : oksm, АдрТекст : adrText)
+                            }
                         }
                         //1..1
                         ДохНалПер(
@@ -283,44 +459,146 @@ void generateXML() {
                                         (nalUderzhLish != null ? [НалУдержЛиш : nalUderzhLish] : []) +
                                         (nalNeUderzh != null ? [НалНеУдерж : nalNeUderzh] : [])
                         )
-                        //0..1
-                        СпрДохФЛ() {
-                            3.times{ index_1 ->
-                                //КодДоход    040 (Код дохода)
-                                def kodDohod040 = getRefBookValue(370, row["col_040_${index_1 + 1}"])?.CODE?.value
-                                //СумДоход    041 (Сумма дохода)
-                                def sumDohod041 = row["col_041_${index_1 + 1}"]
+                        def sumDohod041Map = [:]
+                        def sumVichet043MapMap = [:]
+                        def nalVichStandMap = [:]
+                        for (def row : dataRows) {
+                            boolean isSprDohFL = (1..3).find { index_1 ->
+                                //КодДоход    040 (Код дохода) или СумДоход    041 (Сумма дохода) заполнены
+                                row["col_040_${index_1}"] != null || row["col_041_${index_1}"] != null
+                            } != null
 
-                                СумДох(КодДоход : kodDohod040, СумДоход : sumDohod041) {
-                                    5.times{ index_2 ->
-                                        //КодВычет    042 (Код вычета)
-                                        def kodVichet042 = getRefBookValue(350, row["col_042_${index_1 + 1}_${index_2 + 1}"])?.CODE?.value
-                                        //СумВычет    043 (Сумма вычета)
-                                        def sumVichet043 = row["col_043_${index_1 + 1}_${index_2 + 1}"]
+                            if (isSprDohFL) {
+                                3.times{ index_1 ->
+                                    //КодДоход    040 (Код дохода)
+                                    def kodDohod040 = getRefBookValue(370, row["col_040_${index_1 + 1}"])?.CODE?.value
+                                    //СумДоход    041 (Сумма дохода)
+                                    def sumDohod041 = row["col_041_${index_1 + 1}"]
 
-                                        //1..n
-                                        СумВыч(КодВычет : kodVichet042, СумВычет : sumVichet043)
+                                    // 0..n
+                                    if (kodDohod040 || sumDohod041 != null) {
+                                        sumDohod041Map[kodDohod040] = sumDohod041
+                                        if (sumVichet043MapMap[kodDohod040] == null) {
+                                            sumVichet043MapMap[kodDohod040] = [:]
+                                        }
+                                        5.times{ index_2 ->
+                                            //КодВычет    042 (Код вычета)
+                                            def kodVichet042 = getRefBookValue(350, row["col_042_${index_1 + 1}_${index_2 + 1}"])?.CODE?.value
+                                            //СумВычет    043 (Сумма вычета)
+                                            def sumVichet043 = row["col_043_${index_1 + 1}_${index_2 + 1}"]
+
+                                            //0..n
+                                            if (kodVichet042 || sumVichet043 != null) {
+                                                if (sumVichet043MapMap[kodDohod040][kodVichet042] == null) {
+                                                    sumVichet043MapMap[kodDohod040][kodVichet042] = []
+                                                }
+                                                sumVichet043MapMap[kodDohod040][kodVichet042].add(sumVichet043)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            boolean isNalVichStand = (1..2).find { index_1 ->
+                                //КодВычет    051 (Код вычета) или СумВычет    052 (Сумма вычета) заполнены
+                                row["col_051_3_${index_1}"] != null || row["col_052_3_${index_1}"] != null
+                            } != null
+
+                            //0..1
+                            if (isNalVichStand) {
+                                2.times{ index_1 ->
+                                    //КодВычет    051 (Код вычета)
+                                    def kodVichet051 = getRefBookValue(350, row["col_051_3_${index_1 + 1}"])?.CODE?.value
+                                    //СумВычет    052 (Сумма вычета)
+                                    def sumVichet052 = row["col_052_3_${index_1 + 1}"]
+                                    //0..n
+                                    if (kodVichet051 || sumVichet052 != null) {
+                                        if (nalVichStandMap[kodVichet051] == null) {
+                                            nalVichStandMap[kodVichet051] = []
+                                        }
+                                        nalVichStandMap[kodVichet051].add(sumVichet052)
                                     }
                                 }
                             }
                         }
 
                         //0..1
-                        НалВычСтанд() {
-                            2.times{ index_1 ->
-                                //КодВычет    051 (Код вычета)
-                                def kodVichet051 = getRefBookValue(350, row["col_051_3_${index_1 + 1}"])?.CODE?.value
-                                //СумВычет    052 (Сумма вычета)
-                                def sumVichet052 = row["col_052_3_${index_1 + 1}"]
-                                //1..n
-                                СумВыч(КодВычет : kodVichet051, СумВычет : sumVichet052)
+                        if (!sumDohod041Map.isEmpty()) {
+                            СпрДохФЛ() {
+                                sumDohod041Map.each { def kodDohod040, sumDohod041 ->
+                                    // 0..n
+                                    СумДох(КодДоход : kodDohod040, СумДоход : sumDohod041) {
+                                        if (!sumVichet043MapMap[kodDohod040].isEmpty()) {
+                                            sumVichet043MapMap[kodDohod040].each { def kodVichet042, sumVichet043List ->
+                                                //0..n
+                                                sumVichet043List.each { sumVichet043 ->
+                                                    СумВыч(КодВычет : kodVichet042, СумВычет : sumVichet043)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
+                        }
+
+                        //0..1
+                        if (!nalVichStandMap.isEmpty()) {
+                            НалВычСтанд() {
+                                nalVichStandMap.each { def kodVichet051, sumVichet052List ->
+                                    //0..n
+                                    sumVichet052List.each { sumVichet052 ->
+                                        СумВыч(КодВычет : kodVichet051, СумВычет : sumVichet052)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //ДатаСправ   Дата составления
+                def dataSprav = (docDate != null ? docDate : new Date()).format("dd.MM.yyyy")
+                //Тип         Тип
+                def type = String.format("%02d", reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId))
+
+                def groupsApp2 = [:]
+                if (dataRowsApp2) {
+                    fillRecordsMap([4L, 10L, 350L, 360L, 370L])
+                    if (isCFOApp2) {
+                        groupsApp2 = groupRows(dataRowsApp2)
+                    }
+                }
+
+                if (!isCFOApp2) {
+                    generateApp2(builder, dataRowsApp2, isCFOApp2, null, dataSprav, type)
+                } else {
+                    def index = 0
+                    groupsApp2.each { key, rows ->
+                        index++
+                        if (rows.size() == 1) {
+                            generateApp2(builder, rows, isCFOApp2, index, dataSprav, type)
+                        } else {
+                            generateApp2CFO(builder, rows, index, dataSprav, type)
                         }
                     }
                 }
             }
         }
     }
+}
+
+def groupRows (def dataRows) {
+    def groupColumns = ['innRF', 'inn', 'surname', 'name', 'patronymic', 'birthday', 'series', 'taxRate']
+    def resultMap = [:]
+    dataRows.each { row ->
+        def key = groupColumns.sum { alias ->
+            String.valueOf(row[alias])
+        }?.toLowerCase()?.hashCode()?.toString()
+        if (resultMap[key] == null) {
+            resultMap[key] = []
+        }
+        resultMap[key].add(row)
+    }
+    return resultMap
 }
 
 List<String> getErrorTable(record) {
