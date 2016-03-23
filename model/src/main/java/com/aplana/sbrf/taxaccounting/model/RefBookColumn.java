@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+
 /**
  * Реализация {@link Column}, предназначенная для хранения значений
  * справочников.
@@ -20,7 +23,11 @@ public class RefBookColumn extends FilterColumn {
 
     private boolean isHierarchical = false;
 
-	private static ValidationStrategy validationStrategy = new ValidationStrategy() {
+    private RefBookAttribute refBookAttribute;
+
+    private ColumnFormatter formatter;
+
+    private static ValidationStrategy validationStrategy = new ValidationStrategy() {
 		@Override
 		public boolean matches(String valueToCheck) {
 			return true;
@@ -36,7 +43,7 @@ public class RefBookColumn extends FilterColumn {
 		return refBookAttributeId;
 	}
 
-	public void setRefBookAttributeId(Long refBookAttributeId) {
+	public void setRefBookAttributeId1(Long refBookAttributeId) {
 		this.refBookAttributeId = refBookAttributeId;
 	}
 
@@ -57,28 +64,14 @@ public class RefBookColumn extends FilterColumn {
     }
 
 	@Override
-	public Formatter getFormatter() {
-		return new Formatter() {
-			@Override
-			public String format(String valueToFormat) {
-				try {
-					Long val = Long.parseLong(valueToFormat);
-					String plainString = val.toString();
-
-					int length = plainString.length();
-					StringBuilder stringBuilder = new StringBuilder(plainString.substring(0, length));
-					for (int i = 3; i < length; i += 3) {
-						if (i < length) {
-							stringBuilder.insert(length - i, " ");
-						}
-					}
-					return stringBuilder.toString();
-				} catch (NumberFormatException e) {
-					return String.valueOf(valueToFormat);
-				}
-
-			}
-		};
+	public ColumnFormatter getFormatter() {
+        if (formatter != null) return formatter;
+        if (refBookAttribute != null && refBookAttribute.getAttributeType() != null
+                && refBookAttribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+            return formatter = new NumericColumnFormatter(refBookAttribute.getPrecision(), refBookAttribute.getMaxLength());
+        } else {
+            return formatter = new ColumnFormatter();
+        }
 	}
 
 	@Override
@@ -86,6 +79,14 @@ public class RefBookColumn extends FilterColumn {
 		return validationStrategy;
 	}
 
+    public RefBookAttribute getRefBookAttribute() {
+        return refBookAttribute;
+    }
+
+    public void setRefBookAttribute(RefBookAttribute refBookAttribute) {
+        formatter = null;
+        this.refBookAttribute = refBookAttribute;
+    }
 
     public Long getRefBookAttributeId2() {
         return refBookAttributeId2;

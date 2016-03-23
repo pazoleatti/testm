@@ -201,6 +201,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setAttributeType(RefBookAttributeType.values()[SqlUtils.getInteger(rs, "type") - 1]);
             result.setRefBookId(SqlUtils.getLong(rs, "reference_id"));
             result.setRefBookAttributeId(SqlUtils.getLong(rs, "attribute_id"));
+            if (result.getRefBookAttributeId() !=  null) result.setRefBookAttribute(getAttribute(result.getRefBookAttributeId()));
             result.setVisible(rs.getBoolean("visible"));
             result.setPrecision(SqlUtils.getInteger(rs, "precision"));
             result.setWidth(SqlUtils.getInteger(rs, "width"));

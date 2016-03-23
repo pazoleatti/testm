@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
@@ -122,9 +123,11 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 						// запрашиваем строку, на которую у нас установлена ссылка
 						Map<String, RefBookValue> refValue = refDataProvider.getRecordData(recordValue.getValue().getReferenceValue());
 						// извлекаем значение отображаемого свойства (разыменовывание)
-						RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
-						String dereferenceValue  = refValue.get(refAttribute.getAlias()).toString();
-						serializedValue.setDereferenceValue(dereferenceValue);
+						RefBookAttribute refAttribute = attribute.getRefBookAttribute();
+						String dereferenceValue = refValue.get(refAttribute.getAlias()).toString();
+                        ReferenceColumn referenceColumn = new ReferenceColumn();
+                        referenceColumn.setRefBookAttribute(refAttribute);
+						serializedValue.setDereferenceValue(referenceColumn.getFormatter().format(dereferenceValue));
 					}
 					break;
 				default:

@@ -370,7 +370,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	public void onRefBookBox(ValueChangeEvent<RefBook> event) {
         Column currentColumn = columns.get(columnIndex);
         if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
-            ((RefBookColumn) currentColumn).setRefBookAttributeId(event.getValue().getAttributes().get(0).getId());
+            ((RefBookColumn) currentColumn).setRefBookAttributeId1(event.getValue().getAttributes().get(0).getId());
+            ((RefBookColumn) currentColumn).setRefBookAttribute(event.getValue().getAttributes().get(0).getRefBookAttribute());
         } else if (ColumnType.REFERENCE.equals(currentColumn.getColumnType())) {
             ((ReferenceColumn) currentColumn).setRefBookAttributeId(event.getValue().getAttributes().get(0).getId());
         }
@@ -386,7 +387,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         }
         Column currentColumn = columns.get(columnIndex);
         if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
-            ((RefBookColumn) currentColumn).setRefBookAttributeId(event.getValue().getId());
+            ((RefBookColumn) currentColumn).setRefBookAttributeId1(event.getValue().getId());
+            ((RefBookColumn) currentColumn).setRefBookAttribute(event.getValue().getRefBookAttribute());
         } else if (ColumnType.REFERENCE.equals(currentColumn.getColumnType())) {
             ((ReferenceColumn) currentColumn).setRefBookAttributeId(event.getValue().getId());
         }
@@ -412,8 +414,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         Column currentColumn = columns.get(columnIndex);
         if (ColumnType.REFERENCE.equals(currentColumn.getColumnType())) {
             ((ReferenceColumn) currentColumn).setRefBookAttributeId2(event.getValue().getId());
+            ((ReferenceColumn) currentColumn).setRefBookAttribute(event.getValue());
         } else if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
             ((RefBookColumn) currentColumn).setRefBookAttributeId2(event.getValue().getId());
+            ((RefBookColumn) currentColumn).setRefBookAttribute(event.getValue());
         }
     }
 
@@ -715,7 +719,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			RefBookColumn refBookColumn = new RefBookColumn();
             copyMainColumnAttributes(column, refBookColumn);
             RefBook refBook = getUiHandlers().getRefBook(getUiHandlers().getRefBookByAttributeId(null, true));
-            refBookColumn.setRefBookAttributeId(refBook.getAttributes().get(0).getId());
+            refBookColumn.setRefBookAttributeId1(refBook.getAttributes().get(0).getId());
+            refBookColumn.setRefBookAttribute(refBook.getAttributes().get(0).getRefBookAttribute());
 			newColumn = refBookColumn;
 		} else if (REFERENCE_TYPE.equals(typeColumnDropBox.getValue())){
             ReferenceColumn referenceColumn = new ReferenceColumn();

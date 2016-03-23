@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.NumericColumnFormatter;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 

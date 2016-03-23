@@ -7,7 +7,7 @@ public class NumericColumnTest {
 	@Test
 	public void testFormatter() {
 		NumericColumn numericColumn = new NumericColumn();
-		Column.Formatter formatter = numericColumn.getFormatter();
+        ColumnFormatter formatter = numericColumn.getFormatter();
 
 		Assert.assertEquals("12 345", formatter.format("12345"));
 		Assert.assertEquals("123 456 789 012 345", formatter.format("123456789012345"));

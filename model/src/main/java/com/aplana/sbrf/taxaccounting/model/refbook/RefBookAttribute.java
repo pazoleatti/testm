@@ -41,7 +41,9 @@ public class RefBookAttribute implements Serializable {
 	 */
 	private Long refBookAttributeId;
 
-	/** Признак видимости атрибута */
+    private RefBookAttribute refBookAttribute;
+
+    /** Признак видимости атрибута */
 	private boolean visible;
 
 	/** Точность. Количество знаков после запятой. Используется для форматирования вещественных значений при выводе
@@ -137,7 +139,15 @@ public class RefBookAttribute implements Serializable {
 		this.refBookAttributeId = refBookAttributeId;
 	}
 
-	/**
+    public RefBookAttribute getRefBookAttribute() {
+        return refBookAttribute;
+    }
+
+    public void setRefBookAttribute(RefBookAttribute refBookAttribute) {
+        this.refBookAttribute = refBookAttribute;
+    }
+
+    /**
 	 * Возвращает код справочника, на которое ссылается атрибут
 	 * @return код справочника
 	 */

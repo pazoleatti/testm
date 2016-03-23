@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -385,11 +386,13 @@ public class ColumnDaoTest extends AbstractDao {
 
     //@Test
     public void saveFormColumns2Test() {
+        RefBookAttribute refBookAttribute = new RefBookAttribute();
 
         List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
 
         RefBookColumn refBookColumn = new RefBookColumn();
-        refBookColumn.setRefBookAttributeId(4L);
+        refBookColumn.setRefBookAttributeId1(4L);
+        refBookColumn.setRefBookAttribute(refBookAttribute);
         refBookColumn.setAlias("refBookColumn");
         refBookColumn.setName("Справочная графа");
         refBookColumn.setOrder(4);

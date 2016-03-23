@@ -107,19 +107,24 @@ public class RefBookHelperImplTest {
 
 	@Test
 	public void testDataRowsDereference() {
+        RefBookAttribute refBookAttribute1 = new RefBookAttribute();
+        RefBookAttribute refBookAttribute2 = new RefBookAttribute();
+
 		StringColumn sColumn = new StringColumn();
 		sColumn.setAlias("No");
 		sColumn.setId(1);
 		RefBookColumn rbColumn = new RefBookColumn();
 		rbColumn.setAlias("Rate");
 		rbColumn.setId(2);
-		rbColumn.setRefBookAttributeId(2L);
+		rbColumn.setRefBookAttributeId1(2L);
+        rbColumn.setRefBookAttribute(refBookAttribute2);
 		ReferenceColumn refColumn = new ReferenceColumn();
 		refColumn.setAlias("Country");
 		refColumn.setId(3);
 		refColumn.setParentId(2);
 		refColumn.setRefBookAttributeId(3L);
 		refColumn.setRefBookAttributeId2(1L);
+        refColumn.setRefBookAttribute(refBookAttribute1);
         ReferenceColumn dateColumn = new ReferenceColumn();
         dateColumn.setAlias("date");
         dateColumn.setId(4);
