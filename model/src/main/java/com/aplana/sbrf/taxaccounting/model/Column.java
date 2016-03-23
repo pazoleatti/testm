@@ -26,9 +26,6 @@ public abstract class Column implements Ordered, Serializable {
 		boolean matches(String valueToCheck);
 	}
 
-	public interface Formatter {
-		String format(String valueToFormat);
-	}
 	private static final long serialVersionUID = 1L;
 
 	private Integer id;
@@ -41,7 +38,7 @@ public abstract class Column implements Ordered, Serializable {
 	/** Номер столбца в таблице с данными. Принимает значения от MIN_DATA_ORDER до MAX_DATA_ORDER.
 	 * Также может иметь значение NULL для новых столбцов*/
 	private Integer dataOrder;
-
+    private ColumnFormatter formatter = new ColumnFormatter();
 	/**
 	 * Идентификатор столбца в БД
 	 * Если значение == null, то считается, что столбец новый и при его сохранении будет сгенерирован новый идентификатор
@@ -148,13 +145,8 @@ public abstract class Column implements Ordered, Serializable {
 	 * Возвращает объект, который форматирует значения в ячейках
 	 * @return
 	 */
-	public Formatter getFormatter() {
-		return new Formatter() {
-			@Override
-			public String format(String valueToFormat) {
-				return valueToFormat;
-			}
-		};
+	public ColumnFormatter getFormatter() {
+        return formatter;
 	}
 
 	public ValidationStrategy getValidationStrategy() {

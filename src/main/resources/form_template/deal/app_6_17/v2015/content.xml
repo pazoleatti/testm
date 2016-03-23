@@ -20,7 +20,7 @@
         <alias>name</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>Полное наименование юридического лица с указанием ОПФ</name>
+        <name>Полное наименование с указанием ОПФ</name>
         <order>2</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
@@ -94,7 +94,7 @@
         <alias>dealDate</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
-        <name>Дата заключения сделки</name>
+        <name>Дата  заключения сделки</name>
         <order>9</order>
         <width>6</width>
         <formatId>0</formatId>

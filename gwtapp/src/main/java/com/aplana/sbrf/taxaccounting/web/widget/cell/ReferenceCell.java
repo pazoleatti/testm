@@ -27,6 +27,8 @@ public class ReferenceCell extends com.google.gwt.cell.client.AbstractCell<Objec
         String rendValue = cell.getRefBookDereference();
         if (rendValue == null) {
             rendValue = "";
+        } else {
+            rendValue = column.getFormatter().format(rendValue);
         }
         SafeHtml safeValue = SafeHtmlUtils.fromString(String.valueOf(rendValue));
         sb.append(safeValue);

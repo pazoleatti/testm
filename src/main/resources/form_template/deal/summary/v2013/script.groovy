@@ -2009,19 +2009,23 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
         // 51. п. 050 "ИНН организации"
         colIndex = 50
-        formDataService.checkReferenceValue(9, values[colIndex], map.INN_KIO?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        def expectedValue = (map.INN_KIO?.stringValue != null ? map.INN_KIO?.stringValue : "")
+        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 52. п. 060 "КПП организации"
         colIndex++
-        formDataService.checkReferenceValue(9, values[colIndex], map.KPP?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (map.KPP?.stringValue != null ? map.KPP?.stringValue : "")
+        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
         colIndex++
-        formDataService.checkReferenceValue(9, values[colIndex], map.REG_NUM?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (map.REG_NUM?.stringValue != null ? map.REG_NUM?.stringValue : "")
+        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
         colIndex++
-        formDataService.checkReferenceValue(9, values[colIndex], map.TAXPAYER_CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (map.TAXPAYER_CODE?.stringValue != null ? map.TAXPAYER_CODE?.stringValue : "")
+        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 55. п. 090 "Адрес"
         colIndex++

@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 
 /**
  * Реализация {@link Column}, предназначенная для хранения числовых данных.
@@ -15,7 +13,7 @@ import java.math.RoundingMode;
  * @author dsultanbekov
  */
 public class NumericColumn extends Column implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2687461617629174348L;
 
 	/**
 	 * Максимально допустимое значение точности для числового столбца
@@ -33,7 +31,7 @@ public class NumericColumn extends Column implements Serializable {
 
 	private int maxLength = MAX_LENGTH;
 
-	private static Formatter formatter;
+	private ColumnFormatter formatter;
 
 	public NumericColumn() {
 		columnType = ColumnType.NUMBER;
@@ -55,6 +53,7 @@ public class NumericColumn extends Column implements Serializable {
 	 * @param precision желаемое значение точности
 	 */
 	public void setPrecision(int precision) {
+        formatter = null;
 		if (precision < 0 || precision > MAX_PRECISION) {
 			throw new IllegalArgumentException("Value " + precision + " is not supported by 'precision' field");
 		}
@@ -72,51 +71,17 @@ public class NumericColumn extends Column implements Serializable {
 	}
 
 	public void setMaxLength(int maxLength) {
+        formatter = null;
         if (maxLength<0||maxLength>MAX_LENGTH){
             throw new IllegalArgumentException("Value " + precision + " is not supported by 'precision' field");
         }
 		this.maxLength = maxLength;
 	}
 
-	@Override
-	public Formatter getFormatter() {
-		return formatter != null ? formatter :
-			new Formatter() {
-				@Override
-				public String format(String valueToFormat) {
-					valueToFormat = valueToFormat.replace(" ", "");
-					MathContext mathContext = new MathContext(maxLength);
-					BigDecimal val = new BigDecimal(valueToFormat, mathContext);
-					val = val.setScale(precision, RoundingMode.HALF_UP);
-
-					boolean hasSign = (val.signum() == -1);
-					if (hasSign) {
-						val = val.abs();
-					}
-                    String plainString = val.toPlainString();
-                    int pos = plainString.indexOf(".");
-                    int intLength;
-                    if (pos > 0) {
-                        intLength = pos;
-                    } else {
-                        intLength  = plainString.length();
-                    }
-                    StringBuilder stringBuilder = new StringBuilder(plainString.substring(0, intLength));
-                    for (int i = 3; i < intLength; i += 3) {
-                        if (i < intLength) {
-                            stringBuilder.insert(intLength - i, " ");
-                        }
-                    }
-                    if (precision > 0) {
-                        stringBuilder.append(plainString.substring(intLength, plainString.length()));
-                    }
-                    if (hasSign) {
-                        stringBuilder.insert(0, "-");
-                    }
-                    return stringBuilder.toString();
-                }
-			};
-	}
+    @Override
+	public ColumnFormatter getFormatter() {
+		return formatter != null ? formatter : (formatter = new NumericColumnFormatter(precision, maxLength));
+    }
 
 	@Override
 	public ValidationStrategy getValidationStrategy() {

@@ -74,8 +74,13 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                 String filter = rs.getString("filter");
                 if (parentColumnId == null) {
                     result = new RefBookColumn();
-                    ((RefBookColumn) result).setRefBookAttributeId(attributeId);
+                    ((RefBookColumn) result).setRefBookAttributeId1(attributeId);
                     ((RefBookColumn) result).setRefBookAttributeId2(attributeId2);
+                    if (attributeId2 != null) {
+                        ((RefBookColumn) result).setRefBookAttribute(refBookDao.getByAttribute(attributeId2).getAttribute(attributeId2));
+                    } else {
+                        ((RefBookColumn) result).setRefBookAttribute(refBookDao.getByAttribute(attributeId).getAttribute(attributeId));
+                    }
                     ((RefBookColumn) result).setFilter(filter);
                     RefBook refBook = refBookDao.getByAttribute(attributeId);
                     ((RefBookColumn) result).setHierarchical(refBook.getType() == 1);
@@ -90,6 +95,11 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                     result = new ReferenceColumn();
                     ((ReferenceColumn) result).setRefBookAttributeId(attributeId);
                     ((ReferenceColumn) result).setRefBookAttributeId2(attributeId2);
+                    if (attributeId2 != null) {
+                        ((ReferenceColumn) result).setRefBookAttribute(refBookDao.getByAttribute(attributeId2).getAttribute(attributeId2));
+                    } else {
+                        ((ReferenceColumn) result).setRefBookAttribute(refBookDao.getByAttribute(attributeId).getAttribute(attributeId));
+                    }
                     ((ReferenceColumn) result).setParentId(parentColumnId);
                 }
             } else if ("A".equals(type)) {

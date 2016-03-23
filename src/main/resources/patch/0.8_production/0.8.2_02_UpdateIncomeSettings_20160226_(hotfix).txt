@@ -1,0 +1,64 @@
+import groovy.transform.Field
+import org.springframework.jndi.JndiTemplate
+
+import javax.sql.DataSource
+
+@Field
+def dataSourceName = "java:comp/env/jdbc/TaxAccDS"
+
+setSettings()
+
+void setSettings() {
+    try {
+		Map<String, Object> params = new HashMap<String, Object>();
+		//Новый код ОКАТО - 36701330
+		namedParameterJdbcTemplate.update("insert into ref_book_oktmo (id, code, name,  parent_id, version, status, record_id) select seq_ref_book_oktmo.nextval as id, '36701330' as code, 'Октябрьский' as name, id as parent_id, date '2015-01-01' as version, 0 as status, 0 as record_id from ref_book_oktmo where code = '36701000'", params)
+		
+		//Переносим основную часть настроек
+		namedParameterJdbcTemplate.update("insert into ref_book_record (id, ref_book_id, record_id, version, status) select seq_ref_book_record.nextval, ref_book_id, record_id, date '2015-10-01', status from ref_book_record where id = 242158399", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242158399) and version = date '2015-10-01' and ref_book_id = 33), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242158399", params)
+		
+		//Переносим табличную часть настроек
+		namedParameterJdbcTemplate.update("insert into ref_book_record (id, ref_book_id, record_id, version, status) select seq_ref_book_record.nextval, ref_book_id, record_id, date '2015-10-01', status from ref_book_record where id in (242158599, 242158799, 242158699, 242158999, 242159099, 242158499, 242158899)", params)	  
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242158599) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242158599", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242158799) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242158799", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242158699) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242158699", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242158999) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242158999", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242159099) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242159099", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242158499) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242158499", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242158899) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242158899", params)
+	  
+		//Обновляем LINK на новую основную часть настроек
+		namedParameterJdbcTemplate.update("update ref_book_value set reference_value = (select id from ref_book_record where ref_book_id = 33 and version = date '2015-10-01' and record_id = (select record_id from ref_book_record where id = 242158399)) where attribute_id = 3301 and record_id in (select id from ref_book_record where record_id in (select record_id from ref_book_record where id in (242158599, 242158799, 242158699, 242158999, 242159099, 242158499, 242158899)) and version = date '2015-10-01' and ref_book_id = 330)", params)
+		
+		//Изменяемые параметры в периоде 2015-год
+		namedParameterJdbcTemplate.update(" merge into ref_book_value tgt using \n"+
+											" 	( with t as (select 242158799 as old_record_id, 3318 as attribute_id, null as string_value, (select id from ref_book_record r where ref_book_id = 35 and status = 0 and exists(select 1 from ref_book_value v where v.record_id = r.id and v.number_value = 2)) as reference_value from dual union all\n"+
+											" 		select 242158799, 3319, 'Лопатина' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158799, 3320, 'Елена' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158799, 3321, 'Викторовна' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158799, 3322, 'Доверенность' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158699, 3318,  null as string_value, (select id from ref_book_record r where ref_book_id = 35 and status = 0 and exists(select 1 from ref_book_value v where v.record_id = r.id and v.number_value = 2)) as reference_value from dual union all\n"+
+											" 		select 242158699, 3319, 'Лукина' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158699, 3320, 'Валентина' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158699, 3321, 'Андреевна' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158699, 3322, 'Доверенность' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158999, 3319, 'Фролова' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158999, 3320, 'Татьяна' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158999, 3321, 'Валентиновна' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242159099, 3311,  null as string_value, (select id from ref_book_oktmo r where code = '36701330') as reference_value from dual union all\n"+
+											" 		select 242158499, 3318,  null as string_value, (select id from ref_book_record r where ref_book_id = 35 and status = 0 and exists(select 1 from ref_book_value v where v.record_id = r.id and v.number_value = 2)) as reference_value from dual union all\n"+
+											" 		select 242158499, 3319, 'Ананьева' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158499, 3320, 'Инна' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158499, 3321, 'Валерьевна' as string_value, null as reference_value from dual union all\n"+
+											" 		select 242158499, 3322, 'Доверенность' as string_value, null as reference_value from dual )\n"+
+											" 	select rbr.id as record_id, t.attribute_id, t.string_value, t.reference_value from t\n"+
+											" 	join ref_book_record d on d.id = t.old_record_id\n"+
+											" 	join ref_book_record rbr on rbr.record_id = d.record_id and rbr.ref_book_id = 330 and rbr.version = date '2015-10-01' ) src\n"+
+											" on (tgt.record_id = src.record_id and tgt.attribute_id = src.attribute_id)\n"+
+											" when matched then\n"+
+											"      update set tgt.string_value = src.string_value, tgt.reference_value = src.reference_value", params)
+	} catch (Exception ex) {
+		logger.error("Ошибка: ${ex}")
+	}
+}

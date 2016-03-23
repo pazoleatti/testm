@@ -206,7 +206,7 @@
         <alias>countryCodeNumeric2</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>Место совершения сделки (адрес места доставки /разгрузки драгоценного металла). Код страны по классификатору ОКСМ (цифровой)</name>
+        <name>Место совершения сделки (адрес места доставки (разгрузки драгоценного металла). Код страны по классификатору ОКСМ (цифровой)</name>
         <order>19</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
@@ -218,7 +218,7 @@
         <alias>region2</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>Место совершения сделки (адрес места доставки /разгрузки драгоценного металла). &quot;Регион (код)&quot;</name>
+        <name>Место совершения сделки (адрес места доставки (разгрузки драгоценного металла). &quot;Регион (код)&quot;</name>
         <order>20</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
@@ -230,7 +230,7 @@
         <alias>city2</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Место совершения сделки (адрес места доставки /разгрузки драгоценного металла). Город</name>
+        <name>Место совершения сделки (адрес места доставки (разгрузки драгоценного металла). Город</name>
         <order>21</order>
         <width>5</width>
         <maxLength>50</maxLength>
@@ -240,7 +240,7 @@
         <alias>locality2</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Место совершения сделки (адрес места доставки /разгрузки драгоценного металла). Населенный пункт (село, поселок и т.д.)</name>
+        <name>Место совершения сделки (адрес места доставки (разгрузки драгоценного металла). Населенный пункт (село, поселок и т.д.)</name>
         <order>22</order>
         <width>6</width>
         <maxLength>50</maxLength>

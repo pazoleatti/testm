@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
@@ -22,12 +25,9 @@ public class ReferenceColumn extends Column {
 
     private Long refBookAttributeId2;
 
-    private static Formatter formatter = new Formatter() {
-        @Override
-        public String format(String valueToFormat) {
-            return String.valueOf(valueToFormat);
-        }
-    };
+    private RefBookAttribute refBookAttribute;
+
+    private ColumnFormatter formatter;
 
 	public ReferenceColumn() {
 		columnType = ColumnType.REFERENCE;
@@ -87,8 +87,22 @@ public class ReferenceColumn extends Column {
     }
 
     @Override
-    public Formatter getFormatter() {
-        return formatter;
+    public ColumnFormatter getFormatter() {
+        if (formatter != null) return formatter;
+        if (refBookAttribute != null && refBookAttribute.getAttributeType() != null
+                && refBookAttribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+            return formatter = new NumericColumnFormatter(refBookAttribute.getPrecision(), refBookAttribute.getMaxLength());
+        } else {
+            return formatter = new ColumnFormatter();
+        }
+    }
+
+    public RefBookAttribute getRefBookAttribute() {
+        return refBookAttribute;
+    }
+
+    public void setRefBookAttribute(RefBookAttribute refBookAttribute) {
+        this.refBookAttribute = refBookAttribute;
     }
 
     @Override

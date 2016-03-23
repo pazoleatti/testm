@@ -150,7 +150,6 @@ public class App_6_7Test extends ScriptTestBase {
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        // TODO (Ramil Timerbaev) добавить тесты для логических проверок 9
     }
 
     // Расчет пустой (в импорте - расчет заполненной)
