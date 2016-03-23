@@ -16,20 +16,29 @@ public class FormStyle implements Serializable {
 	private static final char COLOR_SEPARATOR = '-';
 	private static final String STYLE_PARSING_ERROR_MESSAGE = "Ошибка чтения стилей ячейки ";
 
+	public static final String NO_CHANGE_STYLE_ALIAS = "Корректировка-без изменений";
+	public static final String INSERT_STYLE_ALIAS = "Корректировка-добавлено";
+	public static final String DELETE_STYLE_ALIAS = "Корректировка-удалено";
+	public static final String CHANGE_STYLE_ALIAS = "Корректировка-изменено";
+	public static final String EDITABLE_STYLE_ALIAS = "Редактируемая";
+	public static final String AUTO_FILL_STYLE_ALIAS = "Автозаполняемая";
+
+	public static final String DEFAULT_STYLE_ALIAS = "По умолчанию";
+	public static final String MANUAL_EDITABLE_STYLE_ALIAS = "Ручной ввод-редактируемая";
+	public static final String MANUAL_READ_ONLY_STYLE_ALIAS = "Ручной ввод-только чтение";
 	/**
 	 * Стиль по умолчанию
 	 */
-	public static final FormStyle DEFAULT_STYLE = new FormStyle("default", Color.BLACK, Color.WHITE, false, false);
+	public static final FormStyle DEFAULT_STYLE = new FormStyle(DEFAULT_STYLE_ALIAS, Color.BLACK, Color.WHITE, false, false);
 	/**
 	 * Стиль для редактируемых ячеек в режиме ручного ввода
 	 */
-	public static final FormStyle MANUAL_EDITABLE_STYLE = new FormStyle("manual_editable", Color.BLACK, Color.LIGHT_BLUE, false, false);
+	public static final FormStyle MANUAL_EDITABLE_STYLE = new FormStyle(MANUAL_EDITABLE_STYLE_ALIAS, Color.BLACK, Color.LIGHT_BLUE, false, false);
 	/**
 	 * Стиль для НЕредактируемых ячеек в режиме ручного ввода
 	 */
-	public static final FormStyle MANUAL_READ_ONLY_STYLE = new FormStyle("manual_read_only", Color.BLACK, Color.WHITE, false, false);
+	public static final FormStyle MANUAL_READ_ONLY_STYLE = new FormStyle(MANUAL_READ_ONLY_STYLE_ALIAS, Color.BLACK, Color.WHITE, false, false);
 
-	private Integer id;
 	private String alias;
 	private Color fontColor = Color.BLACK; // цвет шрифта по умолчанию
 	private Color backColor = Color.WHITE; // цвет фона по умолчанию
@@ -49,22 +58,6 @@ public class FormStyle implements Serializable {
 		setBold(bold);
 	}
 
-	/**
-	 * Идентификатор записи в БД, если null, то стиль еще не был сохранён в БД
-	 * @return идентификатор записи в БД или null, если стиль еще не сохранялся в БД
-	 */
-    @XmlTransient
-	public Integer getId() {
-		return id;
-	}
-	/**
-	 * Задать идентификатор стиля в БД
-	 * @param id значение идентификатора (если объект еще не сохранялся в БД, то null)
-	 */
-	public void setId(Integer id) {
-		this.id = id;
-	}
-	
 	/**
 	 * Получить алиас стиля (используется в скриптах при указании стиля ячеек)
 	 * @return алас стиля

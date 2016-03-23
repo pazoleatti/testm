@@ -40,9 +40,9 @@ VALUES (3311, 'Строковый столбец', 331, 1, 'stringColumn', 'S', 
 INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, data_ord)
 VALUES (3312, 'Числовой столбец', 331, 2, 'numericColumn', 'N', 10, 2, 15, 0, 1);
 
-INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, italic, bold) VALUES (3291, 'alias1', 329, 3, 2, 1, 0);
-INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, italic, bold) VALUES (3292, 'alias2', 329, 2, 3, 0, 1);
-INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, italic, bold) VALUES (3293, 'alias3', 329, 1, 1, 1, 1);
+INSERT INTO form_style (alias, form_template_id, font_color, back_color, italic, bold) VALUES ('alias1', 329, 3, 2, 1, 0);
+INSERT INTO form_style (alias, form_template_id, font_color, back_color, italic, bold) VALUES ('alias2', 329, 2, 3, 0, 1);
+INSERT INTO form_style (alias, form_template_id, font_color, back_color, italic, bold) VALUES ('alias3', 329, 1, 1, 1, 1);
 
 INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign, number_current_row) VALUES (329, 329, 101, 1, 3, 0, 2);
 INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (3291, 329, 101, 1, 3, 0);

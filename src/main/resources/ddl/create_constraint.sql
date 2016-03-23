@@ -43,7 +43,6 @@ alter table form_style add constraint form_style_chk_font_color check (font_colo
 alter table form_style add constraint form_style_chk_back_color check (back_color in (0,1,2,3,4,5,6,7,8,9,10,11,12,13));
 alter table form_style add constraint form_style_chk_italic check (italic in (0,1));
 alter table form_style add constraint form_style_chk_bold check (bold in (0,1));
-alter table form_style add constraint form_style_uniq_alias unique (form_template_id, alias);
 
 alter table blob_data add constraint blob_data_pk primary key(id);
 

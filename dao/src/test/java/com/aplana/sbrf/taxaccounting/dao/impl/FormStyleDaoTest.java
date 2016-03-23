@@ -41,21 +41,18 @@ public class FormStyleDaoTest {
 		//Then
 		Assert.assertEquals(NUMBER_OF_STYLES, listOfStylesInDb.size());
 
-		Assert.assertEquals(Integer.valueOf(1), listOfStylesInDb.get(FIRST_STYLE).getId());
 		Assert.assertEquals("alias1", listOfStylesInDb.get(FIRST_STYLE).getAlias());
 		Assert.assertEquals(Color.LIGHT_BLUE, listOfStylesInDb.get(FIRST_STYLE).getFontColor());
 		Assert.assertEquals(Color.LIGHT_BROWN, listOfStylesInDb.get(FIRST_STYLE).getBackColor());
 		Assert.assertEquals(true, listOfStylesInDb.get(FIRST_STYLE).isItalic());
 		Assert.assertEquals(false, listOfStylesInDb.get(FIRST_STYLE).isBold());
 
-		Assert.assertEquals(Integer.valueOf(2), listOfStylesInDb.get(SECOND_STYLE).getId());
 		Assert.assertEquals("alias2", listOfStylesInDb.get(SECOND_STYLE).getAlias());
 		Assert.assertEquals(Color.LIGHT_BROWN, listOfStylesInDb.get(SECOND_STYLE).getFontColor());
 		Assert.assertEquals(Color.LIGHT_BLUE, listOfStylesInDb.get(SECOND_STYLE).getBackColor());
 		Assert.assertEquals(false, listOfStylesInDb.get(SECOND_STYLE).isItalic());
 		Assert.assertEquals(true, listOfStylesInDb.get(SECOND_STYLE).isBold());
 
-		Assert.assertEquals(Integer.valueOf(3), listOfStylesInDb.get(THIRD_STYLE).getId());
 		Assert.assertEquals("alias3", listOfStylesInDb.get(THIRD_STYLE).getAlias());
 		Assert.assertEquals(Color.LIGHT_YELLOW, listOfStylesInDb.get(THIRD_STYLE).getFontColor());
 		Assert.assertEquals(Color.LIGHT_YELLOW, listOfStylesInDb.get(THIRD_STYLE).getBackColor());

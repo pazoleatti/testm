@@ -45,7 +45,6 @@ public class DataRowMapperTest {
 		List<FormStyle> styles = new ArrayList<FormStyle>();
 		FormStyle style = new FormStyle();
 		style.setAlias("style");
-		style.setId(345);
 		styles.add(style);
 		return new Cell(null, styles);
 	}

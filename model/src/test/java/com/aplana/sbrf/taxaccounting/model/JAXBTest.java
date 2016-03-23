@@ -72,7 +72,6 @@ public class JAXBTest {
 
         List<FormStyle> formStyles = new ArrayList<FormStyle>();
         FormStyle formStyle1 = new FormStyle();
-        formStyle1.setId(1);
         formStyle1.setAlias("Редактируемая");
         formStyle1.setBackColor(Color.LIGHT_BLUE);
         formStyle1.setFontColor(Color.LIGHT_BROWN);

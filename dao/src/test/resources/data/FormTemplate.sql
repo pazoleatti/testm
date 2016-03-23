@@ -31,9 +31,9 @@ insert into form_column (id, name, form_template_id, ord, alias, type, width, pr
 insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, checking, numeration_row, data_ord)
 	values (4, 'Автонумеруемая графа', 1, 4, 'autoNumerationColumn', 'A', 10, null, 0, 1, 3);
 
-insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (1, 'alias1', 1, 3, 2, 1, 0);
-insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (2, 'alias2', 1, 2, 3, 0, 1);
-insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (3, 'alias3', 1, 1, 1, 1, 1);
+insert into form_style (alias, form_template_id, font_color, back_color, italic, bold) values ('alias1', 1, 3, 2, 1, 0);
+insert into form_style (alias, form_template_id, font_color, back_color, italic, bold) values ('alias2', 1, 2, 3, 0, 1);
+insert into form_style (alias, form_template_id, font_color, back_color, italic, bold) values ('alias3', 1, 1, 1, 1, 1);
 
 --insert into form_script (id, form_template_id, name, ord, body, condition, per_row) values (1, 1, 'scriptName1', 1, '', '', 0);
 --insert into event_script (event_code, script_id, ord) values (1, 1, 0);

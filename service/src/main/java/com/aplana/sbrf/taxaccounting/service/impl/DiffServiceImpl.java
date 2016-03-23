@@ -176,16 +176,16 @@ public class DiffServiceImpl implements DiffService {
 
         if (diffType == null) {
             // Строка не изменилась
-            rowStyle(dataRow, styleService.get(StyleService.STYLE_NO_CHANGE));
+            rowStyle(dataRow, styleService.get(FormStyle.NO_CHANGE_STYLE_ALIAS));
             return;
         }
 
         switch (diffType) {
             case INSERT:
-                rowStyle(dataRow, styleService.get(StyleService.STYLE_INSERT));
+                rowStyle(dataRow, styleService.get(FormStyle.INSERT_STYLE_ALIAS));
                 return;
             case DELETE:
-                rowStyle(dataRow, styleService.get(StyleService.STYLE_DELETE));
+                rowStyle(dataRow, styleService.get(FormStyle.DELETE_STYLE_ALIAS));
                 return;
             case CHANGE:
                 for (String key : dataRow.keySet()) {
@@ -194,7 +194,7 @@ public class DiffServiceImpl implements DiffService {
                     Cell cell = dataRow.getCell(key);
                     // Стиль
                     if (isValueChanged(originalCell.getValue(), revisedCell.getValue())) {
-                        cell.setStyle(styleService.get(StyleService.STYLE_CHANGE));
+                        cell.setStyle(styleService.get(FormStyle.CHANGE_STYLE_ALIAS));
                     } else {
                         // Если ячейки являются зависимыми, то необходимо сравнить их родительские графы
                         if (originalCell.getColumn().getColumnType() == ColumnType.REFERENCE
@@ -212,7 +212,7 @@ public class DiffServiceImpl implements DiffService {
                             if (!isValueChanged(originalParentCell.getValue(), revisedParentCell.getValue())) {
                                 // Если у зависимой графы не поменялось значение родительской графы, то зависимая графа
                                 // тоже считается не измененной
-                                cell.setStyle(styleService.get(StyleService.STYLE_NO_CHANGE));
+                                cell.setStyle(styleService.get(FormStyle.NO_CHANGE_STYLE_ALIAS));
                             } else {
                                 // Родительская графа изменилась, нужно сравнить разыменованные значения
                                 String originalDereference = null;
@@ -256,13 +256,13 @@ public class DiffServiceImpl implements DiffService {
                                     }
                                 }
                                 if (isValueChanged(originalDereference, revisedDereference)) {
-                                    cell.setStyle(styleService.get(StyleService.STYLE_CHANGE));
+                                    cell.setStyle(styleService.get(FormStyle.CHANGE_STYLE_ALIAS));
                                 } else {
-                                    cell.setStyle(styleService.get(StyleService.STYLE_NO_CHANGE));
+                                    cell.setStyle(styleService.get(FormStyle.NO_CHANGE_STYLE_ALIAS));
                                 }
                             }
                         } else {
-                            cell.setStyle(styleService.get(StyleService.STYLE_NO_CHANGE));
+                            cell.setStyle(styleService.get(FormStyle.NO_CHANGE_STYLE_ALIAS));
                         }
                     }
                     // Значение

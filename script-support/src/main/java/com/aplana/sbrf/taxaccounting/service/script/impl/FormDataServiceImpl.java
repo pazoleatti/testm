@@ -215,13 +215,13 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         if (editableColumns != null) {
             for (String alias : editableColumns) {
                 row.getCell(alias).setEditable(true);
-                row.getCell(alias).setStyle(styleService.get(StyleService.EDITABLE_CELL_STYLE));
+                row.getCell(alias).setStyle(styleService.get(FormStyle.EDITABLE_STYLE_ALIAS));
             }
         }
         // Стиль для автозаполняемых
         if (autoFillColumns != null) {
             for (String alias : autoFillColumns) {
-                row.getCell(alias).setStyle(styleService.get(StyleService.AUTO_FILL_CELL_STYLE));
+                row.getCell(alias).setStyle(styleService.get(FormStyle.AUTO_FILL_STYLE_ALIAS));
             }
         }
 

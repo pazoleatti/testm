@@ -39,12 +39,12 @@ public class DiffServiceTest {
     public void init() {
         ReflectionTestUtils.setField(diffService, "refBookHelper", mock(RefBookHelper.class));
 		styleService = mock(StyleService.class);
-		when(styleService.get(StyleService.STYLE_NO_CHANGE)).thenReturn(new FormStyle(StyleService.STYLE_NO_CHANGE, Color.BLACK, Color.GREY, false, false));
-		when(styleService.get(StyleService.STYLE_INSERT)).thenReturn(new FormStyle(StyleService.STYLE_INSERT, Color.BLACK, Color.PALE_GREEN, false, false));
-		when(styleService.get(StyleService.STYLE_DELETE)).thenReturn(new FormStyle(StyleService.STYLE_DELETE, Color.BLACK, Color.LIGHT_CORAL, false, false));
-		when(styleService.get(StyleService.STYLE_CHANGE)).thenReturn(new FormStyle(StyleService.STYLE_CHANGE, Color.RED, Color.WHITE, false, true));
-		when(styleService.get(StyleService.EDITABLE_CELL_STYLE)).thenReturn(new FormStyle(StyleService.EDITABLE_CELL_STYLE, Color.BLACK, Color.LIGHT_BLUE, false, false));
-		when(styleService.get(StyleService.AUTO_FILL_CELL_STYLE)).thenReturn(new FormStyle(StyleService.AUTO_FILL_CELL_STYLE, Color.DARK_GREEN, Color.WHITE, false, true));
+		when(styleService.get(FormStyle.NO_CHANGE_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.NO_CHANGE_STYLE_ALIAS, Color.BLACK, Color.GREY, false, false));
+		when(styleService.get(FormStyle.INSERT_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.INSERT_STYLE_ALIAS, Color.BLACK, Color.PALE_GREEN, false, false));
+		when(styleService.get(FormStyle.DELETE_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.DELETE_STYLE_ALIAS, Color.BLACK, Color.LIGHT_CORAL, false, false));
+		when(styleService.get(FormStyle.CHANGE_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.CHANGE_STYLE_ALIAS, Color.RED, Color.WHITE, false, true));
+		when(styleService.get(FormStyle.EDITABLE_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.EDITABLE_STYLE_ALIAS, Color.BLACK, Color.LIGHT_BLUE, false, false));
+		when(styleService.get(FormStyle.AUTO_FILL_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.AUTO_FILL_STYLE_ALIAS, Color.DARK_GREEN, Color.WHITE, false, true));
 		ReflectionTestUtils.setField(diffService, "styleService", styleService);
     }
 
@@ -182,16 +182,16 @@ public class DiffServiceTest {
     public void getDiffTest() {
         List<FormStyle> styles = new LinkedList<FormStyle>();
         FormStyle formStyle = new FormStyle();
-        formStyle.setAlias(StyleService.STYLE_CHANGE);
+        formStyle.setAlias(FormStyle.CHANGE_STYLE_ALIAS);
         styles.add(formStyle);
         formStyle = new FormStyle();
-        formStyle.setAlias(StyleService.STYLE_NO_CHANGE);
+        formStyle.setAlias(FormStyle.NO_CHANGE_STYLE_ALIAS);
         styles.add(formStyle);
         formStyle = new FormStyle();
-        formStyle.setAlias(StyleService.STYLE_INSERT);
+        formStyle.setAlias(FormStyle.INSERT_STYLE_ALIAS);
         styles.add(formStyle);
         formStyle = new FormStyle();
-        formStyle.setAlias(StyleService.STYLE_DELETE);
+        formStyle.setAlias(FormStyle.DELETE_STYLE_ALIAS);
         styles.add(formStyle);
         List<Column> columns = getColumnList();
 
@@ -228,11 +228,11 @@ public class DiffServiceTest {
             Cell cell = dataRow.getCell(key);
             styleList.add(cell.getStyle().toString());
         }
-        Assert.assertEquals(styleService.get(StyleService.STYLE_NO_CHANGE).toString(), styleList.get(0));
-        Assert.assertEquals(styleService.get(StyleService.STYLE_CHANGE).toString(), styleList.get(1));
-        Assert.assertEquals(styleService.get(StyleService.STYLE_CHANGE).toString(), styleList.get(2));
-        Assert.assertEquals(styleService.get(StyleService.STYLE_CHANGE).toString(), styleList.get(3));
-        Assert.assertEquals(styleService.get(StyleService.STYLE_CHANGE).toString(), styleList.get(4));
+        Assert.assertEquals(styleService.get(FormStyle.NO_CHANGE_STYLE_ALIAS).toString(), styleList.get(0));
+        Assert.assertEquals(styleService.get(FormStyle.CHANGE_STYLE_ALIAS).toString(), styleList.get(1));
+        Assert.assertEquals(styleService.get(FormStyle.CHANGE_STYLE_ALIAS).toString(), styleList.get(2));
+        Assert.assertEquals(styleService.get(FormStyle.CHANGE_STYLE_ALIAS).toString(), styleList.get(3));
+        Assert.assertEquals(styleService.get(FormStyle.CHANGE_STYLE_ALIAS).toString(), styleList.get(4));
     }
 
     // Тестовые графы

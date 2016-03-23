@@ -155,34 +155,10 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     formTemplate.isUpdating(),
                     formTemplateId
             );
+			formStyleDao.saveFormStyles(formTemplate);
 
-            //http://jira.aplana.com/browse/SBRFACCTAX-11384
-            final Collection<Integer> removedStyleIds = formStyleDao.saveFormStyles(formTemplate);
-            /*final Map<ColumnKeyEnum, Collection<Long>> columns  = columnDao.updateFormColumns(formTemplate);
-
-            //Очистка полей содержащих значения удаленных стилей
-            if (!removedStyleIds.isEmpty()){
-                ArrayList<Long> allColumnsForUpdate = new ArrayList<Long>() {{
-                    addAll(columns.get(ColumnKeyEnum.UPDATED)!=null?columns.get(ColumnKeyEnum.UPDATED):new ArrayList<Long>(0));
-                    addAll(columns.get(ColumnKeyEnum.ADDED)!=null?columns.get(ColumnKeyEnum.ADDED):new ArrayList<Long>(0));
-                }};
-                StringBuilder sb = new StringBuilder();
-                for (Long colId : allColumnsForUpdate) {
-                    sb.append(SqlUtils.transformToSqlInStatement(String.format("c%d_style_id", colId), removedStyleIds));
-                    sb.append(" OR ");
-                }
-                if (!sb.toString().isEmpty()){
-                    String sqlForUpdateStyles = sb.toString().substring(0, sb.toString().lastIndexOf("OR") - 1);
-
-                    int num = getJdbcTemplate().update(
-                            String.format(
-                                    "update form_data_%d set %s where %s",
-                                    formTemplate.getId(),
-                                    transformForCleanColumns(allColumnsForUpdate, "_style_id"), sqlForUpdateStyles)
-                    );
-                    LOG.info("Number of updated styles " + num);
-                }
-            }*/
+			//todo http://jira.aplana.com/browse/SBRFACCTAX-14414 Изменить структуру хранения НФ.
+			//final Map<ColumnKeyEnum, Collection<Long>> columns  = columnDao.updateFormColumns(formTemplate);
 
             return formTemplateId;
         } catch (DataAccessException e){

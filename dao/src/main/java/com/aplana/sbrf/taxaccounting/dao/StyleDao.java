@@ -1,25 +1,26 @@
-package com.aplana.sbrf.taxaccounting.service;
+package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
 import java.util.List;
 
 /**
- * Сервис для работы со стилями ячеек НФ
+ * ДАО для работы со стилями ячеек НФ
  *
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
- * @since 15.03.2016 17:45
+ * @since 21.03.2016 15:29
  */
-public interface StyleService {
-
+public interface StyleDao {
 	/**
 	 * Получить стиль по его алиасу
 	 * @param alias алиас стиля.
 	 * @return стиль
+	 * @throws IncorrectResultSizeDataAccessException если стиль не найден
 	 */
 	FormStyle get(String alias);
 	/**
-	 * Получить все стили, включая встроенный "По умолчанию"
+	 * Получить все стили
 	 * @return
 	 */
 	List<FormStyle> getAll();

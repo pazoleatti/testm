@@ -1,10 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.StyleDao;
 import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.service.StyleService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Сервис для работы со стилями ячеек НФ
@@ -16,37 +21,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class StyleServiceImpl implements StyleService {
 
+	@Autowired
+	private StyleDao styleDao;
+
 	@Override
 	public FormStyle get(String alias) {
-		// встроенные стили
 		if (FormStyle.DEFAULT_STYLE.getAlias().equals(alias)) {
 			return FormStyle.DEFAULT_STYLE;
 		}
-		if (FormStyle.MANUAL_EDITABLE_STYLE.getAlias().equals(alias)) {
-			return FormStyle.MANUAL_EDITABLE_STYLE;
-		}
-		if (FormStyle.MANUAL_READ_ONLY_STYLE.getAlias().equals(alias)) {
-			return FormStyle.MANUAL_READ_ONLY_STYLE;
-		}
-		// стили из "бд"
-		if (STYLE_NO_CHANGE.equals(alias)) {
-			return new FormStyle(StyleService.STYLE_NO_CHANGE, Color.BLACK, Color.GREY, false, false);
-		}
-		if (STYLE_INSERT.equals(alias)) {
-			return new FormStyle(StyleService.STYLE_INSERT, Color.BLACK, Color.PALE_GREEN, false, false);
-		}
-		if (STYLE_DELETE.equals(alias)) {
-			return new FormStyle(StyleService.STYLE_DELETE, Color.BLACK, Color.LIGHT_CORAL, false, false);
-		}
-		if (STYLE_CHANGE.equals(alias)) {
-			return new FormStyle(StyleService.STYLE_CHANGE, Color.RED, Color.WHITE, false, true);
-		}
-		if (EDITABLE_CELL_STYLE.equals(alias)) {
-			return new FormStyle(StyleService.EDITABLE_CELL_STYLE, Color.BLACK, Color.LIGHT_BLUE, false, false);
-		}
-		if (AUTO_FILL_CELL_STYLE.equals(alias)) {
-			return new FormStyle(StyleService.AUTO_FILL_CELL_STYLE, Color.DARK_GREEN, Color.WHITE, false, true);
-		}
-		return null;
+		return styleDao.get(alias);
+	}
+
+	@Override
+	public List<FormStyle> getAll() {
+		List<FormStyle> styles = new ArrayList<FormStyle>();
+		styles.add(FormStyle.DEFAULT_STYLE);
+		styles.addAll(styleDao.getAll());
+		return styles;
 	}
 }
