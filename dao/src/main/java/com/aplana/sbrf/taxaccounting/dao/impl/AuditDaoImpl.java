@@ -677,7 +677,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		}
 	}
 
-    public String orderByClause(HistoryBusinessSearchOrdering ordering, boolean ascSorting) {
+    private String orderByClause(HistoryBusinessSearchOrdering ordering, boolean ascSorting) {
         StringBuilder order = new StringBuilder();
         order.append(" order by ");
         String column = null;
