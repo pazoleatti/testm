@@ -568,7 +568,6 @@ void importTransportData() {
     String[] rowCells
     int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
-    def totalTF = null        // итоговая строка со значениями из тф для добавления
     def newRows = []
 
     loadRecordIdsInMap()
@@ -582,12 +581,8 @@ void importTransportData() {
             fileRowIndex++
             rowIndex++
             if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
-                // итоговая строка тф
-                rowCells = reader.readNext()
-                if (rowCells != null) {
-                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
-                }
                 break
+                // итоговые строки не проверяем
             }
             def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
             if (newRow) {
@@ -601,63 +596,7 @@ void importTransportData() {
     // отображать ошибки переполнения разряда
     showMessages(newRows, logger)
 
-    // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
-        def totalColumnsIndexMap = [
-                'income'           : 23,
-                'deduction'        : 24,
-                'taxBase'          : 25,
-                'calculated'       : 26,
-                'withheld'         : 27,
-                'listed'           : 28,
-                'withheldAgent'    : 29,
-                'nonWithheldAgent' : 30,
-                'col_041_1'        : 32,
-                'col_043_1_1'      : 34,
-                'col_043_1_2'      : 36,
-                'col_043_1_3'      : 38,
-                'col_043_1_4'      : 40,
-                'col_043_1_5'      : 42,
-                'col_041_2'        : 44,
-                'col_043_2_1'      : 46,
-                'col_043_2_2'      : 48,
-                'col_043_2_3'      : 50,
-                'col_043_2_4'      : 52,
-                'col_043_2_5'      : 54,
-                'col_041_3'        : 56,
-                'col_043_3_1'      : 58,
-                'col_043_3_2'      : 60,
-                'col_043_3_3'      : 62,
-                'col_043_3_4'      : 64,
-                'col_043_3_5'      : 66,
-                'col_052_3_1'      : 68,
-                'col_052_3_2'      : 70
-        ]
-
-        // итоговая строка для сверки сумм
-        def totalTmp = formData.createDataRow()
-        totalColumnsIndexMap.keySet().asList().each { alias ->
-            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-        }
-
-        // подсчет итогов
-        for (def row : newRows) {
-            if (row.getAlias()) {
-                continue
-            }
-            totalColumnsIndexMap.keySet().asList().each { alias ->
-                def value1 = totalTmp.getCell(alias).value
-                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-                totalTmp.getCell(alias).setValue(value1 + value2, null)
-            }
-        }
-
-        // сравнение контрольных сумм
-        checkTFSum(totalTmp, totalTF, totalColumnsIndexMap.keySet().asList(), totalTF?.getImportIndex(), logger, false)
-    } else {
-        logger.warn("В транспортном файле не найдена итоговая строка")
-    }
+    // сравнение итогов убрали
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(newRows)
