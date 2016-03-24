@@ -229,8 +229,9 @@ void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
 
     def prevDataRows = getPrevDataRows()
-    def countMap = getTradeNumberCountMap(prevDataRows)
-    def rowMap = getTradeNumberObjectMap(prevDataRows)
+    def currCountMap = getTradeNumberCountMap(dataRows)
+    def prevCountMap = getTradeNumberCountMap(prevDataRows)
+    def prevRowMap = getTradeNumberObjectMap(prevDataRows)
     if (prevDataRows != null && !prevDataRows.isEmpty() && dataRows.size() > 1) {
         // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11)
         //      в текущем отчетном периоде (выполняется один раз для всего экземпляра)
@@ -238,8 +239,8 @@ void logicCheck() {
         def severalContract = []
         prevDataRows.each { prevRow ->
             if (prevRow.getAlias() == null && prevRow.reserveCalcValue > 0) {
-                def count = countMap[prevRow.tradeNumber]
-                if (count == 0) {
+                def count = currCountMap[prevRow.tradeNumber]
+                if (count == null) {
                     missContract.add(prevRow.tradeNumber)
                 } else if (count > 1) {
                     severalContract.add(prevRow.tradeNumber)
@@ -314,14 +315,14 @@ void logicCheck() {
         }
         // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )
         if (!isBalancePeriod() && !isConsolidated) {
-            def result = checkOld(row, 'lotSizePrev', 'lotSizeCurrent', rowMap)
+            def result = checkOld(row, 'lotSizePrev', 'lotSizeCurrent', prevRowMap)
             if (result) {
                 loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 4» (${row.lotSizePrev}) текущей строки РНУ-25 за текущий период = «Графе 5» ($result) строки РНУ-25 за предыдущий период, значение «Графы 3» которой соответствует значению «Графы 3» РНУ-25 за текущий период.")
             }
         }
         // 12. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 6, 11 (за предыдущий период) )
         if (!isBalancePeriod() && !isConsolidated) {
-            def result = checkOld(row, 'reserve', 'reserveCalcValue', rowMap)
+            def result = checkOld(row, 'reserve', 'reserveCalcValue', prevRowMap)
             if (result) {
                 loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 6» (${row.reserve}) текущей строки РНУ-25 за текущий период = «Графе 11» ($result) строки РНУ-25 за предыдущий период, значение «Графы 3» которой соответствует значению «Графы 3» РНУ-25 за текущий период.")
             }
@@ -330,7 +331,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
         // 16. Арифметические проверки граф 6, 10..13
         if (!isBalancePeriod()) {
-            needValue['reserve'] = calc6(rowMap, countMap, row)
+            needValue['reserve'] = calc6(prevRowMap, prevCountMap, row)
             needValue['costOnMarketQuotation'] = calc10(row)
             needValue['reserveCalcValue'] = calc11(row, sign)
             needValue['reserveCreation'] = calc12(row)
