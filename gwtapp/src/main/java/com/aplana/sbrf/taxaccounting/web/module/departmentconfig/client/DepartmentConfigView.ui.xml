@@ -223,7 +223,7 @@
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle">
                                         <g:cell width="1%" height="22px">
-                                            <g:Label ui:field="taxOrganCodeLabel" text="Код налогового органа:" addStyleNames="{style.leftLabels}"/>
+                                            <g:Label ui:field="taxOrganCodeLabel" text="Код налогового органа (кон.):" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
                                             <aplana:TextBox ui:field="taxOrganCode" width="150px" maxLength="4"/>
@@ -291,7 +291,7 @@
 
                             <g:cell width="50%">
                                 <g:VerticalPanel spacing="2" width="100%" ui:field="taxTypeIPanel">
-                                    <style:LabelSeparator text="Ответственный за декларацию" addStyleNames="{style.labelSeparetors}"/>
+                                    <style:LabelSeparator ui:field="labelResponsible" text="Ответственный за декларацию" addStyleNames="{style.labelSeparetors}"/>
 
                                     <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle">
                                         <g:cell width="1%" height="22px">

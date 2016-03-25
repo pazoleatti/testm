@@ -176,6 +176,11 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             if (TaxType.VAT.equals(action.getTaxType())) {
                 depCombined.setTaxOrganCodeProm((paramsMap.get(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name()).getStringValue()));
             }
+
+            // МУКС
+            if (TaxType.DEAL.equals(action.getTaxType())) {
+                depCombined.setTaxOrganCodeProm((paramsMap.get(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name()).getStringValue()));
+            }
         }
 
         // Если запись не нашлась, то готовим новую

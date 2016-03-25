@@ -120,6 +120,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			type;
 
     @UiField
+    @Editor.Ignore
+    LabelSeparator labelResponsible;
+
+    @UiField
     CheckBox prepayment;
 
     @UiField
@@ -521,13 +525,13 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         periodPickerPopup.setType(taxType.name());
         currentTaxType = taxType;
         taxTypeLabel.setText(taxType.getName());
-        if (TaxType.VAT.equals(taxType)) {
-            taxOrganCodeLabel.setText("Код налогового органа (кон.):");
-            taxOrganCodePromPanel.setVisible(true);
+        //taxOrganCodeLabel.setText("Код налогового органа (кон.):");
+        if (TaxType.DEAL.equals(taxType)) {
+            labelResponsible.setText("Ответственный за уведомление");
         } else {
-            taxOrganCodeLabel.setText("Код налогового органа:");
-            taxOrganCodePromPanel.setVisible(false);
+            labelResponsible.setText("Ответственный за декларацию");
         }
+
 		reloadDepartments();
 	}
 

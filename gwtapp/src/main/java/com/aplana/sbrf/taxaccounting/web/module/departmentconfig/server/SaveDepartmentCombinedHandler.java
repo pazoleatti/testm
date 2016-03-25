@@ -150,6 +150,11 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 paramsMap.put(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getTaxOrganCodeProm()));
             }
 
+            // МУКС
+            if (TaxType.DEAL.equals(action.getTaxType())) {
+                paramsMap.put(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getTaxOrganCodeProm()));
+            }
+
             Logger logger = new Logger();
             /** Проверка существования справочных атрибутов */
             /*checkReferenceValues(provider, refBook, paramsMap, period.getCalendarStartDate(), period.getEndDate(), logger);
