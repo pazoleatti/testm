@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstan
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateRowUiHandlers;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTemplateExt;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -44,6 +45,7 @@ public class FormTemplateRowPresenter
 		void addCustomHeader(List<DataRow<HeaderCell>> newHeaders);
 	}
 
+    private FormTemplateExt formTemplateExt;
 	private FormTemplate formTemplate;
 
 	@Inject
@@ -56,7 +58,8 @@ public class FormTemplateRowPresenter
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		formTemplate = event.getFormTemplateExt().getFormTemplate();
+        formTemplateExt = event.getFormTemplateExt();
+        formTemplate = event.getFormTemplateExt().getFormTemplate();
 		setViewData();
 	}
 
@@ -84,7 +87,7 @@ public class FormTemplateRowPresenter
 
 	private void setViewData() {
 		FormDataUtils.setValueOwners(formTemplate.getHeaders());
-		getView().setStylesData(formTemplate.getStyles());
+		getView().setStylesData(formTemplateExt.getStyles());
 		getView().setColumnsData(formTemplate.getColumns());
 		getView().setRowsData(formTemplate.getRows());
 		getView().addCustomHeader(formTemplate.getHeaders());
