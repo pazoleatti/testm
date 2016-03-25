@@ -717,7 +717,7 @@ void checkItog(def dataRows) {
     checkItogRows(groupRows, testItogRows, itogRows, new GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
-            return getValuesByGroupColumn(row)
+            return row.code
         }
     }, new CheckGroupSum() {
         @Override
@@ -760,6 +760,16 @@ void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.Gro
                 itogRows.remove(row)
             } else {
                 groupCount++
+            }
+        } else {
+            // нефиксированная строка и отсутствует последний итог
+            if (i == dataRows.size() - 1) {
+                itogRows.add(groupCount, null)
+                groupCount++
+                String groupCols = groupString.getString(row);
+                if (groupCols != null) {
+                    logger.error("Группа «%s» не имеет строки итога!", groupCols); // итога (не  подитога)
+                }
             }
         }
     }

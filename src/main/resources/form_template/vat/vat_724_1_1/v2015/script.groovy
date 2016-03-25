@@ -938,7 +938,7 @@ void compareSpecificTotalValues(def dataRows, def sectionMap) {
         checkItogRows(sectionRows, calcPeriodTotals, periodTotals, new GroupString() {
             @Override
             String getString(DataRow<Cell> row) {
-                return getValuesByGroupColumn(row)
+                return getRefBookValue(8, row.period)?.NAME?.stringValue
             }
         }, new CheckGroupSum() {
             @Override
@@ -1031,6 +1031,16 @@ void checkItogRows(def dataRows, def testItogRows, def itogRows, GroupString gro
             } else {
                 groupCount++
             }
+        } else {
+            // нефиксированная строка и отсутствует последний итог
+            if (i == dataRows.size() - 1) {
+                itogRows.add(groupCount, null)
+                groupCount++
+                String groupCols = groupString.getString(row);
+                if (groupCols != null) {
+                    rowLog(logger, row, String.format("Группа «%s» не имеет строки итога!", groupCols), logLevel); // итога (не  подитога)
+                }
+            }
         }
     }
     if (testItogRows.size() == itogRows.size()) {
@@ -1065,8 +1075,6 @@ String getValuesByGroupColumn(DataRow row) {
     // графа 12
     if (row?.period) {
         value = getRefBookValue(8, row.period)?.NAME?.stringValue
-    } else {
-        value = 'графа 2 не задана'
     }
     return value
 }

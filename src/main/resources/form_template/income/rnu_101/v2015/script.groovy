@@ -402,7 +402,9 @@ void importData() {
             } else {
                 row = rows[subTotalRow.getIndex() - 1]
                 def groupValue = getValuesByGroupColumn(row)
-                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, groupValue))
+                if (groupValue != null) {
+                    rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, groupValue))
+                }
             }
         }
         if (!totalRowFromFileMap.isEmpty()) {
@@ -680,7 +682,7 @@ void checkItog(def dataRows) {
     checkItogRows(groupRows, testItogRows, itogRows, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
-            return getValuesByGroupColumn(row)
+            return row.incomeCode
         }
     }, new ScriptUtils.CheckGroupSum() {
         @Override
@@ -724,6 +726,16 @@ void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.Gro
             } else {
                 groupCount++
             }
+        } else {
+            // нефиксированная строка и отсутствует последний итог
+            if (i == dataRows.size() - 1) {
+                itogRows.add(groupCount, null)
+                groupCount++
+                String groupCols = groupString.getString(row);
+                if (groupCols != null) {
+                    logger.error("Группа «%s» не имеет строки итога!", groupCols); // итога (не  подитога)
+                }
+            }
         }
     }
     if (testItogRows.size() == itogRows.size()) {
@@ -752,8 +764,6 @@ String getValuesByGroupColumn(DataRow row) {
     // графа 7
     if (row?.incomeCode) {
         value = row.incomeCode
-    } else {
-        value = 'графа 7 не задана'
     }
     return value
 }
