@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -199,20 +200,21 @@ public class PeriodServiceImpl implements PeriodService {
 
             }
 		}
-        lockDataService.unlockAll(user);
 	}
 
 	private boolean checkBeforeClose(List<Integer> departments, int reportPeriodId, List<LogEntry> logs, TAUser user) {
 		boolean allGood = true;
         List<FormData> formDataList = formDataService.find(departments, reportPeriodId);
         for (FormData fd : formDataList) {
-            LockData lock = lockDataService.getLock(formDataService.generateTaskKey(fd.getId(), ReportType.EDIT_FD));
-            if (lock != null) {
+            Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(fd.getId());
+            if (lockType != null) {
                 logs.add(new LogEntry(LogLevel.WARNING,
                         "Форма " + fd.getFormType().getName() +
                                 " " + fd.getKind().getTitle() +
                                 " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
-                                " редактируется пользователем " + userService.getUser(lock.getUserId()).getName()));
+                                " заблокировна пользователем " + userService.getUser(lockType.getSecond().getUserId()).getName() +
+                                " (запущена операция \"" + formDataService.getTaskName(lockType.getFirst(), fd.getId(), userService.getSystemUserInfo()) +"\")")
+                );
                 allGood = false;
             }
         }
