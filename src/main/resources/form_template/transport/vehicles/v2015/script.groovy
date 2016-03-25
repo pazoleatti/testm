@@ -1238,7 +1238,7 @@ def loggerError(def row, def msg) {
 
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 26
+    int COLUMN_COUNT = 27
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
     String TABLE_END_VALUE = null

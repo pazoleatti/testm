@@ -922,10 +922,16 @@ public final class ScriptUtils {
      */
     @SuppressWarnings("unused")
     public static void checkHeaderSize(List<List<String>> headerRows, int referenceColSize, int referenceRowSize) {
-        if (headerRows.isEmpty()) {
+        if (headerRows == null || headerRows.isEmpty()) {
             throw new ServiceException(WRONG_HEADER_START);
         }
-        checkHeaderSize(headerRows.get(headerRows.size() - 1).size(), headerRows.size(), referenceColSize, referenceRowSize);
+        int currentColSize = 0;
+        for (List<String> row : headerRows) {
+            if (row != null) {
+                currentColSize = Math.max(row.size(), currentColSize);
+            }
+        }
+        checkHeaderSize(currentColSize, headerRows.size(), referenceColSize, referenceRowSize);
     }
 
     /**
