@@ -467,30 +467,24 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                 if (!checkSet.add(subreport.getAlias())) {
                     logger.error(
                             String.format(
-                                    "Нарушено требование к уникальности, уже существует отчет с псевдонимом \"%s\" в данной версии макета!",
-                                    subreport.getAlias()
+                                    "Отчет №\"%s\". Нарушено требование к уникальности, уже существует отчет с псевдонимом \"%s\" в данной версии макета!",
+                                    subreport.getOrder(), subreport.getAlias()
                             )
                     );
                 }
                 if (subreport.getAlias().getBytes().length > SUBREPORT_ALIAS_MAX_VALUE) {
-                    logger.error("Значение для псевдонима отчета \"" + subreport.getAlias() +
-                            "\" слишком велико (фактическое: " + subreport.getAlias().getBytes().length
-                            + ", максимальное: " + SUBREPORT_ALIAS_MAX_VALUE + ")");
+                    logger.error("Отчет №\"%s\". Значение для псевдонима отчета слишком велико (фактическое: %d, максимальное: %d)",
+                            subreport.getOrder(), subreport.getAlias().getBytes().length, SUBREPORT_ALIAS_MAX_VALUE);
                 }
             }
 
             if (subreport.getName() == null || subreport.getName().isEmpty()) {
-                logger.error(
-                        String.format(
-                                "Отчет №\"%s\". Поле \"Наименование\" обязательно для заполнения.",
-                                subreport.getOrder(), subreport.getName()
-                        )
-                );
+                logger.error("Отчет №\"%s\". Поле \"Наименование\" обязательно для заполнения.",
+                            subreport.getOrder(), subreport.getName());
             } else {
                 if (subreport.getName().getBytes().length > SUBREPORT_NAME_MAX_VALUE) {
-                    logger.error("Значение для имени отчета \"" + subreport.getName() +
-                            "\" слишком велико (фактическое: " + subreport.getName().getBytes().length +
-                            ", максимальное: " + SUBREPORT_NAME_MAX_VALUE + ")");
+                    logger.error("Отчет №\"%s\". Значение для имени отчета слишком велико (фактическое: %d, максимальное: %d)",
+                                 subreport.getOrder(), subreport.getName().getBytes().length, SUBREPORT_NAME_MAX_VALUE);
                 }
             }
         }
