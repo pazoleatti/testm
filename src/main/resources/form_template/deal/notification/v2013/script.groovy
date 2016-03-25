@@ -113,7 +113,7 @@ void generateXML() {
 
     // атрибуты элементов Файл и Документ
     def fileId = TaxType.DEAL.declarationPrefix + "_" +
-            departmentParam.TAX_ORGAN_CODE.value + "_" +
+            departmentParam.TAX_ORGAN_CODE_PROM?.value + "_" +
             departmentParam.TAX_ORGAN_CODE.value + "_" +
             departmentParam.INN.value + "" + departmentParam.KPP.value + "_" +
             Calendar.getInstance().getTime().format('yyyyMMdd') + "_" +
@@ -351,7 +351,10 @@ List<String> getErrorDepartment(record) {
         errorList.add("«КПП»")
     }
     if (record.TAX_ORGAN_CODE?.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
-        errorList.add("«Код налогового органа»")
+        errorList.add("«Код налогового органа (кон.)»")
+    }
+    if (record.TAX_ORGAN_CODE_PROM?.stringValue == null || record.TAX_ORGAN_CODE_PROM.stringValue.isEmpty()) {
+        errorList.add("«Код налогового органа (пром.)»")
     }
     if (record.OKVED_CODE?.referenceValue == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
