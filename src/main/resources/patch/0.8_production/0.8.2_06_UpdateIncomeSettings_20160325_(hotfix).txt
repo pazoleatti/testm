@@ -1,0 +1,62 @@
+import groovy.transform.Field
+import org.springframework.jndi.JndiTemplate
+
+import javax.sql.DataSource
+
+@Field
+def dataSourceName = "java:comp/env/jdbc/TaxAccDS"
+
+setSettings()
+
+void setSettings() {
+    try {
+		Map<String, Object> params = new HashMap<String, Object>();
+		
+		//SBRFACCTAX-15165 - Волго-Вятский банк УНП
+		//"117";"25.03.2016 13:09:07";"";"id = 242152199; version = 2015-07-01; kpp = 332802001; tax_organ = 3328; name = 'Владимирское отделение №8611 ПАО Сбербанк'; oktmo = 17701000- город Владимир; additional_name = 'Владимирское отделение №8611 ПАО Сбербанк'; link = 242151499; phone = 831-416-67-37; docname = Доверенность 1336/23-Д от 17.09.2013; orgname = null;  "
+		//"118";"25.03.2016 13:09:07";"";"id = 242151799; version = 2015-07-01; kpp = 526002001; tax_organ = 5260; name = 'Волго-Вятский банк ПАО Сбербанк'; oktmo = 22701000- город Нижний Новгород; additional_name = 'Волго-Вятский банк ПАО Сбербанк'; link = 242151499; phone = 831-416-67-37; docname = Доверенность 1336/23-Д от 17.09.2013; orgname = null;  "
+		//"119";"25.03.2016 13:09:07";"";"id = 242151999; version = 2015-07-01; kpp = 434502001; tax_organ = 4345; name = 'Кировское отделение №8612 ПАО Сбербанк '; oktmo = 33701000- город Киров; additional_name = 'Кировское отделение №8612 ПАО Сбербанк '; link = 242151499; phone = 831-416-67-37; docname = Доверенность 1336/23-Д от 17.09.2013; orgname = null;  "
+		//"120";"25.03.2016 13:09:07";"";"id = 242151899; version = 2015-07-01; kpp = 132602001; tax_organ = 1326; name = 'Мордовское отделение №8589 ПАО Сбербанк '; oktmo = 89701000- Саранск; additional_name = 'Мордовское отделение №8589 ПАО Сбербанк'; link = 242151499; phone = 831-416-67-37; docname = Доверенность 1336/23-Д от 17.09.2013; orgname = null;  "
+		//"121";"25.03.2016 13:09:07";"";"id = 242151599; version = 2015-07-01; kpp = 165502001; tax_organ = 1655; name = 'Отделение ""Банк Татарстан"" №8610 ПАО Сбербанк'; oktmo = 92701000- город Казань; additional_name = 'Отделение ""Банк Татарстан"" №8610 ПАО Сбербанк'; link = 242151499; phone = 831-416-67-37; docname = Доверенность 1336/23-Д от 17.09.2013; orgname = null;  "
+		//"122";"25.03.2016 13:09:07";"";"id = 242152099; version = 2015-07-01; kpp = 121543001; tax_organ = 1215; name = 'Отделение Марий Эл №8614 ПАО Сбербанк'; oktmo = 88701000- город Йошкар-Ола; additional_name = 'Отделение Марий Эл №8614 ПАО Сбербанк '; link = 242151499; phone = 831-416-67-37; docname = Доверенность 1336/23-Д от 17.09.2013; orgname = null;  "
+		//"123";"25.03.2016 13:09:07";"";"id = 242151699; version = 2015-07-01; kpp = 213002001; tax_organ = 2130; name = 'Чувашское отделение №8613 ПАО Сбербанк '; oktmo = 97701000- город Чебоксары; additional_name = 'Чувашское отделение №8613 ПАО Сбербанк'; link = 242151499; phone = 831-416-67-37; docname = Доверенность 1336/23-Д от 17.09.2013; orgname = null;  "
+
+		
+		//Переносим основную часть настроек
+		namedParameterJdbcTemplate.update("insert into ref_book_record (id, ref_book_id, record_id, version, status) select seq_ref_book_record.nextval, ref_book_id, record_id, date '2015-10-01', status from ref_book_record where id = 242151499", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242151499) and version = date '2015-10-01' and ref_book_id = 33), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242151499", params)
+		
+		//Переносим табличную часть настроек
+		namedParameterJdbcTemplate.update("insert into ref_book_record (id, ref_book_id, record_id, version, status) select seq_ref_book_record.nextval, ref_book_id, record_id, date '2015-10-01', status from ref_book_record where id in (242152199, 242151799, 242151999, 242151899, 242151599, 242152099, 242151699)", params)	  
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242152199) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242152199", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242151799) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242151799", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242151999) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242151999", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242151899) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242151899", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242151599) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242151599", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242152099) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242152099", params)
+		namedParameterJdbcTemplate.update("insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value) select (select id from ref_book_record where record_id = (select record_id from ref_book_record where id = 242151699) and version = date '2015-10-01' and ref_book_id = 330), attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = 242151699", params)
+		
+		
+		//Обновляем LINK на новую основную часть настроек
+		namedParameterJdbcTemplate.update("update ref_book_value set reference_value = (select id from ref_book_record where ref_book_id = 33 and version = date '2015-10-01' and record_id = (select record_id from ref_book_record where id = 242151499)) where attribute_id = 3301 and record_id in (select id from ref_book_record where record_id in (select record_id from ref_book_record where id in (242152199, 242151799, 242151999, 242151899, 242151599, 242152099, 242151699)) and version = date '2015-10-01' and ref_book_id = 330)", params)
+		
+		//Изменяемые параметры в периоде 2015-год
+		namedParameterJdbcTemplate.update(" merge into ref_book_value tgt using \n"+
+											" 	( with t as (select 242152199 as old_record_id, 3322 as attribute_id, 'Доверенность 459/10-ДГ от 24.12.2015' as string_value, null as reference_value from dual union all\n"+
+											" 				 select 242151799, 3322, 'Доверенность 459/10-ДГ от 24.12.2015' as string_value, null as reference_value from dual union all\n"+
+											" 				 select 242151999, 3322, 'Доверенность 459/10-ДГ от 24.12.2015' as string_value, null as reference_value from dual union all\n"+
+											" 				 select 242151899, 3322, 'Доверенность 459/10-ДГ от 24.12.2015' as string_value, null as reference_value from dual union all\n"+
+											" 				 select 242151599, 3322, 'Доверенность 459/10-ДГ от 24.12.2015' as string_value, null as reference_value from dual union all\n"+
+											" 				 select 242152099, 3322, 'Доверенность 459/10-ДГ от 24.12.2015' as string_value, null as reference_value from dual union all\n"+
+											" 				 select 242151699, 3322, 'Доверенность 459/10-ДГ от 24.12.2015' as string_value, null as reference_value from dual ) \n"+
+											" 	select rbr.id as record_id, t.attribute_id, t.string_value, t.reference_value from t\n"+
+											" 	join ref_book_record d on d.id = t.old_record_id\n"+
+											" 	join ref_book_record rbr on rbr.record_id = d.record_id and rbr.ref_book_id = 330 and rbr.version = date '2015-10-01') src\n"+
+											" on (tgt.record_id = src.record_id and tgt.attribute_id = src.attribute_id)\n"+
+											" when matched then\n"+
+											"      update set tgt.string_value = src.string_value, tgt.reference_value = src.reference_value", params)
+												
+	} catch (Exception ex) {
+		logger.error("Ошибка: ${ex}")
+	}
+}
