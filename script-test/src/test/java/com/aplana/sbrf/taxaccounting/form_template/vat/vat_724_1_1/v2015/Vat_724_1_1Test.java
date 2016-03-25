@@ -116,6 +116,7 @@ public class Vat_724_1_1Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getCustomInputStream(name));
         testHelper.setImportFileName(name);
         testHelper.execute(FormDataEvent.IMPORT);
+        checkLogger();
         testHelper.getLogger().clear();
         for (DataRow<Cell> dataRow : testHelper.getDataRowHelper().getAllCached()) {
             dataRow.setImportIndex(null);
@@ -139,7 +140,9 @@ public class Vat_724_1_1Test extends ScriptTestBase {
         Assert.assertEquals("Строка 13: Должна быть заполнена хотя бы одна из граф с суммой корректировки (+, -) НДС (раздел 1-9)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 17: Графы с суммой корректировки (+, -) налоговой базы (раздел 7-9) не должны быть заполнены!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 17: Графа «Данные бухгалтерского учёта. Величина корректировки НДС. Номер балансового счёта» заполнена неверно! Возможные значения (раздел 8): пустое значение, «6030901», «6030904», «6030905».", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «второй квартал» не имеет строки итога!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 10: Строка итога не относится к какой-либо группе!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «четвёртый квартал» не имеет строки итога!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 15: Строка итога не относится к какой-либо группе!", entries.get(i++).getMessage());
         Assert.assertEquals("Группа строк «четвёртый квартал» не имеет строки «ВСЕГО по дополнительному листу книги продаж за четвёртый квартал по ставке 18%»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());

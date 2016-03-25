@@ -222,7 +222,7 @@ void checkItog(def dataRows) {
     checkItogRows(groupRows, testItogRows, itogRows, new GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
-            return getValuesByGroupColumn(row)
+            return row.code
         }
     }, new CheckGroupSum() {
         @Override
@@ -266,6 +266,16 @@ void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.Gro
             } else {
                 groupCount++
             }
+        } else {
+            // нефиксированная строка и отсутствует последний итог
+            if (i == dataRows.size() - 1) {
+                itogRows.add(groupCount, null)
+                groupCount++
+                String groupCols = groupString.getString(row);
+                if (groupCols != null) {
+                    logger.error("Группа «%s» не имеет строки итога!", groupCols); // итога (не  подитога)
+                }
+            }
         }
     }
     if (testItogRows.size() == itogRows.size()) {
@@ -301,18 +311,6 @@ def calcSubTotalRows(def dataRows) {
 
     updateIndexes(tmpRows)
     return tmpRows.findAll { it.getAlias() }
-}
-
-// Возвращает строку со значениями полей строки по которым идет группировка
-String getValuesByGroupColumn(DataRow row) {
-    def value
-    // графа 12
-    if (row?.code) {
-        value = row.code
-    } else {
-        value = 'графа 12 не задана'
-    }
-    return value
 }
 
 // Алгоритмы заполнения полей формы
