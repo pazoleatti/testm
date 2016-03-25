@@ -113,7 +113,7 @@ void generateXML() {
 
     // атрибуты элементов Файл и Документ
     def fileId = TaxType.DEAL.declarationPrefix + "_" +
-            departmentParam.TAX_ORGAN_CODE_PROM?.value + "_" +
+            (useTaxOrganCodeProm() ? departmentParam.TAX_ORGAN_CODE_PROM?.value : departmentParam.TAX_ORGAN_CODE.value) + "_" +
             departmentParam.TAX_ORGAN_CODE.value + "_" +
             departmentParam.INN.value + "" + departmentParam.KPP.value + "_" +
             Calendar.getInstance().getTime().format('yyyyMMdd') + "_" +
@@ -336,6 +336,16 @@ void generateXML() {
     }
 }
 
+@Field
+def declarationReportPeriod
+
+boolean useTaxOrganCodeProm() {
+    if (declarationReportPeriod == null) {
+        declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    }
+    return (declarationReportPeriod?.taxPeriod?.year > 2015 || (declarationReportPeriod?.taxPeriod?.year == 2015 && declarationReportPeriod?.order > 3))
+}
+
 List<String> getErrorDepartment(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.NAME?.stringValue == null || record.NAME.stringValue.isEmpty()) {
@@ -353,7 +363,7 @@ List<String> getErrorDepartment(record) {
     if (record.TAX_ORGAN_CODE?.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
         errorList.add("«Код налогового органа (кон.)»")
     }
-    if (record.TAX_ORGAN_CODE_PROM?.stringValue == null || record.TAX_ORGAN_CODE_PROM.stringValue.isEmpty()) {
+    if (useTaxOrganCodeProm() && (record.TAX_ORGAN_CODE_PROM?.stringValue == null || record.TAX_ORGAN_CODE_PROM.stringValue.isEmpty())) {
         errorList.add("«Код налогового органа (пром.)»")
     }
     if (record.OKVED_CODE?.referenceValue == null) {
