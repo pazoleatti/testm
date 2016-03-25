@@ -193,14 +193,6 @@ void logicCheck() {
             rowError(logger, row, "Строка $rowNum: «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
-        // Проверка положительной суммы
-        if (incomeSumCell.value != null && incomeSumCell.value <= 0) {
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msgIn» должно быть больше «0»!")
-        }
-        if (outcomeSumCell.value != null && outcomeSumCell.value <= 0) {
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msgOut» должно быть больше «0»!")
-        }
-
         // Проверка диапазона дат
         if (row.contractDate) {
             checkDateValid(logger, row, 'contractDate', row.contractDate, true)
