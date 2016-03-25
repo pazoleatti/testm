@@ -212,8 +212,8 @@ public class PeriodServiceImpl implements PeriodService {
                         "Форма " + fd.getFormType().getName() +
                                 " " + fd.getKind().getTitle() +
                                 " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
-                                " заблокировна пользователем " + userService.getUser(lockType.getSecond().getUserId()).getName() +
-                                " (запущена операция \"" + formDataService.getTaskName(lockType.getFirst(), fd.getId(), userService.getSystemUserInfo()) +"\")")
+                                " заблокирована пользователем " + userService.getUser(lockType.getSecond().getUserId()).getName() +
+                                "(запущена операция \"" + formDataService.getTaskName(lockType.getFirst(), fd.getId(), userService.getSystemUserInfo()) +"\")")
                 );
                 allGood = false;
             }
