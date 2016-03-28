@@ -91,7 +91,7 @@ public class FilterTreeListenerTest {
         Filter.getFilterQuery("AliasStringType11 like 'any \\\'key' and (1=1 OR 1=1)", universalFilterTreeListener);
         assertTrue(result6.getQuery().toString().equals("aAliasStringType11.STRING_value like ? and(1 = 1 OR 1 = 1)"));
         assertTrue(result6.getParams().size() == 1);
-        assertTrue(result6.getParams().get(0).equals(new String("any \\\'key")));
+        assertTrue(result6.getParams().get(0).equals(new String("any 'key")));
 
         PreparedStatementData result7 = new PreparedStatementData();
         universalFilterTreeListener.setPs(result7);
@@ -105,7 +105,7 @@ public class FilterTreeListenerTest {
         Filter.getFilterQuery("AliasStringType11 like 'any \\\'key1' and AliasStringType11 like 'any key2' and AliasStringType11 like 'any key3'", universalFilterTreeListener);
         assertTrue(result8.getQuery().toString().equals("aAliasStringType11.STRING_value like ? and aAliasStringType11.STRING_value like ? and aAliasStringType11.STRING_value like ?"));
         assertTrue(result8.getParams().size() == 3);
-        assertTrue(result8.getParams().get(0).equals(new String("any \\\'key1")));
+        assertTrue(result8.getParams().get(0).equals(new String("any 'key1")));
         assertTrue(result8.getParams().get(1).equals(new String("any key2")));
         assertTrue(result8.getParams().get(2).equals(new String("any key3")));
     }

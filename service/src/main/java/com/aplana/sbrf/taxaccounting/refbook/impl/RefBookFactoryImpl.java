@@ -153,7 +153,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
             return null;
         }
 
-        String q = query.trim().toLowerCase();
+        String q = query.trim().toLowerCase().replaceAll("\'", "\\\\\'");
         StringBuilder resultSearch = new StringBuilder();
         RefBook refBook = get(refBookId);
         for (RefBookAttribute attribute : refBook.getAttributes()) {
