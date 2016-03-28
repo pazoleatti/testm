@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -23,6 +24,7 @@ import java.util.Map;
 @Repository
 public class StyleDaoImpl extends AbstractDao implements StyleDao  {
 
+	private static final String CACHE_NAME = "PermanentData";
 	private static final String SELECT_SQL_ALL = "SELECT alias, font_color, back_color, italic, bold FROM style ORDER BY alias";
 	private static final String SELECT_SQL = "SELECT alias, font_color, back_color, italic, bold FROM style WHERE alias = :alias";
 	private static final String GET_ERROR_MESSAGE = "Не найден стиль по указанному псевдониму \"%s\"";
@@ -43,6 +45,7 @@ public class StyleDaoImpl extends AbstractDao implements StyleDao  {
 	}
 
 	@Override
+	@Cacheable(value = CACHE_NAME, key = "'Style_' + #alias")
 	public FormStyle get(String alias) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("alias", alias);
@@ -54,6 +57,7 @@ public class StyleDaoImpl extends AbstractDao implements StyleDao  {
 	}
 
 	@Override
+	@Cacheable(value = CACHE_NAME, key = "'Style_all'")
 	public List<FormStyle> getAll() {
 		return getNamedParameterJdbcTemplate().query(SELECT_SQL_ALL, new StyleMapper());
 	}
