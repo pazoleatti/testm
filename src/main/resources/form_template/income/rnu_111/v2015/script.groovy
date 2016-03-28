@@ -304,11 +304,11 @@ void importData() {
 
     // сравнение итогов
     def totalRow = calcTotalRow(rows)
-    rows.add(totalRow)
-    updateIndexes(rows)
     if (totalRowFromFile) {
         compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+        rows.add(totalRow)
     }
+    updateIndexes(rows)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
