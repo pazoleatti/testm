@@ -83,9 +83,6 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'countryCode', 'price
 @Field
 def nonEmptyColumns = ['name', 'serviceName', 'sum', 'docDate', 'price', 'cost', 'dealDoneDate']
 
-@Field
-def totalColumns = ['sum', 'price', 'cost']
-
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -387,7 +384,6 @@ void importTransportData() {
     String[] rowCells
     int fileRowIndex = 2    // номер строки в файле (1, 2, ..)
     int rowIndex = 0        // номер строки в НФ (1, 2, ..)
-    def totalTF = null      // итоговая строка со значениями из тф для добавления
     def newRows = []
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
@@ -408,14 +404,9 @@ void importTransportData() {
             fileRowIndex++
             rowIndex++
             if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
-                // итоговая строка тф
-                rowCells = reader.readNext()
-                if (rowCells != null) {
-                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
-                }
                 break
             }
-            def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex, false)
+            def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
             if (newRow) {
                 newRows.add(newRow)
             }
@@ -426,11 +417,6 @@ void importTransportData() {
 
     // отображать ошибки переполнения разряда
     showMessages(newRows, logger)
-
-    // сравнение итогов
-    def totalRow = formData.createStoreMessagingDataRow()
-    calcTotalSum(newRows, totalRow, totalColumns)
-    checkAndSetTFSum(totalRow, totalTF, totalColumns, totalTF?.getImportIndex(), logger, false)
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(newRows)
@@ -445,11 +431,10 @@ void importTransportData() {
  * @param columnCount количество колонок
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
- * @param isTotal признак итоговой строки
  *
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
-def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal) {
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -469,42 +454,40 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     def int colOffset = 1
 
-    if (!isTotal) {
-        def String iksrName = getColumnName(newRow, 'iksr')
-        def nameFromFile = pure(rowCells[2])
-        def recordId = getTcoRecordId(nameFromFile,  pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
-        def map = getRefBookValue(520, recordId)
+    def String iksrName = getColumnName(newRow, 'iksr')
+    def nameFromFile = pure(rowCells[2])
+    def recordId = getTcoRecordId(nameFromFile,  pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+    def map = getRefBookValue(520, recordId)
 
-        // графа 2
-        newRow.name = recordId
-        // графа 3
-        if (map != null) {
-            def expectedValues = [ map.INN?.value, map.REG_NUM?.value, map.TAX_CODE_INCORPORATION?.value, map.SWIFT?.value, map.KIO?.value ]
-            expectedValues = expectedValues.unique().findAll{ it != null && it != '' }
-            formDataService.checkReferenceValue(pure(rowCells[3]), expectedValues, getColumnName(newRow, 'iksr'), map.NAME.value, fileRowIndex, 3 + colOffset, logger, false)
-        }
-        def countryMap
-        // графа 4.1
-        if (map != null) {
-            countryMap = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
-            if (countryMap != null) {
-                def expectedValues = [countryMap.NAME?.stringValue, countryMap.FULLNAME?.stringValue]
-                formDataService.checkReferenceValue(pure(rowCells[4]), expectedValues, getColumnName(newRow, 'countryName'), map.NAME.value, fileRowIndex, 4 + colOffset, logger, false)
-            }
-        }
-        // графа 4.2
-        if (countryMap != null) {
-            formDataService.checkReferenceValue(pure(rowCells[5]), [countryMap.CODE?.stringValue], getColumnName(newRow, 'countryCode'), map.NAME.value, fileRowIndex, 5 + colOffset, logger, false)
-        }
-        // графа 5
-        newRow.serviceName = getRecordIdImport(13, 'CODE', pure(rowCells[6]), fileRowIndex, 6 + colOffset, false)
-        // графа 7
-        newRow.docNumber = pure(rowCells[8])
-        // графа 8
-        newRow.docDate = parseDate(pure(rowCells[9]), "dd.MM.yyyy", fileRowIndex, 9 + colOffset, logger, true)
-        // графа 11
-        newRow.dealDoneDate = parseDate(pure(rowCells[12]), "dd.MM.yyyy", fileRowIndex, 12 + colOffset, logger, true)
+    // графа 2
+    newRow.name = recordId
+    // графа 3
+    if (map != null) {
+        def expectedValues = [ map.INN?.value, map.REG_NUM?.value, map.TAX_CODE_INCORPORATION?.value, map.SWIFT?.value, map.KIO?.value ]
+        expectedValues = expectedValues.unique().findAll{ it != null && it != '' }
+        formDataService.checkReferenceValue(pure(rowCells[3]), expectedValues, getColumnName(newRow, 'iksr'), map.NAME.value, fileRowIndex, 3 + colOffset, logger, false)
     }
+    def countryMap
+    // графа 4.1
+    if (map != null) {
+        countryMap = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
+        if (countryMap != null) {
+            def expectedValues = [countryMap.NAME?.stringValue, countryMap.FULLNAME?.stringValue]
+            formDataService.checkReferenceValue(pure(rowCells[4]), expectedValues, getColumnName(newRow, 'countryName'), map.NAME.value, fileRowIndex, 4 + colOffset, logger, false)
+        }
+    }
+    // графа 4.2
+    if (countryMap != null) {
+        formDataService.checkReferenceValue(pure(rowCells[5]), [countryMap.CODE?.stringValue], getColumnName(newRow, 'countryCode'), map.NAME.value, fileRowIndex, 5 + colOffset, logger, false)
+    }
+    // графа 5
+    newRow.serviceName = getRecordIdImport(13, 'CODE', pure(rowCells[6]), fileRowIndex, 6 + colOffset, false)
+    // графа 7
+    newRow.docNumber = pure(rowCells[8])
+    // графа 8
+    newRow.docDate = parseDate(pure(rowCells[9]), "dd.MM.yyyy", fileRowIndex, 9 + colOffset, logger, true)
+    // графа 11
+    newRow.dealDoneDate = parseDate(pure(rowCells[12]), "dd.MM.yyyy", fileRowIndex, 12 + colOffset, logger, true)
     // графа 6
     newRow.sum = parseNumber(pure(rowCells[7]), fileRowIndex, 7 + colOffset, logger, true)
     // графа 9
