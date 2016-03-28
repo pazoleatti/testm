@@ -244,7 +244,8 @@ create table form_column (
   parent_column_id number(9),
   attribute_id2 number(18),
   numeration_row number(9),
-  data_ord number(2) not null
+  data_ord number(2) not null,
+  short_name varchar2(1000)
 );
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
@@ -264,6 +265,7 @@ comment on column form_column.parent_column_id is 'Ссылка на родит�
 comment on column form_column.attribute_id2 is 'Код отображаемого атрибута для столбцов-ссылок второго уровня';
 comment on column form_column.numeration_row is 'Тип нумерации строк для автонумеруемой графы (0 - последовательная, 1 - сквозная)';
 comment on column form_column.data_ord is 'Порядковый номер столбца в таблице данных';
+comment on column form_column.short_name is 'Краткое наименование';
 
 create sequence seq_form_column start with 10000;
 ---------------------------------------------------------------------------------------------------

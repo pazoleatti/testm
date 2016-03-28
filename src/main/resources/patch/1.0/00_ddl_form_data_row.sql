@@ -7,6 +7,10 @@ SET SERVEROUTPUT ON SIZE 1000000;
 ALTER TABLE form_column ADD data_ord NUMBER(2);
 COMMENT ON COLUMN form_column.data_ord IS 'Порядковый номер столбца в таблице данных';
 
+--https://jira.aplana.com/browse/SBRFACCTAX-15158: добавить в FORM_COLUMN строковое поле SHORT_NAME
+alter table form_column add short_name varchar2(1000);
+comment on column form_column.short_name is 'Краткое наименование';
+
 MERGE INTO form_column tgt
 USING (select id, row_number() over (partition by form_template_id order by ord) - 1 as data_ord from form_column) src
 ON (tgt.id = src.id)
