@@ -1,3 +1,8 @@
+--https://jira.aplana.com/browse/SBRFACCTAX-15172: Код налогового органа (пром.) для МУКС
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (872,37,'Код налогового органа (пром.)','TAX_ORGAN_CODE_PROM',1,21,null,null,1,null,10,0,0,null,null,0,4);
+UPDATE ref_book_attribute SET name = 'Код налогового органа (кон.)' WHERE id = 185;	
+
+-----------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15018: 1.0. ТЦО. Реализовать справочник "Вид корректировки"
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (540,'Вид корректировки',1,0,0,null);
