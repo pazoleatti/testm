@@ -184,8 +184,7 @@ public class App_6_9Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         List<String> aliases = Arrays.asList("docNumber", "docDate", "price", "cost", "dealDoneDate");
-        // ожидается 5 строк
-        int expected = 5;
+        int expected = 4;
         defaultCheckLoadData(aliases, expected);
 
         checkLoadData(testHelper.getDataRowHelper().getAll());
@@ -312,11 +311,6 @@ public class App_6_9Test extends ScriptTestBase {
         Assert.assertEquals(1, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(1, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(1, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
-
-        Assert.assertNull(dataRows.get(4).getCell("price").getValue());
-        Assert.assertEquals(4, dataRows.get(4).getCell("count").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(4).getCell("finResult").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(4).getCell("cost").getNumericValue().doubleValue(), 0);
     }
 }
 
