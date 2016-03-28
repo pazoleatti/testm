@@ -244,7 +244,7 @@ public class Rnu_117Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         List<String> aliases = Arrays.asList("reasonNumber", "reasonDate", "rate", "sum1", "rate1", "sum2", "rate2", "sum3");
-        defaultCheckLoadData(aliases, 3);
+        defaultCheckLoadData(aliases, 2);
         checkLogger();
         checkLoadData(testHelper.getDataRowHelper().getAll());
 
