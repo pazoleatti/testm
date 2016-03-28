@@ -509,6 +509,34 @@ void importData() {
         rowValues.clear()
     }
 
+    // сравнение подитогов
+    if (!totalRowFromFileMap.isEmpty()) {
+        // получить посчитанные подитоги
+        def tmpSubTotalRows = calcSubTotalRows(rows)
+        tmpSubTotalRows.each { subTotalRow ->
+            def totalRows = totalRowFromFileMap[subTotalRow.getIndex()]
+            if (totalRows) {
+                totalRows.each { totalRow ->
+                    compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
+                }
+                totalRowFromFileMap.remove(subTotalRow.getIndex())
+            } else {
+                row = rows[subTotalRow.getIndex() - 1]
+                if (row.code) {
+                    rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, row.code))
+                }
+            }
+        }
+        if (!totalRowFromFileMap.isEmpty()) {
+            // для этих подитогов из файла нет групп
+            totalRowFromFileMap.each { key, totalRows ->
+                totalRows.each { totalRow ->
+                    rowWarning(logger, totalRow, String.format(GROUP_WRONG_ITOG_ROW, totalRow.getIndex()))
+                }
+            }
+        }
+    }
+
     // сравнение итогов
     def totalRow = calcTotalRow(rows)
     rows.add(totalRow)

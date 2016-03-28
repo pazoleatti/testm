@@ -401,9 +401,8 @@ void importData() {
                 totalRowFromFileMap.remove(subTotalRow.getIndex())
             } else {
                 row = rows[subTotalRow.getIndex() - 1]
-                def groupValue = getValuesByGroupColumn(row)
-                if (groupValue != null) {
-                    rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, groupValue))
+                if (row.incomeCode != null) {
+                    rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, row.incomeCode))
                 }
             }
         }
@@ -756,16 +755,6 @@ void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.Gro
             }
         }
     }
-}
-
-// Возвращает строку со значениями полей строки по которым идет группировка
-String getValuesByGroupColumn(DataRow row) {
-    def value
-    // графа 7
-    if (row?.incomeCode) {
-        value = row.incomeCode
-    }
-    return value
 }
 
 void afterLoad() {
