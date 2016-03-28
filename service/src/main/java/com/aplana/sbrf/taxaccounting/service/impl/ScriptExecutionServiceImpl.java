@@ -213,6 +213,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                                 logger.error("%s \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.",
                                         declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "Макет декларации" : "Макет уведомления",
                                         declarationTemplate.getName(), scriptName);
+                                continue;
                             }
                             logger.info("Выполнен импорт скрипта для макета декларации формы \"%s\"", declarationTemplate.getName());
                         } else {
@@ -245,6 +246,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                                 refBookScriptingService.saveScript(refBookId, script, logger);
                             } catch (ServiceLoggerException e) {
                                 logger.error("Справочник \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.", refBook.getName(), scriptName);
+                                continue;
                             }
                             logger.info("Выполнен импорт скрипта для справочника \"%s\"", refBook.getName());
                         } else {
