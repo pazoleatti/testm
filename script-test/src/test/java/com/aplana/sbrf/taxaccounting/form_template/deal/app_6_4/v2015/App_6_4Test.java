@@ -165,8 +165,7 @@ public class App_6_4Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         List<String> aliases = Arrays.asList("sum", "docNumber", "docDate", "price", "cost", "dealDoneDate");
-        // ожидается 5 строк: 4 из файла + 1 итоговая строка
-        int expected = 4 + 1;
+        int expected = 4;
         defaultCheckLoadData(aliases, expected);
 
         checkLogger();
@@ -183,8 +182,7 @@ public class App_6_4Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         List<String> aliases = Arrays.asList("sum", "docNumber", "docDate", "price", "cost", "dealDoneDate");
-        // ожидается 5 строк
-        int expected = 5;
+        int expected = 4;
         defaultCheckLoadData(aliases, expected);
 
         checkLoadData(testHelper.getDataRowHelper().getAll());
@@ -291,10 +289,6 @@ public class App_6_4Test extends ScriptTestBase {
         Assert.assertEquals(4, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(7, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(10, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
-
-        Assert.assertEquals(22, dataRows.get(4).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(22, dataRows.get(4).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(22, dataRows.get(4).getCell("cost").getNumericValue().doubleValue(), 0);
     }
 }
 
