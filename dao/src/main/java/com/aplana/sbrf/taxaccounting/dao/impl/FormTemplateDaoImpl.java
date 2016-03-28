@@ -745,8 +745,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
+    @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplateId", beforeInvocation = true),
+            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplateId + new String(\"_script\")", beforeInvocation = true)})
     public void updateScript(final int formTemplateId, final String script) {
         getJdbcTemplate().update("UPDATE FORM_TEMPLATE SET SCRIPT = ? WHERE ID = ?", script, formTemplateId);
     }

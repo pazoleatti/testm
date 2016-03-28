@@ -184,7 +184,7 @@ void logicCheck() {
 
         // 7. Проверка корректности даты совершения сделки
         // TODO (SBRFACCTAX-15094) заменить на checkDatePeriodExt
-        checkDatePeriodExt(logger, row, 'dealDoneDate', 'docDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
+        checkDatePeriodExtLocal(logger, row, 'dealDoneDate', 'docDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
     }
 }
 
