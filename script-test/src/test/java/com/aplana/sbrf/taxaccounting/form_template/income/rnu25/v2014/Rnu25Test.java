@@ -213,6 +213,12 @@ public class Rnu25Test extends ScriptTestBase {
         }
     }
 
+    /**
+     * Сообщение арифметической проверки.
+     *
+     * @param row строка
+     * @param columns список неправильных алиасов
+     */
     private String getWrongCalcMsg(DataRow<Cell> row, String [] columns) {
         List<String> tmpColumnNames = new ArrayList<String>();
         for (String alias : columns) {
@@ -784,7 +790,6 @@ public class Rnu25Test extends ScriptTestBase {
             msg = String.format(ScriptUtils.WRONG_NON_EMPTY, 1, row.getCell(column).getColumn().getName());
             Assert.assertEquals(msg, entries.get(i++).getMessage());
         }
-        // расчитываемые графы 6, 10..13
         String [] arithmeticCheckAlias = { "reserve", "costOnMarketQuotation", "reserveCalcValue", "reserveCreation", "reserveRecovery" };
         msg = getWrongCalcMsg(row, arithmeticCheckAlias);
         Assert.assertEquals(msg, entries.get(i++).getMessage());
@@ -893,7 +898,6 @@ public class Rnu25Test extends ScriptTestBase {
         Assert.assertEquals(msg, entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
-        dataRows.remove(subTotalRow2);
 
         // 18.1 Проверка итогового значений по всей форме
         row.getCell("rowNumber").setValue(1, null);
