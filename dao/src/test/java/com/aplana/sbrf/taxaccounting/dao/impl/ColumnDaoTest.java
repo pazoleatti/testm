@@ -46,6 +46,7 @@ public class ColumnDaoTest extends AbstractDao {
 
         assertEquals(Integer.valueOf(1), listOfColumnsInDb.get(FIRST_COLUMN).getId());
         assertEquals("Строковый столбец", listOfColumnsInDb.get(FIRST_COLUMN).getName());
+        assertEquals("Стр. столбец", listOfColumnsInDb.get(FIRST_COLUMN).getShortName());
         assertEquals(1, listOfColumnsInDb.get(FIRST_COLUMN).getOrder());
         assertEquals("stringColumn", listOfColumnsInDb.get(FIRST_COLUMN).getAlias());
         assertEquals(500, ((StringColumn) listOfColumnsInDb.get(FIRST_COLUMN)).getMaxLength());
@@ -53,12 +54,14 @@ public class ColumnDaoTest extends AbstractDao {
 
         assertEquals(Integer.valueOf(2), listOfColumnsInDb.get(SECOND_COLUMN).getId());
         assertEquals("Числовой столбец", listOfColumnsInDb.get(SECOND_COLUMN).getName());
+        assertEquals("Чис. столбец", listOfColumnsInDb.get(SECOND_COLUMN).getShortName());
         assertEquals(2, listOfColumnsInDb.get(SECOND_COLUMN).getOrder());
         assertEquals("numericColumn", listOfColumnsInDb.get(SECOND_COLUMN).getAlias());
         assertEquals(false, listOfColumnsInDb.get(SECOND_COLUMN).isChecking());
 
         assertEquals(Integer.valueOf(3), listOfColumnsInDb.get(THIRD_COLUMN).getId());
         assertEquals("Дата-столбец", listOfColumnsInDb.get(THIRD_COLUMN).getName());
+        assertEquals("Д-столбец", listOfColumnsInDb.get(THIRD_COLUMN).getShortName());
         assertEquals(3, listOfColumnsInDb.get(THIRD_COLUMN).getOrder());
 		assertEquals(2, listOfColumnsInDb.get(THIRD_COLUMN).getDataOrder().intValue());
 		assertEquals("dateColumn", listOfColumnsInDb.get(THIRD_COLUMN).getAlias());
@@ -66,6 +69,7 @@ public class ColumnDaoTest extends AbstractDao {
 
         assertEquals(Integer.valueOf(4), listOfColumnsInDb.get(FOURTH_COLUMN).getId());
         assertEquals("Автонумеруемая графа", listOfColumnsInDb.get(FOURTH_COLUMN).getName());
+        assertEquals("Авт. графа", listOfColumnsInDb.get(FOURTH_COLUMN).getShortName());
         assertEquals(4, listOfColumnsInDb.get(FOURTH_COLUMN).getOrder());
         assertEquals("autoNumerationColumn", listOfColumnsInDb.get(FOURTH_COLUMN).getAlias());
         assertEquals(false, listOfColumnsInDb.get(FOURTH_COLUMN).isChecking());
@@ -331,6 +335,7 @@ public class ColumnDaoTest extends AbstractDao {
         StringColumn newColumn = new StringColumn();
         newColumn.setAlias("newColumn");
         newColumn.setName("Новый столбец");
+        newColumn.setShortName("Нов. столбец");
         newColumn.setOrder(5);
 		newColumn.setDataOrder(newColumn.getOrder() - 1);
         newColumn.setMaxLength(100);
@@ -352,6 +357,7 @@ public class ColumnDaoTest extends AbstractDao {
         assertEquals(5, columnList.size());
         assertEquals("newColumn", newColumn.getAlias());
         assertEquals("Новый столбец", newColumn.getName());
+        assertEquals("Нов. столбец", newColumn.getShortName());
         assertEquals(5, newColumn.getOrder());
         assertEquals(100, newColumn.getMaxLength());
         assertEquals(false, newColumn.isChecking());

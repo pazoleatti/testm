@@ -111,6 +111,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			result.setId(SqlUtils.getInteger(rs, "id"));
 			result.setAlias(rs.getString("alias"));
 			result.setName(rs.getString("name"));
+			result.setShortName(rs.getString("short_name"));
 			result.setWidth(SqlUtils.getInteger(rs, "width"));
 			result.setOrder(SqlUtils.getInteger(rs, "ord"));
 			result.setDataOrder(SqlUtils.getInteger(rs, "data_ord"));
@@ -123,8 +124,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
     public List<Column> getFormColumns(int formId) {
 		return getJdbcTemplate().query(
 				"SELECT " +
-				"  id, name, form_template_id, alias, type, width, precision, ord, max_length, " +
-				"  checking, format, attribute_id, filter, parent_column_id, attribute_id2, numeration_row, data_ord " +
+				"  id, name, form_template_id, alias, type, width, precision, ord, max_length, checking, format, " +
+                        "attribute_id, filter, parent_column_id, attribute_id2, numeration_row, data_ord, short_name " +
 				"FROM form_column " +
 				"WHERE form_template_id = ? " +
 				"ORDER BY ord",
@@ -215,8 +216,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
         getJdbcTemplate().batchUpdate(
                 "INSERT INTO form_column (id, name, form_template_id, alias, type, width, precision, ord, max_length, " +
-                        "checking, format, attribute_id, filter, parent_column_id, attribute_id2, numeration_row, data_ord) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        "checking, format, attribute_id, filter, parent_column_id, attribute_id2, numeration_row, data_ord, short_name) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -304,6 +305,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             ps.setNull(16, Types.NUMERIC);
                         }
 						ps.setInt(17, col.getDataOrder());
+                        ps.setString(18, col.getShortName());
                     }
 
                     @Override
@@ -403,7 +405,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
         getJdbcTemplate().batchUpdate(
                 "UPDATE form_column SET name = ?, alias = ?, type = ?, width = ?, precision = ?, ord = ?, " +
                         "max_length = ?, checking = ?, format = ?, attribute_id = ?, filter = ?, " +
-                        "parent_column_id = ?, attribute_id2 = ?, numeration_row = ?, data_ord = ? " +
+                        "parent_column_id = ?, attribute_id2 = ?, numeration_row = ?, data_ord = ?, short_name = ? " +
                         "WHERE alias = ? and form_template_id = ?",
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -501,8 +503,9 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             ps.setNull(14, Types.NUMERIC);
                         }
 						ps.setInt(15, col.getDataOrder());
-                        ps.setString(16, col.getAlias());
-                        ps.setInt(17, formTemplate.getId());
+                        ps.setString(16, col.getShortName());
+                        ps.setString(17, col.getAlias());
+                        ps.setInt(18, formTemplate.getId());
                     }
 
                     @Override

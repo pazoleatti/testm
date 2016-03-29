@@ -39,6 +39,7 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Муниципальное образование, на территории которого зарегистрировано транспортное средство (ТС)</name>
+        <shortName>Муниципальное образование</shortName>
         <order>4</order>
         <width>15</width>
         <parentAlias>codeOKATO</parentAlias>
@@ -190,6 +191,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Доля налогоплательщика в праве на ТС</name>
+        <shortName>Доля налогоплательщика</shortName>
         <order>19</order>
         <width>9</width>
         <maxLength>21</maxLength>
@@ -261,6 +263,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Модель (версия) из перечня, утвержденного на налоговый период</name>
+        <shortName>Модель (версия)</shortName>
         <order>26</order>
         <width>8</width>
         <hierarchical>false</hierarchical>

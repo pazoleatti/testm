@@ -31,6 +31,7 @@ public abstract class Column implements Ordered, Serializable {
 	private Integer id;
 	protected ColumnType columnType;
 	private String name;
+	private String shortName;
 	private String alias;
 	private int width;
 	private boolean checking;
@@ -65,7 +66,7 @@ public abstract class Column implements Ordered, Serializable {
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * Задаёт наименование столбца
 	 * @param name желаемое значение наименования столбца
@@ -73,6 +74,22 @@ public abstract class Column implements Ordered, Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+    /**
+     * Возвращает краткое наименование столбца (заголовок)
+     * @return краткое наименование столбца
+     */
+    public String getShortName() {
+        return shortName;
+    }
+
+    /**
+     * Задаёт краткое наименование столбца
+     * @param shortName желаемое значение краткого наименования столбца
+     */
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
 	
 	/**
 	 * Возвращает алиас столбца. Алиас - это строковый псевдоним, который используется для доступа

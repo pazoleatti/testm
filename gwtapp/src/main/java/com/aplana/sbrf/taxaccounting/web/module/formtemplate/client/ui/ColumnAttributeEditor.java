@@ -33,6 +33,9 @@ public class ColumnAttributeEditor extends Composite implements Editor<Column>, 
 	private boolean initialized = false;
 	private final Driver driver = GWT.create(Driver.class);
 
+    @UiField
+    TextBox shortName;
+
 	@UiField
 	TextBox alias;
 
