@@ -255,6 +255,8 @@ void logicCheck() {
     // 14. Проверка итоговых значений пофиксированной строке «Всего»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
+    } else {
+        logger.error("Отсутствует итоговая строка!")
     }
 }
 

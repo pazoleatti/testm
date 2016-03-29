@@ -110,6 +110,7 @@ public class Rnu_122Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная Плата, % годовых / ед. вал."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная сумма дохода (расхода), выраженная в: Руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма доначисления дохода (корректировки расхода) до рыночного уровня (руб.)"), entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
 
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();

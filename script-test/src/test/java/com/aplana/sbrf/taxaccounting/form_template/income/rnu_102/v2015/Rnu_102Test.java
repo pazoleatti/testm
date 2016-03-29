@@ -103,6 +103,7 @@ public class Rnu_102Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактически начисленного расхода (руб.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма расхода, соответствующая рыночному уровню (руб.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма доначисления расхода до рыночного уровня (руб.)"), entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
 
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -124,6 +125,7 @@ public class Rnu_102Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(String.format("Строка %d: Неверное значение граф: %s!", 1, "«Сумма расхода, соответствующая рыночному уровню (руб.)», «Сумма доначисления расхода до рыночного уровня (руб.)»"), entries.get(i++).getMessage());
         Assert.assertEquals("Группа «1» не имеет строки итога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

@@ -103,6 +103,7 @@ public class Rnu_107Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактически начисленного дохода"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма дохода, соответствующая рыночному уровню тарифа"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма доначисления дохода до рыночного уровня тарифа"), entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -124,6 +125,8 @@ public class Rnu_107Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Основание для совершения операции. Дата","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного дохода» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Неверное значение граф: «Сумма доначисления дохода до рыночного уровня тарифа»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «1» не имеет строки итога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         testHelper.getLogger().clear();
 
         // Для прохождения всех ЛП
