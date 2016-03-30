@@ -78,33 +78,37 @@ update ref_book_attribute set is_unique = 0 where ref_book_id = 520 and alias in
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5220,520,'InnKio','INNKIO',1,20,null,null,0,null,10,0,0,null,null,0, 10);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5221,520,'RSK','RSK',1,21,null,null,0,null,10,0,0,null,null,0,50);
 
+--https://jira.aplana.com/browse/SBRFACCTAX-15169: 1.0. ТЦО. Добавить поле RS в справочник "Участники ТЦО"
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5222,520,'RS','RS',1,22,null,null,0,null,10,0,0,null,null,0,50);
+
 set serveroutput on size 30000;
 
 begin
 merge into ref_book_value tgt
 using (
 	with 
-		dt as (
-			select rbr.id, cast(org_code.number_value as number(1)) as ORG_CODE, rba.alias, rbv.string_value as val
-			from ref_book_record rbr
-			join ref_book_value org on org.record_id = rbr.id and org.attribute_id = 5203
-			join ref_book_value org_code on org.reference_value = org_code.record_id and org_code.attribute_id = 5131
-			join ref_book_attribute rba on rba.ref_book_id = rbr.ref_book_id and rbr.ref_book_id = 520
-			join ref_book_value rbv on rbv.record_id = rbr.id and rbv.attribute_id = rba.id 
-			where rbr.status <> -1 and rba.alias in ('INN', 'KIO', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT')),
-		dt_pivot as (
-			select id as record_id,
-			case when org_code = 1 then INN when org_code = 2 and KIO is not null then KIO else null end INNKIO,
-			case when org_code = 1 then null when org_code = 2 then nvl(nvl(REG_NUM, TAX_CODE_INCORPORATION), SWIFT) else null end as RSK
-			 from dt
-			pivot
-			(max(val) for alias in ('INN' INN, 'KIO' KIO, 'REG_NUM' REG_NUM, 'TAX_CODE_INCORPORATION' TAX_CODE_INCORPORATION, 'SWIFT' SWIFT)))
-	select * 
-	from dt_pivot
-	unpivot (string_value for attribute_id in (INNKIO as 5220, RSK as 5221))) src
+    dt as (
+      select rbr.id, cast(org_code.number_value as number(1)) as ORG_CODE, rba.alias, rbv.string_value as val
+      from ref_book_record rbr
+      join ref_book_value org on org.record_id = rbr.id and org.attribute_id = 5203
+      join ref_book_value org_code on org.reference_value = org_code.record_id and org_code.attribute_id = 5131
+      join ref_book_attribute rba on rba.ref_book_id = rbr.ref_book_id and rbr.ref_book_id = 520
+      join ref_book_value rbv on rbv.record_id = rbr.id and rbv.attribute_id = rba.id 
+      where rbr.status <> -1 and rba.alias in ('INN', 'KIO', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT')),
+    dt_pivot as (
+      select id as record_id,
+      case when org_code = 1 then INN when org_code = 2 and KIO is not null then KIO else null end INNKIO,
+      case when org_code = 1 then null when org_code = 2 then nvl(nvl(REG_NUM, TAX_CODE_INCORPORATION), SWIFT) else null end as RSK,
+      case when org_code = 1 then null when org_code = 2 then nvl(REG_NUM, SWIFT) else null end as RS
+       from dt
+      pivot
+      (max(val) for alias in ('INN' INN, 'KIO' KIO, 'REG_NUM' REG_NUM, 'TAX_CODE_INCORPORATION' TAX_CODE_INCORPORATION, 'SWIFT' SWIFT)))
+  select * 
+  from dt_pivot
+  unpivot (string_value for attribute_id in (INNKIO as 5220, RSK as 5221, RS as 5222))) src
 on (tgt.attribute_id = src.attribute_id and tgt.record_id = src.record_id)
 when matched then
-     update set tgt.string_value = src.string_value
+     update set tgt.string_value = src.string_value where tgt.string_value <> src.string_value
 when not matched then
      insert (tgt.record_id, tgt.attribute_id, tgt.string_value) values (src.record_id, src.attribute_id, src.string_value);
 	 
