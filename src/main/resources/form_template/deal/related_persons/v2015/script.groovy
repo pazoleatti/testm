@@ -745,7 +745,7 @@ def getShortRow(def recordId) {
     if (record520?.REG_NUM?.value) {
         value = record520?.REG_NUM?.value
     } else if (!record520?.REG_NUM?.value && !record520?.SWIFT?.value) {
-        value = record520?.KIO?.value
+        value = record520?.TAX_CODE_INCORPORATION?.value
     }
     values.add(value)
 

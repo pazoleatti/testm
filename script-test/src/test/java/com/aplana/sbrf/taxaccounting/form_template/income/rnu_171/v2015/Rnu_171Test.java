@@ -136,7 +136,7 @@ public class Rnu_171Test extends ScriptTestBase {
         i = 0;
         Assert.assertEquals("Строка 1: Дата по графе «Дата договора цессии» должна принимать значение из диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Доход (выручка) от уступки права требования (руб. коп.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Код налогового учета» должна принимать значение из следующего списка: «10360» или «10361»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Код налогового учета» должна принимать значение из следующего списка: «19540» или «19570»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Неверное значение граф: «Финансовый результат уступки права требования (руб. коп.)», «Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)», «Корректировка финансового результата (руб. коп.)»!", entries.get(i++).getMessage());
         Assert.assertEquals("Группа «10345» не имеет строки итога!", entries.get(i++).getMessage());
         Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
@@ -150,7 +150,7 @@ public class Rnu_171Test extends ScriptTestBase {
         row.getCell("repaymentDate").setValue(sdf.parse("01.03.2014"), null);
         row.getCell("concessionsDate").setValue(sdf.parse("02.03.2014"), null);
         row.getCell("income").setValue(1L, null);
-        row.getCell("code").setValue("10360", null);
+        row.getCell("code").setValue("19570", null);
         row.getCell("marketPrice").setValue(2L, null);
         row.getCell("finResult").setValue(1L, null);
         row.getCell("finResultTax").setValue(2L, null);
@@ -158,7 +158,7 @@ public class Rnu_171Test extends ScriptTestBase {
         dataRows.add(subTotal);
         subTotal.setAlias("itg#0");
         subTotal.getCell("incomeCorrection").setValue(0L, null);
-        subTotal.getCell("code").setValue("10360", null);
+        subTotal.getCell("code").setValue("19570", null);
         subTotal.setIndex(2);
         testHelper.execute(FormDataEvent.CHECK);
 
@@ -186,9 +186,8 @@ public class Rnu_171Test extends ScriptTestBase {
         row.getCell("finResult").setValue(1L, null);
         row.getCell("finResultTax").setValue(2L, null);
         row.getCell("incomeCorrection").setValue(1L, null);
-        row.getCell("code").setValue("10361", null);
+        row.getCell("code").setValue("19540", null);
         testHelper.execute(FormDataEvent.CALCULATE);
-        testHelper.execute(FormDataEvent.CHECK);
         i = 0;
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
@@ -272,8 +271,8 @@ public class Rnu_171Test extends ScriptTestBase {
 
     // Проверить загруженные данные
     void checkLoadData(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals("10345", dataRows.get(0).getCell("code").getStringValue());
-        Assert.assertEquals("10345", dataRows.get(1).getCell("code").getStringValue());
+        Assert.assertEquals("19540", dataRows.get(0).getCell("code").getStringValue());
+        Assert.assertEquals("19540", dataRows.get(1).getCell("code").getStringValue());
     }
 
     // Проверить расчеты

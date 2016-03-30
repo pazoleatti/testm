@@ -190,7 +190,11 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     void onFilterPressClicked(KeyPressEvent event) {
         if (KeyCodes.KEY_ENTER == event.getNativeEvent().getKeyCode()) {
             if (!filterText.getText().isEmpty()){
-                getUiHandlers().onRangeChange(0, pager.getPageSize());
+                if (filterText.getText().length()>=3) {
+                    getUiHandlers().onRangeChange(0, pager.getPageSize());
+                } else {
+                    Dialog.warningMessage("Слишком короткая строка запроса. Для поиска наберите не менее 3-х символов.");
+                }
             } else {
                 clearTableData();
             }

@@ -128,7 +128,7 @@ def calcColumns = ['sum4', 'sum5', 'sum8']
 def course810 = getRecordId(15, 'CODE', '810')
 
 @Field
-def pattern = /[0-9]{1,10}[\.|\,]?[0-9]{0,2}\%?/
+def pattern = /[0-9]{1,10}[\.]?[0-9]{0,2}\%?/
 
 // Дата начала отчетного периода
 @Field
@@ -262,7 +262,7 @@ void logicCheck() {
             if (row[alias] != null && !(row[alias].replaceAll(" ", "") ==~ pattern)) {
                 def msg = row.getCell(alias).column.name
                 logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
-                        " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
+                        " следующий символ «.», следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
             }
         }
 
@@ -338,6 +338,12 @@ void calc() {
         row.sum5 = calc24(row, flag23, calcCol23)
         // графа 27
         row.sum8 = calc27(row)
+        // графы 19, 23
+        ['dealPay', 'tradePay'].each { alias ->
+            if (row[alias] != null) {
+                row[alias] = row[alias].replaceAll(",", ".")
+            }
+        }
     }
 
     // Общий итог

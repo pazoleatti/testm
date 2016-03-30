@@ -180,9 +180,9 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // 2. Проверка кода налогового учета
-        if (row.code != null && row.code != '10345' && row.code != '10355') {
+        if (row.code != null && !['19300', '19510'].contains(row.code)) {
             def msg = row.getCell('code').column.name
-            logger.error("Строка $rowNum: Графа «$msg» должна принимать значение из следующего списка: «10345» или «10355»!")
+            logger.error("Строка $rowNum: Графа «$msg» должна принимать значение из следующего списка: «19300» или «19510»!")
         }
 
         // 3. Проверка корректности даты первичного документа
@@ -224,12 +224,12 @@ void logicCheck() {
         }
 
         // 9. Проверка допустимых значений
-        def pattern = /[0-9]+[\.|\,]?[0-9]{0,2}\%?/
+        def pattern = /[0-9]+[\.]?[0-9]{0,2}\%?/
         ['dealPay', 'tradePay'].each { alias ->
             if (row[alias] != null && !(row[alias].replaceAll(" ", "") ==~ pattern)) {
                 def msg = row.getCell(alias).column.name
                 logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
-                        " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
+                        " следующий символ «.», следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
             }
         }
 
@@ -272,6 +272,12 @@ void calc() {
     for (row in dataRows) {
         // графа 21
         row.sum6 = calc21(row)
+        // графы 15, 18
+        ['dealPay', 'tradePay'].each { alias ->
+            if (row[alias] != null) {
+                row[alias] = row[alias].replaceAll(",", ".")
+            }
+        }
     }
 
     // Сортировка

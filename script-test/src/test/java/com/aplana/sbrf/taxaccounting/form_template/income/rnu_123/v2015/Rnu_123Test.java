@@ -89,6 +89,7 @@ public class Rnu_123Test extends ScriptTestBase {
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
         dataRows.add(row);
+        row.getCell("dealPay").setValue("1234567890.12", null);
         testHelper.execute(FormDataEvent.CHECK);
 
         List<LogEntry> entries = testHelper.getLogger().getEntries();
@@ -105,7 +106,6 @@ public class Rnu_123Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Расчетный период. Для целей бухгалтерского учета (согласно условиям сделки). Дата начала"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Расчетный период. Для целей бухгалтерского учета (согласно условиям сделки). Дата окончания"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "База для расчета, кол. дней"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Плата по условиям сделки,% год./ед. вал."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактического дохода, руб. По данным бухгалтерского учета"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактического дохода, руб. Всего по данным налогового учета"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная Плата, % годовых/ед. вал."), entries.get(i++).getMessage());
