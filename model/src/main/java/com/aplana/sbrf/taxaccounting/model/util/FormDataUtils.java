@@ -88,18 +88,29 @@ public final class FormDataUtils {
 	}
 
 	/**
-	 * Создает группу Cell 
-	 * 
+	 * Создает группу Cell
+	 *
 	 * @param formTemplate версия макета НФ, в которой хранится информация о стилях и столбцах
 	 * @return
 	 */
 	public static List<Cell> createCells(FormTemplate formTemplate) {
-		List<Cell> cells = new ArrayList<Cell>();
-		for (Column column : formTemplate.getColumns()) {
-			cells.add(new Cell(column, formTemplate.getStyles()));
-		}
-		return cells;
+		return createCells(formTemplate.getColumns(), formTemplate.getStyles());
 	}
+
+    /**
+     * Создает группу Cell
+     *
+     * @param columns
+     * @param styles
+     * @return
+     */
+    public static List<Cell> createCells(List<Column> columns, List<FormStyle> styles) {
+        List<Cell> cells = new ArrayList<Cell>();
+        for (Column column : columns) {
+            cells.add(new Cell(column, styles));
+        }
+        return cells;
+    }
 
 	/**
 	 * Создает группу CellHeader

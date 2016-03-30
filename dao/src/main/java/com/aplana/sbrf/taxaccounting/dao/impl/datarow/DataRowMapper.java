@@ -134,7 +134,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 	@Override
 	public DataRow<Cell> mapRow(ResultSet rs, int rowNum) throws SQLException {
-		List<Cell> cells = FormDataUtils.createCells(formData.getFormTemplate());
+        List<Cell> cells = FormDataUtils.createCells(formData.getFormColumns(), formData.getFormStyles());
 		Integer previousRowNumber = formData.getPreviousRowNumber() != null ? formData.getPreviousRowNumber() : 0;
 		String alias = rs.getString("alias");
 		for (Cell cell : cells) {
