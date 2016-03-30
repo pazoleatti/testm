@@ -180,9 +180,9 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // 2. Проверка кода налогового учета
-        if (row.code != null && row.code != '10345' && row.code != '10355') {
+        if (row.code != null && !['19300', '19510'].contains(row.code)) {
             def msg = row.getCell('code').column.name
-            logger.error("Строка $rowNum: Графа «$msg» должна принимать значение из следующего списка: «10345» или «10355»!")
+            logger.error("Строка $rowNum: Графа «$msg» должна принимать значение из следующего списка: «19300» или «19510»!")
         }
 
         // 3. Проверка корректности даты первичного документа
