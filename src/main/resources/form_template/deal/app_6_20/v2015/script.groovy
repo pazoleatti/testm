@@ -185,12 +185,26 @@ void logicCheck() {
         }
 
         // 8. Проверка корректности даты совершения сделки
-        if (row.dealDate && row.dealDoneDate && (row.dealDoneDate < row.dealDate || row.dealDoneDate > getReportPeriodEndDate())) {
-            def msg1 = getColumnName(row, 'dealDoneDate')
-            def msg2 = getColumnName(row, 'dealDate')
-            def msg3 = getReportPeriodEndDate().format('dd.MM.yyyy')
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2» и не больше $msg3!")
-        }
+        // TODO (SBRFACCTAX-15094) заменить на checkDatePeriodExt
+        checkDatePeriodExtLocal(logger, row, 'dealDoneDate', 'dealDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
+    }
+}
+
+// TODO (SBRFACCTAX-15094) удалить
+void checkDatePeriodExtLocal(logger, row, String alias, String startAlias, Date yearStartDate, Date endDate, boolean fatal) {
+    // дата проверяемой графы
+    Date docDate = row.getCell(alias).getDateValue();
+    // дата другой графы
+    Date startDate = row.getCell(startAlias).getDateValue();
+
+    if (docDate != null && startDate != null && (docDate.before(yearStartDate) || docDate.after(endDate) || docDate.before(startDate))) {
+        logger.error(String.format("Строка %d: Дата по графе «%s» должна принимать значение из диапазона %s - %s и быть больше либо равна дате по графе «%s»!",
+                row.getIndex(),
+                getColumnName(row, alias),
+                formatDate(yearStartDate, "dd.MM.yyyy"),
+                formatDate(endDate, "dd.MM.yyyy"),
+                getColumnName(row, startAlias)
+        ));
     }
 }
 

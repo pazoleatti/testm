@@ -108,6 +108,7 @@ public class Rnu_171Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная цена прав требования для целей налогообложения (руб. коп.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Корректировка финансового результата (руб. коп.)"), entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -138,6 +139,7 @@ public class Rnu_171Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Код налогового учета» должна принимать значение из следующего списка: «10360» или «10361»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Неверное значение граф: «Финансовый результат уступки права требования (руб. коп.)», «Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)», «Корректировка финансового результата (руб. коп.)»!", entries.get(i++).getMessage());
         Assert.assertEquals("Группа «10345» не имеет строки итога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -162,6 +164,7 @@ public class Rnu_171Test extends ScriptTestBase {
 
         i = 0;
         Assert.assertEquals("Строка 1: Неверное значение граф: «Корректировка финансового результата (руб. коп.)»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -173,6 +176,7 @@ public class Rnu_171Test extends ScriptTestBase {
 
         i = 0;
         Assert.assertEquals("Строка 1: Неверное значение граф: «Корректировка финансового результата (руб. коп.)»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -182,9 +186,8 @@ public class Rnu_171Test extends ScriptTestBase {
         row.getCell("finResult").setValue(1L, null);
         row.getCell("finResultTax").setValue(2L, null);
         row.getCell("incomeCorrection").setValue(1L, null);
-        subTotal.getCell("incomeCorrection").setValue(1L, null);
-        subTotal.getCell("code").setValue("10361", null);
         row.getCell("code").setValue("10361", null);
+        testHelper.execute(FormDataEvent.CALCULATE);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
         Assert.assertEquals(i, entries.size());

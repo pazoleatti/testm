@@ -117,6 +117,9 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             taxOrganCode.setFilter(filter);
             taxOrganKpp.setPeriodDates(version, version);
             taxOrganCode.setPeriodDates(version, version);
+        } else {
+            taxOrganKpp.setFilter("0 = 1");
+            taxOrganCode.setFilter("0 = 1");
         }
 
         if (taxType == TaxType.TRANSPORT) {

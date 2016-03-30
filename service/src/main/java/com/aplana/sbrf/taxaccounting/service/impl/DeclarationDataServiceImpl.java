@@ -590,6 +590,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 scriptSpecificReportHolder.setFileOutputStream(outputStream);
                 scriptSpecificReportHolder.setFileInputStream(inputStream);
                 scriptSpecificReportHolder.setFileName(ddReportType.getSubreport().getAlias());
+                params.put(DeclarationDataScriptParams.DOC_DATE, new Date());
                 params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
                 stateLogger.updateState("Формирование отчета");
                 if (!declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE_SPECIFIC_REPORT, logger, params)) {
@@ -640,8 +641,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         Map<String, Object> exchangeParams = new HashMap<String, Object>();
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
-        StringWriter writer = new StringWriter();
-        exchangeParams.put(DeclarationDataScriptParams.XML, writer);
 
         File xmlFile = null;
         Writer fileWriter = null;
@@ -822,6 +821,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             JRPdfExporter exporter = new JRPdfExporter();
             exporter.setParameter(JRPdfExporterParameter.JASPER_PRINT, jasperPrint);
             exporter.setParameter(JRPdfExporterParameter.OUTPUT_STREAM, data);
+            exporter.setParameter(JRPdfExporterParameter.CHARACTER_ENCODING, "Ansi");
             exporter.getPropertiesUtil().setProperty(JRPdfExporterParameter.PROPERTY_SIZE_PAGE_TO_CONTENT, "true");
 
             exporter.exportReport();

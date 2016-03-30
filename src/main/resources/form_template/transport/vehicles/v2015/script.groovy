@@ -373,7 +373,7 @@ def logicCheck() {
         }
 
         if (row.share != null) {
-            def columnName = getColumnName(row, 'share')
+            def columnName = row.getCell('share').column.shortName
             if (!(row.share ==~ /\d{1,10}\/\d{1,10}/)) {
                 loggerError(row, errorMsg + "Графа «$columnName» должна быть заполнена согласно формату «(от 1 до 10 знаков)/(от 1 до 10 знаков)»!")
             } else {

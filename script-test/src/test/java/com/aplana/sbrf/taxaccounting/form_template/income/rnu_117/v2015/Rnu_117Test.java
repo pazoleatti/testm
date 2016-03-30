@@ -126,6 +126,7 @@ public class Rnu_117Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактически начисленного расхода, руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Процентная ставка, признаваемая рыночной для целей налогообложения, % годовых"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма расхода, соответствующая рыночному уровню, руб."), entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -244,7 +245,7 @@ public class Rnu_117Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         List<String> aliases = Arrays.asList("reasonNumber", "reasonDate", "rate", "sum1", "rate1", "sum2", "rate2", "sum3");
-        defaultCheckLoadData(aliases, 3);
+        defaultCheckLoadData(aliases, 2);
         checkLogger();
         checkLoadData(testHelper.getDataRowHelper().getAll());
 

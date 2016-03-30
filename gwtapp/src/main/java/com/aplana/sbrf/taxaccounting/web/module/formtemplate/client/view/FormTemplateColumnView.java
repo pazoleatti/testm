@@ -758,6 +758,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	private void copyMainColumnAttributes(Column from, Column to) {
 		to.setId(from.getId());
 		to.setName(from.getName());
+		to.setShortName(from.getShortName());
 		to.setAlias(from.getAlias());
 		to.setWidth(from.getWidth());
 		to.setOrder(from.getOrder());

@@ -46,7 +46,7 @@ abstract class AbstractQueryBuilderComponent extends AbstractTreeListenerCompone
     public void enterString(FilterTreeParser.StringContext ctx) {
         ps.appendQuery("?");
         // Строка по умолчанию содерижт символы кавычек. Пример " 'Текст' "
-        ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1));
+        ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1).replaceAll("\\\\\'", "\'"));
     }
 
 

@@ -50,14 +50,14 @@ INSERT INTO form_template (id, type_id, data_rows, version, monthly, fixed_rows,
 INSERT INTO form_template (id, type_id, data_rows, version, monthly, fixed_rows, name, fullname, header, status)
   VALUES (4, 2, NULL, date '2016-01-01', 0, 0, 'name_4', 'fullname_4', 'header_4', 1);
 
-INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, data_ord)
-	values (1, 'Строковый столбец', 1, 1, 'stringColumn', 'S', 10, NULL, 500, 1, 0);
-INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, data_ord)
-	values (2, 'Числовой столбец', 1, 2, 'numericColumn', 'N', 10, 2, 15, 0, 1);
-INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, checking, format, data_ord)
-	values (3, 'Дата-столбец', 1, 3, 'dateColumn', 'D', 10, NULL, 0, 1, 2);
-INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, checking, numeration_row, data_ord)
-	values (4, 'Автонумеруемая графа', 1, 4, 'autoNumerationColumn', 'A', 10, NULL, 0, 1, 3);
+INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, data_ord, short_name)
+	values (1, 'Строковый столбец', 1, 1, 'stringColumn', 'S', 10, NULL, 500, 1, 0, 'Стр. столбец');
+INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, data_ord, short_name)
+	values (2, 'Числовой столбец', 1, 2, 'numericColumn', 'N', 10, 2, 15, 0, 1, 'Чис. столбец');
+INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, checking, format, data_ord, short_name)
+	values (3, 'Дата-столбец', 1, 3, 'dateColumn', 'D', 10, NULL, 0, 1, 2, 'Д-столбец');
+INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, checking, numeration_row, data_ord, short_name)
+	values (4, 'Автонумеруемая графа', 1, 4, 'autoNumerationColumn', 'A', 10, NULL, 0, 1, 3, 'Авт. графа');
 
 INSERT INTO form_style (alias, form_template_id, font_color, back_color, italic, bold) VALUES ('alias1', 1, 3, 2, 1, 0);
 INSERT INTO form_style (alias, form_template_id, font_color, back_color, italic, bold) VALUES ('alias2', 1, 2, 3, 0, 1);
