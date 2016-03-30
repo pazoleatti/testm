@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -39,7 +40,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 	private static final Log LOG = LogFactory.getLog(ScriptExecutionServiceImpl.class);
 
 
-    final static String LOCK_MESSAGE = "%s \"%s\" заблокирован пользователем с логином \"%s\". Макет был пропущен.";
+    final static String LOCK_MESSAGE = "%s \"%s\" заблокирован пользователем с логином \"%s\". Макет пропущен.";
 
     @Autowired
     private LogEntryService logEntryService;
@@ -130,6 +131,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
         Map<String, List<String>> files = new HashMap<String, List<String>>();
         ZipInputStream zis = null;
         boolean hasFatalError = false;
+        Set<String> errorFolders = new HashSet<String>();
         try {
             zis = new ZipInputStream(new BufferedInputStream(zipFile));
             ZipEntry entry;
@@ -140,8 +142,10 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         hasFatalError = true;
                         break;
                     }
-                    String folderName = entry.getName().substring(0, entry.getName().indexOf("/"));
-                    String scriptName = entry.getName().substring(entry.getName().indexOf("/") + 1, entry.getName().indexOf("."));
+                    File file = new File(entry.getName());
+                    String folderName = file.getParent();
+                    String scriptFileName = file.getName();
+                    String scriptName = scriptFileName.substring(0, scriptFileName.indexOf("."));
 
                     if (!files.containsKey(folderName)) {
                         files.put(folderName, new ArrayList<String>());
@@ -149,7 +153,8 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                     files.get(folderName).add(scriptName);
 
                     if (!FOLDERS.contains(folderName)) {
-                        logger.error("Пропущен каталог \"%s\", так как его имя не поддерживается", folderName);
+                        if (errorFolders.add(folderName))
+                            logger.error("Пропущен каталог \"%s\", так как его имя не поддерживается", folderName);
                         continue;
                     }
                     String script = IOUtils.toString(zis, "UTF-8");
@@ -159,13 +164,13 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         try {
                             formTypeId = Integer.parseInt(scriptName.substring(0, scriptName.indexOf("-")));
                             year = Integer.parseInt(scriptName.substring(scriptName.indexOf("-") + 1));
-                        } catch (NumberFormatException e) {
-                            logger.error("Название файла \"%s\" некорректно. Файл был пропущен.", scriptName);
+                        } catch (Exception e) {
+                            logger.error("Наименование файла \"%s\" некорректно. Файл пропущен.", scriptFileName);
                             continue;
                         }
                         Integer formTemplateId = formTemplateService.get(formTypeId, year);
                         if (formTemplateId == null) {
-                            logger.error("Макет налоговой формы, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
+                            logger.error("Макет налоговой формы, указанный в файле \"%s\" не существует. Файл пропущен.", scriptFileName);
                             continue;
                         }
 
@@ -177,10 +182,10 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                             try {
                                 formTemplateService.updateScript(formTemplate, logger);
                             } catch (ServiceLoggerException e) {
-                                logger.error("Макет налоговой формы \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен ", formTemplate.getName(), formTemplate.getName());
+                                logger.error("Макет налоговой формы \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен ", formTemplate.getName(), scriptFileName);
                                 continue;
                             }
-                            logger.info("Выполнен импорт скрипта для макета налоговой формы \"%s\"", formTemplate.getName());
+                            logger.info("Выполнен импорт скрипта для макета налоговой формы \"%s\" из файла \"%s\"", formTemplate.getName(), scriptFileName);
                         } else {
                             logger.error(LOCK_MESSAGE, "Макет налоговой формы", formTemplate.getName(), lockUser);
                         }
@@ -192,13 +197,13 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         try {
                             declarationTypeId = Integer.parseInt(scriptName.substring(0, scriptName.indexOf("-")));
                             year = Integer.parseInt(scriptName.substring(scriptName.indexOf("-") + 1));
-                        } catch (NumberFormatException e) {
-                            logger.error("Название файла \"%s\" некорректно. Файл был пропущен.", scriptName);
+                        } catch (Exception e) {
+                            logger.error("Наименование файла \"%s\" некорректно. Файл пропущен.", scriptFileName);
                             continue;
                         }
                         Integer declarationTemplateId = declarationTemplateService.get(declarationTypeId, year);
                         if (declarationTemplateId == null) {
-                            logger.error("Макет декларации/уведомления, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
+                            logger.error("Макет декларации/уведомления, указанный в файле \"%s\" не существует. Файл пропущен.", scriptFileName);
                             continue;
                         }
 
@@ -210,12 +215,12 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                             try {
                                 declarationTemplateService.updateScript(declarationTemplate, logger);
                             } catch (ServiceLoggerException e) {
-                                logger.error("%s \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.",
+                                logger.error("%s \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен.",
                                         declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "Макет декларации" : "Макет уведомления",
                                         declarationTemplate.getName(), scriptName);
                                 continue;
                             }
-                            logger.info("Выполнен импорт скрипта для макета декларации формы \"%s\"", declarationTemplate.getName());
+                            logger.info("Выполнен импорт скрипта для макета декларации формы \"%s\" из файла \"%s\"", declarationTemplate.getName(), scriptFileName);
                         } else {
                             logger.error(LOCK_MESSAGE,
                                     declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "Макет декларации" : "Макет уведомления",
@@ -230,11 +235,11 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         try {
                             refBookId = Long.parseLong(scriptName);
                         } catch (NumberFormatException e) {
-                            logger.error("Название файла \"%s\" некорректно. Файл был пропущен.", scriptName);
+                            logger.error("Наименование файла \"%s\" некорректно. Файл пропущен.", scriptFileName);
                             continue;
                         }
                         if (!refBookDao.isRefBookExist(refBookId)) {
-                            logger.error("Справочник, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
+                            logger.error("Справочник, указанный в файле \"%s\" не существует. Файл пропущен.", scriptFileName);
                             continue;
                         }
 
@@ -245,10 +250,10 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                             try {
                                 refBookScriptingService.saveScript(refBookId, script, logger);
                             } catch (ServiceLoggerException e) {
-                                logger.error("Справочник \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.", refBook.getName(), scriptName);
+                                logger.error("Справочник \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен.", refBook.getName(), scriptFileName);
                                 continue;
                             }
-                            logger.info("Выполнен импорт скрипта для справочника \"%s\"", refBook.getName());
+                            logger.info("Выполнен импорт скрипта для справочника \"%s\" из файла \"%s\"", refBook.getName(), scriptFileName);
                         } else {
                             logger.error(LOCK_MESSAGE, "Справочник", refBook.getName(), lockUser);
                         }
@@ -256,7 +261,8 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                 }
             }
         } catch(Exception e) {
-            logger.error("Произошла непредвиденная ошибка при импорте скриптов. Все изменения были отменены.");
+            LOG.error(e.getMessage(), e);
+            logger.error("При импорте скриптов произошла ошибка. Подробности записаны в журнал сервера. Все изменения отменены.");
             hasFatalError = true;
             throw new ServiceException(e.getMessage(), e);
         } finally {
