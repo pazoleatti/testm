@@ -495,7 +495,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true ,key = "#decTemplateId")
+    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true ,key = "#dtId")
     public void deleteXsd(int dtId) {
         try{
             getJdbcTemplate().update("update declaration_template set xsd = null where ID = ?", dtId);
@@ -505,7 +505,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true ,key = "#decTemplateId")
+    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true ,key = "#dtId")
     public void deleteJrxml(int dtId) {
         try{
             getJdbcTemplate().update("update declaration_template set jrxml = null WHERE ID = ?", dtId);
