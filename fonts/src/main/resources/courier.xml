@@ -3,7 +3,6 @@
     <fontFamily name="Courier New">
         <normal>courier/cour.ttf</normal>
         <bold>courier/courbd.ttf</bold>
-        <pdfEncoding>Cp1251</pdfEncoding>
         <pdfEmbedded>true</pdfEmbedded>
         <exportFonts>
             <export key="net.sf.jasperreports.html">Courier New</export>

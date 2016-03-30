@@ -5,7 +5,6 @@
         <bold>arial/arialbd.ttf</bold>
         <italic>arial/ariali.ttf</italic>
         <boldItalic>arial/arialbi.ttf</boldItalic>
-        <pdfEncoding>Cp1251</pdfEncoding>
         <pdfEmbedded>true</pdfEmbedded>
         <exportFonts>
             <export key="net.sf.jasperreports.html">Arial</export>
