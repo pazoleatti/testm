@@ -180,9 +180,9 @@ void logicCheck() {
         }
 
         // 4. Проверка кода налогового учета
-         if (row.code != null && !['10360', '10361'].contains(row.code)) {
-             logger.error("Строка $rowNum: Графа «${getColumnName(row, 'code')}» должна принимать значение из следующего списка: «10360» или «10361»!")
-         }
+        if (row.code != null && !['19540', '19570'].contains(row.code)) {
+            logger.error("Строка $rowNum: Графа «${getColumnName(row, 'code')}» должна принимать значение из следующего списка: «19540» или «19570»!")
+        }
 
         // 5. Проверка расчетных граф
         def values = [:]
