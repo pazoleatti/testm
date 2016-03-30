@@ -248,13 +248,6 @@ void logicCheck() {
     if (!dataRows) {
         return
     }
-    // суммы строки общих итогов
-    def totalSums = [:]
-    totalColumns.each { alias ->
-        if (totalSums[alias] == null) {
-            totalSums[alias] = 0
-        }
-    }
     // данные предыдущего отчетного периода
     def prevDataRows = getPrevDataRows()
     def rowsMap = getTradeNumberObjectMap(prevDataRows)
@@ -304,7 +297,7 @@ void logicCheck() {
         // 12. Проверка на положительные значения при наличии созданного резерва
         if (row.reserveCreation > 0 && (row.lotSizeCurrent < 0 || row.cost < 0 ||
                 row.costOnMarketQuotation < 0 || row.reserveCalcValue < 0)) {
-            logger.warn(row, errorMsg + 'Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!')
+            rowWarning(logger, row, errorMsg + 'Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!')
         }
 
         def prevRow = null
@@ -337,10 +330,6 @@ void logicCheck() {
             needValue['reserveCreation'] = calc16(row)
             needValue['reserveRecovery'] = calc17(row)
             checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
-        }
-        // 19. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
-        totalColumns.each { alias ->
-            totalSums[alias] += (row.getCell(alias).value ?: 0)
         }
     }
     // 18. Проверка подитоговых значений
@@ -379,7 +368,7 @@ void logicCheck() {
             if (prevRow.getAlias() == null && prevRow.reserveCalcValue > 0) {
                 def tnum = prevRow.tradeNumber
                 def count = countMap[tnum]
-                if (count == 0) {
+                if (count == null) {
                     missContract.add(tnum)
                 } else if (count > 1) {
                     severalContract.add(tnum)
@@ -1138,24 +1127,8 @@ void checkItog(def dataRows) {
 
 // Возвращает строку со значениями полей строки по которым идет группировка
 String getValuesByGroupColumn(DataRow row) {
-    def values = []
-    def tmp
-
     // 2
-    tmp = (row.issuer != null ? row.issuer : 'графа 2 не задана')
-    values.add(tmp)
-
-    // 5
-    def currency = getRefBookValue(15L, row.currency)?.CODE_2?.value
-    tmp = (currency != null ? currency : 'графа 5 не задана')
-    values.add(tmp)
-
-    // 10
-    def signSecurity = getRefBookValue(62L, row.signSecurity)?.CODE?.value
-    tmp = (signSecurity != null ? signSecurity : 'графа 10 не задана')
-    values.add(tmp)
-
-    return values.join("; ")
+    return (row.issuer != null ? row.issuer : 'графа 2 не задана')
 }
 
 /** Получить уникальный ключ группы. */

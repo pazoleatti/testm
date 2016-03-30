@@ -117,6 +117,7 @@ public class Rnu_116Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная цена сделки"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Отклонения по доходам, в руб."), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Отклонения по расходам, в руб."), entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -143,7 +144,8 @@ public class Rnu_116Test extends ScriptTestBase {
         row.getCell("incomeDelta").setValue(13L, null);
         row.getCell("outcomeDelta").setValue(14L, null);
         testHelper.execute(FormDataEvent.CHECK);
-        Assert.assertEquals(String.format("Строка %d: Неверное значение граф: %s!",1, "«Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб. Доходы», «Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб. Расходы», «Отклонения по доходам, в руб.», «Отклонения по расходам, в руб.»"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format("Строка %d: Неверное значение граф: %s!", 1, "«Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб. Доходы», «Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб. Расходы», «Отклонения по доходам, в руб.», «Отклонения по расходам, в руб.»"), entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
 
         // Для прохождения всех ЛП после расчета
         testHelper.execute(FormDataEvent.CALCULATE);

@@ -128,6 +128,7 @@ public class Rnu_114Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Совокупная процентная ставка"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Рыночная ставка"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма фактического процентного дохода"), entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -156,6 +157,7 @@ public class Rnu_114Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «База года (360/365/366)» должна принимать значение из следующего списка: «360», «365», «366»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Рыночная ставка» должно быть больше или равно значению графы «Совокупная процентная ставка»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Неверное значение граф: «Отклонение Совокупной процентной ставки от рыночного уровня»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
