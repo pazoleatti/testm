@@ -43,7 +43,7 @@ public class RefBookColumn extends FilterColumn {
 		return refBookAttributeId;
 	}
 
-	public void setRefBookAttributeId1(Long refBookAttributeId) {
+	public void setRefBookAttributeId(Long refBookAttributeId) {
 		this.refBookAttributeId = refBookAttributeId;
 	}
 

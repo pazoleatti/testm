@@ -100,7 +100,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
      */
     private void initCommonTable() {
         paramColumn.setId(1);
-        paramColumn.setRefBookAttributeId1(1041L);
+        paramColumn.setRefBookAttributeId(1041L);
         paramColumn.setRefBookAttribute(new RefBookAttribute(){{setAttributeType(RefBookAttributeType.STRING);}});
         // Допустимые значения
         paramColumn.setFilter(getConfParamFilter(ConfigurationParamGroup.COMMON));
@@ -119,7 +119,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 
         departmentColumn.setId(1);
         departmentColumn.setNameAttributeId(161L);
-        departmentColumn.setRefBookAttributeId1(161L);
+        departmentColumn.setRefBookAttributeId(161L);
         departmentColumn.setRefBookAttribute(new RefBookAttribute(){{setAttributeType(RefBookAttributeType.STRING);}});
         departmentColumn.setHierarchical(true);
         departmentColumn.setFilter("TYPE=2"); // ТБ
