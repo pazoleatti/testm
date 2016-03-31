@@ -160,6 +160,7 @@ public class Rnu_111Test extends ScriptTestBase {
         i = 0;
         Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного дохода (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма дохода, соответствующая рыночному уровню (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Неверное значение граф: «Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
