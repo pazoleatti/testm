@@ -268,6 +268,18 @@ void save() {
             }
         }
         it.put("RSK", new RefBookValue(RefBookAttributeType.STRING, rsk))
+
+        // Алгоритм заполнения поля «RS»:
+        def rs
+        // if (orgCode == 1) { то не заполняется
+        if (orgCode == 2) {
+            if (regNum) {
+                rs = regNum
+            } else if (swift) {
+                rs = swift
+            }
+        }
+        it.put("RS", new RefBookValue(RefBookAttributeType.STRING, rs))
     }
 }
 

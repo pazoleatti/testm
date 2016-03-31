@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -345,5 +346,22 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         i++; // расшифровка паттерна КИО
 
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+
+        // Проверка автозаполнения поля 'RS'
+        RefBookDataProvider prov = testHelper.getRefBookFactory().getDataProvider(REF_BOOK_ORG_CODE_ID);
+        for (Map<String, RefBookValue> rec : saveRecords) {
+            Long x = (Long) prov.getRecordData(rec.get("ORG_CODE").getReferenceValue()).get("CODE").getNumberValue();
+            String rs = rec.get("RS").getStringValue();
+            if (x != 2) {
+                Assert.assertNull(rs);
+                continue;
+            }
+            RefBookValue value = rec.get("REG_NUM") != null ? rec.get("REG_NUM") : rec.get("SWIFT");
+            if (value != null) {
+                Assert.assertEquals(value.getStringValue(), rs);
+            } else {
+                Assert.assertNull(rs);
+            }
+        }
     }
 }
