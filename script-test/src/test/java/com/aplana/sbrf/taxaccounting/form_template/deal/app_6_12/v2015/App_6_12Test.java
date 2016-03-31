@@ -200,7 +200,6 @@ public class App_6_12Test extends ScriptTestBase {
         row.getCell("incomeSum").setValue(7.77, null);
         i = 0;
         testHelper.execute(FormDataEvent.CALCULATE);
-        testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }

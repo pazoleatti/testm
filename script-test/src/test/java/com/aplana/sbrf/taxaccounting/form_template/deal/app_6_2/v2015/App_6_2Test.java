@@ -159,7 +159,6 @@ public class App_6_2Test extends ScriptTestBase {
         row.getCell("cost").setValue(0, null);
         i = 0;
         testHelper.execute(FormDataEvent.CALCULATE);
-        testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }
