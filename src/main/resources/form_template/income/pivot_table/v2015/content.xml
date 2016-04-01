@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>Сводная таблица - Лист 08 декларации по прибыли</name>
+    <fullName>Сводная таблица - Лист 08 декларации по прибыли</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>number</alias>
+        <checking>false</checking>
+        <dataOrder>0</dataOrder>
+        <name>№ п/п</name>
+        <order>1</order>
+        <width>4</width>
+        <maxLength>9</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>rnu</alias>
+        <checking>false</checking>
+        <dataOrder>1</dataOrder>
+        <name>Номер РНУ</name>
+        <order>2</order>
+        <width>8</width>
+        <maxLength>10</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>code</alias>
+        <checking>false</checking>
+        <dataOrder>2</dataOrder>
+        <name>Код КНУ</name>
+        <order>3</order>
+        <width>8</width>
+        <maxLength>10</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>corrType</alias>
+        <checking>false</checking>
+        <dataOrder>3</dataOrder>
+        <name>Вид корректировки (1, 2, 3)</name>
+        <order>4</order>
+        <width>8</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5402</nameAttributeId>
+        <refBookAttribute>
+            <alias>CODE</alias>
+            <attributeType>NUMBER</attributeType>
+            <id>5401</id>
+            <maxLength>1</maxLength>
+            <name>Код</name>
+            <precision>0</precision>
+            <readOnly>false</readOnly>
+            <required>true</required>
+            <sortOrder>1</sortOrder>
+            <unique>1</unique>
+            <visible>true</visible>
+            <width>5</width>
+        </refBookAttribute>
+        <refBookAttributeId>5401</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>base</alias>
+        <checking>false</checking>
+        <dataOrder>4</dataOrder>
+        <name>Основание отнесения сделки к контролируемой в соответствии со ст. 105.14 НК РФ</name>
+        <order>5</order>
+        <width>8</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5412</nameAttributeId>
+        <refBookAttribute>
+            <alias>CODE</alias>
+            <attributeType>STRING</attributeType>
+            <id>5411</id>
+            <maxLength>3</maxLength>
+            <name>Код</name>
+            <readOnly>false</readOnly>
+            <required>true</required>
+            <sortOrder>1</sortOrder>
+            <unique>1</unique>
+            <visible>true</visible>
+            <width>5</width>
+        </refBookAttribute>
+        <refBookAttributeId>5411</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>countryCode</alias>
+        <checking>false</checking>
+        <dataOrder>5</dataOrder>
+        <name>Код страны регистрации (инкорпорации) контрагента</name>
+        <order>6</order>
+        <width>7</width>
+        <parentAlias>name</parentAlias>
+        <refBookAttribute>
+            <alias>CODE</alias>
+            <attributeType>STRING</attributeType>
+            <id>50</id>
+            <maxLength>3</maxLength>
+            <name>Код</name>
+            <readOnly>false</readOnly>
+            <required>true</required>
+            <unique>1</unique>
+            <visible>true</visible>
+            <width>3</width>
+        </refBookAttribute>
+        <refBookAttributeId>5204</refBookAttributeId>
+        <refBookAttributeId2>50</refBookAttributeId2>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>innKio</alias>
+        <checking>false</checking>
+        <dataOrder>6</dataOrder>
+        <name>ИНН контрагента</name>
+        <order>7</order>
+        <width>7</width>
+        <parentAlias>name</parentAlias>
+        <refBookAttribute>
+            <alias>INNKIO</alias>
+            <attributeType>STRING</attributeType>
+            <id>5220</id>
+            <maxLength>10</maxLength>
+            <name>InnKio</name>
+            <readOnly>false</readOnly>
+            <required>false</required>
+            <unique>0</unique>
+            <visible>false</visible>
+            <width>10</width>
+        </refBookAttribute>
+        <refBookAttributeId>5220</refBookAttributeId>
+        <refBookAttributeId2>5220</refBookAttributeId2>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>rsk</alias>
+        <checking>false</checking>
+        <dataOrder>7</dataOrder>
+        <name>Регистрационный номер контрагента в стране регистрации (инкорпорации)</name>
+        <order>8</order>
+        <width>7</width>
+        <parentAlias>name</parentAlias>
+        <refBookAttribute>
+            <alias>RSK</alias>
+            <attributeType>STRING</attributeType>
+            <id>5221</id>
+            <maxLength>50</maxLength>
+            <name>RSK</name>
+            <readOnly>false</readOnly>
+            <required>false</required>
+            <unique>0</unique>
+            <visible>false</visible>
+            <width>10</width>
+        </refBookAttribute>
+        <refBookAttributeId>5221</refBookAttributeId>
+        <refBookAttributeId2>5221</refBookAttributeId2>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <dataOrder>8</dataOrder>
+        <name>Наименование организации (ФИО) контрагента</name>
+        <order>9</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5201</nameAttributeId>
+        <refBookAttribute>
+            <alias>NAME</alias>
+            <attributeType>STRING</attributeType>
+            <id>5201</id>
+            <maxLength>256</maxLength>
+            <name>Полное наименование юридического лица с указанием ОПФ</name>
+            <readOnly>false</readOnly>
+            <required>true</required>
+            <unique>1</unique>
+            <visible>true</visible>
+            <width>30</width>
+        </refBookAttribute>
+        <refBookAttributeId>5201</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sign010</alias>
+        <checking>false</checking>
+        <dataOrder>9</dataOrder>
+        <name>Доходы от реализации. Код строки 010. Признак (0-уменьшение, 1- увеличение)</name>
+        <order>10</order>
+        <width>11</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum010</alias>
+        <checking>false</checking>
+        <dataOrder>10</dataOrder>
+        <name>Доходы от реализации. Код строки 010. Сумма в рублях</name>
+        <order>11</order>
+        <width>11</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sign020</alias>
+        <checking>false</checking>
+        <dataOrder>11</dataOrder>
+        <name>Внереализационные доходы. Код строки 020. Признак (0-уменьшение, 1- увеличение)</name>
+        <order>12</order>
+        <width>11</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum020</alias>
+        <checking>false</checking>
+        <dataOrder>12</dataOrder>
+        <name>Внереализационные доходы. Код строки 020. Сумма в рублях</name>
+        <order>13</order>
+        <width>11</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sign030</alias>
+        <checking>false</checking>
+        <dataOrder>13</dataOrder>
+        <name>Расходы, уменьшающие сумму доходов от реализации. Код строки 030. Признак (0-уменьшение, 1- увеличение)</name>
+        <order>14</order>
+        <width>11</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum030</alias>
+        <checking>false</checking>
+        <dataOrder>14</dataOrder>
+        <name>Расходы, уменьшающие сумму доходов от реализации. Код строки 030. Сумма в рублях</name>
+        <order>15</order>
+        <width>11</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sign040</alias>
+        <checking>false</checking>
+        <dataOrder>15</dataOrder>
+        <name>Внереализационные расходы. Код строки 040. Признак (0-уменьшение, 1- увеличение)</name>
+        <order>16</order>
+        <width>11</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum040</alias>
+        <checking>false</checking>
+        <dataOrder>16</dataOrder>
+        <name>Внереализационные расходы. Код строки 040. Сумма в рублях</name>
+        <order>17</order>
+        <width>11</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sign060</alias>
+        <checking>false</checking>
+        <dataOrder>17</dataOrder>
+        <name>Доходы от выбытия, в том числе доход от погашения. Код строки 060. Признак (0-уменьшение, 1- увеличение)</name>
+        <order>18</order>
+        <width>11</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum060</alias>
+        <checking>false</checking>
+        <dataOrder>18</dataOrder>
+        <name>Доходы от выбытия, в том числе доход от погашения. Код строки 060. Сумма в рублях</name>
+        <order>19</order>
+        <width>11</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sign070</alias>
+        <checking>false</checking>
+        <dataOrder>19</dataOrder>
+        <name>Расходы, связанные с приобретением и реализацией или иным выбытием (в том числе, погашением). Код строки 070. Признак (0-уменьшение, 1- увеличение)</name>
+        <order>20</order>
+        <width>11</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum070</alias>
+        <checking>false</checking>
+        <dataOrder>20</dataOrder>
+        <name>Расходы, связанные с приобретением и реализацией или иным выбытием (в том числе, погашением). Код строки 070. Сумма в рублях</name>
+        <order>21</order>
+        <width>11</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sign080</alias>
+        <checking>false</checking>
+        <dataOrder>21</dataOrder>
+        <name>Итого сумма корректировки (сумма строк 060, 070) по модулю. Код строки 080. Признак (0-уменьшение, 1- увеличение)</name>
+        <order>22</order>
+        <width>11</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum080</alias>
+        <checking>false</checking>
+        <dataOrder>22</dataOrder>
+        <name>Итого сумма корректировки (сумма строк 060, 070) по модулю. Код строки 080. Сумма в рублях</name>
+        <order>23</order>
+        <width>11</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sign100</alias>
+        <checking>false</checking>
+        <dataOrder>23</dataOrder>
+        <name>Сумма налога, подлежащая исчислению, исходя из итоговой суммы корректировки по строкам 050, 080 и соответствующей налоговой ставки. Код строки 100. Признак (0-уменьшение, 1- увеличение)</name>
+        <order>24</order>
+        <width>11</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum100</alias>
+        <checking>false</checking>
+        <dataOrder>24</dataOrder>
+        <name>Сумма налога, подлежащая исчислению, исходя из итоговой суммы корректировки по строкам 050, 080 и соответствующей налоговой ставки. Код строки 100. Сумма в рублях</name>
+        <order>25</order>
+        <width>11</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>
