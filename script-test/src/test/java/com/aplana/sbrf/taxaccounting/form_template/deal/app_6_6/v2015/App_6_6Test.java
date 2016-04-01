@@ -85,9 +85,7 @@ public class App_6_6Test extends ScriptTestBase {
 
         // для попадания в ЛП:
         // 1. Проверка на заполнение графы
-        // 2. Проверка возможности заполнения режима переговорных сделок
-        // 4. Проверка возможности заполнения даты совершения сделки
-        // 6. Заполнение граф 13 и 14 (сумма дохода, расхода)
+        // 7. Заполнение граф 13 и 14 (сумма дохода, расхода)
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
         dataRows.add(row);
@@ -104,20 +102,17 @@ public class App_6_6Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Код валюты расчетов по сделке"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Курс ЦБ РФ"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Цена 1-ой части сделки, руб."), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Выполнение расчета графы «Дата совершения сделки» невозможно, так как не заполнена используемая в расчете графа «Дата исполнения 2-ой части сделки»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» должна быть заполнена, если не заполнена графа «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         // для попадания в ЛП:
-        // 2. Проверка возможности заполнения режима переговорных сделок
-        // 5. Проверка даты совершения сделки
-        // 6. Заполнение граф 13 и 14 (сумма дохода, расхода)
-        // 8. Корректность даты (заключения) сделки
-        // 9. Корректность даты исполнения 1–ой части сделки (проверка даты окончания периода)
-        // 11. Корректность даты совершения сделки
-        // 12. Проверка диапазона дат
+        // 2. Проверка корректности даты договора
+        // 3. Корректность даты заключения сделки
+        // 5. Проверка корректности даты исполнения 1-ой части сделки
+        // 6. Проверка корректности даты исполнения 2-ой части сделки
+        // 7. Заполнение граф 13 и 14 (сумма дохода, расхода)
+        // 9. Проверка даты совершения сделки
         row.getCell("name").setValue(1L, null);
         row.getCell("docNumber").setValue("string", null);
         row.getCell("docDate").setValue(sdf.parse("02.01.2990"), null);
@@ -133,19 +128,18 @@ public class App_6_6Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть равно значению графы «Дата исполнения 2-ой части сделки», если дата исполнения 2-ой части сделки относится к отчетному периоду формы!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» должна быть заполнена, если не заполнена графа «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата договора","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата (заключения) сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата исполнения 1-ой части сделки» должно быть не меньше значения графы «Дата (заключения) сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата исполнения 2-ой части сделки» должно быть не меньше значения графы «Дата исполнения 1-ой части сделки» и не больше 31.12.2099!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» должна быть заполнена, если не заполнена графа «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть равно «31.12.2014»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         // для попадания в ЛП:
-        // 6. Заполнение граф 13 и 14 (сумма дохода, расхода)
-        // 10. Корректность даты исполнения 1–ой части сделки (проверка даты начала периода)
+        // 5. Проверка корректности даты исполнения 1-ой части сделки
+        // 7. Заполнение граф 13 и 14 (сумма дохода, расхода)
         row.getCell("name").setValue(1L, null);
         row.getCell("docNumber").setValue("string", null);
         row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
@@ -164,35 +158,31 @@ public class App_6_6Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» не может быть заполнена одновременно с графой «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата исполнения 1-ой части сделки» должно быть не меньше значения графы «Дата (заключения) сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» должно быть не меньше значения графы «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
 
         // для попадания в ЛП:
-        // 7. Проверка положительной суммы дохода/расхода
-
+        // 8. Проверка положительной суммы дохода/расхода
         row.getCell("incomeSum").setValue(-1, null);
         row.getCell("outcomeSum").setValue(null, null);
         row.getCell("date1").setValue(sdf.parse("03.01.2014"), null);
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма процентного дохода (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         // для попадания в ЛП:
-        // 7. Проверка положительной суммы дохода/расхода
+        // 8. Проверка положительной суммы дохода/расхода
         row.getCell("incomeSum").setValue(null, null);
         row.getCell("outcomeSum").setValue(-1, null);
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма процентного расхода (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -200,30 +190,19 @@ public class App_6_6Test extends ScriptTestBase {
         // для успешного прохождения всех ЛП:
         row.getCell("outcomeSum").setValue(1, null);
         testHelper.execute(FormDataEvent.CHECK);
-        entries = testHelper.getLogger().getEntries();
-        i = 0;
-        Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
-        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
-        testHelper.getLogger().clear();
+        Assert.assertEquals(0, testHelper.getLogger().getEntries().size());
 
         // проверка неотрицательности суммы доходов;
         row.getCell("incomeSum").setValue(0, null);
         row.getCell("outcomeSum").setValue(null, null);
         testHelper.execute(FormDataEvent.CHECK);
-        entries = testHelper.getLogger().getEntries();
-        i = 0;
-        Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
-        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
-        testHelper.getLogger().clear();
+        Assert.assertEquals(0, testHelper.getLogger().getEntries().size());
 
         // проверка неотрицательности суммы расходов;
         row.getCell("outcomeSum").setValue(0, null);
         row.getCell("incomeSum").setValue(null, null);
         testHelper.execute(FormDataEvent.CALCULATE);
-        entries = testHelper.getLogger().getEntries();
-        i = 0;
-        Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
-        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        Assert.assertEquals(0, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
     }
