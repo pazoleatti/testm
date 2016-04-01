@@ -211,7 +211,7 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         // ORG_CODE = 2, TYPE = "НЛ"
         value8.put("ORG_CODE", new RefBookValue(RefBookAttributeType.REFERENCE, 262625999L));
         value8.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 262680899L));
-        value8.put("KIO", new RefBookValue(RefBookAttributeType.STRING, "7707083893"));
+        value8.put("TAX_CODE_INCORPORATION", new RefBookValue(RefBookAttributeType.STRING, "7707083893"));
         // заполнено поле ИНН, КПП для иностранной организации
         value8.put("INN", new RefBookValue(RefBookAttributeType.STRING, "7707083894"));
         value8.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "7707083894"));
@@ -305,7 +305,7 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         Assert.assertNull(saveRecords.get(5).get("IKKSR").getStringValue());
         Assert.assertNull(saveRecords.get(5).get("IKSR").getStringValue());
         //7
-        Assert.assertEquals("Для иностранной организации обязательно должно быть заполнено одно из следующих полей: «КИО», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для иностранной организации обязательно должно быть заполнено одно из следующих полей: «Код налогоплательщика в стране инкорпорации», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!", entries.get(i++).getMessage());
         Assert.assertEquals("Для иностранной организации нельзя указать «INN»!", entries.get(i++).getMessage());
         Assert.assertEquals("Для Резидента оффшорной зоны обязательно должны быть заполнены поля «OFFSHORE_CODE»,«KIO»!", entries.get(i++).getMessage());
         Assert.assertEquals("Вычисленное контрольное число по полю \"ИНН\" некорректно (7707083894).", entries.get(i++).getMessage());
