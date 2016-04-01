@@ -40,6 +40,8 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
             getView().setVersionMode(true);
             setNeedToReload();
             return;
+        } else {
+            getView().setVersionMode(isVersionMode);
         }
         super.showRecord(refBookRecordId);
     }
