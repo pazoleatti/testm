@@ -875,8 +875,8 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
                         }
                         break
                     case 840 : // РНУ-122
-                        if ((isCalc10 && "10345".equals(row.code)) ||
-                                (!isCalc10 && "10355".equals(row.code))) {
+                        if ((isCalc10 && "19300".equals(row.code)) ||
+                                (!isCalc10 && "19510".equals(row.code))) {
                             result += (row.sum6?.abs() ?: 0)
                         }
                         break
@@ -886,8 +886,8 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
                         }
                         break
                     case 843 : // РНУ-171
-                        if ((isCalc10 && "10360".equals(row.code)) ||
-                                (!isCalc10 && "10361".equals(row.code))) {
+                        if ((isCalc10 && "19540".equals(row.code)) ||
+                                (!isCalc10 && "19570".equals(row.code))) {
                             result += (row.incomeCorrection?.abs() ?: 0)
                         }
                         break
