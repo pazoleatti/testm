@@ -2951,7 +2951,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	@Override
 	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
 		if (recordIds.isEmpty()) {
-			return null;
+            return new HashMap<Long, RefBookValue>();
 		}
 		RefBook refBook = getByAttribute(attributeId);
  		final RefBookAttribute attribute = refBook.getAttribute(attributeId);
@@ -2969,7 +2969,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	@Override
 	public Map<Long, RefBookValue> dereferenceValues(String tableName, Long attributeId, Collection<Long> recordIds) {
 		if (recordIds.isEmpty()) {
-			return null;
+			return new HashMap<Long, RefBookValue>();
 		}
 		RefBook refBook = getByAttribute(attributeId);
 		final RefBookAttribute attribute = refBook.getAttribute(attributeId);
