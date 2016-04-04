@@ -164,25 +164,18 @@ void logicCheck() {
         }
 
         // 4. Проверка положительного значения графы 9, 11-15
-        ['sum', 'time', 'rate', 'sum1', 'rate1', 'sum2', 'rate2', 'sum3'].each {
+        ['sum', 'time', 'rate', 'sum1', 'rate1', 'sum2'].each {
             if (row[it] != null && row[it] < 0) {
                 msg = row.getCell(it).column.name
                 rowError(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
             }
         }
 
-        def values = []
-        // 5. Проверка значения графы 16,17
-        if (calc16(row) != null && row.rate2 != calc16(row)) {
-            values.add(row.getCell('rate2').column.name)
-        }
-        if (calc17(row) != null && row.sum3 != calc17(row)) {
-            values.add(row.getCell('sum3').column.name)
-        }
-        if (!values.empty) {
-            def str = values.join("», «")
-            rowError(logger, row, "Строка $rowNum: Неверное значение граф: «$str»!")
-        }
+        // Проверка расчётных граф
+        def needValue = formData.createDataRow()
+        needValue.rate2 = calc16(row)
+        needValue.sum3 = calc17(row)
+        checkCalc(row, ['rate2', 'sum3'], needValue, logger, true)
     }
 
     // 6. Проверка итоговых значений пофиксированной строке «Итого»

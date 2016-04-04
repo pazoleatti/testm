@@ -397,7 +397,7 @@ public class ColumnDaoTest extends AbstractDao {
         List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
 
         RefBookColumn refBookColumn = new RefBookColumn();
-        refBookColumn.setRefBookAttributeId1(4L);
+        refBookColumn.setRefBookAttributeId(4L);
         refBookColumn.setRefBookAttribute(refBookAttribute);
         refBookColumn.setAlias("refBookColumn");
         refBookColumn.setName("Справочная графа");

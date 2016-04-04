@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -116,7 +115,7 @@ public class RefBookHelperImplTest {
 		RefBookColumn rbColumn = new RefBookColumn();
 		rbColumn.setAlias("Rate");
 		rbColumn.setId(2);
-		rbColumn.setRefBookAttributeId1(2L);
+		rbColumn.setRefBookAttributeId(2L);
         rbColumn.setRefBookAttribute(refBookAttribute2);
 		ReferenceColumn refColumn = new ReferenceColumn();
 		refColumn.setAlias("Country");

@@ -760,15 +760,14 @@ public class RefBookUniversal implements RefBookDataProvider {
 
             //Обновление периода актуальности
             if (isRelevancePeriodChanged) {
+                if (!isValuesChanged) {
+                    //Если изменился только период актуальности, то ищем все ссылки не пересекающиеся с новым периодом, но которые действовали в старом
+                    checkUsages(refBook, Arrays.asList(uniqueRecordId), versionFrom, versionTo, false, logger, "Изменение невозможно, обнаружено использование элемента справочника!");
+                }
                 if (!refBook.isVersioned()) {
                     //Если справочник не версионный, то нет смысла проверять пересечения
-                    checkUsages(refBook, Arrays.asList(uniqueRecordId), versionFrom, versionTo, null, logger, "Изменение невозможно, обнаружено использование элемента справочника!");
+                    //checkUsages(refBook, Arrays.asList(uniqueRecordId), versionFrom, versionTo, null, logger, "Изменение невозможно, обнаружено использование элемента справочника!");
                 } else {
-                    if (!isValuesChanged) {
-                        //Если изменился только период актуальности, то ищем все ссылки не пересекающиеся с новым периодом, но которые действовали в старом
-                        checkUsages(refBook, Arrays.asList(uniqueRecordId), versionFrom, versionTo, false, logger, "Изменение невозможно, обнаружено использование элемента справочника!");
-                    }
-
                     List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
                     if (previousVersion != null && (previousVersion.isVersionEndFake() && SimpleDateUtils.addDayToDate(previousVersion.getVersionEnd(), 1).equals(versionFrom))) {
                         //Если установлена дата окончания, которая совпадает с существующей фиктивной версией - то она удаляется

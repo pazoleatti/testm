@@ -164,7 +164,6 @@ public class App_6_5Test extends ScriptTestBase {
         row.getCell("count").setValue(9, null);
         i = 0;
         testHelper.execute(FormDataEvent.CALCULATE);
-        testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }

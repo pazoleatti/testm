@@ -125,7 +125,7 @@ def sortColumns = ['name', 'docNumber', 'docDate', 'transDoneDate']
 def calcColumns = ['sum4', 'sum5', 'sum8']
 
 @Field
-def course810 = getRecordId(15, 'CODE', '810')
+def course810
 
 @Field
 def pattern = /[0-9]{1,10}[\.]?[0-9]{0,2}\%?/
@@ -141,6 +141,13 @@ def endDate = null
 // Порядок отчетного периода
 @Field
 def periodOrder = null
+
+def getCourse810() {
+    if (course810 == null) {
+        course810 = getRecordId(15, 'CODE', '810')
+    }
+    return course810
+}
 
 def getReportPeriodStartDate() {
     if (startDate == null) {
@@ -385,13 +392,13 @@ def calc24(def row, def flag23, def calcCol23) {
         if (row.sum3 == null) {
             return null
         } else if (!flag23) {
-            if (row.course == course810) {
+            if (row.course == getCourse810()) {
                 return calcCol23
             } else {
                 return round(calcCol23 * row.course2, 2)
             }
         } else if (flag23 && !(row.base < 1)) {
-            if (row.course == course810) {
+            if (row.course == getCourse810()) {
                 return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             } else {
                 return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1) * row.course2)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -210,7 +211,7 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         // ORG_CODE = 2, TYPE = "НЛ"
         value8.put("ORG_CODE", new RefBookValue(RefBookAttributeType.REFERENCE, 262625999L));
         value8.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 262680899L));
-        value8.put("KIO", new RefBookValue(RefBookAttributeType.STRING, "7707083893"));
+        value8.put("TAX_CODE_INCORPORATION", new RefBookValue(RefBookAttributeType.STRING, "7707083893"));
         // заполнено поле ИНН, КПП для иностранной организации
         value8.put("INN", new RefBookValue(RefBookAttributeType.STRING, "7707083894"));
         value8.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "7707083894"));
@@ -304,7 +305,7 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         Assert.assertNull(saveRecords.get(5).get("IKKSR").getStringValue());
         Assert.assertNull(saveRecords.get(5).get("IKSR").getStringValue());
         //7
-        Assert.assertEquals("Для иностранной организации обязательно должно быть заполнено одно из следующих полей: «КИО», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для иностранной организации обязательно должно быть заполнено одно из следующих полей: «Код налогоплательщика в стране инкорпорации», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!", entries.get(i++).getMessage());
         Assert.assertEquals("Для иностранной организации нельзя указать «INN»!", entries.get(i++).getMessage());
         Assert.assertEquals("Для Резидента оффшорной зоны обязательно должны быть заполнены поля «OFFSHORE_CODE»,«KIO»!", entries.get(i++).getMessage());
         Assert.assertEquals("Вычисленное контрольное число по полю \"ИНН\" некорректно (7707083894).", entries.get(i++).getMessage());
@@ -345,5 +346,22 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         i++; // расшифровка паттерна КИО
 
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+
+        // Проверка автозаполнения поля 'RS'
+        RefBookDataProvider prov = testHelper.getRefBookFactory().getDataProvider(REF_BOOK_ORG_CODE_ID);
+        for (Map<String, RefBookValue> rec : saveRecords) {
+            Long x = (Long) prov.getRecordData(rec.get("ORG_CODE").getReferenceValue()).get("CODE").getNumberValue();
+            String rs = rec.get("RS").getStringValue();
+            if (x != 2) {
+                Assert.assertNull(rs);
+                continue;
+            }
+            RefBookValue value = rec.get("REG_NUM") != null ? rec.get("REG_NUM") : rec.get("SWIFT");
+            if (value != null) {
+                Assert.assertEquals(value.getStringValue(), rs);
+            } else {
+                Assert.assertNull(rs);
+            }
+        }
     }
 }

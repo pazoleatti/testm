@@ -162,7 +162,6 @@ public class Rnu_112Test extends ScriptTestBase {
         row.getCell("rateDiff").setValue(1L, null);
         row.getCell("incomeCorrection").setValue(BigDecimal.valueOf(0.02), null);
         testHelper.execute(FormDataEvent.CALCULATE);
-        testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }

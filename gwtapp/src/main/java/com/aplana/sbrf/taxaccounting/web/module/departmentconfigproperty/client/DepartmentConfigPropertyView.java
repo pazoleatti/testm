@@ -420,7 +420,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                     case REFERENCE:
                         RefBookColumn refColumn = new RefBookColumn();
                         refColumn.setId(cell.getId().intValue());
-                        refColumn.setRefBookAttributeId1(cell.getRefBookAttributeId());
+                        refColumn.setRefBookAttributeId(cell.getRefBookAttributeId());
                         refColumn.setRefBookAttribute(cell.getRefBookAttribute());
                         refColumn.setAlias(h.name());
                         refColumn.setName(cell.getName());

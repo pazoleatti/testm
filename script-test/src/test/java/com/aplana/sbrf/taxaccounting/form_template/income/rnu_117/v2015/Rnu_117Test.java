@@ -141,7 +141,6 @@ public class Rnu_117Test extends ScriptTestBase {
         row.getCell("rate1").setValue(1L, null);
         row.getCell("sum2").setValue(1L, null);
         testHelper.execute(FormDataEvent.CALCULATE);
-        testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

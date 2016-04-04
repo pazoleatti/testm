@@ -158,7 +158,25 @@ void logicCheck() {
         // 1. Проверка на заполнение граф
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // 2. Проверка возможности заполнения цены и стоимости
+        // 2. Проверка корректности даты договора
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
+
+        // 3. Проверка корректности даты заключения сделки
+        checkDatePeriod(logger, row, 'dealDate', 'docDate', getReportPeriodEndDate(), true)
+
+        // 4. Проверка количества
+        if (row.count!=null && row.count != 1) {
+            def msg = row.getCell('count').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно значению «1»!")
+        }
+
+        // 5. Проверка суммы доходов
+        if (row.sum && row.sum < 0) {
+            def msg = row.getCell('sum').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+        }
+
+        // 6. Проверка возможности заполнения цены и стоимости
         if (row.sum==null) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('cost').column.name
@@ -167,40 +185,41 @@ void logicCheck() {
                     "используемая в расчете графа «$msg3»!")
         }
 
-        // 3. Проверка цены
+        // 7. Проверка цены
         if (row.sum!=null && row.price != row.sum) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
-        // 4. Проверка стоимости
+        // 8. Проверка стоимости
         if (row.sum!=null && row.cost != row.sum) {
             def msg1 = row.getCell('cost').column.name
             def msg2 = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
-        // 5. Проверка количества
-        if (row.count!=null && row.count != 1) {
-            def msg = row.getCell('count').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно значению «1»!")
-        }
+        // 9. Проверка корректности даты совершения сделки
+        // TODO (SBRFACCTAX-15094) заменить на checkDatePeriodExt
+        checkDatePeriodExtLocal(logger, row, 'dealDoneDate', 'dealDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
+    }
+}
 
-        // 6. Проверка корректности даты договора
-        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
+// TODO (SBRFACCTAX-15094) удалить
+void checkDatePeriodExtLocal(logger, row, String alias, String startAlias, Date yearStartDate, Date endDate, boolean fatal) {
+    // дата проверяемой графы
+    Date docDate = row.getCell(alias).getDateValue();
+    // дата другой графы
+    Date startDate = row.getCell(startAlias).getDateValue();
 
-        // 7. Проверка корректности даты заключения сделки
-        checkDatePeriod(logger, row, 'dealDate', 'docDate', getReportPeriodEndDate(), true)
-
-        // 8. Проверка корректности даты совершения сделки
-        checkDatePeriod(logger, row, 'dealDoneDate', 'dealDate', getReportPeriodEndDate(), true)
-
-        // 9. Проверка положительной суммы доходов
-        if (row.sum && row.sum < 0) {
-            def msg = row.getCell('sum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
-        }
+    if (docDate != null && startDate != null && (docDate.before(yearStartDate) || docDate.after(endDate) || docDate.before(startDate))) {
+        logger.error(String.format("Строка %d: Дата по графе «%s» должна принимать значение из диапазона %s - %s и быть больше либо равна дате по графе «%s»!",
+                row.getIndex(),
+                getColumnName(row, alias),
+                formatDate(yearStartDate, "dd.MM.yyyy"),
+                formatDate(endDate, "dd.MM.yyyy"),
+                getColumnName(row, startAlias)
+        ));
     }
 }
 

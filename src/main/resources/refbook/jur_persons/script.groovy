@@ -78,8 +78,9 @@ void save() {
         }
 
         // 2. Обязательное заполнение идентификационного кода для иностранной организации
-        if (orgCode == 2 && !kio && !swift && !regNum) {
-            logger.error('Для иностранной организации обязательно должно быть заполнено одно из следующих полей: «КИО», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!')
+        if (orgCode == 2 && !taxCodeIncorporation && !swift && !regNum) {
+            logger.error('Для иностранной организации обязательно должно быть заполнено одно из следующих полей: ' +
+                    '«Код налогоплательщика в стране инкорпорации», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!')
         }
 
         // 3. Обязательное заполнение идентификационного кода для российской организации
@@ -268,6 +269,18 @@ void save() {
             }
         }
         it.put("RSK", new RefBookValue(RefBookAttributeType.STRING, rsk))
+
+        // Алгоритм заполнения поля «RS»:
+        def rs
+        // if (orgCode == 1) { то не заполняется
+        if (orgCode == 2) {
+            if (regNum) {
+                rs = regNum
+            } else if (swift) {
+                rs = swift
+            }
+        }
+        it.put("RS", new RefBookValue(RefBookAttributeType.STRING, rs))
     }
 }
 
