@@ -185,7 +185,7 @@ void logicCheck() {
                 }
             }
         }
-        if (countryCode && row.dealsMode != null && row.dealsMode != calc10(row.name)) {
+        if (countryCode && row.dealsMode != calc10(row.name)) {
             String msg1 = row.getCell('dealsMode').column.name
             String msg2 = row.getCell('countryCode').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению «Да», " +
