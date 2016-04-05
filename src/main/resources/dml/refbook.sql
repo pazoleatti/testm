@@ -150,6 +150,8 @@ insert into ref_book (id, name, visible, type, read_only, region_attribute_id, i
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (540,'Вид корректировки',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (541,'Коды основания отнесения сделки к контролируемой',1,0,0,null);
 
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (542,'Коды валют и драгоценных металлов',1,0,1,null);
+
 UPDATE ref_book SET is_versioned = 0 WHERE id IN (30, 93, 207, 95, 74, 103, 94, 105, 104, 108, 204, 205, 400, 401, 206, 310, 330, 510, 511);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (0,0,'Тестовое наименование','NAME',1,1,null,null,1,null,10,0,0,null,null,0,2000);
@@ -787,6 +789,10 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5411, 541, 'Код', 		'CODE', 1, 1, null, null, 1, null, 	5, 1, 1, 1, 	null, 0, 3);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5412, 541, 'Наименование', 	'NAME', 1, 2, null, null, 1, null, 	20, 1, 0, null, null, 0, 1000);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5421, 542, 'Код','CODE',1,1,null,null,1,null,10,1,1,null,null,0,3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5422, 542, 'Наименование','NAME',1,2,null,null,1,null,10,1,0,null,null,0,255);
+
 
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_attribute_id;

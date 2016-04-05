@@ -145,8 +145,6 @@ declare
 /
 commit;
 
-drop package pck_zip;
-drop java source "ZipBlob";
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14699
 alter table declaration_report drop constraint decl_report_pk; 
@@ -1059,6 +1057,9 @@ fetch query_destination bulk collect into l_destination;
 END;
 END DECLARATION_PCKG;
 /
+--------------------------------------------------------------------------------------------------------------
+drop package pck_zip;
+drop java source "ZipBlob";
 --------------------------------------------------------------------------------------------------------------
 commit;
 exit;
