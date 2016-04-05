@@ -1666,7 +1666,8 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    void checkLockedMe(LockData lockData, TAUser user) {
+    @Override
+    public void checkLockedMe(LockData lockData, TAUser user) {
         if (lockData == null) {
             throw new ServiceException("Блокировка не найдена. Объект должен быть заблокирован текущим пользователем");
         }
