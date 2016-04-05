@@ -99,7 +99,7 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'countryCode', 'deals
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealDate', 'date1', 'date2', 'priceFirstCurrency',
-                       'currencyCode', 'courseCB', 'priceFirstRub']
+                       'currencyCode', 'priceFirstRub']
 
 @Field
 def totalColumns = ['incomeSum', 'outcomeSum']
@@ -185,7 +185,7 @@ void logicCheck() {
                 }
             }
         }
-        if (countryCode && row.dealsMode != null && row.dealsMode != calc10(row.name)) {
+        if (countryCode && row.dealsMode != calc10(row.name)) {
             String msg1 = row.getCell('dealsMode').column.name
             String msg2 = row.getCell('countryCode').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению «Да», " +
@@ -217,7 +217,7 @@ void logicCheck() {
         if (both) {
             String msg1 = row.getCell('outcomeSum').column.name
             String msg2 = row.getCell('incomeSum').column.name
-            logger.error("Строка $rowNum: Графа «$msg1» должно быть не меньше значения графы «$msg2»!")
+            logger.error("Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
         }
 
         // 8. Проверка положительной суммы дохода/расхода

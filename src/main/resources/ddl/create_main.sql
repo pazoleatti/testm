@@ -1131,6 +1131,28 @@ CREATE TABLE form_data_row (
 );
 CREATE SEQUENCE seq_form_data_row START WITH 10000;
 --------------------------------------------------------------------------------------------------------
+create table form_data_row_span
+(
+  id           number(9) not null,
+  form_data_id number(9) not null,
+  temporary    number(1) not null,
+  manual       number(1) not null,
+  data_ord     number(3) not null,
+  ord          number(9) not null,
+  colspan      number(9),
+  rowspan      number(9)
+);
+
+comment on table form_data_row_span is 'Информация по горизонтальном/вертикальном объединении ячеек в НФ';
+comment on column form_data_row_span.id is 'Идентификатор записи';
+comment on column form_data_row_span.form_data_id is 'Идентификатор НФ';
+comment on column form_data_row_span.manual is 'Версия ручного ввода';
+comment on column form_data_row_span.temporary is 'Резервный/временный срез';
+comment on column form_data_row_span.ord is 'Позиция в строке';
+comment on column form_data_row_span.data_ord is 'Позиция в столбце';
+comment on column form_data_row_span.colspan is 'Объединение по горизонтали';
+comment on column form_data_row_span.rowspan is 'Объединение по вертикали';
+--------------------------------------------------------------------------------------------------------
 CREATE TABLE style (
   alias				     VARCHAR2(50 CHAR) NOT NULL,
   font_color			 NUMBER(3) NULL,

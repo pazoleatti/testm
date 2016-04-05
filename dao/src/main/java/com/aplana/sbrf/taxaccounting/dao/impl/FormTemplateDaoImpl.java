@@ -158,7 +158,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			formStyleDao.saveFormStyles(formTemplate);
 
 			//todo http://jira.aplana.com/browse/SBRFACCTAX-14414 Изменить структуру хранения НФ.
-			//final Map<ColumnKeyEnum, Collection<Long>> columns  = columnDao.updateFormColumns(formTemplate);
+			columnDao.updateFormColumns(formTemplate);
 
             return formTemplateId;
         } catch (DataAccessException e){

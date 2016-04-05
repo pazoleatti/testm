@@ -56,7 +56,7 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
         if (value == null) {
             throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
         }
-        String msg = String.format("количество ячеек форм-источников(%s) превышает максимально допустимое(%s)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), value);
+        String msg = String.format("количество ячеек форм-источников(%s) превышает максимально допустимое(%s)!",  value, "%s");
         return checkTask(getReportType(), value, declarationDataService.getTaskName(ddReportType, declarationTemplate.getType().getTaxType()), msg);
     }
 

@@ -458,6 +458,12 @@ public interface FormDataService {
     void checkLockedByTask(long formDataId, Logger logger, TAUserInfo userInfo, String taskName, boolean editMode);
 
     /**
+     * Проверка, что заблокирована текущим пользователем
+     * @param lockData
+     * @param user
+     */
+    void checkLockedMe(LockData lockData, TAUser user);
+    /**
      *
      * @param userInfo
      * @param formData

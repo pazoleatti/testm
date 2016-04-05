@@ -3,6 +3,12 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 UPDATE ref_book_attribute SET name = 'Код налогового органа (кон.)' WHERE id = 185;	
 
 -----------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-15305: 1.0 БД. Добавить справочник "Коды валют и драгоценных металлов"
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (542,'Коды валют и драгоценных металлов',1,0,1,null);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5421,542,'Код','CODE',1,1,null,null,1,null,10,1,1,null,null,0,3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5422,542,'Наименование','NAME',1,2,null,null,1,null,10,1,0,null,null,0,255);
+-----------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15018: 1.0. ТЦО. Реализовать справочник "Вид корректировки"
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (540,'Вид корректировки',1,0,0,null);

@@ -657,7 +657,7 @@ public class RefBookDaoTest {
 		Map<Long, RefBookValue> result;
 		List<Long> recordIds = new ArrayList<Long>();
 	   	result = refBookDao.dereferenceValues(4L, recordIds);
-		assertNull(result);
+		assertTrue(result.isEmpty());
 		recordIds.add(5L);
 		recordIds.add(6L);
 		recordIds.add(7L);

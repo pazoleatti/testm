@@ -45,6 +45,7 @@ drop table form_data_ref_book;
 drop table form_data_file;
 drop table ref_book_vzl_history;
 drop table form_data_row;
+drop table form_data_row_span;
 drop sequence seq_form_data_row;
 drop table form_data;
 drop sequence seq_declaration_data;

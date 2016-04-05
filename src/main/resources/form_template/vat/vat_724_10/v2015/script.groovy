@@ -555,10 +555,9 @@ void checkDeclarations() {
     }
 
     // мапа декларации (id -> название)
+    // оставляю мапу, т.к. в дальнейшем возможно добавление других источников
     def declarationTypeMap = [
-            4  : 'Декларация по НДС (раздел 1-7)',
-            7  : 'Декларация по НДС (аудит, раздел 1-7)',
-            20 : 'Декларация по НДС (короткая, раздел 1-7)',
+            4  : 'Декларация по НДС (раздел 1-7)'
     ]
 
     // получение декларации и проверка принятости
@@ -574,7 +573,7 @@ void checkDeclarations() {
                         departmentName : getDepartment(bankDepartmentId)?.name,
                         periodName : departmentReportPeriod.reportPeriod.name,
                         year : departmentReportPeriod.reportPeriod.taxPeriod.year,
-                        correctionDate : date?.format('dd.MM.yyyy'),
+                        correctionDate : date?.format('dd.MM.yyyy')
                 ]
                 results.add(result)
             }
@@ -583,8 +582,8 @@ void checkDeclarations() {
 
     // вывод результатов проверки
     if (results) {
-        def msg = "Форма не может быть переведена из статуса «Принята», т.к. существуют принятые экземпляры деклараций-приемников:"
-        logger.error(msg)
+        def msg = "Существуют принятые экземпляры деклараций-приемников:"
+        logger.warn(msg)
 
         results.each { result ->
             def declarationName = result.declarationName
@@ -593,11 +592,11 @@ void checkDeclarations() {
             def year = result.year
             def correctionDate = result.correctionDate
             if (correctionDate) {
-                msg = "Вид: %s, Подразделение: %s, Период: %s %d, Дата сдачи корректировки: %s."
-                logger.error(msg, declarationName, departmentName, periodName, year, correctionDate)
+                msg = "Вид: «%s», Подразделение: «%s», Период: «%d, %s», Дата сдачи корректировки: «%s»."
+                logger.warn(msg, declarationName, departmentName, year, periodName, correctionDate)
             } else {
-                msg = "Вид: %s, Подразделение: %s, Период: %s %d."
-                logger.error(msg, declarationName, departmentName, periodName, year)
+                msg = "Вид: «%s», Подразделение: «%s», Период: «%d, %s»."
+                logger.warn(msg, declarationName, departmentName, year, periodName)
             }
         }
     }
