@@ -3,6 +3,8 @@ alter session set NLS_NUMERIC_CHARACTERS = '.,';
 alter session set NLS_DATE_FORMAT = 'dd.MM.yyyy HH24:MI:ss';
 
 SET SERVEROUTPUT ON SIZE 1000000;
+begin dbms_output.put_line('Script start: ' || current_timestamp); end; 
+/
 
 ALTER TABLE form_column ADD data_ord NUMBER(2);
 COMMENT ON COLUMN form_column.data_ord IS 'Порядковый номер столбца в таблице данных';
@@ -139,23 +141,38 @@ CREATE TABLE form_data_row (
 	c99 VARCHAR2(2000 char), c99_style VARCHAR2(50 char)
 );
 
-alter table form_data_row add constraint form_data_row_pk primary key(id);
-alter table form_data_row add constraint form_data_row_fk_form_data foreign key(form_data_id) references form_data(id) on delete cascade;
-alter table form_data_row add constraint form_data_row_unq unique (FORM_DATA_ID, TEMPORARY, MANUAL, ORD);
-alter table form_data_row add constraint form_data_row_chk_temp check (TEMPORARY in (0, 1)) ;
-alter table form_data_row add constraint form_data_row_chk_manual check (MANUAL in (0, 1)) ;
-
-create or replace function get_style (style_id varchar2, editable number, colspan number, rowspan number) return varchar2 is
+create or replace function get_style (style_id varchar2, editable number) return varchar2 is
 res varchar2(100);
 begin
-    res := TRIM(TRAILING ';' FROM (CASE WHEN NOT style_id IS NULL THEN style_id || ';' END ||
-                    CASE WHEN editable = 1 THEN 'e;' END ||
-                    CASE WHEN NOT colspan IS NULL AND colspan <> 1 THEN 'c' || colspan || ';' END ||
-                    CASE WHEN NOT rowspan IS NULL AND rowspan <> 1 THEN 'r' || rowspan END));
-    
+    res := CASE WHEN editable = 1 THEN 'e' END || CASE WHEN NOT style_id IS NULL THEN style_id END;
     return (res);
 end;
 /
+
+create sequence seq_form_data_row_span start with 1;
+
+--https://jira.aplana.com/browse/SBRFACCTAX-15026: Реализовать постраничное отображение\редактирование объединенных по вертикали строк
+create table form_data_row_span
+(
+  id           number(9) not null,
+  form_data_id number(9) not null,
+  temporary    number(1) not null,
+  manual       number(1) not null,
+  data_ord     number(3) not null,
+  ord          number(9) not null,
+  colspan      number(9),
+  rowspan      number(9)
+);
+
+comment on table form_data_row_span is 'Информация по горизонтальном/вертикальном объединении ячеек в НФ';
+comment on column form_data_row_span.id is 'Идентификатор записи';
+comment on column form_data_row_span.form_data_id is 'Идентификатор НФ';
+comment on column form_data_row_span.manual is 'Версия ручного ввода';
+comment on column form_data_row_span.temporary is 'Резервный/временный срез';
+comment on column form_data_row_span.ord is 'Позиция в строке';
+comment on column form_data_row_span.data_ord is 'Позиция в столбце';
+comment on column form_data_row_span.colspan is 'Объединение по горизонтали';
+comment on column form_data_row_span.rowspan is 'Объединение по вертикали';
 
 -----------------------------------------------------------------------------------------------------
 alter table log_clob_query add rows_affected number(9);
@@ -184,10 +201,12 @@ declare
 	cnt_rows number(18);
 	decode_str varchar2(512);
 	decode_stmt varchar2(512);
+	form_data_row_span_stmt varchar2(512);
 begin
   --Получить идентификатор текущей сессии для логирования
 	    select seq_log_query_session.nextval into v_session_id from dual;
 		insert into log_clob_query (id, form_template_id, sql_mode, session_id) values(seq_log_query.nextval, 0, 'DDL', v_session_id);
+  		
 		
   for x in (select table_name, ft.id from user_tables ut full outer join form_template ft on 'FORM_DATA_'||ft.id = ut.table_name where regexp_like(table_name, '^FORM_DATA_[0-9]+$') order by ft.id nulls first, table_name) loop
       if (x.id is null) then
@@ -197,17 +216,22 @@ begin
          insert_header := 'insert into form_data_row (id, form_data_id, temporary, manual, ord, alias';
          insert_body := 'select id, form_data_id, temporary, manual, ord, alias';
 		 
-		 decode_str := 'select listagg('', ''|| id || '', ''''s'' || fs.font_color ||''-''||fs.back_color||case when italic = 1 then ''i'' end || case when bold = 1 then ''b'' end || '''''''') within group (order by id) || '', '''''''')'' as style from form_style fs where form_template_id = '||x.id;
+		 decode_str := 'select listagg('', ''|| id || '', '''''' || case when italic = 1 then ''i'' end || case when bold = 1 then ''b'' end || fs.font_color ||''-''||fs.back_color|| '''''''') within group (order by id) || '', '''''''')'' as style from form_style fs where form_template_id = '||x.id;
 		 execute immediate decode_str into decode_stmt;
 		 
 		 if (decode_stmt = ', '''')') then decode_stmt := ', '''', '''', '''')'; end if;
 		 
          for y in (select id, data_ord from form_column fc where fc.form_template_id = x.id order by data_ord) loop
 			insert_header := insert_header || ', C' || y.data_ord || ', C'||y.data_ord||'_style';
-            insert_body := insert_body || ', C' || y.id ||'  AS c'||y.data_ord ||', get_style(decode(C'|| y.id ||'_style_id' || decode_stmt||', C'|| y.id ||'_editable, C'|| y.id ||'_colspan, C'|| y.id ||'_rowspan) as C'||y.data_ord||'_style';  	
+            insert_body := insert_body || ', C' || y.id ||'  AS c'||y.data_ord ||', get_style(decode(C'|| y.id ||'_style_id' || decode_stmt||', C'|| y.id ||'_editable) as C'||y.data_ord||'_style';  	
+			
+			--Отдельно стили по colspan / rowspan
+			form_data_row_span_stmt := 'insert into form_data_row_span (id, form_data_id, temporary, manual, data_ord, ord, colspan, rowspan) select seq_form_data_row_span.nextval, form_data_id, temporary, manual, '||y.data_ord||' as data_ord, ord, C'||y.id||'_COLSPAN, C'||y.id||'_ROWSPAN FROM '||x.table_name ||' t where exists (select 1 from form_data fd where fd.id = t.form_data_id) and temporary = 0 and (C'||y.id||'_COLSPAN <> 1 or C'||y.id||'_ROWSPAN <> 1)';
+			execute immediate form_data_row_span_stmt;	 
 		 end loop;
          insert_body := insert_body || ' from '||x.table_name ||' t where exists (select 1 from form_data fd where fd.id = t.form_data_id) and temporary = 0';
 		 insert_header := insert_header || ')';
+		 
       end if;
       
       query_stmt := insert_header || insert_body;
@@ -229,6 +253,22 @@ begin
   end loop;
 end;
 /
+
+update form_data_row_span set colspan = null where colspan = 1;
+update form_data_row_span set rowspan = null where rowspan = 1;
+
+-- Констрейнты на новые таблицы
+alter table form_data_row add constraint form_data_row_pk primary key(id);
+alter table form_data_row add constraint form_data_row_fk_form_data foreign key(form_data_id) references form_data(id) on delete cascade;
+alter table form_data_row add constraint form_data_row_unq unique (FORM_DATA_ID, TEMPORARY, MANUAL, ORD);
+alter table form_data_row add constraint form_data_row_chk_temp check (TEMPORARY in (0, 1)) ;
+alter table form_data_row add constraint form_data_row_chk_manual check (MANUAL in (0, 1)) ;
+
+alter table form_data_row_span add constraint form_data_row_span_pk primary key (id);
+alter table form_data_row_span add constraint form_data_row_span_fk foreign key (form_data_id) references form_data (id);
+alter table form_data_row_span add constraint form_data_row_span_unq unique (form_data_id, temporary, manual, data_ord, ord);
+alter table form_data_row_span add constraint form_data_row_span_chk_dataord check (data_ord between 0 and 99);
+------------------------------------------------------------------------------------------------------------------------------------------
 
 select sum(rows_affected), max(total_duration_min) from v_log_clob_query;
 
@@ -287,6 +327,9 @@ WHEN MATCHED THEN UPDATE SET
 WHEN NOT MATCHED THEN INSERT (t.alias, t.font_color, t.back_color, t.italic, t.bold)
 VALUES
     (s.alias, s.font_color, s.back_color, s.italic, s.bold);
+	
+begin dbms_output.put_line('Script end:   ' || current_timestamp); end; 
+/
 
 COMMIT;
 EXIT;
