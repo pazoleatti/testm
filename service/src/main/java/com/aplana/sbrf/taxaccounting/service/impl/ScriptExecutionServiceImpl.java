@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,7 +176,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         }
 
                         //Проверяем не заблокирован ли макет
-                        FormTemplate formTemplate = formTemplateService.get(formTemplateId);
+                        FormTemplate formTemplate = SerializationUtils.clone(formTemplateService.get(formTemplateId));
                         String lockUser = canImportScript(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId, userInfo.getUser());
                         if (lockUser == null){
                             formTemplate.setScript(script);
@@ -208,7 +209,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         }
 
                         //Проверяем не заблокирован ли макет
-                        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+                        DeclarationTemplate declarationTemplate = SerializationUtils.clone(declarationTemplateService.get(declarationTemplateId));
                         String lockUser = canImportScript(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId, userInfo.getUser());
                         if (lockUser == null) {
                             declarationTemplate.setCreateScript(script);
@@ -244,7 +245,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         }
 
                         //Проверяем не заблокирован ли справочник
-                        RefBook refBook = refBookDao.get(refBookId);
+                        RefBook refBook = SerializationUtils.clone(refBookDao.get(refBookId));
                         String lockUser = canImportScript(LockData.LockObjects.REF_BOOK.name() + "_" + refBookId, userInfo.getUser());
                         if (lockUser == null) {
                             try {
