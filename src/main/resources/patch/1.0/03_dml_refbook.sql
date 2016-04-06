@@ -3,6 +3,17 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 UPDATE ref_book_attribute SET name = 'Код налогового органа (кон.)' WHERE id = 185;	
 
 -----------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-15302: 0.8.4 Классификаторы доходов/расходов: Изменить название поля "Символ ОПУ" на "Символ ОФР"
+UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Символ ОФР' WHERE REF_BOOK_ID IN (27, 28) AND ALIAS = 'OPU';
+
+UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Символ ОФР' WHERE REF_BOOK_ID = 29  AND ALIAS = 'OPU';
+
+UPDATE REF_BOOK SET NAME = 'Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОФР' WHERE REF_BOOK_ID = 102;
+UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Символ ОФР' WHERE REF_BOOK_ID = 102 AND ALIAS = 'OPU';
+
+UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Код ОФР' WHERE REF_BOOK_ID = 52  AND ALIAS = 'OPU_CODE';
+
+-----------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15305: 1.0 БД. Добавить справочник "Коды валют и драгоценных металлов"
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (542,'Коды валют и драгоценных металлов',1,0,1,null);
 
