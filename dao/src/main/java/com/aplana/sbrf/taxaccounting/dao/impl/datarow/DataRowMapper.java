@@ -149,7 +149,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 					cell.setValue(numeration, rowNum);
 				}
 			} else {
-				cell.setValue(parseCellValue(column.getColumnType(), rs.getString(COLUMN_PREFIX + column.getDataOrder())), rowNum);
+				cell.setValue(parseCellValue(column.getColumnType(), rs.getString(COLUMN_PREFIX + column.getDataOrder())), rowNum, true);
 			}
 			// чтение стилей
 			parseCellStyle(cell, rs.getString(COLUMN_PREFIX + column.getDataOrder() + "_style"));

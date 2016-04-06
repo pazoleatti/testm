@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -36,6 +37,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -71,6 +74,8 @@ public class FormDataServiceImpl implements FormDataService {
     final static String LOCK_MESSAGE_TASK = "Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
     final static String REF_BOOK_LINK = "Строка %s%s \"%s\"%s";
+    final static String CELL_CHECK_MSG = "Строка %s: значение графы \"%s\" %s";
+    final static String CELL_CHECK_MSG_1 = "Строки %s: значения графы \"%s\" %s";
     final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
     private static final String SAVE_ERROR = "Найдены ошибки при сохранении формы!";
     private static final String SORT_ERROR = "Найдены ошибки при сортировке строк формы!";
@@ -613,7 +618,7 @@ public class FormDataServiceImpl implements FormDataService {
                 }
 
                 //Проверка справочных значений
-                checkReferenceValues(logger, formData, false);
+                checkValues(logger, formData, false);
 
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
@@ -801,7 +806,7 @@ public class FormDataServiceImpl implements FormDataService {
                 lockForm(logger, formData);
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
                 stateLogger.updateState("Проверка ссылок на справочники");
-                checkReferenceValues(logger, formData, false);
+                checkValues(logger, formData, false);
                 //Делаем переход
                 moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
                 break;
@@ -812,7 +817,7 @@ public class FormDataServiceImpl implements FormDataService {
                 lockForm(logger, formData);
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
                 stateLogger.updateState("Проверка ссылок на справочники");
-                checkReferenceValues(logger, formData, false);
+                checkValues(logger, formData, false);
                 checkConsolidateFromSources(formData, logger, userInfo);
                 //Делаем переход
                 moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
@@ -932,7 +937,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void checkReferenceValues(Logger logger, FormData formData, boolean needCheckTemp) {
+    public void checkValues(Logger logger, FormData formData, boolean needCheckTemp) {
         Map<RefBookDataProvider, List<Long>> references = new HashMap<RefBookDataProvider, List<Long>>();
         Map<Long, List<ReferenceInfo>> referenceInfoMap = new HashMap<Long, List<ReferenceInfo>>();
         Map<String, RefBookDataProvider> providers = new HashMap<String, RefBookDataProvider>();
@@ -966,6 +971,61 @@ public class FormDataServiceImpl implements FormDataService {
                             }
                         }
                     }
+                } else if (ColumnType.STRING.equals(column.getColumnType())) {
+                    StringColumn stringColumn = (StringColumn) column;
+                    List<Integer> rowNumbersErr1 = new ArrayList<Integer>();
+                    List<Integer> rowNumbersErr2 = new ArrayList<Integer>();
+                    for (DataRow<Cell> row : rows) {
+                        String temp = row.getCell(column.getAlias()).getStringValue();
+                        if (!column.getValidationStrategy().matches(temp)) {
+                            rowNumbersErr1.add(row.getIndex());
+                        }
+                        // Проверка на соответствие паттерну
+                        if (temp != null && !temp.isEmpty() && !stringColumn.matches(temp)) {
+                            rowNumbersErr2.add(row.getIndex());
+                        }
+                    }
+                    if (!rowNumbersErr1.isEmpty()) {
+                        logger.error(rowNumbersErr1.size() == 1 ? CELL_CHECK_MSG : CELL_CHECK_MSG_1,
+                                StringUtils.join(rowNumbersErr1.toArray(), ", ", null),
+                                column.getName(),
+                                (rowNumbersErr1.size() == 1 ? "превышает" : "превышают") +
+                                " допустимую разрядность (" + stringColumn.getMaxLength() + ")!");
+
+                    }
+                    if (!rowNumbersErr2.isEmpty()) {
+                        logger.error(rowNumbersErr2.size() == 1 ? CELL_CHECK_MSG : CELL_CHECK_MSG_1,
+                                StringUtils.join(rowNumbersErr2.toArray(), ", ", null),
+                                column.getName(),
+                                "не " + (rowNumbersErr1.size() == 1 ? "соответствует" : "соответствуют") +" паттерну \'" +
+                                        stringColumn.getFilter() + "\'!");
+                    }
+                } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
+                    BigDecimal value;
+                    List<Integer> rowNumbers = new ArrayList<Integer>();
+                    NumericColumn numericColumn = (NumericColumn) column;
+                    int precision = numericColumn.getPrecision();
+                    for (DataRow<Cell> row : rows) {
+                        value = row.getCell(column.getAlias()).getNumericValue();
+                        if (value != null) {
+                            value = value.setScale(precision, RoundingMode.HALF_UP);
+                            String str = value.setScale(precision, RoundingMode.HALF_UP).toPlainString();
+                            if (!column.getValidationStrategy().matches(str)) {
+                                rowNumbers.add(row.getIndex());
+                            }
+                        }
+                    }
+                    if (!rowNumbers.isEmpty()) {
+                        logger.error(rowNumbers.size() == 1 ? CELL_CHECK_MSG : CELL_CHECK_MSG_1,
+                                StringUtils.join(rowNumbers.toArray(), ", ", null),
+                                column.getName(),
+                                (rowNumbers.size() == 1 ? "превышает" : "превышают") +
+                                " допустимую разрядность. Должно быть не более " +
+                                        (numericColumn.getMaxLength() - numericColumn.getPrecision()) + " знакомест и не более " + numericColumn.getPrecision() +
+                                        " знаков после запятой!");
+
+                    }
+
                 }
             }
 
