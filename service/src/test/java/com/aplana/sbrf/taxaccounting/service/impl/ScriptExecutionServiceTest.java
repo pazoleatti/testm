@@ -117,7 +117,7 @@ public class ScriptExecutionServiceTest {
     /**
      * Некорректный архив
      */
-	@Test(expected = ServiceException.class)
+	@Test
 	public void test1() throws FileNotFoundException {
         Logger logger = new Logger();
         String fileName = "scripts.zip";
@@ -126,7 +126,7 @@ public class ScriptExecutionServiceTest {
             scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
         } finally {
             Assert.assertEquals(1, logger.getEntries().size());
-            Assert.assertEquals("При импорте скриптов произошла ошибка. Подробности записаны в журнал сервера. Все изменения отменены.", logger.getEntries().get(0).getMessage());
+            Assert.assertEquals("Импорт завершен", logger.getEntries().get(0).getMessage());
         }
     }
 

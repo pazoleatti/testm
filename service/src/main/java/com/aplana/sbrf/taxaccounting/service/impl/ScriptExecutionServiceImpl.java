@@ -10,6 +10,9 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
@@ -130,12 +133,12 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
     @Override
     public void importScripts(Logger logger, InputStream zipFile, String fileName, TAUserInfo userInfo) {
         Map<String, List<String>> files = new HashMap<String, List<String>>();
-        ZipInputStream zis = null;
+        ZipArchiveInputStream zis = null;
         boolean hasFatalError = false;
         Set<String> errorFolders = new HashSet<String>();
         try {
-            zis = new ZipInputStream(new BufferedInputStream(zipFile));
-            ZipEntry entry;
+            zis = new ZipArchiveInputStream(new BufferedInputStream(zipFile));
+            ArchiveEntry entry;
             while((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
                     if (!entry.getName().contains("/")) {
