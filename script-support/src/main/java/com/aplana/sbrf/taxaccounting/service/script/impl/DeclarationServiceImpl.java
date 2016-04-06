@@ -237,6 +237,16 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    public DeclarationType getType(int declarationTypeId) {
+        return declarationTypeDao.get(declarationTypeId);
+    }
+
+    @Override
+    public DeclarationTemplate getTemplate(int declarationTemplateId) {
+        return declarationTemplateDao.get(declarationTemplateId);
+    }
+
+    @Override
     public void exportPDF(JasperPrint jasperPrint, OutputStream data) {
         declarationDataService.exportPDF(jasperPrint, data);
     }
