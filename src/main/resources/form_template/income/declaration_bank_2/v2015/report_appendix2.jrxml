@@ -262,6 +262,9 @@
 			<initialValueExpression><![CDATA[$F{NumBlocks}]]></initialValueExpression>
 		</variable>
 	</subDataset>
+	<parameter name="START_PAGE_NUMBER" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+	</parameter>
 	<queryString language="xPath">
 		<![CDATA[/Файл/Документ/Прибыль/СведДохФЛ]]>
 	</queryString>
@@ -881,7 +884,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="1b7902e3-dd44-4fe9-b1be-7344bd39c66c" x="370" y="23" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -895,7 +898,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="23" width="15" height="19" isPrintWhenDetailOverflows="true">
@@ -911,7 +914,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="23" width="15" height="19" isPrintWhenDetailOverflows="true">
@@ -927,7 +930,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(4)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="23" width="15" height="19" isPrintWhenDetailOverflows="true">
@@ -943,7 +946,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(5)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(5)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="9c4a287b-afc2-4c2f-b6c5-bcbb45c01d4b" x="340" y="23" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -957,7 +960,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(0)]]></textFieldExpression>
 			</textField>
 			<image hAlign="Center">
 				<reportElement uuid="d56b9386-df1b-4d3a-9fe2-35e7c10c79c3" x="21" y="0" width="96" height="40" isPrintWhenDetailOverflows="true"/>
@@ -9634,7 +9637,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="043d324f-2db6-433a-9dae-0f9eaf0b7c00" x="370" y="23" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -9648,7 +9651,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="23" width="15" height="19" isPrintWhenDetailOverflows="true">
@@ -9664,7 +9667,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="23" width="15" height="19" isPrintWhenDetailOverflows="true">
@@ -9680,7 +9683,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(4)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="23" width="15" height="19" isPrintWhenDetailOverflows="true">
@@ -9696,7 +9699,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(5)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(5)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="a10e8710-1ec9-4b56-9901-293a039f4e24" x="340" y="23" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -9710,7 +9713,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER} + $P{START_PAGE_NUMBER})).length()-6).charAt(0)]]></textFieldExpression>
 			</textField>
 			<image hAlign="Center">
 				<reportElement uuid="ab7df6a2-3606-41f8-b622-881a6829bf61" x="21" y="0" width="96" height="40" isPrintWhenDetailOverflows="true"/>
