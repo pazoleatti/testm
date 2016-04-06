@@ -184,7 +184,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         if (lockUser == null){
                             formTemplate.setScript(script);
                             try {
-                                formTemplateService.updateScript(formTemplate, logger);
+                                formTemplateService.updateScript(formTemplate, logger, userInfo);
                             } catch (ServiceLoggerException e) {
                                 logger.error("Макет налоговой формы \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен ", formTemplate.getName(), scriptFileName);
                                 continue;
@@ -217,7 +217,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         if (lockUser == null) {
                             declarationTemplate.setCreateScript(script);
                             try {
-                                declarationTemplateService.updateScript(declarationTemplate, logger);
+                                declarationTemplateService.updateScript(declarationTemplate, logger, userInfo);
                             } catch (ServiceLoggerException e) {
                                 logger.error("%s \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен.",
                                         declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "Макет декларации" : "Макет уведомления",

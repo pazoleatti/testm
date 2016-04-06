@@ -224,7 +224,7 @@ public interface DeclarationTemplateService {
      * @param declarationTemplateId идентификатор макета
      * @param script скрипт
      */
-    void updateScript(DeclarationTemplate declarationTemplate, Logger log);
+    void updateScript(DeclarationTemplate declarationTemplate, Logger log, TAUserInfo userInfo);
 
     /**
      *

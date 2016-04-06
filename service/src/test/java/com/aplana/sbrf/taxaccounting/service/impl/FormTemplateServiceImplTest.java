@@ -5,11 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -135,6 +131,7 @@ public class FormTemplateServiceImplTest extends Assert {
         ReflectionTestUtils.setField(scriptingService, "departmentService", departmentService);
 
         ReflectionTestUtils.setField(formTemplateService, "scriptingService", scriptingService);
+        ReflectionTestUtils.setField(formTemplateService, "mainOperatingService", mock(MainOperatingService.class));
     }
 
     /**
@@ -310,7 +307,7 @@ public class FormTemplateServiceImplTest extends Assert {
         String script = IOUtils.toString(stream, "UTF-8");
         formTemplate.setScript(script);
         Logger log = new Logger();
-        formTemplateService.updateScript(formTemplate, log);
+        formTemplateService.updateScript(formTemplate, log, new TAUserInfo());
     }
 
     @Test(expected = ServiceLoggerException.class)
@@ -325,7 +322,7 @@ public class FormTemplateServiceImplTest extends Assert {
         String script = IOUtils.toString(stream, "UTF-8");
         formTemplate.setScript(script);
         Logger log = new Logger();
-        formTemplateService.updateScript(formTemplate, log);
+        formTemplateService.updateScript(formTemplate, log, new TAUserInfo());
     }
 
 //    @Test(expected = ValidationException.class)
