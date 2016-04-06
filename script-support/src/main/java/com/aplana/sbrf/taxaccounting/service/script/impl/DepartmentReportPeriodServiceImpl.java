@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -30,5 +31,10 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     @Override
     public Map<Integer, List<Date>> getCorrectionDateListByReportPeriod(Collection<Integer> reportPeriodIds) {
         return departmentReportPeriodDao.getCorrectionDateListByReportPeriod(reportPeriodIds);
+    }
+
+    @Override
+    public List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
+        return departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
     }
 }
