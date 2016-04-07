@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
@@ -24,6 +25,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -61,14 +63,6 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         logger.setTaUserInfo(securityService.currentUserInfo());
         SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
         RefBook slaveRefBook = rbFactory.get(action.getSlaveRefBookId());
-        ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
-
-        /** Проверка существования справочных атрибутов */
-        /*checkReferenceValues(slaveRefBook, action.getRows(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
-        if (logger.getMainMsg() != null) {
-            result.setUuid(logEntryService.save(logger.getEntries()));
-            result.setErrorMsg(logger.getMainMsg());
-        }*/
 
         /** Специфичные проверки для настроек подразделений */
         Pattern innPattern = Pattern.compile(RefBookUtils.INN_JUR_PATTERN);
@@ -125,6 +119,8 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         if (logger.containsLevel(LogLevel.ERROR) && result.getErrorType() == SaveDepartmentRefBookValuesResult.ERROR_TYPE.NONE){
             result.setHasFatalError(true);
             result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.COMMON_ERROR);
+            prepareResult(result, logger, action);
+            return result;
         }
 
         Map<Pair<String, String>, Integer> counter = new HashMap<Pair<String, String>, Integer>();
@@ -190,45 +186,6 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
     @Override
     public void undo(SaveDepartmentRefBookValuesAction saveDepartmentRefBookValuesAction, SaveDepartmentRefBookValuesResult saveDepartmentRefBookValuesResult, ExecutionContext executionContext) throws ActionException {
 
-    }
-
-    /**
-     * Проверка существования записей справочника на которые ссылаются атрибуты.
-     * Считаем что все справочные атрибуты хранятся в универсальной структуре как и сами настройки
-     * @param refBook
-     * @param rows
-     * @return возвращает true, если проверка пройдена
-     */
-    private void checkReferenceValues(RefBook refBook, List<Map<String, TableCell>> rows, Date versionFrom, Date versionTo, Logger logger) {
-        Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<RefBookDataProvider, List<RefBookLinkModel>>();
-
-        RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
-        RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
-
-        int i = 1;
-        for (Map<String, TableCell> row : rows) {
-            for (Map.Entry<String, TableCell> e : row.entrySet()) {
-                TableCell cell = e.getValue();
-                if (cell.getType() == null) {
-                    continue;
-                }
-                if (cell.getType() == RefBookAttributeType.REFERENCE) {
-                    if (cell.getRefValue() != null) {
-                        //Собираем ссылки на справочники и группируем их по провайдеру, обрабатывающему справочники
-                        RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
-                        if (!references.containsKey(linkProvider)) {
-                            references.put(linkProvider, new ArrayList<RefBookLinkModel>());
-                        }
-                        //Сохраняем данные для отображения сообщений
-                        references.get(linkProvider).add(new RefBookLinkModel(i, e.getKey(), cell.getRefValue(), null, versionFrom, versionTo));
-                    }
-                }
-            }
-            i++;
-        }
-
-        //Проверяем ссылки и выводим соообщения если надо
-        refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
     }
 
     private List<Map<String,RefBookValue>> convertRows(List<Map<String, TableCell>> rows) {
