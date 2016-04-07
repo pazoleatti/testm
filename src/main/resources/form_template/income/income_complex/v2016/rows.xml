@@ -1,0 +1,1215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="R1">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Доходы от реализации" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeTaxSumS" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+    </row>
+    <row alias="R2">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10830"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Доходы по операциям купли-продажи драгоценных металлов и драгоценных камней в виде разницы между ценой реализации и учётной стоимостью"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по поставочным срочным сделкам, квалифицированным в качестве сделок на поставку предмета с отсрочкой исполнения для целей налогообложения"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-83"/>
+    </row>
+    <row alias="R3">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10910"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="8" stringValue="Выручка от реализации имущества и имущественных прав"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации амортизируемого имущества"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+    </row>
+    <row alias="R4">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10920"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Прибыль от реализации амортизируемого имущества (без учёта сделок, по которым получены убытки)"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+    </row>
+    <row alias="R5">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10930"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации прочего имущества"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+    </row>
+    <row alias="R6">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10940"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации имущественных прав"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+    </row>
+    <row alias="R7">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10950"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Цена реализации права на земельный участок"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+    </row>
+    <row alias="R8">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10855"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации права требования как финансовой услуги"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 14"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-72"/>
+    </row>
+    <row alias="R9">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10860"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации права требования до наступления срока погашения, предусмотренного кредитным договором"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-70"/>
+    </row>
+    <row alias="R10">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10870"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации права требования после наступления срока погашения, предусмотренного кредитным договором"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-71"/>
+    </row>
+    <row alias="R11">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11040"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="12" stringValue="Выручка от реализации ценных бумаг обращающихся и не обращающихся на организованном рынке"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации ОФЗ"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 19"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-51"/>
+    </row>
+    <row alias="R12">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11050"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации субфедеральных и муниципальных ЦБ"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+    </row>
+    <row alias="R13">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11060"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации Еврооблигаций РФ"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+    </row>
+    <row alias="R14">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11070"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации ОВГВЗ"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+    </row>
+    <row alias="R15">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11080"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации акций"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+    </row>
+    <row alias="R16">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11090"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации корпоративных облигаций"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+    </row>
+    <row alias="R17">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11100"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации прочих ЦБ"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+    </row>
+    <row alias="R18">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11110"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации (погашения) векселей сторонних эмитентов"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-57"/>
+    </row>
+    <row alias="R19">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11120"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактической выручки от реализации (выбытия) ценных бумаг, обращающихся на ОРЦБ, ниже минимальной цены сделок на ОРЦБ"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 23"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-51"/>
+    </row>
+    <row alias="R20">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11130"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактической выручки от реализации (выбытия) ценных бумаг, обращающихся на ОРЦБ, ниже минимальной цены сделок на ОРЦБ"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 22"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-51"/>
+    </row>
+    <row alias="R21">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11140"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактической выручки от реализации (выбытия) векселей,  ниже расчётной цены"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13 (заполняет только ЦА)"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-57"/>
+    </row>
+    <row alias="R22">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11150"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактической выручки от реализации (выбытия) ценных бумаг, не обращающихся на ОРЦБ, ниже расчётной цены"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 39"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+    </row>
+    <row alias="R23">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Контрольная сумма" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeTaxSumS" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+    </row>
+    <row alias="R24">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Внереализационные доходы" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeTaxSumS" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+    </row>
+    <row alias="R25">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11405"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Доходы от проведения операций с иностранной валютой, осуществляемых в наличной и безналичной формах, включая комиссионные сборы (вознаграждения) при операциях по покупке или продаже иностранной валюты, в том числе за cчёт и по поручению клиента, от операций с валютными ценностями, включая комиссионные сборы (вознаграждения) при проведении операций с валютными ценностями"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по поставочным срочным сделкам, квалифицированным в качестве сделок на поставку предмета с отсрочкой исполнения для целей налогообложения"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-83"/>
+    </row>
+    <row alias="R26">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15170"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="7" stringValue="Доходы в виде процентов по договорам займа, кредита, банковского счёта, банковского вклада, размещения банком от своего имени и за свой счёт денежных средств, а также другим долговым обязательствам"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Неполученные проценты по кредитам, депозитам и иным размещённым средствам, предоставленным кредитным организациям"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" stringValue="91603.01"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+    </row>
+    <row alias="R27">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15180"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Неполученные проценты по кредитам, депозитам и иным размещённым средствам, предоставленным банкам-нерезидентам"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" stringValue="91603.02"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+    </row>
+    <row alias="R28">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15190"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Неполученные проценты по кредитам, предоставленным юридическим лицам и индивидуальным предпринимателям"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" stringValue="91604.01"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+    </row>
+    <row alias="R29">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15200"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Неполученные проценты по кредитам, предоставленным юридическим лицам-нерезидентам"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" stringValue="91604.02"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+    </row>
+    <row alias="R30">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15210"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Неполученные проценты по кредитам, предоставленным физическим лицам-резидентам"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" stringValue="91604.03"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+    </row>
+    <row alias="R31">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15220"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Неполученные проценты по кредитам, предоставленным физическим лицам-нерезидентам"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" stringValue="91604.04"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+    </row>
+    <row alias="R32">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15230"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по сделкам РЕПО и сделкам по представлению займов  ценными бумагами"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-53"/>
+    </row>
+    <row alias="R33">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16110"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="4" stringValue="Доходы в виде сумм восстановленных резервов, расходы на формирование которых были учтены в составе расходов, учитываемых при определении налоговой базы"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Резерв под возможное обесценение ГКО, ОФЗ, и ОБР, ранее учитываемый для целей налогообложения"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13 (заполняет только ЦА)"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-25"/>
+    </row>
+    <row alias="R34">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16120"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Резерв под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента, ранее учитываемый для целей налогообложения"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 17 (заполняет только ЦА)"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-26"/>
+    </row>
+    <row alias="R35">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16130"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Резерв под возможное обесценение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций, ранее учитываемый для целей налогообложения"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 17 (заполняет только ЦА)"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-27"/>
+    </row>
+    <row alias="R36">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16140"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Резерв по сомнительным долгам"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-30"/>
+    </row>
+    <row alias="R37">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16280"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="2" stringValue="Доходы в виде положительной курсовой разницы, возникающей от переоценки имущества в виде валютных ценностей и требований (обязательств), стоимость которых выражена в иностранной валюте, в том числе по валютным счетам в банках"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная разница от переоценки процентных векселей"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-58"/>
+    </row>
+    <row alias="R38">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16290"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная разница от переоценки дисконтных векселей"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 14"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-59"/>
+    </row>
+    <row alias="R39">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16300"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="2" stringValue="Доходы в виде стоимости полученных материалов или иного имущества при демонтаже или разборке при ликвидации выводимых из эксплуатации имущества Банка, а также при ремонте, модернизации, реконструкции, техническом перевооружении, частичной ликвидации данного имущества"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от оприходования на склад запчастей и материалов при демонтаже или разборке, полученные при ликвидации выводимых из эксплуатации основных средств, а также ремонте, модернизации, реконструкции, техническом перевооружении, частичной ликвидации основных средств "/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 9"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+    </row>
+    <row alias="R40">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16310"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от оприходования на склад запчастей и материалов при демонтаже или разборке, полученные при ликвидации выводимых из эксплуатации основных средств, а также ремонте, модернизации, реконструкции, техническом перевооружении, частичной ликвидации основных средств "/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 9"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+    </row>
+    <row alias="R41">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16420"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Доходы от восстановления расходов на капитальные вложения в соответствии с абз. 4 п. 9 ст. 258 НК РФ"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Восстановление амортизационной премии при реализации Взаимозависимому с Банком лицу амортизируемого имущества ранее, чем по истечении 5 лет с даты ввода его в эксплуатацию"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 7"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+    </row>
+    <row alias="R42">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16430"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="20" stringValue="Процентный доход по ценным бумагам"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по купонным облигациям, облагаемый по ставке 20%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10 + графа 11 + графа 12"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-31"/>
+    </row>
+    <row alias="R43">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16440"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по купонным облигациям, облагаемый по ставке 15%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 3 + графа 4 + графа 5 + графа 6"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-31"/>
+    </row>
+    <row alias="R44">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16450"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по купонным облигациям, облагаемый по ставке 9%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 7 + графа 8"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-31"/>
+    </row>
+    <row alias="R45">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16460"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по купонным облигациям, облагаемый по ставке 0%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 9"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-31"/>
+    </row>
+    <row alias="R46">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16470"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по облигациям, по которым открыта короткая позиция, облагаемый по ставке 20%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-32.2"/>
+    </row>
+    <row alias="R47">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16480"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по облигациям, по которым открыта короткая позиция, облагаемый по ставке 15%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-32.2"/>
+    </row>
+    <row alias="R48">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16490"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по облигациям, по которым открыта короткая позиция, облагаемый по ставке 9%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-32.2"/>
+    </row>
+    <row alias="R49">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16500"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по облигациям, по которым открыта короткая позиция, облагаемый по ставке 0%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-32.2"/>
+    </row>
+    <row alias="R50">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16510"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход в виде процентного расхода по коротким позициям, облагаемый по ставке 15%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-39.1"/>
+    </row>
+    <row alias="R51">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16520"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход в виде процентного расхода по коротким позициям, облагаемый по ставке 9%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-39.1"/>
+    </row>
+    <row alias="R52">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16530"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход в виде процентного расхода по коротким позициям, облагаемый по ставке 20%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-39.2"/>
+    </row>
+    <row alias="R53">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16540"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход в виде процентного расхода по коротким позициям, облагаемый по ставке 15%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-39.2"/>
+    </row>
+    <row alias="R54">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16550"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход в виде процентного расхода по коротким позициям, облагаемый по ставке 0%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-39.2"/>
+    </row>
+    <row alias="R55">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16560"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход в виде процентного расхода по коротким позициям, облагаемый по ставке 20%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-40.2"/>
+    </row>
+    <row alias="R56">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16570"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход в виде процентного расхода по коротким позициям, облагаемый по ставке 15%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-40.2"/>
+    </row>
+    <row alias="R57">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16580"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход в виде процентного расхода по коротким позициям, облагаемый по ставке 9%"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-40.2"/>
+    </row>
+    <row alias="R55">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16590"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по процентным векселям сторонних эмитентов"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-55"/>
+    </row>
+    <row alias="R56">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16600"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по дисконтным векселям сторонних эмитентов"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-56"/>
+    </row>
+    <row alias="R57">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16660"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по ГКО (кроме полученного от реализации (выбытия)), по которым открыта короткая позиция."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 2"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-36.2"/>
+    </row>
+    <row alias="R58">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16670"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по ОФЗ, по которым открыта короткая позиция"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 4"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-38.2"/>
+    </row>
+    <row alias="R59">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16970"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="16" stringValue="Доходы по операциям с финансовыми инструментами срочных сделок"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10.1"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-80"/>
+    </row>
+    <row alias="R60">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16980"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям со сделками опцион, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13.1"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-80"/>
+    </row>
+    <row alias="R61">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16990"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям со сделками своп, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 14.1"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-81"/>
+    </row>
+    <row alias="R62">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17000"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям со сделками CDS, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 22"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-82"/>
+    </row>
+    <row alias="R63">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17010"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по сделкам поставочный форвард, предусматривающих покупку-продажу ценных бумаг,квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 27"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-84"/>
+    </row>
+    <row alias="R64">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17020"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по сделкам поставочный опцион, предусматривающих покупку-продажу ценных бумаг в результате возникновения кредитного события и квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 31"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-85"/>
+    </row>
+    <row alias="R65">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17030"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы  по сделкам кредитно-дефолтный своп, предусматривающих покупку-продажу ценных бумаг, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 22"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-86"/>
+    </row>
+    <row alias="R66">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17040"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям уступки (новации) сделок с ФИСС и досрочного прекращения (терминации) сделок с ФИСС"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-87"/>
+    </row>
+    <row alias="R67">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17050"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходыпо срочным сделкам, квалифицированным в качестве сделок с ФИСС и признаваемым обращающимися на организованном рынке"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-88"/>
+    </row>
+    <row alias="R68">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17060"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: форвард."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11.1"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-89"/>
+    </row>
+    <row alias="R69">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17070"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: опцион."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11.1"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-81"/>
+    </row>
+    <row alias="R70">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17080"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: своп."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15.1"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-82"/>
+    </row>
+    <row alias="R71">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17090"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ &quot;CDS&quot;"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 18"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-84"/>
+    </row>
+    <row alias="R72">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17100"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: форвард на поставку ценных бумаг."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 25"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-85"/>
+    </row>
+    <row alias="R73">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17110"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: опцион на поставку ценных бумаг."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 29"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-86"/>
+    </row>
+    <row alias="R74">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17120"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям сс ФИСС, необращающимся на ОРЦБ: уступка, новация, терминация по ФИСС."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 14"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-88"/>
+    </row>
+    <row alias="R75">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19000"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="12" stringValue="Сумма доначисления доходов от операций с Взаимозависимыми лицами и резидентами офшорных зон"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов от реализации вследствие оказания услуг по прочим операциям в связи с применением цен не соответствующим рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 16"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-101"/>
+    </row>
+    <row alias="R76">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19030"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления внереализационных доходов вследствие оказания услуг по прочим операциям в связи с применением цен не соответствующим рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 16"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-101"/>
+    </row>
+    <row alias="R77">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19060"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов от реализации вследствие оказания услуг по тарифам, не соответствующим рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-107"/>
+    </row>
+    <row alias="R78">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19090"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления внереализационных доходов вследствие оказания услуг по тарифам, не соответствующим рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-107"/>
+    </row>
+    <row alias="R79">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19120"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов при применении в сделках по предоставлению имущества в аренду цен, не соответствующих рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-110"/>
+    </row>
+    <row alias="R80">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19150"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов при применении в сделках по предоставлению Межбанковских кредитов процентных ставок, не соответствующих рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 17"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-111"/>
+    </row>
+    <row alias="R81">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19180"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма корректировки доходов по сделкам РЕПО при несоответствии процентных ставок рыночным"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 18"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-112"/>
+    </row>
+    <row alias="R82">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19210"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов при применении в сделках по предоставлению кредитных продуктов процентных ставок, не соответствующих рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 16"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-114"/>
+    </row>
+    <row alias="R83">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19240"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов при применении в сделках с драгоценными металлами курса, не соответствующего рыночному уровню."/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 22"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-115"/>
+    </row>
+    <row alias="R84">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19270"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов при применении в конверсионных сделках курса, не соответствующего рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 22"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-116"/>
+    </row>
+    <row alias="R85">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19300"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов по синдицированным кредитам в виде плат и комиссий, не соответствующих рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 21"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-122"/>
+    </row>
+    <row alias="R86">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19330"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов по гарантиям и аккредитивам предоставляемых по ценам, не соответствующим рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 29"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-123"/>
+    </row>	
+    <row alias="R87">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19360"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="6" stringValue="Сумма уменьшения расходов, относимая на доходы от операций с Взаимозависимыми лицами и резидентами офшорных зон"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов от реализации вследствие оказания услуг по прочим операциям  в связи с применением цен не соответствующим рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 16"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-102"/>
+    </row>
+    <row alias="R88">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19390"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения внереализационных расходов  вследствие оказания услуг по прочим операциям в связи с применением цен не соответствующим рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 16"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-102"/>
+    </row>
+    <row alias="R89">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19420"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов по сделкам с драгоценными металлами в связи с применением курсов, не соответствующих рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 23"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-115"/>
+    </row>
+    <row alias="R90">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19450"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов по конверсионным сделкам в связи с применением курсов, не соответствующих рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 23"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-116"/>
+    </row>
+    <row alias="R91">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19480"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов по сделкам привлечения средств в связи с применением процентной ставки, не соответствующей рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 13"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-117"/>
+    </row>
+    <row alias="R92">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19510"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов по синдицированным кредитам в виде плат и комиссий, не соответствующих рыночному уровню"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 21"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-122"/>
+    </row>
+    <row alias="R93">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19540"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="2" stringValue="Сумма корректировки финансового результата от уступки прав требования по сделкам со Взаимозависимыми лицами и резидентами оффшорных зон"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма корректировки финансового результата (прибыли) от уступки прав требования после предусмотренного кредитным договором срока погашения основного долга"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-171"/>
+    </row>
+    <row alias="R94">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19570"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма корректировки финансового результата(убытка) от уступки прав требования после предусмотренного кредитным договором срока погашения основного долга"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 15"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-171"/>
+    </row>
+    <row alias="R95">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Контрольная сумма" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="incomeTaxSumS" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+    </row>
+    <row alias="R96">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Специальная информация" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="incomeTaxSumS" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+    </row>
+    <row alias="R97">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="2" stringValue="Количество объектов реализации амортизируемого имущества"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="всего"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+    </row>
+    <row alias="R98">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="20"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="в т.ч. объектов, реализованных с убытком"/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+    </row>
+</rows>
