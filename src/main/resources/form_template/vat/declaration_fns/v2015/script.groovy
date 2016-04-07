@@ -441,7 +441,8 @@ void generateXML() {
         }
         if (correction == 1 || correction > 1) {
             // уточненная декларация (номер корректировки «1») или уточненная декларация (номер корректировки больше «1»)
-            def rows724_1_1 = getSourceRows724_1_1()
+            def formData724_1_1 = getFormData724_1_1()
+            def rows724_1_1 = (formData724_1_1 ? formDataService.getDataRowHelper(formData724_1_1)?.getAll() : null)
             if (rows724_1_1) {
                 def code = getRefBookValue(8, getReportPeriod()?.dictTaxPeriodId)?.CODE?.value
 
@@ -1731,10 +1732,16 @@ def prevSection3Check() {
     def formTypeId = formType_724_1_1
     def formDataKind = FormDataKind.CONSOLIDATED
     def formName = formDataService.getFormTemplate(formTypeId, forFormNamePeriod4Id)?.name
-    if (getSourceRows724_1_1()) {
+    def formData = getFormData724_1_1()
+    if (formData) {
+        def subMsg = ''
+        def correctionDate = getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate?.format('dd.MM.yyyy')
+        if (correctionDate) {
+            subMsg = String.format(", Дата сдачи корректировки: «%s»", correctionDate)
+        }
         // сообщение 3
-        def msg = "Для заполнения строк 010-040, 070, 120, 170 раздела 3 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s»."
-        logger.info(msg, formDataKind.title, formName, departmentName, periodName)
+        def msg = "Для заполнения строк 010-040, 070, 120, 170 раздела 3 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s»>»%s."
+        logger.info(msg, formDataKind.title, formName, departmentName, periodName, subMsg)
     } else {
         // сообщение 4
         def msg = "Не найдена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s». При заполнении строк 010-040, 070, 120, 170 раздела 3 значения требуемых граф формы-источника будут приняты за нулевые."
@@ -1746,9 +1753,14 @@ def prevSection3Check() {
     formName = formDataService.getFormTemplate(formTypeId, forFormNamePeriod4Id)?.name
     formData = getFormData(formTypeId, formDataKind, bankDepartmentId, getPeriod4Id())
     if (formData && formData.state == WorkflowState.ACCEPTED) {
+        def subMsg = ''
+        def correctionDate = getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate?.format('dd.MM.yyyy')
+        if (correctionDate) {
+            subMsg = String.format(", Дата сдачи корректировки: «%s»", correctionDate)
+        }
         // сообщение 5
-        def msg = "Для заполнения строки 105 раздела 3 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s»."
-        logger.info(msg, formDataKind.title, formName, departmentName, periodName)
+        def msg = "Для заполнения строки 105 раздела 3 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s»>»%s."
+        logger.info(msg, formDataKind.title, formName, departmentName, periodName, subMsg)
     } else {
         // сообщение 6
         def msg = "Не найдена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s». Строка 105 раздела 3 не будет заполнена."
@@ -1758,19 +1770,19 @@ def prevSection3Check() {
 }
 
 @Field
-def sourceRows724_1_1 = null
+def formData724_1_1 = null
 
 /** Получить строки источника 724.1.1 (форма должна быть только в корректирующем периоде). */
-def getSourceRows724_1_1() {
-    if (sourceRows724_1_1 == null) {
+def getFormData724_1_1() {
+    if (formData724_1_1 == null) {
         def formData = getFormData(formType_724_1_1, FormDataKind.CONSOLIDATED, bankDepartmentId, getPeriod4Id())
         def correctionDate = (formData ? getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate : null)
         // период только корректирующий
         if (formData && formData.state == WorkflowState.ACCEPTED && correctionDate) {
-            sourceRows724_1_1 = formDataService.getDataRowHelper(formData)?.getAll()
+            formData724_1_1 = formData
         }
     }
-    return sourceRows724_1_1
+    return formData724_1_1
 }
 
 // TODO (Ramil Timerbaev) в 1.0 поменять на departmentReportPeriodService.getListByFilter()
