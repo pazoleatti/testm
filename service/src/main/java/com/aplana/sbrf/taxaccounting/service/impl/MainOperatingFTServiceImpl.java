@@ -267,7 +267,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             throw new ServiceLoggerException(errorMsg, logEntryService.save(logger.getEntries()));
     }
 
-    private void logging(int id, FormDataEvent event, TAUser user){
+    @Override
+    public void logging(int id, FormDataEvent event, TAUser user){
         TemplateChanges changes = new TemplateChanges();
         changes.setEvent(event);
         changes.setEventDate(new Date());

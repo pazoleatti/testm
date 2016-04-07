@@ -972,7 +972,9 @@ void createSpecificReport() {
     // заголовок
     tmpRow = sheet.createRow(rowIndex)
     cell = tmpRow.createCell(0)
-    cell.setCellValue("Налоговый период: " + (reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.year ?: ''))
+
+    def year = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.year
+    cell.setCellValue("Налоговый период: " + (year ? year + " г." : ""))
     cell.setCellStyle(getCellStyle(StyleType.ROW_1))
     // объединение трех ячеек
     region = new CellRangeAddress(rowIndex, rowIndex, 0, 2)

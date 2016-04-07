@@ -18,6 +18,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +73,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	private TAUserService userService;
     @Autowired
     private DeclarationSubreportDao declarationSubreportDao;
+    @Autowired
+    @Qualifier("declarationTemplateMainOperatingService")
+    MainOperatingService mainOperatingService;
 
     @Override
 	public List<DeclarationTemplate> listAll() {
@@ -435,9 +439,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    public void updateScript(DeclarationTemplate declarationTemplate, Logger log) {
+    public void updateScript(DeclarationTemplate declarationTemplate, Logger log, TAUserInfo userInfo) {
         checkScript(declarationTemplate, log);
         declarationTemplateDao.updateScript(declarationTemplate.getId(), declarationTemplate.getCreateScript());
+        mainOperatingService.logging(declarationTemplate.getId(), FormDataEvent.SCRIPTS_IMPORT, userInfo.getUser());
     }
 
     @Override
