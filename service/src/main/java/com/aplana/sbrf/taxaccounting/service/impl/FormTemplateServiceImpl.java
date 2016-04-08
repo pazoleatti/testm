@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Реализация сервиса для работы с шаблонами налоговых форм
@@ -303,6 +305,15 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                         + ", максимальное: " + FORM_COLUMN_ALIAS_MAX_VALUE + ")");
             }
 
+            if (ColumnType.STRING.equals(column.getColumnType())) {
+                String filter = ((StringColumn)column).getFilter();
+                try {
+                    Pattern.compile(filter);
+                } catch (PatternSyntaxException e) {
+                    logger.error("Значение фильтра столбца \"" + column.getAlias() +
+                            "\" имеет некорректный формат!");
+                }
+            }
             /*if (ColumnType.STRING.equals(column.getColumnType()) && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
 				if (formTemplateDao.checkExistLargeString(formTemplate.getId(), column)) {
 					logger.error("Длина одного из существующих значений графы '" + column.getName() + "' больше указанной длины " + ((StringColumn) column).getPrevLength());
