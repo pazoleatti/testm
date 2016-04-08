@@ -1,7 +1,6 @@
 package form_template.income.income_complex.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -14,7 +13,7 @@ import java.math.RoundingMode
  * Форма "6.1.1	Сводная форма начисленных доходов (доходы сложные)".
  * formTypeId=302
  *
- * TODO проверочные графы
+ * TODO заполнение графы 16
  *
  * @author bkinzyabulatov
  *
@@ -49,13 +48,13 @@ import java.math.RoundingMode
  * 8   incomeTaxSumRnuSource        источник информации в РНУ
  * 9   incomeTaxSumS                сумма
  * 10  rnuNo                        форма РНУ
- * пока убрал
  * 11  logicalCheck                 Логическая проверка
  * 12  accountingRecords            Счёт бухгалтерского учёта
  * 13  opuSumByEnclosure2           в Приложении №5
  * 14  opuSumByTableD               в Таблице "Д"
  * 15  opuSumTotal                  в бухгалтерской отчётности
- * 16  difference                   Расхождение
+ * 16  explanation                  Расхождение
+ * 17  difference                   Расхождение
  */
 
 switch (formDataEvent) {
@@ -76,7 +75,7 @@ switch (formDataEvent) {
         calc()
         formDataService.saveCachedDataRows(formData, logger)
         break
-    // подготовить/утвердить/принять
+// подготовить/утвердить/принять
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
@@ -100,14 +99,14 @@ def refBookCache = [:]
 @Field
 def recordCache = [:]
 
-// Редактируемые атрибуты (графа 6, 7, 9)
+// Редактируемые атрибуты (графа 9)
 @Field
-def editableColumns = ['incomeBuhSumAccepted', 'incomeBuhSumPrevTaxPeriod', 'incomeTaxSumS']
+def editableColumns = ['incomeTaxSumS']
 
 //Аттрибуты, очищаемые перед импортом формы
 @Field
 def resetColumns = ['incomeBuhSumAccepted', 'incomeBuhSumPrevTaxPeriod', 'incomeTaxSumS', 'logicalCheck',
-        'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference']
+                    'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference']
 
 // Атрибут итоговой строки для которой вычисляются суммы (графа 9)
 @Field
@@ -131,6 +130,10 @@ def firstTotalRowAlias = 'R23'
 // Алиас для второй строки итогов
 @Field
 def secondTotalRowAlias = 'R95'
+
+// Алиасы строк ~РНУ-8 для расчета контрольных граф Сводной формы начисленных доходов
+@Field
+def rowsAliasesRnu8 = (26..31).collect { "R$it" as String } as List<String>
 
 // Алиасы строк, по которым надо подвести итоги для первой итоговой строки
 @Field
@@ -166,6 +169,9 @@ def getReportPeriodEndDate() {
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
+    // контрольные графы
+    calcControlRnu8(dataRows)    // расчет строк ~РНУ-8
+
     // итоговые строки
     getDataRow(dataRows, firstTotalRowAlias)[totalColumn] = getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum)
     getDataRow(dataRows, secondTotalRowAlias)[totalColumn] = getSum(dataRows, totalColumn, rowsAliasesForSecondControlSum)
@@ -174,6 +180,7 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
+    // 1. Проверка заполнения обязательных граф
     for (def row : dataRows) {
         def columns = []
         editableColumns.each { alias ->
@@ -184,8 +191,25 @@ void logicCheck() {
         checkNonEmptyColumns(row, row.getIndex(), columns, logger, true)
     }
 
+    // 2. Арифметическая проверка итоговых значений
     checkTotalSum(getDataRow(dataRows, firstTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum))
     checkTotalSum(getDataRow(dataRows, secondTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForSecondControlSum))
+
+    // 3. Проверка наличия формы «Оборотная ведомость»
+    def rowIndexes = []
+    rowsAliasesRnu8.each { rowAlias ->
+        def row = getDataRow(dataRows, rowAlias)
+        final income101Data = getIncome101Data(row)
+        if (!income101Data || income101Data.isEmpty()) { // Нет данных об оборотной ведомости
+            rowIndexes += row.getIndex()
+        }
+    }
+    if (!rowIndexes.isEmpty()) {
+        logger.warn("Cтроки ${rowIndexes.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+    }
+
+    // 4. Проверка наличия данных в форме-источнике «Таблица 1. Пояснение отклонений от ОФР в простом регистре налогового учёта «Доходы»» для заполнения графы 16
+    // перенесена в консолидацию
 }
 
 // Консолидация формы
@@ -194,6 +218,7 @@ def consolidation() {
     def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(), getReportPeriodStartDate(), getReportPeriodEndDate())
     def isFromSummary = isFromSummary(formSources)
     isFromSummary ? consolidationFromSummary(dataRows, formSources) : consolidationFromPrimary(dataRows, formSources)
+    // TODO консолидация из "Таблица 1" + сообщение при отсутствии
 
 }
 
@@ -366,10 +391,58 @@ void addPrevValue(Collection<String> codes, def dataRows, String column, def dat
         return
     }
     codes.each { code ->
-        def row = dataRows.find { row.incomeTypeId == code}
+        def row = dataRows.find { row.incomeTypeId == code }
         def rowOld = dataRowsOld.find { it.incomeTypeId == code && it.incomeBuhSumAccountNumber == row.incomeBuhSumAccountNumber }
         row[column] ? (row[column] += rowOld[columnOld]) : (row[column] = rowOld[columnOld])
     }
+}
+
+// Расчет контрольных граф Сводной формы начисленных доходов (строки ~РНУ-8)
+void calcControlRnu8(def dataRows) {
+    rowsAliasesRnu8.each { rowAlias ->
+        def row = getDataRow(dataRows, rowAlias)
+        final income101Data = getIncome101Data(row)
+        // графа 14
+        row.opuSumByTableD = getOpuSumByTableDControlRnu8(row, income101Data)
+        // графа 15
+        row.opuSumTotal = getOpuSumTotalControlRnu8(row, income101Data)
+        // графа 17 = «Графа 14» - «Графа 15» - «Графа 16»
+        row.difference = row.opuSumByTableD - row.opuSumTotal - (row.explanation ?: BigDecimal.ZERO)
+    }
+}
+
+// Графа 15. Расчет контрольных граф Сводной формы начисленных доходов (строки ~РНУ-8)
+def getOpuSumTotalControlRnu8(def row, def income101Data) {
+    if (income101Data) {
+        return income101Data.sum { income101Row ->
+            if (income101Row.ACCOUNT.stringValue == row.accountingRecords) {
+                return (income101Row.OUTCOME_DEBET_REMAINS.numberValue ?: BigDecimal.ZERO)
+            } else {
+                return BigDecimal.ZERO
+            }
+        }
+    }
+    return 0
+}
+
+// Графа 14. Расчет контрольных граф Сводной формы начисленных доходов (строки ~РНУ-8)
+def getOpuSumByTableDControlRnu8(def row, def income101Data) {
+    if (income101Data) {
+        return income101Data.sum { income101Row ->
+            if (income101Row.ACCOUNT.stringValue == row.accountingRecords) {
+                return (income101Row.INCOME_DEBET_REMAINS.numberValue ?: BigDecimal.ZERO)
+            } else {
+                return BigDecimal.ZERO
+            }
+        }
+    }
+    return 0
+}
+
+// Возвращает данные из Оборотной Ведомости за период, для которого сформирована текущая форма
+def getIncome101Data(def row) {
+    // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
+    return bookerStatementService.getRecords(50L, formData.departmentId, getReportPeriodEndDate(), "ACCOUNT = '${row.accountingRecords}'")
 }
 
 // Округление
@@ -380,8 +453,7 @@ def BigDecimal round(BigDecimal value, def int precision = 2) {
 // Подсчет сумм для столбца colName в строках rowsAliases
 def getSum(def dataRows, def colName, def rowsAliases) {
     return rowsAliases.sum { rowAlias ->
-        def tmp = getDataRow(dataRows, rowAlias)[colName]
-        return (tmp ?: 0)
+        return getDataRow(dataRows, rowAlias)[colName] ?: BigDecimal.ZERO
     }
 }
 
@@ -393,7 +465,6 @@ boolean isEqualNum(String accNum, def balance) {
     return accNum.replace('.', '') == getBalanceValue(balance)?.replace('.', '')
 }
 
-
 /**
  * Метод для консолидации - расчет ячейки из итоговой строки источника
  * @param dataRows - строки сводной
@@ -404,22 +475,22 @@ boolean isEqualNum(String accNum, def balance) {
  * @param columnsChild - графы для сложения из источников
  */
 void addChildTotalData(def dataRows, String knu, def column, def dataRowsChild, String totalAlias, def columnsChild) {
-    if (!(dataRows && knu && column && dataRowsChild && columnsChild)){
-        logger.info("Ошибка при консолидации")//TODO заменить на что-то более адекватное
+    if (!(dataRows && knu && column && dataRowsChild && columnsChild)) {
+        logger.info("Ошибка при консолидации")// не должен сюда заходить
         return
     }
-    def addValue = 0
+    def addValue = BigDecimal.ZERO
     for (def rowChild : dataRowsChild) {
         //ищем итоговую строку
         if (rowChild.getAlias() == totalAlias) {
             addValue += columnsChild.sum { columnChild ->
-                rowChild[columnChild] ?: 0
+                return (rowChild[columnChild] ?:  BigDecimal.ZERO)
             }
         }
     }
     def row = getRow(dataRows, knu)
     if (row[column] == null) {
-        logger.info("Пустая ячейка при КНУ = ${knu}")//TODO убрать
+        logger.info("Пустая ячейка при КНУ = ${knu}")// не должен сюда заходить
     }
     row[column] ? (row[column] += addValue) : (row[column] = addValue)
 }
@@ -427,13 +498,13 @@ void addChildTotalData(def dataRows, String knu, def column, def dataRowsChild, 
 def getRow(def dataRows, def knu) {
     for (def row : dataRows) {
         // ищем по кну строку в сводной
-        if (row.incomeTypeId == knu){
+        if (row.incomeTypeId == knu) {
             return row
         }
     }
 }
 
-void checkTotalSum(totalRow, sum){
+void checkTotalSum(totalRow, sum) {
     if (totalRow[totalColumn] != sum) {
         logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графе \"" + getColumnName(totalRow, totalColumn) + "\"")
     }
@@ -446,7 +517,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 

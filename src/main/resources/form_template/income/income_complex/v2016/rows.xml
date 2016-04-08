@@ -11,6 +11,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
         <cell alias="incomeTaxSumS" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
     </row>
     <row alias="R2">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10830"/>
@@ -23,6 +30,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-83"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R3">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10910"/>
@@ -35,6 +49,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R4">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10920"/>
@@ -47,6 +68,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R5">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10930"/>
@@ -59,6 +87,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R6">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10940"/>
@@ -71,6 +106,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R7">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10950"/>
@@ -83,18 +125,32 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R8">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10855"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Выручка от реализации права требования как финансовой услуги"/>
-        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 14"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-72"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R9">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10860"/>
@@ -107,6 +163,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-70"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R10">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10870"/>
@@ -119,6 +182,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-71"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R11">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11040"/>
@@ -131,6 +201,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 19"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-51"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R12">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11050"/>
@@ -143,6 +220,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R13">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11060"/>
@@ -155,6 +239,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R14">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11070"/>
@@ -167,6 +258,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R15">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11080"/>
@@ -179,6 +277,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R16">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11090"/>
@@ -191,6 +296,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R17">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11100"/>
@@ -203,6 +315,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R18">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11110"/>
@@ -215,6 +334,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-57"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R19">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11120"/>
@@ -227,6 +353,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 23"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-51"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R20">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11130"/>
@@ -239,6 +372,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 22"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-51"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R21">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11140"/>
@@ -251,6 +391,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13 (заполняет только ЦА)"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-57"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R22">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11150"/>
@@ -263,6 +410,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 39"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R23">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
@@ -275,6 +429,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
         <cell alias="incomeTaxSumS" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
     </row>
     <row alias="R24">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
@@ -287,18 +448,32 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
         <cell alias="incomeTaxSumS" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
     </row>
     <row alias="R25">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11405"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Доходы от проведения операций с иностранной валютой, осуществляемых в наличной и безналичной формах, включая комиссионные сборы (вознаграждения) при операциях по покупке или продаже иностранной валюты, в том числе за cчёт и по поручению клиента, от операций с валютными ценностями, включая комиссионные сборы (вознаграждения) при проведении операций с валютными ценностями"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по поставочным срочным сделкам, квалифицированным в качестве сделок на поставку предмета с отсрочкой исполнения для целей налогообложения"/>
-        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-83"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R26">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15170"/>
@@ -311,18 +486,32 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="91603.01"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="15 Значение в столбце &quot;Расхождение&quot;"/>
     </row>
     <row alias="R27">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15180"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Неполученные проценты по кредитам, депозитам и иным размещённым средствам, предоставленным банкам-нерезидентам"/>
         <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1" stringValue="91603.02"/>
-        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="91603.02"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="15 Значение в столбце &quot;Расхождение&quot;"/>
     </row>
     <row alias="R28">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15190"/>
@@ -335,6 +524,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="91604.01"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="15 Значение в столбце &quot;Расхождение&quot;"/>
     </row>
     <row alias="R29">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15200"/>
@@ -347,6 +543,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="91604.02"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="15 Значение в столбце &quot;Расхождение&quot;"/>
     </row>
     <row alias="R30">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15210"/>
@@ -359,6 +562,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="91604.03"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="15 Значение в столбце &quot;Расхождение&quot;"/>
     </row>
     <row alias="R31">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15220"/>
@@ -371,6 +581,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 5"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="91604.04"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="14 Числовое значение КП"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="15 Значение в столбце &quot;Расхождение&quot;"/>
     </row>
     <row alias="R32">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15230"/>
@@ -383,6 +600,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-53"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R33">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16110"/>
@@ -395,6 +619,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13 (заполняет только ЦА)"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-25"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R34">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16120"/>
@@ -407,6 +638,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 17 (заполняет только ЦА)"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-26"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R35">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16130"/>
@@ -419,6 +657,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 17 (заполняет только ЦА)"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-27"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R36">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16140"/>
@@ -431,6 +676,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-30"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R37">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16280"/>
@@ -443,6 +695,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-58"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R38">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16290"/>
@@ -455,6 +714,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 14"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-59"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R39">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16300"/>
@@ -467,6 +733,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 9"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R40">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16310"/>
@@ -479,6 +752,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 9"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R41">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16420"/>
@@ -491,6 +771,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 7"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R42">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16430"/>
@@ -503,6 +790,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10 + графа 11 + графа 12"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-31"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R43">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16440"/>
@@ -515,6 +809,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 3 + графа 4 + графа 5 + графа 6"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-31"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R44">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16450"/>
@@ -527,6 +828,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 7 + графа 8"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-31"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R45">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16460"/>
@@ -539,6 +847,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 9"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-31"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R46">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16470"/>
@@ -551,6 +866,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-32.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R47">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16480"/>
@@ -563,6 +885,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-32.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R48">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16490"/>
@@ -575,6 +904,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-32.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R49">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16500"/>
@@ -587,6 +923,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-32.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R50">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16510"/>
@@ -599,6 +942,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-39.1"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R51">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16520"/>
@@ -611,6 +961,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-39.1"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R52">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16530"/>
@@ -623,6 +980,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-39.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R53">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16540"/>
@@ -635,6 +999,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-39.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R54">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16550"/>
@@ -647,6 +1018,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-39.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R55">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16560"/>
@@ -659,6 +1037,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-40.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R56">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16570"/>
@@ -671,6 +1056,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-40.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R57">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16580"/>
@@ -683,6 +1075,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-40.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R55">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16590"/>
@@ -695,6 +1094,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-55"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R56">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16600"/>
@@ -707,6 +1113,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-56"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R57">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16660"/>
@@ -719,6 +1132,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 2"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-36.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R58">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16670"/>
@@ -731,6 +1151,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 4"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-38.2"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R59">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16970"/>
@@ -743,6 +1170,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10.1"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-80"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R60">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16980"/>
@@ -755,6 +1189,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13.1"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-80"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R61">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16990"/>
@@ -767,6 +1208,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 14.1"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-81"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R62">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17000"/>
@@ -779,6 +1227,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 22"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-82"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R63">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17010"/>
@@ -791,6 +1246,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 27"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-84"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R64">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17020"/>
@@ -803,6 +1265,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 31"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-85"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R65">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17030"/>
@@ -815,6 +1284,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 22"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-86"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R66">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17040"/>
@@ -827,6 +1303,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-87"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R67">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17050"/>
@@ -839,6 +1322,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-88"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R68">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17060"/>
@@ -851,6 +1341,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11.1"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-89"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R69">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17070"/>
@@ -863,6 +1360,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11.1"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-81"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R70">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17080"/>
@@ -875,6 +1379,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15.1"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-82"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R71">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17090"/>
@@ -887,6 +1398,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 18"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-84"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R72">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17100"/>
@@ -899,6 +1417,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 25"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-85"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R73">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17110"/>
@@ -911,6 +1436,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 29"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-86"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R74">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17120"/>
@@ -923,6 +1455,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 14"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-88"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R75">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19000"/>
@@ -935,6 +1474,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 16"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-101"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R76">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19030"/>
@@ -947,6 +1493,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 16"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-101"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R77">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19060"/>
@@ -959,6 +1512,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-107"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R78">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19090"/>
@@ -971,6 +1531,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-107"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R79">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19120"/>
@@ -983,6 +1550,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-110"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R80">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19150"/>
@@ -995,6 +1569,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 17"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-111"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R81">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19180"/>
@@ -1007,6 +1588,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 18"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-112"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R82">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19210"/>
@@ -1019,6 +1607,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 16"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-114"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R83">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19240"/>
@@ -1031,6 +1626,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 22"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-115"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R84">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19270"/>
@@ -1043,6 +1645,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 22"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-116"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R85">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19300"/>
@@ -1055,6 +1664,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 21"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-122"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R86">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19330"/>
@@ -1079,6 +1695,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 16"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-102"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R88">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19390"/>
@@ -1091,6 +1714,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 16"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-102"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R89">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19420"/>
@@ -1103,6 +1733,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 23"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-115"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R90">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19450"/>
@@ -1115,6 +1752,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 23"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-116"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R91">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19480"/>
@@ -1127,6 +1771,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 13"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-117"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R92">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19510"/>
@@ -1139,6 +1790,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 21"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-122"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R93">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19540"/>
@@ -1151,6 +1809,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-171"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R94">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19570"/>
@@ -1163,6 +1828,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="Графа 15"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-171"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R95">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
@@ -1175,6 +1847,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
         <cell alias="incomeTaxSumS" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
     </row>
     <row alias="R96">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
@@ -1187,6 +1866,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
         <cell alias="incomeTaxSumS" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
     </row>
     <row alias="R97">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10"/>
@@ -1199,6 +1885,13 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R98">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="20"/>
@@ -1211,5 +1904,12 @@
         <cell alias="incomeTaxSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
 </rows>
