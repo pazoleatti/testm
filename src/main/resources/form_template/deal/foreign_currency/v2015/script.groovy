@@ -153,12 +153,9 @@ void logicCheck() {
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
 
-        // Проверка заполнения доходов и расходов Банка
-        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            rowError(logger, row, "Строка $rowNum: Графа «$msgOut» не может быть заполнена одновременно с графой «$msgIn»!")
-        }
-        if (incomeSumCell.value == null && outcomeSumCell.value == null) {
-            rowError(logger, row, "Строка $rowNum: Графа «$msgOut» должна быть заполнена, если не заполнена графа «$msgIn»!")
+        // Проверка заполнения сумм доходов и расходов
+        if (!incomeSumCell.value && !outcomeSumCell.value) {
+            rowError(logger, row, "Строка $rowNum: В одной из граф «$msgIn», «$msgOut» должно быть указано значение, отличное от «0»!")
         }
 
         // Корректность даты заключения сделки
@@ -170,12 +167,13 @@ void logicCheck() {
         }
 
         // Проверка вычисления цены
-        if (incomeSumCell.value != null && outcomeSumCell.value == null && row.price != incomeSumCell.value) {
-            def msgPrice = row.getCell('price').column.name
+        def msgPrice = row.getCell('price').column.name
+        if (row.incomeSum && !row.outcomeSum && row.price != row.incomeSum) {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
-        } else if (outcomeSumCell.value != null && incomeSumCell.value == null && row.price != outcomeSumCell.value) {
-            def msgPrice = row.getCell('price').column.name
+        } else if (row.outcomeSum && !row.incomeSum && row.price != row.outcomeSum) {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
+        } else if (row.outcomeSum && row.incomeSum && row.price != (row.incomeSum - row.outcomeSum).abs()) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разности значений граф «$msgIn» и «$msgOut» по модулю!")
         }
 
         // Проверка корректности стоимости сделки
@@ -258,10 +256,13 @@ void calc() {
 
     for (row in dataRows) {
         // Расчет поля "Цена"
-        if (row.incomeSum != null && row.outcomeSum == null) {
+        row.price = null
+        if (row.incomeSum && !row.outcomeSum) {
             row.price = row.incomeSum
-        } else if (row.incomeSum == null && row.outcomeSum != null) {
+        } else if (row.outcomeSum && !row.incomeSum) {
             row.price = row.outcomeSum
+        } else if (row.outcomeSum && row.incomeSum) {
+            row.price = (row.incomeSum - row.outcomeSum).abs()
         }
         // Расчет поля "Итого"
         row.total = row.price
