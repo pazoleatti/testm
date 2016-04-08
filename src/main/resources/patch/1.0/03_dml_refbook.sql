@@ -8,7 +8,7 @@ UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Символ ОФР' WHERE REF_BOOK_ID IN 
 
 UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Символ ОФР' WHERE REF_BOOK_ID = 29  AND ALIAS = 'OPU';
 
-UPDATE REF_BOOK SET NAME = 'Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОФР' WHERE REF_BOOK_ID = 102;
+UPDATE REF_BOOK SET NAME = 'Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОФР' WHERE ID = 102;
 UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Символ ОФР' WHERE REF_BOOK_ID = 102 AND ALIAS = 'OPU';
 
 UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Код ОФР' WHERE REF_BOOK_ID = 52  AND ALIAS = 'OPU_CODE';

@@ -3,6 +3,11 @@ alter table log_system add server varchar2(200);
 comment on column log_system.server is 'Сервер'; 
 
 ----------------------------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-15340: 1.0 БД. Изменения для логирования импорта скриптов
+
+alter table template_changes drop constraint template_changes_chk_event; 
+alter table template_changes add constraint template_changes_chk_event check (event in (701, 702, 703, 704, 705, 904));
+----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14423: Реализовать справочник "История изменения категории ВЗЛ"
 
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id, is_versioned) values (521, 'История изменения категории ВЗЛ', 0, 0, 0, null, 0);
