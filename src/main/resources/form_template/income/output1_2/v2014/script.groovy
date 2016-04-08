@@ -312,11 +312,13 @@ void consolidation() {
 def getRowMap(def rows, boolean isNewFormType) {
     def result = [:]
     rows.each{ row ->
-        def keyString = isNewFormType ? keyColumnsNew.collect{ row[it] ?: 0 }.join("#") : keyColumns.collect{ row[it] ?: 0 }.join("#")
-        if(result[keyString] == null) {
-            result[keyString] = []
+        if(row.dividends > 0 && row.sum > 0 && row.withheldSum >= 0){
+            def keyString = isNewFormType ? keyColumnsNew.collect{ row[it] ?: 0 }.join("#") : keyColumns.collect{ row[it] ?: 0 }.join("#")
+            if(result[keyString] == null) {
+                result[keyString] = []
+            }
+            result[keyString].add(row)
         }
-        result[keyString].add(row)
     }
     return result
 }
@@ -370,10 +372,10 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     newRow.dividendAgentAll = (row.emitentInn == graph3String && row.all != null) ? row.all : null
 
     // «Графа 25» = Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 25» =(«Графа 4» первичной формы - «Графа 5» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
-    newRow.dividendAgentWithStavka0 = (row.emitentInn == graph3String) ? ((row.all ?: 0) - (row.rateZero ?: 0)) : null
+    newRow.dividendAgentWithStavka0 = (row.emitentInn == graph3String && row.all != null && row.rateZero != null) ? (row.all - row.rateZero) : null
 
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 26» = («Графа 12» первичной формы – («Графа 4» первичной формы – «Графа 5» первичной формы)) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 26» = «Графа 6» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
-    newRow.dividendD1D2 =  (row.emitentInn == graph3String) ? ((row.allSum ?: 0) - ((row.all ?: 0) - (row.rateZero ?: 0))) : (row.distributionSum ?: 0)
+    newRow.dividendD1D2 =  (row.emitentInn == graph3String && row.all != null && row.rateZero != null) ? ((row.allSum ?: 0) - (row.all - row.rateZero)) : row.distributionSum
 
     if (!isNewFormType) { // старый алгоритм
         // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0»
@@ -414,14 +416,22 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
 
         // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
         // Если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9», то «Графа 27» = (Сумма по «Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6» первичной формы)
-        if (row.allSum) {
-            newRow.dividendSumForTaxStavka9 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 9 && it.dividends) ? (it.dividends) : 0 } * row.distributionSum / row.allSum
+        if (row.distributionSum != null) {
+            if(row.allSum) {
+                newRow.dividendSumForTaxStavka9 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 9 && it.dividends) ? (it.dividends) : 0 } * row.distributionSum / row.allSum
+            } else {
+                newRow.dividendSumForTaxStavka9 = 0
+            }
         }
 
         // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
         // Если «Графа 17» первичной формы = 1и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0», то «Графа 28» = (Сумма по «Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6» первичной формы)
-        if (row.allSum) {
-            newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 0 && it.dividends) ? (it.dividends) : 0 } * row.distributionSum / row.allSum
+        if (row.distributionSum != null) {
+            if(row.allSum) {
+                newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 0 && it.dividends) ? (it.dividends) : 0 } * row.distributionSum / row.allSum
+            } else {
+                newRow.dividendSumForTaxStavka0 = 0
+            }
         }
 
         // Графа 29: Принимает значение: ∑ Граф 27 для одного Решения (графа 7-8)
@@ -481,8 +491,12 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         if (newRow.dividendD1D2 < 0) {
             newRow.dividendSumForTaxStavka9 = 0
         } else {
-            if (row.allSum) {
-                newRow.dividendSumForTaxStavka9 = ((rowList.sum{ (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? (it.dividends) : 0 })/ row.allSum) * row.distributionSum
+            if (row.distributionSum != null) {
+                if (row.allSum) {
+                    newRow.dividendSumForTaxStavka9 = ((rowList.sum{ (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? (it.dividends) : 0 })/ row.allSum) * row.distributionSum
+                } else {
+                    newRow.dividendSumForTaxStavka9 = 0
+                }
             }
         }
 
@@ -493,8 +507,12 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         if (newRow.dividendD1D2 < 0) {
             newRow.dividendSumForTaxStavka0 = 0
         } else {
-            if (row.allSum) {
-                newRow.dividendSumForTaxStavka0 = ((rowList.sum{ (it.status == 1 && it.type == 3 && it.rate == 0 && it.dividends) ? (it.dividends) : 0 }) / row.allSum) * row.distributionSum
+            if (row.distributionSum != null) {
+                if(row.allSum) {
+                    newRow.dividendSumForTaxStavka0 = ((rowList.sum{ (it.status == 1 && it.type == 3 && it.rate == 0 && it.dividends) ? (it.dividends) : 0 }) / row.allSum) * row.distributionSum
+                } else {
+                    newRow.dividendSumForTaxStavka0 = 0
+                }
             }
         }
 
@@ -508,13 +526,15 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
             if (row.emitentInn == graph3String) { // Группа относится к сберу
                 boolean found = rowList.find { it.status == 1 && it.type == 5 && it.rate == 13 } != null
                 if (found) { // Есть строки для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
-                    if (row.allSum) { // Деление не на ноль
-                        def sourseSum = rowList.sum {
-                            (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? it.dividends : 0
+                    if(row.distributionSum != null) {
+                        if (row.allSum) { // Деление не на ноль
+                            def sourseSum = rowList.sum {
+                                (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? it.dividends : 0
+                            }
+                            newRow.taxSum = (sourseSum * 0.13 * row.distributionSum) / row.allSum
+                        } else { // при делении на ноль «Графа 29» = 0
+                            newRow.taxSum = 0
                         }
-                        newRow.taxSum = (sourseSum * 0.13 * row.distributionSum) / row.allSum
-                    } else { // при делении на ноль «Графа 29» = 0
-                        newRow.taxSum = 0
                     }
                 } else { // нет строк для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
                     newRow.taxSum = 0
