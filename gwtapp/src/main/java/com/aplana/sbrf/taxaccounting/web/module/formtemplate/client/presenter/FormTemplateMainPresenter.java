@@ -46,16 +46,17 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
     @ProxyEvent
     public void onSetData(final FormTemplateMainEvent event) {
         InitTypeAction action = new InitTypeAction();
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<InitTypeResult>() {
-            @Override
-            public void onSuccess(InitTypeResult result) {
-                FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, result.getRefBookList());
-            }
-        }, FormTemplateMainPresenter.this));
         formTemplateExt = new FormTemplateExt();
         formTemplate = new FormTemplate();
         formTemplateExt.setFormTemplate(formTemplate);
         formTemplate.setVersion(new Date());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<InitTypeResult>() {
+            @Override
+            public void onSuccess(InitTypeResult result) {
+                formTemplateExt.setStyles(result.getStyles());
+                FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, result.getRefBookList());
+            }
+        }, FormTemplateMainPresenter.this));
         FormType type = new FormType();
         type.setId(0);
         type.setName("");
@@ -84,6 +85,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         formTemplateExt = new FormTemplateExt();
                         formTemplate = new FormTemplate();
                         formTemplateExt.setFormTemplate(formTemplate);
+                        formTemplateExt.setStyles(result.getStyles());
                         formTemplate.setVersion(new Date());
                         formTemplate.setType(result.getFormType());
                         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());
