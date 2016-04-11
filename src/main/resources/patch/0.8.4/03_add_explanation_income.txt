@@ -1,0 +1,291 @@
+import com.aplana.sbrf.taxaccounting.model.Column
+import com.aplana.sbrf.taxaccounting.model.ColumnType
+import com.aplana.sbrf.taxaccounting.model.FormStyle
+import com.aplana.sbrf.taxaccounting.model.FormTemplate
+import com.aplana.sbrf.taxaccounting.model.FormType
+import org.apache.commons.io.IOUtils
+
+/**
+ Создает макет НФ, кроме таблицы для хранения данных
+ # Инструкция:
+ Вставить текст данного скрипта на странице, соответствующей ссылке с окончанием:
+ .../gwtapp/#!scriptExecution
+ Нажать "Выполнить".
+
+ */
+
+boolean createType = true
+boolean createTemplate = true
+boolean addColumns = true
+boolean addStyles = true
+boolean addDataRows = true
+boolean addDataHeaders = true
+boolean addScript = true
+
+try {
+    // id типа формы, имя типа формы, вид налога(I, T, V, D, P, E), включать в ИФРС(флаг), имя ИФРС
+    FormType formType = new FormType()
+    formType.setId(851)
+    formType.setName('Таблица 1. Пояснение отклонений от ОФР в простом регистре налогового учёта «Доходы»')
+    formType.setTaxType(TaxType.INCOME)
+    formType.setIsIfrs(false)
+    formType.setIfrsName('')
+    formType.setCode('')
+    // id шаблона формы, имя шаблона короткое, имя шаблона полное, год версии, ежемесячность(флаг), код
+    FormTemplate formTemplate = new FormTemplate()
+    formTemplate.setId(851)
+    formTemplate.setFixedRows(false)
+    formTemplate.setName('Таблица 1. Пояснение отклонений от ОФР в простом регистре налогового учёта «Доходы»')
+    formTemplate.setFullName('Таблица 1. Пояснение отклонений от ОФР в простом регистре налогового учёта «Доходы»')
+    formTemplate.setVersion(Date.parse('dd.MM.yyyy', '01.01.2016'))
+    formTemplate.setMonthly(false)
+    formTemplate.setHeader('')
+    formTemplate.setComparative(false)
+    formTemplate.setAccruing(false)
+    formTemplate.setUpdating(false)
+
+    def form_type_id = formType.id
+    def form_template_id = formTemplate.id
+
+    def rs = namedParameterJdbcTemplate.queryForObject("SELECT count(id) from FORM_TYPE where id = $form_type_id", [:], Integer.class)
+    if (rs == 1) {
+        logger.info("Макет НФ с данным id = $form_type_id уже существует в системе!")
+        if (createType) {
+            return
+        }
+    }
+
+    rs = namedParameterJdbcTemplate.queryForObject("SELECT count(id) from FORM_TEMPLATE where id = $form_template_id", [:], Integer.class)
+    if (rs == 1) {
+        logger.info("Версия макета НФ с данным id = $form_template_id уже существует в системе!")
+        if (createTemplate) {
+            return
+        }
+    }
+
+    addTypeTemplate(formType, formTemplate, createType, createTemplate)
+
+    List<Column> formColumns = new ArrayList<>()
+	def referenceColumnMap = [:]
+
+    //Добавление колонок
+    // NAME, ALIAS, TYPE, WIDTH, PRECISION, MAX_LENGTH, CHECKING, ATTRIBUTE_ID, FORMAT, FILTER, PARENT_COLUMN_ID, ATTRIBUTE_ID2, NUMERATION_ROW
+    if (addColumns) {
+        def Column formColumn = new AutoNumerationColumn()
+        formColumn.setOrder(1)
+        formColumn.setName('№ пп.')
+        formColumn.setAlias('rowNum')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Автонумеруемая графа')})
+        formColumn.setWidth(5)
+        formColumn.setChecking(false)
+        formColumn.setNumerationType(NumerationType.getById(0))
+        formColumns.add(formColumn)
+
+        formColumn = new RefBookColumn()
+        formColumn.setOrder(2)
+        formColumn.setName('КНУ')
+        formColumn.setAlias('code')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Справочник')})
+        formColumn.setWidth(10)
+        formColumn.setChecking(false)
+        formColumn.setRefBookAttributeId(140)
+        formColumn.setRefBookAttributeId2(null)
+        formColumn.setNameAttributeId(140)
+        formColumn.setFilter('' ?: null)
+        formColumns.add(formColumn)
+
+        formColumn = new ReferenceColumn()
+        formColumn.setOrder(3)
+        formColumn.setName('Символ ОФР')
+        formColumn.setAlias('symbol')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Зависимая графа')})
+        formColumn.setWidth(15)
+        formColumn.setChecking(false)
+        formColumn.setParentAlias('symbol')
+        formColumn.setRefBookAttributeId(144)
+        formColumn.setRefBookAttributeId2(null)
+        referenceColumnMap['symbol'] = 'code'
+        formColumns.add(formColumn)
+
+        formColumn = new NumericColumn()
+        formColumn.setOrder(4)
+        formColumn.setName('Сумма отклонения данных в РНУ-4 с данными бухгалтерского учёта')
+        formColumn.setAlias('sum')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Число')})
+        formColumn.setWidth(10)
+        formColumn.setChecking(false)
+        formColumn.setPrecision(0)
+        formColumn.setMaxLength(14)
+        formColumns.add(formColumn)
+
+        formColumn = new StringColumn()
+        formColumn.setOrder(5)
+        formColumn.setName('Пояснение')
+        formColumn.setAlias('explanation')
+        formColumn.setColumnType(ColumnType.find{ it.title.equals('Строка')})
+        formColumn.setWidth(10)
+        formColumn.setChecking(false)
+        formColumn.setMaxLength(128)
+        formColumn.setPrevLength(0)
+        formColumns.add(formColumn)
+
+
+        formTemplate.getColumns().addAll(formColumns)
+        columnDaoImpl.createFormColumns(formColumns, formTemplate)
+
+	  	referenceColumnMap.each { alias, parentAlias ->
+			def column = formColumns.find{ it.alias == alias }
+			if (column != null) {
+				column.setParentAlias(parentAlias)
+			} else {
+				logger.error("Родительская колонка с псевдонимом $parentAlias не обнаружена!")
+			}
+		}
+
+        if (!referenceColumnMap.isEmpty()) {
+            columnDaoImpl.updateFormColumns(formColumns, formTemplate)
+        }
+
+        logger.info("К версии макета добавлены колонки")
+    }
+
+    List<FormStyle> formStyles = new ArrayList<>()
+
+    if (addStyles) {
+        def FormStyle formStyle = new FormStyle()
+        formStyle.setAlias('Редактируемая')
+        formStyle.setBackColor(Color.getById(3))
+        formStyle.setBold(false)
+        formStyle.setFontColor(Color.getById(0))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Корректировка-добавлено')
+        formStyle.setBackColor(Color.getById(12))
+        formStyle.setBold(false)
+        formStyle.setFontColor(Color.getById(0))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Корректировка-удалено')
+        formStyle.setBackColor(Color.getById(8))
+        formStyle.setBold(false)
+        formStyle.setFontColor(Color.getById(0))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Корректировка-без изменений')
+        formStyle.setBackColor(Color.getById(6))
+        formStyle.setBold(false)
+        formStyle.setFontColor(Color.getById(0))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Корректировка-изменено')
+        formStyle.setBackColor(Color.getById(4))
+        formStyle.setBold(true)
+        formStyle.setFontColor(Color.getById(10))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Контрольные суммы')
+        formStyle.setBackColor(Color.getById(2))
+        formStyle.setBold(true)
+        formStyle.setFontColor(Color.getById(0))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+        formStyle = new FormStyle()
+        formStyle.setAlias('Автозаполняемая')
+        formStyle.setBackColor(Color.getById(4))
+        formStyle.setBold(true)
+        formStyle.setFontColor(Color.getById(13))
+        formStyle.setItalic(false)
+        formStyles.add(formStyle)
+
+
+        formTemplate.getStyles().addAll(formStyles)
+        formStyleDaoImpl.saveFormStyles(formTemplate)
+        logger.info("К версии макета добавлены стили")
+    }
+
+    String longString = ''
+
+    if (addDataRows) {
+        longString += 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48cm93cy8+'
+
+        addLongText(form_template_id, longString, 'DATA_ROWS')
+        logger.info("К версии макета добавлены фиксированные строки")
+    }
+
+    longString = ''
+    if (addDataHeaders) {
+        longString += 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxyb3dzPg0KICAgIDxyb3cgYWxpYXM9IiI+DQogICAgICAgIDxjZWxsIGFsaWFzPSJyb3dOdW0iIGNvbFNwYW49IjEiIHJvd1NwYW49IjIiIHZhbHVlPSLihJYg0L/Qvy4iLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9ImNvZGUiIGNvbFNwYW49IjEiIHJvd1NwYW49IjIiIHZhbHVlPSLQmtCd0KMiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9InN5bWJvbCIgY29sU3Bhbj0iMSIgcm93U3Bhbj0iMiIgdmFsdWU9ItCh0LjQvNCy0L7QuyDQntCk0KAiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9InN1bSIgY29sU3Bhbj0iMSIgcm93U3Bhbj0iMiIgdmFsdWU9ItCh0YPQvNC80LAg0L7RgtC60LvQvtC90LXQvdC40Y8g0LTQsNC90L3Ri9GFINCyINCg0J3Qoy00INGBINC00LDQvdC90YvQvNC4INCx0YPRhdCz0LDQu9GC0LXRgNGB0LrQvtCz0L4g0YPRh9GR0YLQsCIvPg0KICAgICAgICA8Y2VsbCBhbGlhcz0iZXhwbGFuYXRpb24iIGNvbFNwYW49IjEiIHJvd1NwYW49IjIiIHZhbHVlPSLQn9C+0Y/RgdC90LXQvdC40LUiLz4NCiAgICA8L3Jvdz4NCiAgICA8cm93IGFsaWFzPSIiPg0KICAgICAgICA8Y2VsbCBhbGlhcz0icm93TnVtIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0iMSIvPg0KICAgICAgICA8Y2VsbCBhbGlhcz0iY29kZSIgY29sU3Bhbj0iMSIgcm93U3Bhbj0iMSIgdmFsdWU9IjIiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9InN5bWJvbCIgY29sU3Bhbj0iMSIgcm93U3Bhbj0iMSIgdmFsdWU9IjMiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9InN1bSIgY29sU3Bhbj0iMSIgcm93U3Bhbj0iMSIgdmFsdWU9IjQiLz4NCiAgICAgICAgPGNlbGwgYWxpYXM9ImV4cGxhbmF0aW9uIiBjb2xTcGFuPSIxIiByb3dTcGFuPSIxIiB2YWx1ZT0iNSIvPg0KICAgIDwvcm93Pg0KPC9yb3dzPg=='
+
+        addLongText(form_template_id, longString, 'DATA_HEADERS')
+        logger.info("К версии макета добавлен заголовок")
+    }
+
+    longString = ''
+    if (addScript) {
+        longString += 'cGFja2FnZSBmb3JtX3RlbXBsYXRlLmluY29tZS5leHBsYW5hdGlvbl9pbmNvbWUudjIwMTYNCg0KaW1wb3J0IGF1LmNvbS5ieXRlY29kZS5vcGVuY3N2LkNTVlJlYWRlcg0KaW1wb3J0IGNvbS5hcGxhbmEuc2JyZi50YXhhY2NvdW50aW5nLm1vZGVsLkZvcm1EYXRhRXZlbnQNCmltcG9ydCBjb20uYXBsYW5hLnNicmYudGF4YWNjb3VudGluZy5tb2RlbC5leGNlcHRpb24uU2VydmljZUV4Y2VwdGlvbg0KaW1wb3J0IGNvbS5hcGxhbmEuc2JyZi50YXhhY2NvdW50aW5nLm1vZGVsLmxvZy5Mb2dMZXZlbA0KaW1wb3J0IGNvbS5hcGxhbmEuc2JyZi50YXhhY2NvdW50aW5nLm1vZGVsLnV0aWwuU3RyaW5nVXRpbHMNCmltcG9ydCBncm9vdnkudHJhbnNmb3JtLkZpZWxkDQoNCi8qKg0KICog0KLQsNCx0LvQuNGG0LAgMS4g0J/QvtGP0YHQvdC10L3QuNC1INC+0YLQutC70L7QvdC10L3QuNC5INC+0YIg0J7QpNCgINCyINC/0YDQvtGB0YLQvtC8INGA0LXQs9C40YHRgtGA0LUg0L3QsNC70L7Qs9C+0LLQvtCz0L4g0YPRh9GR0YLQsCDCq9CU0L7RhdC+0LTRi8K7DQogKiBmb3JtVGVtcGxhdGVJZD04NTENCiAqLw0KDQovLyDQs9GA0LDRhNCwIDEgLSByb3dOdW0NCi8vINCz0YDQsNGE0LAgMiAtIGNvZGUNCi8vINCz0YDQsNGE0LAgMyAtIHN5bWJvbA0KLy8g0LPRgNCw0YTQsCA0IC0gc3VtDQovLyDQs9GA0LDRhNCwIDUgLSBleHBsYW5hdGlvbg0KDQpzd2l0Y2ggKGZvcm1EYXRhRXZlbnQpIHsNCiAgICBjYXNlIEZvcm1EYXRhRXZlbnQuQ1JFQVRFOg0KICAgICAgICBmb3JtRGF0YVNlcnZpY2UuY2hlY2tVbmlxdWUoZm9ybURhdGEsIGxvZ2dlcikNCiAgICAgICAgYnJlYWsNCiAgICBjYXNlIEZvcm1EYXRhRXZlbnQuQ0FMQ1VMQVRFOg0KICAgICAgICBjYWxjKCkNCiAgICAgICAgbG9naWNDaGVjaygpDQogICAgICAgIGZvcm1EYXRhU2VydmljZS5zYXZlQ2FjaGVkRGF0YVJvd3MoZm9ybURhdGEsIGxvZ2dlcikNCiAgICAgICAgYnJlYWsNCiAgICBjYXNlIEZvcm1EYXRhRXZlbnQuQ0hFQ0s6DQogICAgICAgIGxvZ2ljQ2hlY2soKQ0KICAgICAgICBicmVhaw0KICAgIGNhc2UgRm9ybURhdGFFdmVudC5BRERfUk9XOg0KICAgICAgICBmb3JtRGF0YVNlcnZpY2UuYWRkUm93KGZvcm1EYXRhLCBjdXJyZW50RGF0YVJvdywgZWRpdGFibGVDb2x1bW5zLCAoYWxsQ29sdW1ucyAtIGVkaXRhYmxlQ29sdW1ucykpDQogICAgICAgIGJyZWFrDQogICAgY2FzZSBGb3JtRGF0YUV2ZW50LkRFTEVURV9ST1c6DQogICAgICAgIGlmIChjdXJyZW50RGF0YVJvdyAhPSBudWxsICYmIGN1cnJlbnREYXRhUm93LmdldEFsaWFzKCkgPT0gbnVsbCkgew0KICAgICAgICAgICAgZm9ybURhdGFTZXJ2aWNlLmdldERhdGFSb3dIZWxwZXIoZm9ybURhdGEpLmRlbGV0ZShjdXJyZW50RGF0YVJvdykNCiAgICAgICAgfQ0KICAgICAgICBicmVhaw0KICAgIGNhc2UgRm9ybURhdGFFdmVudC5NT1ZFX0NSRUFURURfVE9fUFJFUEFSRUQ6ICAvLyDQn9C+0LTQs9C+0YLQvtCy0LjRgtGMINC40LcgItCh0L7Qt9C00LDQvdCwIg0KICAgIGNhc2UgRm9ybURhdGFFdmVudC5NT1ZFX0NSRUFURURfVE9fQVBQUk9WRUQ6ICAvLyDQo9GC0LLQtdGA0LTQuNGC0Ywg0LjQtyAi0KHQvtC30LTQsNC90LAiDQogICAgY2FzZSBGb3JtRGF0YUV2ZW50Lk1PVkVfQ1JFQVRFRF9UT19BQ0NFUFRFRDogIC8vINCf0YDQuNC90Y/RgtGMINC40LcgItCh0L7Qt9C00LDQvdCwIg0KICAgIGNhc2UgRm9ybURhdGFFdmVudC5NT1ZFX1BSRVBBUkVEX1RPX0FQUFJPVkVEOiAvLyDQo9GC0LLQtdGA0LTQuNGC0Ywg0LjQtyAi0J/QvtC00LPQvtGC0L7QstC70LXQvdCwIg0KICAgIGNhc2UgRm9ybURhdGFFdmVudC5NT1ZFX1BSRVBBUkVEX1RPX0FDQ0VQVEVEOiAvLyDQn9GA0LjQvdGP0YLRjCDQuNC3ICLQn9C+0LTQs9C+0YLQvtCy0LvQtdC90LAiDQogICAgY2FzZSBGb3JtRGF0YUV2ZW50Lk1PVkVfQVBQUk9WRURfVE9fQUNDRVBURUQ6IC8vINCf0YDQuNC90Y/RgtGMINC40LcgItCj0YLQstC10YDQttC00LXQvdCwIg0KICAgICAgICBsb2dpY0NoZWNrKCkNCiAgICAgICAgYnJlYWsNCiAgICBjYXNlIEZvcm1EYXRhRXZlbnQuQ09NUE9TRToNCiAgICAgICAgZm9ybURhdGFTZXJ2aWNlLmNvbnNvbGlkYXRpb25TaW1wbGUoZm9ybURhdGEsIGxvZ2dlciwgdXNlckluZm8pDQogICAgICAgIGNhbGMoKQ0KICAgICAgICBsb2dpY0NoZWNrKCkNCiAgICAgICAgZm9ybURhdGFTZXJ2aWNlLnNhdmVDYWNoZWREYXRhUm93cyhmb3JtRGF0YSwgbG9nZ2VyKQ0KICAgICAgICBicmVhaw0KICAgIGNhc2UgRm9ybURhdGFFdmVudC5JTVBPUlQ6DQogICAgICAgIGltcG9ydERhdGEoKQ0KICAgICAgICBmb3JtRGF0YVNlcnZpY2Uuc2F2ZUNhY2hlZERhdGFSb3dzKGZvcm1EYXRhLCBsb2dnZXIpDQogICAgICAgIGJyZWFrDQogICAgY2FzZSBGb3JtRGF0YUV2ZW50LlNPUlRfUk9XUzoNCiAgICAgICAgc29ydEZvcm1EYXRhUm93cygpDQogICAgICAgIGJyZWFrDQp9DQoNCi8vLy8g0JrRjdGI0Lgg0Lgg0LrQvtC90YHRgtCw0L3RgtGLDQpARmllbGQNCmRlZiBwcm92aWRlckNhY2hlID0gWzpdDQpARmllbGQNCmRlZiByZWNvcmRDYWNoZSA9IFs6XQ0KQEZpZWxkDQpkZWYgcmVmQm9va0NhY2hlID0gWzpdDQoNCkBGaWVsZA0KZGVmIGFsbENvbHVtbnMgPSBbJ3Jvd051bScsICdjb2RlJywgJ3N5bWJvbCcsICdzdW0nLCAnZXhwbGFuYXRpb24nXQ0KDQovLyDQoNC10LTQsNC60YLQuNGA0YPQtdC80YvQtSDQsNGC0YDQuNCx0YPRgtGLDQpARmllbGQNCmRlZiBlZGl0YWJsZUNvbHVtbnMgPSBbJ2NvZGUnLCAnc3VtJywgJ2V4cGxhbmF0aW9uJ10NCg0KLy8g0J/RgNC+0LLQtdGA0Y/QtdC80YvQtSDQvdCwINC/0YPRgdGC0YvQtSDQt9C90LDRh9C10L3QuNGPINCw0YLRgNC40LHRg9GC0YsNCkBGaWVsZA0KZGVmIG5vbkVtcHR5Q29sdW1ucyA9IFsnY29kZScsICdzdW0nXQ0KDQpARmllbGQNCmRlZiBzdGFydERhdGUgPSBudWxsDQoNCkBGaWVsZA0KZGVmIGVuZERhdGUgPSBudWxsDQoNCi8vINCg0LDQt9GL0LzQtdC90L7QstCw0L3QuNC1INC30LDQv9C40YHQuCDRgdC/0YDQsNCy0L7Rh9C90LjQutCwDQpkZWYgZ2V0UmVmQm9va1ZhbHVlKGRlZiBsb25nIHJlZkJvb2tJZCwgZGVmIExvbmcgcmVjb3JkSWQpIHsNCiAgICByZXR1cm4gZm9ybURhdGFTZXJ2aWNlLmdldFJlZkJvb2tWYWx1ZShyZWZCb29rSWQsIHJlY29yZElkLCByZWZCb29rQ2FjaGUpDQp9DQoNCmRlZiBnZXRSZXBvcnRQZXJpb2RTdGFydERhdGUoKSB7DQogICAgaWYgKHN0YXJ0RGF0ZSA9PSBudWxsKSB7DQogICAgICAgIHN0YXJ0RGF0ZSA9IHJlcG9ydFBlcmlvZFNlcnZpY2UuZ2V0Q2FsZW5kYXJTdGFydERhdGUoZm9ybURhdGEucmVwb3J0UGVyaW9kSWQpLnRpbWUNCiAgICB9DQogICAgcmV0dXJuIHN0YXJ0RGF0ZQ0KfQ0KDQpkZWYgZ2V0UmVwb3J0UGVyaW9kRW5kRGF0ZSgpIHsNCiAgICBpZiAoZW5kRGF0ZSA9PSBudWxsKSB7DQogICAgICAgIGVuZERhdGUgPSByZXBvcnRQZXJpb2RTZXJ2aWNlLmdldEVuZERhdGUoZm9ybURhdGEucmVwb3J0UGVyaW9kSWQpLnRpbWUNCiAgICB9DQogICAgcmV0dXJuIGVuZERhdGUNCn0NCg0KLy8g0J/QvtC40YHQuiDQt9Cw0L/QuNGB0Lgg0LIg0YHQv9GA0LDQstC+0YfQvdC40LrQtSDQv9C+INC30L3QsNGH0LXQvdC40Y4gKNC00LvRjyDQuNC80L/QvtGA0YLQsCkNCmRlZiBnZXRSZWNvcmRJbXBvcnQoZGVmIExvbmcgcmVmQm9va0lkLCBkZWYgU3RyaW5nIGFsaWFzLCBkZWYgU3RyaW5nIHZhbHVlLCBkZWYgaW50IHJvd0luZGV4LCBkZWYgaW50IGNvbEluZGV4LA0KICAgICAgICAgICAgICAgICAgICBkZWYgYm9vbGVhbiByZXF1aXJlZCA9IHRydWUpIHsNCiAgICBpZiAodmFsdWUgPT0gbnVsbCB8fCB2YWx1ZSA9PSAnJykgew0KICAgICAgICByZXR1cm4gbnVsbA0KICAgIH0NCiAgICByZXR1cm4gZm9ybURhdGFTZXJ2aWNlLmdldFJlZkJvb2tSZWNvcmRJbXBvcnQocmVmQm9va0lkLCByZWNvcmRDYWNoZSwgcHJvdmlkZXJDYWNoZSwgcmVmQm9va0NhY2hlLCBhbGlhcywgdmFsdWUsDQogICAgICAgICAgICBnZXRSZXBvcnRQZXJpb2RFbmREYXRlKCksIHJvd0luZGV4LCBjb2xJbmRleCwgbG9nZ2VyLCByZXF1aXJlZCkNCn0NCg0KLy8g0J/QvtC70YPRh9C40YLRjCDQvdC+0LLRg9GOINGB0YLRgNC+0LrRgyDRgSDQt9Cw0LTQsNC90L3Ri9C80Lgg0YHRgtC40LvRj9C80LgNCmRlZiBnZXROZXdSb3coKSB7DQogICAgZGVmIHJvdyA9IChmb3JtRGF0YUV2ZW50IGluIFtGb3JtRGF0YUV2ZW50LklNUE9SVCwgRm9ybURhdGFFdmVudC5JTVBPUlRfVFJBTlNQT1JUX0ZJTEVdKSA/IGZvcm1EYXRhLmNyZWF0ZVN0b3JlTWVzc2FnaW5nRGF0YVJvdygpIDogZm9ybURhdGEuY3JlYXRlRGF0YVJvdygpDQogICAgZWRpdGFibGVDb2x1bW5zLmVhY2ggew0KICAgICAgICByb3cuZ2V0Q2VsbChpdCkuZWRpdGFibGUgPSB0cnVlDQogICAgICAgIHJvdy5nZXRDZWxsKGl0KS5zZXRTdHlsZUFsaWFzKCfQoNC10LTQsNC60YLQuNGA0YPQtdC80LDRjycpDQogICAgfQ0KICAgIChhbGxDb2x1bW5zIC0gZWRpdGFibGVDb2x1bW5zKS5lYWNoIHsNCiAgICAgICAgcm93LmdldENlbGwoaXQpLnNldFN0eWxlQWxpYXMoJ9CQ0LLRgtC+0LfQsNC/0L7Qu9C90Y/QtdC80LDRjycpDQogICAgfQ0KICAgIHJldHVybiByb3cNCn0NCg0Kdm9pZCBjYWxjKCkgew0KICAgIC8vINGA0LDRgdGH0LXRgtC+0LIg0L3QtdGCDQp9DQoNCnZvaWQgbG9naWNDaGVjaygpIHsNCiAgICBkZWYgZGF0YVJvd3MgPSBmb3JtRGF0YVNlcnZpY2UuZ2V0RGF0YVJvd0hlbHBlcihmb3JtRGF0YSkuYWxsQ2FjaGVkDQoNCiAgICBkZWYgY29kZU1hcCA9IFs6XQ0KICAgIGZvciAoZGVmIHJvdyA6IGRhdGFSb3dzKSB7DQogICAgICAgIC8vIDEuINCe0LHRj9C30LDRgtC10LvRjNC90L7RgdGC0Ywg0LfQsNC/0L7Qu9C90LXQvdC40Y8g0L/QvtC70LXQuQ0KICAgICAgICBjaGVja05vbkVtcHR5Q29sdW1ucyhyb3csIHJvdy5nZXRJbmRleCgpLCBub25FbXB0eUNvbHVtbnMsIGxvZ2dlciwgdHJ1ZSkNCg0KICAgICAgICAvLyAyLiDQn9GA0L7QstC10YDQutCwINGD0L3QuNC60LDQu9GM0L3QvtGB0YLQuCDQt9C90LDRh9C10L3QuNGPINC/0L7Qu9GPIDINCiAgICAgICAgaWYgKHJvdy5jb2RlKSB7DQogICAgICAgICAgICBkZWYgY29kZSA9IGdldFJlZkJvb2tWYWx1ZSgyOCwgcm93LmNvZGUpPy5DT0RFLnZhbHVlDQogICAgICAgICAgICBpZiAoY29kZU1hcFtjb2RlXSA9PSBudWxsKSB7DQogICAgICAgICAgICAgICAgY29kZU1hcFtjb2RlXSA9IFtdDQogICAgICAgICAgICB9DQogICAgICAgICAgICBjb2RlTWFwW2NvZGVdLmFkZChyb3cpDQogICAgICAgIH0NCg0KICAgICAgICAvLyAzLiDQn9GA0L7QstC10YDQutCwINGB0YPQvNC80Ysg0L7RgtC60LvQvtC90LXQvdC40LkNCiAgICAgICAgaWYgKHJvdy5zdW0gIT0gbnVsbCAmJiAhKHJvdy5zdW0gPiBCaWdEZWNpbWFsLlpFUk8pKSB7DQogICAgICAgICAgICBsb2dnZXIuZXJyb3IoItCh0YLRgNC+0LrQsCAke3Jvdy5nZXRJbmRleCgpfTog0JfQvdCw0YfQtdC90LjQtSDQs9GA0LDRhNGLIMKrJHtnZXRDb2x1bW5OYW1lKHJvd3NbMF0sICdzdW0nKX3CuyDQtNC+0LvQttC90L4g0LHRi9GC0Ywg0LHQvtC70YzRiNC1IMKrMMK7ISIpDQogICAgICAgIH0NCiAgICB9DQoNCiAgICAvLyAyLiDQn9GA0L7QstC10YDQutCwINGD0L3QuNC60LDQu9GM0L3QvtGB0YLQuCDQt9C90LDRh9C10L3QuNGPINC/0L7Qu9GPIDINCiAgICBjb2RlTWFwLmVhY2ggeyBjb2RlLCByb3dzIC0+DQogICAgICAgIGlmIChyb3dzLnNpemUoKSA+IDEpIHsNCiAgICAgICAgICAgIGRlZiByb3dOdW1iZXJzID0gcm93cy5jb2xsZWN0IHsgaXQuZ2V0SW5kZXgoKSB9LmpvaW4oJywgJykNCiAgICAgICAgICAgIGxvZ2dlci5lcnJvcigi0KHRgtGA0L7QutCwICRyb3dOdW1iZXJzOiDQl9C90LDRh9C10L3QuNC1INCz0YDQsNGE0Ysgwqske2dldENvbHVtbk5hbWUocm93c1swXSwgJ2NvZGUnKX3CuyDQvdC1INGD0L3QuNC60LDQu9GM0L3QviEiKQ0KICAgICAgICB9DQogICAgfQ0KfQ0KDQovLyDQodC+0YDRgtC40YDQvtCy0LrQsCDQs9GA0YPQv9C/INC4INGB0YLRgNC+0LoNCnZvaWQgc29ydEZvcm1EYXRhUm93cygpIHsNCiAgICBkZWYgZGF0YVJvd0hlbHBlciA9IGZvcm1EYXRhU2VydmljZS5nZXREYXRhUm93SGVscGVyKGZvcm1EYXRhKQ0KICAgIGRlZiBkYXRhUm93cyA9IGRhdGFSb3dIZWxwZXIuYWxsQ2FjaGVkDQogICAgc29ydFJvd3MocmVmQm9va1NlcnZpY2UsIGxvZ2dlciwgZGF0YVJvd3MsIG51bGwsIG51bGwsIG51bGwpDQogICAgZGF0YVJvd0hlbHBlci5zYXZlU29ydCgpDQp9DQoNCnZvaWQgaW1wb3J0RGF0YSgpIHsNCiAgICBkZWYgdG1wUm93ID0gZm9ybURhdGEuY3JlYXRlRGF0YVJvdygpDQogICAgaW50IENPTFVNTl9DT1VOVCA9IDUNCiAgICBpbnQgSEVBREVSX1JPV19DT1VOVCA9IDMNCiAgICBTdHJpbmcgVEFCTEVfU1RBUlRfVkFMVUUgPSBnZXRDb2x1bW5OYW1lKHRtcFJvdywgJ3Jvd051bScpDQogICAgU3RyaW5nIFRBQkxFX0VORF9WQUxVRSA9IG51bGwNCg0KICAgIGRlZiBhbGxWYWx1ZXMgPSBbXSAgICAgIC8vINC30L3QsNGH0LXQvdC40Y8g0YTQvtGA0LzRiw0KICAgIGRlZiBoZWFkZXJWYWx1ZXMgPSBbXSAgIC8vINC30L3QsNGH0LXQvdC40Y8g0YjQsNC/0LrQuA0KICAgIGRlZiBwYXJhbXNNYXAgPSBbJ3Jvd09mZnNldCcgOiAwLCAnY29sT2Zmc2V0JyA6IDBdICAvLyDQvNCw0L/QsCDRgSDQv9Cw0YDQsNC80LXRgtGA0LDQvNC4ICjQvtGC0YHRgtGD0L/RiyDRgdCy0LXRgNGF0YMg0Lgg0YHQu9C10LLQsCkNCg0KICAgIGNoZWNrQW5kUmVhZEZpbGUoSW1wb3J0SW5wdXRTdHJlYW0sIFVwbG9hZEZpbGVOYW1lLCBhbGxWYWx1ZXMsIGhlYWRlclZhbHVlcywgVEFCTEVfU1RBUlRfVkFMVUUsIFRBQkxFX0VORF9WQUxVRSwgSEVBREVSX1JPV19DT1VOVCwgcGFyYW1zTWFwKQ0KDQogICAgLy8g0L/RgNC+0LLQtdGA0LrQsCDRiNCw0L/QutC4DQogICAgY2hlY2tIZWFkZXJYbHMoaGVhZGVyVmFsdWVzLCBDT0xVTU5fQ09VTlQsIEhFQURFUl9ST1dfQ09VTlQsIHRtcFJvdykNCiAgICBpZiAobG9nZ2VyLmNvbnRhaW5zTGV2ZWwoTG9nTGV2ZWwuRVJST1IpKSB7DQogICAgICAgIHJldHVybg0KICAgIH0NCiAgICAvLyDQvtGB0LLQvtCx0L7QttC00LXQvdC40LUg0YDQtdGB0YPRgNGB0L7QsiDQtNC70Y8g0Y3QutC+0L3QvtC80LjQuCDQv9Cw0LzRj9GC0LgNCiAgICBoZWFkZXJWYWx1ZXMuY2xlYXIoKQ0KICAgIGhlYWRlclZhbHVlcyA9IG51bGwNCg0KICAgIGRlZiBmaWxlUm93SW5kZXggPSBwYXJhbXNNYXAucm93T2Zmc2V0DQogICAgZGVmIGNvbE9mZnNldCA9IHBhcmFtc01hcC5jb2xPZmZzZXQNCiAgICBwYXJhbXNNYXAuY2xlYXIoKQ0KICAgIHBhcmFtc01hcCA9IG51bGwNCg0KICAgIGRlZiByb3dJbmRleCA9IDANCiAgICBkZWYgcm93cyA9IFtdDQogICAgZGVmIGFsbFZhbHVlc0NvdW50ID0gYWxsVmFsdWVzLnNpemUoKQ0KDQogICAgLy8g0YTQvtGA0LzQuNGA0L7QstCw0L3QuNC1INGB0YLRgNC+0Log0L3RhA0KICAgIGZvciAoZGVmIGkgPSAwOyBpIDwgYWxsVmFsdWVzQ291bnQ7IGkrKykgew0KICAgICAgICByb3dWYWx1ZXMgPSBhbGxWYWx1ZXNbMF0NCiAgICAgICAgZmlsZVJvd0luZGV4KysNCiAgICAgICAgLy8g0LLRgdC1INGB0YLRgNC+0LrQuCDQv9GD0YHRgtGL0LUgLSDQstGL0YXQvtC0DQogICAgICAgIGlmICghcm93VmFsdWVzKSB7DQogICAgICAgICAgICBhbGxWYWx1ZXMucmVtb3ZlKHJvd1ZhbHVlcykNCiAgICAgICAgICAgIHJvd1ZhbHVlcy5jbGVhcigpDQogICAgICAgICAgICBicmVhaw0KICAgICAgICB9DQogICAgICAgIC8vINC/0YDQvtGB0YLQsNGPINGB0YLRgNC+0LrQsA0KICAgICAgICByb3dJbmRleCsrDQogICAgICAgIGRlZiBuZXdSb3cgPSBnZXROZXdSb3dGcm9tWGxzKHJvd1ZhbHVlcywgY29sT2Zmc2V0LCBmaWxlUm93SW5kZXgsIHJvd0luZGV4KQ0KICAgICAgICByb3dzLmFkZChuZXdSb3cpDQogICAgICAgIC8vINC+0YHQstC+0LHQvtC00LjRgtGMINC90LXQvdGD0LbQvdGL0LUg0LTQsNC90L3Ri9C1IC0g0LjQvdCw0YfQtSDQvdC1INGF0LLQsNGC0LjRgiDQv9Cw0LzRj9GC0LgNCiAgICAgICAgYWxsVmFsdWVzLnJlbW92ZShyb3dWYWx1ZXMpDQogICAgICAgIHJvd1ZhbHVlcy5jbGVhcigpDQogICAgfQ0KDQogICAgc2hvd01lc3NhZ2VzKHJvd3MsIGxvZ2dlcikNCiAgICBpZiAoIWxvZ2dlci5jb250YWluc0xldmVsKExvZ0xldmVsLkVSUk9SKSkgew0KICAgICAgICBmb3JtRGF0YVNlcnZpY2UuZ2V0RGF0YVJvd0hlbHBlcihmb3JtRGF0YSkuYWxsQ2FjaGVkID0gcm93cw0KICAgIH0NCn0NCg0KLyoqDQogKiDQn9GA0L7QstC10YDQuNGC0Ywg0YjQsNC/0LrRgyDRgtCw0LHQu9C40YbRiw0KICoNCiAqIEBwYXJhbSBoZWFkZXJSb3dzINGB0YLRgNC+0LrQuCDRiNCw0L/QutC4DQogKiBAcGFyYW0gY29sQ291bnQg0LrQvtC70LjRh9C10YHRgtCy0L4g0LrQvtC70L7QvdC+0Log0LIg0YLQsNCx0LvQuNGG0LUNCiAqIEBwYXJhbSByb3dDb3VudCDQutC+0LvQuNGH0LXRgdGC0LLQviDRgdGC0YDQvtC6INCyINGC0LDQsdC70LjRhtC1DQogKiBAcGFyYW0gdG1wUm93INCy0YHQv9C+0LzQvtCz0LDRgtC10LvRjNC90LDRjyDRgdGC0YDQvtC60LAg0LTQu9GPINC/0L7Qu9GD0YfQtdC90LjRjyDQvdCw0LfQstCw0L3QuNC4INCz0YDQsNGE0L7Qsg0KICovDQp2b2lkIGNoZWNrSGVhZGVyWGxzKGRlZiBoZWFkZXJSb3dzLCBkZWYgY29sQ291bnQsIHJvd0NvdW50LCBkZWYgdG1wUm93KSB7DQogICAgaWYgKGhlYWRlclJvd3MuaXNFbXB0eSgpKSB7DQogICAgICAgIHRocm93IG5ldyBTZXJ2aWNlRXhjZXB0aW9uKFdST05HX0hFQURFUl9ST1dfU0laRSkNCiAgICB9DQogICAgY2hlY2tIZWFkZXJTaXplKGhlYWRlclJvd3NbMF0uc2l6ZSgpLCBoZWFkZXJSb3dzLnNpemUoKSwgY29sQ291bnQsIHJvd0NvdW50KQ0KICAgIGRlZiBoZWFkZXJNYXBwaW5nID0gWw0KICAgICAgICAgICAgKFsoaGVhZGVyUm93c1swXVswXSk6IGdldENvbHVtbk5hbWUodG1wUm93LCAncm93TnVtJyldKSwNCiAgICAgICAgICAgIChbKGhlYWRlclJvd3NbMF1bMV0pOiBnZXRDb2x1bW5OYW1lKHRtcFJvdywgJ2NvZGUnKV0pLA0KICAgICAgICAgICAgKFsoaGVhZGVyUm93c1swXVsyXSk6IGdldENvbHVtbk5hbWUodG1wUm93LCAnc3ltYm9sJyldKSwNCiAgICAgICAgICAgIChbKGhlYWRlclJvd3NbMF1bM10pOiBnZXRDb2x1bW5OYW1lKHRtcFJvdywgJ3N1bScpXSksDQogICAgICAgICAgICAoWyhoZWFkZXJSb3dzWzBdWzRdKTogZ2V0Q29sdW1uTmFtZSh0bXBSb3csICdleHBsYW5hdGlvbicpXSksDQogICAgXQ0KICAgICgxLi41KS5lYWNoIHsgaW5kZXggLT4NCiAgICAgICAgaGVhZGVyTWFwcGluZy5hZGQoKFsoaGVhZGVyUm93c1sxXVtpbmRleCAtIDFdKTogaW5kZXgudG9TdHJpbmcoKV0pKQ0KICAgIH0NCiAgICBjaGVja0hlYWRlckVxdWFscyhoZWFkZXJNYXBwaW5nLCBsb2dnZXIpDQp9DQoNCi8qKg0KICog0J/QvtC70YPRh9C40YLRjCDQvdC+0LLRg9GOINGB0YLRgNC+0LrRgyDQvdGEINC/0L4g0LfQvdCw0YfQtdC90LjRj9C8INC40Lcg0Y3QutGB0LXQu9GPLg0KICoNCiAqIEBwYXJhbSB2YWx1ZXMg0YHQv9C40YHQvtC6INGB0YLRgNC+0Log0YHQviDQt9C90LDRh9C10L3QuNGP0LzQuA0KICogQHBhcmFtIGNvbE9mZnNldCDQvtGC0YHRgtGD0L8g0LIg0LrQvtC70L7QvdC60LDRhQ0KICogQHBhcmFtIGZpbGVSb3dJbmRleCDQvdC+0LzQtdGAINGB0YLRgNC+0LrQuCDQsiDRgtGEDQogKiBAcGFyYW0gcm93SW5kZXgg0YHRgtGA0L7QutCwINCyINC90YQNCiAqLw0KZGVmIGdldE5ld1Jvd0Zyb21YbHMoZGVmIHZhbHVlcywgZGVmIGNvbE9mZnNldCwgZGVmIGZpbGVSb3dJbmRleCwgZGVmIHJvd0luZGV4KSB7DQogICAgZGVmIG5ld1JvdyA9IGdldE5ld1JvdygpDQogICAgbmV3Um93LnNldEluZGV4KHJvd0luZGV4KQ0KICAgIG5ld1Jvdy5zZXRJbXBvcnRJbmRleChmaWxlUm93SW5kZXgpDQogICAgZGVmIGNvbEluZGV4DQoNCiAgICAvLyDQs9GA0LDRhNCwIDIgLSBjb2RlICAgICAgIC0g0LDRgtGA0LjQsdGD0YIgMTQwIC0gQ09ERSwg0YHQv9GA0LDQstC+0YfQvdC40LogMjgNCiAgICAvLyDQs9GA0LDRhNCwIDMgLSBzeW1ib2wgICAgICAgLSDQt9Cw0LLQuNGB0LjRgiDQvtGCINCz0YDQsNGE0YsgMiAtINCw0YLRgNC40LHRg9GCIDE0NCAtIE9QVSwg0YHQv9GA0LDQstC+0YfQvdC40LogMjgNCg0KICAgIC8vINCz0YDQsNGE0LAgMg0KICAgIGNvbEluZGV4ID0gMg0KICAgIGRlZiBtYXAgPSBnZXRSZWNvcmRJbXBvcnQoMjhMLCAnQ09ERScsIHZhbHVlc1tjb2xJbmRleF0sIGZpbGVSb3dJbmRleCwgY29sSW5kZXggKyBjb2xPZmZzZXQsIGZhbHNlKQ0KICAgIG5ld1Jvdy5jb2RlID0gbWFwPy5yZWNvcmRfaWQ/LnZhbHVlDQoNCiAgICAvLyDQs9GA0LDRhNCwIDMNCiAgICBjb2xJbmRleCA9IDMNCiAgICBpZiAobWFwICE9IG51bGwpIHsNCiAgICAgICAgZm9ybURhdGFTZXJ2aWNlLmNoZWNrUmVmZXJlbmNlVmFsdWUoMjgsIHZhbHVlc1tjb2xJbmRleF0sIG1hcC5PUFU/LnN0cmluZ1ZhbHVlLCBmaWxlUm93SW5kZXgsIGNvbEluZGV4ICsgY29sT2Zmc2V0LCBsb2dnZXIsIGZhbHNlKQ0KICAgIH0NCg0KICAgIC8vINCz0YDQsNGE0LAgNA0KICAgIGNvbEluZGV4ID0gNA0KICAgIG5ld1Jvdy5zdW0gPSBwYXJzZU51bWJlcih2YWx1ZXNbY29sSW5kZXhdLCBmaWxlUm93SW5kZXgsIGNvbEluZGV4ICsgY29sT2Zmc2V0LCBsb2dnZXIsIHRydWUpDQoNCiAgICAvLyDQs9GA0LDRhNCwIDUNCiAgICBjb2xJbmRleCA9IDkNCiAgICBuZXdSb3cuZXhwbGFuYXRpb24gPSB2YWx1ZXNbY29sSW5kZXhdDQoNCiAgICByZXR1cm4gbmV3Um93DQp9'
+
+        addLongText(form_template_id, longString, 'SCRIPT')
+        logger.info("К версии макета добавлен скрипт")
+    }
+
+} catch (Exception ex) {
+    logger.error("Error: ${ex.getLocalizedMessage()}. Все изменения откатаны")
+}
+
+def void addTypeTemplate(FormType formType, FormTemplate formTemplate, boolean createType, boolean createTemplate) {
+    def form_type_id = formType.id ?: ""
+    def form_type_name = formType.name ?: ""
+    def form_type_tax_type = formType.taxType.code ?: ""
+    def form_type_is_ifrs = formType.isIfrs ? 1 : 0
+    def form_type_ifrs_name = formType.ifrsName ?: ""
+    def form_type_ifrs_code = formType.code ?: ""
+
+    def form_template_id = formTemplate.id ?: ""
+    def form_template_is_fixed_rows = formTemplate.isFixedRows() ? 1 : 0
+    def form_template_name = formTemplate.name ?: ""
+    def form_template_fullname = formTemplate.fullName ?: ""
+    def form_template_version = formTemplate.version.format("dd.MM.yy")
+    def form_template_monthly = formTemplate.isMonthly() ? 1 : 0
+    def form_template_comparative = formTemplate.isComparative() ? 1 : 0
+    def form_template_header = formTemplate.header ?: ""
+    def form_template_accruing = formTemplate.isAccruing() ? 1 : 0
+    def form_template_updating = formTemplate.isUpdating() ? 1 : 0
+
+    String formTypeSql = "INSERT INTO FORM_TYPE (ID, NAME, TAX_TYPE, STATUS, IS_IFRS, IFRS_NAME, CODE) VALUES " +
+            "('$form_type_id', '$form_type_name', '$form_type_tax_type', '0', '$form_type_is_ifrs', '$form_type_ifrs_name', '$form_type_ifrs_code')"
+    if (createType) {
+        namedParameterJdbcTemplate.update(formTypeSql, [:])
+        logger.info("Создан тип НФ с id = $form_type_id без версии макета, колонок, стилей, заголовка, фиксированных строк и скрипта")
+    }
+
+    String formTemplateSql = "INSERT INTO FORM_TEMPLATE (ID, TYPE_ID, FIXED_ROWS, NAME, FULLNAME, VERSION, STATUS, MONTHLY, HEADER, COMPARATIVE, ACCRUING, UPDATING) VALUES " +
+            "($form_template_id, '$form_type_id', '$form_template_is_fixed_rows', '$form_template_name', '$form_template_fullname', TO_DATE('$form_template_version', 'DD.MM.RR'), '1', '$form_template_monthly', '$form_template_header', '$form_template_comparative', '$form_template_accruing', '$form_template_updating')"
+    if (createTemplate) {
+        namedParameterJdbcTemplate.update(formTemplateSql, [:])
+        logger.info("Создан тип НФ с id = $form_template_id для версии макета с id = $form_type_id, но без колонок, стилей, заголовка, фиксированных строк и скрипта")
+    }
+}
+
+def void addLongText (def form_template_id, String longString, String alias) {
+    final int MAX_LENGTH = 2000
+    namedParameterJdbcTemplate.update("UPDATE FORM_TEMPLATE SET $alias = null where id = $form_template_id", [:])
+    int start = 0
+    longString = new String(longString.decodeBase64(), "UTF-8")
+    while (start < longString.length()) {
+        int end = (start + MAX_LENGTH) < longString.length() ? (start + MAX_LENGTH) : longString.length()
+        String text = longString.substring(start, end)
+       namedParameterJdbcTemplate.update('UPDATE FORM_TEMPLATE SET ' + alias + ' = ' + alias + ' || :text where id = ' +form_template_id, ['text' : text])
+        start += MAX_LENGTH
+    }
+}
