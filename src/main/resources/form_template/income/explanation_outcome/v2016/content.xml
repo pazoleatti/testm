@@ -45,8 +45,8 @@
         <name>Сумма отклонения данных в РНУ-5 с данными бухгалтерского учёта</name>
         <order>4</order>
         <width>10</width>
-        <maxLength>14</maxLength>
-        <precision>0</precision>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>explanation</alias>
