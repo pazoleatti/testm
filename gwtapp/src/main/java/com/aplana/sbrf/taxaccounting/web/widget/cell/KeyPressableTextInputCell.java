@@ -15,6 +15,7 @@
  */
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -364,12 +365,27 @@ public class KeyPressableTextInputCell extends
 	 */
 	private void commit(Context context, Element parent, ViewData viewData,
 	                    ValueUpdater<String> valueUpdater) {
-		String value = updateViewData(parent, viewData, false);
-		clearInput(getInputElement(parent));
-		setValue(context, parent, viewData.getOriginal());
-		if (valueUpdater != null) {
-			valueUpdater.update(value);
-		}
+        String value = updateViewData(parent, viewData, false);
+        try {
+            clearInput(getInputElement(parent));
+            setValue(context, parent, viewData.getOriginal());
+            if (valueUpdater != null) {
+                valueUpdater.update(value);
+            }
+        } catch(IllegalArgumentException e) {
+            Dialog.errorMessage(e.getMessage());
+            String originalText = viewData.getOriginal();
+            if (viewData.isEditingAgain()) {
+                viewData.setText(originalText);
+                viewData.setEditing(false);
+            } else {
+                setViewData(context.getKey(), null);
+            }
+            cancel(context, parent, originalText);
+            if (valueUpdater != null) {
+                valueUpdater.update(originalText);
+            }
+        }
 	}
 
 	private void editEvent(Context context, Element parent, String value,

@@ -18,7 +18,7 @@ public class NumericColumnFormatter extends ColumnFormatter implements Serializa
 
     public NumericColumnFormatter(int precision, int maxLength) {
         this.precision = precision;
-        this.maxLength = maxLength;
+        //this.maxLength = maxLength;
     }
 
     @Override

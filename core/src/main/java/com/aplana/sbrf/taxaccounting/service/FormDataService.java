@@ -321,10 +321,11 @@ public interface FormDataService {
 
     /**
      * Проверяет ссылки на справочники в нф, действуют ли они в периоде формы
+     * для строковых и числовых проверяем соответсвие фильтру и формату
      * @param formData нф
      * @param needCheckTemp нужно проверить также временный срез
      */
-    void checkReferenceValues(Logger logger, FormData formData, boolean needCheckTemp);
+    void checkValues(Logger logger, FormData formData, boolean needCheckTemp);
 
     /**
      * Обновление "Номер последней строки предыдущей НФ" всех существующих экземпляров НФ для указанного шаблона

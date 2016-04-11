@@ -249,5 +249,5 @@ public interface FormTemplateService {
      * @param formTemplateId идентификатор макета
      * @param script скрипт
      */
-    void updateScript(FormTemplate formTemplate, Logger log);
+    void updateScript(FormTemplate formTemplate, Logger log, TAUserInfo userInfo);
 }

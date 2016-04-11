@@ -7,7 +7,7 @@ where attribute_id = 5102 and record_id in (
 	where rbr.ref_book_id = 510);		
 	
 --https://jira.aplana.com/browse/SBRFACCTAX-14735: Формирование специфического отчета декларации
-INSERT INTO async_task_type (id, name, handler_jndi, limit_kind, dev_mode) values (26, 'Формирование специфического отчета декларации', 'ejb/taxaccounting/async-task.jar/SpecificReportDeclarationDataAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote', '', 0);
+INSERT INTO async_task_type (id, name, handler_jndi, limit_kind, dev_mode) values (26, 'Формирование специфического отчета декларации', 'ejb/taxaccounting/async-task.jar/SpecificReportDeclarationDataAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote', 'Сумма по всем формам-источникам. Ячейки = строки * графы', 0);
 
 --https://jira.aplana.com/browse/SBRFACCTAX-15059: Обновить справочник цветов в БД в соответствии с ENUM
 merge into color color_tbl

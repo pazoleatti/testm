@@ -10,6 +10,9 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
@@ -130,12 +133,12 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
     @Override
     public void importScripts(Logger logger, InputStream zipFile, String fileName, TAUserInfo userInfo) {
         Map<String, List<String>> files = new HashMap<String, List<String>>();
-        ZipInputStream zis = null;
+        ZipArchiveInputStream zis = null;
         boolean hasFatalError = false;
         Set<String> errorFolders = new HashSet<String>();
         try {
-            zis = new ZipInputStream(new BufferedInputStream(zipFile));
-            ZipEntry entry;
+            zis = new ZipArchiveInputStream(new BufferedInputStream(zipFile));
+            ArchiveEntry entry;
             while((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
                     if (!entry.getName().contains("/")) {
@@ -181,7 +184,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         if (lockUser == null){
                             formTemplate.setScript(script);
                             try {
-                                formTemplateService.updateScript(formTemplate, logger);
+                                formTemplateService.updateScript(formTemplate, logger, userInfo);
                             } catch (ServiceLoggerException e) {
                                 logger.error("Макет налоговой формы \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен ", formTemplate.getName(), scriptFileName);
                                 continue;
@@ -214,7 +217,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         if (lockUser == null) {
                             declarationTemplate.setCreateScript(script);
                             try {
-                                declarationTemplateService.updateScript(declarationTemplate, logger);
+                                declarationTemplateService.updateScript(declarationTemplate, logger, userInfo);
                             } catch (ServiceLoggerException e) {
                                 logger.error("%s \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен.",
                                         declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "Макет декларации" : "Макет уведомления",

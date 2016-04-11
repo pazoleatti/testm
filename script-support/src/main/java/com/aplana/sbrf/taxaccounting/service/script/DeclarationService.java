@@ -132,4 +132,8 @@ public interface DeclarationService {
      * @param data
      */
     void exportXLSX(JasperPrint jasperPrint, OutputStream data);
+
+    DeclarationType getType(int declarationTypeId);
+
+    DeclarationTemplate getTemplate(int declarationTemplateId);
 }

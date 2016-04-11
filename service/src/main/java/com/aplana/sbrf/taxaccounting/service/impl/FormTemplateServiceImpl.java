@@ -16,6 +16,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Реализация сервиса для работы с шаблонами налоговых форм
@@ -62,6 +65,9 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     private LogEntryService logEntryService;
 	@Autowired
 	private TAUserService userService;
+    @Autowired
+    @Qualifier("formTemplateMainOperatingService")
+    MainOperatingService mainOperatingService;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -299,6 +305,15 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                         + ", максимальное: " + FORM_COLUMN_ALIAS_MAX_VALUE + ")");
             }
 
+            if (ColumnType.STRING.equals(column.getColumnType())) {
+                String filter = ((StringColumn)column).getFilter();
+                try {
+                    Pattern.compile(filter);
+                } catch (PatternSyntaxException e) {
+                    logger.error("Значение фильтра столбца \"" + column.getAlias() +
+                            "\" имеет некорректный формат!");
+                }
+            }
             /*if (ColumnType.STRING.equals(column.getColumnType()) && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
 				if (formTemplateDao.checkExistLargeString(formTemplate.getId(), column)) {
 					logger.error("Длина одного из существующих значений графы '" + column.getName() + "' больше указанной длины " + ((StringColumn) column).getPrevLength());
@@ -412,9 +427,10 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public void updateScript(FormTemplate formTemplate, Logger logger) {
+    public void updateScript(FormTemplate formTemplate, Logger logger, TAUserInfo userInfo) {
         checkScript(formTemplate, logger);
         formTemplateDao.updateScript(formTemplate.getId(), formTemplate.getScript());
+        mainOperatingService.logging(formTemplate.getId(), FormDataEvent.SCRIPTS_IMPORT, userInfo.getUser());
     }
 
     @Override

@@ -259,7 +259,7 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
      */
 	public Object putForce(String key, Object value) {
 		C cellValue = getCell(key);
-		return cellValue.setValue(value, getIndex(), true);
+		return cellValue.setForceValue(value, getIndex());
 	}
 
 	@Override

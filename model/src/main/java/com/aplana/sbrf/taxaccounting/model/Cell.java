@@ -90,16 +90,29 @@ public class Cell extends AbstractCell {
     }
 
     @Override
-    public Object setValue(Object value, Integer rowNumber, boolean force) {
-        return doSetValue(value, rowNumber, force);
+    public Object setForceValue(Object value, Integer rowNumber) {
+        return doSetValue(value, rowNumber, true, false);
+    }
+
+    @Override
+    public Object setValue(Object value, Integer rowNumber, boolean skipValidation) {
+        return doSetValue(value, rowNumber, false, skipValidation);
     }
 
     @Override
     public Object setValue(Object value, Integer rowNumber) {
-        return doSetValue(value, rowNumber, false);
+        return doSetValue(value, rowNumber, false, false);
     }
 
-    private Object doSetValue(Object value, Integer rowNumber, boolean force) {
+    /**
+     *
+     * @param value
+     * @param rowNumber
+     * @param force - @true устанавливаем только строковое значение
+     * @param skipValidation - @true перед установкой значения не выполняем проверки
+     * @return
+     */
+    private Object doSetValue(Object value, Integer rowNumber, boolean force, boolean skipValidation) {
 		stringValue = null;
 		dateValue = null;
 		numericValue = null;
@@ -153,7 +166,7 @@ public class Cell extends AbstractCell {
                         int precision = ((NumericColumn) getColumn()).getPrecision();
                         value = ((BigDecimal) value).setScale(precision, RoundingMode.HALF_UP);
                         String str = ((BigDecimal) value).toPlainString();
-                        if (!getColumn().getValidationStrategy().matches(str)) {
+                        if (!skipValidation && !getColumn().getValidationStrategy().matches(str)) {
                             NumericColumn numericColumn = (NumericColumn) getColumn();
                             return showError(msgValue + "превышает допустимую разрядность. Должно быть не более " +
                                     (numericColumn.getMaxLength() - numericColumn.getPrecision()) + " знакомест и не более " + numericColumn.getPrecision() +
@@ -171,12 +184,12 @@ public class Cell extends AbstractCell {
                 case STRING: {
                     if (value instanceof String) {
                         String temp = (String) value;
-                        if (!getColumn().getValidationStrategy().matches(temp)) {
+                        if (!skipValidation && !getColumn().getValidationStrategy().matches(temp)) {
                             return showError(msgValue + "превышает допустимую разрядность (" +
                                     ((StringColumn) getColumn()).getMaxLength() + ")!");
                         }
                         // Проверка на соответствие паттерну
-                        if (!temp.isEmpty() && !((StringColumn) getColumn()).matches(temp)) {
+                        if (!skipValidation && !temp.isEmpty() && !((StringColumn) getColumn()).matches(temp)) {
                             return showError(msgValue + "не соответствует паттерну \'" +
                                     ((StringColumn) getColumn()).getFilter() + "\'!");
                         }

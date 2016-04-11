@@ -149,11 +149,19 @@ abstract public class AbstractCell implements Serializable {
 	abstract public Object setValue(Object object, Integer rowNumber);
 
 	/**
-	 * Принудительно устанавливает значение в ячейке
+	 * Принудительно устанавливает строковое значение в ячейку
 	 * @param object новое значение ячейки
 	 * @param rowNumber номер строки на форме (для вывода при возникновении ошибки)
 	 * @return
 	 */
-	abstract public Object setValue(Object object, Integer rowNumber, boolean force);
+	abstract public Object setForceValue(Object object, Integer rowNumber);
 
+    /**
+     * Принудительно устанавливает значение в ячейку, т.е. без валидации данных
+     * @param object новое значение ячейки
+     * @param rowNumber номер строки на форме (для вывода при возникновении ошибки)
+     * @param force true - валидация данных не проводиться
+     * @return
+     */
+    abstract public Object setValue(Object object, Integer rowNumber, boolean force);
 }
