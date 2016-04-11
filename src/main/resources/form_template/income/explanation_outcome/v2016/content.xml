@@ -5,8 +5,8 @@
     <comparative>false</comparative>
     <accruing>false</accruing>
     <updating>false</updating>
-    <name>Таблица 1. Пояснение отклонений от ОФР в простом регистре налогового учёта «Доходы»</name>
-    <fullName>Таблица 1. Пояснение отклонений от ОФР в простом регистре налогового учёта «Доходы»</fullName>
+    <name>Таблица 2. Пояснение отклонений от ОФР в простом регистре налогового учёта «Расходы»</name>
+    <fullName>Таблица 2. Пояснение отклонений от ОФР в простом регистре налогового учёта «Расходы»</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
@@ -24,8 +24,8 @@
         <order>2</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>140</nameAttributeId>
-        <refBookAttributeId>140</refBookAttributeId>
+        <nameAttributeId>130</nameAttributeId>
+        <refBookAttributeId>130</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
@@ -36,13 +36,13 @@
         <order>3</order>
         <width>15</width>
         <parentAlias>code</parentAlias>
-        <refBookAttributeId>144</refBookAttributeId>
+        <refBookAttributeId>134</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Сумма отклонения данных в РНУ-4 с данными бухгалтерского учёта</name>
+        <name>Сумма отклонения данных в РНУ-5 с данными бухгалтерского учёта</name>
         <order>4</order>
         <width>10</width>
         <maxLength>14</maxLength>

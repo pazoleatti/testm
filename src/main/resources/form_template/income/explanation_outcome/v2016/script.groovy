@@ -1,4 +1,4 @@
-package form_template.income.explanation_income.v2016
+package form_template.income.explanation_outcome.v2016
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -8,8 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
- * Таблица 1. Пояснение отклонений от ОФР в простом регистре налогового учёта «Доходы»
- * formTemplateId=851
+ * Таблица 2. Пояснение отклонений от ОФР в простом регистре налогового учёта «Расходы»
+ * formTemplateId=852
  */
 
 // графа 1 - rowNum
@@ -142,7 +142,7 @@ void logicCheck() {
 
         // 2. Проверка уникальности значения поля 2
         if (row.code) {
-            def code = getRefBookValue(28, row.code)?.CODE.value
+            def code = getRefBookValue(27, row.code)?.CODE.value
             if (codeMap[code] == null) {
                 codeMap[code] = []
             }
@@ -268,18 +268,18 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.setImportIndex(fileRowIndex)
     def colIndex
 
-    // графа 2 - code       - атрибут 140 - CODE, справочник 28
-    // графа 3 - symbol       - зависит от графы 2 - атрибут 144 - OPU, справочник 28
+    // графа 2 - code       - атрибут 130 - CODE, справочник 27
+    // графа 3 - symbol       - зависит от графы 2 - атрибут 134 - OPU, справочник 27
 
     // графа 2
     colIndex = 2
-    def map = getRecordImport(28L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    def map = getRecordImport(27L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     newRow.code = map?.record_id?.value
 
     // графа 3
     colIndex = 3
     if (map != null) {
-        formDataService.checkReferenceValue(28, values[colIndex], map.OPU?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        formDataService.checkReferenceValue(27, values[colIndex], map.OPU?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
     }
 
     // графа 4
