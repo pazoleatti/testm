@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="">
-        <cell alias="rowNum" colSpan="1" rowSpan="2" value="№ пп."/>
-        <cell alias="code" colSpan="1" rowSpan="2" value="КНУ"/>
-        <cell alias="symbol" colSpan="1" rowSpan="2" value="Символ ОФР"/>
-        <cell alias="sum" colSpan="1" rowSpan="2" value="Сумма отклонения данных в РНУ-5 с данными бухгалтерского учёта"/>
-        <cell alias="explanation" colSpan="1" rowSpan="2" value="Пояснение"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ пп."/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="КНУ"/>
+        <cell alias="symbol" colSpan="1" rowSpan="1" value="Символ ОФР"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" value="Сумма отклонения данных в РНУ-5 с данными бухгалтерского учёта"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" value="Пояснение"/>
     </row>
     <row alias="">
         <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
