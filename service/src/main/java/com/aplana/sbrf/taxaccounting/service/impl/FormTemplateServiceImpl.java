@@ -307,11 +307,13 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
             if (ColumnType.STRING.equals(column.getColumnType())) {
                 String filter = ((StringColumn)column).getFilter();
-                try {
-                    Pattern.compile(filter);
-                } catch (PatternSyntaxException e) {
-                    logger.error("Значение фильтра столбца \"" + column.getAlias() +
-                            "\" имеет некорректный формат!");
+                if (filter != null && !filter.isEmpty()) {
+                    try {
+                        Pattern.compile(filter);
+                    } catch (PatternSyntaxException e) {
+                        logger.error("Значение фильтра столбца \"" + column.getName() +
+                                "\" имеет некорректный формат!");
+                    }
                 }
             }
             /*if (ColumnType.STRING.equals(column.getColumnType()) && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
