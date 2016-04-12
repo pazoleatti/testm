@@ -9,7 +9,7 @@
         <name>КНУ</name>
         <order>1</order>
         <width>3</width>
-        <maxLength>5</maxLength>
+        <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -18,7 +18,7 @@
         <name>Группа дохода</name>
         <order>2</order>
         <width>15</width>
-        <maxLength>500</maxLength>
+        <maxLength>2000</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -27,7 +27,7 @@
         <name>Вид дохода по операциям</name>
         <order>3</order>
         <width>28</width>
-        <maxLength>500</maxLength>
+        <maxLength>2000</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -36,7 +36,7 @@
         <name>Доход по данным бухгалтерского учёта. Балансовый счёт по учёту дохода</name>
         <order>4</order>
         <width>7</width>
-        <maxLength>15</maxLength>
+        <maxLength>20</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
