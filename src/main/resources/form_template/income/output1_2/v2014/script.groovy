@@ -231,6 +231,14 @@ void logicCheck() {
         if ((row.dividendD1D2 ?: 0) != ((row.totalDividend ?: 0) + (row.dividendAgentWithStavka0 ?: 0)) && (row.dividendD1D2 ?: 0) != ((row.dividendSumRaspredPeriod ?: 0) + (row.dividendNonIncome ?: 0) - (row.dividendAgentWithStavka0 ?: 0))) {
             warnMessageCondition(row, 'dividendD1D2', "«Графа 26» = («Графа 8» + «Графа 25») ИЛИ («Графа 9» + «Графа 23» - «Графа 25»)")
         }
+
+        // 13. Проверка правильности заполнения «Графы 29»
+        // 14. Проверка возможности заполнения «Графы 24»
+        // 15. Проверка возможности заполнения «Графы 25»
+        // 16. Проверка возможности заполнения «Графы 26»
+        // 17. Проверка возможности заполнения «Графы 27», «Графы 28»
+        // 18. Проверка возможности заполнения «Графы 29», «Графы 31»
+        // выполняются при консолидации
     }
 }
 
@@ -283,9 +291,17 @@ void consolidation() {
     def lastPeriodStartDate = reportPeriodService.getCalendarStartDate(lastPeriod.id).time
     def lastPeriodEndDate = reportPeriodService.getEndDate(lastPeriod.id).time
 
-    def departmentParams = refBookFactory.getDataProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = 1", null)
+    def filter = "DEPARTMENT_ID = " + userDepartment.id
+    def departmentParams = refBookFactory.getDataProvider(33).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
     if (departmentParams?.size() > 0) {
         graph3String = departmentParams?.get(0)?.INN?.stringValue
+    }
+    if (graph3String == null || graph3String == '') {
+        def period = reportPeriodService.get(formData.reportPeriodId)
+        def periodName = period?.taxPeriod?.year + ' ' + period?.name
+        def msg = 'В настройках подразделения «%s» за период «%s» не заполнен атрибут «ИНН»!'
+        logger.error(msg, userDepartment.name, periodName)
+        return
     }
 
     // получить формы-источники в текущем налоговом периоде
@@ -332,14 +348,16 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     // беру первую строку
     def row = rowList[0]
 
+    def isInnEquals = row.emitentInn == graph3String
+
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 1» = «1», иначе «Графа 1» = «2»
-    newRow.taCategory = (row.emitentInn == graph3String) ? 1 : 2
+    newRow.taCategory = (isInnEquals ? 1 : 2)
 
     // «Графа 2» = «Графа 2» первичной формы
     newRow.emitent = row.emitentName
 
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 3»  не заполняется, иначе «Графа 3» = «Графа 3» первичной формы
-    newRow.inn = (row.emitentInn == graph3String) ? null : row.emitentInn
+    newRow.inn = (isInnEquals ? null : row.emitentInn)
 
     // «Графа 4» = «Графа 7» первичной формы
     newRow.decreeNumber = row.decisionNumber
@@ -369,13 +387,48 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     newRow.dividendTaxUnknown = rowList.sum{ (it.status == 3 && it.dividends != null) ? it.dividends : 0 }
 
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 24» = «Графа 4» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
-    newRow.dividendAgentAll = (row.emitentInn == graph3String && row.all != null) ? row.all : null
+    newRow.dividendAgentAll = (isInnEquals && row.all != null) ? row.all : null
+
+    // Логическая проверка 14. Проверка возможности заполнения «Графы 24»
+    if (isInnEquals && newRow.dividendAgentAll == null) {
+        def columnName = getColumnName(newRow, 'dividendAgentAll')
+        def sourceColumnName4 = getColumnName(row, 'all')
+        def msg = "Строка %d: Графа «%s» не заполнена, т.к. графа «%s» формы-источника не заполнена!"
+        logger.warn(msg, rowIndex, columnName, sourceColumnName4)
+    }
 
     // «Графа 25» = Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 25» =(«Графа 4» первичной формы - «Графа 5» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
-    newRow.dividendAgentWithStavka0 = (row.emitentInn == graph3String && row.all != null && row.rateZero != null) ? (row.all - row.rateZero) : null
+    newRow.dividendAgentWithStavka0 = (isInnEquals && row.all != null && row.rateZero != null) ? (row.all - row.rateZero) : null
+
+    // Логическая проверка 15. Проверка возможности заполнения «Графы 25»
+    if (isInnEquals && newRow.dividendAgentWithStavka0 == null) {
+        def columnName = getColumnName(newRow, 'dividendAgentWithStavka0')
+        def sourceColumnName4 = getColumnName(row, 'all')
+        def sourceColumnName5 = getColumnName(row, 'rateZero')
+        def msg = "Строка %d: Графа «%s» не заполнена, т.к. графа «%s», «%s» формы-источника не заполнена!"
+        logger.warn(msg, rowIndex, columnName, sourceColumnName4, sourceColumnName5)
+    }
 
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 26» = («Графа 12» первичной формы – («Графа 4» первичной формы – «Графа 5» первичной формы)) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 26» = «Графа 6» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
-    newRow.dividendD1D2 =  (row.emitentInn == graph3String && row.all != null && row.rateZero != null) ? ((row.allSum ?: 0) - (row.all - row.rateZero)) : row.distributionSum
+    newRow.dividendD1D2 = null
+    if (isInnEquals && row.all != null && row.rateZero != null) {
+        newRow.dividendD1D2 = (row.allSum ?: 0) - (row.all - row.rateZero)
+    } else if (!isInnEquals && row.distributionSum != null) {
+        newRow.dividendD1D2 = row.distributionSum
+    }
+
+    // Логическая проверка 16. Проверка возможности заполнения «Графы 26»
+    if (newRow.dividendD1D2 == null) {
+        def columnName = getColumnName(newRow, 'dividendD1D2')
+        def subMsg
+        if (isInnEquals) {
+            subMsg = String.format("%s», «%s", getColumnName(row, 'all'), getColumnName(row, 'rateZero'))
+        } else {
+            subMsg = getColumnName(row, 'distributionSum')
+        }
+        def msg = "Строка %d: Графа «%s» не заполнена, т.к. графа «%s» формы-источника не заполнена!"
+        logger.warn(msg, rowIndex, columnName, subMsg)
+    }
 
     if (!isNewFormType) { // старый алгоритм
         // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0»
@@ -450,6 +503,9 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
             newRow.taxSumFromPeriod = 0
         }
 
+        // «Графа 31» = Сумма по «Графа 27» по строкам группы строк формы-источника, в которых дата по «Графе 28» принадлежит последнему кварталу отчетного года
+        newRow.taxSumLast = rowList.sum{ (it.withheldSum != null && it.withheldDate != null && lastPeriodStartDate <= it.withheldDate && it.withheldDate <= lastPeriodEndDate) ? it.withheldSum : 0 }
+
     } else { // обновленный алгоритм
         // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «3» и «Графа 22» первичной формы = «0»
         newRow.dividendRussianStavka0 = rowList.sum{ (it.status == 1 && it.type == 3 && it.rate == 0 && it.dividends != null) ? it.dividends : 0 }
@@ -516,33 +572,45 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
             }
         }
 
+        def valueFor29And31 = rowList.sum { (it.type != 2 && it.status == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
+
+        // «Графа 31» - идет перед графой 29, потому что расчет графы 29 мастами совпадает с расчетом графы 21
+        if (isInnEquals) { // Группа относится к сберу
+            boolean found = rowList.find { it.status == 1 && it.type == 5 && it.rate == 13 } != null
+            if (found) { // Есть строки для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
+                if(row.distributionSum != null) {
+                    if (row.allSum) { // Деление не на ноль
+                        def sourseSum = rowList.sum {
+                            (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? it.dividends : 0
+                        }
+                        newRow.taxSumLast = (sourseSum * 0.13 * row.distributionSum) / row.allSum
+                    } else { // при делении на ноль «Графа 29» = 0
+                        newRow.taxSumLast = 0
+                    }
+                } else {
+                    // Логическая проверка 18. Проверка возможности заполнения «Графы 29», «Графы 31»
+                    def columnName29 = getColumnName(newRow, 'taxSum')
+                    def columnName31 = getColumnName(newRow, 'taxSumLast')
+                    def sourceColumnName6 = getColumnName(row, 'distributionSum')
+                    def msg = "Строка %d: Графа «%s», «%s» не заполнена, т.к. графа «%s» формы-источника не заполнена!"
+                    logger.warn(msg, rowIndex, columnName29, columnName31, sourceColumnName6)
+                }
+            } else { // нет строк для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
+                newRow.taxSumLast = 0
+            }
+        } else { // Группа НЕ относится к сберу
+            newRow.taxSumLast = valueFor29And31
+        }
+
         // Если значение «Графы 26» < 0, то «Графа 29» = 0 иначе
         // «Графа 29»
         // Сумма по «Графа 27» по всем строкам группы строк формы-источника, в которых («Графа 16» не равна «2» И «Графа 17» = «1»)
         if (newRow.dividendD1D2 < 0) {
             newRow.taxSum = 0
         } else {
-            def value2 = rowList.sum { (it.type != 2 && it.status == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
-            if (row.emitentInn == graph3String) { // Группа относится к сберу
-                boolean found = rowList.find { it.status == 1 && it.type == 5 && it.rate == 13 } != null
-                if (found) { // Есть строки для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
-                    if(row.distributionSum != null) {
-                        if (row.allSum) { // Деление не на ноль
-                            def sourseSum = rowList.sum {
-                                (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? it.dividends : 0
-                            }
-                            newRow.taxSum = (sourseSum * 0.13 * row.distributionSum) / row.allSum
-                        } else { // при делении на ноль «Графа 29» = 0
-                            newRow.taxSum = 0
-                        }
-                    }
-                } else { // нет строк для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
-                    newRow.taxSum = 0
-                }
-            } else { // Группа НЕ относится к сберу
-                newRow.taxSum = value2
-            }
-            if (newRow.taxSum != value2) { // проверка алгоритма
+            newRow.taxSum = newRow.taxSumLast
+            if (newRow.taxSum != valueFor29And31) {
+                // Логическая проверка 13. Проверка правильности заполнения «Графы 29»
                 logger.warn("Строка ${rowIndex}: Графа «Исчисленная сумма налога, подлежащая уплате в бюджет» заполнена неверно! Не выполняется условие: " +
                         "«Графа 29» = Сумма по «Графа 27» для строк формы-источника «Расчет налога на прибыль организаций " +
                         "с доходов, удерживаемого налоговым агентом (источником выплаты доходов)», " +
@@ -564,8 +632,14 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         }
     }
 
-    // «Графа 31» =  «Графа 29»
-    newRow.taxSumLast = newRow.taxSum
+    // Логическая проверка 17. Проверка возможности заполнения «Графы 27», «Графы 28»
+    if (!isNewFormType && row.distributionSum == null || isNewFormType && newRow.dividendD1D2 >=0 && row.distributionSum == null) {
+        def columnName27 = getColumnName(newRow, 'dividendSumForTaxStavka9')
+        def columnName28 = getColumnName(newRow, 'dividendSumForTaxStavka0')
+        def sourceColumnName6 = getColumnName(row, 'distributionSum')
+        def msg = "Строка %d: Графа «%s», «%s» не заполнена, т.к. графа «%s» формы-источника не заполнена!"
+        logger.warn(msg, rowIndex, columnName27, columnName28, sourceColumnName6)
+    }
 
     return newRow
 }
