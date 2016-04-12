@@ -321,18 +321,14 @@ void consolidationFromPrimary(def dataRows, def formSources) {
         if (isMonth) {
             for (def periodOrder = 3 * reportPeriod.order - 2; periodOrder < 3 * reportPeriod.order + 1; periodOrder++) {
                 def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, reportPeriod.id, periodOrder, formData.comparativePeriodId, formData.accruing)
-                if (child.state == WorkflowState.ACCEPTED) {
-                    children.add(child)
-                }
+                children.add(child)
             }
         } else {
             def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
-            if (child.state == WorkflowState.ACCEPTED) {
-                children.add(child)
-            }
+            children.add(child)
         }
         for (def child in children) {
-            if (child != null) {
+            if (child != null && child.state == WorkflowState.ACCEPTED) {
                 def dataRowsChild = formDataService.getDataRowHelper(child)?.allSaved
                 switch (child.formType.id) {
                     case formTypeId_RNU8: //(РНУ-8) Простой регистр налогового учёта «Требования»
@@ -361,9 +357,9 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                                 row.incomeTaxSumS = (row.incomeTaxSumS ?: BigDecimal.ZERO) + (rowChild.outcome - rowChild.income)
                             }
                             // удаляем использованные строки источника
-                            ((Map)codeMap.get(knu)).remove(balanceKey)
+                            ((Map)codeMap.get(knu))?.remove(balanceKey)
                             // если остались строки источника с тем же кну, но с другим балансовым счетом, то выводим сообщение
-                            if (!((Map)codeMap.get(knu)).isEmpty()) {
+                            if (!((Map)codeMap.get(knu))?.isEmpty()) {
                                 strangeCodes.add(knu)
                             }
                         }
