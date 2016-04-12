@@ -175,7 +175,7 @@ void sortFormDataRows() {
 void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 5
-    int HEADER_ROW_COUNT = 3
+    int HEADER_ROW_COUNT = 2
     String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
     String TABLE_END_VALUE = null
 
@@ -272,22 +272,22 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // графа 3 - symbol       - зависит от графы 2 - атрибут 134 - OPU, справочник 27
 
     // графа 2
-    colIndex = 2
+    colIndex = 1
     def map = getRecordImport(27L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     newRow.code = map?.record_id?.value
 
     // графа 3
-    colIndex = 3
+    colIndex = 2
     if (map != null) {
         formDataService.checkReferenceValue(27, values[colIndex], map.OPU?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
     }
 
     // графа 4
-    colIndex = 4
+    colIndex = 3
     newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     // графа 5
-    colIndex = 9
+    colIndex = 4
     newRow.explanation = values[colIndex]
 
     return newRow
