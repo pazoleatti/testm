@@ -1083,7 +1083,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R55">
+    <row alias="R58">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16590"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по процентным векселям сторонних эмитентов"/>
@@ -1102,7 +1102,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R56">
+    <row alias="R59">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16600"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по дисконтным векселям сторонних эмитентов"/>
@@ -1121,7 +1121,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R57">
+    <row alias="R60">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16660"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по ГКО (кроме полученного от реализации (выбытия)), по которым открыта короткая позиция."/>
@@ -1140,7 +1140,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R58">
+    <row alias="R61">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16670"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по ОФЗ, по которым открыта короткая позиция"/>
@@ -1159,7 +1159,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R59">
+    <row alias="R62">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16970"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="16" stringValue="Доходы по операциям с финансовыми инструментами срочных сделок"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
@@ -1178,7 +1178,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R60">
+    <row alias="R63">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16980"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям со сделками опцион, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
@@ -1197,7 +1197,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R61">
+    <row alias="R64">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16990"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям со сделками своп, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
@@ -1216,7 +1216,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R62">
+    <row alias="R65">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17000"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям со сделками CDS, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
@@ -1235,7 +1235,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R63">
+    <row alias="R66">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17010"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по сделкам поставочный форвард, предусматривающих покупку-продажу ценных бумаг,квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
@@ -1254,7 +1254,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R64">
+    <row alias="R67">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17020"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по сделкам поставочный опцион, предусматривающих покупку-продажу ценных бумаг в результате возникновения кредитного события и квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
@@ -1273,7 +1273,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R65">
+    <row alias="R68">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17030"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы  по сделкам кредитно-дефолтный своп, предусматривающих покупку-продажу ценных бумаг, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
@@ -1292,7 +1292,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R66">
+    <row alias="R69">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17040"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям уступки (новации) сделок с ФИСС и досрочного прекращения (терминации) сделок с ФИСС"/>
@@ -1311,7 +1311,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R67">
+    <row alias="R70">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17050"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходыпо срочным сделкам, квалифицированным в качестве сделок с ФИСС и признаваемым обращающимися на организованном рынке"/>
@@ -1330,7 +1330,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R68">
+    <row alias="R71">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17060"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: форвард."/>
@@ -1349,7 +1349,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R69">
+    <row alias="R72">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17070"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: опцион."/>
@@ -1368,7 +1368,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R70">
+    <row alias="R73">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17080"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: своп."/>
@@ -1387,7 +1387,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R71">
+    <row alias="R74">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17090"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ &quot;CDS&quot;"/>
@@ -1406,7 +1406,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R72">
+    <row alias="R75">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17100"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: форвард на поставку ценных бумаг."/>
@@ -1425,7 +1425,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R73">
+    <row alias="R76">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17110"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: опцион на поставку ценных бумаг."/>
@@ -1444,7 +1444,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R74">
+    <row alias="R77">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17120"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от минимальной расчетной цены по операциям сс ФИСС, необращающимся на ОРЦБ: уступка, новация, терминация по ФИСС."/>
@@ -1463,7 +1463,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R75">
+    <row alias="R78">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19000"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="12" stringValue="Сумма доначисления доходов от операций с Взаимозависимыми лицами и резидентами офшорных зон"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов от реализации вследствие оказания услуг по прочим операциям в связи с применением цен не соответствующим рыночному уровню"/>
@@ -1482,7 +1482,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R76">
+    <row alias="R79">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19030"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления внереализационных доходов вследствие оказания услуг по прочим операциям в связи с применением цен не соответствующим рыночному уровню"/>
@@ -1501,7 +1501,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R77">
+    <row alias="R80">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19060"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов от реализации вследствие оказания услуг по тарифам, не соответствующим рыночному уровню"/>
@@ -1520,7 +1520,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R78">
+    <row alias="R81">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19090"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления внереализационных доходов вследствие оказания услуг по тарифам, не соответствующим рыночному уровню"/>
@@ -1539,7 +1539,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R79">
+    <row alias="R82">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19120"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов при применении в сделках по предоставлению имущества в аренду цен, не соответствующих рыночному уровню"/>
@@ -1558,7 +1558,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R80">
+    <row alias="R83">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19150"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов при применении в сделках по предоставлению Межбанковских кредитов процентных ставок, не соответствующих рыночному уровню"/>
@@ -1577,7 +1577,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R81">
+    <row alias="R84">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19180"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма корректировки доходов по сделкам РЕПО при несоответствии процентных ставок рыночным"/>
@@ -1596,7 +1596,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R82">
+    <row alias="R85">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19210"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов при применении в сделках по предоставлению кредитных продуктов процентных ставок, не соответствующих рыночному уровню"/>
@@ -1615,7 +1615,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R83">
+    <row alias="R86">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19240"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов при применении в сделках с драгоценными металлами курса, не соответствующего рыночному уровню."/>
@@ -1634,7 +1634,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R84">
+    <row alias="R87">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19270"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов при применении в конверсионных сделках курса, не соответствующего рыночному уровню"/>
@@ -1653,7 +1653,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R85">
+    <row alias="R88">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19300"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов по синдицированным кредитам в виде плат и комиссий, не соответствующих рыночному уровню"/>
@@ -1672,7 +1672,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R86">
+    <row alias="R89">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19330"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления доходов по гарантиям и аккредитивам предоставляемых по ценам, не соответствующим рыночному уровню"/>
@@ -1684,7 +1684,7 @@
         <cell alias="incomeTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Числовое значение"/>
         <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-123"/>
     </row>	
-    <row alias="R87">
+    <row alias="R90">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19360"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="6" stringValue="Сумма уменьшения расходов, относимая на доходы от операций с Взаимозависимыми лицами и резидентами офшорных зон"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов от реализации вследствие оказания услуг по прочим операциям  в связи с применением цен не соответствующим рыночному уровню"/>
@@ -1703,7 +1703,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R88">
+    <row alias="R91">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19390"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения внереализационных расходов  вследствие оказания услуг по прочим операциям в связи с применением цен не соответствующим рыночному уровню"/>
@@ -1722,7 +1722,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R89">
+    <row alias="R92">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19420"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов по сделкам с драгоценными металлами в связи с применением курсов, не соответствующих рыночному уровню"/>
@@ -1741,7 +1741,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R90">
+    <row alias="R93">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19450"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов по конверсионным сделкам в связи с применением курсов, не соответствующих рыночному уровню"/>
@@ -1760,7 +1760,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R91">
+    <row alias="R94">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19480"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов по сделкам привлечения средств в связи с применением процентной ставки, не соответствующей рыночному уровню"/>
@@ -1779,7 +1779,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R92">
+    <row alias="R95">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19510"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов по синдицированным кредитам в виде плат и комиссий, не соответствующих рыночному уровню"/>
@@ -1798,7 +1798,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R93">
+    <row alias="R96">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19540"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="2" stringValue="Сумма корректировки финансового результата от уступки прав требования по сделкам со Взаимозависимыми лицами и резидентами оффшорных зон"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма корректировки финансового результата (прибыли) от уступки прав требования после предусмотренного кредитным договором срока погашения основного долга"/>
@@ -1817,7 +1817,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R94">
+    <row alias="R97">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19570"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма корректировки финансового результата(убытка) от уступки прав требования после предусмотренного кредитным договором срока погашения основного долга"/>
@@ -1836,7 +1836,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R95">
+    <row alias="R98">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Контрольная сумма" styleAlias="10 Контрольные суммы"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
@@ -1855,7 +1855,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
         <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="10 Контрольные суммы"/>
     </row>
-    <row alias="R96">
+    <row alias="R99">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Специальная информация" styleAlias="2 Раздел 1 уровня"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
@@ -1874,7 +1874,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
         <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="2 Раздел 1 уровня"/>
     </row>
-    <row alias="R97">
+    <row alias="R100">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="2" stringValue="Количество объектов реализации амортизируемого имущества"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="всего"/>
@@ -1893,7 +1893,7 @@
         <cell alias="explanation" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R98">
+    <row alias="R101">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="20"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="в т.ч. объектов, реализованных с убытком"/>
