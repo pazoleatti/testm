@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>Таблица 2. Пояснение отклонений от ОФР в простом регистре налогового учёта «Расходы»</name>
+    <fullName>Таблица 2. Пояснение отклонений от ОФР в простом регистре налогового учёта «Расходы»</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ пп.</name>
+        <order>1</order>
+        <width>5</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>code</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>КНУ</name>
+        <order>2</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>130</nameAttributeId>
+        <refBookAttributeId>130</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>symbol</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>Символ ОФР</name>
+        <order>3</order>
+        <width>15</width>
+        <parentAlias>code</parentAlias>
+        <refBookAttributeId>134</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма отклонения данных в РНУ-5 с данными бухгалтерского учёта</name>
+        <order>4</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>explanation</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Пояснение</name>
+        <order>5</order>
+        <width>10</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>
