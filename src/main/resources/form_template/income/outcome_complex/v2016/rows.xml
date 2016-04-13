@@ -98,7 +98,7 @@
     <row alias="R6">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20200"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="2" stringValue="Расходы, связанные с изготовлением и внедрением платёжно-расчётных средств (пластиковые карточки, дорожные чеки и др.)"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы, связанные с изготовлением и внедрением платёжно-расчётных средств (пластиковые карточки, дорожные чеки и др.)"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -117,7 +117,7 @@
     <row alias="R7">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20210"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Затраты на капитальный ремонт и проведение технических осмотров, учитываемых в бухгалтерском учете в составе основных средств, либо в качестве отдельного инвентарного объекта"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1597,7 +1597,7 @@
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R85">
-        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="2700"/>
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="27000"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения стоимости приобретения ценных бумаг от максимальной (расчетной) цены: поставочный форвард, предусматривающий покупку-продажу ценных бумаг"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>

@@ -330,10 +330,10 @@ void consolidationFromTable2(def dataRows, def formSources) {
         def indexes = dataRows.findAll { !(it.getAlias() in skipAliases) }
         for (def sourceRow : formDataService.getDataRowHelper(source).allSaved) {
             def code = getRefBookValue(27, sourceRow.code)?.CODE?.value
-            if (!sourceRow.code && !code) {
+            def row = (code ? dataRows.find { it.consumptionTypeId == code } : null)
+            if (!code || !row) {
                 continue
             }
-            def row = dataRows.find { it.consumptionTypeId == code }
             indexes.remove(row)
 
             // графа 16
