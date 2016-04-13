@@ -421,7 +421,7 @@ void calcExplanation(def dataRows, def formSources, def isFromSummary) {
         }
     }
     for (row in dataRows) {
-        if (row.incomeTypeId != null) {
+        if ((rowsAliasesForFirstControlSum + rowsAliasesForSecondControlSum).contains(row.getAlias())) {
             def sourceRow = codeMap[row.incomeTypeId]
             if (sourceRow != null) {
                 row.explanation = sourceRow.sum
