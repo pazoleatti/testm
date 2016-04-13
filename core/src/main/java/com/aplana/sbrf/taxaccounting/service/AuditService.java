@@ -34,7 +34,7 @@ public interface AuditService {
      * @param formTypeName наименование типа НФ (необязательное) Хранится для информации о виде НФ, даже если она будет изменена
      * @param formKindId вид НФ (необязательное)
      * @param note пояснение (необязательное)
-     * @param blobDataId сыылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
+     * @param blobDataId ссылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
      * @param formTypeId идентификатор вид налоговой формы (в бд протсо как число, не ссылка на FORM_TYPE, заполнение согласно http://conf.aplana.com/pages/viewpage.action?pageId=9580637)
 	 */
     @Deprecated
@@ -51,7 +51,7 @@ public interface AuditService {
      * @param formTypeName наименование типа НФ (необязательное) Хранится для информации о виде НФ, даже если она будет изменена
      * @param formKindId вид НФ (необязательное)
      * @param note пояснение (необязательное)
-     * @param blobDataId сыылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
+     * @param blobDataId ссылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
      */
     void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
              String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId);
@@ -66,7 +66,7 @@ public interface AuditService {
      * @param formTypeName наименование типа НФ (необязательное) Хранится для информации о виде НФ, даже если она будет изменена
      * @param formKindId вид НФ (необязательное)
      * @param note пояснение (необязательное)
-     * @param blobDataId сыылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
+     * @param blobDataId ссылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
      */
     void add(FormDataEvent event, TAUserInfo userInfo,  String reportPeriodName, Integer departmentId,
              String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId);
@@ -80,7 +80,7 @@ public interface AuditService {
      * @param declarationTemplateName наименование типа декларации (необязательное)
      * @param formTemplateName наименование типа НФ (необязательное) Хранится для информации о виде НФ, даже если она будет изменена
      * @param note пояснение (необязательное)
-     * @param blobDataId сыылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
+     * @param blobDataId ссылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
      */
     void add(FormDataEvent event, TAUserInfo userInfo, Date startDate, Date endDate,
              String declarationTemplateName, String formTemplateName, String note, String blobDataId);
