@@ -1133,7 +1133,7 @@ CREATE SEQUENCE seq_form_data_row START WITH 10000;
 --------------------------------------------------------------------------------------------------------
 create table form_data_row_span
 (
-  id           number(9) not null,
+  id           number(18) not null,
   form_data_id number(9) not null,
   temporary    number(1) not null,
   manual       number(1) not null,

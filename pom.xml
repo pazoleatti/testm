@@ -251,12 +251,11 @@
 				<version>1.0.3</version>
 				<scope>provided</scope>
 			</dependency>
-			<dependency>
-				<groupId>commons-collections</groupId>
-				<artifactId>commons-collections</artifactId>
-				<version>3.2</version>
-				<scope>provided</scope>
-			</dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>4.1</version>
+            </dependency>
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
@@ -419,10 +418,6 @@
 			<groupId>commons-logging</groupId>
 		</dependency>
 		<dependency>
-			<groupId>commons-collections</groupId>
-			<artifactId>commons-collections</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
@@ -568,18 +563,18 @@
 		</profile>
 	</profiles>
 
-	<repositories>
-		<repository>
-			<id>codehaus.repo</id>
-			<name>Codehaus repository (for latest groovy, jackson, etc.)</name>
-			<url>http://repository.codehaus.org</url>
-		</repository>
-		<repository>
-			<id>taxaccounting-thirdparty</id>
-			<name>Сторонние библиотеки, используемые в проекте</name>
-			<url>http://aplana.datateh.ru:8181/nexus/content/repositories/thirdparty/</url>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository>
+            <id>codehaus.repo</id>
+            <name>Codehaus repository (for latest groovy, jackson, etc.)</name>
+            <url>http://repository.codehaus.org</url>
+        </repository>
+        <!--<repository>
+            <id>taxaccounting-thirdparty</id>
+            <name>Сторонние библиотеки, используемые в проекте</name>
+            <url>http://aplana.datateh.ru:8181/nexus/content/repositories/thirdparty/</url>
+        </repository>-->
+    </repositories>
 
 	<scm>
 		<connection>scm:git:https://scm.aplana.com/git/sbrfacctax</connection>

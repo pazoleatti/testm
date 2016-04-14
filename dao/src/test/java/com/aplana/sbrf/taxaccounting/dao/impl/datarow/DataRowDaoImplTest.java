@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DataRowType;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -12,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,6 +21,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -448,6 +454,105 @@ public class DataRowDaoImplTest extends Assert {
 		assertEquals(3, dataRowDao.getTempRowCount(formData));
 		assertEquals(3, rows.size());
 		assertEquals("total", rows.get(2).getAlias());
+	}
+
+	@Test
+	public void getColumnByDataOrdTest() {
+		FormData formData = formDataDao.get(329, false);
+		List<Column> columns = formData.getFormColumns();
+		Column column = DataRowDaoImpl.getColumnByDataOrd(columns, 0);
+		assertEquals("stringColumn", column.getAlias());
+		column = DataRowDaoImpl.getColumnByDataOrd(columns, 3);
+		assertEquals("autoNumerationColumn", column.getAlias());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void getColumnByDataOrdTest2() {
+		FormData formData = formDataDao.get(329, false);
+		List<Column> columns = formData.getFormColumns();
+		DataRowDaoImpl.getColumnByDataOrd(columns, 99);
+	}
+
+	@Test
+	public void updateChildRowTest() throws SQLException {
+		FormData formData = formDataDao.get(329, false);
+		DataRowMapper dataRowMapper = new DataRowMapper(formData);
+		// имитация первой строки результата пейджинга
+		DataRow<Cell> row = formData.createDataRow();
+		row.setIndex(5);
+
+		Connection conn = ((JdbcTemplate) jdbc.getJdbcOperations()).getDataSource().getConnection();
+		Statement stmt = conn.createStatement();
+		// выполняем основную операцию
+		try {
+			ResultSet rs = stmt.executeQuery(
+				"SELECT 3 AS row_id, 1 AS x, 3 AS y, 2 AS colspan, 5 AS rowspan, '31.49' AS cell_value, 'b5-6' AS cell_style FROM DUAL UNION " +
+				"SELECT 4 AS row_id, 0 AS x, 4 AS y, 1 AS colspan, 2 AS rowspan, 'string_value' AS cell_value, '3-10' AS cell_style FROM DUAL UNION " +
+				"SELECT 4 AS row_id, 3 AS x, 4 AS y, 1 AS colspan, 2 AS rowspan, '52' AS cell_value, 'i0-4' AS cell_style FROM DUAL");
+			while (rs.next()) {
+				DataRowDaoImpl.updateChildRow(dataRowMapper, rs, row);
+			}
+		} finally {
+			stmt.close();
+		}
+		assertEquals(1, row.getCell("stringColumn").getColSpan());
+		assertEquals(1, row.getCell("stringColumn").getRowSpan());
+		assertEquals("string_value", row.get("stringColumn"));
+		assertEquals(2, row.getCell("numericColumn").getColSpan());
+		assertEquals(3, row.getCell("numericColumn").getRowSpan());
+		assertEquals(BigDecimal.valueOf(31.49), row.get("numericColumn"));
+		assertEquals(1, row.getCell("dateColumn").getColSpan());
+		assertEquals(1, row.getCell("dateColumn").getRowSpan());
+		assertNull(row.get("dateColumn"));
+		assertEquals(1, row.getCell("autoNumerationColumn").getColSpan());
+		assertEquals(1, row.getCell("autoNumerationColumn").getRowSpan());
+		assertNull(row.get("autoNumerationColumn"));
+		assertEquals(1, row.getCell("refBookColumn").getColSpan());
+		assertEquals(1, row.getCell("refBookColumn").getRowSpan());
+	}
+
+	@Test
+	public void setSpanInfo() {
+		FormData formData = formDataDao.get(3293, false);
+		List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);
+		assertEquals(8, rows.size());
+		assertEquals(1, rows.get(0).getCell("stringColumn").getColSpan());
+		assertEquals(1, rows.get(0).getCell("stringColumn").getRowSpan());
+		assertEquals(1, rows.get(1).getCell("stringColumn").getColSpan());
+		assertEquals(1, rows.get(1).getCell("stringColumn").getRowSpan());
+		assertEquals(1, rows.get(2).getCell("stringColumn").getColSpan());
+		assertEquals(1, rows.get(2).getCell("stringColumn").getRowSpan());
+		assertEquals(1, rows.get(5).getCell("stringColumn").getColSpan());
+		assertEquals(1, rows.get(5).getCell("stringColumn").getRowSpan());
+		assertEquals(1, rows.get(6).getCell("stringColumn").getColSpan());
+		assertEquals(1, rows.get(6).getCell("stringColumn").getRowSpan());
+		assertEquals(1, rows.get(7).getCell("stringColumn").getColSpan());
+		assertEquals(1, rows.get(7).getCell("stringColumn").getRowSpan());
+
+		assertEquals(1, rows.get(0).getCell("numericColumn").getColSpan());
+		assertEquals(1, rows.get(0).getCell("numericColumn").getRowSpan());
+		assertEquals(1, rows.get(1).getCell("numericColumn").getColSpan());
+		assertEquals(1, rows.get(1).getCell("numericColumn").getRowSpan());
+		assertEquals(1, rows.get(7).getCell("numericColumn").getColSpan());
+		assertEquals(1, rows.get(7).getCell("numericColumn").getRowSpan());
+
+		assertEquals(1, rows.get(0).getCell("dateColumn").getColSpan());
+		assertEquals(1, rows.get(0).getCell("dateColumn").getRowSpan());
+		assertEquals(1, rows.get(1).getCell("dateColumn").getColSpan());
+		assertEquals(1, rows.get(1).getCell("dateColumn").getRowSpan());
+		assertEquals(1, rows.get(7).getCell("dateColumn").getColSpan());
+		assertEquals(1, rows.get(7).getCell("dateColumn").getRowSpan());
+
+		assertEquals(1, rows.get(3).getCell("stringColumn").getColSpan());
+		assertEquals(2, rows.get(3).getCell("stringColumn").getRowSpan());
+		assertEquals(2, rows.get(2).getCell("numericColumn").getColSpan());
+		assertEquals(5, rows.get(2).getCell("numericColumn").getRowSpan());
+		assertEquals(1, rows.get(3).getCell("autoNumerationColumn").getColSpan());
+		assertEquals(2, rows.get(3).getCell("autoNumerationColumn").getRowSpan());
+		assertEquals(1, rows.get(6).getCell("autoNumerationColumn").getColSpan());
+		assertEquals(2, rows.get(6).getCell("autoNumerationColumn").getRowSpan());
+		assertEquals(1, rows.get(6).getCell("refBookColumn").getColSpan());
+		assertEquals(2, rows.get(6).getCell("refBookColumn").getRowSpan());
 	}
 
 }

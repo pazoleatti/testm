@@ -49,10 +49,20 @@ INSERT INTO form_data(id, form_template_id, department_report_period_id, state, 
 INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign, number_current_row) VALUES (3292, 329, 101, 1, 3, 0, 1);
 INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign, number_current_row) VALUES (330, 330, 101, 1, 3, 0, 2);
 INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign, number_current_row) VALUES (331, 331, 101, 1, 3, 0, 2);
+INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (3293, 329, 101, 1, 3, 0);
 
 INSERT INTO form_data_row(id, form_data_id, temporary, manual, ord, alias, c0, c1, c2, c3, c4)
   SELECT 1, 329, 0, 0, 1, trim('row_alias №1'), trim('number'), '636', null, null, null FROM DUAL UNION
   SELECT 2, 329, 0, 0, 2, null, trim('some string'), null, null, null, null FROM DUAL UNION
+
+  SELECT 11, 3293, 0, 0, 1, null, trim('s1'), '1', null, null, null FROM DUAL UNION
+  SELECT 12, 3293, 0, 0, 2, null, trim('s2'), '2', null, null, null FROM DUAL UNION
+  SELECT 13, 3293, 0, 0, 3, null, trim('s3'), '3', null, null, null FROM DUAL UNION
+  SELECT 14, 3293, 0, 0, 4, null, trim('s4'), '4', null, null, null FROM DUAL UNION
+  SELECT 15, 3293, 0, 0, 5, null, trim('s5'), '5', null, null, null FROM DUAL UNION
+  SELECT 16, 3293, 0, 0, 6, null, trim('s6'), '6', null, null, null FROM DUAL UNION
+  SELECT 17, 3293, 0, 0, 7, null, trim('s7'), '7', null, null, null FROM DUAL UNION
+  SELECT 18, 3293, 0, 0, 8, null, trim('s8'), '8', null, null, null FROM DUAL UNION
 
   SELECT 3, 329, 1, 0, 1, null, null, '666', null, null, null FROM DUAL UNION
   SELECT 4, 329, 1, 0, 2, null, trim('qwerty'), null, null, null, null FROM DUAL UNION
@@ -65,3 +75,28 @@ INSERT INTO form_data_row(id, form_data_id, temporary, manual, ord, alias, c0, c
   SELECT 8, 3291, 1, 0, 1, null, trim('qwerty'), '666', null, null, null FROM DUAL UNION
   SELECT 9, 3291, 1, 0, 2, trim('some alias{wan}'), null, null, null, null, null FROM DUAL UNION
   SELECT 10, 3291, 1, 0, 3, trim('total'), trim('sum'), '50', null, null, null FROM DUAL;
+
+--     0   1   2   3   4
+--   ---------------------
+-- 1 |   |   |   |   |   |
+--   |---|---|---|---|---|
+-- 2 |   |   |   |   |   |
+--   |---|-------|---|---|
+-- 3 |   |       |   |   |
+--   |---|       |---|---|
+-- 4 |   |       |   |   |
+--   |   |       |   |---|
+-- 5 | o | o   o | o | o |
+--   |---|       |---|---|
+-- 6 | o | o   o | o | o |
+--   |---|       |---|---|
+-- 7 | o | o   o | o | o |
+--   |---|-------|   |   |
+-- 8 |   |   |   |   |   |
+--   ---------------------
+INSERT INTO form_data_row_span (id, form_data_id, temporary, manual, data_ord, ord, colspan, rowspan)
+  SELECT 14, 3293, 0, 0, 0, 4, null, 2 FROM DUAL UNION
+  SELECT 13, 3293, 0, 0, 1, 3, 2, 5 FROM DUAL UNION
+  SELECT 14, 3293, 0, 0, 3, 4, null, 2  FROM DUAL UNION
+  SELECT 17, 3293, 0, 0, 4, 7, null, 2 FROM DUAL UNION
+  SELECT 17, 3293, 0, 0, 3, 7, null, 2 FROM DUAL;

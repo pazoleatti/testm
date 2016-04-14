@@ -359,7 +359,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         if (oldModelFullStringValue != null && newModelFullStringValue != null
                 && !oldModelFullStringValue.equals(newModelFullStringValue)) {
-            return "'" + oldModelFullStringValue + "' -> '" + newModelFullStringValue + "'";
+            return "\"" + oldModelFullStringValue + "\" -> \"" + newModelFullStringValue + "\"";
         }
         return null;
     }

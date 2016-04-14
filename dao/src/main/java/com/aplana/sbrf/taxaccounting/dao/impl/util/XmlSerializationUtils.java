@@ -382,7 +382,7 @@ public final class XmlSerializationUtils {
 			String styleString = valueNode.getNodeValue();
 			if(styleString.length() > 0) {
 				FormStyle style;
-				if (styleString.charAt(0) == FormStyle.STYLE_CODE && styleString.length() > 3) {
+				if (styleString.contains(String.valueOf(FormStyle.COLOR_SEPARATOR))) { // новый способ оформления стилей
 					style = FormStyle.valueOf((valueNode.getNodeValue()));
 				} else {
 					style = formTemplate.getStyle(valueNode.getNodeValue());

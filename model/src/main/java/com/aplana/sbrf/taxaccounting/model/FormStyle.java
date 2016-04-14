@@ -10,10 +10,9 @@ import java.io.Serializable;
 public class FormStyle implements Serializable {
 	private static final long serialVersionUID = 7152539133796468066L;
 
-	public static final char STYLE_CODE = 's';
 	private static final char STYLE_BOLD = 'b';
 	private static final char STYLE_ITALIC = 'i';
-	private static final char COLOR_SEPARATOR = '-';
+	public static final char COLOR_SEPARATOR = '-';
 	private static final String STYLE_PARSING_ERROR_MESSAGE = "Ошибка чтения стилей ячейки ";
 
 	public static final String NO_CHANGE_STYLE_ALIAS = "Корректировка-без изменений";
@@ -175,14 +174,14 @@ public class FormStyle implements Serializable {
 	 * @return
 	 */
 	public static final FormStyle valueOf(String styleString) {
-		if (styleString.length() < 4 || styleString.charAt(0) != STYLE_CODE) { // минимально возможное число символов = 4: "sN-N"
+		if (styleString.length() < 3) { // минимально возможное число символов = 3: "N-N"
 			throw new IllegalArgumentException(STYLE_PARSING_ERROR_MESSAGE + '"' + styleString + '"');
 		}
 		FormStyle formStyle = new FormStyle();
 		StringBuilder fontColor = new StringBuilder();
 		StringBuilder backColor = new StringBuilder();
 		boolean fontScan = true; // флаг. true - поиск цвета шрифта, false - поиск цвета фона
-		for (int i = 1; i < styleString.length(); i++) {
+		for (int i = 0; i < styleString.length(); i++) {
 			char ch = styleString.charAt(i);
 			switch (ch) {
 				case STYLE_BOLD:
@@ -216,16 +215,15 @@ public class FormStyle implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(STYLE_CODE)
-				.append(getFontColor().getId())
-				.append(COLOR_SEPARATOR)
-				.append(getBackColor().getId());
 		if (isItalic()) {
 			sb.append(STYLE_ITALIC);
 		}
 		if (isBold()) {
 			sb.append(STYLE_BOLD);
 		}
+		sb.append(getFontColor().getId())
+			.append(COLOR_SEPARATOR)
+			.append(getBackColor().getId());
 		return sb.toString();
 	}
 }

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
 import java.math.BigDecimal;
@@ -57,13 +56,19 @@ public class Cell extends AbstractCell {
      */
     public Cell() {
         super();
+		init();
     }
 
     public Cell(Column column, List<FormStyle> formStyleList) {
         super(column);
-        this.style = FormStyle.DEFAULT_STYLE;
 		this.formStyleList = formStyleList;
+		init();
     }
+
+	private void init() {
+		this.style = FormStyle.DEFAULT_STYLE;
+		setEditable(false);
+	}
 
     @Override
     public Object getValue() {
