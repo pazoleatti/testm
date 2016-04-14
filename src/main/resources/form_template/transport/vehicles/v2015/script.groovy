@@ -1530,22 +1530,12 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 }
 
 def getOkato(String codeOkato) {
-    if(codeOkato.length() < 3){
+    if(!codeOkato || codeOkato.length() < 3){
         return codeOkato
     }
-    codeOkato = codeOkato.substring(0, 3)
-    switch (codeOkato) {
-        case '719':
-            codeOkato = '89'
-            break
-        case '718':
-            codeOkato = '86'
-            break
-        case '118':
-            codeOkato = '83'
-            break
-        default:
-            codeOkato = codeOkato.substring(0, 2)
+    codeOkato = codeOkato?.substring(0, 3)
+    if(codeOkato && !(codeOkato in ["719", "718", "118"])){
+        codeOkato = codeOkato?.substring(0, 2)
     }
     return codeOkato
 }
@@ -1561,61 +1551,47 @@ def getTaxBenefitCodeImport(def taxBenefit, def rowIndex, def colIndex, def okat
                 logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
                         "На форме невозможно заполнить графу «Код налоговой льготы», так как в файле не заполнена графа «Код ОКТМО»!")
             } else {
-                def taxBenefitId = getRecordIdImport(6L, 'CODE', taxBenefit, rowIndex, colIndex)
-                def ref_id = 7
-                def okato = getOkato(getRefBookValue(96L, okatoId)?.CODE?.value)
-                def region = getRegionByOKTMO(okatoId, rowIndex)
-                def dictRegionId = region?.record_id?.value
-                String filter = "DECLARATION_REGION_ID = $regionId and DICT_REGION_ID = $dictRegionId and TAX_BENEFIT_ID =$taxBenefitId"
-                if (recordCache[ref_id] != null) {
-                    if (recordCache[ref_id][filter] != null) {
-                        return recordCache[ref_id][filter]
-                    }
-                } else {
-                    recordCache[ref_id] = [:]
+                def region = null
+                def okato = getOkato(getRefBookValue(96, okatoId)?.CODE?.stringValue)
+                if (okato) {
+                    def filter = "OKTMO_DEFINITION = '$okato'" // Определяющая часть кода ОКТМО
+                    region = getRecord(4, filter, getReportPeriodEndDate())
                 }
-
-                def provider = refBookFactory.getDataProvider(ref_id)
-                def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
-                if (records.size() > 0) {
-                    recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-                    return recordCache[ref_id][filter]
-                } else {
-                    // наименование субъекта РФ для атрибута «Регион» подразделения формы
-                    def regionName = getRefBookValue(4L, regionId)?.CODE?.value
+                if(!region){
                     logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                            "На форме не заполнена графа «Код налоговой льготы», так как в справочнике " +
-                            "«Параметры налоговых льгот транспортного налога» не найдена запись, " +
-                            "актуальная на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "», " +
-                            "в которой поле «Код субъекта РФ представителя декларации» = «$regionName», " +
-                            "поле «Код субъекта РФ» = «$okato», поле «Код налоговой льготы» = «$taxBenefit»!")
+                            "На форме невозможно заполнить графу «Код налоговой льготы», так как в справочнике " +
+                            "«Коды субъектов Российской Федерации» отсутствует запись, в которой графа " +
+                            "«Определяющая часть кода ОКТМО» равна значению первых символов графы «Код ОКТМО» ($okato) формы!")
+                } else {
+                    def taxBenefitId = getRecordIdImport(6L, 'CODE', taxBenefit, rowIndex, colIndex)
+                    def ref_id = 7
+                    def dictRegionId = region?.record_id?.value
+                    String filter = "DECLARATION_REGION_ID = $regionId and DICT_REGION_ID = $dictRegionId and TAX_BENEFIT_ID =$taxBenefitId"
+                    if (recordCache[ref_id] != null) {
+                        if (recordCache[ref_id][filter] != null) {
+                            return recordCache[ref_id][filter]
+                        }
+                    } else {
+                        recordCache[ref_id] = [:]
+                    }
+
+                    def provider = refBookFactory.getDataProvider(ref_id)
+                    def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+                    if (records.size() > 0) {
+                        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+                        return recordCache[ref_id][filter]
+                    } else {
+                        // наименование субъекта РФ для атрибута «Регион» подразделения формы
+                        def regionName = getRefBookValue(4L, regionId)?.CODE?.value
+                        logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
+                                "На форме не заполнена графа «Код налоговой льготы», так как в справочнике " +
+                                "«Параметры налоговых льгот транспортного налога» не найдена запись, " +
+                                "актуальная на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "», " +
+                                "в которой поле «Код субъекта РФ представителя декларации» = «$regionName», " +
+                                "поле «Код субъекта РФ» = «$okato», поле «Код налоговой льготы» = «$taxBenefit»!")
+                    }
                 }
             }
-        }
-    }
-}
-
-/**
- * Получение региона по коду ОКТМО
- */
-def getRegionByOKTMO(def oktmoCell, def index) {
-    def endDate = getReportPeriodEndDate()
-
-    def oktmo3 = getRefBookValue(96, oktmoCell)?.CODE?.stringValue?.substring(0, 3)
-    if ("719".equals(oktmo3)) {
-        return getRecord(4, 'CODE', '89', index, null, endDate);
-    } else if ("718".equals(oktmo3)) {
-        return getRecord(4, 'CODE', '86', index, null, endDate);
-    } else if ("118".equals(oktmo3)) {
-        return getRecord(4, 'CODE', '83', index, null, endDate);
-    } else {
-        def filter = "CODE like '" + oktmo3?.substring(0, 2) + "%'" // код субъекта РФ
-        def record = getRecord(4, filter, endDate)
-        if (record != null) {
-            return record
-        } else {
-            logger.error("Строка $index: Не удалось определить регион по коду ОКТМО")
-            return null
         }
     }
 }
