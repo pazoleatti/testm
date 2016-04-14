@@ -1,0 +1,101 @@
+﻿import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
+import com.aplana.sbrf.taxaccounting.model.DeclarationType
+import org.apache.commons.io.IOUtils
+
+/**
+ * Создает макет декларации.
+ *
+ * # Инструкция:
+ * Вставить текст данного скрипта на странице, соответствующей ссылке с окончанием:
+ * .../gwtapp/#!scriptExecution
+ * Нажать "Выполнить".
+ */
+
+boolean createType = %createType%
+boolean createTemplate = %createTemplate%
+boolean addScript = %addScript%
+
+try {
+    // тип
+    DeclarationType type = new DeclarationType()
+    type.setId(%typeId%)
+    type.setName('%typeName%')
+    type.setTaxType(%taxType%)
+    type.setIsIfrs(%isIfrs%)
+    type.setIfrsName('%ifrsName%')
+    // макет
+    DeclarationTemplate template = new DeclarationTemplate()
+    template.setId(%templateId%)
+    template.setName('%templateName%')
+    template.setVersion(Date.parse('dd.MM.yyyy', '%version%'))
+
+    def type_id = type.id
+    def template_id = template.id
+
+    def rs = namedParameterJdbcTemplate.queryForObject("SELECT count(id) from DECLARATION_TYPE where id = $type_id", [:], Integer.class)
+    if (rs == 1) {
+        logger.info("Макет декларации с данным id = $type_id уже существует в системе!")
+        if (createType) {
+            return
+        }
+    }
+
+    rs = namedParameterJdbcTemplate.queryForObject("SELECT count(id) from DECLARATION_TEMPLATE where id = $template_id", [:], Integer.class)
+    if (rs == 1) {
+        logger.info("Версия макета декларации с данным id = $template_id уже существует в системе!")
+        if (createTemplate) {
+            return
+        }
+    }
+
+    addTypeTemplate(type, template, createType, createTemplate)
+
+    String longString = ''
+    if (addScript) {
+%script%
+        addLongText(template_id, longString, 'CREATE_SCRIPT')
+        logger.info("К версии макета добавлен скрипт")
+    }
+
+} catch (Exception ex) {
+    logger.error("Error: ${ex.getLocalizedMessage()}. Все изменения откатаны")
+}
+
+def void addTypeTemplate(DeclarationType type, DeclarationTemplate template, boolean createType, boolean createTemplate) {
+    def type_id = type.id ?: ""
+    def type_name = type.name ?: ""
+    def type_tax_type = type.taxType.code ?: ""
+    def type_is_ifrs = type.isIfrs ? 1 : 0
+    def type_ifrs_name = type.ifrsName ?: ""
+
+    def template_id = template.id ?: ""
+    def template_name = template.name ?: ""
+    def template_version = template.version.format("dd.MM.yy")
+
+    String declarationTypeSql = "INSERT INTO DECLARATION_TYPE (ID, NAME, TAX_TYPE, STATUS, IS_IFRS, IFRS_NAME) VALUES " +
+            "('$type_id', '$type_name', '$type_tax_type', '0', '$type_is_ifrs', '$type_ifrs_name')"
+    if (createType) {
+        namedParameterJdbcTemplate.update(declarationTypeSql, [:])
+        logger.info("Создан тип декларации с id = $type_id без версии макета")
+    }
+
+    String templateSql = "INSERT INTO DECLARATION_TEMPLATE (ID, DECLARATION_TYPE_ID, NAME, VERSION, STATUS) VALUES " +
+            "($template_id, '$type_id', '$template_name', TO_DATE('$template_version', 'DD.MM.RR'), '1')"
+    if (createTemplate) {
+        namedParameterJdbcTemplate.update(templateSql, [:])
+        logger.info("Создан макет декларации с id = $template_id для типа декларации с id = $type_id, но без xsd, jrxml и скрипта")
+    }
+}
+
+def void addLongText(def template_id, String longString, String alias) {
+    final int MAX_LENGTH = 2000
+    namedParameterJdbcTemplate.update("UPDATE DECLARATION_TEMPLATE SET $alias = null where id = $template_id", [:])
+    int start = 0
+    longString = new String(longString.decodeBase64(), "UTF-8")
+    while (start < longString.length()) {
+        int end = (start + MAX_LENGTH) < longString.length() ? (start + MAX_LENGTH) : longString.length()
+        String text = longString.substring(start, end)
+        namedParameterJdbcTemplate.update('UPDATE DECLARATION_TEMPLATE SET ' + alias + ' = ' + alias + ' || :text where id = ' +template_id, ['text' : text])
+        start += MAX_LENGTH
+    }
+}
