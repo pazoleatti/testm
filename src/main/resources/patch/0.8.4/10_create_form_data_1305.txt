@@ -4,13 +4,11 @@ import org.springframework.jndi.JndiTemplate
 import javax.sql.DataSource
 
 /**
- Создает таблицу для хранения НФ (выполнять после скрипта создания макета НФ)
+ Создает таблицу для хранения НФ (выполнять после скрипта создания макета НФ) + обновляет имя макета
  # Инструкция:
- 1) В 21-й строке указать id версии макета НФ
- 2) В 24-й строке указать флаг пересоздания (true, false)
- 3) Вставить текст данного скрипта на странице, соответствующей ссылке с окончанием:
+ 1) Вставить текст данного скрипта на странице, соответствующей ссылке с окончанием:
  .../gwtapp/#!scriptExecution
- 4) Нажать "Выполнить".
+ 2) Нажать "Выполнить".
 
  */
 
@@ -21,6 +19,9 @@ def dataSourceName = 'jdbc/TaxAccDS-nonXA'
 def form_template_id = 1305
 
 @Field
+def form_type_id = 305
+
+@Field
 def recreate = false
 
 try {
@@ -29,6 +30,8 @@ try {
     def connection = dataSource.connection
 
     def stmt = connection.createStatement()
+    stmt.executeQuery("UPDATE form_type set name = 'Доходы, учитываемые в простых РНУ (доходы простые) (с полугодия 2015)' where id = ${form_type_id}")
+    logger.info("Макет переименован")
     def result = namedParameterJdbcTemplate.queryForObject("SELECT count(TABLE_NAME) FROM USER_TABLES WHERE TABLE_NAME = 'FORM_DATA_$form_template_id'", [:], Integer.class)
     if (result == 1) {
         logger.info("Таблица FORM_DATA_$form_template_id НФ уже существует в системе!" + (recreate ? " Таблица будет пересоздана": " Для пересоздания таблицы поменяйте флаг recreate на true"))
