@@ -175,9 +175,6 @@ def getReportPeriodEndDate() {
 def getRecordId(String knu, String accountNo, Date date) {
     def ref_id = 28
     String filter = getFilterForRefbook28(knu, accountNo)
-    if (knu == '') {
-        filter = "CODE is null"
-    }
     if (recordCache[ref_id] != null) {
         if (recordCache[ref_id][filter] != null) {
             return recordCache[ref_id][filter]
@@ -217,8 +214,8 @@ void fillRecordsMap(List<String> values, Date date) {
  * @param number балансовый счёт по учёту дохода (графа 4 сводной)
  */
 def getFilterForRefbook28(def knu, def number) {
-    def tmpNumber = number.replace('.', '')
-    return "LOWER(CODE) = LOWER('$knu') and LOWER(NUMBER) = LOWER('$tmpNumber')"
+    def tmpNumber = number?.replace('.', '') ?: ''
+    return (knu ? "LOWER(CODE) = LOWER('$knu')" : "CODE is null") + (tmpNumber ? " and LOWER(NUMBER) = LOWER('$tmpNumber')" : "and NUMBER is null")
 }
 
 void calc() {
@@ -508,24 +505,21 @@ def consolidationFromPrimary(def dataRows, def formSources) {
 void fillFromRnu6(def dataRows, def dataRowsChild, def strangeCodes) {
     def codeBalanceMap = [:]
     def codeMap = [:]
-    dataRowsChild.each { rowRNU6 ->
+    for (rowRNU6 in dataRowsChild) {
         if (rowRNU6.getAlias() == null) {
             // для проверки кодов
             def map = getRefBookValue(28, rowRNU6.code)
             def codeKey = map.CODE.value
-            def balanceKey = map.NUMBER.value?.replace('.', '')
+            def balanceKey = map.NUMBER.value?.replace('.', '') ?: ''
             if (codeMap[codeKey] == null) {
                 codeMap[codeKey] = []
-            }
-            if (codeMap[codeKey][balanceKey] == null) {
-                codeMap[codeKey][balanceKey] = []
             }
             codeMap[codeKey].add(balanceKey)
 
             // ключ состоит из id записи кну и балансового счета
             String key = String.valueOf(rowRNU6.code)
             if (codeBalanceMap[key] == null) {
-                codeBalanceMap[key] = ["sum5" : 0, "sum6" : 0]
+                codeBalanceMap[key] = ["sum5": 0, "sum6": 0]
             }
             //«графа 5» =  сумма значений по «графе 10» (столбец «Сумма дохода в налоговом учёте. Рубли») всех форм источников вида «(РНУ-6)
             codeBalanceMap[key].sum5 += (rowRNU6.taxAccountingRuble ?: 0)
@@ -537,26 +531,24 @@ void fillFromRnu6(def dataRows, def dataRowsChild, def strangeCodes) {
     (rows5 + rows679).each { rowNum ->
         def row = getDataRow(dataRows, "R$rowNum")
         def knu = row.incomeTypeId
-        def balanceKey = row.accountNo.replace('.', "")
+        def balanceKey = row.accountNo?.replace('.', "") ?: ''
         // удаляем использованные коды
         codeMap.get(knu)?.remove(balanceKey)
         // если остались строки источника с тем же кну, но с другим балансовым счетом, то выводим сообщение
         if (codeMap.get(knu) != null && !(codeMap.get(knu).isEmpty())) {
             strangeCodes.add(knu)
         }
-        if (row.incomeTypeId != null && row.accountNo != null) {
-            def recordId = getRecordId(knu, balanceKey, getReportPeriodEndDate())
+        def recordId = getRecordId(knu, balanceKey, getReportPeriodEndDate())
 
-            if (recordId != null) {
-                def sums = codeBalanceMap[String.valueOf(recordId)]
-                if (sums != null) {
-                    if (rows5.contains(rowNum)) {
-                        row.rnu6Field10Sum = (row.rnu6Field10Sum ?: 0) + (sums.sum5 ?: 0)
-                    }
-                    if (rows679.contains(rowNum)) {
-                        row.rnu6Field12Accepted = (row.rnu6Field12Accepted ?: 0) + (sums.sum6 ?: 0)
-                        // графа 7 больше не берется из источников
-                    }
+        if (recordId != null) {
+            def sums = codeBalanceMap[String.valueOf(recordId)]
+            if (sums != null) {
+                if (rows5.contains(rowNum)) {
+                    row.rnu6Field10Sum = (row.rnu6Field10Sum ?: 0) + (sums.sum5 ?: 0)
+                }
+                if (rows679.contains(rowNum)) {
+                    row.rnu6Field12Accepted = (row.rnu6Field12Accepted ?: 0) + (sums.sum6 ?: 0)
+                    // графа 7 больше не берется из источников
                 }
             }
         }
@@ -567,7 +559,10 @@ void fillFromRnu6(def dataRows, def dataRowsChild, def strangeCodes) {
 
 void fillFromRnu4(def dataRows, def dataRowsChild, def strangeCodes) {
     def codeMap = [:]
-    dataRowsChild.each { rowRNU4 ->
+    for (rowRNU4 in dataRowsChild) {
+        if (rowRNU4.getAlias() != null) {
+            continue
+        }
         def map = getRefBookValue(28, rowRNU4.balance)
         def codeKey = map.CODE.value
         def balanceKey = map.NUMBER.value?.replace('.', '')
@@ -585,16 +580,16 @@ void fillFromRnu4(def dataRows, def dataRowsChild, def strangeCodes) {
         String balanceKey = row.accountNo.replace('.', "")
         // получаем строки источника по КНУ и Балансовому счету
         Map balanceMap = codeMap.get(knu)
+        // считаем
+        def rowsChild = balanceMap?.get(balanceKey) ?: []
+        rowsChild.each { rowChild ->
+            row.rnu4Field5Accepted = (row.rnu4Field5Accepted ?: BigDecimal.ZERO) + rowChild.sum
+        }
         // удаляем использованные строки источника
         balanceMap?.remove(balanceKey)
         // если остались строки источника с тем же кну, но с другим балансовым счетом, то выводим сообщение
         if (balanceMap != null && !(balanceMap.isEmpty())) {
             strangeCodes.add(knu)
-        }
-        // считаем
-        def rowsChild = balanceMap?.get(balanceKey) ?: []
-        rowsChild.each{ rowChild ->
-            row.rnu4Field5Accepted = (row.rnu4Field5Accepted ?: BigDecimal.ZERO) + rowChild.sum
         }
     }
 }
@@ -636,7 +631,7 @@ void calcExplanation(def dataRows, def formSources, def isFromSummary) {
         if (!(row.getAlias() in rowsNotCalc)) {
             def knu = row.incomeTypeId
             def opuMap = codeMap.get(knu)
-            def opuKey = row.accountingRecords
+            def opuKey = row.accountingRecords ?: ''
             def sourceRows = opuMap?.get(opuKey)
             row.explanation = BigDecimal.ZERO
             if (sourceRows != null && !(sourceRows.isEmpty())) {
