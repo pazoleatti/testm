@@ -126,7 +126,8 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
                 if (cell.getType() == null) {
                     continue;
                 }
-                if (cell.getType() == RefBookAttributeType.REFERENCE) {
+                if (cell.getType() == RefBookAttributeType.REFERENCE
+                        && !e.getKey().equals("DEPARTMENT_ID")) { //Подразделения не версионируются и их нет смысла проверять
                     if (cell.getRefValue() != null) {
                         //Собираем ссылки на справочники и группируем их по провайдеру, обрабатывающему справочники
                         RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
