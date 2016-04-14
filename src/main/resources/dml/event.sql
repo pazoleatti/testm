@@ -39,9 +39,6 @@ INSERT INTO event (id,name) VALUES (501,'Вход пользователя в С
 INSERT INTO event (id,name) VALUES (502,'Выход пользователя из Системы');
 INSERT INTO event (id,name) VALUES (503,'Взаимодействие с внешней АС');
 INSERT INTO event (id,name) VALUES (601,'Архивирование журнала событий');
-INSERT INTO event (id,name) VALUES (901,'Создание подразделения');
-INSERT INTO event (id,name) VALUES (902,'Модификация подразделения');
-INSERT INTO event (id,name) VALUES (903,'Удаление подразделения');
 INSERT INTO event (id,name) VALUES (701,'Версия создана');
 INSERT INTO event (id,name) VALUES (702,'Версия изменена');
 INSERT INTO event (id,name) VALUES (703,'Версия введена в действие');
@@ -64,3 +61,8 @@ INSERT INTO event (id,name) VALUES (841,'Редактирование догов
 INSERT INTO event (id,name) VALUES (842,'Закрытие договора обеспечения');
 INSERT INTO event (id,name) VALUES (850,'Создание задачи формирования РНУ-23');
 INSERT INTO event (id,name) VALUES (860,'Создание задачи формирования отчета');
+INSERT INTO event (id,name) VALUES (901,'Создание подразделения');
+INSERT INTO event (id,name) VALUES (902,'Модификация подразделения');
+INSERT INTO event (id,name) VALUES (903,'Удаление подразделения');
+INSERT INTO event (id,name) VALUES (904,'Импорт скриптов');
+INSERT INTO event (id,name) VALUES (951,'Редактирование конфигурационного параметра');

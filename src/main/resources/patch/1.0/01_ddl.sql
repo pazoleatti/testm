@@ -60,7 +60,7 @@ commit;
 
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14691: Новое событие ЖА - Изменение пути базы открытых ключей
-insert into event (id, name) values (951, 'Изменение пути базы открытых ключей');
+insert into event (id, name) values (951, 'Редактирование конфигурационного параметра');
 insert into role_event (event_id, role_id) values (951, 5);
 
 alter table log_system drop constraint log_system_chk_dcl_form;

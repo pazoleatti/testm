@@ -203,7 +203,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            saveAndLog(model, userInfo);
+            saveAndLog(model, emailConfigs, asyncConfigs, userInfo);
 
             //Сохранение настроек почты
             RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG);
@@ -329,14 +329,95 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * @param model    модель с конфигурационными параметрами
      * @param userInfo информация о пользователе
      */
-    void saveAndLog(ConfigurationParamModel model, TAUserInfo userInfo) {
+    void saveAndLog(ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, TAUserInfo userInfo) {
         ConfigurationParamModel oldModel = configurationDao.getAll();
-        configurationDao.save(model);
-        String keyFileUrlDiff = getKeyFileUrlDiff(oldModel, model);
-        if (keyFileUrlDiff != null) {
-            auditService.add(FormDataEvent.SETTINGS_CHANGE_KEY_FILE_URL, userInfo,
-                    userInfo.getUser().getDepartmentId(), null, null, null, null, keyFileUrlDiff, null);
+        Map<String, Map<String, String>> oldEmailConfigMap = new HashMap<String, Map<String, String>>();
+        Map<String, Map<String, String>> oldAsyncConfigMap = new HashMap<String, Map<String, String>>();
+        for (Map<String, String> config: getEmailConfig()) {
+            oldEmailConfigMap.put(config.get("NAME"), config);
         }
+        for (Map<String, String> config: getAsyncConfig()) {
+            oldAsyncConfigMap.put(config.get("ID"), config);
+        }
+        configurationDao.save(model);
+        for (ConfigurationParam param: ConfigurationParam.values()) {
+            if (ConfigurationParamGroup.COMMON.equals(param.getGroup())) {
+                if (model.keySet().contains(param) && oldModel.keySet().contains(param)) {
+                    String keyFileUrlDiff = checkParams(oldModel, model, param, 0);
+                    if (keyFileUrlDiff != null) {
+                        auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                                userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Изменён параметр \"" + param.getCaption() +"\":" + keyFileUrlDiff, null);
+                    }
+                } else if (model.keySet().contains(param)) {
+                    String stringValue = "\"" + model.getFullStringValue(param, 0) + "\"";
+                    auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Добавлен параметр \"" + param.getCaption() +"\":" + stringValue, null);
+                } else if (oldModel.keySet().contains(param)) {
+                    String stringValue = "\"" + oldModel.getFullStringValue(param, 0) + "\"";
+                    auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Удален параметр \"" + param.getCaption() +"\":" + stringValue, null);
+                }
+            } else if (ConfigurationParamGroup.FORM.equals(param.getGroup())) {
+                Map<Integer, List<String>> values = model.get(param);
+                Map<Integer, List<String>> oldValues = oldModel.get(param);
+                Set<Integer> allDepartmentIds = new HashSet<Integer>();
+                Set<Integer> departmentIds = values!= null?values.keySet():new HashSet<Integer>();
+                Set<Integer> oldDepartmentIds = oldValues!= null?oldValues.keySet():new HashSet<Integer>();
+                allDepartmentIds.addAll(departmentIds);
+                allDepartmentIds.addAll(oldDepartmentIds);
+
+                for(Integer departmentId: allDepartmentIds) {
+                    if (departmentIds.contains(departmentId) && oldDepartmentIds.contains(departmentId)) {
+                        // Проверка на изменение
+                        String keyFileUrlDiff = checkParams(oldModel, model, param, departmentId);
+                        if (keyFileUrlDiff != null) {
+                            auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                                    departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Изменён параметр \"" +param.getCaption() +"\":" + keyFileUrlDiff, null);
+                        }
+                    } else if (departmentIds.contains(departmentId)) {
+                        // Добавление
+                        String stringValue = "\"" + model.getFullStringValue(param, departmentId) + "\"";
+                        auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                                departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Добавлен параметр \"" +param.getCaption() +"\":" + stringValue, null);
+                    } else {
+                        // Удаление
+                        String stringValue = "\"" + oldModel.getFullStringValue(param, departmentId) + "\"";
+                        auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                                departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Удален параметр \"" +param.getCaption() +"\":" + stringValue, null);
+                    }
+                }
+            }
+        }
+        for (Map<String, String> config: emailConfigs) {
+            Map<String, String> oldConfig = oldEmailConfigMap.get(config.get("NAME"));
+            String check = checkConfig(config, oldConfig, "VALUE");
+            if (check != null) {
+                auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                        userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.EMAIL.getCaption() + ". Изменён параметр \"" +config.get("NAME") +"\":" + check, null);
+            }
+        }
+        RefBook refBookAsyncConfig = refBookFactory.get(RefBook.ASYNC_CONFIG);
+        for (Map<String, String> config: asyncConfigs) {
+            Map<String, String> oldConfig = oldAsyncConfigMap.get(config.get("ID"));
+            for (String key: Arrays.asList("SHORT_QUEUE_LIMIT", "TASK_LIMIT")) {
+                String check = checkConfig(config, oldConfig, key);
+                if (check != null) {
+                    auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.ASYNC.getCaption() + ". Изменён параметр \"" + refBookAsyncConfig.getAttribute(key).getName() + "\" для задания \"" + config.get("NAME")+ "\":" + check, null);
+                }
+            }
+        }
+    }
+
+    private String checkConfig(Map<String, String> config, Map<String, String> oldConfig, String key) {
+        String value = config.get(key);
+        String oldValue = oldConfig.get(key);
+        if (value == null) value = "";
+        if (oldValue == null) oldValue = "";
+        if (!value.equals(oldValue)) {
+            return "\"" + oldValue + "\" -> \"" + value + "\"";
+        }
+        return null;
     }
 
     // Проверка значения параметра "Проверять ЭЦП"
@@ -347,20 +428,27 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     /**
-     * Изменился ли путь к БОК
+     * Изменился ли путь настроики
      *
      * @param oldModel модель со старыми данными
      * @param newModel модель с новыми данными
-     * @return если изменился путь, то возвращает и старый и новый пути
+     * @return если изменился параметр, то возвращает и старый и новый значениея
      */
-    private String getKeyFileUrlDiff(ConfigurationParamModel oldModel, ConfigurationParamModel newModel) {
-        String oldModelFullStringValue = oldModel.getFullStringValue(ConfigurationParam.KEY_FILE, 0);
-        String newModelFullStringValue = newModel.getFullStringValue(ConfigurationParam.KEY_FILE, 0);
-
-        if (oldModelFullStringValue != null && newModelFullStringValue != null
-                && !oldModelFullStringValue.equals(newModelFullStringValue)) {
-            return "'" + oldModelFullStringValue + "' -> '" + newModelFullStringValue + "'";
+    private String checkParams(ConfigurationParamModel oldModel, ConfigurationParamModel newModel, ConfigurationParam param, Integer departmentId) {
+        String oldModelFullStringValue = oldModel.getFullStringValue(param, departmentId);
+        String newModelFullStringValue = newModel.getFullStringValue(param, departmentId);
+        if (oldModelFullStringValue != null && newModelFullStringValue != null) {
+            if (!oldModelFullStringValue.equals(newModelFullStringValue)) {
+                return "\"" + oldModelFullStringValue + "\" -> \"" + newModelFullStringValue + "\"";
+            } else {
+                return null;
+            }
+        } else if (oldModelFullStringValue == null && newModelFullStringValue == null) {
+            return null;
+        } else if (oldModelFullStringValue != null) {
+            return "\"" + oldModelFullStringValue + "\" -> \"\"";
+        } else {
+            return "\"\" -> \"" + newModelFullStringValue + "\"";
         }
-        return null;
     }
 }
