@@ -38,7 +38,7 @@
         <alias>accountNo</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Балансовый счёт по учёту дохода</name>
+        <name>Балансовый счет по учету дохода</name>
         <order>4</order>
         <width>7</width>
         <maxLength>20</maxLength>
