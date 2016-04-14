@@ -1,4 +1,4 @@
-package form_template.income.declaration_bank_2.v2015
+package form_template.income.declaration_bank_2.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent

@@ -227,9 +227,10 @@ void logicCheck() {
             wasError = true
         }
         // 12 Проверка правильности заполнения «Графы 26»
-        // «Графа 26» = («Графа 8» + «Графа 25») ИЛИ («Графа 9» + «Графа 23» - «Графа 25»)
-        if ((row.dividendD1D2 ?: 0) != ((row.totalDividend ?: 0) + (row.dividendAgentWithStavka0 ?: 0)) && (row.dividendD1D2 ?: 0) != ((row.dividendSumRaspredPeriod ?: 0) + (row.dividendNonIncome ?: 0) - (row.dividendAgentWithStavka0 ?: 0))) {
-            warnMessageCondition(row, 'dividendD1D2', "«Графа 26» = («Графа 8» + «Графа 25») ИЛИ («Графа 9» + «Графа 23» - «Графа 25»)")
+        // «Графа 26» = («Графа 8» - «Графа 25») ИЛИ («Графа 9» + «Графа 23» - «Графа 25»)
+        if ((row.dividendD1D2 ?: 0) != ((row.totalDividend ?: 0) - (row.dividendAgentWithStavka0 ?: 0)) ||
+                (row.dividendD1D2 ?: 0) != ((row.dividendSumRaspredPeriod ?: 0) + (row.dividendNonIncome ?: 0) - (row.dividendAgentWithStavka0 ?: 0))) {
+            warnMessageCondition(row, 'dividendD1D2', "«Графа 26» = («Графа 8» - «Графа 25») ИЛИ («Графа 9» + «Графа 23» - «Графа 25»)")
         }
 
         // 13. Проверка правильности заполнения «Графы 29»
