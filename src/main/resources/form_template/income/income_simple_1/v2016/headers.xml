@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="2" value="КНУ"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="2" value="Группа дохода"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="2" value="Вид дохода по операциям"/>
+        <cell alias="accountNo" colSpan="1" rowSpan="2" value="Балансовый счёт по учёту дохода"/>
+        <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="2" value="РНУ-6 (графа 10) сумма"/>
+        <cell alias="rnu6Field12Accepted" colSpan="2" rowSpan="1" value="РНУ-6 (графа 12)"/>
+        <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" rowSpan="1" value="РНУ-6 (графа 12)"/>
+        <cell alias="rnu4Field5Accepted" colSpan="1" rowSpan="2" value="РНУ-4 (графа 5) сумма"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="2" value="Логическая проверка"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="2" value="Счёт бухгалтерс-кого учёта"/>
+        <cell alias="opuSumByEnclosure2" colSpan="4" rowSpan="1" value="Сумма по бухгалтерскому учёту"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" value="Сумма по бухгалтерскому учёту"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" value="Сумма по бухгалтерскому учёту"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" value="Сумма по бухгалтерскому учёту"/>
+        <cell alias="difference" colSpan="1" rowSpan="2" value="Расхождение"/>
+    </row>
+    <row alias="">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" value="КНУ"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1" value="Группа дохода"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" value="Вид дохода по операциям"/>
+        <cell alias="accountNo" colSpan="1" rowSpan="1" value="Балансовый счёт по учёту дохода"/>
+        <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1" value="РНУ-6 (графа 10) сумма"/>
+        <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1" value="сумма"/>
+        <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" rowSpan="1" value="в т.ч. учтено в предыдущих налоговых периодах по графе 10"/>
+        <cell alias="rnu4Field5Accepted" colSpan="1" rowSpan="1" value="РНУ-4 (графа 5) сумма"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" value="Логическая проверка"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" value="Счёт бухгалтерс-кого учёта"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1" value="в Приложении №5"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" value="в Таблице &quot;Д&quot;"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" value="в бухгалтерской отчётности"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" value="Пояснение таблица 1 (графа 4)"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" value="Расхождение"/>
+    </row>
+    <row alias="">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="accountNo" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="rnu4Field5Accepted" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" value="13"/>
+        <cell alias="explanation" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" value="15"/>
+    </row>
+</rows>
