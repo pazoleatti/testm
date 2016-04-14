@@ -6,8 +6,8 @@
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="2" value="Вид дохода по операциям"/>
         <cell alias="accountNo" colSpan="1" rowSpan="2" value="Балансовый счёт по учёту дохода"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="2" value="РНУ-6 (графа 10) сумма"/>
-        <cell alias="rnu6Field12Accepted" colSpan="2" rowSpan="1" value="РНУ-6 (графа 12)"/>
-        <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" rowSpan="1" value="РНУ-6 (графа 12)"/>
+        <cell alias="rnu6Field12Accepted" colSpan="2" rowSpan="1" value="РНУ-6 (графа 12) сумма"/>
+        <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" rowSpan="1" value="РНУ-6 (графа 12) сумма"/>
         <cell alias="rnu4Field5Accepted" colSpan="1" rowSpan="2" value="РНУ-4 (графа 5) сумма"/>
         <cell alias="logicalCheck" colSpan="1" rowSpan="2" value="Логическая проверка"/>
         <cell alias="accountingRecords" colSpan="1" rowSpan="2" value="Счёт бухгалтерс-кого учёта"/>
