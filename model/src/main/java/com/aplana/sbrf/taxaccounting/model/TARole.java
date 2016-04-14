@@ -76,4 +76,13 @@ public class TARole implements Serializable {
 	public int hashCode() {
 		return 0;
 	}
+
+    @Override
+    public String toString() {
+        return "TARole{" +
+                "id: " + id +
+                ",alias: " + alias +
+                ",name: " + name +
+                '}';
+    }
 }
