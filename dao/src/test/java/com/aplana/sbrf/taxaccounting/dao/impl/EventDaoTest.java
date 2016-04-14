@@ -28,7 +28,7 @@ public class EventDaoTest {
 
     @Test
     public void testGetEventCodes(){
-        Assert.assertEquals(12, eventDao.getEventCodes(TARole.ROLE_CONTROL_UNP, Arrays.asList(501, 701),"10_", "9__").size());
-        Assert.assertEquals(45, eventDao.getEventCodes(TARole.ROLE_CONTROL_UNP, null).size());
+        Assert.assertEquals(14, eventDao.getEventCodes(TARole.ROLE_CONTROL_UNP, Arrays.asList(501, 701),"10_", "9__").size());
+        Assert.assertEquals(64, eventDao.getEventCodes(TARole.ROLE_CONTROL_UNP, null).size());
     }
 }
