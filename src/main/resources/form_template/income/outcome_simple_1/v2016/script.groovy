@@ -639,7 +639,7 @@ void calcExplanation(def dataRows, def formSources, def isFromSummary) {
         }
     }
     if (!rowNumbers.isEmpty()) {
-        logger.warn("Строка %s: Графа «%s» заполнена значением «0», т.к. не найдены строки по требуемым КНУ в форме-источнике «%s»!",
+        logger.warn("Строки %s: Графа «%s» заполнена значением «0», т.к. не найдены строки по требуемым КНУ в форме-источнике «%s»!",
                 rowNumbers.join(', '), getColumnName(dataRows[0], 'explanation'), formTypeService.get(formTypeId_Tab2).name)
     }
     if (!strangeCodes.isEmpty()) {
