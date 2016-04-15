@@ -61,8 +61,7 @@ public class GetRowsDataHandler extends
             // Обновление измененных строк во временном срезе
             if (!action.getModifiedRows().isEmpty()) {
                 refBookHelper.dataRowsCheck(action.getModifiedRows(), formTemplate.getColumns());
-                dataRowService.update(securityService.currentUserInfo(), action.getFormDataId(),
-                        action.getModifiedRows(), action.isManual());
+                dataRowService.update(securityService.currentUserInfo(), action.getFormDataId(), action.getModifiedRows(), action.isManual());
             }
             // Отображаемый диапазон строк
             DataRowRange dataRowRange;

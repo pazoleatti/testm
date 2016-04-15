@@ -4,7 +4,11 @@ import java.io.Serializable;
 
 /**
  * Диапазон строк НФ
- * 
+ * <ul>
+ *   <li>offset - начало диапазона</li>
+ *   <li>count - величина смещения</li>
+ * </ul>
+ *
  * @author sgoryachkin
  *
  */

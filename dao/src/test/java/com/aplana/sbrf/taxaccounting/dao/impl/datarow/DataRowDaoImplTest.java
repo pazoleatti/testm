@@ -490,7 +490,7 @@ public class DataRowDaoImplTest extends Assert {
 				"SELECT 4 AS row_id, 0 AS x, 4 AS y, 1 AS colspan, 2 AS rowspan, 'string_value' AS cell_value, '3-10' AS cell_style FROM DUAL UNION " +
 				"SELECT 4 AS row_id, 3 AS x, 4 AS y, 1 AS colspan, 2 AS rowspan, '52' AS cell_value, 'i0-4' AS cell_style FROM DUAL");
 			while (rs.next()) {
-				DataRowDaoImpl.updateChildRow(dataRowMapper, rs, row);
+				DataRowDaoImpl.updateChildCell(dataRowMapper, rs, row);
 			}
 		} finally {
 			stmt.close();

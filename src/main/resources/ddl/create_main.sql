@@ -1133,7 +1133,7 @@ CREATE SEQUENCE seq_form_data_row START WITH 10000;
 --------------------------------------------------------------------------------------------------------
 create table form_data_row_span
 (
-  id           number(18) not null,
+  row_id       number(18) not null,
   form_data_id number(9) not null,
   temporary    number(1) not null,
   manual       number(1) not null,
@@ -1144,7 +1144,7 @@ create table form_data_row_span
 );
 
 comment on table form_data_row_span is 'Информация по горизонтальном/вертикальном объединении ячеек в НФ';
-comment on column form_data_row_span.id is 'Идентификатор записи';
+comment on column form_data_row_span.row_id is 'Идентификатор строки НФ';
 comment on column form_data_row_span.form_data_id is 'Идентификатор НФ';
 comment on column form_data_row_span.manual is 'Версия ручного ввода';
 comment on column form_data_row_span.temporary is 'Резервный/временный срез';

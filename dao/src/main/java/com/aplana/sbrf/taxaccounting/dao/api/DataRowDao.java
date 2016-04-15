@@ -134,7 +134,7 @@ public interface DataRowDao {
 
 	/**
 	 * Сохранить отсортированные строки без учета остальных изменений. Обновятся только значения атрибута ORD.
-	 * Порядок задается последовательностью элементов в rows. Данный метод используется для персортировки
+	 * Порядок задается последовательностью элементов в rows. Данный метод используется для пересортировки
 	 * всех строк НФ.
 	 */
 	void reorderRows(FormData formData, List<DataRow<Cell>> rows);
@@ -182,6 +182,6 @@ public interface DataRowDao {
 	/**
 	 * Обновляет существующие строки НФ
 	 */
-	void updateRows(FormData formData, Collection<DataRow<Cell>> rows);
+	void updateRows(FormData formData, List<DataRow<Cell>> rows);
 
 }
