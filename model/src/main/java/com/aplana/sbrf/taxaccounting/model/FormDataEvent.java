@@ -102,7 +102,7 @@ public enum FormDataEvent implements Serializable {
     SCRIPTS_IMPORT(904, "Импорт скриптов"),
     CHECK_SCRIPT(905, "Проверка скриптов"),
 
-	SETTINGS_CHANGE_KEY_FILE_URL(951, "Изменение пути базы открытых ключей");
+    EDIT_CONFIG_PARAMS(951, "Редактирование конфигурационного параметра");
 
 	private String title;
 	private int code;

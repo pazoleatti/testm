@@ -15,12 +15,14 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.SaveDepartmentRefBookValuesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -156,12 +158,6 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
 
             Logger logger = new Logger();
-            /** Проверка существования справочных атрибутов */
-            /*checkReferenceValues(provider, refBook, paramsMap, period.getCalendarStartDate(), period.getEndDate(), logger);
-            if (logger.getMainMsg() != null) {
-                result.setUuid(logEntryService.save(logger.getEntries()));
-                result.setErrorMsg(logger.getMainMsg());
-            }*/
 
             logger.setTaUserInfo(securityService.currentUserInfo());
             RefBookRecord record = new RefBookRecord();
@@ -192,6 +188,16 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
             if (depCombined.getTaxOrganCode() != null && !depCombined.getTaxOrganCode().isEmpty()) {
                 checkPattern(logger, "Код налогового органа", depCombined.getTaxOrganCode(), taxOrganPattern, RefBookUtils.TAX_ORGAN_MEANING);
+            }
+
+            if (logger.containsLevel(LogLevel.ERROR)){
+                result.setHasError(true);
+                if (action.getOldUUID() == null) {
+                    result.setUuid(logEntryService.save(logger.getEntries()));
+                } else {
+                    result.setUuid(logEntryService.update(logger.getEntries(), action.getOldUUID()));
+                }
+                return result;
             }
 
             // Проверка необходимости редактирования
@@ -258,35 +264,6 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
         }
         return result;
-    }
-
-    /**
-     * Проверка существования записей справочника на которые ссылаются атрибуты.
-     * Считаем что все справочные атрибуты хранятся в универсальной структуре как и сами настройки
-     * @param refBook
-     * @param rows
-     */
-    private void checkReferenceValues(RefBookDataProvider provider, RefBook refBook, Map<String, RefBookValue> rows, Date versionFrom, Date versionTo, Logger logger) {
-        Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<RefBookDataProvider, List<RefBookLinkModel>>();
-
-        RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
-        for (Map.Entry<String, RefBookValue> e : rows.entrySet()) {
-            if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE && !e.getKey().equals("DEPARTMENT_ID")) {
-                Long link = e.getValue().getReferenceValue();
-                if (link != null) {
-                    //Собираем ссылки на справочники и группируем их по провайдеру, обрабатывающему справочники
-                    RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
-                    if (!references.containsKey(linkProvider)) {
-                        references.put(linkProvider, new ArrayList<RefBookLinkModel>());
-                    }
-                    //Сохраняем данные для отображения сообщений
-                    references.get(linkProvider).add(new RefBookLinkModel(null, e.getKey(), link, null, versionFrom, versionTo));
-                }
-            }
-        }
-
-        //Проверяем ссылки и выводим соообщения если надо
-        refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
     }
 
     @Override

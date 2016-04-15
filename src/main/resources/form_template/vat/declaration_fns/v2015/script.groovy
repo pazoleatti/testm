@@ -6,10 +6,10 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 import org.apache.commons.collections.map.HashedMap
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 
-import java.sql.Connection;
+import java.sql.Connection
 import java.sql.ResultSet
 
 import javax.xml.stream.XMLStreamReader
@@ -24,7 +24,7 @@ import java.sql.Statement
  */
 
 @Field
-def declarationType = 4;
+def declarationType = 4
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -1709,20 +1709,20 @@ def prevSection3Check() {
 
     // 1. проверка декларации "Декларация по НДС (раздел 1-7)"
     if (correction != null && correction > 1) {
-        // TODO (Ramil Timerbaev) в 1.0 поменять на declarationService.getType()
-        def kind = declarationService.declarationTypeDao.get(declarationType).name
+        // TODO (Ramil Timerbaev) в 1.0 поменять на declarationService.getType(declarationType)
+        def declarationName = 'Декларация по НДС (раздел 1-7)'
         DeclarationData declarationNDS1_7 = getPrevCorrectionDeclaration()
         DepartmentReportPeriod dpr = getPrevDepartmentReportPeriod()
         def correctionDate = (dpr?.correctionDate?.format('dd.MM.yyyy') ?: '')
         if (declarationNDS1_7 == null || !declarationNDS1_7.accepted) {
             // сообщение 1
             def msg = "Не найдена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «%s». Расчет раздела 3 не будет выполнен."
-            logger.warn(msg, kind, departmentName, periodName, correctionDate)
+            logger.warn(msg, declarationName, departmentName, periodName, correctionDate)
             return false
         } else {
             // сообщение 2
             def msg = "Для заполнения строк 010-040, 070, 120, 170 раздела 3 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «%s»."
-            logger.info(msg, kind, departmentName, periodName, correctionDate)
+            logger.info(msg, declarationName, departmentName, periodName, correctionDate)
         }
     }
 
@@ -1792,19 +1792,28 @@ List<DepartmentReportPeriod> getDepartmentReportPeriods(def periodId, def depart
             " where report_period_id = %d and department_id = %s " +
             " order by correction_date asc nulls first "
     sql = String.format(sql, periodId, departmentId)
-    Connection connection = dataSource.getConnection()
-    Statement stmt = connection.createStatement()
-    ResultSet resultSet = stmt.executeQuery(sql)
+    Connection connection = null
+    Statement stmt = null
+    ResultSet resultSet = null
     List<DepartmentReportPeriod> departmentReportPeriods = []
-    while (resultSet.next()) {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod()
-        departmentReportPeriod.setId(SqlUtils.getInteger(resultSet, "id"))
-        departmentReportPeriod.setDepartmentId(SqlUtils.getInteger(resultSet, "department_id"))
-        departmentReportPeriod.setReportPeriod(reportPeriodService.get(SqlUtils.getInteger(resultSet, "report_period_id")))
-        departmentReportPeriod.setActive(!SqlUtils.getInteger(resultSet, "is_active").equals(0))
-        departmentReportPeriod.setBalance(!SqlUtils.getInteger(resultSet, "is_balance_period").equals(0))
-        departmentReportPeriod.setCorrectionDate(resultSet.getDate("correction_date"))
-        departmentReportPeriods.add(departmentReportPeriod)
+    try {
+        connection = dataSource.getConnection()
+        stmt = connection.createStatement()
+        resultSet = stmt.executeQuery(sql)
+        while (resultSet.next()) {
+            DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod()
+            departmentReportPeriod.setId(SqlUtils.getInteger(resultSet, "id"))
+            departmentReportPeriod.setDepartmentId(SqlUtils.getInteger(resultSet, "department_id"))
+            departmentReportPeriod.setReportPeriod(reportPeriodService.get(SqlUtils.getInteger(resultSet, "report_period_id")))
+            departmentReportPeriod.setActive(!SqlUtils.getInteger(resultSet, "is_active").equals(0))
+            departmentReportPeriod.setBalance(!SqlUtils.getInteger(resultSet, "is_balance_period").equals(0))
+            departmentReportPeriod.setCorrectionDate(resultSet.getDate("correction_date"))
+            departmentReportPeriods.add(departmentReportPeriod)
+        }
+    } finally {
+        resultSet.close()
+        stmt.close()
+        connection.close()
     }
     return departmentReportPeriods
 }

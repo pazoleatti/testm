@@ -84,4 +84,17 @@ public class TAUser implements Serializable {
 		}
 		return false;
 	}
+
+    @Override
+    public String toString() {
+        return "TAUser{" +
+                "id: " + id +
+                ",login: " + login +
+                ",name: " + name +
+                ",roles: " + roles.toString() +
+                ",departmentId: " + departmentId +
+                ",active: " + active +
+                ",email: " + email +
+                '}';
+    }
 }
