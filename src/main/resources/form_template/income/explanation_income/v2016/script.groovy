@@ -169,11 +169,6 @@ void logicCheck() {
             }
             codeMap[code].add(row)
         }
-
-        // 3. Проверка суммы отклонений
-        if (row.sum != null && !(row.sum > BigDecimal.ZERO)) {
-            logger.error("Строка ${row.getIndex()}: Значение графы «${getColumnName(row, 'sum')}» должно быть больше «0»!")
-        }
     }
 
     // 2. Проверка уникальности значения поля 2
