@@ -48,7 +48,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, logger, userInfo)
-        calc()
+        groupRows() // объединяет строки с одинаковыми кодами
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
         break
@@ -130,6 +130,27 @@ def getNewRow() {
 
 void calc() {
     // расчетов нет
+}
+
+// объединяет строки с одинаковыми кодами
+void groupRows() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    def codeMap = [:]
+    dataRows.each { row ->
+        if (codeMap[row.code] == null) {
+            codeMap[row.code] = []
+        }
+        codeMap[row.code].add(row)
+    }
+    def rows = []
+    codeMap.each {codeId, codeRows ->
+        def row = codeRows[0]
+        row.sum = codeRows.sum { it.sum }
+        row.explanation = null
+        rows.add(row)
+    }
+    sortRows(refBookService, logger, rows, null, null, null)
+    formDataService.getDataRowHelper(formData).setAllCached(rows)
 }
 
 void logicCheck() {
