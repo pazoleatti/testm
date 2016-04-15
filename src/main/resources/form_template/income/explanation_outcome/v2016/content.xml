@@ -55,7 +55,7 @@
         <name>Пояснение</name>
         <order>5</order>
         <width>10</width>
-        <maxLength>255</maxLength>
+        <maxLength>2000</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <styles>
