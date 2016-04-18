@@ -62,6 +62,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		lastColumnStyle = " " + style.lastColumn();
 		selectedCellStyle = " " + style.selectedRowCell();
         rowCountWhenInitialize = cellTable.getRowCount();
+        globalSpans.clear();
 	}
 
 	@Override
@@ -193,12 +194,6 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
 		// End the row.
 		tr.endTR();
-		// После билда всех строк очищаем список спанов
-		int curPage = (int)Math.ceil(absRowIndex/cellTable.getPageSize());
-
-		if (cellTable.getVisibleItems().size() == (absRowIndex+1 - (cellTable.getPageSize()*curPage))) {
-			globalSpans.clear();
-		}
 	}
 
 	/**

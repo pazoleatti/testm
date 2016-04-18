@@ -3,6 +3,11 @@ alter table log_system add server varchar2(200);
 comment on column log_system.server is 'Сервер'; 
 
 ----------------------------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-15340: 1.0 БД. Изменения для логирования импорта скриптов
+
+alter table template_changes drop constraint template_changes_chk_event; 
+alter table template_changes add constraint template_changes_chk_event check (event in (701, 702, 703, 704, 705, 904));
+----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14423: Реализовать справочник "История изменения категории ВЗЛ"
 
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id, is_versioned) values (521, 'История изменения категории ВЗЛ', 0, 0, 0, null, 0);
@@ -55,13 +60,17 @@ commit;
 
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14691: Новое событие ЖА - Изменение пути базы открытых ключей
-insert into event (id, name) values (951, 'Изменение пути базы открытых ключей');
+insert into event (id, name) values (951, 'Редактирование конфигурационного параметра');
 insert into role_event (event_id, role_id) values (951, 5);
 
 alter table log_system drop constraint log_system_chk_dcl_form;
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
 alter table log_system drop constraint log_system_chk_rp;
 alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951) or report_period_name is not null);
+
+--https://jira.aplana.com/browse/SBRFACCTAX-15438: БД. Изменения для "Фиксировать в ЖА изменения конфиг. параметров"
+UPDATE ref_book_attribute SET NAME = 'Ограничение на выполнение задания в очереди быстрых заданий' WHERE ID = 4104;
+UPDATE ref_book_attribute SET NAME = 'Ограничение на выполнение задания' WHERE ID = 4105;
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14602: Заархивировать JasperPrint-отчеты декларации
 set serveroutput on size 1000000;
@@ -130,8 +139,9 @@ declare
         where jasper.type = 3 and rawtohex(DBMS_LOB.SUBSTR(BLOB_TO_CLOB(bd_jasper.data), 4, 1)) <> '504B0304'
         order by excel.blob_data_id nulls last;
  begin
-   for x in data_to_compress loop
-   
+	dbms_output.enable (buffer_size => null);
+	
+	for x in data_to_compress loop  
 		if (x.excel_blob_data_id is not null) then
 			delete from blob_data where id = x.jasper_blob_data_id;
 			dbms_output.put_line('Deleted : '||x.declaration_data_id||' // '||x.template_name ||' ('||x.department_name||' // '||x.report_period_name || ' ' || x.year||')');
@@ -140,7 +150,7 @@ declare
 			update blob_data bd set bd.data = b_compressed_file where bd.id = x.jasper_blob_data_id;
 			dbms_output.put_line('Compressed : '||x.declaration_data_id||' // '||x.template_name ||' ('||x.department_name||' // '||x.report_period_name || ' ' || x.year||')');
 		end if;
-   end loop;        
+	end loop;        
  end;
 /
 commit;

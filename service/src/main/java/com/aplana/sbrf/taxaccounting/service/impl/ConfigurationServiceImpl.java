@@ -203,7 +203,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            saveAndLog(model, userInfo);
+            saveAndLog(model, emailConfigs, asyncConfigs, userInfo);
 
             //Сохранение настроек почты
             RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG);
@@ -359,7 +359,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         if (oldModelFullStringValue != null && newModelFullStringValue != null
                 && !oldModelFullStringValue.equals(newModelFullStringValue)) {
-            return "\"" + oldModelFullStringValue + "\" -> \"" + newModelFullStringValue + "\"";
+            return "'" + oldModelFullStringValue + "' -> '" + newModelFullStringValue + "'";
         }
         return null;
     }

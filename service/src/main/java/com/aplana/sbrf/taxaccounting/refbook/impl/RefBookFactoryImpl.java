@@ -301,6 +301,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
         switch (reportType) {
             case EXCEL_REF_BOOK:
             case CSV_REF_BOOK:
+                return String.format("Формирование отчета справочника \"%s\" в %s-формате : Версия: %s, Фильтр: \"%s\"", refBook.getName(), reportType.getName(), SDF_DD_MM_YYYY.format(version), filter);
             case SPECIFIC_REPORT_REF_BOOK:
                 return String.format("Формирование специфического отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.format(version), filter);
             default:

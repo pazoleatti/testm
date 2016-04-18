@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
@@ -269,7 +268,8 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
         for (Map.Entry<String, RefBookValue> e : rows.entrySet()) {
-            if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE && !e.getKey().equals("DEPARTMENT_ID")) {
+            if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE
+                    && !e.getKey().equals("DEPARTMENT_ID")) { //Подразделения не версионируются и их нет смысла проверять
                 Long link = e.getValue().getReferenceValue();
                 if (link != null) {
                     //Собираем ссылки на справочники и группируем их по провайдеру, обрабатывающему справочники

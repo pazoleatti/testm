@@ -83,8 +83,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     protected enum LogData {
         L32("Файл «%s» сохранен в каталоге загрузки «%s».", LogLevel.INFO, true),
         L33("Ошибка при сохранении файла «%s» в каталоге загрузки! %s.", LogLevel.ERROR, true),
-        L34_1("Не указан путь к каталогу загрузки %s! Файл «%s» не сохранен.", LogLevel.ERROR, true),
-        L34_2("Не указан путь к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, true),
+        L34_1_1("Не указан путь к каталогу загрузки %s! Файл «%s» не сохранен.", LogLevel.ERROR, true),
+        L34_1_2("Не указан путь к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, true),
+        L34_2_1("Нет доступа к каталогу загрузки %s! Файл «%s» не сохранен.", LogLevel.ERROR, true),
+        L34_2_2("Нет доступа к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, true),
         L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true),
         L37("При загрузке файла «%s» произошла непредвиденная ошибка: %s.", LogLevel.ERROR, true),
         L48("Для налоговой формы загружаемого файла \"%s\" не предусмотрена обработка транспортного файла! Загрузка не выполнена.", LogLevel.ERROR, true);
@@ -250,19 +252,29 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         return new ImportCounter(success, fail);
     }
 
+    private boolean checkPath(String path) {
+        if (path == null || !FileWrapper.canReadFolder(path + "/") || !FileWrapper.canWriteFolder(path + "/"))
+            return false;
+        try {
+            ResourceUtils.getSharedResource(path + "/");
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Копирование файла из потока в каталог загрузки
      */
     private boolean copyFileFromStream(TAUserInfo userInfo, InputStream inputStream, CheckResult checkResult, String fileName, Logger logger)
             throws IOException {
         if (checkResult.getPath() != null) {
-            try {
-                ResourceUtils.getSharedResource(checkResult.getPath() + "/");
-            } catch (Exception e) {
+            if (!checkPath(checkResult.getPath())) {
                 if (checkResult.isRefBook()) {
-                    log(userInfo, LogData.L34_1, logger, checkResult.getRefBookName(), fileName);
+                    log(userInfo, LogData.L34_2_1, logger, checkResult.getRefBookName(), fileName);
                 } else {
-                    log(userInfo, LogData.L34_2, logger, departmentService.getDepartment(checkResult.getDepartmentTbId()).getName(), fileName);
+                    log(userInfo, LogData.L34_2_2, logger, departmentService.getDepartment(checkResult.getDepartmentTbId()).getName(), fileName);
                 }
                 return false;
             }
@@ -309,7 +321,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             if (isDiasoftRefBook) {
                 // Справочники не проверяем
                 checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0,
-                        DIASOFT_NAME, LogData.L34_1, logger));
+                        DIASOFT_NAME, LogData.L34_1_1, logger));
                 checkResult.setRefBook(true);
                 checkResult.setRefBookName(DIASOFT_NAME);
                 return checkResult;
@@ -317,7 +329,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             if (isAvgCostRefBook) {
                 checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY, 0,
-                        AVG_COST_NAME, LogData.L34_1, logger));
+                        AVG_COST_NAME, LogData.L34_1_1, logger));
                 checkResult.setRefBook(true);
                 checkResult.setRefBookName(AVG_COST_NAME);
                 return checkResult;
@@ -416,7 +428,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             checkResult.setDepartmentTbId(departmentTbId);
             checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentTbId,
-                    DIASOFT_NAME, LogData.L34_2, logger));
+                    null, LogData.L34_1_2, logger));
             formTypeId = formType.getId();
             formTypeName = formType.getName();
 
@@ -436,9 +448,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         ConfigurationParamModel model = configurationDao.getByDepartment(departmentId);
         List<String> uploadPathList = model.get(configurationParam, departmentId);
         if (uploadPathList == null || uploadPathList.isEmpty()) {
-            if (logData == LogData.L34_1) {
+            if (logData == LogData.L34_1_1) {
                 log(userInfo, logData, logger, refBookName, fileName);
-            } else if (logData == LogData.L34_2) {
+            } else if (logData == LogData.L34_1_2) {
                 log(userInfo, logData, logger, departmentService.getDepartment(departmentId).getName(), fileName);
             }
             return null;
