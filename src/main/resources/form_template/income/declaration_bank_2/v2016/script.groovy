@@ -723,7 +723,7 @@ void generateXML() {
     /** УбытПрошОбсл. Код строки декларации 090. */
     def ubitProshObsl = empty
     /** СтоимРеалПТДоСр. Код строки декларации 120. Код вида расхода = 21050. */
-    def stoimRealPTDoSr = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21460]))
+    def stoimRealPTDoSr = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21050]))
     /** СтоимРеалПТПосСр. Код строки декларации 130. Код вида расхода = 21470. Не заполняется с 2015 года. */
     def stoimRealPTPosSr = getLong(0)
     /** РасхРеалТов. Код строки декларации 190. */
