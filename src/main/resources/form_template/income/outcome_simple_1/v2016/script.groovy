@@ -123,8 +123,6 @@ def first2Alias = 'R103'
 def last2Alias = 'R379'
 @Field
 def total2Alias = 'R380'
-@Field
-def exceptAlias = 'R39'
 
 @Field
 def rowsNotCalc = [head1Alias, total1Alias, head2Alias, total2Alias]

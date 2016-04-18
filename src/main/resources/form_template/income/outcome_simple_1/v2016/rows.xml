@@ -429,7 +429,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20310"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="- Начисления стимулирующего (компенсирующего) характера, связанные с режимом работы, в т.ч. стоимость бесплатно предоставляемых работникам в соответствии с коллективными и трудовыми договорами коммунальных услуг, питания и продуктов, жилья
-- Надбавки, обусловленные районным регулированием оплаты труда и надбавки, установленные Правительством РФ за непрерывный стаж работы в районах Крайнего Севера и приравненных к ним местностях 
+- Надбавки, обусловленные районным регулированием оплаты труда и надбавки, установленные Правительством РФ за непрерывный стаж работы в районах Крайнего Севера и приравненных к ним местностях
 - Доплаты инвалидам, предусмотренные законодательством РФ"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.48101.98"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
@@ -569,15 +569,13 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20400"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по договорам добровольного личного страхования на оплату медицинских расходов"/>
-        <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.48102.10
-"/>
+        <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.48102.10"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
         <cell alias="rnu7Field12PrevTaxPeriod" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
         <cell alias="rnu5Field5Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
         <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
-        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="48102.10
-"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="48102.10"/>
         <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
         <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
@@ -1316,8 +1314,7 @@
 - световая и иная наружная реклама, включая изготовление рекламных стендов и рекламных щитов;
 - участие в выставках, ярмарках, экспозициях, на оформление витрин, выставок-продаж, комнат образцов и демонстрационных залов;
 - изготовление рекламных брошюр и каталогов, содержащих информацию о реализуемых товарах (работах, услугах), товарных знаках и знаках обслуживания и (или) о самой организации;
-- уценка товаров, полностью или частично потерявших свои первоначальные качества при экспонировании.
-"/>
+- уценка товаров, полностью или частично потерявших свои первоначальные качества при экспонировании."/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.48407.01"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
