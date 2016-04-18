@@ -487,11 +487,11 @@ void consolidationFromPrimary(def dataRows, def formSources) {
     }
     if (!strangeCodesRnu7.isEmpty()) {
         logger.warn("По строкам с КНУ %s не совпадает номер балансового счета текущей формы и формы-источника «%s»!",
-                strangeCodesRnu6.join(', '), formTypeService.get(formTypeId_RNU7).name)
+                strangeCodesRnu7.join(', '), formTypeService.get(formTypeId_RNU7).name)
     }
     if (!strangeCodesRnu5.isEmpty()) {
         logger.warn("По строкам с КНУ %s не совпадает номер балансового счета текущей формы и формы-источника «%s»!",
-                strangeCodesRnu4.join(', '), formTypeService.get(formTypeId_RNU5).name)
+                strangeCodesRnu5.join(', '), formTypeService.get(formTypeId_RNU5).name)
     }
 }
 
