@@ -51,7 +51,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
 
 	private SingleSelectionModel<DataRow<Cell>> singleSelectionModel;
-	private NoSelectionModel<DataRow<Cell>> noSelectionModel;
 
     public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы:";
     public static final String FORM_DATA_KIND_TITLE_D = "Тип формы:";
@@ -60,8 +59,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     private boolean fixedRows;
     // флаг что нужно заскролить к выделенной строке, используется для формы поиска
     private Integer needScrollToRow = null;
-    // содержит ссылку на предыдуще выделенную строку при использовании NoSelectionModel
-    private DataRow<Cell> prevSelectedRow = null;
 
     interface Binder extends UiBinder<Widget, FormDataView> {
 	}
@@ -435,16 +432,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public DataRow<Cell> getSelectedRow() {
-		return fixedRows ? noSelectionModel.getLastSelectedObject() : singleSelectionModel.getSelectedObject();
+		return singleSelectionModel.getSelectedObject();
 	}
 
 	@Override
 	public void setSelectedRow(DataRow<Cell> item, boolean selected) {
-        if(fixedRows) {
-            noSelectionModel.setSelected(item, selected);
-        } else{
-            singleSelectionModel.setSelected(item, selected);
-        }
+        singleSelectionModel.setSelected(item, selected);
 	}
 
     @UiHandler(value = {"manualVersionLink", "autoVersionLink"})
@@ -864,7 +857,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
     public void setFocus(final Long rowIndex) {
         if (fixedRows){
+            singleSelectionModel.clear();
+            selectRow(rowIndex.intValue());
             formDataTable.setKeyboardSelectedRow(rowIndex.intValue() - 1);
+            formDataTable.setKeyboardSelectedColumn(0);
         } else {
             singleSelectionModel.clear();
             // go to essential page
@@ -890,47 +886,19 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
     public void setupSelectionModel(boolean fixedRows) {
         this.fixedRows = fixedRows;
-        if (fixedRows){
-            noSelectionModel = new NoSelectionModel<DataRow<Cell>>(KEY_PROVIDER);
-            formDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.BOUND_TO_SELECTION);
-            noSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-                @Override
-                public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
-                    FormDataUiHandlers handlers = getUiHandlers();
-                    if (handlers != null) {
-                        handlers.onSelectRow();
-                    }
-                    if (prevSelectedRow != null) {
-                        if (formDataTable.getVisibleItemCount() > 0) {
-                            TableCellElement item = formDataTable.getRowElement(prevSelectedRow.getIndex() - 1).getCells().getItem(0);
-                            item.removeAttribute("style");
-                        }
-                    }
-                    DataRow<Cell> selectedRow = getSelectedRow();
-                    if (selectedRow != null) {
-                        prevSelectedRow = selectedRow;
-                        TableCellElement item = formDataTable.getRowElement(getSelectedRow().getIndex() - 1).getCells().getItem(0);
-                        item.setAttribute("style", "background-color: #5a5a5a !important;");
-                    }
+        singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>(KEY_PROVIDER);
+        formDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
+        singleSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
+                FormDataUiHandlers handlers = getUiHandlers();
+                if (handlers != null) {
+                    handlers.onSelectRow();
                 }
-            });
+            }
+        });
 
-            formDataTable.setSelectionModel(noSelectionModel);
-        } else {
-            singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>(KEY_PROVIDER);
-            formDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
-            singleSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-                @Override
-                public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
-                    FormDataUiHandlers handlers = getUiHandlers();
-                    if (handlers != null) {
-                        handlers.onSelectRow();
-                    }
-                }
-            });
-
-            formDataTable.setSelectionModel(singleSelectionModel);
-        }
+        formDataTable.setSelectionModel(singleSelectionModel);
     }
 
     @Override
