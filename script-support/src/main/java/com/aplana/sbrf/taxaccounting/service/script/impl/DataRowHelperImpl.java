@@ -131,16 +131,6 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	}
 
 	@Override
-	public void commit() {
-		dataRowDao.removeCheckPoint(fd);
-	}
-
-	@Override
-	public void rollback() {
-		dataRowDao.restoreCheckPoint(fd);
-	}
-
-	@Override
 	public void save(List<DataRow<Cell>> dataRows) {
         dataRowDao.removeRows(fd);
         this.dataRows = new ArrayList<DataRow<Cell>>();

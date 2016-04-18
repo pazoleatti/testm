@@ -238,7 +238,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param formData код НФ + ручной\автоматическтй срез
 	 * @param temporary постоянный\резервный срез
 	 */
-	private void removeSpanAll(FormData formData, DataRowType temporary) {
+	void removeSpanAll(FormData formData, DataRowType temporary) {
 		if (temporary != DataRowType.SAVED && temporary != DataRowType.TEMP) {
 			throw new IllegalArgumentException("Wrong value of 'temporary' argument");
 		}
@@ -249,13 +249,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		getNamedParameterJdbcTemplate().update(SQL_DELETE_SPAN_ALL, rowParams);
 	}
 
-	private static final String SQL_INSERT_SPAN = "INSERT INTO form_data_row_span (form_data_id, temporary, manual, data_ord, ord, colspan, rowspan) " +
-			"VALUES (:form_data_id, :temporary, :manual, :data_ord, :ord, :colspan, :rowspan)";
+	private static final String SQL_INSERT_SPAN = "INSERT INTO form_data_row_span (row_id, form_data_id, temporary, manual, data_ord, ord, colspan, rowspan) " +
+			"VALUES (:row_id, :form_data_id, :temporary, :manual, :data_ord, :ord, :colspan, :rowspan)";
 	/**
 	 * Вставляем информацию об объединениях ячеек для указанных строк
 	 * @param rows строки, должны быть уже в БД
 	 */
-	private void insertSpan(FormData formData, DataRowType temporary, List<DataRow<Cell>> rows) {
+	void insertSpan(FormData formData, DataRowType temporary, List<DataRow<Cell>> rows) {
 		if (rows.isEmpty()) {
 			return;
 		}
@@ -283,6 +283,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 					values.put("row_id", row.getId());
 					values.put("data_ord", cell.getColumn().getDataOrder());
 					values.put("ord", row.getIndex());
+					values.put("colspan", null);
+					values.put("rowspan", null);
 					if (colspan > 1) {
 						values.put("colspan", colspan);
 					}
@@ -297,7 +299,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	private static final String SQL_SHIFT_SPAN = "UPDATE form_data_row_span SET rowspan = rowspan + :count " +
-			"WHERE rowspan > 1 AND ord + rowspan > :offset AND ord < :offset AND temporary = :temporary AND " +
+			"WHERE rowspan > 1 AND ord + rowspan >= :offset AND ord < :offset AND temporary = :temporary AND " +
 			"manual = :manual AND form_data_id = :form_data_id";
 	/**
 	 * Раздвигает спаны по вертикали
@@ -305,10 +307,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param range
 	 * @param temporary
 	 */
-	private void shiftSpan(FormData formData, DataRowRange range, DataRowType temporary) {
+	void shiftSpan(FormData formData, DataRowRange range, DataRowType temporary) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
-		params.put("temporary", temporary);
+		params.put("temporary", temporary.getCode());
 		params.put("manual", formData.isManual() ? 1 : 0);
 		params.put("offset", range.getOffset());
 		params.put("count", range.getCount());
@@ -371,7 +373,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param from
 	 * @param to
 	 */
-	private void moveSpan(FormData formData, DataRowType from, DataRowType to) {
+	void moveSpan(FormData formData, DataRowType from, DataRowType to) {
 		if (from != DataRowType.SAVED && from != DataRowType.TEMP) {
 			throw new IllegalArgumentException("Wrong value of 'from' argument");
 		}
@@ -390,8 +392,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		getNamedParameterJdbcTemplate().update(SQL_MOVE_SPAN, rowParams);
 	}
 
-	private static final String SQL_COPY_SPAN = "INSERT INTO form_data_row_span (form_data_id, temporary, manual, data_ord, ord, colspan, rowspan) " +
-			"SELECT :form_data_id_target, temporary, :manual_target, data_ord, ord, colspan, rowspan FROM form_data_row_span WHERE " +
+	private static final String SQL_COPY_SPAN = "INSERT INTO form_data_row_span (row_id, form_data_id, temporary, manual, data_ord, ord, colspan, rowspan) " +
+			"SELECT (SELECT id FROM form_data_row WHERE ord = s.ord AND form_data_id = :form_data_id_source AND temporary = :temporary AND manual = :manual_source) as row_id, " +
+			":form_data_id_target, temporary, :manual_target, data_ord, ord, colspan, rowspan FROM form_data_row_span s WHERE " +
 			"form_data_id = :form_data_id_source AND temporary = :temporary AND manual = :manual_source";
 	/**
 	 * Копирует спаны в постоянном срезе из одного экземпляра НФ в другую, либо в рамках одной НФ, но из автоматической
@@ -401,7 +404,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param temporary тип среза, откуда и куда копируются данные
 	 * @param targetManual в какую версию ввода копировать данные (авто или ручную)
 	 */
-	private void copySpan(FormData formDataSource, FormData formDataTarget, DataRowType temporary, DataRowType targetManual) {
+	void copySpan(FormData formDataSource, FormData formDataTarget, DataRowType temporary, DataRowType targetManual) {
 		if (temporary != DataRowType.SAVED && temporary != DataRowType.TEMP) {
 			throw new IllegalArgumentException("Wrong value of 'temporary' argument");
 		}
@@ -423,12 +426,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * удаления строк
 	 * @param rows
 	 */
-	private void updateSpanAfterRemove(List<DataRow<Cell>> rows) {
-		//todo
-	}
-
-	private void updateSpanAfterRemove(FormData formData, DataRowRange range) {
-		//todo
+	private void updateSpanOnRemove(FormData formData, List<DataRow<Cell>> rows) {
+		if (rows.isEmpty()) {
+			return;
+		}
+		for (DataRow<Cell> row : rows) {
+			DataRowRange range = new DataRowRange(row.getIndex(), -1); // сжимаем спаны на олну строку
+			shiftSpan(formData, range, DataRowType.SAVED);
+		}
 	}
 
 	private static final String SQL_DELETE_SPAN = "DELETE FROM form_data_row_span WHERE row_id = :row_id";
@@ -436,8 +441,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * Удаляем всю информацию по объединениям ячеек для указанных строк
 	 * @param rows
 	 */
-	private void removeSpan(Collection<DataRow<Cell>> rows) {
-		//TODO не забыть поменять rowspan у существующих строк
+	void removeSpan(Collection<DataRow<Cell>> rows) {
 		if (rows.isEmpty()) {
 			return;
 		}
@@ -448,7 +452,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			spanParams.add(values);
 		}
 		getNamedParameterJdbcTemplate().batchUpdate(SQL_DELETE_SPAN, spanParams.toArray(new Map[0]));
-
 	}
 
 	@Override
@@ -599,10 +602,11 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private static final String DELETE_BY_ROW_ID = "DELETE FROM form_data_row WHERE id = :id";
 	@Override
 	public void removeRows(FormData formData, final List<DataRow<Cell>> rows) {
+		if (rows.isEmpty()) {
+			return;
+		}
 		// примечание: строки надо удалять так, чтобы не нарушалась последовательность ORD = 1, 2, 3, ...
 
-		// обновляем пропуски в спанах
-		updateSpanAfterRemove(rows);
 		// формируем список параметров для батча
 		List<Map<String, Long>> params = new ArrayList<Map<String, Long>>(rows.size());
 		for (DataRow<Cell> row : rows) {
@@ -616,6 +620,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		getNamedParameterJdbcTemplate().batchUpdate(DELETE_BY_ROW_ID.intern(), params.toArray(new Map[0]));
 		// упорядочиваем заново строки
 		reorderRows(formData);
+		// обновляем пропуски в спанах
+		updateSpanOnRemove(formData, rows);
+		// синхронизируем form_data_row_span.ord
+		reorderSpan(formData);
 	}
 
 	/**
@@ -645,6 +653,30 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
+	}
+
+	/*private static final String SQL_REORDER_SPAN = "MERGE INTO form_data_row_span t USING \n" +
+			"(SELECT id, ord FROM form_data_row \n" +
+			"WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual) s \n" +
+			"ON (t.row_id = s.id) WHEN MATCHED THEN UPDATE SET t.ord = s.ord";*/
+	private static final String SQL_REORDER_SPAN = "MERGE INTO form_data_row_span t USING \n" +
+			"(SELECT id, ord FROM form_data_row \n" +
+			"WHERE form_data_id = 3293 AND temporary = 0 AND manual = 0) s \n" +
+			"ON (t.row_id = s.id) WHEN MATCHED THEN UPDATE SET t.ord = s.ord";
+	/**
+	 * Синхронизирует form_data_row_span.ord со значениями из form_data_row.ord
+	 * @param formData
+	 */
+	private void reorderSpan(FormData formData) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("form_data_id", formData.getId());
+		params.put("temporary", DataRowType.SAVED.getCode());
+		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(SQL_REORDER_SPAN);
+		}
+		getNamedParameterJdbcTemplate().update(SQL_REORDER_SPAN, params);
 	}
 
 	@Override
@@ -941,28 +973,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		getNamedParameterJdbcTemplate().update(sqlSpan.toString().intern(), params);
 	}
 
-	@Override
-	public void removeRows(FormData formData, DataRowRange range) {
-		StringBuilder sql = new StringBuilder("DELETE FROM form_data_row");
-		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND ord BETWEEN :indexFrom AND :indexTo");
-
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("form_data_id", formData.getId());
-		params.put("temporary", DataRowType.SAVED.getCode());
-		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
-		params.put("indexFrom", range.getOffset());
-		params.put("indexTo", range.getOffset() + range.getCount() - 1);
-
-		if (LOG.isTraceEnabled()) {
-			LOG.trace(params);
-			LOG.trace(sql.toString());
-		}
-		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
-		shiftRows(formData, new DataRowRange(range.getOffset() + range.getCount(), -range.getCount()), DataRowType.SAVED);
-		// удаление спанов по диапазону
-		updateSpanAfterRemove(formData, range);
-	}
-
 	private static final String SQL_SHIFT_ROW_ORD = "UPDATE form_data_row " +
 			"SET ord = ord + :shift WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND ord >= :offset";
 	private static final String SQL_SHIFT_SPAN_ORD = "UPDATE form_data_row_span " +
@@ -1158,12 +1168,21 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		getNamedParameterJdbcTemplate().query(ROW_SPAN_QUERY, params, handler);
 	}
 
-	private static final String SQL_UPDATE_PARENT_VALUE = "UPDATE form_data_row SET c%1s = :value, c%1s_style = :style WHERE " +
+	private static final String SQL_UPDATE_PARENT_VALUE = "UPDATE form_data_row SET c%1$s = :value, c%1$s_style = :style WHERE " +
 			"form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND ord = :ord";
 	private static final String SQL_UPDATE_PARENT_SPAN = "UPDATE form_data_row_span SET rowspan = :rowspan " +
 			"WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND ord = :ord AND " +
 			"data_ord = :data_ord";
-	private void updateParentCell(DataRowMapper dataRowMapper, ResultSet rs, DataRow<Cell> childRow, DataRowCallbackHandler handler) throws SQLException {
+
+	/**
+	 *  Обновляем родительские ячейки и удаляем данные из дочерних, если нашли родителя
+	 * @param dataRowMapper
+	 * @param rs
+	 * @param childRow
+	 * @param handler
+	 * @throws SQLException
+	 */
+	void updateParentCell(DataRowMapper dataRowMapper, ResultSet rs, DataRow<Cell> childRow, DataRowCallbackHandler handler) throws SQLException {
 		final List<Column> columns = dataRowMapper.getFormData().getFormColumns();
 		int childRowOrd = childRow.getIndex();
 
@@ -1195,7 +1214,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		getNamedParameterJdbcTemplate().update(String.format(SQL_UPDATE_PARENT_VALUE, dataOrd), params);
 		// обнуляем дочернюю ячейку
 		cell.setStyle(null);
-		cell.setValue(column.getColumnType(), null);
+		cell.setValue(null, null);
 		cell.setColSpan(null);
 		cell.setRowSpan(null);
 	}

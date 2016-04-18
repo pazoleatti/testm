@@ -80,16 +80,6 @@ public class DataRowHelperStub implements DataRowHelper {
     }
 
     @Override
-    public void commit() {
-        // Не требуется
-    }
-
-    @Override
-    public void rollback() {
-        // Не требуется
-    }
-
-    @Override
     public DataRow getDataRow(List<DataRow<Cell>> dataRows, String rowAlias) {
         if (rowAlias == null) {
             throw new NullPointerException("Row alias cannot be null");

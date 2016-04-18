@@ -79,7 +79,7 @@ INSERT INTO form_data_row(id, form_data_id, temporary, manual, ord, alias, c0, c
 --     0   1   2   3   4
 --   ---------------------
 -- 1 |   |   |   |   |   |
---   |---|---|---|---|---|
+--   |---|   |---|---|---|
 -- 2 |   |   |   |   |   |
 --   |---|-------|---|---|
 -- 3 |   |       |   |   |
@@ -94,9 +94,10 @@ INSERT INTO form_data_row(id, form_data_id, temporary, manual, ord, alias, c0, c
 --   |---|-------|   |   |
 -- 8 |   |   |   |   |   |
 --   ---------------------
-INSERT INTO form_data_row_span (id, form_data_id, temporary, manual, data_ord, ord, colspan, rowspan)
+INSERT INTO form_data_row_span (row_id, form_data_id, temporary, manual, data_ord, ord, colspan, rowspan)
   SELECT 14, 3293, 0, 0, 0, 4, null, 2 FROM DUAL UNION
   SELECT 13, 3293, 0, 0, 1, 3, 2, 5 FROM DUAL UNION
   SELECT 14, 3293, 0, 0, 3, 4, null, 2  FROM DUAL UNION
   SELECT 17, 3293, 0, 0, 4, 7, null, 2 FROM DUAL UNION
+  SELECT 11, 3293, 0, 0, 1, 1, null, 2 FROM DUAL UNION
   SELECT 17, 3293, 0, 0, 3, 7, null, 2 FROM DUAL;

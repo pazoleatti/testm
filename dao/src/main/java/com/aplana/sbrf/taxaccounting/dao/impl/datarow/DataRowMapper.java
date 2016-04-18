@@ -178,6 +178,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 				cell.setEditable(true);
 				styleString = value.substring(1);
 			} else {
+				cell.setEditable(false);
 				styleString = value;
 			}
 			// разбираем стиль

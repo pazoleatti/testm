@@ -117,14 +117,6 @@ public interface DataRowDao {
 	void removeAllManualRows(FormData formData);
 
 	/**
-	 * Удаляет строки в диапазоне индексов.
-	 *
-	 * @param formData экземпляр НФ для которой выполняется удаление строк
-	 * @param range диапазон удаляемых строк, индекс начинается с 1
-	 */
-	void removeRows(FormData formData, DataRowRange range);
-
-	/**
 	 * Удаляет указанные строки
 	 *
 	 * @param formData
