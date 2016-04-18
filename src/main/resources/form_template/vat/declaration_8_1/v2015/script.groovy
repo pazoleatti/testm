@@ -1,15 +1,25 @@
 package form_template.vat.declaration_8_1.v2015
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
+import org.apache.commons.lang3.StringUtils
+import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.jdbc.core.RowMapper
 
-import javax.xml.namespace.QName
 import javax.xml.stream.XMLStreamReader
+import java.sql.ResultSet
+import java.sql.SQLException
 
 /**
  * Декларация по НДС (раздел 8.1)
@@ -35,9 +45,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.PRE_CALCULATION_CHECK:
         checkDepartmentParams(LogLevel.WARNING)
+        preXmlCheck()
         break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
+        preXmlCheck()
         generateXML()
         break
     default:
@@ -136,6 +148,140 @@ boolean useTaxOrganCodeProm() {
     return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
 }
 
+@Field
+def declarationType8sources = 18
+@Field
+def declarationType8_1 = 13
+@Field
+def declarationType8sourcesName = "Декларация по НДС (раздел 8 без консолид. формы)"
+@Field
+def declarationType8_1Name = "Декларация по НДС (раздел 8.1)"
+@Field
+def unpId = 1
+@Field
+def DeclarationData declarationSource
+@Field
+def formSource
+@Field
+def sourceSuperRow
+
+void preXmlCheck() {
+    def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
+    declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    def periodName = declarationReportPeriod.name
+    def unpName = departmentService.get(unpId).name
+    def year = declarationReportPeriod.taxPeriod.year
+    def declarationDRP
+    if (corrNumber == 1) {
+        // Декларация по НДС (раздел 8 без консолид. формы)
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter()
+        // ищем не в корректирующем периоде
+        filter.isCorrection = false
+        filter.correctionDate = null
+        filter.departmentIdList = [unpId]
+        filter.taxTypeList = [TaxType.VAT]
+        filter.yearStart = year
+        filter.yearEnd = year
+        filter.reportPeriodIdList = [declarationData.reportPeriodId]
+        def departmentReportPeriods = getListByFilter(filter)
+        def declarations = declarationService.find(declarationType8sources, departmentReportPeriods[0].id)
+        declarationSource = declarations.find { it.accepted }
+    } else if (corrNumber > 1) {
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter()
+        // ищем в корректирующем периоде
+        filter.isCorrection = true
+        filter.departmentIdList = [unpId]
+        filter.taxTypeList = [TaxType.VAT]
+        filter.yearStart = year
+        filter.yearEnd = year
+        filter.reportPeriodIdList = [declarationData.reportPeriodId]
+        def departmentReportPeriods = getListByFilter(filter)
+        if (!departmentReportPeriods.isEmpty()) {
+            departmentReportPeriods.remove(departmentReportPeriods.size() - 1)
+        }
+        // начиная с последней корректировки ищем декларацию с ПризнСвед91 = 0
+        for (drp in departmentReportPeriods.reverse()) {
+            def declarations = declarationService.find(declarationType8_1, drp.id)
+            if (declarations != null && declarations.size() == 1 && declarations[0].accepted && getDeclarationXmlAttr(declarations[0], ['Документ'], 'ПризнСвед91') == '0') {
+                declarationSource = declarations[0]
+                declarationDRP = drp
+                break
+            }
+        }
+    }
+    boolean isFirstCorrection = corrNumber == 1
+    def declarationTypeName = isFirstCorrection ? declarationType8sourcesName : declarationType8_1Name
+    if (declarationSource == null) { // сообщение 1
+        if (isFirstCorrection) {
+            logger.error("Не найдена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s, %s». Расчет раздела 8.1 не будет выполнен.",
+                    declarationTypeName, unpName, year, periodName)
+        } else {
+            logger.error("Не найдена декларация-источник со строкой «001» равной «0». Вид: «%s», Подразделение: «%s», Период: «%s, %s», Дата сдачи корректировки: «меньше %s». Расчет раздела 8.1 не будет выполнен.",
+                    declarationTypeName, unpName, year, periodName, declarationDRP.correctionDate.format("dd.MM.yyyy"))
+        }
+    } else { // сообщение №2
+        if (formDataEvent != FormDataEvent.CALCULATE) {
+            logger.info("Для заполнения строки 005 раздела 8.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s, %s»%s.",
+                    declarationTypeName, unpName, year, periodName, declarationDRP != null ? String.format(", Дата сдачи корректировки: «%s»", declarationDRP.correctionDate.format("dd.MM.yyyy")) : "")
+        }
+        // период 4 квартал
+        def period = reportPeriodService.listByTaxPeriod(declarationReportPeriod.taxPeriod.id).find { it.order == 4 }
+        // Выполнить поиск формы-источника «(724.1.1) Корректировка сумм НДС и налоговых вычетов за прошедшие налоговые периоды»
+        def form
+        if (period) {
+            form = formDataService.getLast(848, FormDataKind.CONSOLIDATED, unpId, period.id, null, null, false)
+        }
+        if (form != null && form.state == WorkflowState.ACCEPTED && reportPeriodService.getCorrectionNumber(form.departmentReportPeriodId) != 0) {
+            formSource = form
+            def dataRows = formDataService.getDataRowHelper(formSource).allSaved
+            def periodCode = getRefBookValue(8, declarationReportPeriod.dictTaxPeriodId).CODE.value
+            def superRow = dataRows.find { it.getAlias() == ('super_purchase_18_' + periodCode) }
+            if (superRow != null) { // сообщение 3
+                sourceSuperRow = superRow
+                if (formDataEvent != FormDataEvent.CALCULATE) {
+                    def drp = departmentReportPeriodService.get(formSource.departmentReportPeriodId)
+                    logger.info("Для заполнения строки 190 раздела 8.1 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s, %s», Дата сдачи корректировки: «%s».",
+                            formSource.kind.title, formSource.formType.name, unpName, year, period.name, drp.correctionDate.format("dd.MM.yyyy"))
+                }
+            } else  if (formDataEvent != FormDataEvent.CALCULATE) { // сообщение 4
+                logger.info("Т.к. не найдена требуемая строка формы-источника 724.1.1, для заполнения строки 190 раздела 8.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s, %s»%s.",
+                        declarationTypeName, unpName, year, periodName, declarationDRP != null ? String.format(", Дата сдачи корректировки: «%s»", declarationDRP.correctionDate.format("dd.MM.yyyy")) : "")
+            }
+        } else if (formDataEvent != FormDataEvent.CALCULATE) { // сообщение 5
+            logger.info("Т.к. не найдена форма-источник 724.1.1, для заполнения строки 190 раздела 8.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s, %s»,%s.",
+                    declarationTypeName, unpName, year, periodName, declarationDRP != null ? String.format(", Дата сдачи корректировки: «%s»", declarationDRP.correctionDate.format("dd.MM.yyyy")) : "")
+        }
+    }
+}
+
+// Получает из декларации атрибут
+def getDeclarationXmlAttr(def declarationData, def treePath, def attrName) {
+    // получение данных из xml'ки
+    def reader = declarationService.getXmlStreamReader(declarationData.id)
+    if (reader == null) {
+        return
+    }
+    def elements = [:]
+
+    try{
+        while (reader.hasNext()) {
+            if (reader.startElement) {
+                elements[reader.name.localPart] = true
+                if (isCurrentNode(treePath, elements)) {
+                    return getXmlValue(reader, attrName)
+                }
+            }
+            if (reader.endElement) {
+                elements[reader.name.localPart] = false
+            }
+            reader.next()
+        }
+    } finally {
+        reader.close()
+    }
+    return null
+}
+
 void generateXML() {
     // атрибуты, заполняемые по настройкам подразделений
     def departmentParam = getDepartmentParam()
@@ -157,20 +303,14 @@ void generateXML() {
 
     // атрибуты, заполняемые по форме 937.1.1 (строки 001, 005 и 190 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
-    def code001 = null
-    def (code005, code190) = [null, null]
-    code005 = (getCode005() ?: 0)
-    def sourceCorrNumber
+    def code001 = 1
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()) {
         if (formData.formType.id == 616) {
-            sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
-            sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-            code190 = code005 + (getDataRow(sourceDataRows, 'total')?.nds ?: 0) // "Всего"
+            code001 = 0
         }
     }
-    if (corrNumber > 0) {
-        code001 = (corrNumber == sourceCorrNumber) ? 0 : 1
-    }
+    def code005 = getCode005(corrNumber)
+    def code190 = (sourceSuperRow != null) ? sourceSuperRow.sumNdsPlus : code005
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
@@ -338,35 +478,15 @@ def getCurrencyCode(String str) {
     return null
 }
 
-def getCode005() {
-    def result = null
-    // получить данные "декларации 8 без консолидированных"
-    def declarationTypeId = 18
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-    def declarationData8 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
-    if (declarationData8 == null || !declarationData8.accepted) {
-        // при отсутствии данные "декларации 8 без консолидированных", получить данные "декларации 8"
-        declarationTypeId = 12
-        declarationData8 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
-        if (declarationData8 == null || !declarationData8.accepted) {
-            return result
-        }
-    }
-    if (declarationData8.id != null) {
-        def reader = declarationService.getXmlStreamReader(declarationData8.id)
-        if (reader == null) {
-            return
-        }
-        try{
-            while (reader.hasNext()) {
-                if (reader.startElement && QName.valueOf('КнигаПокуп').equals(reader.name)) {
-                    result = getXmlDecimal(reader, "СумНДСВсКПк")
-                    break
-                }
-                reader.next()
-            }
-        } finally {
-            reader.close()
+def getCode005(def corrNumber) {
+    def result = BigDecimal.ZERO
+    if (declarationSource != null && declarationSource.id != null) {
+        boolean isDeclSource = corrNumber == 1
+        def treePath = isDeclSource ? ['Документ', 'КнигаПокуп'] : ['Документ', 'КнигаПокупДЛ']
+        def attrName = isDeclSource ? 'СумНДСВсКПк' : 'СумНДСИтП1Р8'
+        def code = getDeclarationXmlAttr(declarationSource, treePath, attrName)
+        if (code) {
+            result = new BigDecimal(code)
         }
     }
     return result
@@ -467,7 +587,106 @@ def getRefBook(def id) {
  * @return
  */
 boolean isCurrentNode(List<String> nodeNames, Map<String, Boolean> elements) {
-    nodeNames.add('Файл')
+    def tempNodes = nodeNames + 'Файл'
     def enteredNodes = elements.findAll { it.value }.keySet() // узлы в которые вошли, но не вышли еще
-    return enteredNodes.containsAll(nodeNames) && enteredNodes.size() == nodeNames.size()
+    return enteredNodes.containsAll(tempNodes) && enteredNodes.size() == tempNodes.size()
+}
+
+@Field
+def mapper
+
+def getDRPMapper() {
+    if (mapper == null) {
+        mapper = new RowMapper<DepartmentReportPeriod>() {
+            @Override
+            public DepartmentReportPeriod mapRow(ResultSet rs, int index) throws SQLException {
+                DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+                departmentReportPeriod.setId(SqlUtils.getInteger(rs, "id"));
+                departmentReportPeriod.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
+                departmentReportPeriod.setReportPeriod(reportPeriodService.get(SqlUtils.getInteger(rs, "report_period_id")));
+                departmentReportPeriod.setActive(!SqlUtils.getInteger(rs, "is_active").equals(0));
+                departmentReportPeriod.setBalance(!SqlUtils.getInteger(rs, "is_balance_period").equals(0));
+                departmentReportPeriod.setCorrectionDate(rs.getDate("correction_date"));
+                return departmentReportPeriod;
+            }
+        }
+    }
+    return mapper
+}
+
+def getLastDepartmentReportPeriod(def departmentId, def reportPeriodId) {
+    def declarationTemplateDao = declarationService.declarationTemplateDao
+    try {
+        return declarationTemplateDao.getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
+                "drp.is_active, drp.is_balance_period, drp.correction_date " +
+                "from " +
+                "department_report_period drp, " +
+                "(select max(correction_date) as correction_date, department_id, report_period_id " +
+                "from department_report_period " +
+                "where department_id = ? and report_period_id = ? " +
+                "group by department_id, report_period_id) m " +
+                "where drp.department_id = m.department_id " +
+                "and drp.report_period_id = m.report_period_id " +
+                "and (drp.correction_date = m.correction_date or (m.correction_date is null " +
+                "and drp.correction_date is null))",
+                [departmentId, reportPeriodId] as Object[], getDRPMapper());
+    } catch (EmptyResultDataAccessException e) {
+        return null;
+    }
+}
+
+def List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter filter) {
+    def declarationTemplateDao = declarationService.declarationTemplateDao
+    String QUERY_TEMPLATE_COMPOSITE_SORT = "select drp.id, drp.department_id, drp.report_period_id, drp.is_active, drp.is_balance_period, drp.correction_date \n" +
+            "          from \n" +
+            "          department_report_period drp \n" +
+            "          join report_period rp on drp.report_period_id = rp.id \n" +
+            "          join tax_period tp on rp.tax_period_id = tp.id \n" +
+            "            %s \n" +
+            "            order by tp.year, drp.CORRECTION_DATE NULLS FIRST";
+    return declarationTemplateDao.getNamedParameterJdbcTemplate().query(String.format(QUERY_TEMPLATE_COMPOSITE_SORT, getFilterString(filter)),
+            new HashMap<String, Object>(2) {{
+                put("yearStart", filter.getYearStart());
+                put("yearEnd", filter.getYearEnd());
+            }}, getDRPMapper());
+}
+
+def String getFilterString(DepartmentReportPeriodFilter filter) {
+    if (filter == null) {
+        return "";
+    }
+    List<String> causeList = new LinkedList<String>();
+    if (filter.isCorrection() != null) {
+        causeList.add("drp.correction_date is " + (filter.isCorrection() ? " not " : "") + " null");
+    }
+    if (filter.isBalance() != null) {
+        causeList.add("drp.is_balance_period " + (filter.isBalance() ? "<>" : "=") + " 0");
+    }
+    if (filter.isActive() != null) {
+        causeList.add("drp.is_active " + (filter.isActive() ? "<>" : "=") + " 0");
+    }
+    if (filter.getCorrectionDate() != null) {
+        causeList.add("drp.correction_date = to_date('" +
+                filter.getCorrectionDate().format('dd.MM.yyyy') +
+                "', 'DD.MM.YYYY')");
+    }
+    if (filter.getDepartmentIdList() != null) {
+        causeList.add(SqlUtils.transformToSqlInStatement("drp.department_id",
+                filter.getDepartmentIdList()));
+    }
+    if (filter.getReportPeriodIdList() != null) {
+        causeList.add(SqlUtils.transformToSqlInStatement("drp.report_period_id",
+                filter.getReportPeriodIdList()));
+    }
+    if (filter.getTaxTypeList() != null) {
+        causeList.add("tp.tax_type in " +
+                SqlUtils.transformTaxTypeToSqlInStatement(filter.getTaxTypeList()));
+    }
+    if (filter.getYearStart() != null || filter.getYearEnd() != null){
+        causeList.add("(:yearStart is null or tp.year >= :yearStart) and (:yearEnd is null or tp.year <= :yearEnd)");
+    }
+    if (causeList.isEmpty()) {
+        return "";
+    }
+    return " where " + StringUtils.join(causeList, " and ");
 }
