@@ -2,7 +2,7 @@
 alter session set NLS_NUMERIC_CHARACTERS = '.,';
 alter session set NLS_DATE_FORMAT = 'dd.MM.yyyy HH24:MI:ss';
 
-SET SERVEROUTPUT ON SIZE 1000000;
+set serveroutput on size 1000000;
 begin dbms_output.put_line('Script start: ' || current_timestamp); end; 
 /
 
@@ -149,12 +149,10 @@ begin
 end;
 /
 
-create sequence seq_form_data_row_span start with 1;
-
 --https://jira.aplana.com/browse/SBRFACCTAX-15026: Реализовать постраничное отображение\редактирование объединенных по вертикали строк
 create table form_data_row_span
 (
-  id           number(9) not null,
+  row_id       number(18) not null,
   form_data_id number(9) not null,
   temporary    number(1) not null,
   manual       number(1) not null,
@@ -165,7 +163,7 @@ create table form_data_row_span
 );
 
 comment on table form_data_row_span is 'Информация по горизонтальном/вертикальном объединении ячеек в НФ';
-comment on column form_data_row_span.id is 'Идентификатор записи';
+comment on column form_data_row_span.row_id is 'Идентификатор записи из таблицы form_data_row';
 comment on column form_data_row_span.form_data_id is 'Идентификатор НФ';
 comment on column form_data_row_span.manual is 'Версия ручного ввода';
 comment on column form_data_row_span.temporary is 'Резервный/временный срез';
@@ -206,7 +204,8 @@ begin
   --Получить идентификатор текущей сессии для логирования
 	    select seq_log_query_session.nextval into v_session_id from dual;
 		insert into log_clob_query (id, form_template_id, sql_mode, session_id) values(seq_log_query.nextval, 0, 'DDL', v_session_id);
-  		
+  
+  dbms_output.enable (buffer_size => null);
 		
   for x in (select table_name, ft.id from user_tables ut full outer join form_template ft on 'FORM_DATA_'||ft.id = ut.table_name where regexp_like(table_name, '^FORM_DATA_[0-9]+$') order by ft.id nulls first, table_name) loop
       if (x.id is null) then
@@ -226,7 +225,7 @@ begin
             insert_body := insert_body || ', C' || y.id ||'  AS c'||y.data_ord ||', get_style(decode(C'|| y.id ||'_style_id' || decode_stmt||', C'|| y.id ||'_editable) as C'||y.data_ord||'_style';  	
 			
 			--Отдельно стили по colspan / rowspan
-			form_data_row_span_stmt := 'insert into form_data_row_span (id, form_data_id, temporary, manual, data_ord, ord, colspan, rowspan) select seq_form_data_row_span.nextval, form_data_id, temporary, manual, '||y.data_ord||' as data_ord, ord, C'||y.id||'_COLSPAN, C'||y.id||'_ROWSPAN FROM '||x.table_name ||' t where exists (select 1 from form_data fd where fd.id = t.form_data_id) and temporary = 0 and (C'||y.id||'_COLSPAN <> 1 or C'||y.id||'_ROWSPAN <> 1)';
+			form_data_row_span_stmt := 'insert into form_data_row_span (row_id, form_data_id, temporary, manual, data_ord, ord, colspan, rowspan) select id, form_data_id, temporary, manual, '||y.data_ord||' as data_ord, ord, C'||y.id||'_COLSPAN, C'||y.id||'_ROWSPAN FROM '||x.table_name ||' t where exists (select 1 from form_data fd where fd.id = t.form_data_id) and temporary = 0 and (C'||y.id||'_COLSPAN <> 1 or C'||y.id||'_ROWSPAN <> 1)';
 			execute immediate form_data_row_span_stmt;	 
 		 end loop;
          insert_body := insert_body || ' from '||x.table_name ||' t where exists (select 1 from form_data fd where fd.id = t.form_data_id) and temporary = 0';
@@ -246,10 +245,10 @@ begin
 	  commit;	
   end loop;
   
-  for dt in (select table_name from user_tables where regexp_like(table_name, '^FORM_DATA_[0-9]+$')) loop
+  for dt in (select table_name from user_tables where regexp_like(table_name, '^FORM_DATA_[0-9]+$') order by table_name) loop
 	query_stmt := 'DROP TABLE '||dt.table_name;
 	execute immediate query_stmt;
-	dbms_output.put_line(query_stmt);
+	dbms_output.put_line(dt.table_name || ' dropped.');
   end loop;
 end;
 /
@@ -264,7 +263,7 @@ alter table form_data_row add constraint form_data_row_unq unique (FORM_DATA_ID,
 alter table form_data_row add constraint form_data_row_chk_temp check (TEMPORARY in (0, 1)) ;
 alter table form_data_row add constraint form_data_row_chk_manual check (MANUAL in (0, 1)) ;
 
-alter table form_data_row_span add constraint form_data_row_span_pk primary key (id);
+alter table form_data_row_span add constraint form_data_row_span_fk_row foreign key(row_id) references form_data_row(id) on delete cascade;
 alter table form_data_row_span add constraint form_data_row_span_fk foreign key (form_data_id) references form_data (id);
 alter table form_data_row_span add constraint form_data_row_span_unq unique (form_data_id, temporary, manual, data_ord, ord);
 alter table form_data_row_span add constraint form_data_row_span_chk_dataord check (data_ord between 0 and 99);

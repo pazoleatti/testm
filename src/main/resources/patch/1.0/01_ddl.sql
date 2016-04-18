@@ -67,6 +67,10 @@ alter table log_system drop constraint log_system_chk_dcl_form;
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
 alter table log_system drop constraint log_system_chk_rp;
 alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951) or report_period_name is not null);
+
+--https://jira.aplana.com/browse/SBRFACCTAX-15438: БД. Изменения для "Фиксировать в ЖА изменения конфиг. параметров"
+UPDATE ref_book_attribute SET NAME = 'Ограничение на выполнение задания в очереди быстрых заданий' WHERE ID = 4104;
+UPDATE ref_book_attribute SET NAME = 'Ограничение на выполнение задания' WHERE ID = 4105;
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14602: Заархивировать JasperPrint-отчеты декларации
 set serveroutput on size 1000000;
@@ -135,8 +139,9 @@ declare
         where jasper.type = 3 and rawtohex(DBMS_LOB.SUBSTR(BLOB_TO_CLOB(bd_jasper.data), 4, 1)) <> '504B0304'
         order by excel.blob_data_id nulls last;
  begin
-   for x in data_to_compress loop
-   
+	dbms_output.enable (buffer_size => null);
+	
+	for x in data_to_compress loop  
 		if (x.excel_blob_data_id is not null) then
 			delete from blob_data where id = x.jasper_blob_data_id;
 			dbms_output.put_line('Deleted : '||x.declaration_data_id||' // '||x.template_name ||' ('||x.department_name||' // '||x.report_period_name || ' ' || x.year||')');
@@ -145,7 +150,7 @@ declare
 			update blob_data bd set bd.data = b_compressed_file where bd.id = x.jasper_blob_data_id;
 			dbms_output.put_line('Compressed : '||x.declaration_data_id||' // '||x.template_name ||' ('||x.department_name||' // '||x.report_period_name || ' ' || x.year||')');
 		end if;
-   end loop;        
+	end loop;        
  end;
 /
 commit;
