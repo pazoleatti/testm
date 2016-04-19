@@ -481,13 +481,14 @@ def logicCheck() {
     // "Идентификационный номер ТС", "Налоговая база", "Единица измерения налоговой базы по ОКЕИ" одинаковы
     rowMap.each { key, rowList ->
         if (rowList.size() > 1) {
-            def errorRows = ''
+            def errorRows = []
             rowList.each { row ->
-                errorRows = errorRows + ', ' + row.getIndex()
+                errorRows.add(row.getIndex())
             }
-            if (!''.equals(errorRows)) {
+            if (!errorRows.empty) {
                 def row = rowList[0]
-                loggerError(row, "Обнаружены строки $errorRows, у которых " +
+                def errorRowsStr = errorRows.join(", ")
+                loggerError(row, "Обнаружены строки $errorRowsStr, у которых " +
                         "Код ОКТМО = ${getRefBookValue(96L, row.codeOKATO)?.CODE?.stringValue ?: '\"\"'}, " +
                         "Код вида ТС = ${getRefBookValue(42L, row.tsTypeCode)?.CODE?.stringValue ?: '\"\"'}, " +
                         "Идентификационный номер ТС = ${row.identNumber ?: '\"\"'}, " +
