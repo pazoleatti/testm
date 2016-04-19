@@ -206,8 +206,11 @@ void consolidation() {
                     if (sourceRow.status == 1 &&
                             (it.formTypeId != lastSourceFormType && sourceRow.type == 1 || it.formTypeId == lastSourceFormType && sourceRow.type != 2) &&
                             (sourceRow.rate == 0 || sourceRow.rate == 9 || sourceRow.rate == 13)) {
-                        def newRow = formNewRow(sourceRow, departmentReportPeriod, fullCorrMap, tinyCorrMap, rows.size())
-                        rows.add(newRow)
+                        // и «Графа 23» > «0» и «Графа 24» > «0» и «Графа 27» >= 0
+                        if(sourceRow.dividends > 0 && sourceRow.sum > 0 && sourceRow.withheldSum >= 0){
+                            def newRow = formNewRow(sourceRow, departmentReportPeriod, fullCorrMap, tinyCorrMap, rows.size())
+                            rows.add(newRow)
+                        }
                     }
                 }
             }

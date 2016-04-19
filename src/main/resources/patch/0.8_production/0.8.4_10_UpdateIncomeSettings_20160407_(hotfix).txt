@@ -1,0 +1,129 @@
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+
+Logger newLogger = new Logger() {
+  public void info(String message, Object... args) {
+  log(LogLevel.INFO, message, args);
+ }
+  
+  public void log(LogLevel level, String message, Object...args) {
+ String extMessage = String.format(message, args);
+ if (messageDecorator != null) {
+   extMessage = messageDecorator.getDecoratedMessage(extMessage);
+ }
+ LogEntry entry = new LogEntry(level, extMessage);
+ entries.add(entry);
+  }
+};
+logger.entries = newLogger.entries
+
+try {
+    def connection = dataSource.connection
+    def stmt = connection.createStatement()
+	
+	def res = stmt.executeQuery("""
+						with dept as (
+						  SELECT * from (
+							SELECT d.id as dept_id, substr(sys_connect_by_path(name, '|'), 2) dept_name
+							FROM   department d
+							START  WITH PARENT_ID = 0
+							CONNECT BY parent_id = prior id ) d
+						  WHERE exists (select 1 from ref_book_value rbv where rbv.reference_value = d.dept_id and rbv.attribute_id = 192)        
+						  ),
+					dept_versions as (
+						  SELECT 
+								 rbr_main_unp.id,
+								 dept.dept_name,
+								 dept.dept_id,
+								 rbr_main_unp.status,
+								 rbr_main_unp.version,
+								 rbr_main_unp.ref_book_id,
+            					 rbr_main_unp.record_id,
+								 nvl(lead(rbr_main_unp.version) over(PARTITION BY rbr_main_unp.record_id ORDER BY rbr_main_unp.version) - interval '1' day , to_date('31.12.9999', 'DD.MM.YYYY')) AS next_version,
+								 nvl(lead(rbr_main_unp.version) over(PARTITION BY rbr_main_unp.record_id, rbr_main_unp.status ORDER BY rbr_main_unp.version) - interval '1' day , to_date('31.12.9999', 'DD.MM.YYYY')) AS next_actual_version
+						  FROM   dept
+						  LEFT   JOIN ref_book_value rbv_main_unp ON dept.dept_id = rbv_main_unp.reference_value AND rbv_main_unp.attribute_id = 192
+						  LEFT   JOIN ref_book_record rbr_main_unp ON rbr_main_unp.id = rbv_main_unp.record_id)
+					select d.dept_id, d.dept_name, dv.id,  dv.version, rbr.id, dv.record_id
+					from dept d
+					left join dept_versions dv on d.dept_id = dv.dept_id and (status = 0 and to_date('01.01.2016', 'DD.MM.YYYY') >= version and to_date('01.01.2016', 'DD.MM.YYYY') <= next_actual_version)
+					left join ref_book_record rbr on rbr.id = dv.id + 1
+					order by rbr.id nulls last, d.dept_name
+	""")
+	  	while (res.next()) {
+		  newLogger.info("dept_id = ${res.getInt(1)}; name = ${res.getString(2)}; old_record_id = ${res.getString(3)}; old_version = ${res.getDate(4)}; target_record.id = ${res.getString(5)}; init_record_id = ${res.getString(6)};" 
+					 )
+	  	}
+  
+  def insert_res1 = stmt.executeUpdate("""
+			insert into ref_book_record (id, record_id, ref_book_id, version, status)
+				with dept as (
+					  SELECT * from (
+						SELECT d.id as dept_id, substr(sys_connect_by_path(name, '|'), 2) dept_name
+						FROM   department d
+						START  WITH PARENT_ID = 0
+						CONNECT BY parent_id = prior id ) d
+					  WHERE exists (select 1 from ref_book_value rbv where rbv.reference_value = d.dept_id and rbv.attribute_id = 192)        
+					  ),
+				dept_versions as (
+					  SELECT 
+							 rbr_main_unp.id,
+							 dept.dept_name,
+							 dept.dept_id,
+							 rbr_main_unp.status,
+							 rbr_main_unp.version,
+							 rbr_main_unp.ref_book_id,
+							 rbr_main_unp.record_id,
+							 nvl(lead(rbr_main_unp.version) over(PARTITION BY rbr_main_unp.record_id ORDER BY rbr_main_unp.version) - interval '1' day , to_date('31.12.9999', 'DD.MM.YYYY')) AS next_version,
+							 nvl(lead(rbr_main_unp.version) over(PARTITION BY rbr_main_unp.record_id, rbr_main_unp.status ORDER BY rbr_main_unp.version) - interval '1' day , to_date('31.12.9999', 'DD.MM.YYYY')) AS next_actual_version
+					  FROM   dept
+					  LEFT   JOIN ref_book_value rbv_main_unp ON dept.dept_id = rbv_main_unp.reference_value AND rbv_main_unp.attribute_id = 192
+					  LEFT   JOIN ref_book_record rbr_main_unp ON rbr_main_unp.id = rbv_main_unp.record_id)
+				select dv.id + 1 as new_id, dv.record_id, dv.ref_book_id, to_date('01.01.2016', 'DD.MM.YYYY') as version, 0 as status
+				from dept d
+				left join dept_versions dv on d.dept_id = dv.dept_id and (status = 0 and to_date('01.01.2016', 'DD.MM.YYYY') > version and to_date('01.01.2016', 'DD.MM.YYYY') <= next_actual_version)
+				left join ref_book_record rbr on rbr.id = dv.id + 1
+				where rbr.id is null and dv.version is not null
+				order by d.dept_name
+	""")
+  newLogger.info("Insert ref_book_record (main) = ${insert_res1} rows") 
+  
+  def insert_res2 = stmt.executeUpdate("""
+	insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value)
+		select rbr2016.id, attribute_id, string_value, number_value, date_value, reference_value 
+		from ref_book_record rbr2016
+		join ref_book_value rbv2015 on rbv2015.record_id = rbr2016.id - 1
+		where ref_book_id = 33 and version = to_date('01.01.2016', 'DD.MM.YYYY') 
+			and not exists (select 1 from ref_book_value rbv where rbv.attribute_id = rbv2015.attribute_id and rbv.record_id = rbr2016.id)
+			and exists (select 1 from ref_book_value rbv where rbv.attribute_id = 192 and rbv.record_id = rbr2016.id - 1)
+	""")
+  newLogger.info("Insert ref_book_value (main) = ${insert_res2} rows") 
+  
+  def insert_res3 = stmt.executeUpdate("""
+	insert into ref_book_record (id, record_id, ref_book_id, version, status)
+		select rbr2015.id + 1, seq_ref_book_record_row_id.nextval as record_id, 330, to_date('01.01.2016', 'DD.MM.YYYY'), 0
+		from ref_book_record rbr2016
+		join ref_book_value rbv2015_link on rbv2015_link.reference_value = rbr2016.id - 1 and rbv2015_link.attribute_id = 3301
+		join ref_book_record rbr2015 on rbr2015.id = rbv2015_link.record_id
+		where rbr2016.ref_book_id = 33 and rbr2016.version = to_date('01.01.2016', 'DD.MM.YYYY')
+			and not exists (select 1 from ref_book_record rbr where rbr.id = rbr2015.id + 1)
+			and exists (select 1 from ref_book_value rbv where rbv.attribute_id = 192 and rbv.record_id = rbr2016.id - 1)
+	""")
+  newLogger.info("Insert ref_book_record (table) = ${insert_res3} rows") 
+  
+  def insert_res4 = stmt.executeUpdate("""
+	insert into ref_book_value (record_id, attribute_id, string_value, number_value, date_value, reference_value)
+		select rbr2016.id, attribute_id, case when attribute_id = 3323 then null else string_value end string_value, number_value, date_value, case when attribute_id = 3301 then reference_value + 1 else  reference_value  end  reference_value 
+		from ref_book_record rbr2016
+		join ref_book_value rbv2015 on rbv2015.record_id = rbr2016.id - 1
+		where ref_book_id = 330 and version = to_date('01.01.2016', 'DD.MM.YYYY') and not exists (select 1 from ref_book_value rbv where rbv.attribute_id = rbv2015.attribute_id and rbv.record_id = rbr2016.id)
+			and exists (select 1 from ref_book_value rbv where rbv.attribute_id = 3301 and rbv.record_id = rbr2016.id - 1)
+	""")
+  newLogger.info("Insert ref_book_value (table) = ${insert_res4} rows") 
+		
+    connection.close()
+} catch (Exception ex) {
+    logger.error("Error: ${ex.getLocalizedMessage()}")
+}
+  

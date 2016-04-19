@@ -1,0 +1,1656 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="R1">
+        <cell alias="consumptionTypeId" colSpan="2" rowSpan="1" stringValue="Расходы от реализации" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="table2" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+    </row>
+    <row alias="R2">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20020"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="3" stringValue="Расходы на приобретение материальных запасов, инструментов, приспособлений, инвентаря, приборов, спецодежды и другого имущества, не являющихся амортизируемым имуществом"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Ввод в эксплуатацию имущества стоимостью менее стоимости  амортизируемого имущества, определенной п. 1, ст. 256 НК РФ, учитываемого в бухгалтерском учёте как объекты основных средств. Удорожание (реконструкция, модернизация) в размере менее стоимости  амортизируемого имущества, определенной п. 1, ст. 256 НК РФ полностью самортизированного имущества или объектов основных средств, относящихся к «0» амортизационной группе, а также имущества, ранее отражённого в РНУ-10 (до изменения ВНД в РНУ-48) - независимо от суммы "/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 8"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-10"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R3">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20030"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Стоимость приобретённых книг, брошюр и справочников"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 8"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-10"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R4">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20050"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Часть стоимости переданного в эксплуатацию имущества (по объектам имущества, учитываемого в бухгалтерском учёте в качестве запасов), приобретенного на условиях отсрочки платежа,  в виде разницы между суммой, подлежащей оплате по договору, и стоимостью приобретения на условиях немедленной оплаты, признаваемой в бухгалтерском учете процентными расходам. "/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 8"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-10"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R5">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20130"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="3" stringValue="Расходы на приобретение работ и услуг производственного характера, выполняемых сторонними организациями или индивидуальными предпринимателями, а также выполнение этих работ за счёт собственных средств"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Капвложения в неотделимые улучшения арендованного имущества (осуществлённые до 01.01.2006), используемое для банковской деятельности по договорам со сторонними организациями, или произведённые собственными службами"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 8"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-10"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R6">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20200"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы, связанные с изготовлением и внедрением платёжно-расчётных средств (пластиковые карточки, дорожные чеки и др.)"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-12"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R7">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20210"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Затраты на капитальный ремонт и проведение технических осмотров, учитываемых в бухгалтерском учете в составе основных средств, либо в качестве отдельного инвентарного объекта"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 8"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-10"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R8">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20280"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Расходы на оплату труда - начисления стимулирующего характера, в т.ч. премии за производственные результаты, надбавки к тарифным ставкам и окладам за профессиональное мастерство, высокие достижения в труде и иные подобные показатели"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Резерв на выплату вознаграждения по итогам работы за год"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-15"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R9">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20390"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="4" stringValue="Расходы на оплату труда - суммы платежей (взносов) по договорам обязательного страхования, а также по договорам добровольного страхования (договорам негосударственного пенсионного обеспечения), заключённым в пользу работников со страховыми организациями (негосударственными пенсионными фондами), имеющими лицензии, выданные в соответствии с законодательством РФ"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по договорам добровольного личного страхования, предусматривающих выплату в случаях смерти и (или) причинения вреда здоровью в пределах установленных норм"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 7"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-14"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R10">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20420"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по договорам добровольного личного страхования на оплату медицинских расходов в пределах установленных норм"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 7"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-14"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R11">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20440"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по договорам негосударственного пенсионного обеспечения работников в рамках корпоративной пенсионной программы  в пределах установленных норм"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 7"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-14"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R12">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20460"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Платежи по договорам добровольного долгосрочного страхования жизни, добровольного пенсионного страхования, учитываемые для налогообложения в пределах установленных норм"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 7"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-14"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R13">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20470"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="5" stringValue="Суммы начисленной амортизации"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Суммы начисленной амортизации по нематериальным активам, учитываемые для целей налогообложения"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 4"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R14">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20480"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Начисленная амортизация на сумму капвложений в предоставленные в аренду объекты ОС в форме неотделимых улучшений, произведённых арендатором с согласия арендодателя, а также капвложения в предоставленные по договору безвозмездного пользования объекты ОС в форме неотделимых улучшений, произведённых организацией - ссудополучателем с согласия ссудодателя"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 4"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-47"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R15">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20490"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Суммы 10% капитальных вложений, относимые на расходы"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 4"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-47"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R16">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20500"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Суммы 30% капитальных вложений, относимые на расходы"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 4"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-47"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R17">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20510"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Суммы начисленной амортизации по основным средствам, учитываемые для целей налогообложения"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 4"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-47"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R18">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20520"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Суммы начисленной амортизации при применении к основной норме амортизации  специального коэффициента"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Не выше 3 в отношении амортизируемых основных средств, являющихся предметом договора финансовой аренды (лизинга), когда данные основные средства должны учитываться в соответствии с  условиями договора финансовой аренды (лизинга)"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 4"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-47"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R19">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20630"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Суммы налогов и сборов, таможенных пошлин и сборов, начисленные в установленном законодательством РФ, за исключением перечисленных в ст. 270 НК РФ"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Суммы НДС, включённого в первоначальную стоимость объектов, учитываемых в бухгалтерском учёте в составе основных средств и нематериальных активов"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 8"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-10"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R20">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20820"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Расходы на аудиторские услуги, расходы на публикацию бухгалтерской отчётности, а также публикацию и иное раскрытие другой информации, если законодательством РФ на налогоплательщика возложена обязанность осуществлять их публикацию (раскрытие)"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по аудиторским проверкам, а также расходы на публикацию отчётности"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-12"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R21">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20840"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Представительские расходы, связанные с официальным приёмом и обслуживанием представителей других организаций, участвующих в переговорах в целях установления и поддержания сотрудничества"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Представительские расходы в пределах утверждённых норм"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 7"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-14"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R22">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20850"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Расходы на подготовку и переподготовку кадров, состоящих в штате на договорной основе"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на подготовку кадров с целью повышения квалификации"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-12"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R23">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20930"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="4" stringValue="Расходы, связанные с приобретением права на использование программ для ЭВМ и баз данных по договорам с правообладателем (по лицензионным соглашениям) и обновление программ для ЭВМ и баз данных, а именно: - стоимость лицензий на занятие отдельными видами деятельности - разрешений - объектов интеллектуальной собственности  стоимостью менее стоимости  амортизируемого имущества, определенной п.1 ст.256  и сроком использования более 12 месяцев - исключительных прав на программы для ЭВМ стоимостью менее стоимости  амортизируемого имущества, определенной п.1 ст.256  - нематериальные активы в бухгалтерском учёте - объектов интеллектуальной собственности, не относящихся к нематериальным активам"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Плата за право пользования объектами интеллектуальной собственности (в т.ч. на использование программ для ЭВМ и баз данных по лицензионным соглашениям), учитываемые в бухгалтерском учёте как  нематериальные активы (СПИ более 12 месяцев), оприходованные после 01.01.2009"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 8"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-10"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R24">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20940"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Плата за право пользования объектами интеллектуальной собственности (в т.ч. на использование программ для ЭВМ и баз данных по лицензионным соглашениям), учитываемые в бухгалтерском учёте как  нематериальные активы (СПИ более 12 месяцев), оприходованные до 01.01.2009"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-12"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R25">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20950"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на приобретение объектов интеллектуальной собственности (в том числе расходы на приобретение исключительных прав на программы для ЭВМ) менее стоимости  амортизируемого имущества, определенной п. 1, ст. 256 НК РФ и сроком полезного использования более 12 месяцев, учитываемые в бухгалтерском учёте как  нематериальные активы, оприходованные после 01.01.2009"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 8"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-10"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R26">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20960"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на приобретение объектов интеллектуальной собственности (в том числе расходы на приобретение исключительных прав на программы для ЭВМ) менее стоимости  амортизируемого имущества, определенной п. 1, ст. 256 НК РФ и сроком полезного использования более 12 месяцев, учитываемые в бухгалтерском учёте как  нематериальные активы, оприходованные после 01.01.2009"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-12"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R27">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20970"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="2" stringValue="Расходы, связанные с приобретением права на заключение договора аренды земельных участков, при условии заключения указанного договора аренды"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы, связанные с приобретением права на аренду земельных участков, кроме расходов по договорам аренды длительностью менее 1 года"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-12"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R28">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20980"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на приобретение права на земельные участки, по ст. 264.1 НК РФ,  в течение срока действия договора аренды земельного участка, не подлежащего государственной регистрации (сроком менее 1 года)"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-12"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R29">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21030"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Расходы на рекламные мероприятия"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на рекламу в пределах установленных норм"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 7"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-14"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R30">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21050"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="6" stringValue="Расходы, связанные с уступкой права требования"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Стоимость права требования, реализованного до наступления срока погашения, предусмотренного кредитным договором"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-70"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R31">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21060"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Убыток от реализации права требования до наступления срока погашения, предусмотренного кредитным договором - размер убытка, соответствующий сумме процентов, исчисленных в соответствии со ст. 269 НК РФ"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 16"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-70"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R32">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21070"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Убыток от реализации права требования до наступления срока погашения, предусмотренного кредитным договором – размер убытка, превышающий сумму процентов, исчисленных с соответствии со ст. 269 НК РФ"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 17"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-70"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R33">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21080"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Стоимость права требования, реализованного после наступления срока погашения, предусмотренного кредитным договором"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6 - графа 7"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-71"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R34">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21090"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Убыток от реализации права требования после наступления срока погашения, предусмотренного кредитным договором"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-71"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R35">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21100"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Стоимость права требования, реализованного как финансовая услуга"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15 - графа 17"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-72"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R36">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21110"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Убытки от реализации амортизируемого имущества"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Убытки от реализации амортизируемого имущества, относящиеся к расходам текущего отчётного периода"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 9"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-50"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R37">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21170"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Расходы (убытки) по операциям купли-продажи драгоценных металлов и драгоценных камней в виде разницы между ценой реализации и учётной стоимостью"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по поставочным срочным сделкам, квалифицированным в качестве сделок на поставку предмета с отсрочкой исполнения для целей налогообложения"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-83"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R38">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21230"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="11" stringValue="Расходы по операциям с ценными бумагами"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы от реализации (погашения) векселей сторонних эмитентов"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-57"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R39">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21240"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по операциям с ОФЗ (включая цены приобретения и расходы, связанные с приобретением и реализацией)"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 21"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-51"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R40">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21250"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы, связанные с реализацией субфедеральных и муниципальных ценных бумаг"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 32"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R41">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21260"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы, связанные с реализацией Еврооблигаций РФ"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 32"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R42">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21270"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы, связанные с реализацией ОВГВЗ"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 32"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R43">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21280"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы, связанные с реализацией акций"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 32"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R44">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21290"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы, связанные с реализацией корпоративных облигаций"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 32"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R45">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21300"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы, связанные с реализацией прочих ценных бумаг"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 32"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R46">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21310"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Затраты по операциям РЕПО (расходы, связанные с приобретением и реализацией ценных бумаг по сделкам РЕПО)"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 5"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-64"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R47">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21320"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактических расходов на приобретение ценных бумаг от  рыночной цены"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 24"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-51"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R48">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21330"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактических расходов на приобретение ценных бумаг от  рыночной цены"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 40"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="ф. 7.8"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R49">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21390"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="4" stringValue="Другие расходы, связанные с банковской деятельностью"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Стоимость реализованных имущественных прав, включая расходы связанные с их приобретением"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R50">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21400"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Остаточная стоимость реализованного амортизируемого имущества и расходы, связанные с его реализацией"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R51">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21410"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Цена приобретения реализованного прочего имущества (остаточная стоимость прочего имущества, стоимость которого уже отнесена на расходы) и расходы, связанные с его реализацией"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R52">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21420"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Убытки от реализации амортизируемого имущества (без учёта сделок, по которым получена прибыль)"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R53">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Контрольная сумма" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="table2" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+    </row>
+    <row alias="R54">
+        <cell alias="consumptionTypeId" colSpan="2" rowSpan="1" stringValue="Внереализационные расходы" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="table2" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="Заголовок раздела (серый)"/>
+    </row>
+    <row alias="R55">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="24650"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="3" stringValue="Расходы в виде процентов по долговым обязательствам любого вида, в т.ч. процентов начисленных по ценным бумагам и иным выпущенным (эмитированным) обязательствам, а также процентов, уплачиваемых в связи с реструктуризацией задолженности по налогам и сборам в соответствии с порядком, установленным Правительством РФ"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный расход по процентным векселям"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 14"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-61"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R56">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="24660"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Дисконтный расход дисконтным векселям"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 18"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-62"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R57">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="24670"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по сделкам РЕПО и займам ценными бумагами"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 7"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-53"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R58">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="25680"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="2" stringValue="Расходы в виде отрицательной курсовой разницы, возникающей от переоценки имущества в виде валютных ценностей и требований (обязательств), стоимость которых выражена в иностранной валюте"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Отрицательная разница от переоценки процентных векселей"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-58"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R59">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="25690"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Отрицательная разница от переоценки дисконтных векселей"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-59"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R60">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="25830"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Расходы (убытки) от проведения операций с иностранной валютой, осуществляемых в наличной и безналичной формах, включая комиссионные сборы (вознаграждения) при операциях по покупке или продаже иностранной валюты, в т.ч. за счёт и по поручению клиента, от операций с валютными ценностями и расходы по управлению и защите от валютных рисков"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по поставочным срочным сделкам, квалифицированным в качестве сделок на поставку предмета с отсрочкой исполнения для целей налогообложения"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-83"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R61">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26310"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="4" stringValue="Расходы на формирование резервов"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Резерв под возможное обесценение ОФЗ"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12 (заполняется ЦА)"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-25"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R62">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26320"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Резерв под возможное обесценение акций, РДР"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 16 (заполняется ЦА)"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-26"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R63">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26330"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Резерв под возможное обесценение субфедеральных и муниципальных облигаций , ОВГВЗ и Еврооблигаций РФ"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 16 (заполняется ЦА)"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-27"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R64">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26340"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Резерв по сомнительным долгам"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-30"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R65">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26360"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="2" stringValue="Расходы на ликвидацию основных средств и иного имущества"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на ликвидацию выводимых из эксплуатации основных средств, включая суммы недостаточной в соответствии с установленным сроком полезного использования амортизации, а также расходы на ликвидацию незавершённого строительства и иного имущества, монтаж которого не завершён (расходы на демонтаж, разборку, вывоз разобранного имущества), охрану недр и другие аналогичные работы"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R66">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26370"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Суммы недоначисленной в соответствии с установленным сроком полезного использования амортизации при частичной ликвидации основных средств"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 6"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-49"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R67">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26820"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="19" stringValue="Расходы  по операциям с финансовыми инструментами срочных сделок"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 10.2"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-80"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R68">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26830"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по операциям со сделками опцион, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 13.2"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-81"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R69">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26840"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по операциям со сделками своп, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 14.2"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-82"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R70">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26850"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по операциям со сделками CDS, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 23"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-84"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R71">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26860"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по сделкам поставочный форвард, предусматривающих покупку-продажу ценных бумаг,квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 28"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-85"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R72">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26870"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по сделкам поставочный опцион, предусматривающих покупку-продажу ценных бумаг в результате возникновения кредитного события и квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 32"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-86"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R73">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26880"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы  по сделкам кредитно-дефолтный своп, предусматривающих покупку-продажу ценных бумаг, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 23"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-87"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R74">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26890"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по операциям уступки (новации) сделок с ФИСС и досрочного прекращения (терминации) сделок с ФИСС"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-88"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R75">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26900"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходыпо срочным сделкам, квалифицированным в качестве сделок с ФИСС и признаваемым обращающимися на организованном рынке "/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 12"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-89"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R76">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26910"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от максимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: опцион."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11.2"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-80"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R77">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26920"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от максимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: опцион."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 11.2"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-81"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R78">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26930"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от максимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: своп."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15.2"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-82"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R79">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26940"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от максимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: CDS ."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 19"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-84"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R80">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26950"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от максимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: форвард на поставку ценных бумаг."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 26"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-85"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R81">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26960"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от максимальной расчетной цены по операциям с ФИСС, необращающимся на ОРЦБ: опцион на поставку ценных бумаг."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 30"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-86"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R82">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26970"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения стоимости приобретения ценных бумаг от максимальной (расчетной) цены:  поставочный опцион, предусмаотривающий покупку-продажу ценных бумаг. "/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 33"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-86"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R83">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26980"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения стоимости приобретения ценных бумаг от максимальной (расчетной) цены:  кредитно-дефолтный своп, предусматривающий продажу ценных бумаг."/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 24"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-87"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R84">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26990"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от максимальной (расчетной) цены по операциям с  необращающимися ФИСС: уступка (новации) и досрочное прекращение (терминация) сделок с ФИСС"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 15"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-88"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R85">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="27000"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения стоимости приобретения ценных бумаг от максимальной (расчетной) цены: поставочный форвард, предусматривающий покупку-продажу ценных бумаг"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 29"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-85"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R86">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="27060"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Прочие внереализационные расходы"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы в виде превышения   стоимости  приобретаемых активов  ( акций, долей, паев)  над стоимостью  имущества, переданного в их оплату "/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" stringValue="графа 8"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" stringValue="РНУ-10"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="table2" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R87">
+        <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Контрольная сумма" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionBuhSumPrevTaxPeriod" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionTaxSumRnuSource" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="consumptionTaxSumS" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="rnuNo" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="opuSumByEnclosure3" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="opuSumByTableP" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="table2" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
+    </row>
+</rows>
