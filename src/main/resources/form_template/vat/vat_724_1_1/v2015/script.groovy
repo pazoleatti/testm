@@ -1,10 +1,22 @@
 package form_template.vat.vat_724_1_1.v2015
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
+import org.apache.commons.lang3.StringUtils
 import groovy.transform.Field
+import org.springframework.jdbc.core.RowMapper
+
+import javax.xml.stream.XMLStreamReader
+import java.sql.ResultSet
+import java.sql.SQLException
 
 /**
  * (724.1.1) Корректировка сумм НДС и налоговых вычетов за прошедшие налоговые периоды
@@ -29,8 +41,11 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        calc()
-        logicCheck()
+        checkFillDeclarationMap(true)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicCheck()
+        }
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
@@ -51,6 +66,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
+        break
+    case FormDataEvent.MOVE_ACCEPTED_TO_APPROVED:
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
+        checkDeclarationAccepted()
         break
     case FormDataEvent.COMPOSE:
         consolidation()
@@ -109,6 +129,9 @@ def totalColumns7_9_Purchase = ['sumNdsPlus', 'sumNdsMinus', 'sum']
 
 @Field
 def skipColumns = ['sumMinus', 'sumNdsMinus']
+
+@Field
+def skipColumnsDeclaration = ['sumMinus', 'sumNdsMinus', 'sum']
 
 // Группируемые атрибуты (графа 2)
 @Field
@@ -235,6 +258,213 @@ def getNewRow(boolean isGroup_1_6) {
     return newRow
 }
 
+@Field
+def periodNames = ["первый квартал", "второй квартал", "третий квартал", "четвертый квартал"]
+@Field
+def declarationType9sources = 21
+@Field
+def declarationType9_1 = 15
+@Field
+def declarationType8sources = 18
+@Field
+def declarationType8_1 = 13
+@Field
+def declarationType9sourcesName = 'Декларация по НДС (раздел 9 без консолид. формы)'
+@Field
+def declarationType9_1Name = 'Декларация по НДС (раздел 9.1)'
+@Field
+def declarationType8sourcesName = "Декларация по НДС (раздел 8 без консолид. формы)"
+@Field
+def declarationType8_1Name = "Декларация по НДС (раздел 8.1)"
+@Field
+def unpId = 1
+@Field
+def declarationSaleMap
+@Field
+def declarationPurchaseMap
+
+void checkFillDeclarationMap(boolean showMessages) {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    // Проверка налогового периода
+    def errorNumbers = []
+    def periodTypesSale = [] // Для заполнения граф 4(5), 7(8) по фиксированным строкам №16, 17
+    def periodTypesPurchase = [] // Для заполнения графы 7(8) по фиксированной строке №22
+    def head8Index = getDataRow(dataRows, 'head_8').getIndex()
+    for (def row : dataRows) {
+        if (row.getAlias() == null) {
+            def periodType = getRefBookValue(8, row.period)
+            if (!periodNames.contains(periodType?.NAME?.stringValue)) {
+                errorNumbers.add(row.getIndex())
+            } else {
+                if (row.getIndex() < head8Index) {
+                    periodTypesSale.add(periodType)
+                } else {
+                    periodTypesPurchase.add(periodType)
+                }
+            }
+        }
+    }
+    boolean isError = false
+    if (showMessages && !errorNumbers.isEmpty()) {
+        logger.error("Строки ${errorNumbers.join(', ')}: Графа «${getColumnName(dataRows[0], 'period')}» заполнена неверно! Возможные значения: «${periodNames.join('», «')}».")
+        isError = true
+    }
+
+    if (!isError) {
+        def reportPeriods = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
+        def unpName = departmentService.get(unpId).name
+        // разделы 1-7, продажи
+        declarationSaleMap = checkGetSourceDeclaration(true, showMessages, periodTypesSale, reportPeriods, reportPeriod, unpName, declarationType9sources, declarationType9_1)
+        // разделы 8, 9, покупки
+        declarationPurchaseMap = checkGetSourceDeclaration(false, showMessages, periodTypesPurchase, reportPeriods, reportPeriod, unpName, declarationType8sources, declarationType8_1)
+    }
+}
+
+// проверки наличия деклараций
+def checkGetSourceDeclaration(boolean isSale, boolean showMessages, def periodTypes, def reportPeriods, def reportPeriod, def unpName, def typeFirst, def typeSecond) {
+    def declarationTypeNameFirst = isSale ? declarationType9sourcesName : declarationType8sourcesName
+    def declarationTypeNameSecond = isSale ? declarationType9_1Name : declarationType8_1Name
+    def year = reportPeriod?.taxPeriod?.year
+    def periodTypeIds = periodTypes.sort{ it.CODE.stringValue }.collect { it.record_id.value }
+    def declarationMap = [:]
+    periodTypeIds.each { periodTypeId ->
+        def periodName = getRefBookValue(8, periodTypeId)?.NAME?.stringValue
+        def period = reportPeriods.find { it.dictTaxPeriodId == periodTypeId }
+        def departmentReportPeriod = getLastDepartmentReportPeriod(unpId, period.id)
+        def corrNumber = reportPeriodService.getCorrectionNumber(departmentReportPeriod.id)
+        if (corrNumber == 0) { // сообщение 3
+            def MESSAGE_3_SALE = "Невозможно определить декларацию-источник, т.к. не создан корректирующий период «%s, %s». " +
+                    "При заполнении строк «ВСЕГО за %s» по доп. листу книги продаж по ставке 18%%, 10%% значения требуемых строк декларации-источника будут приняты за нулевые."
+            def MESSAGE_3_PURCHASE = "Невозможно определить декларацию-источник, т.к. не создан корректирующий период «%s, %s». " +
+                    "При заполнении строки «ВСЕГО за %s» по доп. листу книги покупок по ставке 18%% значение требуемой строки декларации-источника будет принято за нулевое."
+            if (showMessages) {
+                logger.warn(isSale ? MESSAGE_3_SALE : MESSAGE_3_PURCHASE, year, periodName, periodName)
+            }
+        } else if (corrNumber == 1) {
+            // Выполнить поиск декларации-источника «Декларация по НДС (раздел 8/9 без консолид. формы)»
+            DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter()
+            // ищем не в корректирующем периоде
+            filter.isCorrection = false
+            filter.correctionDate = null
+            filter.departmentIdList = [unpId]
+            filter.taxTypeList = [TaxType.VAT]
+            filter.yearStart = year
+            filter.yearEnd = year
+            def departmentReportPeriods = getListByFilter(filter)
+            def declarationDRP = departmentReportPeriods.find { it.reportPeriod.dictTaxPeriodId == periodTypeId }
+            def declarations = declarationService.find(typeFirst, declarationDRP.id)
+            if (declarations != null && declarations.size() == 1 && declarations[0].accepted) { // Сообщение 4
+                declarationMap.put(periodTypeId, declarations[0])
+                def MESSAGE_4_SALE_SHORT = "Для заполнения строк «ВСЕГО за %s» по доп. листу книги продаж по ставке 18%%, 10%% определена декларация-источник. " +
+                        "Вид: «%s», Подразделение: «%s», Период: «%s, %s»."
+                def MESSAGE_4_PURCHASE_SHORT = "Для заполнения строки «ВСЕГО за %s» по доп. листу книги покупок по ставке 18%% определена декларация-источник. " +
+                        "Вид: «%s», Подразделение: «%s», Период: «%s, %s»."
+                if (showMessages) {
+                    logger.info(isSale ? MESSAGE_4_SALE_SHORT : MESSAGE_4_PURCHASE_SHORT, periodName, declarationTypeNameFirst, unpName, year, periodName)
+                }
+            } else if (declarations.isEmpty() || !declarations[0].accepted) { // Сообщение 1
+                def MESSAGE_1_SALE = "Не найдена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s, %s». При заполнении строк «ВСЕГО за %s» " +
+                        "по доп. листу книги продаж по ставке 18%%, 10%% значения требуемых строк декларации-источника будут приняты за нулевые."
+                def MESSAGE_1_PURCHASE = "Не найдена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s, %s». При заполнении строки «ВСЕГО за %s» " +
+                        "по доп. листу книги покупок по ставке 18%% значение требуемой строки декларации-источника будет принято за нулевое."
+                if (showMessages) {
+                    logger.warn(isSale ? MESSAGE_1_SALE : MESSAGE_1_PURCHASE, declarationTypeNameFirst, unpName, year, periodName, periodName)
+                }
+            }
+        } else {
+            // Выполнить поиск декларации-источника «Декларация по НДС (раздел 8/9.1)»
+            DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter()
+            // ищем в корректирующем периоде
+            filter.isCorrection = true
+            filter.departmentIdList = [unpId]
+            filter.taxTypeList = [TaxType.VAT]
+            filter.yearStart = year
+            filter.yearEnd = year
+            def departmentReportPeriods = getListByFilter(filter)
+            // убираем последнюю корректировку
+            if (!departmentReportPeriods.isEmpty()) {
+                departmentReportPeriods.remove(departmentReportPeriods.size() - 1)
+            }
+            // начиная с последней корректировки ищем декларацию с ПризнСвед91 = 0
+            DepartmentReportPeriod drpTemp
+            for (drp in departmentReportPeriods.reverse()) {
+                if (drp.reportPeriod.dictTaxPeriodId != periodTypeId) {
+                    continue
+                }
+                def declarations = declarationService.find(typeSecond, drp.id)
+                if (declarations != null && declarations.size() == 1 && declarations[0].accepted && getDeclarationXmlAttr(declarations[0], ['Документ'], 'ПризнСвед91') == '0') {
+                    declarationMap.put(periodTypeId, declarations[0])
+                    drpTemp = drp
+                    break
+                }
+            }
+            if (declarationMap[periodTypeId] != null) { // Сообщение 4
+                def MESSAGE_4_SALE = "Для заполнения строк «ВСЕГО за %s» по доп. листу книги продаж по ставке 18%%, 10%% определена декларация-источник. " +
+                        "Вид: «%s», Подразделение: «%s», Период: «%s, %s», Дата сдачи корректировки: «%s»."
+                def MESSAGE_4_PURCHASE = "Для заполнения строки «ВСЕГО за %s» по доп. листу книги покупок по ставке 18%% определена декларация-источник. " +
+                        "Вид: «%s», Подразделение: «%s», Период: «%s, %s», Дата сдачи корректировки: «%s»."
+                if (showMessages) {
+                    logger.info(isSale ? MESSAGE_4_SALE : MESSAGE_4_PURCHASE, periodName, declarationTypeNameSecond, unpName, year, periodName, drpTemp.correctionDate.format("dd.MM.yyyy"))
+                }
+            } else { // Сообщение 2
+                def MESSAGE_2_SALE = "Не найдена декларация-источник со строкой «001» равной «0». Вид: «%s», Подразделение: «%s», Период: «%s, %s», " +
+                        "Дата сдачи корректировки: «меньше %s». При заполнении строк «ВСЕГО за %s» по доп. листу книги продаж по ставке 18%%, 10%% значения требуемых строк декларации-источника будут приняты за нулевые."
+                def MESSAGE_2_PURCHASE = "Не найдена декларация-источник со строкой «001» равной «0». Вид: «%s», Подразделение: «%s», Период: «%s, %s», " +
+                        "Дата сдачи корректировки: «меньше %s». При заполнении строки «ВСЕГО за %s» по доп. листу книги покупок по ставке 18%% значение требуемой строки декларации-источника будет принято за нулевое."
+                if (showMessages) {
+                    logger.warn(isSale ? MESSAGE_2_SALE : MESSAGE_2_PURCHASE, declarationTypeNameSecond, unpName, year, periodName, departmentReportPeriod.correctionDate.format("dd.MM.yyyy"),  periodName)
+                }
+            }
+        }
+    }
+    return declarationMap
+}
+
+// Получает из декларации атрибут
+def getDeclarationXmlAttr(def declarationData, def treePath, def attrName) {
+    // получение данных из xml'ки
+    def reader = declarationService.getXmlStreamReader(declarationData.id)
+    if (reader == null) {
+        return
+    }
+    def elements = [:]
+
+    try{
+        while (reader.hasNext()) {
+            if (reader.startElement) {
+                elements[reader.name.localPart] = true
+                if (isCurrentNode(treePath, elements)) {
+                    return getXmlValue(reader, attrName)
+                }
+            }
+            if (reader.endElement) {
+                elements[reader.name.localPart] = false
+            }
+            reader.next()
+        }
+    } finally {
+        reader.close()
+    }
+    return null
+}
+
+String getXmlValue(XMLStreamReader reader, String attrName) {
+    return reader?.getAttributeValue(null, attrName)
+}
+
+/**
+ * Ищет точное ли совпадение узлов дерева xml c текущими незакрытыми элементами
+ * @param nodeNames ожидаемые элементы xml
+ * @param elements незакрытые элементы
+ * @return
+ */
+boolean isCurrentNode(List<String> nodeNames, Map<String, Boolean> elements) {
+    def tempNodes = nodeNames + 'Файл'
+    def enteredNodes = elements.findAll { it.value }.keySet() // узлы в которые вошли, но не вышли еще
+    return enteredNodes.containsAll(tempNodes) && enteredNodes.size() == tempNodes.size()
+}
+
 // Алгоритмы заполнения полей формы
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
@@ -336,6 +566,7 @@ void calcMegaTotal(def megaTotal, def dataRows) {
     }
 }
 
+// Считаем супер-итоги для "Всего за налоговый период по доп. листу книги покупок/продаж"
 def calcSuperTotals(def dataRows) {
     def sectionsSuper = ['sale_18' : ['1', '3', '5', '6', '7'], 'sale_10' : ['2', '4'], 'purchase' : ['8', '9']]
     def totalColumnsSuper = ['sale_18' : totalColumns1_6_Sale, 'sale_10' : totalColumns1_6_Sale, 'purchase' : totalColumns7_9_Purchase]
@@ -344,6 +575,7 @@ def calcSuperTotals(def dataRows) {
     sectionsSuper.keySet().each { key ->
         def subSections = sectionsSuper[key]
         def columns = totalColumnsSuper[key] - skipColumns
+        def declarationColumns = totalColumnsSuper[key] - skipColumnsDeclaration
         // фиксированные строки (Итого за )
         def rows = dataRows?.findAll { row ->
             row.getAlias() != null && row.getAlias() ==~ /total_[${subSections.join('')}]_.*/
@@ -357,18 +589,44 @@ def calcSuperTotals(def dataRows) {
             }
             sumMap[periodId].add(row)
         }
-        sumMap.keySet().each { periodId ->
-            def superRow = getSuperTotalRow(key, periodId as Long)
+        sumMap.each { periodTypeId, sectionRows ->
+            def superRow = getSuperTotalRow(key, periodTypeId as Long)
             columns.each { alias ->
                 superRow[alias] = BigDecimal.ZERO
-                sumMap[periodId].each { row ->
+                sectionRows.each { row ->
                     superRow[alias] += (row[alias] ?: BigDecimal.ZERO)
+                }
+                if (alias in declarationColumns) {
+                    superRow[alias] += getDeclarationAddValue(periodTypeId, key, alias)
                 }
             }
             superRows.add(superRow)
         }
     }
     return superRows
+}
+
+def getDeclarationAddValue(def periodTypeId, def rowAlias, def columnAlias) {
+    def rowDeclarationMap = ['sale_18' : declarationSaleMap, 'sale_10' : declarationSaleMap, 'purchase' : declarationPurchaseMap]
+    def complexCalcMap = ['sale_18' : ['sumPlus': [('' + declarationType9sources): [['Документ', 'КнигаПрод'], 'СтПродБезНДС18'],
+                                                   ('' + declarationType9_1): [['Документ', 'КнигаПродДЛ'], 'СтПродВсП1Р9_18']],
+                                       'sumNdsPlus': [('' + declarationType9sources): [['Документ', 'КнигаПрод'], 'СумНДСВсКПр18'],
+                                                      ('' + declarationType9_1): [['Документ', 'КнигаПродДЛ'], 'СумНДСВсП1Р9_18']]],
+                          'sale_10' : ['sumPlus': [('' + declarationType9sources): [['Документ', 'КнигаПрод'], 'СтПродБезНДС10'],
+                                                   ('' + declarationType9_1): [['Документ', 'КнигаПродДЛ'], 'СтПродВсП1Р9_10']],
+                                       'sumNdsPlus': [('' + declarationType9sources): [['Документ', 'КнигаПрод'], 'СумНДСВсКПр10'],
+                                                      ('' + declarationType9_1): [['Документ', 'КнигаПродДЛ'], 'СумНДСВсП1Р9_10']]],
+                          'purchase': ['sumNdsPlus': [('' + declarationType8sources): [['Документ', 'КнигаПокуп'], 'СумНДСВсКПк'],
+                                                      ('' + declarationType8_1): [['Документ', 'КнигаПокупДЛ'], 'СумНДСИтП1Р8']]]]
+    DeclarationData declaration = rowDeclarationMap[rowAlias][periodTypeId]
+    if (declaration == null) {
+        return BigDecimal.ZERO
+    }
+    def declarationTemplateDao = declarationService.declarationTemplateDao
+    def declarationTypeId = declarationTemplateDao.get(declaration.declarationTemplateId).type.id as String
+    def declTypeAttrMap = complexCalcMap[rowAlias][columnAlias]
+    def addValueString = getDeclarationXmlAttr(declaration, declTypeAttrMap[declarationTypeId][0], declTypeAttrMap[declarationTypeId][1])
+    return addValueString ? new BigDecimal(addValueString) : BigDecimal.ZERO
 }
 
 /** считает итоги, специфично, т.к. есть объединения по графам 4,5 и 7,8 */
@@ -465,7 +723,14 @@ void logicCheck() {
         // 1. Проверка заполнения граф
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // 2. Проверка незаполненности граф с суммой корректировки
+        // 2. Проверка налогового периода
+        def periodType = getRefBookValue(8, row.period)
+        if (!periodNames.contains(periodType?.NAME?.stringValue)) {
+            logger.error("Строка ${row.getIndex()}: Графа «${getColumnName(dataRows[0], 'period')}» заполнена неверно! Возможные значения: «${periodNames.join('», «')}».")
+        }
+
+
+        // 3. Проверка незаполненности граф с суммой корректировки
         if (isAfterSection6 && emptyColumns_7_9.find { row[it] != null } != null) {
             logger.error("Строка $index: Графы с суммой корректировки (+, -) налоговой базы (раздел 7-9) не должны быть заполнены!")
         }
@@ -515,7 +780,44 @@ void logicCheck() {
             calcCheck10(row, row.sum)
         }
     }
+    checkFillDeclarationMap(false) // заполняем декларации-источники
     compareSpecificTotalValues(dataRows, arrangeRows(dataRows))
+}
+
+void checkDeclarationAccepted() {
+    def declarationTypeIdsMap = [4 : 'Декларация по НДС (раздел 1-7)',
+                              7 : 'Декларация по НДС (аудит, раздел 1-7)',
+                              20 : 'Декларация по НДС (короткая, раздел 1-7)',
+                              13 : 'Декларация по НДС (раздел 8.1)',
+                              15 : 'Декларация по НДС (раздел 9.1)']
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    if (formData.kind == FormDataKind.CONSOLIDATED && formData.departmentId == unpId && reportPeriod.order == 4 && reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) != 0) {
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter()
+        // ищем в корректирующем периоде
+        filter.isCorrection = true
+        filter.departmentIdList = [unpId]
+        filter.taxTypeList = [TaxType.VAT]
+        filter.yearStart = reportPeriod.taxPeriod.year
+        filter.yearEnd = reportPeriod.taxPeriod.year
+        def departmentReportPeriods = getListByFilter(filter)
+        boolean foundAccepted = false
+        declarationTypeIdsMap.each { declarationTypeId, typeName ->
+            departmentReportPeriods.each { drp ->
+                def declarations = declarationService.find(declarationTypeId as Integer, drp.id).findAll { it.accepted }
+                if (!declarations.isEmpty()) {
+                    if (!foundAccepted) {
+                        logger.warn("Существуют принятые экземпляры деклараций-приемников:")
+                        foundAccepted = true
+                    }
+                    def period = reportPeriodService.get(drp.reportPeriod)
+                    declarations.each { declaration ->
+                        logger.warn("Вид: «%s», Подразделение: «%s», Период: «%s, %s», Дата сдачи корректировки: «%s».",
+                                typeName, departmentService.get(declaration.departmentId), reportPeriod.taxPeriod.year, getRefBookValue(8, period.dictTaxPeriodId).NAME.value, drp.correctionDate.format('dd.MM.yyyy'))
+                    }
+                }
+            }
+        }
+    }
 }
 
 void consolidation() {
@@ -689,7 +991,7 @@ void importData() {
     def rows = []
     def sectionIndex = null
 
-    // формирвание строк нф
+    // формирование строк нф
     for (def i = 0; i < allValuesCount; i++) {
         rowValues = allValues[0]
         fileRowIndex++
@@ -776,6 +1078,7 @@ void importData() {
 
     updateIndexes(rows)
 
+    checkFillDeclarationMap(false) // заполняем декларации-источники
     // сравнение итогов
     compareSpecificTotalValues(rows, sectionMap)
 
@@ -970,7 +1273,7 @@ void compareSpecificTotalValues(def dataRows, def sectionMap) {
         columns.each { alias ->
             def value = megaTotal[alias] ?: BigDecimal.ZERO
             if (value != compareMegaTotal[alias]) {
-                logger.log(logLevel, WRONG_TOTAL, false, getColumnName(megaTotal, alias))
+                logger.log(logLevel, "Строка ${megaTotal.getIndex()}: " + WRONG_TOTAL, false, getColumnName(megaTotal, alias))
             }
         }
     }
@@ -985,7 +1288,17 @@ void compareSpecificTotalValues(def dataRows, def sectionMap) {
         if (calcRow == null) {
             rowLog(logger, superRow, String.format("Строка %d: Строка итога не относится к какой-либо группе!", superRow.getIndex()), logLevel)
         } else {
-            compareTotalValues(superRow, calcRow, columns, logger, !isImport)
+            def compareColumns = (superRow.getAlias().startsWith('super_sale') ? totalColumns1_6_Sale : totalColumns7_9_Purchase) - skipColumns
+            if (isImport) {
+                compareTotalValues(superRow, calcRow, compareColumns, logger, !isImport)
+            } else {
+                compareColumns.each { alias ->
+                    def value = superRow[alias] ?: BigDecimal.ZERO
+                    if (value != calcRow[alias]) {
+                        logger.log(logLevel, "Строка ${superRow.getIndex()}: " + WRONG_TOTAL, false, getColumnName(superRow, alias))
+                    }
+                }
+            }
             compareSuperRows.remove(calcRow)
         }
     }
@@ -1077,4 +1390,99 @@ String getValuesByGroupColumn(DataRow row) {
         value = getRefBookValue(8, row.period)?.NAME?.stringValue
     }
     return value
+}
+
+@Field
+def mapper
+
+def getDRPMapper() {
+    if (mapper == null) {
+        mapper = new RowMapper<DepartmentReportPeriod>() {
+            @Override
+            public DepartmentReportPeriod mapRow(ResultSet rs, int index) throws SQLException {
+                DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+                departmentReportPeriod.setId(SqlUtils.getInteger(rs, "id"));
+                departmentReportPeriod.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
+                departmentReportPeriod.setReportPeriod(reportPeriodService.get(SqlUtils.getInteger(rs, "report_period_id")));
+                departmentReportPeriod.setActive(!SqlUtils.getInteger(rs, "is_active").equals(0));
+                departmentReportPeriod.setBalance(!SqlUtils.getInteger(rs, "is_balance_period").equals(0));
+                departmentReportPeriod.setCorrectionDate(rs.getDate("correction_date"));
+                return departmentReportPeriod;
+            }
+        }
+    }
+    return mapper
+}
+
+def DepartmentReportPeriod getLastDepartmentReportPeriod(def departmentId, def reportPeriodId) {
+    def declarationTemplateDao = declarationService.declarationTemplateDao
+    return declarationTemplateDao.getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
+            "drp.is_active, drp.is_balance_period, drp.correction_date " +
+            "from " +
+            "department_report_period drp, " +
+            "(select max(correction_date) as correction_date, department_id, report_period_id " +
+            "from department_report_period " +
+            "where department_id = ? and report_period_id = ? " +
+            "group by department_id, report_period_id) m " +
+            "where drp.department_id = m.department_id " +
+            "and drp.report_period_id = m.report_period_id " +
+            "and (drp.correction_date = m.correction_date or (m.correction_date is null " +
+            "and drp.correction_date is null))",
+            [departmentId, reportPeriodId] as Object[], getDRPMapper());
+}
+
+def List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter filter) {
+    def declarationTemplateDao = declarationService.declarationTemplateDao
+    String QUERY_TEMPLATE_COMPOSITE_SORT = "select drp.id, drp.department_id, drp.report_period_id, drp.is_active, drp.is_balance_period, drp.correction_date \n" +
+            "          from \n" +
+            "          department_report_period drp \n" +
+            "          join report_period rp on drp.report_period_id = rp.id \n" +
+            "          join tax_period tp on rp.tax_period_id = tp.id \n" +
+            "            %s \n" +
+            "            order by tp.year, drp.CORRECTION_DATE NULLS FIRST";
+    return declarationTemplateDao.getNamedParameterJdbcTemplate().query(String.format(QUERY_TEMPLATE_COMPOSITE_SORT, getFilterString(filter)),
+            new HashMap<String, Object>(2) {{
+                put("yearStart", filter.getYearStart());
+                put("yearEnd", filter.getYearEnd());
+            }}, getDRPMapper());
+}
+
+def String getFilterString(DepartmentReportPeriodFilter filter) {
+    if (filter == null) {
+        return "";
+    }
+    List<String> causeList = new LinkedList<String>();
+    if (filter.isCorrection() != null) {
+        causeList.add("drp.correction_date is " + (filter.isCorrection() ? " not " : "") + " null");
+    }
+    if (filter.isBalance() != null) {
+        causeList.add("drp.is_balance_period " + (filter.isBalance() ? "<>" : "=") + " 0");
+    }
+    if (filter.isActive() != null) {
+        causeList.add("drp.is_active " + (filter.isActive() ? "<>" : "=") + " 0");
+    }
+    if (filter.getCorrectionDate() != null) {
+        causeList.add("drp.correction_date = to_date('" +
+                filter.getCorrectionDate().format('dd.MM.yyyy') +
+                "', 'DD.MM.YYYY')");
+    }
+    if (filter.getDepartmentIdList() != null) {
+        causeList.add(SqlUtils.transformToSqlInStatement("drp.department_id",
+                filter.getDepartmentIdList()));
+    }
+    if (filter.getReportPeriodIdList() != null) {
+        causeList.add(SqlUtils.transformToSqlInStatement("drp.report_period_id",
+                filter.getReportPeriodIdList()));
+    }
+    if (filter.getTaxTypeList() != null) {
+        causeList.add("tp.tax_type in " +
+                SqlUtils.transformTaxTypeToSqlInStatement(filter.getTaxTypeList()));
+    }
+    if (filter.getYearStart() != null || filter.getYearEnd() != null){
+        causeList.add("(:yearStart is null or tp.year >= :yearStart) and (:yearEnd is null or tp.year <= :yearEnd)");
+    }
+    if (causeList.isEmpty()) {
+        return "";
+    }
+    return " where " + StringUtils.join(causeList, " and ");
 }

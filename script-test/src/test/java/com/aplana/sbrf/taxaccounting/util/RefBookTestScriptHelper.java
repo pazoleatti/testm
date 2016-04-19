@@ -8,10 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.script.FormTypeService;
-import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 
@@ -49,6 +46,7 @@ public class RefBookTestScriptHelper {
     private RefBookFactory refBookFactory;
     private RefBookDataProvider refBookDataProvider;
     private FormTypeService formTypeService;
+    private DeclarationService declarationService;
 
     // Заданы константно
     private Logger logger = new Logger();
@@ -93,6 +91,7 @@ public class RefBookTestScriptHelper {
         refBookFactory = mockHelper.mockRefBookFactory();
         refBookDataProvider = mockHelper.getRefBookDataProvider();
         formTypeService = mockHelper.mockFormTypeService();
+        declarationService = mockHelper.mockDeclarationService();
     }
 
     public void setImportFileInputStream(InputStream importFileInputStream) {
@@ -225,6 +224,13 @@ public class RefBookTestScriptHelper {
      */
     public FormTypeService getFormTypeService() {
         return formTypeService;
+    }
+
+    /**
+     * Mock DeclarationService для реализации mock-логики внутри теста
+     */
+    public DeclarationService getDeclarationService() {
+        return declarationService;
     }
 
     /**

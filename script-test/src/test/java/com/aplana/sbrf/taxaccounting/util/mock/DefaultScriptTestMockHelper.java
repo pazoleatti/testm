@@ -244,6 +244,12 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     }
 
     @Override
+    public DeclarationService mockDeclarationService(){
+        DeclarationService declarationService = mock(DeclarationService.class);
+        return declarationService;
+    }
+
+    @Override
     public TransactionHelper mockTransactionHelper() {
         TransactionHelper transactionHelper = mock(TransactionHelper.class);
         return transactionHelper;
