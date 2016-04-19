@@ -174,10 +174,13 @@ public class FormStyle implements Serializable {
 	 * @return
 	 */
 	public static final FormStyle valueOf(String styleString) {
+		FormStyle formStyle = new FormStyle();
+		if (styleString == null || styleString.isEmpty()) {
+			return formStyle;
+		}
 		if (styleString.length() < 3) { // минимально возможное число символов = 3: "N-N"
 			throw new IllegalArgumentException(STYLE_PARSING_ERROR_MESSAGE + '"' + styleString + '"');
 		}
-		FormStyle formStyle = new FormStyle();
 		StringBuilder fontColor = new StringBuilder();
 		StringBuilder backColor = new StringBuilder();
 		boolean fontScan = true; // флаг. true - поиск цвета шрифта, false - поиск цвета фона

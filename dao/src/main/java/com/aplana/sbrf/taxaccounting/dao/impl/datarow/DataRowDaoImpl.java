@@ -228,7 +228,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		getNamedParameterJdbcTemplate().batchUpdate(sql.intern(), params.toArray(new Map[0]));
 		// обновить все спаны
 		removeSpanAll(formData, DataRowType.SAVED);
-		insertSpan(formData, DataRowType.SAVED, rows);
+		insertSpan(formData, DataRowType.SAVED, rows, false);
 	}
 
 	private static final String SQL_DELETE_SPAN_ALL = "DELETE FROM form_data_row_span WHERE " +
@@ -254,8 +254,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	/**
 	 * Вставляем информацию об объединениях ячеек для указанных строк
 	 * @param rows строки, должны быть уже в БД
+	 * @param needShift требуется ли расширять спаны? true - для новых записей
 	 */
-	void insertSpan(FormData formData, DataRowType temporary, List<DataRow<Cell>> rows) {
+	void insertSpan(FormData formData, DataRowType temporary, List<DataRow<Cell>> rows, boolean needShift) {
 		if (rows.isEmpty()) {
 			return;
 		}
@@ -264,7 +265,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 		// расширяем старые спаны
 		DataRowRange range = new DataRowRange(rows.get(0).getIndex(), rows.size());
-		shiftSpan(formData, range, temporary);
+		if (needShift) {
+			shiftSpan(formData, range, temporary);
+		}
 		// запрашиваем информацию о типе среза
 		final Map<String, Object> rowParams = new HashMap<String, Object>();
 		rowParams.put("form_data_id", formData.getId());
@@ -295,7 +298,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				}
 			}
 		}
-		getNamedParameterJdbcTemplate().batchUpdate(SQL_INSERT_SPAN, spanParams.toArray(new Map[0]));
+		if (!spanParams.isEmpty()) {
+			getNamedParameterJdbcTemplate().batchUpdate(SQL_INSERT_SPAN, spanParams.toArray(new Map[0]));
+		}
 	}
 
 	private static final String SQL_SHIFT_SPAN = "UPDATE form_data_row_span SET rowspan = rowspan + :count " +
@@ -342,7 +347,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		updateParentCells(dataRowMapper, temporary, row);
 		//обновление спанов у существующих строк
 		removeSpan(rows);
-		insertSpan(dataRowMapper.getFormData(), temporary, rows);
+		insertSpan(dataRowMapper.getFormData(), temporary, rows, false);
 	}
 
 	private static final String SQL_GET_ROW_PARAMS = "SELECT form_data_id, temporary, manual FROM form_data_row WHERE id = :row_id";
@@ -393,12 +398,19 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	private static final String SQL_COPY_SPAN = "INSERT INTO form_data_row_span (row_id, form_data_id, temporary, manual, data_ord, ord, colspan, rowspan) " +
-			"SELECT (SELECT id FROM form_data_row WHERE ord = s.ord AND form_data_id = :form_data_id_source AND temporary = :temporary AND manual = :manual_source) as row_id, " +
-			":form_data_id_target, temporary, :manual_target, data_ord, ord, colspan, rowspan FROM form_data_row_span s WHERE " +
-			"form_data_id = :form_data_id_source AND temporary = :temporary AND manual = :manual_source";
+			"SELECT (SELECT id FROM form_data_row WHERE ord = s.ord AND form_data_id = :form_data_id_target AND temporary = :temporary_target AND manual = :manual_target) as row_id, " +
+			":form_data_id_target, :temporary_target, :manual_target, data_ord, ord, colspan, rowspan FROM form_data_row_span s WHERE " +
+			"form_data_id = :form_data_id_source AND temporary = :temporary_source AND manual = :manual_source";
 	/**
 	 * Копирует спаны в постоянном срезе из одного экземпляра НФ в другую, либо в рамках одной НФ, но из автоматической
-	 * версии в версию ручного ввода
+	 * версии в версию ручного ввода.
+	 * <br /><br />
+	 * Варианты использования: <br />
+	 * <ul>
+	 *     <li>createCheckPoint - SAVED, AUTO -> TEMP, AUTO</li>
+	 *     <li>copyRows - SAVED, AUTO -> SAVED, AUTO</li>
+	 *     <li>createManual - SAVED, AUTO -> SAVED, MANUAL</li>
+	 * </ul>
 	 * @param formDataSource
 	 * @param formDataTarget
 	 * @param temporary тип среза, откуда и куда копируются данные
@@ -415,7 +427,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		final Map<String, Object> rowParams = new HashMap<String, Object>();
 		rowParams.put("form_data_id_source", formDataSource.getId());
 		rowParams.put("form_data_id_target", formDataTarget.getId());
-		rowParams.put("temporary", temporary.getCode());
+		rowParams.put("temporary_source", DataRowType.SAVED.getCode());
+		rowParams.put("temporary_target", temporary.getCode());
 		rowParams.put("manual_source", DataRowType.AUTO.getCode());
 		rowParams.put("manual_target", targetManual.getCode());
 		getNamedParameterJdbcTemplate().update(SQL_COPY_SPAN, rowParams);
@@ -540,7 +553,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params.toArray(new Map[0]));
 		// вставляем спаны
-		insertSpan(formData, temporary, rows);
+		insertSpan(formData, temporary, rows, true);
 	}
 
 	@Override
@@ -847,22 +860,23 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		final List<Column> columns = formData.getFormColumns();
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT data_ord, ord, colspan, rowspan FROM form_data_row_span ");
-		sb.append("WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual ");
+		sb.append(" SELECT data_ord, ord, colspan, rowspan FROM form_data_row_span ");
+		sb.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual ");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
 		params.put("temporary", temporary.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		final int offset = range == null ? 0 : range.getOffset();
+		final int offset = range == null ? 1 : range.getOffset();
 		// если постранично, то добавляем орграничение на выборку
 		if (range != null) {
-			sb.append("AND ord >= :start AND ord < :end");
+			sb.append(" AND ord >= :start AND ord < :end");
 
 			params.put("start", offset);
 			params.put("end", offset + range.getCount());
 		}
+		sb.append(" ORDER BY ord, data_ord");
 
 		// так как надо обработать большое количество ячеек, то заводим кэш
 		final Map<Integer, Column> columnCache = new HashMap<Integer, Column>();
@@ -880,7 +894,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 					columnCache.put(dataOrd, column);
 				}
 				// установка значений
-				DataRow<Cell> row = rows.get(ord - offset - 1);
+				DataRow<Cell> row = rows.get(ord - offset);
 				Cell cell = row.getCell(column.getAlias());
 				cell.setColSpan(colSpan);
 				cell.setRowSpan(rowSpan);
@@ -1071,39 +1085,40 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 */
 	private static final String ROW_SPAN_QUERY =
 			" with t as ( " +
-			"	select fc.data_ord as x, span.ord as y, span.colspan, span.rowspan, ref.* " +
-			" 	from form_data fd " +
-			" 	join form_column fc on fc.form_template_id = fd.form_template_id " +
-			" 	join form_data_row data on data.form_data_id = fd.id " +
-			" 	join form_data_row_span span on span.form_data_id = data.form_data_id and span.temporary = data.temporary and " +
-			"   span.manual = data.manual and span.data_ord = fc.data_ord " +
-			" 	and data.ord between span.ord and span.ord + span.rowspan " +
-			" 	join form_data_row ref on ref.form_data_id = span.form_data_id and ref.temporary = span.temporary and " +
-			"   ref.manual = span.manual and span.ord = ref.ord " +
-			" 	where fd.id = :form_data_id and data.temporary = :temporary and data.manual = :manual and data.ord = :row_ord) " +
-		" select id row_id, x, y, colspan, rowspan, cell_value, cell_style from t " +
-		" unpivot include nulls ((value, style) for form_data_row_data_ord in " +
-			" ((C0, C0_STYLE) as 0, (C1, C1_STYLE) as 1, (C2, C2_STYLE) as 2, (C3, C3_STYLE) as 3, (C4, C4_STYLE) as 4, (C5, C5_STYLE) as 5, " +
-			" (C6, C6_STYLE) as 6, (C7, C7_STYLE) as 7, (C8, C8_STYLE) as 8, (C9, C9_STYLE) as 9, (C10, C10_STYLE) as 10, " +
-			" (C11, C11_STYLE) as 11, (C12, C12_STYLE) as 12, (C13, C13_STYLE) as 13, (C14, C14_STYLE) as 14, (C15, C15_STYLE) as 15, " +
-			" (C16, C16_STYLE) as 16, (C17, C17_STYLE) as 17, (C18, C18_STYLE) as 18, (C19, C19_STYLE) as 19, (C20, C20_STYLE) as 20, " +
-			" (C21, C21_STYLE) as 21, (C22, C22_STYLE) as 22, (C23, C23_STYLE) as 23, (C24, C24_STYLE) as 24, (C25, C25_STYLE) as 25, " +
-			" (C26, C26_STYLE) as 26, (C27, C27_STYLE) as 27, (C28, C28_STYLE) as 28, (C29, C29_STYLE) as 29, (C30, C30_STYLE) as 30, " +
-			" (C31, C31_STYLE) as 31, (C32, C32_STYLE) as 32, (C33, C33_STYLE) as 33, (C34, C34_STYLE) as 34, (C35, C35_STYLE) as 35, " +
-			" (C36, C36_STYLE) as 36, (C37, C37_STYLE) as 37, (C38, C38_STYLE) as 38, (C39, C39_STYLE) as 39, (C40, C40_STYLE) as 40, " +
-			" (C41, C41_STYLE) as 41, (C42, C42_STYLE) as 42, (C43, C43_STYLE) as 43, (C44, C44_STYLE) as 44, (C45, C45_STYLE) as 45, " +
-			" (C46, C46_STYLE) as 46, (C47, C47_STYLE) as 47, (C48, C48_STYLE) as 48, (C49, C49_STYLE) as 49, (C50, C50_STYLE) as 50, " +
-			" (C51, C51_STYLE) as 51, (C52, C52_STYLE) as 52, (C53, C53_STYLE) as 53, (C54, C54_STYLE) as 54, (C55, C55_STYLE) as 55, " +
-			" (C56, C56_STYLE) as 56, (C57, C57_STYLE) as 57, (C58, C58_STYLE) as 58, (C59, C59_STYLE) as 59, (C60, C60_STYLE) as 60, " +
-			" (C61, C61_STYLE) as 61, (C62, C62_STYLE) as 62, (C63, C63_STYLE) as 63, (C64, C64_STYLE) as 64, (C65, C65_STYLE) as 65, " +
-			" (C66, C66_STYLE) as 66, (C67, C67_STYLE) as 67, (C68, C68_STYLE) as 68, (C69, C69_STYLE) as 69, (C70, C70_STYLE) as 70, " +
-			" (C71, C71_STYLE) as 71, (C72, C72_STYLE) as 72, (C73, C73_STYLE) as 73, (C74, C74_STYLE) as 74, (C75, C75_STYLE) as 75, " +
-			" (C76, C76_STYLE) as 76, (C77, C77_STYLE) as 77, (C78, C78_STYLE) as 78, (C79, C79_STYLE) as 79, (C80, C80_STYLE) as 80, " +
-			" (C81, C81_STYLE) as 81, (C82, C82_STYLE) as 82, (C83, C83_STYLE) as 83, (C84, C84_STYLE) as 84, (C85, C85_STYLE) as 85, " +
-			" (C86, C86_STYLE) as 86, (C87, C87_STYLE) as 87, (C88, C88_STYLE) as 88, (C89, C89_STYLE) as 89, (C90, C90_STYLE) as 90, " +
-			" (C91, C91_STYLE) as 91, (C92, C92_STYLE) as 92, (C93, C93_STYLE) as 93, (C94, C94_STYLE) as 94, (C95, C95_STYLE) as 95, " +
-			" (C96, C96_STYLE) as 96, (C97, C97_STYLE) as 97, (C98, C98_STYLE) as 98, (C99, C99_STYLE) as 99 ))" +
-		" where x = form_data_row_data_ord ";
+			"\n	select fc.data_ord as x, span.ord as y, span.colspan, span.rowspan, ref.* " +
+			"\n 	from form_data fd " +
+			"\n 	join form_column fc on fc.form_template_id = fd.form_template_id " +
+			"\n 	join form_data_row data on data.form_data_id = fd.id " +
+			"\n 	join form_data_row_span span on span.form_data_id = data.form_data_id and span.temporary = data.temporary and " +
+			"\n   span.manual = data.manual and span.data_ord = fc.data_ord " +
+			"\n 	and data.ord between span.ord and span.ord + span.rowspan - 1 " +
+			"\n 	join form_data_row ref on ref.form_data_id = span.form_data_id and ref.temporary = span.temporary and " +
+			"\n   ref.manual = span.manual and span.ord = ref.ord " +
+			"\n 	where fd.id = :form_data_id and data.temporary = :temporary and data.manual = :manual and data.ord = :row_ord" +
+			"		and span.ord <> data.ord) " +
+		"\n select id row_id, x, y, colspan, rowspan, cell_value, cell_style from t " +
+		"\n unpivot include nulls ((cell_value, cell_style) for form_data_row_data_ord in " +
+			"\n ((C0, C0_STYLE) as 0, (C1, C1_STYLE) as 1, (C2, C2_STYLE) as 2, (C3, C3_STYLE) as 3, (C4, C4_STYLE) as 4, (C5, C5_STYLE) as 5, " +
+			"\n (C6, C6_STYLE) as 6, (C7, C7_STYLE) as 7, (C8, C8_STYLE) as 8, (C9, C9_STYLE) as 9, (C10, C10_STYLE) as 10, " +
+			"\n (C11, C11_STYLE) as 11, (C12, C12_STYLE) as 12, (C13, C13_STYLE) as 13, (C14, C14_STYLE) as 14, (C15, C15_STYLE) as 15, " +
+			"\n (C16, C16_STYLE) as 16, (C17, C17_STYLE) as 17, (C18, C18_STYLE) as 18, (C19, C19_STYLE) as 19, (C20, C20_STYLE) as 20, " +
+			"\n (C21, C21_STYLE) as 21, (C22, C22_STYLE) as 22, (C23, C23_STYLE) as 23, (C24, C24_STYLE) as 24, (C25, C25_STYLE) as 25, " +
+			"\n (C26, C26_STYLE) as 26, (C27, C27_STYLE) as 27, (C28, C28_STYLE) as 28, (C29, C29_STYLE) as 29, (C30, C30_STYLE) as 30, " +
+			"\n (C31, C31_STYLE) as 31, (C32, C32_STYLE) as 32, (C33, C33_STYLE) as 33, (C34, C34_STYLE) as 34, (C35, C35_STYLE) as 35, " +
+			"\n (C36, C36_STYLE) as 36, (C37, C37_STYLE) as 37, (C38, C38_STYLE) as 38, (C39, C39_STYLE) as 39, (C40, C40_STYLE) as 40, " +
+			"\n (C41, C41_STYLE) as 41, (C42, C42_STYLE) as 42, (C43, C43_STYLE) as 43, (C44, C44_STYLE) as 44, (C45, C45_STYLE) as 45, " +
+			"\n (C46, C46_STYLE) as 46, (C47, C47_STYLE) as 47, (C48, C48_STYLE) as 48, (C49, C49_STYLE) as 49, (C50, C50_STYLE) as 50, " +
+			"\n (C51, C51_STYLE) as 51, (C52, C52_STYLE) as 52, (C53, C53_STYLE) as 53, (C54, C54_STYLE) as 54, (C55, C55_STYLE) as 55, " +
+			"\n (C56, C56_STYLE) as 56, (C57, C57_STYLE) as 57, (C58, C58_STYLE) as 58, (C59, C59_STYLE) as 59, (C60, C60_STYLE) as 60, " +
+			"\n (C61, C61_STYLE) as 61, (C62, C62_STYLE) as 62, (C63, C63_STYLE) as 63, (C64, C64_STYLE) as 64, (C65, C65_STYLE) as 65, " +
+			"\n (C66, C66_STYLE) as 66, (C67, C67_STYLE) as 67, (C68, C68_STYLE) as 68, (C69, C69_STYLE) as 69, (C70, C70_STYLE) as 70, " +
+			"\n (C71, C71_STYLE) as 71, (C72, C72_STYLE) as 72, (C73, C73_STYLE) as 73, (C74, C74_STYLE) as 74, (C75, C75_STYLE) as 75, " +
+			"\n (C76, C76_STYLE) as 76, (C77, C77_STYLE) as 77, (C78, C78_STYLE) as 78, (C79, C79_STYLE) as 79, (C80, C80_STYLE) as 80, " +
+			"\n (C81, C81_STYLE) as 81, (C82, C82_STYLE) as 82, (C83, C83_STYLE) as 83, (C84, C84_STYLE) as 84, (C85, C85_STYLE) as 85, " +
+			"\n (C86, C86_STYLE) as 86, (C87, C87_STYLE) as 87, (C88, C88_STYLE) as 88, (C89, C89_STYLE) as 89, (C90, C90_STYLE) as 90, " +
+			"\n (C91, C91_STYLE) as 91, (C92, C92_STYLE) as 92, (C93, C93_STYLE) as 93, (C94, C94_STYLE) as 94, (C95, C95_STYLE) as 95, " +
+			"\n (C96, C96_STYLE) as 96, (C97, C97_STYLE) as 97, (C98, C98_STYLE) as 98, (C99, C99_STYLE) as 99 ))" +
+		"\n where x = form_data_row_data_ord ";
 	/**
 	 * Ищет для первой строки (row) родительские ячейки и извлекает из них значения ячеек и спанов
 	 */
@@ -1210,7 +1225,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 		// обновляем стиль и значение родителя
 		params.put("value", dataRowMapper.formatCellValue(cell));
-		params.put("style", cell.getStyle().toString());
+		params.put("style", DataRowMapper.formatCellStyle(cell));
 		getNamedParameterJdbcTemplate().update(String.format(SQL_UPDATE_PARENT_VALUE, dataOrd), params);
 		// обнуляем дочернюю ячейку
 		cell.setStyle(null);
@@ -1250,7 +1265,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		if (parentRowSpan != 0) {
 			cell.setRowSpan(parentRowOrd + parentRowSpan - childRowOrd);
 		}
-		cell.setStyle(FormStyle.valueOf(parentStyle));
+		DataRowMapper.parseCellStyle(cell, parentStyle);
 		cell.setValue(dataRowMapper.parseCellValue(column.getColumnType(), parentValue), childRowOrd);
 	}
 

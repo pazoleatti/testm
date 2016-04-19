@@ -36,6 +36,10 @@ public class FormStyleTest {
 		assertEquals(Color.RED, style.getBackColor());
 		assertTrue(style.isItalic());
 		assertTrue(style.isBold());
+
+		style = FormStyle.valueOf("");
+		assertEquals(Color.BLACK, style.getFontColor());
+		assertEquals(Color.WHITE, style.getBackColor());
 	}
 
 	@Test

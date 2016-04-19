@@ -509,6 +509,12 @@ public class DataRowDaoImplTest extends Assert {
 	public void setSpanInfo() {
 		FormData formData = formDataDao.get(3293, false);
 		List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);
+		checkRows(rows);
+		rows = dataRowDao.getRows(formData, new DataRowRange(1, 9));
+		checkRows(rows);
+	}
+
+	private void checkRows(List<DataRow<Cell>> rows) {
 		assertEquals(8, rows.size());
 		assertEquals(1, rows.get(0).getCell("stringColumn").getColSpan());
 		assertEquals(1, rows.get(0).getCell("stringColumn").getRowSpan());

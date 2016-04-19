@@ -18,6 +18,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.datarow.DataRowMapper;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -380,14 +381,12 @@ public final class XmlSerializationUtils {
 		valueNode = attributes.getNamedItem(ATTR_STYLE_ALIAS);
 		if (valueNode != null && valueNode.getNodeValue() != null) {
 			String styleString = valueNode.getNodeValue();
-			if(styleString.length() > 0) {
-				FormStyle style;
+			if(!styleString.isEmpty()) {
 				if (styleString.contains(String.valueOf(FormStyle.COLOR_SEPARATOR))) { // новый способ оформления стилей
-					style = FormStyle.valueOf((valueNode.getNodeValue()));
+					DataRowMapper.parseCellStyle(cell, styleString);
 				} else {
-					style = formTemplate.getStyle(valueNode.getNodeValue());
+					cell.setStyle(formTemplate.getStyle(styleString));
 				}
-				cell.setStyle(style);
 			}
 		}
 		valueNode = attributes.getNamedItem(ATTR_CELL_EDITABLE);

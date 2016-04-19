@@ -32,7 +32,7 @@ import java.util.Map;
  * @author sgoryachkin
  *
  */
-class DataRowMapper implements RowMapper<DataRow<Cell>> {
+public class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 	private static final Log LOG = LogFactory.getLog(DataRowMapper.class);
 
@@ -170,7 +170,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @param cell
 	 * @param value
 	 */
-	static final void parseCellStyle(Cell cell, String value) {
+	public static final void parseCellStyle(Cell cell, String value) {
 	 	if (value != null && !value.isEmpty()) {
 			String styleString;
 			// флаг редактируемости
