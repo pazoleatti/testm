@@ -149,17 +149,7 @@ void logicCheck() {
         def transactionSumRub = row.transactionSumRub
         def bondCount = row.bondCount
         def priceOne = row.priceOne
-        def courseCB = row.courseCB
-        def transactionSumCurrency = row.transactionSumCurrency
         def contractDate = row.contractDate
-
-        // Проверка конверсии
-        if (courseCB == null || transactionSumCurrency == null || transactionSumRub != (courseCB * transactionSumCurrency).setScale(0, RoundingMode.HALF_UP)) {
-            def msg1 = row.getCell('transactionSumRub').column.name
-            def msg2 = row.getCell('transactionSumCurrency').column.name
-            def msg3 = row.getCell('courseCB').column.name
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно произведению значений графы «$msg2» и графы «$msg3»!")
-        }
 
         // Корректность даты заключения сделки
         if (transactionDate < contractDate) {
