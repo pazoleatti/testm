@@ -36,9 +36,14 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	private static final char STYLE_SEPARATOR = ';';
 	private static final char DECIMAL_SEPARATOR = '.';
 	private static final char WRONG_DECIMAL_SEPARATOR = ',';
-    private SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 	private DecimalFormat decimalFormat;
 
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
 	/**
 	 * Признак участия фиксированной строки в автонумерации
 	 */
@@ -247,7 +252,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 					case STRING:
 						return value;
 					case DATE:
-						return sdf.parse(value);
+						return sdf.get().parse(value);
 					case NUMBER:
 						String cleanValue = value.replace(WRONG_DECIMAL_SEPARATOR, DECIMAL_SEPARATOR);
 						return decimalFormat.parse(cleanValue);
@@ -280,7 +285,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 				case STRING:
 					return value.toString();
 				case DATE:
-					return sdf.format(value);
+					return sdf.get().format(value);
 				case NUMBER:
 				case REFBOOK:
 					return decimalFormat.format(value);

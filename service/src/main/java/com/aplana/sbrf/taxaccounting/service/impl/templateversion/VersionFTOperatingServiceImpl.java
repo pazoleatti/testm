@@ -23,8 +23,12 @@ import java.util.List;
 @Transactional
 public class VersionFTOperatingServiceImpl implements VersionOperatingService {
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
     private static final String MSG_IS_USED_VERSION =
             "Существует экземпляр %s: ";
     private static final String MSG_HAVE_DESTINATION =
@@ -194,9 +198,9 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
 
     private String getPeriod(Pair<Date, Date> pair) {
         if (pair.getSecond() == null) {
-            return String.format("\"%s\"", sdf.format(pair.getFirst()));
+            return String.format("\"%s\"", sdf.get().format(pair.getFirst()));
         } else {
-            return String.format("\"%s\" до периода \"%s\"", sdf.format(pair.getFirst()), sdf.format(pair.getSecond()));
+            return String.format("\"%s\" до периода \"%s\"", sdf.get().format(pair.getFirst()), sdf.get().format(pair.getSecond()));
         }
     }
 

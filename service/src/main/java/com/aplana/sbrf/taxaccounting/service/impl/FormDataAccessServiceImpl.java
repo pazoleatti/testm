@@ -30,7 +30,12 @@ import static java.util.Arrays.asList;
 public class FormDataAccessServiceImpl implements FormDataAccessService {
 
     private static final Log LOG = LogFactory.getLog(FormDataAccessServiceImpl.class);
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     public static final String LOG_EVENT_AVAILABLE_MOVES = "LOG_EVENT_AVAILABLE_MOVES";
     public static final String LOG_EVENT_READ = "READ";
@@ -287,7 +292,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         destination.getFirst(), destination.getSecond(),
                         departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         formData.getPeriodOrder() != null ? ", Месяц: \"" + Months.fromId(formData.getPeriodOrder()).getTitle() + "\"" : "",
-                        departmentReportPeriod.getCorrectionDate() != null ? ", Дата сдачи корректировки: " + SDF.format(departmentReportPeriod.getCorrectionDate()) : ""
+                        departmentReportPeriod.getCorrectionDate() != null ? ", Дата сдачи корректировки: " + sdf.get().format(departmentReportPeriod.getCorrectionDate()) : ""
                 ));
             }
         }

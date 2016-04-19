@@ -61,8 +61,18 @@ public class MappingServiceImpl implements MappingService {
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
-    private static final SimpleDateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
+    private static final ThreadLocal<SimpleDateFormat> YEAR_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy");
+        }
+    };
     private static final String CHARSET = "cp866";
     private static final String RNU_EXT = ".rnu";
     private static final String XML_EXT = ".xml";
@@ -230,8 +240,8 @@ public class MappingServiceImpl implements MappingService {
         String[] params = firstRow.split("\\|");
         try {
 
-            exemplar.setBeginDate(DATE_FORMAT.parse(params[2]));
-            exemplar.setEndDate(DATE_FORMAT.parse(params[3]));
+            exemplar.setBeginDate(sdf.get().parse(params[2]));
+            exemplar.setEndDate(sdf.get().parse(params[3]));
 
             // по коду NNN в назавании файла тип налоговой формы
             exemplar.setFormTemplateId(NalogFormType.getNewCodeByNNN(rnuFilename.substring(0, 3)));
@@ -248,7 +258,7 @@ public class MappingServiceImpl implements MappingService {
             }
 
             //по году определяем TAX_PERIOD
-            String year = YEAR_FORMAT.format(exemplar.getBeginDate());
+            String year = YEAR_FORMAT.get().format(exemplar.getBeginDate());
             exemplar.setTaxPeriod(reportPeriodMappingDao.getTaxPeriodByDate(year));
 
             // по коду отчетного периода 7 символа в назавании файла DICT_TAX_PERIOD

@@ -24,7 +24,12 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
 public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearchDao {
 
 	private static final Log LOG = LogFactory.getLog(FormDataSearchDaoImpl.class);
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     private void appendFromClause(StringBuilder sql){
         sql.append(" FROM form_data fd \n")
@@ -77,7 +82,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 
         if (filter.getCorrectionTag() != null) {
             if (filter.getCorrectionDate() != null) {
-                sql.append(" and drp.correction_date = '" + SDF.format(filter.getCorrectionDate()) + "\'");
+                sql.append(" and drp.correction_date = '" + SDF.get().format(filter.getCorrectionDate()) + "\'");
             } else {
                 sql.append(" and drp.correction_date is " +
                         (Boolean.TRUE.equals(filter.getCorrectionTag()) ? "not " : "") + "null");

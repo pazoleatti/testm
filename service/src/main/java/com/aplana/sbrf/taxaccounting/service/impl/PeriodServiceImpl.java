@@ -68,10 +68,12 @@ public class PeriodServiceImpl implements PeriodService {
     @Autowired
     private NotificationService notificationService;
 
-    @Autowired
-    private LockDataService lockDataService;
-
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
 	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
@@ -511,7 +513,7 @@ public class PeriodServiceImpl implements PeriodService {
         if (logs != null) {
             logs.add(new LogEntry(LogLevel.INFO,
                     "Удален период \"" + rp.getName() + "\" " + rp.getTaxPeriod().getYear() +
-                            (correctionDate == null ? "" : " с датой сдачи корректировки " + formatter.format(correctionDate))
+                            (correctionDate == null ? "" : " с датой сдачи корректировки " + sdf.get().format(correctionDate))
                     ));
         }
 

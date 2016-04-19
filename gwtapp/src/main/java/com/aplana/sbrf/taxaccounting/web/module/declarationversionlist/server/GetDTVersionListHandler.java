@@ -33,7 +33,12 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
     @Autowired
     private DeclarationTypeService declarationTypeService;
 
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     public GetDTVersionListHandler() {
         super(GetDTVersionListAction.class);
@@ -54,9 +59,9 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
             DeclarationTemplate declarationTemplate = declarationTemplateList.get(i);
             decTemplateVersion.setDtId(String.valueOf(declarationTemplate.getId()));
             decTemplateVersion.setTypeName(declarationTemplate.getName());
-            decTemplateVersion.setActualBeginVersionDate(SDF.format(declarationTemplate.getVersion()));
+            decTemplateVersion.setActualBeginVersionDate(SDF.get().format(declarationTemplate.getVersion()));
             decTemplateVersion.setActualEndVersionDate(declarationTemplateList.get(i + 1).getVersion() != null ?
-                    SDF.format(new Date(declarationTemplateList.get(i + 1).getVersion().getTime() - 86400000)) : "");
+                    SDF.get().format(new Date(declarationTemplateList.get(i + 1).getVersion().getTime() - 86400000)) : "");
 
             if (declarationTemplateList.get(i + 1).getStatus() == VersionedObjectStatus.FAKE){
                 i++;
@@ -68,7 +73,7 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
             DeclarationTemplateVersion decTemplateVersion = new DeclarationTemplateVersion();
             decTemplateVersion.setDtId(String.valueOf(declarationTemplateList.get(declarationTemplateList.size() - 1).getId()));
             decTemplateVersion.setTypeName(declarationTemplateList.get(declarationTemplateList.size() - 1).getName());
-            decTemplateVersion.setActualBeginVersionDate(SDF.format(declarationTemplateList.get(declarationTemplateList.size() - 1).getVersion()));
+            decTemplateVersion.setActualBeginVersionDate(SDF.get().format(declarationTemplateList.get(declarationTemplateList.size() - 1).getVersion()));
             declarationTemplateVersions.add(decTemplateVersion);
         }
 

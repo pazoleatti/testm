@@ -53,9 +53,24 @@ public class FormDataServiceImpl implements FormDataService {
 
 	private static final Log LOG = LogFactory.getLog(FormDataServiceImpl.class);
 
-    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
-	private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
-    private static final SimpleDateFormat SDF_DD_MM_YYYY_HH_MM_SS = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
+    private static final ThreadLocal<SimpleDateFormat> SDF_HH_MM_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("HH:mm dd.MM.yyyy");
+        }
+    };
+    private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY_HH_MM_SS = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
 
     private static final Calendar CALENDAR = Calendar.getInstance();
     private static final Date MAX_DATE;
@@ -575,7 +590,7 @@ public class FormDataServiceImpl implements FormDataService {
                                         relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
                                         relation.getYear(),
                                         relation.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                                                SDF_DD_MM_YYYY.format(relation.getCorrectionDate())) : ""
+                                                SDF_DD_MM_YYYY.get().format(relation.getCorrectionDate())) : ""
                                 );
                             }
                         }
@@ -594,7 +609,7 @@ public class FormDataServiceImpl implements FormDataService {
                                     relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
                                     relation.getYear(),
                                     relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                            SDF_DD_MM_YYYY.format(relation.getCorrectionDate())) : ""
+                                            SDF_DD_MM_YYYY.get().format(relation.getCorrectionDate())) : ""
                             );
                         } else if (!sourceService.isFDSourceConsolidated(formData.getId(), relation.getFormDataId())) {
                             consolidationOk = false;
@@ -606,7 +621,7 @@ public class FormDataServiceImpl implements FormDataService {
                                     relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
                                     relation.getYear(),
                                     relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                            SDF_DD_MM_YYYY.format(relation.getCorrectionDate())) : "",
+                                            SDF_DD_MM_YYYY.get().format(relation.getCorrectionDate())) : "",
                                     relation.getState().getTitle()
                             );
                         }
@@ -890,7 +905,7 @@ public class FormDataServiceImpl implements FormDataService {
                             relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
                             relation.getYear(),
                             relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                    SDF_DD_MM_YYYY.format(relation.getCorrectionDate())) : ""
+                                    SDF_DD_MM_YYYY.get().format(relation.getCorrectionDate())) : ""
                     );
                 } else if (!relation.isCreated() || relation.getState() != WorkflowState.ACCEPTED) {
                     hasNotAccepted = true;
@@ -901,7 +916,7 @@ public class FormDataServiceImpl implements FormDataService {
                             relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
                             relation.getYear(),
                             relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                    SDF_DD_MM_YYYY.format(relation.getCorrectionDate())) : "",
+                                    SDF_DD_MM_YYYY.get().format(relation.getCorrectionDate())) : "",
                             !relation.isCreated() ? "Не создана" : relation.getState().getTitle());
                 }
             }
@@ -1161,7 +1176,7 @@ public class FormDataServiceImpl implements FormDataService {
                     relation.getFormTypeName(),
                     relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
                     (relation.getCorrectionDate() != null ?
-                            String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(relation.getCorrectionDate()))
+                            String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.get().format(relation.getCorrectionDate()))
                             :
                             "")
             ));
@@ -1232,7 +1247,7 @@ public class FormDataServiceImpl implements FormDataService {
                         destination.getFormTypeName(),
                         destination.getPeriodName(),
                         (destination.getCorrectionDate() != null ?
-                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(destination.getCorrectionDate()))
+                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.get().format(destination.getCorrectionDate()))
                                 :
                                 "")
                 ));
@@ -1718,7 +1733,7 @@ public class FormDataServiceImpl implements FormDataService {
         if (lockType != null &&
                 !(editMode && ReportType.EDIT_FD.equals(lockType.getFirst()) && lockType.getSecond().getUserId() == userInfo.getUser().getId())) {
             logger.error("\"%s\" пользователем \"%s\" запущена операция \"%s\"",
-                    SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
+                    SDF_HH_MM_DD_MM_YYYY.get().format(lockType.getSecond().getDateLock()),
                     userService.getUser(lockType.getSecond().getUserId()).getName(),
                     getTaskName(lockType.getFirst(), formDataId, userInfo));
             throw new ServiceLoggerException(LOCK_MESSAGE_TASK,
@@ -1733,7 +1748,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
         if (lockData.getUserId() != user.getId()) {
             throw new ServiceException(String.format("Объект заблокирован другим пользователем (\"%s\", \"%s\")",
-                    userService.getUser(lockData.getUserId()).getLogin(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock())));
+                    userService.getUser(lockData.getUserId()).getLogin(), SDF_HH_MM_DD_MM_YYYY.get().format(lockData.getDateLock())));
         }
     }
 
@@ -1833,7 +1848,7 @@ public class FormDataServiceImpl implements FormDataService {
                         String.format(
                                 LOCK_CURRENT_1,
                                 user.getName(),
-                                SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
+                                SDF_HH_MM_DD_MM_YYYY.get().format(lockType.getSecond().getDateLock()),
                                 getTaskName(lockType.getFirst(), formDataId, userInfo))
                 );
                 break;
@@ -1841,7 +1856,7 @@ public class FormDataServiceImpl implements FormDataService {
                 logger.error(
                         String.format(
                                 LockData.LOCK_CURRENT,
-                                SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
+                                SDF_HH_MM_DD_MM_YYYY.get().format(lockType.getSecond().getDateLock()),
                                 user.getName(),
                                 getTaskName(lockType.getFirst(), formDataId, userInfo, args))
                 );
@@ -2032,12 +2047,12 @@ public class FormDataServiceImpl implements FormDataService {
                         }
                         if (LockData.State.IN_QUEUE.getText().equals(lock.getState())) {
                             logger.info(LockData.CANCEL_TASK_NOT_PROGRESS,
-                                    SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                                    SDF_DD_MM_YYYY_HH_MM_SS.get().format(lock.getDateLock()),
                                     userService.getUser(lock.getUserId()).getName(),
                                     getTaskName(reportType1, formDataId, userInfo, specificReportType));
                         } else {
                             logger.info(LockData.CANCEL_TASK_IN_PROGRESS,
-                                    SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                                    SDF_DD_MM_YYYY_HH_MM_SS.get().format(lock.getDateLock()),
                                     userService.getUser(lock.getUserId()).getName(),
                                     getTaskName(reportType1, formDataId, userInfo, specificReportType));
                         }

@@ -30,8 +30,18 @@ import java.util.List;
  */
 public class XmlMigrationGenerator {
 
-    private static final SimpleDateFormat exemplarSDF = new SimpleDateFormat("yyyy-MM-dd");
-    private static final SimpleDateFormat fieldSDF = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> exemplarSDF = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd");
+        }
+    };
+    private static final ThreadLocal<SimpleDateFormat> fieldSDF = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     private static Transformer transformer;
 
@@ -180,8 +190,8 @@ public class XmlMigrationGenerator {
 
         element.setAttribute("asystem", String.valueOf(SystemType.fromId(ex.getSystemId()).getCodeNew()));
         element.setAttribute("subasystem", ex.getSubSystemId());
-        element.setAttribute("datebegin", exemplarSDF.format(ex.getBeginDate()));
-        element.setAttribute("dateend", exemplarSDF.format(ex.getEndDate()));
+        element.setAttribute("datebegin", exemplarSDF.get().format(ex.getBeginDate()));
+        element.setAttribute("dateend", exemplarSDF.get().format(ex.getEndDate()));
 
         //element.setAttribute("dxx","");  //TODO узнать откуда его брать или нужен ли он вообще
         return element;
@@ -301,7 +311,7 @@ public class XmlMigrationGenerator {
     }
 
     private String formatDate(Date date) {
-        return date == null ? null : fieldSDF.format(date);
+        return date == null ? null : fieldSDF.get().format(date);
     }
 
 }

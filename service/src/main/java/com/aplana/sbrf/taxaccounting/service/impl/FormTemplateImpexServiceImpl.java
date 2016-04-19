@@ -76,7 +76,12 @@ public class FormTemplateImpexServiceImpl implements
 
     private static final String TEMPLATE_OF_FOLDER_NAME =
             "%s" + File.separator + "%s-%s" + File.separator + "%s";
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT_YEAR = new SimpleDateFormat("yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_YEAR = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy");
+        }
+    };
 
 	@Override
 	public void exportFormTemplate(Integer id, OutputStream os) {
@@ -241,7 +246,7 @@ public class FormTemplateImpexServiceImpl implements
                             translatedName.length() > MAX_NAME_OF_DIR
                                     ? translatedName.substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
                                     : translatedName.trim().replaceAll(REG_EXP,""),
-                            SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion())));
+                            SIMPLE_DATE_FORMAT_YEAR.get().format(template.getVersion())));
             try {
                 File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
                 folderTemplate.delete();
@@ -343,7 +348,7 @@ public class FormTemplateImpexServiceImpl implements
                             translatedName.length() > MAX_NAME_OF_DIR
                                     ? translatedName.substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
                                     : translatedName.trim().replaceAll(REG_EXP, ""),
-                            SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion()));
+                            SIMPLE_DATE_FORMAT_YEAR.get().format(template.getVersion()));
             try {
                 File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
                 folderTemplate.delete();

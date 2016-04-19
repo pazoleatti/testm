@@ -28,11 +28,35 @@ public final class XlsxReportMetadata {
 	
 	public static final int CELL_POS = 0; //cell for naming position of signer
 
-	public static final SimpleDateFormat sdf_y = new SimpleDateFormat("yy");
-	public static final SimpleDateFormat sdf_m = new SimpleDateFormat("MMMMMM", new Locale("ru"));
-	public static final SimpleDateFormat sdf_d = new SimpleDateFormat("dd");
-	public static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-	
+    public static final ThreadLocal<SimpleDateFormat> sdf_y = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yy");
+        }
+    };
+
+    public static final ThreadLocal<SimpleDateFormat> sdf_m = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("MMMMMM", new Locale("ru"));
+        }
+    };
+
+    public static final ThreadLocal<SimpleDateFormat> sdf_d = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd");
+        }
+    };
+
+    public static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
+
+
 	/*
 	 * Patterns for printing in Exel. "###," shows that we must grouping by 3 characters
 	 */

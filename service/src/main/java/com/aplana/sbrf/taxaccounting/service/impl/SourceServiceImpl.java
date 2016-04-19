@@ -43,12 +43,10 @@ public class SourceServiceImpl implements SourceService {
         INFO, WARN, ERROR
     }
 
-    private final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
-
-    private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            return SIMPLE_DATE_FORMAT;
+            return new SimpleDateFormat("dd.MM.yyyy");
         }
     };
 
@@ -386,7 +384,7 @@ public class SourceServiceImpl implements SourceService {
                                         declaration.getDepartment(),
                                         declaration.getPeriod(),
                                         declaration.getCorrectionDate() != null
-                                                ? " с датой сдачи корректировки " + SIMPLE_DATE_FORMAT.format(declaration.getCorrectionDate())
+                                                ? " с датой сдачи корректировки " + sdf.get().format(declaration.getCorrectionDate())
                                                 : "",
                                         declaration.getTaxOrganCode() != null
                                                 ? ", налоговый орган " + declaration.getTaxOrganCode()
@@ -536,8 +534,8 @@ public class SourceServiceImpl implements SourceService {
                                         (isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType()),
                                 "приемника",
                                 intersection.getSourcePair().getSourceDepartmentName() + ", " + intersection.getSourcePair().getSourceKind() + ": " + intersection.getSourcePair().getSourceType(),
-                                formatter.get().format(intersection.getPeriodStart()) + " - " +
-                                        (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                                sdf.get().format(intersection.getPeriodStart()) + " - " +
+                                        (intersection.getPeriodEnd() != null ? sdf.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                         ));
                     } else {
                         msgsForPair.add(String.format(INTERSECTION_PART,
@@ -545,8 +543,8 @@ public class SourceServiceImpl implements SourceService {
                                 "источника",
                                 intersection.getSourcePair().getDestinationDepartmentName() + ", " +
                                         (isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType()),
-                                formatter.get().format(intersection.getPeriodStart()) + " - " +
-                                        (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                                sdf.get().format(intersection.getPeriodStart()) + " - " +
+                                        (intersection.getPeriodEnd() != null ? sdf.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                         ));
                     }
                     intersectionParts.put(intersection.getSourcePair(), msgsForPair);
@@ -591,13 +589,13 @@ public class SourceServiceImpl implements SourceService {
                             if (excludedPeriodStart == null) {
                                 //Идет создание назначений
                                 SourceObject union = unionMap.get(sourcePair);
-                                period = formatter.get().format(union.getPeriodStart()) + " - " +
-                                        (union.getPeriodEnd() != null ? formatter.get().format(union.getPeriodEnd()) : EMPTY_END_PERIOD_INFO);
+                                period = sdf.get().format(union.getPeriodStart()) + " - " +
+                                        (union.getPeriodEnd() != null ? sdf.get().format(union.getPeriodEnd()) : EMPTY_END_PERIOD_INFO);
                             } else {
                                 //Идет редактирование назначений
                                 Pair<Date, Date> periodDates = unionPairs.get(sourcePair);
-                                period = formatter.get().format(periodDates.getFirst()) + " - " +
-                                        (periodDates.getSecond() != null ? formatter.get().format(periodDates.getSecond()) : EMPTY_END_PERIOD_INFO);
+                                period = sdf.get().format(periodDates.getFirst()) + " - " +
+                                        (periodDates.getSecond() != null ? sdf.get().format(periodDates.getSecond()) : EMPTY_END_PERIOD_INFO);
                             }
                             List<String> msgs = new ArrayList<String>();
                             msgs.add(INTERSECTION_MSG_BEGIN);
@@ -647,8 +645,8 @@ public class SourceServiceImpl implements SourceService {
                                         sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                                 "приемником",
                                 sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
-                                formatter.get().format(sourceObject.getPeriodStart()) + " - " +
-                                        (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                                sdf.get().format(sourceObject.getPeriodStart()) + " - " +
+                                        (sourceObject.getPeriodEnd() != null ? sdf.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                         );
                     } else {
                         logger.info(SAVE_SUCCESS_MSG,
@@ -657,8 +655,8 @@ public class SourceServiceImpl implements SourceService {
                                 sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
                                         (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
                                         sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
-                                formatter.get().format(sourceObject.getPeriodStart()) + " - " +
-                                        (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                                sdf.get().format(sourceObject.getPeriodStart()) + " - " +
+                                        (sourceObject.getPeriodEnd() != null ? sdf.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                         );
                     }
                 }
@@ -733,8 +731,8 @@ public class SourceServiceImpl implements SourceService {
                             "приемника",
                             sourceClientData.isDeclaration() ? "декларации" : "формы",
                             sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
-                            formatter.get().format(sourceObject.getPeriodStart()) + " - " +
-                                    (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                            sdf.get().format(sourceObject.getPeriodStart()) + " - " +
+                                    (sourceObject.getPeriodEnd() != null ? sdf.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                     );
                 }
             } else {
@@ -746,8 +744,8 @@ public class SourceServiceImpl implements SourceService {
                             sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
                                     (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
                                     sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
-                            formatter.get().format(sourceObject.getPeriodStart()) + " - " +
-                                    (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                            sdf.get().format(sourceObject.getPeriodStart()) + " - " +
+                                    (sourceObject.getPeriodEnd() != null ? sdf.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                     );
                 }
             }
@@ -916,8 +914,8 @@ public class SourceServiceImpl implements SourceService {
                                                 sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                                         "приемником",
                                         sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
-                                        formatter.get().format(periodStart) + " - " +
-                                                (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
+                                        sdf.get().format(periodStart) + " - " +
+                                                (periodEnd != null ? sdf.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
                                 );
                             }
                         } else {
@@ -928,8 +926,8 @@ public class SourceServiceImpl implements SourceService {
                                         sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
                                                 (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
                                                 sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
-                                        formatter.get().format(periodStart) + " - " +
-                                                (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
+                                        sdf.get().format(periodStart) + " - " +
+                                                (periodEnd != null ? sdf.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
                                 );
                             }
                         }

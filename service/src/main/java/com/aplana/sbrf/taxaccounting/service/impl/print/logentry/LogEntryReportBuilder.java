@@ -9,6 +9,7 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class LogEntryReportBuilder extends AbstractReportBuilder {
 
@@ -17,7 +18,12 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
     private static final String THIRD_COLUMN = "Тип сообщения";
 	private static final String FOURTH_COLUMN = "Текст сообщения";
 
-    private static final SimpleDateFormat DATE_DATA_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    private static final ThreadLocal<SimpleDateFormat> DATE_DATA_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
 
     private static String[] headers = new String[]{FIRST_COLUMN, SECOND_COLUMN, THIRD_COLUMN, FOURTH_COLUMN};
     private static final String ENCODING = "windows-1251";
@@ -74,7 +80,7 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
     private String[] assemble(LogEntry item, int numberStr){
         List<String> entries = new ArrayList<String>(4);
         entries.add(String.valueOf(numberStr));
-        entries.add(DATE_DATA_FORMAT.format(item.getDate()));
+        entries.add(DATE_DATA_FORMAT.get().format(item.getDate()));
         switch (item.getLevel()) {
             case ERROR:
                 entries.add("ошибка");

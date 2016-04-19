@@ -95,7 +95,7 @@ public abstract class ExcelReportRefBookAsyncTask extends AbstractAsyncTask  {
         Date version = (Date)params.get("version");
         RefBook refBook = refBookFactory.get(refBookId);
 
-        return String.format("Сформирован \"%s\" отчет справочника \"%s\": Версия: %s, Фильтр: \"%s\"", getReportType().getName(), refBook.getName(), SDF_DD_MM_YYYY.format(version), searchPattern);
+        return String.format("Сформирован \"%s\" отчет справочника \"%s\": Версия: %s, Фильтр: \"%s\"", getReportType().getName(), refBook.getName(), SDF_DD_MM_YYYY.get().format(version), searchPattern);
     }
 
     @Override
@@ -105,6 +105,6 @@ public abstract class ExcelReportRefBookAsyncTask extends AbstractAsyncTask  {
         Date version = (Date)params.get("version");
         RefBook refBook = refBookFactory.get(refBookId);
 
-        return String.format("Произошла непредвиденная ошибка при формировании \"%s\" отчета справочника \"%s\": Версия: %s, Фильтр: \"%s\"", getReportType().getName(), refBook.getName(), SDF_DD_MM_YYYY.format(version), searchPattern);
+        return String.format("Произошла непредвиденная ошибка при формировании \"%s\" отчета справочника \"%s\": Версия: %s, Фильтр: \"%s\"", getReportType().getName(), refBook.getName(), SDF_DD_MM_YYYY.get().format(version), searchPattern);
     }
 }

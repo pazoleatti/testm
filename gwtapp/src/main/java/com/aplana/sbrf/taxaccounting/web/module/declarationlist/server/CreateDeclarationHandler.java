@@ -27,7 +27,12 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 		super(CreateDeclaration.class);
 	}
 
-    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
 	@Autowired
     private DeclarationDataService declarationDataService;
@@ -79,7 +84,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
                         String.format("Создание %s", declarationType.getTaxType().getDeclarationShortName()),
                         reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear(),
                         departmentReportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate())
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate())
                                 : "",
                         department.getName(),
                         declarationType.getName(),

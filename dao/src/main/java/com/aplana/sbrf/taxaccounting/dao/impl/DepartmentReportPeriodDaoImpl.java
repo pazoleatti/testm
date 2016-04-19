@@ -35,7 +35,12 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Autowired
     private ReportPeriodDao reportPeriodDao;
 
-    private final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     private final RowMapper<DepartmentReportPeriod> mapper = new RowMapper<DepartmentReportPeriod>() {
         @Override
@@ -83,7 +88,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
         if (filter.getCorrectionDate() != null) {
             causeList.add("drp.correction_date = to_date('" +
-                    SIMPLE_DATE_FORMAT.format(filter.getCorrectionDate()) +
+                    SIMPLE_DATE_FORMAT.get().format(filter.getCorrectionDate()) +
                     "', 'DD.MM.YYYY')");
         }
 

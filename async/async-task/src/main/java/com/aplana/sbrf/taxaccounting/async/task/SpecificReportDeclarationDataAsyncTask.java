@@ -111,7 +111,7 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
             str = ".";
         }
         if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
+            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
         }
         return String.format("Сформирован отчет \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
                 subreport.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
@@ -139,7 +139,7 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
             str = ".";
         }
         if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
+            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
         }
         return String.format("Произошла непредвиденная ошибка при формировании отчета \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
                 subreport.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),

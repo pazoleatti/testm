@@ -37,7 +37,12 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
         SaveDepartmentCombinedResult> {
 
     private static final String SUCCESS_INFO = "Настройки для \"%s\" в периоде с %s по %s успешно сохранены.";
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     @Autowired
     private PeriodService periodService;
@@ -247,9 +252,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             String departmentName = departmentService.getDepartment(action.getDepartment()).getName();
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 if (recordVersion.getVersionEnd() != null) {
-                    logger.info(String.format(SUCCESS_INFO, departmentName, SDF.format(recordVersion.getVersionStart()), SDF.format(recordVersion.getVersionEnd())));
+                    logger.info(String.format(SUCCESS_INFO, departmentName, SDF.get().format(recordVersion.getVersionStart()), SDF.get().format(recordVersion.getVersionEnd())));
                 } else {
-                    logger.info(String.format(SUCCESS_INFO, departmentName, SDF.format(recordVersion.getVersionStart()), "\"-\""));
+                    logger.info(String.format(SUCCESS_INFO, departmentName, SDF.get().format(recordVersion.getVersionStart()), "\"-\""));
                 }
             }
 

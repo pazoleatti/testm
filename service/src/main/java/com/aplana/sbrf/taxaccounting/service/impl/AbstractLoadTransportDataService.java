@@ -35,7 +35,12 @@ public abstract class AbstractLoadTransportDataService {
 
     // Константы
     final static String ZIP_ENCODING = "cp866";
-    final static SimpleDateFormat dateFormat = new SimpleDateFormat("(yyyy.MM.dd HH.mm.ss)");
+    private static final ThreadLocal<SimpleDateFormat> dateFormat = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("(yyyy.MM.dd HH.mm.ss)");
+        }
+    };
 
     protected Integer formDepartmentId = null;
     protected Integer formTypeId = null;
@@ -207,7 +212,7 @@ public abstract class AbstractLoadTransportDataService {
 
             // Создание архива
             String path = folderDst.getPath() + "/" + file.getName()
-                    + dateFormat.format(calendar.getTime()) + ".zip";
+                    + dateFormat.get().format(calendar.getTime()) + ".zip";
             FileWrapper fileDst = ResourceUtils.getSharedResource(path, false);
             ZipArchiveOutputStream zaos = new ZipArchiveOutputStream(fileDst.getOutputStream());
             zaos.setEncoding(ZIP_ENCODING);

@@ -15,7 +15,12 @@ public class RnuMigrationGenerator {
 
     private static final String CR = "\r\n";
     private static final String TOTAL_ROW = "TOTAL_P";
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     public String generateRnuFileToString(Exemplar ex, List<? extends AbstractRnuRow> rnuRows) {
         StringBuilder bu = new StringBuilder();
@@ -110,8 +115,8 @@ public class RnuMigrationGenerator {
         builder.append(Integer.valueOf(exemplar.getTerCode())).append(sep);              //1
         builder.append(exemplar.getDepCode()).append(sep);       //2
 
-        builder.append(formatter.format(exemplar.getBeginDate())).append(sep);      //3
-        builder.append(formatter.format(exemplar.getEndDate())).append(sep);        //4
+        builder.append(formatter.get().format(exemplar.getBeginDate())).append(sep);      //3
+        builder.append(formatter.get().format(exemplar.getEndDate())).append(sep);        //4
 
         builder.append(DepartmentCode.fromDataBaseCode(exemplar.getDepCode()).getFilenamePartCode()).append(sep);   //5
 

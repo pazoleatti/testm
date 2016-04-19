@@ -112,7 +112,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
                     currColumn = formTemplate.getColumn(columnAlias);
                     if(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat().isEmpty()){
-                        cellStyle.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()));
+                        cellStyle.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.get().toPattern()));
                     } else{
                         cellStyle.setDataFormat(dataFormat.getFormat(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat()));
                     }
@@ -163,7 +163,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                         case DATE:
                             cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
                             if(refBookAttribute.getFormat() == null){
-                                cellStyle.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()));
+                                cellStyle.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.get().toPattern()));
                             } else{
                                 cellStyle.setDataFormat(dataFormat.getFormat(refBookAttribute.getFormat().getFormat()));
                             }
@@ -391,16 +391,16 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 ((data.getState() == WorkflowState.CREATED || data.getState() == WorkflowState.PREPARED) && creationDate != null)
                         ? creationDate : new Date();
 
-        arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
-        if (XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("март") ||
-                XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("август")) {
-            String month = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase() + "а";
+        arr = XlsxReportMetadata.sdf_m.get().format(printDate).toLowerCase().toCharArray();
+        if (XlsxReportMetadata.sdf_m.get().format(printDate).equalsIgnoreCase("март") ||
+                XlsxReportMetadata.sdf_m.get().format(printDate).equalsIgnoreCase("август")) {
+            String month = XlsxReportMetadata.sdf_m.get().format(printDate).toLowerCase() + "а";
             arr = month.toCharArray();
         } else {
             arr[arr.length - 1] = 'я';
         }
-        sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
-                new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
+        sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.get().format(printDate),
+                new String(arr), XlsxReportMetadata.sdf_y.get().format(printDate)));
 
         createCellByRange(XlsxReportMetadata.RANGE_DATE_CREATE, sb.toString(), 0, 0);
         sb.delete(0, sb.length());

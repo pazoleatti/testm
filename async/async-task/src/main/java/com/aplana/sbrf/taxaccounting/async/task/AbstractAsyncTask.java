@@ -77,8 +77,18 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         }
     }
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-    protected static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
+    protected static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     /**
      * Выполнение бизнес логики задачи
@@ -136,7 +146,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         final String lock = (String) params.get(LOCKED_OBJECT.name());
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
         final Logger logger = new Logger();
-        LOG.info(String.format("Запущена асинхронная задача с ключом %s и датой начала %s (%s)", lock, sdf.format(lockDate), lockDate.getTime()));
+        LOG.info(String.format("Запущена асинхронная задача с ключом %s и датой начала %s (%s)", lock, sdf.get().format(lockDate), lockDate.getTime()));
         lockService.updateState(lock, lockDate, LockData.State.STARTED.getText());
         final TaskStatus taskStatus = transactionHelper.executeInNewTransaction(new TransactionLogic<TaskStatus>() {
             @Override
@@ -158,7 +168,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     }
                 } catch (final Throwable e) {
                     LOG.error(String.format("Произошла ошибка при выполнении асинхронной задачи с ключом %s и датой начала %s (%s)",
-							lock, sdf.format(lockDate), lockDate.getTime()), e);
+							lock, sdf.get().format(lockDate), lockDate.getTime()), e);
                     if (lockService.isLockExists(lock, lockDate)) {
                         try {
                             transactionHelper.executeInNewTransaction(new TransactionLogic() {

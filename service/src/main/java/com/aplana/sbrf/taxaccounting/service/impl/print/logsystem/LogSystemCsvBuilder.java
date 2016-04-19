@@ -21,8 +21,18 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
 
 	private static final Log LOG = LogFactory.getLog(LogSystemCsvBuilder.class);
 
-    private static final SimpleDateFormat SDF_LOG_NAME = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    private static final ThreadLocal<SimpleDateFormat> SDF_LOG_NAME = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        }
+    };
+    private static final ThreadLocal<SimpleDateFormat> SDF = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
     private static final String PATTER_LOG_FILE_NAME = "log_%s-%s";
     private static final String ENCODING = "windows-1251";
 
@@ -61,8 +71,8 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
     @Override
     protected String flush() throws IOException {
         String fileName = String.format(PATTER_LOG_FILE_NAME,
-                SDF_LOG_NAME.format(items.get(items.size() - 1).getLogDate()),
-                SDF_LOG_NAME.format(items.get(0).getLogDate()));
+                SDF_LOG_NAME.get().format(items.get(items.size() - 1).getLogDate()),
+                SDF_LOG_NAME.get().format(items.get(0).getLogDate()));
         String tmpDir = System.getProperty("java.io.tmpdir");
         File file = new File(tmpDir + File.separator + fileName + ".csv");
         FileWriter fileWriter = new FileWriter(file);
@@ -98,7 +108,7 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
     }
     private String[] assemble(LogSearchResultItem item){
         List<String> entries = new ArrayList<String>();
-        entries.add(SDF.format(item.getLogDate()));
+        entries.add(SDF.get().format(item.getLogDate()));
         entries.add(item.getEvent().getTitle());
         entries.add(item.getNote());
         entries.add(item.getReportPeriodName() != null ? item.getReportPeriodName() : "");

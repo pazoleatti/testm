@@ -283,7 +283,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
                 case DATE:
                     style.setAlignment(CellStyle.ALIGN_CENTER);
                     if(format.isEmpty()){
-                        style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()));
+                        style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.get().toPattern()));
                     } else{
                         style.setDataFormat(dataFormat.getFormat(format));
                     }

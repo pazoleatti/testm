@@ -46,7 +46,12 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
     @Autowired
     private AsyncTaskManagerService asyncTaskManagerService;
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd/MM/yyyy HH:mm z");
+        }
+    };
 
     public CheckDeclarationDataHandler() {
         super(CheckDeclarationDataAction.class);
@@ -111,7 +116,7 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
             logger.error(
                     String.format(
                             LockData.LOCK_CURRENT,
-                            sdf.format(lockDataAccept.getDateLock()),
+                            sdf.get().format(lockDataAccept.getDateLock()),
                             userService.getUser(lockDataAccept.getUserId()).getName(),
                             declarationDataService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, action.getTaxType()))
             );

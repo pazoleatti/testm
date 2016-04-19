@@ -41,7 +41,12 @@ public class RefBookHelperImpl implements RefBookHelper {
     @Autowired
     private ApplicationContext applicationContext;
 
-    private final static SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     @Override
     public void checkReferenceValues(RefBook refBook, Map<RefBookDataProvider, List<RefBookLinkModel>> references,
@@ -128,10 +133,10 @@ public class RefBookHelperImpl implements RefBookHelper {
                                                             link.getIndex() != null ? link.getIndex() :
                                                                     link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()),
-                                                            SDF.format(inactiveRecord.getVersionFrom()),
-                                                            inactiveRecord.getVersionTo() != null ? SDF.format(inactiveRecord.getVersionTo()) : "-",
-                                                            SDF.format(link.getVersionFrom()),
-                                                            link.getVersionTo() != null ? SDF.format(link.getVersionTo()) : "-"
+                                                            sdf.get().format(inactiveRecord.getVersionFrom()),
+                                                            inactiveRecord.getVersionTo() != null ? sdf.get().format(inactiveRecord.getVersionTo()) : "-",
+                                                            sdf.get().format(link.getVersionFrom()),
+                                                            link.getVersionTo() != null ? sdf.get().format(link.getVersionTo()) : "-"
                                                     );
                                                 }
                                                 break;
@@ -144,8 +149,8 @@ public class RefBookHelperImpl implements RefBookHelper {
                                                             link.getIndex() != null ? link.getIndex() :
                                                                     link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()),
-                                                            SDF.format(versionFrom),
-                                                            versionTo != null ? SDF.format(versionTo) : "-"
+                                                            sdf.get().format(versionFrom),
+                                                            versionTo != null ? sdf.get().format(versionTo) : "-"
                                                     );
                                                 } else {
                                                     msg = buildMsg("Поле \"%s\" содержит ссылку на версию записи справочника, которая не является последней действующей в отчетном периоде настроек (с %s по %s)!", link);
@@ -153,8 +158,8 @@ public class RefBookHelperImpl implements RefBookHelper {
                                                             link.getIndex() != null ? link.getIndex() :
                                                                     link.getSpecialId() != null ? link.getSpecialId() : "",
                                                             aliases.get(link.getAttributeAlias()),
-                                                            SDF.format(versionFrom),
-                                                            versionTo != null ? SDF.format(versionTo) : "-"
+                                                            sdf.get().format(versionFrom),
+                                                            versionTo != null ? sdf.get().format(versionTo) : "-"
                                                     );
                                                 }
                                                 break;

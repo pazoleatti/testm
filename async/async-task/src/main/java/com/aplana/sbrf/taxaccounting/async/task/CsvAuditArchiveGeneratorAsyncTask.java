@@ -17,7 +17,12 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
 
 public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTask {
 
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH.mm.ss");
+    private static final ThreadLocal<SimpleDateFormat> SDF = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
     private static final String SUCCESS_MSG =
             "Архивация журнала аудита за период %s-%s выполнена успешно (архивировано %d записей). Данные перенесены в файл архива.";
     private static final String ERROR_MSG =
@@ -80,13 +85,13 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
         Long count = (Long) params.get(AuditService.AsyncNames.LOG_COUNT.name());
 
         return String.format(SUCCESS_MSG,
-                SDF.format(params.get(AuditService.AsyncNames.LOG_FIRST_DATE.name())),
-                SDF.format(
+                SDF.get().format(params.get(AuditService.AsyncNames.LOG_FIRST_DATE.name())),
+                SDF.get().format(
                         params.containsKey(AuditService.AsyncNames.LOG_LAST_DATE.name())
                                 ?
                                 params.get(AuditService.AsyncNames.LOG_LAST_DATE.name())
                                 :
-                                SDF.format(filter.getToSearchDate())
+                                SDF.get().format(filter.getToSearchDate())
 
                 ),
                 count);
@@ -97,13 +102,13 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
         LogSystemFilter filter = (LogSystemFilter) params.get(AuditService.AsyncNames.LOG_FILTER.name());
 
         return String.format(ERROR_MSG,
-                SDF.format(params.get(AuditService.AsyncNames.LOG_FIRST_DATE.name())),
-                SDF.format(
+                SDF.get().format(params.get(AuditService.AsyncNames.LOG_FIRST_DATE.name())),
+                SDF.get().format(
                         params.containsKey(AuditService.AsyncNames.LOG_LAST_DATE.name())
                                 ?
                                 params.get(AuditService.AsyncNames.LOG_LAST_DATE.name())
                                 :
-                                SDF.format(filter.getToSearchDate())
+                                SDF.get().format(filter.getToSearchDate())
 
                 )
         );

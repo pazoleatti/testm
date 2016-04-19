@@ -36,8 +36,12 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
     @Autowired
     private LockDataService lockService;
 
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-
+    private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
     @Override
     protected ReportType getReportType() {
         return ReportType.ACCEPT_DEC;
@@ -107,7 +111,7 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
                 declarationTemplate.getType().getTaxType().getDeclarationShortName(),
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(),
                 reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                        formatter.format(reportPeriod.getCorrectionDate())) : "",
+                        formatter.get().format(reportPeriod.getCorrectionDate())) : "",
                 department.getName(),
                 declarationTemplate.getType().getName(), str);
     }
@@ -133,7 +137,7 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
                 declarationTemplate.getType().getTaxType() == TaxType.DEAL ? "уведомление" : "декларацию",
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(),
                 reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                        formatter.format(reportPeriod.getCorrectionDate())) : "",
+                        formatter.get().format(reportPeriod.getCorrectionDate())) : "",
                 department.getName(),
                 declarationTemplate.getType().getName(), str);
     }

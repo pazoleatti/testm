@@ -40,7 +40,12 @@ public class GetFTVersionListHandler extends AbstractActionHandler<GetFTVersionL
         super(GetFTVersionListAction.class);
     }
 
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     @Override
     public GetFTVersionListResult execute(GetFTVersionListAction action, ExecutionContext context) throws ActionException {
@@ -56,9 +61,9 @@ public class GetFTVersionListHandler extends AbstractActionHandler<GetFTVersionL
             FormTemplate formTemplate = formTemplates.get(i);
             formTemplateVersion.setFormTemplateId(String.valueOf(formTemplate.getId()));
             formTemplateVersion.setTypeName(formTemplate.getName());
-            formTemplateVersion.setActualBeginVersionDate(SDF.format(formTemplate.getVersion()));
+            formTemplateVersion.setActualBeginVersionDate(SDF.get().format(formTemplate.getVersion()));
             formTemplateVersion.setActualEndVersionDate(formTemplates.get(i + 1).getVersion() != null?
-                    SDF.format(new Date(formTemplates.get(i + 1).getVersion().getTime() - AdminConstants.oneDayMilliseconds)):"");
+                    SDF.get().format(new Date(formTemplates.get(i + 1).getVersion().getTime() - AdminConstants.oneDayMilliseconds)):"");
             if (formTemplates.get(i + 1).getStatus() == VersionedObjectStatus.FAKE){
                 i++;
             }
@@ -70,7 +75,7 @@ public class GetFTVersionListHandler extends AbstractActionHandler<GetFTVersionL
             FormTemplateVersion formTemplateVersion = new FormTemplateVersion();
             formTemplateVersion.setFormTemplateId(String.valueOf(formTemplates.get(formTemplates.size() - 1).getId()));
             formTemplateVersion.setTypeName(formTemplates.get(formTemplates.size() - 1).getName());
-            formTemplateVersion.setActualBeginVersionDate(SDF.format(formTemplates.get(formTemplates.size() - 1).getVersion()));
+            formTemplateVersion.setActualBeginVersionDate(SDF.get().format(formTemplates.get(formTemplates.size() - 1).getVersion()));
             formTemplateVersions.add(formTemplateVersion);
         }
 
