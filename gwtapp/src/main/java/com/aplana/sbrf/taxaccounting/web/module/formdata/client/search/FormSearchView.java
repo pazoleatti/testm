@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.search;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResult;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.NotificationTableRow;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.cell.client.Cell;
@@ -21,6 +22,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
@@ -96,15 +98,6 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
         dataProvider.addDataDisplay(searchResultTable);
 
         selectionModel = new SingleSelectionModel<FormDataSearchResult>();
-        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                FormDataSearchResult selRow = selectionModel.getSelectedObject();
-                if (selRow != null) {
-                    getUiHandlers().onClickFoundItem(selRow.getRowIndex());
-                }
-            }
-        });
 
         TextColumn<FormDataSearchResult> counterColumn = new TextColumn<FormDataSearchResult>() {
             @Override
@@ -156,6 +149,18 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
         valueColumn.setCellStyleNames("linkCell");
 
         searchResultTable.setSelectionModel(selectionModel);
+        searchResultTable.addCellPreviewHandler(new CellPreviewEvent.Handler<FormDataSearchResult>(){
+            @Override
+            public void onCellPreview(final CellPreviewEvent<FormDataSearchResult> event) {
+                if (Event.getTypeInt(event.getNativeEvent().getType()) == Event.ONCLICK) {
+                    FormDataSearchResult selRow = event.getValue();
+                    if (selRow != null){
+                        getUiHandlers().onClickFoundItem(selRow.getRowIndex());
+                    }
+                }
+            }
+        });
+
         searchResultTable.addColumn(counterColumn, "№");
         searchResultTable.setColumnWidth(counterColumn, 50, Style.Unit.PX);
         searchResultTable.addColumn(rowIndexColumn, "Строка");
