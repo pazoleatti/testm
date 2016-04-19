@@ -617,9 +617,16 @@ void calcExplanation(def dataRows, def formSources, def isFromSummary) {
     for (row in dataRows) {
         if (!(row.getAlias() in rowsNotCalc)) {
             def knu = row.consumptionTypeId
-            def opuMap = codeMap.get(knu)
-            def opuKey = row.accountingRecords ?: ''
-            def sourceRows = opuMap?.get(opuKey)
+            def opuMap = codeMap.get(knu) as Map
+            def sourceRows
+            def opuKey
+            boolean checkOpu = row.consumptionAccountNumber?.startsWith("706")
+            if (checkOpu) {
+                opuKey = row.accountingRecords ?: ''
+                sourceRows = opuMap?.get(opuKey)
+            } else {
+                sourceRows = opuMap?.values()?.sum() ?: []
+            }
             row.explanation = BigDecimal.ZERO
             if (sourceRows != null && !(sourceRows.isEmpty())) {
                 sourceRows.each { sourceRow ->
@@ -628,11 +635,13 @@ void calcExplanation(def dataRows, def formSources, def isFromSummary) {
             } else {
                 rowNumbers.add(row.getIndex())
             }
-            // удаляем использованные строки источника
-            opuMap?.remove(opuKey)
-            // если остались строки источника с тем же кну, но с другим балансовым счетом, то выводим сообщение
-            if (opuMap != null && !(opuMap.isEmpty())) {
-                strangeCodes.add(knu)
+            if (checkOpu) {
+                // удаляем использованные строки источника
+                opuMap?.remove(opuKey)
+                // если остались строки источника с тем же кну, но с другим балансовым счетом, то выводим сообщение
+                if (opuMap != null && !(opuMap.isEmpty())) {
+                    strangeCodes.add(knu)
+                }
             }
         }
     }
