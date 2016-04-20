@@ -50,7 +50,12 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
     @Autowired
     private DepartmentService departmentService;
 
-    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     public CreateRefBookReportHandler() {
         super(CreateReportAction.class);
@@ -126,7 +131,7 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
             params.put("specificReportType", reportName);
 
         String keyTask = String.format("%s_%s_refBookId_%d_version_%s_filter_%s_%s_%s_%s",
-                LockData.LockObjects.REF_BOOK.name(), reportType.getName(), action.getRefBookId(), SDF_DD_MM_YYYY.format(action.getVersion()) , action.getSearchPattern(),
+                LockData.LockObjects.REF_BOOK.name(), reportType.getName(), action.getRefBookId(), SDF_DD_MM_YYYY.get().format(action.getVersion()) , action.getSearchPattern(),
                 (sortAttribute!=null?sortAttribute.getAlias():null), action.isAscSorting(), UUID.randomUUID());
         asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
             @Override

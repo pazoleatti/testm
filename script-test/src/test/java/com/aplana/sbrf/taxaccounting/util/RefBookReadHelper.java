@@ -23,7 +23,13 @@ import java.util.Map;
 public class RefBookReadHelper {
     private static final String FILE_NAME_PREFIX = "ref_book_";
     private static final String FILE_NAME_EXT = ".csv";
-    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.mm.yyyy");
+
+    private static final ThreadLocal<SimpleDateFormat> simpleDateFormat = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     /**
      * Получение структуры:
@@ -101,7 +107,7 @@ public class RefBookReadHelper {
                         break;
                     case DATE:
                         // TODO Возможно потребуется поддержка других форматов (можно брать из content.xml)
-                        value = simpleDateFormat.parse(row);
+                        value = simpleDateFormat.get().parse(row);
                         break;
                     default:
                         throw new ServiceException("Unknown column type \"%s\"!", row);

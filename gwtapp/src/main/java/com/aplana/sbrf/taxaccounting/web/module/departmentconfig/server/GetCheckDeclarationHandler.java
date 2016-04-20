@@ -35,7 +35,12 @@ import static java.util.Arrays.asList;
 public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDeclarationAction, GetCheckDeclarationResult> {
 
     private static final String WARN_MSG = "\"%s\" %s, \"%s\"%s, состояние - \"%s\"";
-    private final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     @Autowired
     private TAUserService userService;
@@ -119,10 +124,10 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
 
             StringBuffer periodName = new StringBuffer();
             periodName.append("с ");
-            periodName.append(SIMPLE_DATE_FORMAT.format(dateStart));
+            periodName.append(SIMPLE_DATE_FORMAT.get().format(dateStart));
             periodName.append(" по ");
             if (dateEnd != null) {
-                periodName.append(SIMPLE_DATE_FORMAT.format(dateEnd));
+                periodName.append(SIMPLE_DATE_FORMAT.get().format(dateEnd));
             } else {
                 periodName.append(" \"-\"");
             }

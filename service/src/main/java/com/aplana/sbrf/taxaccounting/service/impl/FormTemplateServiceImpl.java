@@ -43,8 +43,13 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
     private static final String CLOSE_PERIOD = "Следующие периоды %s данной версии макета закрыты: %s. " +
             "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!";
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
-	private static final String GET_ERROR_MESSAGE = "Ошибка при получении версии макета НФ. %s";
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
+    private static final String GET_ERROR_MESSAGE = "Ошибка при получении версии макета НФ. %s";
 
 	private Set<String> checkSet = new HashSet<String>();
 
@@ -259,8 +264,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                         LockData.DescriptionTemplate.FORM_TEMPLATE.getText(),
                         formTemplate.getType().getName(),
                         formTemplate.getType().getTaxType().getName(),
-                        SIMPLE_DATE_FORMAT.format(formTemplate.getVersion()),
-                        endVersion != null ? SIMPLE_DATE_FORMAT.format(endVersion) : "-"
+                        sdf.get().format(formTemplate.getVersion()),
+                        endVersion != null ? sdf.get().format(endVersion) : "-"
                 ));
         return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());
 	}
@@ -406,7 +411,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 					stringBuilder.append(departmentReportPeriod.getReportPeriod().getName()).append(" ");
 					stringBuilder.append(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
 					if (departmentReportPeriod.getCorrectionDate() != null) {
-						stringBuilder.append(", корр. (").append(SIMPLE_DATE_FORMAT.format(departmentReportPeriod.getCorrectionDate())).append(")");
+						stringBuilder.append(", корр. (").append(sdf.get().format(departmentReportPeriod.getCorrectionDate())).append(")");
 					}
 					if (i < departmentReportPeriodList.size() - 1) {
 						stringBuilder.append(", ");

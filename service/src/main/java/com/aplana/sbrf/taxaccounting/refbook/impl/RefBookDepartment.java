@@ -52,7 +52,12 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String DFT_RELATION =
             "В настройке подразделения %s для налога %s в периоде %s %s указана ссылка на версию!";
 
-    private static final SimpleDateFormat SDF_YYYY = new SimpleDateFormat("yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF_YYYY = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy");
+        }
+    };
 
     @Autowired
     RefBookDao refBookDao;
@@ -799,7 +804,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                     departmentService.getDepartment(department.getId()).getName(),
                     taxType.getName(),
                     rpName,
-                    SDF_YYYY.format(startDate));
+                    SDF_YYYY.get().format(startDate));
         }
     }
 

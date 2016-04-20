@@ -94,7 +94,7 @@ public abstract class SpecificReportRefBookAsyncTask extends AbstractAsyncTask  
         String specificReportType = (String)params.get("specificReportType");
         RefBook refBook = refBookFactory.get(refBookId);
 
-        return String.format("Сформирован отчет \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.format(version), searchPattern);
+        return String.format("Сформирован отчет \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.get().format(version), searchPattern);
     }
 
     @Override
@@ -105,6 +105,6 @@ public abstract class SpecificReportRefBookAsyncTask extends AbstractAsyncTask  
         String specificReportType = (String)params.get("specificReportType");
         RefBook refBook = refBookFactory.get(refBookId);
 
-        return String.format("Произошла непредвиденная ошибка при формировании отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.format(version), searchPattern);
+        return String.format("Произошла непредвиденная ошибка при формировании отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.get().format(version), searchPattern);
     }
 }

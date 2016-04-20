@@ -54,7 +54,12 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     @Autowired
     LogEntryService logEntryService;
 
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
@@ -184,7 +189,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
                     throw new ServiceException("Обнаружено пересечение указанного срока актуальности с существующей версией!");
                 } else {
                     if (logger != null) {
-                        logger.info("Установлена дата окончания актуальности версии "+sdf.format(SimpleDateUtils.addDayToDate(versionFrom, -1))+" для предыдущей версии");
+                        logger.info("Установлена дата окончания актуальности версии "+sdf.get().format(SimpleDateUtils.addDayToDate(versionFrom, -1))+" для предыдущей версии");
                     }
                 }
             }

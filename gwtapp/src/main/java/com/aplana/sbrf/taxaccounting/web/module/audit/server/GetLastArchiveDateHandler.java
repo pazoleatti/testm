@@ -20,7 +20,12 @@ import java.util.Date;
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS', 'ROLE_OPER')")
 public class GetLastArchiveDateHandler extends AbstractActionHandler<GetLastArchiveDateAction, GetLastArchiveDateResult> {
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH.mm.ss");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
 
     @Autowired
     AuditService auditService;
@@ -33,7 +38,7 @@ public class GetLastArchiveDateHandler extends AbstractActionHandler<GetLastArch
     public GetLastArchiveDateResult execute(GetLastArchiveDateAction action, ExecutionContext executionContext) throws ActionException {
         GetLastArchiveDateResult result = new GetLastArchiveDateResult();
         Date lastArchiveDate = auditService.getLastArchiveDate();
-        result.setLastArchiveDate(lastArchiveDate != null? sdf.format(lastArchiveDate) : "");
+        result.setLastArchiveDate(lastArchiveDate != null? sdf.get().format(lastArchiveDate) : "");
         return result;
     }
 

@@ -33,7 +33,12 @@ import java.util.Map;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveAction, AuditArchiveResult> {
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    private static final ThreadLocal<SimpleDateFormat> SDF = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
 
     @Autowired
     AuditService auditService;
@@ -94,7 +99,7 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
         Date firstLogDate = auditService.getFirstDateOfLog();
         params.put(AuditService.AsyncNames.LOG_FIRST_DATE.name(), firstLogDate);
         if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
-                String.format(LockData.DescriptionTemplate.LOG_SYSTEM_BACKUP.getText(), firstLogDate != null ? SDF.format(firstLogDate):"", SDF.format(action.getLogSystemFilter().getToSearchDate())),
+                String.format(LockData.DescriptionTemplate.LOG_SYSTEM_BACKUP.getText(), firstLogDate != null ? SDF.get().format(firstLogDate):"", SDF.get().format(action.getLogSystemFilter().getToSearchDate())),
                 LockData.State.IN_QUEUE.getText())) == null) {
             try {
                 lockData = lockDataService.getLock(key);
@@ -106,7 +111,7 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
                 asyncManager.executeAsync(asyncTaskTypeId, params, balancingVariant);
 				LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
                 lockDataService.updateQueue(key, lockData.getDateLock(), queue);
-                logger.info(String.format("Задание на архивацию журнала аудита (до даты: %s) поставлено в очередь на формирование.", SDF.format(action.getLogSystemFilter().getToSearchDate())));
+                logger.info(String.format("Задание на архивацию журнала аудита (до даты: %s) поставлено в очередь на формирование.", SDF.get().format(action.getLogSystemFilter().getToSearchDate())));
                 return result;
             } catch (Exception e) {
                 lockDataService.unlock(key, userInfo.getUser().getId());

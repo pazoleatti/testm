@@ -83,7 +83,7 @@ public final class MessageGenerator {
                     reportPeriodName,
                     year,
                     periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
-                    correctionDate != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(correctionDate)) : "",
+                    correctionDate != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.get().format(correctionDate)) : "",
                     VERSION.getVersion(correctionDate!= null, manual, isShowChecked, isAbsolute)).trim();
         } else {
             return String.format(COMPLETE_FORM_WITH_RP_COMPARISON,
@@ -96,7 +96,7 @@ public final class MessageGenerator {
                     fullRpComparisonName,
                     commpYear,
                     periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
-                    correctionDate != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(correctionDate)) : "",
+                    correctionDate != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.get().format(correctionDate)) : "",
                     VERSION.getVersion(correctionDate!= null, manual, isShowChecked, isAbsolute)).trim();
         }
     }
@@ -125,7 +125,7 @@ public final class MessageGenerator {
                 reportPeriodName,
                 rpComparisonName != null && !rpComparisonName.isEmpty() ? String.format(COMPARISON_PERIOD, rpComparisonName) : "",
                 periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
-                correctionDate != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(correctionDate)) : "",
+                correctionDate != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.get().format(correctionDate)) : "",
                 VERSION.getVersion(correctionDate != null, manual, false, false)).trim();
     }
 
@@ -136,7 +136,7 @@ public final class MessageGenerator {
                 departmentName,
                 drp.getReportPeriod().getName(),
                 drp.getReportPeriod().getTaxPeriod().getYear(),
-                drp.getCorrectionDate() != null ? String.format(DD_CORRECTION_DATE, SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
+                drp.getCorrectionDate() != null ? String.format(DD_CORRECTION_DATE, SDF_DD_MM_YYYY.get().format(drp.getCorrectionDate())) : "",
                 tax != null ? String.format(TAX_AUTHORITY, tax) : "",
                 kpp != null ? String.format(KPP, kpp) : "").trim();
     }
@@ -172,5 +172,15 @@ public final class MessageGenerator {
     private static final String TAX_AUTHORITY = " ,Налоговый орган: \"%s\"";
     private static final String KPP = " ,КПП: \"%s\"";
 
-    protected static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

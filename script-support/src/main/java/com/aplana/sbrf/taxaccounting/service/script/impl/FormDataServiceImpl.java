@@ -56,7 +56,12 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private static final String REF_BOOK_TOO_MANY_FOUND_ERROR = "В справочнике «%s» содержится более одного раза значение «%s», соответствующее атрибуту «%s»!";
     private static final String REF_BOOK_ROW_TOO_MANY_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, встречающееся более одного раза в справочнике «%s»!";
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     @Autowired
     private FormDataDao dao;
@@ -303,7 +308,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             filter = String.format(template, alias, value);
         }
 
-        String dateStr = sdf.format(date);
+        String dateStr = sdf.get().format(date);
 
         if (recordCache.containsKey(refBookId)) {
             Long recordId = recordCache.get(refBookId).get(dateStr + filter);

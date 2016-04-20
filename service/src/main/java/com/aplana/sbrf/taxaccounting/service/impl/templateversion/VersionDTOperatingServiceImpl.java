@@ -30,8 +30,12 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     private static final String MSG_HAVE_SOURCE =
             "Существует назначение декларации в качестве приёмника данных для %s типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
     @Autowired
     private DeclarationDataDao declarationDataDao;
     @Autowired
@@ -187,9 +191,9 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
     private String getPeriod(Pair<Date, Date> pair) {
         if (pair.getSecond() == null) {
-            return String.format("\"%s\"", sdf.format(pair.getFirst()));
+            return String.format("\"%s\"", sdf.get().format(pair.getFirst()));
         } else {
-            return String.format("\"%s\" до периода \"%s\"", sdf.format(pair.getFirst()), sdf.format(pair.getSecond()));
+            return String.format("\"%s\" до периода \"%s\"", sdf.get().format(pair.getFirst()), sdf.get().format(pair.getSecond()));
         }
     }
 

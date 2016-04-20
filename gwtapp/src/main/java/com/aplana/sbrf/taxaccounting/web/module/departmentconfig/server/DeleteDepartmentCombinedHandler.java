@@ -53,7 +53,12 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
     private static final String SUCCESS_INFO = "Настройки подразделения в период %s - %s были удалены";
     private static final String SUCCESS_INFO_SHORT = "Настройки подразделения в период %s были удалены";
 
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     public DeleteDepartmentCombinedHandler() {
         super(DeleteDepartmentCombinedAction.class);
@@ -106,9 +111,9 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
 
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 if (recordVersion.getVersionEnd()==null)
-                    logger.info(String.format(SUCCESS_INFO_SHORT, sdf.format(period.getCalendarStartDate())));
+                    logger.info(String.format(SUCCESS_INFO_SHORT, sdf.get().format(period.getCalendarStartDate())));
                 else
-                    logger.info(String.format(SUCCESS_INFO, sdf.format(period.getCalendarStartDate()), sdf.format(recordVersion.getVersionEnd())));
+                    logger.info(String.format(SUCCESS_INFO, sdf.get().format(period.getCalendarStartDate()), sdf.get().format(recordVersion.getVersionEnd())));
             }
 
             if (action.getOldUUID() == null) {

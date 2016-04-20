@@ -44,7 +44,12 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             "в периоде \"%s\", " +
             "инициированное пользователем \"%s\" " +
             "в %s";
-    private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF_HH_MM_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("HH:mm dd.MM.yyyy");
+        }
+    };
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -526,7 +531,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 List<ReportType> blockReportTypes = Arrays.asList(ReportType.EDIT_FD, ReportType.REFRESH_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.MOVE_FD);
                 if (blockReportTypes.contains(reportType)) {
                     log(userInfo, LogData.L40, localLogger,
-                            lock, formDataService.getTaskName(reportType, formData.getId(), userInfo), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()));
+                            lock, formDataService.getTaskName(reportType, formData.getId(), userInfo), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.get().format(lockType.getSecond().getDateLock()));
                     // Переносим файл в каталог ошибок
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, localLogger, lock), currentFile,
                             Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), lock, ""))), localLogger, lock);
@@ -551,7 +556,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     departmentService.getDepartment(formData.getDepartmentId()).getName(),
                     reportPeriodName,
                     userService.getUser(lockData.getUserId()).getName(),
-                    SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock())
+                    SDF_HH_MM_DD_MM_YYYY.get().format(lockData.getDateLock())
             ));
 
         try {

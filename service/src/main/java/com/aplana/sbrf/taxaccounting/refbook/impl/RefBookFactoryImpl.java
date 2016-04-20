@@ -44,7 +44,12 @@ public class RefBookFactoryImpl implements RefBookFactory {
     @Autowired
     private RefBookScriptingService refBookScriptingService;
 
-    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     @Override
     public RefBook get(Long refBookId) {
@@ -301,9 +306,9 @@ public class RefBookFactoryImpl implements RefBookFactory {
         switch (reportType) {
             case EXCEL_REF_BOOK:
             case CSV_REF_BOOK:
-                return String.format("Формирование отчета справочника \"%s\" в %s-формате : Версия: %s, Фильтр: \"%s\"", refBook.getName(), reportType.getName(), SDF_DD_MM_YYYY.format(version), filter);
+                return String.format("Формирование отчета справочника \"%s\" в %s-формате : Версия: %s, Фильтр: \"%s\"", refBook.getName(), reportType.getName(), sdf.get().format(version), filter);
             case SPECIFIC_REPORT_REF_BOOK:
-                return String.format("Формирование специфического отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.format(version), filter);
+                return String.format("Формирование специфического отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), sdf.get().format(version), filter);
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }

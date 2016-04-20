@@ -58,8 +58,18 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private static final Log LOG = LogFactory.getLog(DeclarationDataService.class);
     private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
     private static final String ENCODING = "UTF-8";
-    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
-    private static final SimpleDateFormat SDF_DD_MM_YYYY_HH_MM_SS = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
+    private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY_HH_MM_SS = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
     private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir")+ File.separator +"%s.%s";
     private static final String CALCULATION_NOT_TOPICAL = "Декларация / Уведомление содержит неактуальные консолидированные данные  " +
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
@@ -114,7 +124,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
 	public static final String ATTR_DOC_DATE = "ДатаДок";
-	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
     public static final String MSG_IS_EXIST_DECLARATION =
             "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"%s%s для макета!";
@@ -292,7 +301,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (lockData == null) lockData = lockDataCheck;
             Logger logger = new Logger();
             TAUser blocker = taUserService.getUser(lockData.getUserId());
-            logger.error("Текущая декларация не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.format(lockData.getDateLock()), lockData.getDescription());
+            logger.error("Текущая декларация не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.get().format(lockData.getDateLock()), lockData.getDescription());
             throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
@@ -832,12 +841,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private static Date getFormattedDate(String stringToDate) {
+    private Date getFormattedDate(String stringToDate) {
         if (stringToDate == null)
             return null;
         // Преобразуем строку вида "dd.mm.yyyy" в Date
         try {
-            return formatter.parse(stringToDate);
+            return sdf.get().parse(stringToDate);
         } catch (ParseException e) {
             throw new ServiceException("Невозможно получить дату обновления декларации", e);
         }
@@ -916,7 +925,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
                         departmentService.getDepartment(departmentId).getName(),
                         period.getName() + " " + period.getTaxPeriod().getYear(),
-                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", formatter.format(drp.getCorrectionDate())) : "",
+                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", sdf.get().format(drp.getCorrectionDate())) : "",
                         taKPPString.toString())));
             }
         }
@@ -1028,12 +1037,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (lock != null) {
             if (LockData.State.IN_QUEUE.getText().equals(lock.getState())) {
                 logger.info(LockData.CANCEL_TASK_NOT_PROGRESS,
-                        SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                        SDF_DD_MM_YYYY_HH_MM_SS.get().format(lock.getDateLock()),
                         taUserService.getUser(lock.getUserId()).getName(),
                         getTaskName(ddReportType, taxType));
             } else {
                 logger.info(LockData.CANCEL_TASK_IN_PROGRESS,
-                        SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                        SDF_DD_MM_YYYY_HH_MM_SS.get().format(lock.getDateLock()),
                         taUserService.getUser(lock.getUserId()).getName(),
                         getTaskName(ddReportType, taxType));
             }
@@ -1095,7 +1104,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     rp.getName(),
                     rp.getTaxPeriod().getYear(),
                     drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                            formatter.format(drp.getCorrectionDate())) : "",
+                            sdf.get().format(drp.getCorrectionDate())) : "",
                     dt.getName(),
                     dd.isAccepted()?"принята":"не принята");
         }
@@ -1112,7 +1121,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     declarationTemplate.getType().getTaxType() == TaxType.DEAL ? "Уведомление" : "Декларация",
                     reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     reportPeriod.getCorrectionDate() != null
-                            ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                            ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
                             : "",
                     department.getName(),
                     declarationTemplate.getType().getName(),
@@ -1133,7 +1142,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         getTaskName(ddReportType, declarationTemplate.getType().getTaxType()),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
                                 : "",
                         department.getName(),
                         declarationTemplate.getType().getName(),
@@ -1148,7 +1157,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         getTaskName(ddReportType, declarationTemplate.getType().getTaxType()),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
                                 : "",
                         department.getName(),
                         declarationTemplate.getType().getName(),
@@ -1163,7 +1172,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         declarationTemplate.getType().getTaxType() == TaxType.DEAL ? "Уведомление" : "Декларация",
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
                                 : "",
                         department.getName(),
                         declarationTemplate.getType().getName(),
@@ -1240,7 +1249,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
                             relation.getYear(),
                             relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                    formatter.format(relation.getCorrectionDate())) : "");
+                                    sdf.get().format(relation.getCorrectionDate())) : "");
                 } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), relation.getFormDataId())){
                     consolidationOk = false;
                     logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
@@ -1250,7 +1259,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
                             relation.getYear(),
                             relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                    formatter.format(relation.getCorrectionDate())) : "",
+                                    sdf.get().format(relation.getCorrectionDate())) : "",
                             relation.getState().getTitle());
                 }
             }

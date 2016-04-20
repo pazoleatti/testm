@@ -28,7 +28,12 @@ import java.util.Map;
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS', 'ROLE_OPER', 'ROLE_CONTROL')")
 public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataAction, PrintAuditDataResult> {
 
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
     private static final String SEARCH_CRITERIA = "От даты: \"%s\", До даты: \"%s\", Критерий поиска: \"%s\", Искать в найденном: \"%s\", Искать по полям: \"%s\"";
 
     @Autowired
@@ -65,8 +70,8 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
             fields = builder.substring(0, builder.toString().length() - 2);
         }
         final String searchCriteria = String.format(SEARCH_CRITERIA,
-                SDF.format(filter.getFromSearchDate()),
-                SDF.format(filter.getToSearchDate()),
+                SDF.get().format(filter.getFromSearchDate()),
+                SDF.get().format(filter.getToSearchDate()),
                 filter.getFilter() != null ? filter.getFilter() : "Не задано",
                 filter.getOldLogSystemAuditFilter() == null ? "Нет" : "Да",
                 fields.isEmpty()?"Все поля":fields

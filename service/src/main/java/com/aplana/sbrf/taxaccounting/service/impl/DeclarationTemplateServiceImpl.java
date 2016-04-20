@@ -41,7 +41,12 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	private static final Log LOG = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
     private static final String ENCODING = "UTF-8";
     private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон декларации!";
-    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
     private static final String DEC_DATA_EXIST_IN_TASK =
             "%s в подразделении \"%s\" в периоде \"%s %d%s\"%s%s";
     private static final int SUBREPORT_NAME_MAX_VALUE = 1000;
@@ -335,7 +340,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                         rp.getName(),
                         rp.getTaxPeriod().getYear(),
                         drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                                SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
+                                sdf.get().format(drp.getCorrectionDate())) : "",
                         data.getTaxOrganCode() != null ? ", налоговый орган " + data.getTaxOrganCode() : "",
                         data.getKpp() != null ? ", КПП " + data.getKpp() : ""
                 ));
@@ -348,7 +353,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                         rp.getName(),
                         rp.getTaxPeriod().getYear(),
                         drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                                SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
+                                sdf.get().format(drp.getCorrectionDate())) : "",
                         data.getTaxOrganCode() != null ? ", налоговый орган " + data.getTaxOrganCode() : "",
                         data.getKpp() != null ? ", КПП " + data.getKpp() : ""
                 ));
@@ -411,8 +416,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                         LockData.DescriptionTemplate.DECLARATION_TEMPLATE.getText(),
                         declarationTemplate.getName(),
                         declarationTemplate.getType().getTaxType().getName(),
-                        SDF_DD_MM_YYYY.format(declarationTemplate.getVersion()),
-                        endVersion != null ? SDF_DD_MM_YYYY.format(endVersion) : "-"
+                        sdf.get().format(declarationTemplate.getVersion()),
+                        endVersion != null ? sdf.get().format(endVersion) : "-"
                 ));
         return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());
     }

@@ -44,7 +44,12 @@ public class FillPreviousHandler extends AbstractActionHandler<FillPreviousActio
     @Autowired
     private SecurityService securityService;
 
-     private final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
     private final static String NOT_FOUND_MESSAGE = "В предыдущих корректирующих и в обычном (не корректирующем) периоде не найден экземпляр формы в статусе \"Принята\". Копирование данных не может быть выполнено.";
     private final static String FOUND_CORRECTION_MESSAGE = "Найден экземпляр формы предыдущего периода, дата сдачи корректировки: ";
     private final static String FOUND_SIMPLE_MESSAGE = "Найден экземпляр формы в основном (не корректирующем) периоде.";
@@ -107,7 +112,7 @@ public class FillPreviousHandler extends AbstractActionHandler<FillPreviousActio
                     prevFormData.getDepartmentReportPeriodId());
 
             logger.info(prevFormDepartmentReportPeriod.getCorrectionDate() != null ? FOUND_CORRECTION_MESSAGE +
-                    SIMPLE_DATE_FORMAT.format(prevFormDepartmentReportPeriod.getCorrectionDate()) + "." : FOUND_SIMPLE_MESSAGE);
+                    SIMPLE_DATE_FORMAT.get().format(prevFormDepartmentReportPeriod.getCorrectionDate()) + "." : FOUND_SIMPLE_MESSAGE);
 
             dataRowService.copyRows(prevFormData.getId(), action.getFormData().getId());
             logger.info(SUCCESS_MESSAGE);

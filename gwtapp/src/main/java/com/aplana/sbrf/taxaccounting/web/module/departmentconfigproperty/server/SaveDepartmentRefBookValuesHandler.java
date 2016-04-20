@@ -40,7 +40,12 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
     }
     private static final String SUCCESS_INFO = "Настройки для \"%s\" в периоде с %s по %s успешно сохранены.";
 
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     @Autowired
     RefBookFactory rbFactory;
@@ -161,9 +166,9 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         if (!logger.containsLevel(LogLevel.ERROR)) {
             if (recordVersion != null) {
                 if (recordVersion.getVersionEnd() != null) {
-                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), sdf.format(recordVersion.getVersionEnd())));
+                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.get().format(recordVersion.getVersionStart()), sdf.get().format(recordVersion.getVersionEnd())));
                 } else {
-                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), "\"-\""));
+                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.get().format(recordVersion.getVersionStart()), "\"-\""));
                 }
             }
         }

@@ -22,7 +22,12 @@ import java.util.Map;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataList, GetFormDataListResult> {
-    private static final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> DATE_TIME_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
 	@Autowired
 	private FormDataSearchService formDataSearchService;
@@ -70,7 +75,7 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
             }
 
             if (item.getCorrectionDate() != null) {
-                item.setReportPeriodName(item.getReportPeriodName() + ", корр. (" + DATE_TIME_FORMAT.format(item.getCorrectionDate()) + ")");
+                item.setReportPeriodName(item.getReportPeriodName() + ", корр. (" + DATE_TIME_FORMAT.get().format(item.getCorrectionDate()) + ")");
             }
 
             if (item.getComparativePeriodId() != null) {
@@ -79,7 +84,7 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
                         compPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " +
                                 (item.isAccruing() ? compPeriod.getReportPeriod().getAccName() : compPeriod.getReportPeriod().getName()));
                 if (compPeriod.getCorrectionDate() != null) {
-                    item.setComparativPeriodName(item.getComparativPeriodName() + ", корр. (" + DATE_TIME_FORMAT.format(compPeriod.getCorrectionDate()) + ")");
+                    item.setComparativPeriodName(item.getComparativPeriodName() + ", корр. (" + DATE_TIME_FORMAT.get().format(compPeriod.getCorrectionDate()) + ")");
                 }
             }
         }

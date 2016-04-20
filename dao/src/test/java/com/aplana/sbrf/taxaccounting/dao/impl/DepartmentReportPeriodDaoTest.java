@@ -25,7 +25,7 @@ import java.util.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class DepartmentReportPeriodDaoTest {
 
-    private final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;

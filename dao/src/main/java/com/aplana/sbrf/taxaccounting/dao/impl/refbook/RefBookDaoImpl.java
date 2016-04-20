@@ -62,7 +62,12 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 @Repository
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
-    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd-MM-yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd-MM-yyyy");
+        }
+    };
 
 	private static final Log LOG = LogFactory.getLog(RefBookDaoImpl.class);
 
@@ -84,7 +89,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Autowired
     private BDUtils dbUtils;
 
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     @Override
     @Cacheable(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
@@ -1955,7 +1965,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                             rs.getString("reportPeriodName") + " " + rs.getString("year"),
                             "", //TODO: позже добавить информацию по формам ЭНС
                             month != null ? "Месяц: \"" + Formats.getRussianMonthNameWithTier(month) + "\"" : "",
-                            correctionDate != null ? "Дата сдачи корректировки: \"" + SDF_DD_MM_YYYY.format(correctionDate) + "\"" : "",
+                            correctionDate != null ? "Дата сдачи корректировки: \"" + SDF_DD_MM_YYYY.get().format(correctionDate) + "\"" : "",
                             "" //TODO: позже добавить информацию по расчету нарастающим итогом
                     ));
                     return  formLink;
@@ -2066,8 +2076,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         attributes.getRefbookName(),
                         attributes.getUniqueAttributes(),
                         attributes.isRefbookVersioned() ?
-                                ", действует с " + SDF_DD_MM_YYYY.format(attributes.getVersionStart()) +
-                                        " по " + (attributes.getVersionEnd() != null ? SDF_DD_MM_YYYY.format(attributes.getVersionEnd()) : "-")
+                                ", действует с " + SDF_DD_MM_YYYY.get().format(attributes.getVersionStart()) +
+                                        " по " + (attributes.getVersionEnd() != null ? SDF_DD_MM_YYYY.get().format(attributes.getVersionEnd()) : "-")
                                 : ""
                 ));
             }
@@ -2262,7 +2272,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         };
 
         JdbcTemplate jt = getJdbcTemplate();
-        jt.batchUpdate(String.format(INSERT_REF_BOOK_RECORD_SQL_OLD, refBookId, sdf.format(version)), batchRefBookRecordsPS);
+        jt.batchUpdate(String.format(INSERT_REF_BOOK_RECORD_SQL_OLD, refBookId, sdf.get().format(version)), batchRefBookRecordsPS);
 
         List<Object[]> listValues = getListValuesForBatch(refBookId, records, refBookRecordIds);
         jt.batchUpdate(INSERT_REF_BOOK_VALUE_OLD, listValues);
@@ -2437,7 +2447,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
             // + REF_BOOK_RECORD
             if (!recordAddIds.isEmpty()) {
-                jt.batchUpdate(String.format(UPDATE_REF_BOOK_RECORD_SQL_OLD, refBookId, sdf.format(version)), recordAddIds);
+                jt.batchUpdate(String.format(UPDATE_REF_BOOK_RECORD_SQL_OLD, refBookId, sdf.get().format(version)), recordAddIds);
             }
             // + REF_BOOK_VALUE
             jt.batchUpdate(INSERT_REF_BOOK_VALUE_OLD, listValues);
@@ -2475,10 +2485,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
         JdbcTemplate jt = getJdbcTemplate();
         if (!insertValues.isEmpty()) {
-            jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL_I_OLD, refBookId, sdf.format(version)), insertValues);
+            jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL_I_OLD, refBookId, sdf.get().format(version)), insertValues);
         }
         if (!deleteValues.isEmpty()) {
-            jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL_D_OLD, refBookId, sdf.format(version)), deleteValues);
+            jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL_D_OLD, refBookId, sdf.get().format(version)), deleteValues);
         }
     }
 

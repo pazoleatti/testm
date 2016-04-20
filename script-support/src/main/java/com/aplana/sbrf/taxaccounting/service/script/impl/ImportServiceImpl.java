@@ -42,7 +42,12 @@ public class ImportServiceImpl implements ImportService {
      */
     private static final char QUOTE = '\0';
 
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     @Override
     public String getData(InputStream inputStream, String fileName, String charset) throws IOException {
@@ -390,7 +395,7 @@ public class ImportServiceImpl implements ImportService {
                 // дата
                 Date date = cell.getDateCellValue();
                 if (date != null) {
-                    value = dateFormat.format(date);
+                    value = sdf.get().format(date);
                 }
             } else {
                 // число

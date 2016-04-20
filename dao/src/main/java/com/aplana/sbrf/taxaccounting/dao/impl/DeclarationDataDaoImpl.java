@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -34,7 +36,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
 	private static final Log LOG = LogFactory.getLog(DeclarationDataDaoImpl.class);
     private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
         @Override
@@ -278,7 +285,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         if (filter.getCorrectionTag() != null) {
             if (filter.getCorrectionDate() != null) {
-                sql.append(" and drp.correction_date = '" + sdf.format(filter.getCorrectionDate()) + "\'");
+                sql.append(" and drp.correction_date = '" + sdf.get().format(filter.getCorrectionDate()) + "\'");
             } else {
                 sql.append(" and drp.correction_date is " +
                         (Boolean.TRUE.equals(filter.getCorrectionTag()) ? "not " : "") + "null");

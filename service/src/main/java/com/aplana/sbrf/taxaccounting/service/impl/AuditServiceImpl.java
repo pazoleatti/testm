@@ -39,8 +39,18 @@ public class AuditServiceImpl implements AuditService {
 
     private static final String RP_NAME_PATTERN = "%s %s";
     private static final String RP_NAME_WITH_CORR_PATTERN = "%s %s%s";
-    private static final SimpleDateFormat SDF_YYYY = new SimpleDateFormat("yyyy");
-    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> SDF_YYYY = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy");
+        }
+    };
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     @Override
 	public PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
@@ -100,9 +110,9 @@ public class AuditServiceImpl implements AuditService {
 
                 String rpName;
                 if (endDate == null)
-                    rpName = String.format("С %s", SDF_YYYY.format(startDate));
+                    rpName = String.format("С %s", SDF_YYYY.get().format(startDate));
                 else {
-                    rpName = String.format("С %s по %s", SDF_YYYY.format(startDate), SDF_YYYY.format(endDate));
+                    rpName = String.format("С %s по %s", SDF_YYYY.get().format(startDate), SDF_YYYY.get().format(endDate));
                 }
                 String mnote = note != null ? note.substring(0, Math.min(note.length(), 2000)) : null;
 
@@ -121,7 +131,7 @@ public class AuditServiceImpl implements AuditService {
                 Integer reportPeriodId = declarationData != null ? declarationData.getReportPeriodId() : formData.getReportPeriodId();
                 int departmentRPId = declarationData != null ? declarationData.getDepartmentReportPeriodId() : formData.getDepartmentReportPeriodId();
                 DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentRPId);
-                String corrStr = departmentReportPeriod.getCorrectionDate() != null ? " в корр.периоде " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate()) : "";
+                String corrStr = departmentReportPeriod.getCorrectionDate() != null ? " в корр.периоде " + sdf.get().format(departmentReportPeriod.getCorrectionDate()) : "";
 
 
                 String departmentName = departmentId == 0 ?

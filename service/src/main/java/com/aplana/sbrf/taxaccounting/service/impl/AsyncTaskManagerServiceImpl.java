@@ -34,7 +34,12 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
     @Autowired
     private AsyncManager asyncManager;
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd/MM/yyyy HH:mm z");
+        }
+    };
 
     public static final String LOCK_INFO_MSG = "Запрашиваемая операция \"%s\" уже запущена %s пользователем %s. Вы добавлены в список получателей оповещения о выполнении данной операции.";
     public static final String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";
@@ -61,7 +66,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
                 lockDataService.addUserWaitingForLock(lockDataTask.getKey(), userInfo.getUser().getId());
                 logger.info(String.format(LOCK_INFO_MSG,
                         taskName,
-                        sdf.format(lockDataTask.getDateLock()),
+                        sdf.get().format(lockDataTask.getDateLock()),
                         userService.getUser(lockDataTask.getUserId()).getName()));
             } catch (ServiceException e) {
             }
@@ -130,7 +135,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     logger.info(String.format(LOCK_INFO_MSG,
                             handler.getTaskName(reportType, userInfo),
-                            sdf.format(lockData.getDateLock()),
+                            sdf.get().format(lockData.getDateLock()),
                             userService.getUser(lockData.getUserId()).getName()));
                 } catch (ServiceException e) {
                 }
