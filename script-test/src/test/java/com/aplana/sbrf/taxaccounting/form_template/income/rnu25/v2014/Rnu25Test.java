@@ -84,20 +84,14 @@ public class Rnu25Test extends ScriptTestBase {
     @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
-        int i = 0;
-        List<LogEntry> entries = testHelper.getLogger().getEntries();
-        Assert.assertEquals("Итоговые значения рассчитаны неверно!", entries.get(i++).getMessage());
-        Assert.assertEquals(i, entries.size());
+        checkLogger();
     }
 
     // Расчет пустой
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);
-        int i = 0;
-        List<LogEntry> entries = testHelper.getLogger().getEntries();
-        Assert.assertEquals("Итоговые значения рассчитаны неверно!", entries.get(i++).getMessage());
-        Assert.assertEquals(i, entries.size());
+        checkLogger();
     }
 
     @Test
@@ -158,10 +152,7 @@ public class Rnu25Test extends ScriptTestBase {
     public void composeTest() {
         // Кроме простого выполнения события других проверок нет, т.к. для формы консолидация выполняется сервисом
         testHelper.execute(FormDataEvent.COMPOSE);
-        int i = 0;
-        List<LogEntry> entries = testHelper.getLogger().getEntries();
-        Assert.assertEquals("Итоговые значения рассчитаны неверно!", entries.get(i++).getMessage());
-        Assert.assertEquals(i, entries.size());
+        checkLogger();
     }
 
     /** Проверить загруженные данные. */

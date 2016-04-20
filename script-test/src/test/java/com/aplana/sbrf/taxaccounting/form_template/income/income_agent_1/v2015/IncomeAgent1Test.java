@@ -123,7 +123,7 @@ public class IncomeAgent1Test extends ScriptTestBase {
         // обязательные (графа 1..3, 7..13, 16, 17, 23..25, 27)
         String [] nonEmptyColumns = { "emitentName", "emitentInn", "decisionNumber", "decisionDate",
                 "year", "firstMonth", "lastMonth", "allSum", "addresseeName", "type", "status",
-                "dividends", "sum", "date", "withheldSum" };
+                "dividends", "sum", "date" };
         for (String column : nonEmptyColumns) {
             // TODO (Ramil Timerbaev) недоступен ScriptUtils.WRONG_NON_EMPTY потому что private
             // String msg = String.format(ScriptUtils.WRONG_NON_EMPTY, 1, row.getCell(column).getColumn().getName());
@@ -155,6 +155,8 @@ public class IncomeAgent1Test extends ScriptTestBase {
         row.getCell("region").setValue(1L, null);
         row.getCell("surname").setValue("test", null);
         row.getCell("name").setValue("test", null);
+        row.getCell("withheldSum").setValue(0L, null);
+        row.getCell("distributionSum").setValue(0L, null);
         i = 0;
         testHelper.execute(FormDataEvent.CHECK);
         msg = String.format("Строка 1: В случае если графы «%s» равна значению «1» / «3» / «4» / «5» и графа и «%s» равны значению «1», должна быть заполнена графа «%s» и «%s»!",
@@ -185,6 +187,8 @@ public class IncomeAgent1Test extends ScriptTestBase {
         row.getCell("region").setValue(1L, null);
         row.getCell("surname").setValue("test", null);
         row.getCell("name").setValue("test", null);
+        row.getCell("withheldDate").setValue(sdf.parse("01.01.2015"), null);
+        row.getCell("withheldNumber").setValue("test", null);
         i = 0;
         testHelper.execute(FormDataEvent.CHECK);
         msg = String.format("Строка 1: Вычисленное контрольное число по полю \"%s\" некорректно (%s).",
@@ -242,7 +246,7 @@ public class IncomeAgent1Test extends ScriptTestBase {
         row.getCell("dividends").setValue(1L, null);
         row.getCell("sum").setValue(1L, null);
         row.getCell("date").setValue(date, null);
-        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("withheldSum").setValue(0L, null);
         row.getCell("inn").setValue(inn, null);
         row.getCell("kpp").setValue(kpp, null);
         row.getCell("region").setValue(1L, null);
@@ -277,7 +281,7 @@ public class IncomeAgent1Test extends ScriptTestBase {
         row.getCell("dividends").setValue(1L, null);
         row.getCell("sum").setValue(1L, null);
         row.getCell("date").setValue(date, null);
-        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("withheldSum").setValue(0L, null);
         row.getCell("inn").setValue(inn, null);
         row.getCell("kpp").setValue("776001002", null);
         row.getCell("region").setValue(1L, null);
@@ -393,6 +397,8 @@ public class IncomeAgent1Test extends ScriptTestBase {
         row.getCell("withheldSum").setValue(1L, null);
         row.getCell("inn").setValue(null, null);
         row.getCell("kpp").setValue(null, null);
+        row.getCell("all").setValue(0L, null);
+        row.getCell("rateZero").setValue(0L, null);
         i = 0;
         testHelper.execute(FormDataEvent.CHECK);
         msg = String.format("Строка 1: Графа «%s» заполнена неверно (%s)! Для Банка " +
@@ -447,6 +453,9 @@ public class IncomeAgent1Test extends ScriptTestBase {
             dataRow.getCell("firstMonth").setValue(1L, null);
             dataRow.getCell("lastMonth").setValue(1L, null);
             dataRow.getCell("allSum").setValue(1L, null);
+            dataRow.getCell("all").setValue(1L, null);
+            dataRow.getCell("rateZero").setValue(1L, null);
+            dataRow.getCell("distributionSum").setValue(1L, null);
             dataRow.getCell("addresseeName").setValue("test", null);
             dataRow.getCell("type").setValue(2L, null);
             dataRow.getCell("status").setValue(1L, null);
@@ -454,6 +463,8 @@ public class IncomeAgent1Test extends ScriptTestBase {
             dataRow.getCell("sum").setValue(1L, null);
             dataRow.getCell("date").setValue(tmpDate, null);
             dataRow.getCell("withheldSum").setValue(1L, null);
+            dataRow.getCell("withheldDate").setValue(sdf.parse("01.01.2015"), null);
+            dataRow.getCell("withheldNumber").setValue("test", null);
             dataRow.getCell("inn").setValue(null, null);
             dataRow.getCell("kpp").setValue(null, null);
         }
@@ -482,7 +493,7 @@ public class IncomeAgent1Test extends ScriptTestBase {
         row.getCell("dividends").setValue(1L, null);
         row.getCell("sum").setValue(1L, null);
         row.getCell("date").setValue(date, null);
-        row.getCell("withheldSum").setValue(1L, null);
+        row.getCell("withheldSum").setValue(0L, null);
         row.getCell("inn").setValue("0123456788", null);
         row.getCell("kpp").setValue("776001002", null);
         row.getCell("region").setValue(null, null);
