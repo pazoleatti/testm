@@ -668,13 +668,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
 
-	/*private static final String SQL_REORDER_SPAN = "MERGE INTO form_data_row_span t USING \n" +
-			"(SELECT id, ord FROM form_data_row \n" +
-			"WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual) s \n" +
-			"ON (t.row_id = s.id) WHEN MATCHED THEN UPDATE SET t.ord = s.ord";*/
 	private static final String SQL_REORDER_SPAN = "MERGE INTO form_data_row_span t USING \n" +
 			"(SELECT id, ord FROM form_data_row \n" +
-			"WHERE form_data_id = 3293 AND temporary = 0 AND manual = 0) s \n" +
+			"WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual) s \n" +
 			"ON (t.row_id = s.id) WHEN MATCHED THEN UPDATE SET t.ord = s.ord";
 	/**
 	 * Синхронизирует form_data_row_span.ord со значениями из form_data_row.ord
@@ -974,17 +970,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
-		// удаление спанов
-		StringBuilder sqlSpan = new StringBuilder("DELETE FROM form_data_row_span");
-		sqlSpan.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary");
-		if (temporary == DataRowType.SAVED) {
-			sqlSpan.append(" AND manual = :manual");
-		}
-		if (LOG.isTraceEnabled()) {
-			LOG.trace(params);
-			LOG.trace(sqlSpan.toString());
-		}
-		getNamedParameterJdbcTemplate().update(sqlSpan.toString().intern(), params);
 	}
 
 	private static final String SQL_SHIFT_ROW_ORD = "UPDATE form_data_row " +
