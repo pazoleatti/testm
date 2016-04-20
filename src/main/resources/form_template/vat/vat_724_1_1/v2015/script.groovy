@@ -259,7 +259,7 @@ def getNewRow(boolean isGroup_1_6) {
 }
 
 @Field
-def periodNames = ["первый квартал", "второй квартал", "третий квартал", "четвертый квартал"]
+def periodNames = ["первый квартал", "второй квартал", "третий квартал", "четвёртый квартал"]
 @Field
 def declarationType9sources = 21
 @Field
