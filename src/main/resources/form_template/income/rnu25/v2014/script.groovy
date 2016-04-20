@@ -340,9 +340,8 @@ void logicCheck() {
         }
     }
 
-    def totalRow
+    def totalRow = dataRows.find { 'total'.equals(it.getAlias()) }
     if (prevDataRows != null) {
-        totalRow = dataRows.find { 'total'.equals(it.getAlias()) }
         def totalRowOld = getDataRow(prevDataRows, 'total')
 
         // 13. Проверка корректности заполнения РНУ (графа 4, 5 (за предыдущий период))

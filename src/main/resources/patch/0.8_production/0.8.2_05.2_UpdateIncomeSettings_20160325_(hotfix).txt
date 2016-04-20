@@ -1,0 +1,34 @@
+import groovy.transform.Field
+import org.springframework.jndi.JndiTemplate
+
+import javax.sql.DataSource
+
+@Field
+def dataSourceName = "java:comp/env/jdbc/TaxAccDS"
+
+setSettings()
+
+void setSettings() {
+    try {
+		Map<String, Object> params = new HashMap<String, Object>();
+		
+		//SBRFACCTAX-15162 - Западно-Уральский банк Управление налогового планирования
+		//"19";"25.03.2016 13:09:07";"";"id = 242337699; version = 2015-07-01; kpp = 590443001; tax_organ = 5904; name = 'Западно-Уральский банк ПАО Сбербанк'; oktmo = 57701000- Пермский; additional_name = 'Западно-Уральский банк ПАО Сбербанк'; link = 242157999; phone = 342-210-22-66; docname = Доверенность б/н от 30.10.2013; orgname = Западно-Уральский банк ОАО""Сбербанк России"" ;  "
+		//"20";"25.03.2016 13:09:07";"";"id = 242158199; version = 2015-07-01; kpp = 110102001; tax_organ = 1101; name = 'Коми отделение № 8617 ПАО Сбербанк'; oktmo = 87701000- Сыктывкар; additional_name = 'Коми отделение №8617 ПАО Сбебанк'; link = 242157999; phone = 342-210-22-66; docname = Доверенность б/н от 30.10.2013; orgname = Западно-Уральский банк ОАО""Сбербанк России"";  "
+		//"21";"25.03.2016 13:09:07";"";"id = 242158099; version = 2015-07-01; kpp = 183502001; tax_organ = 1841; name = 'Удмуртское отделение № 8618 ПАО Сбербанк '; oktmo = 94701000- город Ижевск; additional_name = 'Удмуртское отделение №8618 ПАО Сбербанк'; link = 242157999; phone = 342-210-22-66; docname = Доверенность б/н от 30.10.2013 ; orgname = Западно-Уральский банк ОАО""Сбербанк России"";  "
+
+		namedParameterJdbcTemplate.update(" merge into ref_book_value tgt using \n"+
+											" 	( with t as (select 242337699 as old_record_id, 3323 as attribute_id, 'Западно-Уральский банк ПАО Сбербанк' as string_value, null as reference_value from dual union all\n"+
+											" 				 select 242158199, 3323, 'Западно-Уральский банк ПАО Сбербанк' as string_value, null as reference_value from dual union all\n"+
+											" 				 select 242158099, 3323, 'Западно-Уральский банк ПАО Сбербанк' as string_value, null as reference_value from dual ) \n"+
+											" 	select rbr.id as record_id, t.attribute_id, t.string_value, t.reference_value from t\n"+
+											" 	join ref_book_record d on d.id = t.old_record_id\n"+
+											" 	join ref_book_record rbr on rbr.record_id = d.record_id and rbr.ref_book_id = 330 and rbr.version = date '2015-10-01') src\n"+
+											" on (tgt.record_id = src.record_id and tgt.attribute_id = src.attribute_id)\n"+
+											" when matched then\n"+
+											"      update set tgt.string_value = src.string_value, tgt.reference_value = src.reference_value", params)
+		
+	} catch (Exception ex) {
+		logger.error("Ошибка: ${ex}")
+	}
+}

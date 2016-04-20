@@ -16,5 +16,9 @@ dependencies {
 
 }
 
+// для форм
 mainClassName = "com.aplana.sbrf.taxaccounting.FormTemplateCreator"
+
+// для декларации
+// mainClassName = "com.aplana.sbrf.taxaccounting.DeclarationTemplateCreator"
 sourceCompatibility = 1.6

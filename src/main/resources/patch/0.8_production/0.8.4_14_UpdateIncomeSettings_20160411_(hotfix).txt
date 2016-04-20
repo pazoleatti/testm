@@ -1,0 +1,64 @@
+import groovy.transform.Field
+import org.springframework.jndi.JndiTemplate
+import groovy.sql.Sql
+
+import javax.sql.DataSource
+
+@Field
+def dataSourceName = "java:comp/env/jdbc/TaxAccDS"
+
+setSettings()
+
+void setSettings() {
+    try {
+		Map<String, Object> params = new HashMap<String, Object>();
+		
+		//SBRFACCTAX-15348 - УБ УНП (98)
+		Sql plsql = new groovy.sql.Sql(dataSource)
+		plsql.call("""
+		begin 
+			merge into ref_book_value tgt using (
+			with dt ("3302", "3303", "3304", "3305", "3324", "3306", "3307", "3308", "3309", "3310", "3311", "3312", "3313", "3314", "3318", "3319", "3320", "3321", "3322") as ( 
+					select '1','98','6671','667102008','9979','220','Уральский банк ПАО Сбербанк','Уральский банк ПАО Сбербанк','65.12','66','65701000','343 354-64-23','1','4','2','Клепикова','Ольга','Витальевна','Доверенность от 31.10.2013г. №9-ДГ/У146' from dual union all 
+					select '2','98','4501','450102001','9979','220','Курганское отделение №8599 ПАО Сбербанк','Курганское отделение №8599 ПАО Сбербанк','65.12','45','37701000','352 248-96-56','1','4','2','Уханова','Ирина ','Михайловна','Доверенность от 28.10.2013г. №9-ДГ/У35' from dual union all 
+					select '3','98','7453','745302001','9979','220','Челябинское отделение №8597 ПАО Сбербанк','Челябинское отделение №8597 ПАО Сбербанк','65.12','75','75701000','351 749-59-21','1','4','2','Аликов','Дмитрий ','Леонидович','Доверенность от 28.10.2013г. №9-ДГ/У11' from dual union all 
+					select '4','98','0278','027802001','9979','220','Башкирское отделение №8598 ПАО Сбербанк','Башкирское отделение №8598 ПАО Сбербанк','65.12','02','80701000','347 279-69-19','1','4','2','Гибадуллина','Гульнара','Фаниловна','Доверенность от 05.11.2013г. №9-ДГ/У154' from dual	
+					),
+				  dt_link as (select to_char(rbr.id) as "3301", dt.* from dt                          
+					  join ref_book_value rbv on rbv.attribute_id = 192 and reference_value = dt."3303"
+					  join Ref_Book_Record rbr on rbr.id = rbv.record_id and version = to_date('01.01.2016', 'DD.MM.YYYY')),
+				  input_table as  (     
+					select * from dt_link    
+					left join ( select * from (
+						  select rbv330.record_id, rbv330.attribute_id, rbv330.string_value
+						  from ref_book_value rbv33
+						  join ref_book_record rbr33 on rbr33.id = rbv33.record_id and rbr33.ref_book_id = 33 and rbr33.version = to_date('01.01.2016', 'DD.MM.YYYY')
+						  join ref_book_value rbv330_link on rbv330_link.attribute_id = 3301 and rbv330_link.reference_value = rbr33.id
+						  join ref_book_value rbv330 on rbv330.record_id = rbv330_link.record_id and rbv330.attribute_id in (3304, 3305, 3307)
+						  where rbv33.attribute_id = 192 and rbv33.reference_value = 98) t
+							pivot (max(string_value) for attribute_id in ('3304' kno, '3305' kpp, '3307' name))              
+					  ) t on (t.kno = dt_link."3304" and t.kpp = dt_link."3305") or t.name = dt_link."3307"),
+				   input as ( 
+				   select * from input_table   
+				   unpivot (string_value for attribute_id in ("3301", "3302", "3303", "3304", "3305", "3324", "3306", "3307", "3308", "3309", "3310", "3311", "3312", "3313", "3314", "3318", "3319", "3320", "3321", "3322"))
+				   where record_id is not null) -- Отсекаем  только существующие для мержа
+				   select input.record_id, input.attribute_id,
+										   case when rba.type = 1 then input.string_value else null end as target_string_value, 
+							 case when rba.type = 2 then cast(input.string_value as number(38,19)) else null end as target_number_value, 
+										   case when rba.type <> 4 then null 
+												when rba.type = 4 and rba.reference_id in (33, 30) then cast(input.string_value as number(38,19))
+												when rba.type = 4 and (rba.reference_id <> 96 and rba.reference_id <> 33) then (select rbv.record_id from ref_book_value rbv where rbv.attribute_id = rba.attribute_id and nvl(string_value, number_value) = input.string_value) 
+												when rba.type = 4 and rba.reference_id = 96 then (select rbv.record_id from ref_book_oktmo rbv where code = input.string_value) end target_reference_value
+									from input
+						join ref_book_attribute rba on rba.id = input.attribute_id ) src
+			on (tgt.record_id = src.record_id and tgt.attribute_id = src.attribute_id)
+			when matched then update set tgt.string_value = src.target_string_value, tgt.number_value = src.target_number_value, tgt.reference_value = src.target_reference_value
+			when not matched then insert (tgt.record_id, tgt.attribute_id, tgt.string_value,  tgt.number_value, tgt.reference_value) values (src.record_id, src.attribute_id, src.target_string_value, src.target_number_value, src.target_reference_value);
+			
+		end;                
+		""")
+		
+	} catch (Exception ex) {
+		logger.error("Ошибка: ${ex}")
+	}
+}		

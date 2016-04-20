@@ -6,8 +6,14 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 import org.apache.commons.collections.map.HashedMap
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
+
+import java.sql.Connection
+import java.sql.ResultSet
 
 import javax.xml.stream.XMLStreamReader
+import java.sql.Statement
 
 /**
  * Декларация по НДС (короткая, раздел 1-7)
@@ -18,7 +24,7 @@ import javax.xml.stream.XMLStreamReader
  */
 
 @Field
-def declarationType = 20;
+def declarationType = 20
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -64,6 +70,17 @@ def empty = 0
 // Параметры подразделения
 @Field
 def departmentParam = null
+
+@Field
+def bankDepartmentId = 1
+
+// id формы источника 724.1.1 (не требующего настройки пользователем, подтягивается скриптом)
+@Field
+def formType_724_1_1 = 848
+
+// id формы источника 724.10 (не требующего настройки пользователем, подтягивается скриптом)
+@Field
+def formType_724_10 = 623
 
 // Дата окончания отчетного периода
 @Field
@@ -245,7 +262,7 @@ def declarationReportPeriod
 
 boolean useTaxOrganCodeProm() {
     if (declarationReportPeriod == null) {
-        declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        declarationReportPeriod = getReportPeriod()
     }
     return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
 }
@@ -308,7 +325,7 @@ void generateXML() {
     def nameDecl11 = getDeclarationFileName(declarations().declaration11[0])
 
     /** Отчётный период. */
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    def reportPeriod = getReportPeriod()
     def period = 0
     if (reorgFormCode != null) {
         def values = [51, 54, 53, 56]
@@ -332,14 +349,9 @@ void generateXML() {
     }
 
     // РАЗДЕЛ 3
-    // форма 724.1
-    def rows724_1 = dataRowsMap[600]
-    // форма 724.4
-    def rows724_4 = dataRowsMap[603]
+    def section3Check = prevSection3Check()
 
     // TODO Вопрос к заказчику, пока не заполняем
-    def nalBaza105 = empty
-    def sumNal105 = empty
     def nalBaza106 = empty
     def sumNal106 = empty
     def nalBaza107 = empty
@@ -367,50 +379,182 @@ void generateXML() {
     def nalBaza070 = empty
     /** СумНал (ОплПредПост). Код строки 070 Графа 5. */
     def sumNal070 = empty
-    /** НалИсчПрод. Код строки 170 Графа 3. */
-    def nalIschProd = empty
-    if (rows724_1) {
-        def totalRow1baseSum = getDataRowSum(rows724_1, 'total_1', 'baseSum', false)
-        def totalRow1ndsSum = getDataRowSum(rows724_1, 'total_1', 'ndsSum', false)
-        def totalRow2baseSum = getDataRowSum(rows724_1, 'total_2', 'baseSum')
-        def totalRow2ndsSum = getDataRowSum(rows724_1, 'total_2', 'ndsSum')
-        def totalRow3baseSum = getDataRowSum(rows724_1, 'total_3', 'baseSum', false)
-        def totalRow3ndsSum = getDataRowSum(rows724_1, 'total_3', 'ndsSum', false)
-        def totalRow4baseSum = getDataRowSum(rows724_1, 'total_4', 'baseSum')
-        def totalRow4ndsSum = getDataRowSum(rows724_1, 'total_4', 'ndsSum')
-        def totalRow5baseSum = getDataRowSum(rows724_1, 'total_5', 'baseSum')
-        def totalRow5ndsSum = getDataRowSum(rows724_1, 'total_5', 'ndsSum')
-        def totalRow6baseSum = getDataRowSum(rows724_1, 'total_6', 'baseSum', false)
-        def totalRow6ndsSum = getDataRowSum(rows724_1, 'total_6', 'ndsSum', false)
-        def totalRow7baseSum = getDataRowSum(rows724_1, 'total_7', 'baseSum', false)
-        def totalRow7ndsDealSum = getDataRowSum(rows724_1, 'total_7', 'ndsDealSum')
-        def totalRow7ndsBookSum = getDataRowSum(rows724_1, 'total_7', 'ndsBookSum', false)
-
-        nalBaza010 = round(totalRow1baseSum + totalRow7baseSum)
-        sumNal010 = round(totalRow1ndsSum + totalRow7ndsBookSum)
-
-        nalBaza020 = totalRow2baseSum
-        sumNal020 = totalRow2ndsSum
-
-        nalBaza030 = round(totalRow3baseSum + totalRow6baseSum)
-        sumNal030 = round(totalRow3ndsSum + totalRow6ndsSum)
-
-        nalBaza040 = totalRow4baseSum
-        sumNal040 = totalRow4ndsSum
-
-        nalBaza070 = totalRow5baseSum
-        sumNal070 = totalRow5ndsSum
-
-        nalIschProd = totalRow7ndsDealSum
-    }
-
+    /** НалБаза (КорРеалТов18). Код строки 105 Графа 3. */
+    def nalBaza105 = empty
+    /** СумНал (КорРеалТов18). Код строки 105 Графа 5. */
+    def sumNal105 = empty
     /** НалПредНППриоб . Код строки 120 Графа 3. */
     def nalPredNPPriob = empty
+    /** НалИсчПрод. Код строки 170 Графа 3. */
+    def nalIschProd = empty
     /** НалУплПокНА . Код строки 180 Графа 3. */
     def nalUplPokNA = empty
-    if (rows724_4) {
-        nalPredNPPriob = getDataRowSum(rows724_4, 'total1', 'sum2')
-        nalUplPokNA = getDataRowSum(rows724_4, 'total2', 'sum2')
+
+    if (section3Check) {
+        def correction = getCorrectionNumber()
+        // форма 724.1
+        def rows724_1 = dataRowsMap[600]
+        // форма 724.4
+        def rows724_4 = dataRowsMap[603]
+        if (rows724_4) {
+            nalUplPokNA = getDataRowSum(rows724_4, 'total2', 'sum2')
+        }
+        if (correction == null || correction == 0 || correction == 1) {
+            // первичная декларация (номер корректировки «0») или уточненная декларация (номер корректировки «1»)
+            if (rows724_1) {
+                def totalRow1baseSum = getDataRowSum(rows724_1, 'total_1', 'baseSum', false)
+                def totalRow1ndsSum = getDataRowSum(rows724_1, 'total_1', 'ndsSum', false)
+                def totalRow2baseSum = getDataRowSum(rows724_1, 'total_2', 'baseSum', false)
+                def totalRow2ndsSum = getDataRowSum(rows724_1, 'total_2', 'ndsSum', false)
+                def totalRow3baseSum = getDataRowSum(rows724_1, 'total_3', 'baseSum', false)
+                def totalRow3ndsSum = getDataRowSum(rows724_1, 'total_3', 'ndsSum', false)
+                def totalRow4baseSum = getDataRowSum(rows724_1, 'total_4', 'baseSum', false)
+                def totalRow4ndsSum = getDataRowSum(rows724_1, 'total_4', 'ndsSum', false)
+                def totalRow5baseSum = getDataRowSum(rows724_1, 'total_5', 'baseSum', false)
+                def totalRow5ndsSum = getDataRowSum(rows724_1, 'total_5', 'ndsSum', false)
+                def totalRow6baseSum = getDataRowSum(rows724_1, 'total_6', 'baseSum', false)
+                def totalRow6ndsSum = getDataRowSum(rows724_1, 'total_6', 'ndsSum', false)
+                def totalRow7baseSum = getDataRowSum(rows724_1, 'total_7', 'baseSum', false)
+                def totalRow7ndsDealSum = getDataRowSum(rows724_1, 'total_7', 'ndsDealSum', false)
+                def totalRow7ndsBookSum = getDataRowSum(rows724_1, 'total_7', 'ndsBookSum', false)
+
+                nalBaza010 = totalRow1baseSum + totalRow7baseSum
+                sumNal010 = totalRow1ndsSum + totalRow7ndsBookSum
+
+                nalBaza020 = totalRow2baseSum
+                sumNal020 = totalRow2ndsSum
+
+                nalBaza030 = totalRow3baseSum + totalRow6baseSum
+                sumNal030 = totalRow3ndsSum + totalRow6ndsSum
+
+                nalBaza040 = totalRow4baseSum
+                sumNal040 = totalRow4ndsSum
+
+                nalBaza070 = totalRow5baseSum
+                sumNal070 = totalRow5ndsSum
+
+                nalIschProd = totalRow7ndsDealSum
+            }
+            if (rows724_4) {
+                nalPredNPPriob = getDataRowSum(rows724_4, 'total1', 'sum2', false)
+            }
+        }
+        if (correction == 1 || correction > 1) {
+            // уточненная декларация (номер корректировки «1») или уточненная декларация (номер корректировки больше «1»)
+            def formData724_1_1 = getFormData724_1_1()
+            def rows724_1_1 = (formData724_1_1 ? formDataService.getDataRowHelper(formData724_1_1)?.getAll() : null)
+            if (rows724_1_1) {
+                def code = getRefBookValue(8, getReportPeriod()?.dictTaxPeriodId)?.CODE?.value
+
+                def rowAlias = 'total_1_' + code
+                def row = rows724_1_1.find { it.getAlias() == rowAlias }
+                nalBaza010 = nalBaza010 + (row ? row.sumPlus : empty)
+                sumNal010 = sumNal010 + (row ? row.sumNdsPlus : empty)
+
+                rowAlias = 'total_2_' + code
+                row = rows724_1_1.find { it.getAlias() == rowAlias }
+                nalBaza020 = nalBaza020 + (row ? row.sumPlus : empty)
+                sumNal020 = sumNal020 + (row ? row.sumNdsPlus : empty)
+
+                def rowAliases = ["total_3_$code", "total_6_$code"]
+                def rows = rows724_1_1.findAll { it.getAlias() in rowAliases }
+                nalBaza030 = nalBaza030 + (rows ? rows.sum { it.sumPlus ?: empty } : empty)
+                sumNal030 = sumNal030 + (rows ? rows.sum { it.sumNdsPlus ?: empty } : empty)
+
+                rowAlias = 'total_4_' + code
+                row = rows724_1_1.find { it.getAlias() == rowAlias }
+                nalBaza040 = nalBaza040 + (row ? row.sumPlus : empty)
+                sumNal040 = sumNal040 + (row ? row.sumNdsPlus : empty)
+
+                rowAlias = 'total_5_' + code
+                row = rows724_1_1.find { it.getAlias() == rowAlias }
+                nalBaza070 = nalBaza070 +(row ? row.sumPlus : empty)
+                sumNal070 = sumNal070 + (row ? row.sumNdsPlus : empty)
+
+                rowAlias = 'total_8_' + code
+                row = rows724_1_1.find { it.getAlias() == rowAlias }
+                nalIschProd = nalIschProd + (row ? row.sumNdsPlus : empty)
+
+                rowAlias = 'total_9_' + code
+                row = rows724_1_1.find { it.getAlias() == rowAlias }
+                nalPredNPPriob = nalPredNPPriob + (row ? row.sumNdsPlus : empty)
+            }
+
+            def formData724_10 = getFormData(formType_724_10, FormDataKind.CONSOLIDATED, bankDepartmentId, getPeriod4Id())
+            def rows724_10 = (formData724_10 ? formDataService.getDataRowHelper(formData724_10)?.getAll() : null)
+            if (rows724_10) {
+                def order = getReportPeriod().order
+
+                rowAlias = 'total' + order
+                def row = rows724_10.find { it.getAlias() == rowAlias }
+                nalBaza105 = nalBaza105 +(row ? row.sum : empty)
+                sumNal105 = sumNal105 + (row ? row.ndsSum : empty)
+            }
+        }
+        if (correction > 1) {
+            // уточненная декларация (номер корректировки больше «1»)
+            DeclarationData prevCorrectionDeclarationData = getPrevCorrectionDeclaration()
+            // XMLStreamReader декларации за предыдущий корректирующий период
+            XMLStreamReader reader = declarationService.getXmlStreamReader(prevCorrectionDeclarationData.id)
+            try {
+                def elements = [:]
+                while (reader.hasNext()) {
+                    if (reader.startElement) {
+                        elements[reader.name.localPart] = true
+                        if (isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'РеалТов18'], elements)) {
+                            nalBaza010 = nalBaza010 + (getXmlDecimal(reader, "НалБаза") ?: 0)
+                            sumNal010 = sumNal010 + (getXmlDecimal(reader, "СумНал") ?: 0)
+                        }
+                        if (isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'РеалТов10'], elements)) {
+                            nalBaza020 = nalBaza020 + (getXmlDecimal(reader, "НалБаза") ?: 0)
+                            sumNal020 = sumNal020 + (getXmlDecimal(reader, "СумНал") ?: 0)
+                        }
+                        if (isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'РеалТов118'], elements)) {
+                            nalBaza030 = nalBaza030 + (getXmlDecimal(reader, "НалБаза") ?: 0)
+                            sumNal030 = sumNal030 + (getXmlDecimal(reader, "СумНал") ?: 0)
+                        }
+                        if (isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'РеалТов110'], elements)) {
+                            nalBaza040 = nalBaza040 + (getXmlDecimal(reader, "НалБаза") ?: 0)
+                            sumNal040 = sumNal040 + (getXmlDecimal(reader, "СумНал") ?: 0)
+                        }
+                        if (isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'ОплПредПост'], elements)) {
+                            nalBaza070 = nalBaza070 + (getXmlDecimal(reader, "НалБаза") ?: 0)
+                            sumNal070 = sumNal070 + (getXmlDecimal(reader, "СумНал") ?: 0)
+                        }
+                        if (isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'КорРеалТов18'], elements)) {
+                            nalBaza070 = nalBaza070 + (getXmlDecimal(reader, "НалБаза") ?: 0)
+                            sumNal070 = sumNal070 + (getXmlDecimal(reader, "СумНал") ?: 0)
+                        }
+                        if (isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалВыч'], elements)) {
+                            nalPredNPPriob = nalPredNPPriob + (getXmlDecimal(reader, "НалПредНППриоб") ?: 0)
+                            nalIschProd = nalIschProd + (getXmlDecimal(reader, "НалИсчПрод") ?: 0)
+                        }
+                    }
+                    if (reader.endElement){
+                        elements[reader.name.localPart] = false
+                    }
+                    reader.next()
+                }
+            } finally {
+                reader.close()
+            }
+        }
+        nalBaza010 = round(nalBaza010)
+        sumNal010 = round(sumNal010)
+
+        nalBaza020 = round(nalBaza020)
+        sumNal020 = round(sumNal020)
+
+        nalBaza030 = round(nalBaza030)
+        sumNal030 = round(sumNal030)
+
+        nalBaza040 = round(nalBaza040)
+        sumNal040 = round(sumNal040)
+
+        nalBaza070 = round(nalBaza070)
+        sumNal070 = round(sumNal070)
+
+        nalIschProd = round(nalIschProd)
     }
 
     /** НалВосстОбщ. Код строки 110 Графа 5. */
@@ -441,11 +585,11 @@ void generateXML() {
                 // Налоговый период (код)
                 Период: period,
                 // Отчетный год
-                ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.year,
+                ОтчетГод: getReportPeriod().taxPeriod.year,
                 // Код налогового органа
                 КодНО: taxOrganCode,
                 // Номер корректировки
-                НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
+                НомКорр: getCorrectionNumber(),
                 // Код места, по которому представляется документ
                 ПоМесту: taxPlaceTypeCode
         ) {
@@ -917,7 +1061,7 @@ void logicCheck2() {
     }
 
     // 2. Существующие экземпляры декларации по НДС (раздел 8/раздел 8 без консолид. формы/8.1/9/раздел 9 без консолид. формы/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    def reportPeriod = getReportPeriod()
     declarations().each { declaration ->
         def declarationData = declarationService.getLast(declaration.value[0], declarationData.departmentId, reportPeriod.id)
         if (declarationData != null && !declarationData.accepted) {
@@ -1065,7 +1209,7 @@ def getXmlValue(def value) {
 def Map<Long, Expando> getParts() {
     if (declarationParts == null) {
         declarationParts = new HashedMap<Long, Expando>()
-        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        def reportPeriod = getReportPeriod()
         declarations().each { declaration ->
             id = declaration.value[0]
             name = declaration.value[1]
@@ -1182,7 +1326,7 @@ def opuCodes = ['26411.01']
  * @param code строки формы 724.2.1
  */
 def getNalNeVich(def code) {
-    def order = reportPeriodService.get(declarationData.reportPeriodId)?.order
+    def order = getReportPeriod()?.order
     if (code == specialCode) {
         // сумма кодов ОПУ из отчета 102
         def sumOpu = getSumByOpuCodes(opuCodes, getEndDate())
@@ -1444,4 +1588,232 @@ def generateXmlFileId(String taxOrganCodeProm, String taxOrganCode) {
         return fileId
     }
     return null
+}
+
+@Field
+def reportPeriod = null
+
+def getReportPeriod() {
+    if (reportPeriod == null) {
+        reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    }
+    return reportPeriod
+}
+
+@Field
+def correctionNumber = null
+
+def getCorrectionNumber() {
+    if (correctionNumber == null) {
+        correctionNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
+    }
+    return correctionNumber
+}
+
+@Field
+def period4 = null
+
+/** Получить четвертый отчетный период (4 квартал) текущего налогового периода. */
+def getPeriod4Id() {
+    if (period4 == null) {
+        def year = getReportPeriod()?.taxPeriod?.year
+        def start = Date.parse('dd.MM.yyyy', '01.01.' + year)
+        def end = Date.parse('dd.MM.yyyy', '31.12.' + year)
+        def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.VAT, start, end)
+        period4 = reportPeriods.find { it.order == 4 }
+    }
+    return period4?.id
+}
+
+@Field
+def departmentReportPeriodMap = [:]
+
+DepartmentReportPeriod getDepartmentReportPeriod(def id) {
+    if (departmentReportPeriodMap[id] == null) {
+        departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)
+    }
+    return departmentReportPeriodMap[id]
+}
+
+@Field
+def formDataMap = [:]
+
+def getFormData(def formTypeId, def formDataKind, def departmentId, def reportPeriodId) {
+    if (reportPeriodId == null) {
+        return null
+    }
+    def key = formTypeId + '#' + formDataKind.getId() + '#' + departmentId + '#' + reportPeriodId
+    if (formDataMap[key] == null) {
+        formDataMap[key] = formDataService.getLast(formTypeId, formDataKind, bankDepartmentId, reportPeriodId, null, null, false)
+    }
+    return formDataMap[key]
+}
+
+@Field
+DepartmentReportPeriod prevDepartmentReportPeriod = null
+
+/** Получить предыдущий корректирующий период период банка. */
+DepartmentReportPeriod getPrevDepartmentReportPeriod() {
+    if (prevDepartmentReportPeriod) {
+        return prevDepartmentReportPeriod
+    }
+    List<DepartmentReportPeriod> departmentReportPeriods = getDepartmentReportPeriods(declarationData.reportPeriodId, bankDepartmentId)
+    // найти предыдущие корректирующие периоды
+    for (int i = departmentReportPeriods.size() - 1; i >= 0 ; i--) {
+        DepartmentReportPeriod dpr = departmentReportPeriods[i]
+        if (dpr.id == declarationData.departmentReportPeriodId && i > 0) {
+            prevDepartmentReportPeriod = departmentReportPeriods[i - 1]
+            return prevDepartmentReportPeriod
+        }
+    }
+    return null
+}
+
+@Field
+def needFindPrevCorrectionDeclaration = true
+
+@Field
+DeclarationData prevCorrectionDeclarationData = null
+
+/** Получить предыдущую корректирующую декларацию НДС. */
+DeclarationData getPrevCorrectionDeclaration() {
+    if (!needFindPrevCorrectionDeclaration) {
+        return prevCorrectionDeclarationData
+    }
+    DepartmentReportPeriod departmentReportPeriod = getPrevDepartmentReportPeriod()
+    // найти декларацию среди предыдущих корректирующих периодов
+    if (departmentReportPeriod) {
+        List<DeclarationData> declarationDatas = declarationService.find(declarationType, departmentReportPeriod.id)
+        if (declarationDatas != null && !declarationDatas.isEmpty()) {
+            prevCorrectionDeclarationData = declarationDatas.get(0)
+        }
+    }
+    needFindPrevCorrectionDeclaration = false
+    return prevCorrectionDeclarationData
+}
+
+/**
+ * Предварительные проверки перед выполнением расчета Раздела 3 в уточненной декларации.
+ *
+ * @return возвращает false если номер корректировки больше 1 и нет предыдущей корректирующей декларации (в этом случае раздел 3 не будет сформирован)
+ */
+def prevSection3Check() {
+    def correction = getCorrectionNumber()
+    if (correction == null || correction == 0) {
+        return true
+    }
+    def departmentName = departmentService.get(bankDepartmentId)?.name
+    def year = getReportPeriod()?.taxPeriod?.year
+    def period = getReportPeriod()?.name
+    def periodName = year + ', ' + period
+
+    // 1. проверка декларации "Декларация по НДС (раздел 1-7)"
+    if (correction != null && correction > 1) {
+        // TODO (Ramil Timerbaev) в 1.0 поменять на declarationService.getType(declarationType)
+        def declarationName = 'Декларация по НДС (раздел 1-7)'
+        DeclarationData declarationNDS1_7 = getPrevCorrectionDeclaration()
+        DepartmentReportPeriod dpr = getPrevDepartmentReportPeriod()
+        def correctionDate = (dpr?.correctionDate?.format('dd.MM.yyyy') ?: '')
+        if (declarationNDS1_7 == null || !declarationNDS1_7.accepted) {
+            // сообщение 1
+            def msg = "Не найдена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «%s». Расчет раздела 3 не будет выполнен."
+            logger.warn(msg, declarationName, departmentName, periodName, correctionDate)
+            return false
+        } else {
+            // сообщение 2
+            def msg = "Для заполнения строк 010-040, 070, 120, 170 раздела 3 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «%s»."
+            logger.info(msg, declarationName, departmentName, periodName, correctionDate)
+        }
+    }
+
+    def forFormNamePeriod4Id = (getPeriod4Id() ?: declarationData.departmentReportPeriodId)
+
+    // 2. проверка формы 724.1.1
+    def formTypeId = formType_724_1_1
+    def formDataKind = FormDataKind.CONSOLIDATED
+    def formName = formDataService.getFormTemplate(formTypeId, forFormNamePeriod4Id)?.name
+    def formData = getFormData724_1_1()
+    if (formData) {
+        def subMsg = ''
+        def correctionDate = getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate?.format('dd.MM.yyyy')
+        if (correctionDate) {
+            subMsg = String.format(", Дата сдачи корректировки: «%s»", correctionDate)
+        }
+        // сообщение 3
+        def msg = "Для заполнения строк 010-040, 070, 120, 170 раздела 3 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s»>»%s."
+        logger.info(msg, formDataKind.title, formName, departmentName, periodName, subMsg)
+    } else {
+        // сообщение 4
+        def msg = "Не найдена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s». При заполнении строк 010-040, 070, 120, 170 раздела 3 значения требуемых граф формы-источника будут приняты за нулевые."
+        logger.warn(msg, formDataKind.title, formName, departmentName, periodName)
+    }
+
+    // 3. проверка формы 724.10
+    formTypeId = formType_724_10
+    formName = formDataService.getFormTemplate(formTypeId, forFormNamePeriod4Id)?.name
+    formData = getFormData(formTypeId, formDataKind, bankDepartmentId, getPeriod4Id())
+    if (formData && formData.state == WorkflowState.ACCEPTED) {
+        def subMsg = ''
+        def correctionDate = getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate?.format('dd.MM.yyyy')
+        if (correctionDate) {
+            subMsg = String.format(", Дата сдачи корректировки: «%s»", correctionDate)
+        }
+        // сообщение 5
+        def msg = "Для заполнения строки 105 раздела 3 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s»>»%s."
+        logger.info(msg, formDataKind.title, formName, departmentName, periodName, subMsg)
+    } else {
+        // сообщение 6
+        def msg = "Не найдена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s». Строка 105 раздела 3 не будет заполнена."
+        logger.warn(msg, formDataKind.title, formName, departmentName, periodName)
+    }
+    return true
+}
+
+@Field
+def formData724_1_1 = null
+
+/** Получить строки источника 724.1.1 (форма должна быть только в корректирующем периоде). */
+def getFormData724_1_1() {
+    if (formData724_1_1 == null) {
+        def formData = getFormData(formType_724_1_1, FormDataKind.CONSOLIDATED, bankDepartmentId, getPeriod4Id())
+        def correctionDate = (formData ? getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate : null)
+        // период только корректирующий
+        if (formData && formData.state == WorkflowState.ACCEPTED && correctionDate) {
+            formData724_1_1 = formData
+        }
+    }
+    return formData724_1_1
+}
+
+// TODO (Ramil Timerbaev) в 1.0 поменять на departmentReportPeriodService.getListByFilter()
+/** Получить список периодовов подразделения (корректирующих и некорректирующих). */
+List<DepartmentReportPeriod> getDepartmentReportPeriods(def periodId, def departmentId) {
+    def sql = "select * from department_report_period " +
+            " where report_period_id = %d and department_id = %s " +
+            " order by correction_date asc nulls first "
+    sql = String.format(sql, periodId, departmentId)
+    Connection connection = null
+    Statement stmt = null
+    ResultSet resultSet = null
+    List<DepartmentReportPeriod> departmentReportPeriods = []
+    try {
+        connection = dataSource.getConnection()
+        stmt = connection.createStatement()
+        resultSet = stmt.executeQuery(sql)
+        while (resultSet.next()) {
+            DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod()
+            departmentReportPeriod.setId(SqlUtils.getInteger(resultSet, "id"))
+            departmentReportPeriod.setDepartmentId(SqlUtils.getInteger(resultSet, "department_id"))
+            departmentReportPeriod.setReportPeriod(reportPeriodService.get(SqlUtils.getInteger(resultSet, "report_period_id")))
+            departmentReportPeriod.setActive(!SqlUtils.getInteger(resultSet, "is_active").equals(0))
+            departmentReportPeriod.setBalance(!SqlUtils.getInteger(resultSet, "is_balance_period").equals(0))
+            departmentReportPeriod.setCorrectionDate(resultSet.getDate("correction_date"))
+            departmentReportPeriods.add(departmentReportPeriod)
+        }
+    } finally {
+        resultSet.close()
+        stmt.close()
+        connection.close()
+    }
+    return departmentReportPeriods
 }

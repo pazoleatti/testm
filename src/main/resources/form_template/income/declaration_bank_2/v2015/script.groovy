@@ -1536,6 +1536,15 @@ void createSpecificReport() {
 }
 
 void createSpecificReportApp2() {
+    // Отчётный период.
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+
+    // Приложение №2 должно формироваться только в случае если текущий экземпляр декларации относится к периоду «год»
+    if (reportPeriod.order != 4) {
+        logger.error("Невозможно сформировать отчет для текущего отчетного периода! Допустимый отчетный период: \"год\"") // TODO не утверждено. проверить как проработают в чтз
+        return
+    }
+
     File xmlFile = File.createTempFile(scriptSpecificReportHolder.fileName, ".xml", new File(System.getProperty("java.io.tmpdir")));
     FileWriter fileWriter = null
     try {
@@ -1576,8 +1585,6 @@ String getJrxml(def jrxmlInputStream) {
 
 // Запуск генерации XML для спецотчета Приложения 2 к декларации.
 void generateXMLApp2(def xmlInputStream) {
-    def reportPeriodId = declarationData.reportPeriodId
-
     // Параметры подразделения
     def incomeParams = getDepartmentParam()
     def incomeParamsTable = getDepartmentParamTable(incomeParams.record_id.value)
@@ -1587,14 +1594,6 @@ void generateXMLApp2(def xmlInputStream) {
     def inn = incomeParams?.INN?.value
     def kpp = declarationData.kpp
     def formatVersion = incomeParams?.FORMAT_VERSION?.value
-
-    // Отчётный период.
-    def reportPeriod = reportPeriodService.get(reportPeriodId)
-
-    // Приложение №2 должно формироваться только в случае если текущий экземпляр декларации относится к периоду «год»
-    if (reportPeriod.order != 4) {
-        return
-    }
 
     // Данные налоговых форм.
 
@@ -1610,7 +1609,7 @@ void generateXMLApp2(def xmlInputStream) {
         isCFOApp2 = true
         dataRowsApp2 = dataRowsApp2CFO
     } else if (dataRowsApp2CFO != null) {
-        logger.warn("Неверно настроены источники декларации Банка! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Консолидация произведена из «%s».",
+        logger.warn("Неверно настроены источники декларации Банка! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Формирование спецотчета произведено из «%s».",
                 formTypeService.get(415).name, formTypeService.get(418)?.name, formTypeService.get(415)?.name)
     }
 

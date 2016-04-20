@@ -132,6 +132,7 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
+    def yearStartDate = Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy'))
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -172,26 +173,7 @@ void logicCheck() {
         }
 
         // Проверка корректности даты совершения сделки
-        // TODO (SBRFACCTAX-15094) заменить на checkDatePeriodExt
-        checkDatePeriodExtLocal(logger, row, 'dealDoneDate', 'docDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
-    }
-}
-
-// TODO (SBRFACCTAX-15094) удалить
-void checkDatePeriodExtLocal(logger, row, String alias, String startAlias, Date yearStartDate, Date endDate, boolean fatal) {
-    // дата проверяемой графы
-    Date docDate = row.getCell(alias).getDateValue();
-    // дата другой графы
-    Date startDate = row.getCell(startAlias).getDateValue();
-
-    if (docDate != null && startDate != null && (docDate.before(yearStartDate) || docDate.after(endDate) || docDate.before(startDate))) {
-        logger.error(String.format("Строка %d: Дата по графе «%s» должна принимать значение из диапазона %s - %s и быть больше либо равна дате по графе «%s»!",
-                row.getIndex(),
-                getColumnName(row, alias),
-                formatDate(yearStartDate, "dd.MM.yyyy"),
-                formatDate(endDate, "dd.MM.yyyy"),
-                getColumnName(row, startAlias)
-        ));
+        checkDatePeriodExt(logger, row, 'dealDoneDate', 'docDate', yearStartDate, getReportPeriodEndDate(), true)
     }
 }
 
@@ -378,17 +360,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 
-// TODO (SBRFACCTAX-15074) убрать
-void checkTFLocal(BufferedInputStream inputStream, String fileName) {
-    checkBeforeGetXml(inputStream, fileName);
-    if (fileName != null && !fileName.toLowerCase().endsWith(".rnu")) {
-        throw new ServiceException("Выбранный файл не соответствует формату rnu!");
-    }
-}
-
 void importTransportData() {
-    // TODO (SBRFACCTAX-15074) заменить на "ScriptUtils.checkTF(ImportInputStream, UploadFileName)"
-    checkTFLocal(ImportInputStream, UploadFileName)
+    checkTF(ImportInputStream, UploadFileName)
 
     int COLUMN_COUNT = 11
     def DEFAULT_CHARSET = "cp866"

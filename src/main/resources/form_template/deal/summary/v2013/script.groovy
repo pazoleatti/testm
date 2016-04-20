@@ -187,6 +187,7 @@ void logicCheck() {
     }
 
     // Общие значения
+    def yearStartDate = Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy'))
     // "Да"
     def Long recYesId = getRecYesId()
     // "Нет"
@@ -237,8 +238,7 @@ void logicCheck() {
         }
 
         // 5. Проверка корректности даты совершения сделки
-        // TODO (SBRFACCTAX-15094) заменить на checkDatePeriodExt
-        checkDatePeriodExtLocal(logger, row, 'dealDoneDate', 'contractDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
+        checkDatePeriodExt(logger, row, 'dealDoneDate', 'contractDate', yearStartDate, getReportPeriodEndDate(), true)
 
         // 6. Проверка заполнения граф «ИНН, КПП организации»
         def organizationCode = getRefBookValue(70, row.organInfo)?.CODE?.value
@@ -256,24 +256,6 @@ void logicCheck() {
             def msg3 = getColumnName(row, 'organInfo')
             logger.error("Строка $rowNum: Значение графы «$msg1» или графы «$msg2» должно быть заполнено, т.к. значение графы «$msg3» равно «Иностранная организация»!")
         }
-    }
-}
-
-// TODO (SBRFACCTAX-15094) удалить
-void checkDatePeriodExtLocal(logger, row, String alias, String startAlias, Date yearStartDate, Date endDate, boolean fatal) {
-    // дата проверяемой графы
-    Date docDate = row.getCell(alias).getDateValue();
-    // дата другой графы
-    Date startDate = row.getCell(startAlias).getDateValue();
-
-    if (docDate != null && startDate != null && (docDate.before(yearStartDate) || docDate.after(endDate) || docDate.before(startDate))) {
-        logger.error(String.format("Строка %d: Дата по графе «%s» должна принимать значение из диапазона %s - %s и быть больше либо равна дате по графе «%s»!",
-                row.getIndex(),
-                getColumnName(row, alias),
-                formatDate(yearStartDate, "dd.MM.yyyy"),
-                formatDate(endDate, "dd.MM.yyyy"),
-                getColumnName(row, startAlias)
-        ));
     }
 }
 

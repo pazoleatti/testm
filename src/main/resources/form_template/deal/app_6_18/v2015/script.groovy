@@ -170,6 +170,7 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
+    def yearStartDate = Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy'))
 
     // "Да" и "Нет"
     def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
@@ -306,26 +307,7 @@ void logicCheck() {
         }
 
         // Проверка корректности даты совершения сделки
-        // TODO (SBRFACCTAX-15094) заменить на checkDatePeriodExt
-        checkDatePeriodExtLocal(logger, row, 'dealDoneDate', 'dealDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
-    }
-}
-
-// TODO (SBRFACCTAX-15094) удалить
-void checkDatePeriodExtLocal(logger, row, String alias, String startAlias, Date yearStartDate, Date endDate, boolean fatal) {
-    // дата проверяемой графы
-    Date docDate = row.getCell(alias).getDateValue();
-    // дата другой графы
-    Date startDate = row.getCell(startAlias).getDateValue();
-
-    if (docDate != null && startDate != null && (docDate.before(yearStartDate) || docDate.after(endDate) || docDate.before(startDate))) {
-        logger.error(String.format("Строка %d: Дата по графе «%s» должна принимать значение из диапазона %s - %s и быть больше либо равна дате по графе «%s»!",
-                row.getIndex(),
-                getColumnName(row, alias),
-                formatDate(yearStartDate, "dd.MM.yyyy"),
-                formatDate(endDate, "dd.MM.yyyy"),
-                getColumnName(row, startAlias)
-        ));
+        checkDatePeriodExt(logger, row, 'dealDoneDate', 'dealDate', yearStartDate, getReportPeriodEndDate(), true)
     }
 }
 

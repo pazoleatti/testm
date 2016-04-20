@@ -220,8 +220,9 @@ def formNewRows03(def rows, boolean is9months2015) {
     def dataRowsMap = [:]
     rows.each { row ->
         sum = row.withheldSum
-        if ((!is9months2015 && sum != null && sum != 0 && row.type == 1 && row.status == 1) ||
-                (is9months2015 && sum > 0 && row.type != 2 && row.status == 1)) {
+
+        if ((!is9months2015 && sum != null && sum != 0 && row.type == 1 && row.status == 1 && row.dividends > 0 && row.sum > 0 && row.withheldSum > 0) ||
+                (is9months2015 && sum > 0 && row.type != 2 && row.status == 1 && row.dividends > 0 && row.sum > 0 && row.withheldSum > 0)) {
             if (dataRowsMap.containsKey(row.withheldDate)) {
                 sum += dataRowsMap.get(row.withheldDate)
                 dataRowsMap.remove(row.withheldDate)

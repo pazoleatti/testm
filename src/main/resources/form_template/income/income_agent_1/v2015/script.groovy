@@ -123,11 +123,11 @@ def editableColumns = ['emitentName', 'emitentInn', 'all', 'rateZero', 'distribu
                        'withheldSum', 'withheldDate', 'withheldNumber', 'postcode', 'region', 'district', 'city', 'locality',
                        'street', 'house', 'housing', 'apartment', 'surname', 'name', 'patronymic', 'phone']
 
-// обязательные (графа 1..3, 7..13, 16, 17, 23..25, 27)
+// обязательные (графа 1..3, 7..13, 16, 17, 23..25)
 @Field
 def nonEmptyColumns = ['emitentName', 'emitentInn', 'decisionNumber',
                        'decisionDate', 'year', 'firstMonth', 'lastMonth', 'allSum', 'addresseeName', 'type',
-                       'status', 'dividends', 'sum', 'date', 'withheldSum']
+                       'status', 'dividends', 'sum', 'date']
 
 // сортировка (графа 7, 8)
 @Field
@@ -168,7 +168,8 @@ def logicCheck() {
     def dateTo = Date.parse('dd.MM.yyyy', '31.12.2099')
     def period = reportPeriodService.get(formData.reportPeriodId)
     def year = period?.taxPeriod?.year
-    def departmentInn = getDepartmentParams()?.INN?.value
+    def departmentInn = getDepartmentParams(formDataDepartment.id)?.INN?.value
+    def userDepartmentInn = getDepartmentParams(userDepartment.id)?.INN?.value
     def yearRowMap = [:]
 
     for (def row in dataRows) {
@@ -254,6 +255,39 @@ def logicCheck() {
             logger.error("Строка $index: В случае если графа «%s» не равна значению «2» и графа «%s» равна значению «1», должна быть заполнена графа «%s», «%s» и «%s»!",
                     getColumnName(row, 'type'), getColumnName(row, 'status'), getColumnName(row, 'region'), getColumnName(row, 'surname'), getColumnName(row, 'name'))
         }
+
+        // 12. Проверка корректности заполнения граф 27, 28, 29
+        if (row.type != null && (row.type?.intValue() in [2, 3, 4, 5]) &&
+                (row.withheldSum == null || row.withheldDate == null || row.withheldNumber == null)) {
+            logger.warn("Строка $index: В случае если графа «%s» равна значению «2» / «3» / «4» / «5», должна быть заполнена графа «%s», «%s», «%s»!",
+                            getColumnName(row, 'type'), getColumnName(row, 'withheldSum'), getColumnName(row, 'withheldDate'), getColumnName(row, 'withheldNumber'))
+        }
+
+        // 13. Проверка заполнения графы 27
+        if (row.type != null && row.type == 1 && row.withheldSum != 0) {
+            logger.error("Строка $index: В случае если графа «%s» равна значению «1», графа «%s» должна быть равна «0»!",
+                    getColumnName(row, 'type'), getColumnName(row, 'withheldSum'))
+        }
+
+        // 14. Проверка заполнения ИНН для подразделения
+        if (!userDepartmentInn) {
+            def periodName = period?.taxPeriod?.year + ' ' + period?.name
+            logger.error("В настройках подразделения «%s» за период «%s» не заполнен атрибут «ИНН»!", userDepartment.name, periodName)
+        }
+
+        // 15. Проверка заполнения «Графы 4», «Графы 5»
+        if (userDepartmentInn && row.dividends > 0 && row.sum > 0 && row.withheldSum >= 0 && row.emitentInn == userDepartmentInn) {
+            ['all', 'rateZero'].each { alias ->
+                if (row[alias] == null) {
+                    logger.warn("Строка $index: Графа «%s» должна быть заполнена, т.к. значение используется при консолидации в сводную форму 03А!", getColumnName(row, alias))
+                }
+            }
+        }
+
+        // 16. Проверка заполнения «Графы 6»
+        if (row.dividends > 0 && row.sum > 0 && row.withheldSum >= 0 && row.distributionSum == null) {
+            logger.warn("Строка $index: Графа «%s» должна быть заполнена, т.к. значение используется при консолидации в сводную форму 03А!", getColumnName(row, 'distributionSum'))
+        }
     }
     // 10. Проверка уникальности значения графы 7 (номер решения)
     yearRowMap.each { yearValue, rows ->
@@ -269,13 +303,18 @@ def logicCheck() {
     }
 }
 
-def getDepartmentParams() {
-    def filter = "DEPARTMENT_ID = $formDataDepartment.id"
-    def departmentParamList = refBookFactory.getDataProvider(33).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
-    if (departmentParamList && !departmentParamList.isEmpty()) {
-        return departmentParamList.get(0)
+@Field
+def departmentParamMap = [:]
+
+def getDepartmentParams(def id) {
+    if (id != null && departmentParamMap[id] == null) {
+        def filter = "DEPARTMENT_ID = $id"
+        def departmentParamList = refBookFactory.getDataProvider(33).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+        if (departmentParamList && !departmentParamList.isEmpty()) {
+            departmentParamMap[id] = departmentParamList.get(0)
+        }
     }
-    return null
+    return departmentParamMap[id]
 }
 
 def roundValue(BigDecimal value, def int precision) {
