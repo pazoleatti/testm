@@ -183,7 +183,7 @@
 		<fieldDescription><![CDATA[../@ИтСтПродКПр10]]></fieldDescription>
 	</field>
 	<field name="ИтСтПродКПр0" class="java.lang.String">
-		<fieldDescription><![CDATA[../@ИтСтПродКПр10]]></fieldDescription>
+		<fieldDescription><![CDATA[../@ИтСтПродКПр0]]></fieldDescription>
 	</field>
 	<field name="СумНДСИтКПр18" class="java.lang.String">
 		<fieldDescription><![CDATA[../@СумНДСИтКПр18]]></fieldDescription>
