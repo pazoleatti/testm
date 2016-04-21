@@ -85,6 +85,9 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         createSpecificReport()
         break
+    case FormDataEvent.CALCULATE_TASK_COMPLEXITY:
+        calcTaskComplexity()
+        break
 }
 
 //// Кэши и константы
@@ -958,8 +961,8 @@ Sheet sheet = null
 void createSpecificReport() {
     // для работы с эксель
     String TEMPLATE = ClassUtils.classPackageAsResourcePath(FormDataXlsmReportBuilder.class)+ "/acctax.xlsm"
-    InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE)
-    workBook = WorkbookFactory.create(templeteInputStream)
+    InputStream templateInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE)
+    workBook = WorkbookFactory.create(templateInputStream)
     sheet = workBook.getSheetAt(0)
     Row tmpRow
     Cell cell
@@ -1057,6 +1060,9 @@ void createSpecificReport() {
     // название файла
     scriptSpecificReportHolder.setFileName("Контролируемые лица.xlsm")
 }
+
+@Field
+def REPORT_COLUMN_COUNT = 3
 
 def getXlsRowValues(def count, def recordId) {
     def values = []
@@ -1265,7 +1271,7 @@ CellStyle getCellStyle(StyleType styleType, def rowNF = null) {
             style.setFont(font)
 
             DataFormat dataFormat = workBook.createDataFormat()
-            style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()))
+            style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.get().toPattern()))
             break
         case StyleType.GROUP_HEADER :
             style.setAlignment(CellStyle.ALIGN_CENTER)
@@ -1316,3 +1322,9 @@ Row addNewRowInXlsm(int rowIndex, def values, StyleType styleType = null) {
     return newRow
 }
 
+void calcTaskComplexity() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allSaved
+    def rowCount = dataRows.count { it.sign == getRecYesId() } + 7 // 7 фиксированных строк
+    taskComplexityHolder.setValue(REPORT_COLUMN_COUNT * rowCount)
+}

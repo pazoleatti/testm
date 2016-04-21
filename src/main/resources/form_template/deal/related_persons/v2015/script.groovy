@@ -110,6 +110,9 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         createSpecificReport()
         break
+    case FormDataEvent.CALCULATE_TASK_COMPLEXITY:
+        calcTaskComplexity()
+        break
 }
 
 //// Кэши и константы
@@ -719,6 +722,9 @@ def createSpecificReportShortListCSV() {
     scriptSpecificReportHolder.setFileName(fileName)
 }
 
+@Field
+def SHORT_REPORT_COLUMN_COUNT = 6
+
 /** Получить значения строки для краткого отчета. */
 def getShortRow(def recordId) {
     def values = []
@@ -1065,7 +1071,7 @@ CellStyle getCellStyle(StyleType styleType, def rowNF = null) {
             style.setFont(font)
 
             DataFormat dataFormat = workBook.createDataFormat()
-            style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()))
+            style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.get().toPattern()))
             break
         case StyleType.GROUP_HEADER :
             style.setAlignment(CellStyle.ALIGN_CENTER)
@@ -1327,7 +1333,7 @@ def createSpecificReportHistory() {
     rowIndex += scriptSpecificReportHolder.getHeaders().size()
 
     // данные раздела 2
-    rowIndex = fillSection2(rowIndex, widths.size())
+    rowIndex = fillSection2(rowIndex, widths.size(), true)
     // раздел 2 - конец ---------------------------------------------------------------------------------------------
 
     // область печати
@@ -1338,6 +1344,9 @@ def createSpecificReportHistory() {
     // название файла
     scriptSpecificReportHolder.setFileName("История изменения ВЗЛ.xlsm")
 }
+
+@Field
+def LONG_REPORT_COLUMN_COUNT = 15
 
 /** Получить значения по id записи справочника "Участники ТЦО" для записи в спец отчет история ВЗЛ. */
 def getValues520(def record520, def recordId506, def rowIndex = null) {
@@ -1404,7 +1413,7 @@ def getValues520(def record520, def recordId506, def rowIndex = null) {
  * @param columnIndex столбцов в эксель
  * @return номер последней добавленой строки
  */
-def fillSection2(def rowIndex, def columnIndex) {
+def fillSection2(def rowIndex, def columnIndex, boolean fullExport) {
     def from = getReportPeriodStartDate()
     def to = getReportPeriodEndDate()
 
@@ -1438,19 +1447,21 @@ def fillSection2(def rowIndex, def columnIndex) {
             // заголовок группы
             groupDate = item.date
             rowIndex++
-            tmpRow = sheet.createRow(rowIndex)
-            cell = tmpRow.createCell(0)
-            def dateStr = groupDate.format('dd.MM.yyyy')
-            cell.setCellValue("Изменения, внесенные $dateStr")
-            cell.setCellStyle(getCellStyle(StyleType.GROUP_HEADER))
-            region = new CellRangeAddress(rowIndex, rowIndex, 0, columnIndex - 1)
-            // объединение всех ячеек строки
-            sheet.addMergedRegion(region)
+            if (fullExport) {
+                tmpRow = sheet.createRow(rowIndex)
+                cell = tmpRow.createCell(0)
+                def dateStr = groupDate.format('dd.MM.yyyy')
+                cell.setCellValue("Изменения, внесенные $dateStr")
+                cell.setCellStyle(getCellStyle(StyleType.GROUP_HEADER))
+                region = new CellRangeAddress(rowIndex, rowIndex, 0, columnIndex - 1)
+                // объединение всех ячеек строки
+                sheet.addMergedRegion(region)
 
-            RegionUtil.setBorderBottom(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
-            RegionUtil.setBorderTop(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
-            RegionUtil.setBorderRight(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
-            RegionUtil.setBorderLeft(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
+                RegionUtil.setBorderBottom(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
+                RegionUtil.setBorderTop(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
+                RegionUtil.setBorderRight(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
+                RegionUtil.setBorderLeft(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
+            }
         }
 
         // первая строка - заголовок изменения
@@ -1461,26 +1472,30 @@ def fillSection2(def rowIndex, def columnIndex) {
             title = item.type.title
         }
         rowIndex++
-        tmpRow = sheet.createRow(rowIndex)
-        cell = tmpRow.createCell(0)
-        cell.setCellValue(title)
-        cell.setCellStyle(getCellStyle(StyleType.HEADER)) // используется стиль шапки
-        // объединение всех ячеек строки
-        region = new CellRangeAddress(rowIndex, rowIndex, 0, columnIndex - 1)
-        sheet.addMergedRegion(region)
-        RegionUtil.setBorderBottom(CellStyle.BORDER_THIN, region, sheet, workBook)
-        RegionUtil.setBorderTop(CellStyle.BORDER_THIN, region, sheet, workBook)
-        RegionUtil.setBorderRight(CellStyle.BORDER_THIN, region, sheet, workBook)
-        RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, region, sheet, workBook)
+        if (fullExport) {
+            tmpRow = sheet.createRow(rowIndex)
+            cell = tmpRow.createCell(0)
+            cell.setCellValue(title)
+            cell.setCellStyle(getCellStyle(StyleType.HEADER)) // используется стиль шапки
+            // объединение всех ячеек строки
+            region = new CellRangeAddress(rowIndex, rowIndex, 0, columnIndex - 1)
+            sheet.addMergedRegion(region)
+            RegionUtil.setBorderBottom(CellStyle.BORDER_THIN, region, sheet, workBook)
+            RegionUtil.setBorderTop(CellStyle.BORDER_THIN, region, sheet, workBook)
+            RegionUtil.setBorderRight(CellStyle.BORDER_THIN, region, sheet, workBook)
+            RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, region, sheet, workBook)
+        }
 
         // вторая строка - данные (в скобках старые значения)
         rowIndex++
-        Row newRow = addNewRowInXlsm(rowIndex, item.values)
-        // задать стиль и заливку
-        (0..14).each { cellIndex ->
-            cell = newRow.getCell(cellIndex)
-            StyleType styleType = getColumnStyleType(cellIndex)
-            cell.setCellStyle(getCellStyle(styleType))
+        if (fullExport) {
+            Row newRow = addNewRowInXlsm(rowIndex, item.values)
+            // задать стиль и заливку
+            (0..14).each { cellIndex ->
+                cell = newRow.getCell(cellIndex)
+                StyleType styleType = getColumnStyleType(cellIndex)
+                cell.setCellStyle(getCellStyle(styleType))
+            }
         }
     }
     return rowIndex
@@ -1883,4 +1898,22 @@ def getColumnStyleType(def cellIndex) {
             break
     }
     return styleType
+}
+
+void calcTaskComplexity() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allSaved
+    def rowCount = dataRows.size()
+    switch (taskComplexityHolder.alias) {
+        case 'Краткий список ВЗЛ (CSV)' :
+            taskComplexityHolder.setValue(SHORT_REPORT_COLUMN_COUNT * (rowCount + 1)) // 1 фиксированная строка
+            break
+        case 'Краткий список ВЗЛ (XLSM)' :
+            taskComplexityHolder.setValue(SHORT_REPORT_COLUMN_COUNT * (rowCount + 5)) // 5 фиксированных строк
+            break
+        case 'История изменения ВЗЛ' :
+            taskComplexityHolder.setValue(LONG_REPORT_COLUMN_COUNT * (rowCount + 16 + fillSection2(0, LONG_REPORT_COLUMN_COUNT, false)))
+            break
+    }
+
 }
