@@ -17,7 +17,7 @@ public final class PeriodConvertor {
     }
 
     public static Date getDateTo(PeriodsInterval interval) {
-        if (interval.getPeriodTo() != null) {
+        if (interval.getPeriodTo() != null && interval.getYearTo() != null) {
             Calendar periodTo = Calendar.getInstance();
             periodTo.setTime(interval.getPeriodTo().getEndDate());
             periodTo.set(Calendar.YEAR, interval.getYearTo());
