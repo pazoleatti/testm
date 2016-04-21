@@ -1176,6 +1176,9 @@ def specialCode = '1010276'
 @Field
 def opuCodes = ['26411.01']
 
+@Field
+def opuCodes2016 = ['48413.01']
+
 /**
  * Получить значение для НалНеВыч.
  *
@@ -1184,12 +1187,14 @@ def opuCodes = ['26411.01']
 def getNalNeVich(def code) {
     def order = reportPeriodService.get(declarationData.reportPeriodId)?.order
     if (code == specialCode) {
+        def isBefore2016 = getEndDate()?.format('yyyy')?.toInteger() < 2016
+        def tmpOpuCodes = (isBefore2016 ? opuCodes : opuCodes2016)
         // сумма кодов ОПУ из отчета 102
-        def sumOpu = getSumByOpuCodes(opuCodes, getEndDate())
+        def sumOpu = getSumByOpuCodes(tmpOpuCodes, getEndDate())
         if (order == 1) {
             return sumOpu
         } else {
-            def sumOpuPrev = getSumByOpuCodes(opuCodes, getPrevEndDate())
+            def sumOpuPrev = getSumByOpuCodes(tmpOpuCodes, getPrevEndDate())
             // разность сумм
             return sumOpu - sumOpuPrev
         }
