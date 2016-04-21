@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+
 import java.io.Serializable;
 
 /**
@@ -57,7 +59,7 @@ public class FormType implements Serializable {
 	 * @param name желаемое значение названия
 	 */
 	public void setName(String name) {
-		this.name = name;
+        this.name = StringUtils.cleanString(name);
 	}
 	/**
 	 * Возвращает {@link TaxType вид налога}

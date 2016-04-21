@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -58,7 +59,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		this.name = StringUtils.cleanString(name);
 	}
 
 	/**

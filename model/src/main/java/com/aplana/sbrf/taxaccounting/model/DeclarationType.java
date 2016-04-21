@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+
 import java.io.Serializable;
 
 /**
@@ -69,7 +71,7 @@ public class DeclarationType implements Serializable {
 	 * @param name название вида декларации
 	 */
 	public void setName(String name) {
-		this.name = name;
+        this.name = StringUtils.cleanString(name);
 	}
 
     public Boolean getIsIfrs() {

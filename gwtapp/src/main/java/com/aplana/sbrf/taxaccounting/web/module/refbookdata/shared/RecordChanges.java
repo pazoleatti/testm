@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,7 +60,7 @@ public class RecordChanges implements Serializable {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = StringUtils.cleanString(name);
     }
 
     public Date getStart() {
