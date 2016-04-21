@@ -147,10 +147,8 @@ void importData() {
  * @param tmpRow вспомогательная строка для получения названии графов
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
-    if (headerRows.isEmpty() || headerRows.size() < rowCount) {
-        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
-    }
-    checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
+    checkHeaderSize(headerRows, colCount, rowCount)
+
     def headerMapping = [
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
             ([(headerRows[0][1]): getColumnName(tmpRow, 'name')]),

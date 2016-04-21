@@ -255,10 +255,8 @@ void importData() {
  * @param headerRows строки шапки
  */
 void checkHeaderXls(def headerRows, def tmpRow) {
-    if (headerRows.isEmpty()) {
-        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
-    }
-    checkHeaderSize(headerRows[1].size(), headerRows.size(), 6, 3)
+    checkHeaderSize(headerRows, 6, 3)
+
     def headerMapping = [
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),//'№ п/п']),
             ([(headerRows[0][1]): getColumnName(tmpRow, 'name')]),//'Наименование сделки']),

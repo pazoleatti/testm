@@ -244,10 +244,8 @@ def importData() {
  * @param headerRows строки шапки
  */
 void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
-    if (headerRows.isEmpty()) {
-        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
-    }
-    checkHeaderSize(headerRows[1].size(), headerRows.size(), colCount, rowCount)
+    checkHeaderSize(headerRows, colCount, rowCount)
+
     def headerMapping = [
             ([(headerRows[0][0]): getColumnName(tmpRow, 'shareKind')]),
             ([(headerRows[0][1]): getColumnName(tmpRow, 'shareHolder')]),

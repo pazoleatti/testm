@@ -569,10 +569,8 @@ void importData() {
  * @param headerRows строки шапки
  */
 void checkHeaderXls(def headerRows) {
-    if (headerRows.isEmpty()) {
-        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
-    }
-    checkHeaderSize(headerRows[1].size(), headerRows.size(), 4, 2)
+    checkHeaderSize(headerRows, 4, 2)
+
     def headerMapping = [
             ([(headerRows[0][0]) : '№ п/п']),
             ([(headerRows[0][1]) : 'Наименование банка']),

@@ -463,10 +463,8 @@ void importData() {
  * @param tmpRow вспомогательная строка для получения названии графов
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
-    if (headerRows.isEmpty()) {
-        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
-    }
-    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+    checkHeaderSize(headerRows, colCount, rowCount)
+
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def headers = formTemplate.getHeaders()
     def headerMapping = []

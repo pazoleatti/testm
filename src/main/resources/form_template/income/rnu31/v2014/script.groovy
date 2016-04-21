@@ -340,11 +340,8 @@ void importData() {
  * @param rowCount количество строк в таблице
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount) {
-    if (headerRows.isEmpty() || headerRows.size() < 3) {
-        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
-    }
-    // размер заголовка проверяется по последней строке (нумерация столбцов) потому что в первых строках есть объединения
-    checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
+    checkHeaderSize(headerRows, colCount, rowCount)
+
     def headerMapping = [
             ([(headerRows[0][0]): '№ пп']),
             ([(headerRows[0][1]): 'Ставка налога на прибыль']),

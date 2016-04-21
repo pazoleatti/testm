@@ -724,10 +724,8 @@ void importData() {
  * @param rowCount количество строк в таблице
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount) {
-    if (headerRows.isEmpty()) {
-        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
-    }
-    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+    checkHeaderSize(headerRows, colCount, rowCount)
+
     def headerMapping = [
             ([(headerRows[0][0]): '№ пп']),
             ([(headerRows[0][2]): 'Код налогового учета']),

@@ -366,10 +366,8 @@ void importData() {
  * @param rowCount количество строк в таблице
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount) {
-    if (headerRows.isEmpty() || headerRows.size() < rowCount) {
-        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
-    }
-    checkHeaderSize(headerRows[2].size(), headerRows.size(), colCount, rowCount)
+    checkHeaderSize(headerRows, colCount, rowCount)
+
     def headerMapping = [
             ([(headerRows[0][0]): 'КНУ']),
             ([(headerRows[0][1]): 'Вид нормируемых расходов']),

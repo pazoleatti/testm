@@ -649,10 +649,8 @@ void importData() {
  * @param headerRows строки шапки
  */
 void checkHeaderXls(def headerRows) {
-    if (headerRows.isEmpty()) {
-        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
-    }
-    checkHeaderSize(headerRows[0].size(), headerRows.size(), 10, 3)
+    checkHeaderSize(headerRows, 10, 3)
+
     def headerMapping = [
             ([(headerRows[0][0]): 'КНУ']),
             ([(headerRows[0][1]): 'Группа дохода']),
