@@ -51,7 +51,7 @@ switch (formDataEvent) {
         generateXML()
         break
     case FormDataEvent.CALCULATE_TASK_COMPLEXITY:
-        taskComplexityHolder.setValue(100000) //TODO
+        calcTaskComplexity()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         createSpecificReport()
@@ -3035,4 +3035,22 @@ def generateXmlFileId(String taxOrganCodeProm, String taxOrganCode) {
         return fileId
     }
     return null
+}
+
+@Field
+def APP2_COLUMN_COUNT = 71
+
+void calcTaskComplexity() {
+    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
+
+    // Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
+    def dataRowsApp2 = getDataRows(formDataCollection, 415)
+
+    // Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов (ЦФО НДФЛ)."
+    def dataRowsApp2CFO = getDataRows(formDataCollection, 418)
+    if (dataRowsApp2 == null) {
+        dataRowsApp2 = dataRowsApp2CFO
+    }
+    def rowCount = dataRowsApp2.size()
+    taskComplexityHolder.setValue(APP2_COLUMN_COUNT * rowCount)
 }
