@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -184,6 +184,9 @@ public class Cell extends AbstractCell {
                 case STRING: {
                     if (value instanceof String) {
                         String temp = (String) value;
+                        if (temp!= null) {
+                            temp = StringUtils.cleanString(temp);
+                        }
                         if (!skipValidation && !getColumn().getValidationStrategy().matches(temp)) {
                             return showError(msgValue + "превышает допустимую разрядность (" +
                                     ((StringColumn) getColumn()).getMaxLength() + ")!");

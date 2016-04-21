@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import org.junit.Test;
 
@@ -229,8 +228,8 @@ public class DataRowMapperTest {
 		cell.setValue(null, null);
 		assertNull(dataRowMapper.formatCellValue(cell));
 
-		cell.setValue(" qww rt ds", null);
-		assertEquals(" qww rt ds", dataRowMapper.formatCellValue(cell));
+		cell.setValue("\n qww rt ds", null);
+		assertEquals("qww rt ds", dataRowMapper.formatCellValue(cell));
 
 		column = new DateColumn();
 		cell.setColumn(column);

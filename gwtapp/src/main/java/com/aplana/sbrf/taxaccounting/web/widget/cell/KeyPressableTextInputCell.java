@@ -16,6 +16,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -443,7 +444,7 @@ public class KeyPressableTextInputCell extends
 	private String updateViewData(Element parent, ViewData viewData,
 	                              boolean isEditing) {
 		InputElement input = (InputElement) parent.getFirstChild();
-		String value = input.getValue();
+		String value = StringUtils.cleanString(input.getValue());
 		viewData.setText(value);
 		viewData.setEditing(isEditing);
 		return value;

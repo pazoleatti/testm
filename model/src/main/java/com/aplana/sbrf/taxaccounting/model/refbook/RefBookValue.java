@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -84,6 +86,9 @@ public class RefBookValue implements Serializable {
 				(attributeType == RefBookAttributeType.STRING && value instanceof String) ||
 				(attributeType == RefBookAttributeType.DATE && value instanceof Date) ||
 				(attributeType == RefBookAttributeType.REFERENCE && (value instanceof Long || value instanceof Map))) {
+            if (attributeType == RefBookAttributeType.STRING && value != null) {
+                value = StringUtils.cleanString((String)value);
+            }
 			this.value = value;
 		} else {
 			throw new IllegalArgumentException(new StringBuilder("Illegal argument type. Must be \"").append(attributeType.name()).append("\" instead of \"").append(value.getClass().getName()).append("\"").toString());
