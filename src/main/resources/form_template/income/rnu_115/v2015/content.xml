@@ -119,8 +119,8 @@
         <order>11</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>40</nameAttributeId>
-        <refBookAttributeId>40</refBookAttributeId>
+        <nameAttributeId>5421</nameAttributeId>
+        <refBookAttributeId>5421</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>reqVolume</alias>
@@ -140,8 +140,8 @@
         <order>13</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>40</nameAttributeId>
-        <refBookAttributeId>40</refBookAttributeId>
+        <nameAttributeId>5421</nameAttributeId>
+        <refBookAttributeId>5421</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>guarVolume</alias>
