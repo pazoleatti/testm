@@ -3,6 +3,7 @@ package form_template.income.income_simple_1.v2016
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -629,16 +630,9 @@ void calcExplanation(def dataRows, def formSources, def isFromSummary) {
     for (row in dataRows) {
         if (!(row.getAlias() in rowsNotCalc)) {
             def knu = row.incomeTypeId
-            def opuMap = codeMap.get(knu) as Map
-            def sourceRows
-            def opuKey
-            boolean checkOpu = row.accountNo?.startsWith("706")
-            if (checkOpu) {
-                opuKey = row.accountingRecords ?: ''
-                sourceRows = opuMap?.get(opuKey)
-            } else {
-                sourceRows = opuMap?.values()?.sum() ?: []
-            }
+            def opuMap = codeMap.get(knu)
+            def opuKey = row.accountingRecords ?: ''
+            def sourceRows = opuMap?.get(opuKey)
             row.explanation = BigDecimal.ZERO
             if (sourceRows != null && !(sourceRows.isEmpty())) {
                 sourceRows.each { sourceRow ->
@@ -647,13 +641,11 @@ void calcExplanation(def dataRows, def formSources, def isFromSummary) {
             } else {
                 rowNumbers.add(row.getIndex())
             }
-            if (checkOpu) {
-                // удаляем использованные строки источника
-                opuMap?.remove(opuKey)
-                // если остались строки источника с тем же кну, но с другим балансовым счетом, то выводим сообщение
-                if (opuMap != null && !(opuMap.isEmpty())) {
-                    strangeCodes.add(knu)
-                }
+            // удаляем использованные строки источника
+            opuMap?.remove(opuKey)
+            // если остались строки источника с тем же кну, но с другим балансовым счетом, то выводим сообщение
+            if (opuMap != null && !(opuMap.isEmpty())) {
+                strangeCodes.add(knu)
             }
         }
     }
