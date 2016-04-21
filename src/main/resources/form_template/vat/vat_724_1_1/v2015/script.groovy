@@ -46,7 +46,7 @@ switch (formDataEvent) {
             calc()
             logicCheck()
         }
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -74,6 +74,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
+        checkFillDeclarationMap(false)
         calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
@@ -315,9 +316,13 @@ void checkFillDeclarationMap(boolean showMessages) {
         def reportPeriods = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
         def unpName = departmentService.get(unpId).name
         // разделы 1-7, продажи
-        declarationSaleMap = checkGetSourceDeclaration(true, showMessages, periodTypesSale, reportPeriods, reportPeriod, unpName, declarationType9sources, declarationType9_1)
+        if (declarationSaleMap == null) {
+            declarationSaleMap = checkGetSourceDeclaration(true, showMessages, periodTypesSale, reportPeriods, reportPeriod, unpName, declarationType9sources, declarationType9_1)
+        }
         // разделы 8, 9, покупки
-        declarationPurchaseMap = checkGetSourceDeclaration(false, showMessages, periodTypesPurchase, reportPeriods, reportPeriod, unpName, declarationType8sources, declarationType8_1)
+        if (declarationPurchaseMap == null) {
+            declarationPurchaseMap = checkGetSourceDeclaration(false, showMessages, periodTypesPurchase, reportPeriods, reportPeriod, unpName, declarationType8sources, declarationType8_1)
+        }
     }
 }
 
@@ -331,8 +336,11 @@ def checkGetSourceDeclaration(boolean isSale, boolean showMessages, def periodTy
     periodTypeIds.each { periodTypeId ->
         def periodName = getRefBookValue(8, periodTypeId)?.NAME?.stringValue
         def period = reportPeriods.find { it.dictTaxPeriodId == periodTypeId }
-        def departmentReportPeriod = getLastDepartmentReportPeriod(unpId, period.id)
-        def corrNumber = reportPeriodService.getCorrectionNumber(departmentReportPeriod.id)
+        def corrNumber = 0
+        if (period != null) {
+            def departmentReportPeriod = getLastDepartmentReportPeriod(unpId, period.id)
+            corrNumber = reportPeriodService.getCorrectionNumber(departmentReportPeriod.id)
+        }
         if (corrNumber == 0) { // сообщение 3
             def MESSAGE_3_SALE = "Невозможно определить декларацию-источник, т.к. не создан корректирующий период «%s, %s». " +
                     "При заполнении строк «ВСЕГО за %s» по доп. листу книги продаж по ставке 18%%, 10%% значения требуемых строк декларации-источника будут приняты за нулевые."
@@ -1096,8 +1104,11 @@ void importData() {
  * @param tmpRow вспомогательная строка для получения названии графов
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
-    checkHeaderSize(headerRows, colCount, rowCount)
-
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+    // checkHeaderSize(headerRows, colCount, rowCount) TODO заменить в 1.0
     def headerMapping = [
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
             ([(headerRows[0][2]): 'Данные бухгалтерского учёта']),
