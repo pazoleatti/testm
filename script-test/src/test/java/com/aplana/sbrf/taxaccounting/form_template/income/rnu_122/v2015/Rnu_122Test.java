@@ -126,7 +126,7 @@ public class Rnu_122Test extends ScriptTestBase {
         row.getCell("startDate").setValue(sdf.parse("11.11.2014"), null);
         row.getCell("endDate").setValue(sdf.parse("12.11.2014"), null);
         row.getCell("base").setValue(1L, null);
-        row.getCell("dealPay").setValue("1,0", null);
+        row.getCell("dealPay").setValue("1.0", null);
         row.getCell("sum2").setValue(1L, null);
         row.getCell("sum3").setValue(1L, null);
         row.getCell("tradePay").setValue("1%", null);
@@ -136,7 +136,6 @@ public class Rnu_122Test extends ScriptTestBase {
 
         i = 0;
         Assert.assertEquals("Строка 1: Графа «Код классификации дохода / расхода» должна принимать значение из следующего списка: «19300» или «19510»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Плата по условиям сделки,% год./ед. вал.» должно соответствовать следующему формату: первые символы: (0-9), следующий символ «.», следующие символы (0-9), последний символ (%) или пусто!", entries.get(i++).getMessage());
         Assert.assertEquals("Группа «10345» не имеет строки итога!", entries.get(i++).getMessage());
         Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());

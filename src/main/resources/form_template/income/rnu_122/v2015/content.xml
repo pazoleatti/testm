@@ -10,7 +10,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
-        <columnType>AUTO</columnType>
+        <dataOrder>0</dataOrder>
         <name>№ пп</name>
         <order>1</order>
         <width>4</width>
@@ -19,7 +19,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <dataOrder>1</dataOrder>
         <name>fix</name>
         <order>2</order>
         <width>0</width>
@@ -29,40 +29,76 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>name</alias>
         <checking>false</checking>
-        <columnType>REFBOOK</columnType>
+        <dataOrder>2</dataOrder>
         <name>Наименование Взаимозависимого лица/резидента оффшорной зоны</name>
         <order>3</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>5201</nameAttributeId>
+        <refBookAttribute>
+            <alias>NAME</alias>
+            <attributeType>STRING</attributeType>
+            <id>5201</id>
+            <maxLength>256</maxLength>
+            <name>Полное наименование юридического лица с указанием ОПФ</name>
+            <readOnly>false</readOnly>
+            <required>true</required>
+            <unique>1</unique>
+            <visible>true</visible>
+            <width>30</width>
+        </refBookAttribute>
         <refBookAttributeId>5201</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>iksr</alias>
         <checking>false</checking>
-        <columnType>REFERENCE</columnType>
+        <dataOrder>3</dataOrder>
         <name>Идентификационный номер</name>
         <order>4</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
+        <refBookAttribute>
+            <alias>IKSR</alias>
+            <attributeType>STRING</attributeType>
+            <id>5218</id>
+            <maxLength>50</maxLength>
+            <name>IKSR</name>
+            <readOnly>false</readOnly>
+            <required>false</required>
+            <unique>0</unique>
+            <visible>false</visible>
+            <width>30</width>
+        </refBookAttribute>
         <refBookAttributeId>5218</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryName</alias>
         <checking>false</checking>
-        <columnType>REFERENCE</columnType>
+        <dataOrder>4</dataOrder>
         <name>Страна регистрации</name>
         <order>5</order>
         <width>8</width>
         <parentAlias>name</parentAlias>
+        <refBookAttribute>
+            <alias>FULLNAME</alias>
+            <attributeType>STRING</attributeType>
+            <id>54</id>
+            <maxLength>500</maxLength>
+            <name>Полное наименование</name>
+            <readOnly>false</readOnly>
+            <required>true</required>
+            <unique>5</unique>
+            <visible>true</visible>
+            <width>50</width>
+        </refBookAttribute>
         <refBookAttributeId>5204</refBookAttributeId>
         <refBookAttributeId2>54</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>code</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <dataOrder>5</dataOrder>
         <name>Код классификации дохода / расхода</name>
         <order>6</order>
         <width>10</width>
@@ -72,7 +108,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>docNumber</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <dataOrder>6</dataOrder>
         <name>Первичный документ. Номер</name>
         <order>7</order>
         <width>10</width>
@@ -82,7 +118,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>docDate</alias>
         <checking>false</checking>
-        <columnType>DATE</columnType>
+        <dataOrder>7</dataOrder>
         <name>Первичный документ. Дата</name>
         <order>8</order>
         <width>6</width>
@@ -91,7 +127,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum1</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
+        <dataOrder>8</dataOrder>
         <name>Сумма кредита для расчёта (остаток задолженности, невыбранный лимит кредита), ед. вал.</name>
         <order>9</order>
         <width>11</width>
@@ -101,18 +137,31 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>course</alias>
         <checking>false</checking>
-        <columnType>REFBOOK</columnType>
+        <dataOrder>9</dataOrder>
         <name>Валюта</name>
         <order>10</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>64</nameAttributeId>
+        <nameAttributeId>66</nameAttributeId>
+        <refBookAttribute>
+            <alias>CODE</alias>
+            <attributeType>STRING</attributeType>
+            <id>64</id>
+            <maxLength>3</maxLength>
+            <name>Код валюты. Цифровой</name>
+            <readOnly>false</readOnly>
+            <required>true</required>
+            <unique>1</unique>
+            <visible>true</visible>
+            <width>5</width>
+        </refBookAttribute>
         <refBookAttributeId>64</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>transDoneDate</alias>
         <checking>false</checking>
-        <columnType>DATE</columnType>
+        <dataOrder>10</dataOrder>
         <name>Дата фактического отражения операции</name>
         <order>11</order>
         <width>6</width>
@@ -121,6 +170,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>course2</alias>
         <checking>false</checking>
+        <dataOrder>11</dataOrder>
         <name>Курс Банка России на дату фактического отражения в бухгалтерском учёте (руб.)</name>
         <order>12</order>
         <width>11</width>
@@ -130,7 +180,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>startDate</alias>
         <checking>false</checking>
-        <columnType>DATE</columnType>
+        <dataOrder>12</dataOrder>
         <name>Расчетный период (согласно условиям сделки). Дата начала</name>
         <order>13</order>
         <width>6</width>
@@ -139,7 +189,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>endDate</alias>
         <checking>false</checking>
-        <columnType>DATE</columnType>
+        <dataOrder>13</dataOrder>
         <name>Расчетный период (согласно условиям сделки). Дата окончания</name>
         <order>14</order>
         <width>6</width>
@@ -148,6 +198,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>base</alias>
         <checking>false</checking>
+        <dataOrder>14</dataOrder>
         <name>База для расчета, кол. дней</name>
         <order>15</order>
         <width>10</width>
@@ -157,17 +208,18 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>dealPay</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <dataOrder>15</dataOrder>
         <name>Плата по условиям сделки,% год./ед. вал.</name>
         <order>16</order>
         <width>10</width>
+        <filter>[0-9]{1,18}[\.]?[0-9]{0,2}\%?</filter>
         <maxLength>18</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum2</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
+        <dataOrder>16</dataOrder>
         <name>Сумма фактического дохода / расхода, Ед. вал.</name>
         <order>17</order>
         <width>11</width>
@@ -177,7 +229,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum3</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
+        <dataOrder>17</dataOrder>
         <name>Сумма фактического дохода / расхода, Руб.</name>
         <order>18</order>
         <width>18</width>
@@ -187,17 +239,18 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>tradePay</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <dataOrder>18</dataOrder>
         <name>Рыночная Плата, % годовых / ед. вал.</name>
         <order>19</order>
         <width>10</width>
+        <filter>[0-9]{1,18}[\.]?[0-9]{0,2}\%?</filter>
         <maxLength>18</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum4</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
+        <dataOrder>19</dataOrder>
         <name>Рыночная сумма дохода (расхода), выраженная в: Ед. вал.</name>
         <order>20</order>
         <width>11</width>
@@ -207,7 +260,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum5</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
+        <dataOrder>20</dataOrder>
         <name>Рыночная сумма дохода (расхода), выраженная в: Руб.</name>
         <order>21</order>
         <width>11</width>
@@ -217,7 +270,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum6</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
+        <dataOrder>21</dataOrder>
         <name>Сумма доначисления дохода (корректировки расхода) до рыночного уровня (руб.)</name>
         <order>22</order>
         <width>11</width>
@@ -225,22 +278,8 @@
         <precision>2</precision>
     </columns>
     <styles>
-        <alias>Контрольные суммы</alias>
-        <backColor>LIGHT_BROWN</backColor>
-        <bold>true</bold>
-        <fontColor>BLACK</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Корректировка-изменено</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>RED</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Корректировка-без изменений</alias>
-        <backColor>GREY</backColor>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
@@ -260,17 +299,31 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Редактируемая</alias>
-        <backColor>LIGHT_BLUE</backColor>
-        <bold>false</bold>
-        <fontColor>BLACK</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Автозаполняемая</alias>
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

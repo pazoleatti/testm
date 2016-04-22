@@ -128,7 +128,7 @@ def calcColumns = ['sum4', 'sum5', 'sum8']
 def course810
 
 @Field
-def pattern = /[0-9]{1,10}[\.]?[0-9]{0,2}\%?/
+def pattern = /[0-9]{1,18}[\.]?[0-9]{0,2}\%?/ // FIXME
 
 // Дата начала отчетного периода
 @Field
@@ -659,7 +659,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 19
-    newRow.dealPay = values[colIndex]
+    newRow.dealPay = values[colIndex]?.trim()
     colIndex++
 
     // графа 20
@@ -675,7 +675,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 23
-    newRow.tradePay = values[colIndex]
+    newRow.tradePay = values[colIndex]?.trim()
     colIndex++
 
     // графы 24-29
