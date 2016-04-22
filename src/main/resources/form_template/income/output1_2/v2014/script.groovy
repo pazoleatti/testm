@@ -431,7 +431,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     newRow.dividendD1D2 = null
     if (isInnEquals && isNot15521 && row.all != null && row.rateZero != null) {
         newRow.dividendD1D2 = (row.allSum ?: 0) - (row.all - row.rateZero)
-    } else if (!isInnEquals && row.distributionSum != null) {
+    } else if (row.distributionSum != null) {
         newRow.dividendD1D2 = row.distributionSum
     }
 
