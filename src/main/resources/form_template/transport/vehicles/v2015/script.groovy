@@ -398,7 +398,6 @@ def logicCheck() {
             // 15. Проверка допустимых значений «Графы 23»
             if (row.taxBenefitCode != null && records != null && !records.isEmpty()) {
                 // taxBenefitCode: TAX_BENEFIT_ID - «Код налоговой льготы», справочник 7 «Параметры налоговых льгот транспортного налога»
-                def record96 = getRefBookValue(96L, row.codeOKATO)
                 def record7 = getRefBookValue(7L, row.taxBenefitCode)
                 def record6 = getRefBookValue(6L, record7?.TAX_BENEFIT_ID?.value)
                 def record4 = getRefBookValue(4L, record7?.DICT_REGION_ID?.value)
@@ -407,10 +406,9 @@ def logicCheck() {
                     isError = true
                 } else {
                     def dictRegionCode = record4?.CODE?.value
-                    def codeOkato = getOkato(record96?.CODE?.value)
+                    def code = getRegion(row.codeOKATO)?.CODE?.value
                     def taxBenefitCode = record6?.CODE?.value
-
-                    isError = (codeOkato != dictRegionCode) || !(taxBenefitCode in ["30200", "20200", "20210", "20220", "20230"])
+                    isError = (code != dictRegionCode) || !(taxBenefitCode in ["30200", "20200", "20210", "20220", "20230"])
                 }
                 if (isError) {
                     def columnName = getColumnName(row, 'taxBenefitCode')
@@ -1552,12 +1550,8 @@ def getTaxBenefitCodeImport(def taxBenefit, def rowIndex, def colIndex, def okat
                 logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
                         "На форме невозможно заполнить графу «Код налоговой льготы», так как в файле не заполнена графа «Код ОКТМО»!")
             } else {
-                def region = null
                 def okato = getOkato(getRefBookValue(96, okatoId)?.CODE?.stringValue)
-                if (okato) {
-                    def filter = "OKTMO_DEFINITION = '$okato'" // Определяющая часть кода ОКТМО
-                    region = getRecord(4, filter, getReportPeriodEndDate())
-                }
+                def region = getRegion(okatoId)
                 if(!region){
                     logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
                             "На форме невозможно заполнить графу «Код налоговой льготы», так как в справочнике " +
@@ -1595,4 +1589,14 @@ def getTaxBenefitCodeImport(def taxBenefit, def rowIndex, def colIndex, def okat
             }
         }
     }
+}
+
+def getRegion(def record96Id) {
+    def record96 = getRefBookValue(96, record96Id)
+    def okato = getOkato(record96?.CODE?.stringValue)
+    if (okato) {
+        def filter = "OKTMO_DEFINITION = '$okato'" // Определяющая часть кода ОКТМО
+        return getRecord(4, filter, getReportPeriodEndDate())
+    }
+    return null
 }
