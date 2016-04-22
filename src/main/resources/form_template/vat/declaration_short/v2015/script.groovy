@@ -555,6 +555,8 @@ void generateXML() {
         sumNal070 = round(sumNal070)
 
         nalIschProd = round(nalIschProd)
+
+        nalPredNPPriob = round(nalPredNPPriob)
     }
 
     /** НалВосстОбщ. Код строки 110 Графа 5. */
