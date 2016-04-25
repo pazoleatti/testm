@@ -248,7 +248,7 @@ void preXmlCheck() {
                         declarationTypeName, unpName, year, periodName, declarationDRP != null ? String.format(", Дата сдачи корректировки: «%s»", declarationDRP.correctionDate.format("dd.MM.yyyy")) : "")
             }
         } else if (formDataEvent != FormDataEvent.CALCULATE) { // сообщение 5
-            logger.info("Т.к. не найдена форма-источник 724.1.1, для заполнения строки 190 раздела 8.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s, %s»,%s.",
+            logger.info("Т.к. не найдена форма-источник 724.1.1, для заполнения строки 190 раздела 8.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s, %s»%s.",
                     declarationTypeName, unpName, year, periodName, declarationDRP != null ? String.format(", Дата сдачи корректировки: «%s»", declarationDRP.correctionDate.format("dd.MM.yyyy")) : "")
         }
     }
