@@ -81,7 +81,7 @@ def getEndDate() {
 
 def getPrevEndDate() {
     if (prevReportPeriodEndDate == null) {
-        prevReportPeriodEndDate = reportPeriodService.getEndDate(reportPeriodService.getPrevReportPeriod(declarationData.reportPeriodId)?.id)?.time
+        prevReportPeriodEndDate = (reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time - 1)
     }
     return prevReportPeriodEndDate
 }
