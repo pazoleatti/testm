@@ -291,29 +291,17 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
         for (Column column : columns) {
             if (!checkSet.add(column.getAlias())) {
-                logger.error(
-                        String.format(
-                                "Нарушено требование к уникальности, уже существует графа с псевдонимом \"%s\" в данной версии макета \"%s\"!",
-                                column.getAlias(),
-                                column.getName()
-                        )
-                );
+                logger.error("Нарушено требование к уникальности, уже существует графа с псевдонимом \"%s\" в данной версии макета \"%s\"!", column.getAlias(), column.getName());
             }
 
             if (column.getName() != null && column.getName().getBytes().length > FORM_COLUMN_NAME_MAX_VALUE) {
-                logger.error("Значение для имени столбца \"" + column.getName() +
-                        "\" слишком велико (фактическое: " + column.getName().getBytes().length +
-                        ", максимальное: " + FORM_COLUMN_NAME_MAX_VALUE + ")");
+                logger.error("Значение для имени столбца \"%s\" слишком велико (фактическое: %d, максимальное: %d)", column.getName(), column.getName().getBytes().length, FORM_COLUMN_NAME_MAX_VALUE);
             }
             if (column.getShortName() != null && column.getShortName().getBytes().length > FORM_COLUMN_SHORT_NAME_MAX_VALUE) {
-                logger.error("Значение для краткого наименования столбца \"" + column.getAlias() +
-                        "\" слишком велико (фактическое: " + column.getShortName().getBytes().length
-                        + ", максимальное: " + FORM_COLUMN_SHORT_NAME_MAX_VALUE + ")");
+                logger.error("Значение для краткого наименования столбца \"%s\" слишком велико (фактическое: %d, максимальное: %d)", column.getAlias(), column.getShortName().getBytes().length, FORM_COLUMN_SHORT_NAME_MAX_VALUE);
             }
             if (column.getAlias() != null && column.getAlias().getBytes().length > FORM_COLUMN_ALIAS_MAX_VALUE) {
-                logger.error("Значение для алиаса столбца \"" + column.getAlias() +
-                        "\" слишком велико (фактическое: " + column.getAlias().getBytes().length
-                        + ", максимальное: " + FORM_COLUMN_ALIAS_MAX_VALUE + ")");
+                logger.error("Значение для алиаса столбца \"%s\" слишком велико (фактическое: %d, максимальное: %d)", column.getAlias(), column.getAlias().getBytes().length, FORM_COLUMN_ALIAS_MAX_VALUE);
             }
 
             if (ColumnType.STRING.equals(column.getColumnType())) {
@@ -322,8 +310,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                     try {
                         Pattern.compile(filter);
                     } catch (PatternSyntaxException e) {
-                        logger.error("Значение фильтра столбца \"" + column.getName() +
-                                "\" имеет некорректный формат!");
+                        logger.error("Значение фильтра столбца \"%s\" имеет некорректный формат!", column.getName());
                     }
                 }
             }
@@ -338,9 +325,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	private void validateFormRows(List<DataRow<Cell>> rows, Logger logger) {
 		for (DataRow<Cell> row : rows) {
 			if (row.getAlias() != null && row.getAlias().getBytes().length > DATA_ROW_ALIAS_MAX_VALUE) {
-				logger.error("значение для кода строки \"" + row.getAlias() +
-						"\" слишком велико (фактическое: " + row.getAlias().getBytes().length +
-						", максимальное: " + DATA_ROW_ALIAS_MAX_VALUE + ")");
+				logger.error("значение для кода строки \"%s\" слишком велико (фактическое: %d, максимальное: %d)", row.getAlias(), row.getAlias().getBytes().length, DATA_ROW_ALIAS_MAX_VALUE);
 			}
 		}
 	}
@@ -349,16 +334,10 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 		checkSet.clear();
 		for (FormStyle style : styles) {
 			if (!checkSet.add(style.getAlias())) {
-				logger.error(
-                        String.format("Нарушено требование к уникальности, уже существует стиль с именем \"%s\" в данной версии макета!",
-                                style.getAlias()
-                        )
-                );
+				logger.error("Нарушено требование к уникальности, уже существует стиль с именем \"%s\" в данной версии макета!", style.getAlias());
 			}
 			if (style.getAlias() != null && style.getAlias().getBytes().length > FORM_STYLE_ALIAS_MAX_VALUE) {
-				logger.error("значение для алиаса стиля \"" + style.getAlias() +
-						"\" слишком велико (фактическое: " + style.getAlias().getBytes().length +
-						", максимальное: " + FORM_STYLE_ALIAS_MAX_VALUE + ")");
+				logger.error("значение для алиаса стиля \"%s\" слишком велико (фактическое: %d, максимальное: %d)", style.getAlias(), style.getAlias().getBytes().length, FORM_STYLE_ALIAS_MAX_VALUE);
 			}
 		}
 	}

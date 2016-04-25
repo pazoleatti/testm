@@ -1,5 +1,6 @@
 package form_template.income.output1_2.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -228,7 +229,7 @@ void logicCheck() {
         }
         // 12 Проверка правильности заполнения «Графы 26»
         // «Графа 26» = («Графа 8» - «Графа 25») ИЛИ («Графа 9» + «Графа 23» - «Графа 25»)
-        if ((row.dividendD1D2 ?: 0) != ((row.totalDividend ?: 0) - (row.dividendAgentWithStavka0 ?: 0)) ||
+        if ((row.dividendD1D2 ?: 0) != ((row.totalDividend ?: 0) - (row.dividendAgentWithStavka0 ?: 0)) &&
                 (row.dividendD1D2 ?: 0) != ((row.dividendSumRaspredPeriod ?: 0) + (row.dividendNonIncome ?: 0) - (row.dividendAgentWithStavka0 ?: 0))) {
             warnMessageCondition(row, 'dividendD1D2', "«Графа 26» = («Графа 8» - «Графа 25») ИЛИ («Графа 9» + «Графа 23» - «Графа 25»)")
         }
@@ -314,8 +315,10 @@ void consolidation() {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
                 def isNewFormType = (it.formTypeId == lastSourceFormType)
                 def rowMap = getRowMap(sourceHelper.allSaved, isNewFormType)
+                // код подразделения 15521 - Отдел сопровождения и учета депозитарных операций
+                def isNot15521 = (15521 != getDepartment(it.departmentId)?.code)
                 rowMap.each { key, sourceRows ->
-                    def newRow = formNewRow(sourceRows, dataRowsPrev, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate, isNewFormType, rows.size() + 1)
+                    def newRow = formNewRow(sourceRows, dataRowsPrev, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate, isNewFormType, rows.size() + 1, isNot15521)
                     rows.add(newRow)
                 }
             }
@@ -340,7 +343,21 @@ def getRowMap(def rows, boolean isNewFormType) {
     return result
 }
 
-def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate, boolean isNewFormType, int rowIndex) {
+/**
+ * Сформировать новую строку по данным источника.
+ *
+ * @param rowList строки группы источника
+ * @param dataRowsPrev строки предыдущей формы приемника
+ * @param prevPeriodStartDate дата начала предыдущего периода
+ * @param prevPeriodEndDate дата окончания предыдущего периода
+ * @param lastPeriodStartDate дата начала последнего периода в налоговом
+ * @param lastPeriodEndDate дата окончания последнего периода в налоговом
+ * @param isNewFormType признак использования алгоритмов с 9 месяцев 2015
+ * @param rowIndex номер строки
+ * @param isNot15521 принак того что код подраздления источника не равен «15521»
+ */
+def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevPeriodEndDate,
+               def lastPeriodStartDate, def lastPeriodEndDate, boolean isNewFormType, int rowIndex, def isNot15521) {
     def newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
@@ -352,13 +369,13 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     def isInnEquals = row.emitentInn == graph3String
 
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 1» = «1», иначе «Графа 1» = «2»
-    newRow.taCategory = (isInnEquals ? 1 : 2)
+    newRow.taCategory = (isInnEquals && isNot15521 ? 1 : 2)
 
     // «Графа 2» = «Графа 2» первичной формы
     newRow.emitent = row.emitentName
 
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 3»  не заполняется, иначе «Графа 3» = «Графа 3» первичной формы
-    newRow.inn = (isInnEquals ? null : row.emitentInn)
+    newRow.inn = (isInnEquals && isNot15521 ? null : row.emitentInn)
 
     // «Графа 4» = «Графа 7» первичной формы
     newRow.decreeNumber = row.decisionNumber
@@ -388,10 +405,10 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     newRow.dividendTaxUnknown = rowList.sum{ (it.status == 3 && it.dividends != null) ? it.dividends : 0 }
 
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 24» = «Графа 4» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
-    newRow.dividendAgentAll = (isInnEquals && row.all != null) ? row.all : null
+    newRow.dividendAgentAll = (isInnEquals && isNot15521 && row.all != null) ? row.all : null
 
     // Логическая проверка 14. Проверка возможности заполнения «Графы 24»
-    if (isInnEquals && newRow.dividendAgentAll == null) {
+    if (isInnEquals && isNot15521 && newRow.dividendAgentAll == null) {
         def columnName = getColumnName(newRow, 'dividendAgentAll')
         def sourceColumnName4 = getColumnName(row, 'all')
         def msg = "Строка %d: Графа «%s» не заполнена, т.к. графа «%s» формы-источника не заполнена!"
@@ -399,10 +416,10 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     }
 
     // «Графа 25» = Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 25» =(«Графа 4» первичной формы - «Графа 5» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
-    newRow.dividendAgentWithStavka0 = (isInnEquals && row.all != null && row.rateZero != null) ? (row.all - row.rateZero) : null
+    newRow.dividendAgentWithStavka0 = (isInnEquals && isNot15521 && row.all != null && row.rateZero != null) ? (row.all - row.rateZero) : null
 
     // Логическая проверка 15. Проверка возможности заполнения «Графы 25»
-    if (isInnEquals && newRow.dividendAgentWithStavka0 == null) {
+    if (isInnEquals && isNot15521 && newRow.dividendAgentWithStavka0 == null) {
         def columnName = getColumnName(newRow, 'dividendAgentWithStavka0')
         def sourceColumnName4 = getColumnName(row, 'all')
         def sourceColumnName5 = getColumnName(row, 'rateZero')
@@ -412,9 +429,9 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
 
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 26» = («Графа 12» первичной формы – («Графа 4» первичной формы – «Графа 5» первичной формы)) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 26» = «Графа 6» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
     newRow.dividendD1D2 = null
-    if (isInnEquals && row.all != null && row.rateZero != null) {
+    if (isInnEquals && isNot15521 && row.all != null && row.rateZero != null) {
         newRow.dividendD1D2 = (row.allSum ?: 0) - (row.all - row.rateZero)
-    } else if (!isInnEquals && row.distributionSum != null) {
+    } else if (row.distributionSum != null) {
         newRow.dividendD1D2 = row.distributionSum
     }
 
@@ -422,7 +439,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     if (newRow.dividendD1D2 == null) {
         def columnName = getColumnName(newRow, 'dividendD1D2')
         def subMsg
-        if (isInnEquals) {
+        if (isInnEquals && isNot15521) {
             subMsg = String.format("%s», «%s", getColumnName(row, 'all'), getColumnName(row, 'rateZero'))
         } else {
             subMsg = getColumnName(row, 'distributionSum')
@@ -576,7 +593,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         def valueFor29And31 = rowList.sum { (it.type != 2 && it.status == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
 
         // «Графа 31» - идет перед графой 29, потому что расчет графы 29 мастами совпадает с расчетом графы 21
-        if (isInnEquals) { // Группа относится к сберу
+        if (isInnEquals && isNot15521) { // Группа относится к сберу
             boolean found = rowList.find { it.status == 1 && it.type == 5 && it.rate == 13 } != null
             if (found) { // Есть строки для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
                 if(row.distributionSum != null) {
@@ -890,4 +907,14 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     }
 
     return newRow
+}
+
+@Field
+def departmentMap = [:]
+
+Department getDepartment(def id) {
+    if (departmentMap[id] == null) {
+        departmentMap[id] = departmentService.get(id)
+    }
+    return departmentMap[id]
 }

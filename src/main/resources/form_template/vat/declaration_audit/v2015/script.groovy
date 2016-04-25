@@ -98,7 +98,7 @@ def getEndDate() {
 
 def getPrevEndDate() {
     if (prevReportPeriodEndDate == null) {
-        prevReportPeriodEndDate = reportPeriodService.getEndDate(reportPeriodService.getPrevReportPeriod(declarationData.reportPeriodId)?.id)?.time
+        prevReportPeriodEndDate = (reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time - 1)
     }
     return prevReportPeriodEndDate
 }
@@ -555,6 +555,8 @@ void generateXML() {
         sumNal070 = round(sumNal070)
 
         nalIschProd = round(nalIschProd)
+
+        nalPredNPPriob = round(nalPredNPPriob)
     }
 
     /** НалВосстОбщ. Код строки 110 Графа 5. */
@@ -1320,6 +1322,9 @@ def specialCode = '1010276'
 @Field
 def opuCodes = ['26411.01']
 
+@Field
+def opuCodes2016 = ['48413.01']
+
 /**
  * Получить значение для НалНеВыч.
  *
@@ -1328,12 +1333,14 @@ def opuCodes = ['26411.01']
 def getNalNeVich(def code) {
     def order = getReportPeriod()?.order
     if (code == specialCode) {
+        def isBefore2016 = getEndDate()?.format('yyyy')?.toInteger() < 2016
+        def tmpOpuCodes = (isBefore2016 ? opuCodes : opuCodes2016)
         // сумма кодов ОПУ из отчета 102
-        def sumOpu = getSumByOpuCodes(opuCodes, getEndDate())
+        def sumOpu = getSumByOpuCodes(tmpOpuCodes, getEndDate())
         if (order == 1) {
             return sumOpu
         } else {
-            def sumOpuPrev = getSumByOpuCodes(opuCodes, getPrevEndDate())
+            def sumOpuPrev = getSumByOpuCodes(tmpOpuCodes, getPrevEndDate())
             // разность сумм
             return sumOpu - sumOpuPrev
         }

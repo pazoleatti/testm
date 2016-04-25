@@ -224,7 +224,7 @@ void logicCheck() {
         }
 
         // 9. Проверка допустимых значений
-        def pattern = /[0-9]+[\.]?[0-9]{0,2}\%?/
+        def pattern = /[0-9]{1,18}[\.]?[0-9]{0,2}\%?/
         ['dealPay', 'tradePay'].each { alias ->
             if (row[alias] != null && !(row[alias].replaceAll(" ", "") ==~ pattern)) {
                 def msg = row.getCell(alias).column.name
@@ -562,7 +562,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 15
-    newRow.dealPay = values[colIndex]
+    newRow.dealPay = values[colIndex]?.trim()
     colIndex++
 
     // графа 16
@@ -574,7 +574,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 18
-    newRow.tradePay = values[colIndex]
+    newRow.tradePay = values[colIndex]?.trim()
     colIndex++
 
     // графа 19

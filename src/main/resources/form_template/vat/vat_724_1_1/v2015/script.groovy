@@ -102,7 +102,7 @@ def allColumns = ['rowNum', 'fix', 'period', 'number', 'sumPlus', 'sumMinus', 'n
 
 // Редактируемые атрибуты (графа 2,3,6-8) не для разделов 1-6
 @Field
-def editableColumns = ['period', 'number', 'sumPlus', 'sumNdsPlus', 'sumNdsMinus']
+def editableColumns = ['period', 'number', 'numberNds', 'sumNdsPlus', 'sumNdsMinus']
 
 // Редактируемые атрибуты (графа 2-8) для разделов 1-6
 @Field
@@ -732,11 +732,12 @@ void logicCheck() {
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка налогового периода
-        def periodType = getRefBookValue(8, row.period)
-        if (!periodNames.contains(periodType?.NAME?.stringValue)) {
-            logger.error("Строка ${row.getIndex()}: Графа «${getColumnName(dataRows[0], 'period')}» заполнена неверно! Возможные значения: «${periodNames.join('», «')}».")
+        if (row.period) {
+            def periodType = getRefBookValue(8, row.period)
+            if (!periodNames.contains(periodType?.NAME?.stringValue)) {
+                logger.error("Строка ${row.getIndex()}: Графа «${getColumnName(dataRows[0], 'period')}» заполнена неверно! Возможные значения: «${periodNames.join('», «')}».")
+            }
         }
-
 
         // 3. Проверка незаполненности граф с суммой корректировки
         if (isAfterSection6 && emptyColumns_7_9.find { row[it] != null } != null) {
