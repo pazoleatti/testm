@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -23,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +50,8 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
 
     @Autowired
     RefBookPickerFilterBuilder buildFilter;
+
+    private Map<RefBookAttribute, Column> columnMap = new HashMap<RefBookAttribute, Column>();
 
     public GetRefBookTreeValuesHandler() {
         super(GetRefBookTreeValuesAction.class);
@@ -142,19 +148,25 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
                             RefBookDataProvider attrProvider = refProviders.get(id);
                             // запрашиваем значение для разыменовывания
                             value = attrProvider.getValue(refValue, refBookAttribute.getRefBookAttributeId());
+                            //
+                            dereferanceValueString = (value == null ? "" : getColumn(refBookAttribute).getFormatter().format(String.valueOf(value)));
                             // для каждого найденного дополнительного аттрибута разименуем значение
                             if (attrId2Map.get(id) != null) {
                                 for (Long id2 : attrId2Map.get(id)) {
                                     RefBookDataProvider attr2Provider = refProviders.get(id2);
                                     RefBookValue value2 = attr2Provider.getValue(refValue, id2);
-                                    dereferenceValue.getAttrId2DerefValueMap().put(id2, value2 == null ? "" : String.valueOf(value2));
+                                    dereferenceValue.getAttrId2DerefValueMap().put(id2, value2 == null ? "" : getColumn(refBookAttribute).getFormatter().format(String.valueOf(value2)));
                                 }
                             }
                         }
                     } else {
                         value = record.get(alias);
+                        if (RefBookAttributeType.NUMBER.equals(refBookAttribute.getAttributeType())) {
+                            dereferanceValueString = (value == null ? "" : getColumn(refBookAttribute).getFormatter().format(String.valueOf(value)));
+                        } else {
+                            dereferanceValueString = (value == null ? "" : String.valueOf(value));
+                        }
                     }
-                    dereferanceValueString = (value == null ? "" : String.valueOf(value));
                     dereferenceValue.setDereferenceValue(dereferanceValueString);
                     refBookDereferenceValues.add(dereferenceValue);
                 }
@@ -168,6 +180,25 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         }
 
         return new PagingResult<RefBookTreeItem>(items, refBookPage.getTotalCount());
+    }
+
+    private Column getColumn(RefBookAttribute attribute) {
+        if (columnMap.containsKey(attribute))
+            return columnMap.get(attribute);
+        switch (attribute.getAttributeType()) {
+            case NUMBER:
+                NumericColumn numericColumn = new NumericColumn();
+                numericColumn.setMaxLength(attribute.getMaxLength());
+                numericColumn.setPrecision(attribute.getPrecision());
+                columnMap.put(attribute, numericColumn);
+                return numericColumn;
+            case REFERENCE:
+                ReferenceColumn referenceColumn = new ReferenceColumn();
+                referenceColumn.setRefBookAttribute(attribute.getRefBookAttribute());
+                columnMap.put(attribute, referenceColumn);
+                return referenceColumn;
+        }
+        return null;
     }
 
     @Override

@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -38,6 +36,8 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
     private SecurityService securityService;
     @Autowired
     private DepartmentService departmentService;
+
+    private Map<RefBookAttribute, Column> columnMap = new HashMap<RefBookAttribute, Column>();
 
     public GetRefBookDataRowHandler() {
         super(GetRefBookTableDataAction.class);
@@ -144,7 +144,9 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                     switch (value.getAttributeType()) {
                         case NUMBER:
                             if (value.getNumberValue() == null) tableCell = "";
-                            else tableCell = value.getNumberValue().toString();
+                            else {
+                                tableCell = getColumn(attribute).getFormatter().format(value.getNumberValue().toString());
+                            }
                             break;
                         case DATE:
                             if (value.getDateValue() == null) tableCell = "";
@@ -165,7 +167,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                         case REFERENCE:
                             if (value.getReferenceValue() == null) tableCell = "";
                             else {
-								tableCell = dereferenceValues.get(attribute.getId()).get(value.getReferenceValue());
+                                tableCell = getColumn(attribute).getFormatter().format(dereferenceValues.get(attribute.getId()).get(value.getReferenceValue()));
                             }
                             break;
                         default:
@@ -180,6 +182,25 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             tableRow.setRefBookRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
             rows.add(tableRow);
         }
+    }
+
+    private Column getColumn(RefBookAttribute attribute) {
+        if (columnMap.containsKey(attribute))
+            return columnMap.get(attribute);
+        switch (attribute.getAttributeType()) {
+            case NUMBER:
+                NumericColumn numericColumn = new NumericColumn();
+                numericColumn.setMaxLength(attribute.getMaxLength());
+                numericColumn.setPrecision(attribute.getPrecision());
+                columnMap.put(attribute, numericColumn);
+                return numericColumn;
+            case REFERENCE:
+                ReferenceColumn referenceColumn = new ReferenceColumn();
+                referenceColumn.setRefBookAttribute(attribute.getRefBookAttribute());
+                columnMap.put(attribute, referenceColumn);
+                return referenceColumn;
+        }
+        return null;
     }
 
     @Override
