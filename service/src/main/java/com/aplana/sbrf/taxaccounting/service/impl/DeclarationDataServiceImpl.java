@@ -500,11 +500,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile) {
+    public JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params) {
         InputStream jasperTemplate = null;
         try {
             jasperTemplate = getJasper(jrxml);
-            return fillReport(xmlIn, jasperTemplate, jrSwapFile);
+            return fillReport(xmlIn, jasperTemplate, jrSwapFile, params);
         } finally {
             IOUtils.closeQuietly(xmlIn);
             IOUtils.closeQuietly(jasperTemplate);
@@ -519,7 +519,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ZipInputStream zipXmlIn = new ZipInputStream(zipXml);
                 try {
                     zipXmlIn.getNextEntry();
-                    return createJasperReport(zipXmlIn, declarationTemplateService.getJrxml(declarationData.getDeclarationTemplateId()), jrSwapFile);
+                    return createJasperReport(zipXmlIn, declarationTemplateService.getJrxml(declarationData.getDeclarationTemplateId()), jrSwapFile, null);
                 } catch (IOException e) {
                     throw new ServiceException(e.getLocalizedMessage(), e);
                 } finally {
@@ -775,9 +775,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private static JasperPrint fillReport(InputStream xml, InputStream jasperTemplate, JRSwapFile jrSwapFile) {
+    private static JasperPrint fillReport(InputStream xml, InputStream jasperTemplate, JRSwapFile jrSwapFile, Map<String, Object> params) {
         try {
-            Map<String, Object> params = new HashMap<String, Object>();
+            if (params == null) {
+                params = new HashMap<String, Object>();
+            }
             params.put(JRXPathQueryExecuterFactory.XML_INPUT_STREAM, xml);
             final JRSwapFileVirtualizer virtualizer = new JRSwapFileVirtualizer(100, jrSwapFile);
             Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -865,7 +867,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 IOUtils.closeQuietly(fileOutputStream);
             }
 
-            //Архивирование перед сохраннеием в базу
+            //Архивирование перед сохранением в базу
             File zipOutFile = null;
             try {
                 zipOutFile = File.createTempFile("report", ".zip");

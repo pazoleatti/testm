@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<declarationTemplateContent>
+    <subreports>
+        <alias>declaration_app2</alias>
+        <name>Приложение №2 к декларации по налогу на прибыль (Банк)</name>
+        <order>1</order>
+        <blobDataId>report_appendix2.jrxml</blobDataId>
+        <fileName>report_appendix2.jrxml</fileName>
+    </subreports>
+    <subreports>
+        <alias>declaration_no_app2</alias>
+        <name>Декларация по налогу на прибыль (Банк) (все разделы, кроме Приложения №2)</name>
+        <order>2</order>
+        <blobDataId>report_no_appendix2.jrxml</blobDataId>
+        <fileName>report_no_appendix2.jrxml</fileName>
+    </subreports>
+</declarationTemplateContent>

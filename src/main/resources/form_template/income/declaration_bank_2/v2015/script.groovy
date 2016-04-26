@@ -1559,7 +1559,7 @@ void createSpecificReportApp2() {
         fileInputStream = new FileInputStream(xmlFile)
         JRSwapFile jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
         try {
-            def jasperPrint = declarationService.createJasperReport(fileInputStream, getJrxml(scriptSpecificReportHolder.getFileInputStream()), jrSwapFile);
+            def jasperPrint = declarationService.createJasperReport(fileInputStream, getJrxml(scriptSpecificReportHolder.getFileInputStream()), jrSwapFile, null);
             declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream())
             scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name + ".pdf")
         } finally {

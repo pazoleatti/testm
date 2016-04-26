@@ -10,6 +10,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 @ScriptExposed
@@ -114,9 +115,10 @@ public interface DeclarationService {
      * @param xmlIn поток данных xml
      * @param jrxml текст jrxml
      * @param jrSwapFile
+     * @param params
      * @return
      */
-    JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile);
+    JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params);
 
 
     /**

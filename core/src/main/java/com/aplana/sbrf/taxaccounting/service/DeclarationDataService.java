@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с {@link DeclarationData налоговыми декларациями }
@@ -262,9 +263,10 @@ public interface DeclarationDataService {
      * @param xmlIn поток данных xml
      * @param jrxml текст jrxml
      * @param jrSwapFile
+     * @param params
      * @return
      */
-    JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile);
+    JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params);
 
     /**
      * Формирование PDF отчета
