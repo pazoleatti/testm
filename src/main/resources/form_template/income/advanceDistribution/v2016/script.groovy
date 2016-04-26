@@ -322,7 +322,7 @@ void reCalcTotalRow(def dataRows, def totalRow) {
     totalRow.everyMontherPaymentAfterPeriod = (isTaxPeriod ? null : 0)
     totalRow.everyMonthForKvartalNextPeriod = 0
     for (row in dataRows) {
-        if (row.getAlias() == 'total' || row.regionBank == centralId) {
+        if (row.getAlias()) {
             continue
         }
         totalRow.baseTaxOfRub += row.baseTaxOfRub ?: 0
