@@ -1733,7 +1733,7 @@ def prevSection3Check() {
         }
     }
 
-    def forFormNamePeriod4Id = (getPeriod4Id() ?: declarationData.departmentReportPeriodId)
+    def forFormNamePeriod4Id = (getPeriod4Id() ?: declarationData.reportPeriodId)
 
     // 2. проверка формы 724.1.1
     def formTypeId = formType_724_1_1
