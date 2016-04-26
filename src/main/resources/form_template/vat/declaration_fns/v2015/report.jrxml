@@ -676,34 +676,34 @@
 			<variableExpression><![CDATA[$F{100_СумНалСтав0} == null ? "-------------" : ($F{100_СумНалСтав0} + "-------------").substring(0,12)]]></variableExpression>
 		</variable>
 		<variable name="105_СумНал" class="java.lang.String">
-			<variableExpression><![CDATA[$F{105_СумНал} == null ? "-------------" : ($F{105_СумНал} + "-------------").substring(0,12)]]></variableExpression>
+			<variableExpression><![CDATA[$F{105_СумНал} == null || $F{105_СумНал}.equals("0")  ? "-------------" : ($F{105_СумНал} + "-------------").substring(0,12)]]></variableExpression>
 		</variable>
 		<variable name="106_СумНал" class="java.lang.String">
-			<variableExpression><![CDATA[$F{106_СумНал} == null ? "-------------" : ($F{106_СумНал} + "-------------").substring(0,12)]]></variableExpression>
+			<variableExpression><![CDATA[$F{106_СумНал} == null || $F{106_СумНал}.equals("0")  ? "-------------" : ($F{106_СумНал} + "-------------").substring(0,12)]]></variableExpression>
 		</variable>
 		<variable name="107_СумНал" class="java.lang.String">
-			<variableExpression><![CDATA[$F{107_СумНал} == null ? "-------------" : ($F{107_СумНал} + "-------------").substring(0,12)]]></variableExpression>
+			<variableExpression><![CDATA[$F{107_СумНал} == null || $F{107_СумНал}.equals("0")  ? "-------------" : ($F{107_СумНал} + "-------------").substring(0,12)]]></variableExpression>
 		</variable>
 		<variable name="108_СумНал" class="java.lang.String">
-			<variableExpression><![CDATA[$F{108_СумНал} == null ? "-------------" : ($F{108_СумНал} + "-------------").substring(0,12)]]></variableExpression>
+			<variableExpression><![CDATA[$F{108_СумНал} == null || $F{108_СумНал}.equals("0")  ? "-------------" : ($F{108_СумНал} + "-------------").substring(0,12)]]></variableExpression>
 		</variable>
 		<variable name="109_СумНал" class="java.lang.String">
-			<variableExpression><![CDATA[$F{109_СумНал} == null ? "-------------" : ($F{109_СумНал} + "-------------").substring(0,12)]]></variableExpression>
+			<variableExpression><![CDATA[$F{109_СумНал} == null || $F{109_СумНал}.equals("0")  ? "-------------" : ($F{109_СумНал} + "-------------").substring(0,12)]]></variableExpression>
 		</variable>
 		<variable name="105_НалБаза" class="java.lang.String">
-			<variableExpression><![CDATA[$F{105_НалБаза} == null ? "-------------" : ($F{105_НалБаза} + "-------------").substring(0,12)]]></variableExpression>
+			<variableExpression><![CDATA[$F{105_НалБаза} == null || $F{105_НалБаза}.equals("0") ? "-------------" : ($F{105_НалБаза} + "-------------").substring(0,12)]]></variableExpression>
 		</variable>
 		<variable name="106_НалБаза" class="java.lang.String">
-			<variableExpression><![CDATA[$F{106_НалБаза} == null ? "-------------" : ($F{106_НалБаза} + "-------------").substring(0,12)]]></variableExpression>
+			<variableExpression><![CDATA[$F{106_НалБаза} == null || $F{106_НалБаза}.equals("0") ? "-------------" : ($F{106_НалБаза} + "-------------").substring(0,12)]]></variableExpression>
 		</variable>
 		<variable name="107_НалБаза" class="java.lang.String">
-			<variableExpression><![CDATA[$F{107_НалБаза} == null ? "-------------" : ($F{107_НалБаза} + "-------------").substring(0,12)]]></variableExpression>
+			<variableExpression><![CDATA[$F{107_НалБаза} == null || $F{107_НалБаза}.equals("0") ? "-------------" : ($F{107_НалБаза} + "-------------").substring(0,12)]]></variableExpression>
 		</variable>
 		<variable name="108_НалБаза" class="java.lang.String">
-			<variableExpression><![CDATA[$F{108_НалБаза} == null ? "-------------" : ($F{108_НалБаза} + "-------------").substring(0,12)]]></variableExpression>
+			<variableExpression><![CDATA[$F{108_НалБаза} == null || $F{108_НалБаза}.equals("0") ? "-------------" : ($F{108_НалБаза} + "-------------").substring(0,12)]]></variableExpression>
 		</variable>
 		<variable name="109_НалБаза" class="java.lang.String">
-			<variableExpression><![CDATA[$F{109_НалБаза} == null ? "-------------" : ($F{109_НалБаза} + "-------------").substring(0,12)]]></variableExpression>
+			<variableExpression><![CDATA[$F{109_НалБаза} == null || $F{109_НалБаза}.equals("0") ? "-------------" : ($F{109_НалБаза} + "-------------").substring(0,12)]]></variableExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="СумУпл164_раздел3_вычеты" uuid="ec122042-70f0-4cb5-9223-bc226519a146">
