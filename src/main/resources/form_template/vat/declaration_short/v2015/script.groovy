@@ -456,7 +456,7 @@ void generateXML() {
                 nalBaza020 = nalBaza020 + (row ? row.sumPlus : empty)
                 sumNal020 = sumNal020 + (row ? row.sumNdsPlus : empty)
 
-                def rowAliases = ["total_3_$code", "total_6_$code"]
+                def rowAliases = [ 'total_3_' + code, 'total_6_' + code ]
                 def rows = rows724_1_1.findAll { it.getAlias() in rowAliases }
                 nalBaza030 = nalBaza030 + (rows ? rows.sum { it.sumPlus ?: empty } : empty)
                 sumNal030 = sumNal030 + (rows ? rows.sum { it.sumNdsPlus ?: empty } : empty)
