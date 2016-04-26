@@ -560,6 +560,9 @@ def calcTotals(def dataRows) {
     // Считаем три группы супер-итогов
     def superRows = calcSuperTotals(dataRows)
     if (!superRows.isEmpty()) {
+        def purchaseSuperRow = superRows[-1]
+        dataRows.add(purchaseSuperRow)
+        superRows.remove(purchaseSuperRow)
         dataRows.addAll(dataRows.indexOf(getDataRow(dataRows, 'head_8')), superRows)
     }
 }
@@ -818,7 +821,7 @@ void checkDeclarationAccepted() {
                         logger.warn("Существуют принятые экземпляры деклараций-приемников:")
                         foundAccepted = true
                     }
-                    def period = reportPeriodService.get(drp.reportPeriod)
+                    def period = reportPeriodService.get(drp.reportPeriod.id)
                     declarations.each { declaration ->
                         logger.warn("Вид: «%s», Подразделение: «%s», Период: «%s, %s», Дата сдачи корректировки: «%s».",
                                 typeName, departmentService.get(declaration.departmentId), reportPeriod.taxPeriod.year, getRefBookValue(8, period.dictTaxPeriodId).NAME.value, drp.correctionDate.format('dd.MM.yyyy'))
