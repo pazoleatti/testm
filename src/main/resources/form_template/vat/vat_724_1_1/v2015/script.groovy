@@ -781,7 +781,7 @@ void logicCheck() {
         // 7. Проверка ставки НДС
         def validRate = rateMap[section][0]
         if (row.rateNds && validRate != row.rateNds) {
-            logger.error("Строка $index: Графа «${getColumnName(row,'rateNds')}» заполнена неверно! Возможные значения (раздел ${rateMap[section][1]}): «$validRate».")
+            logger.error("Строка $index: Графа «${getColumnName(row,'rateNds')}» заполнена неверно! Возможное значение (раздел ${rateMap[section][1]}): «$validRate».")
         }
 
         // 8. Проверка суммы НДС по дополнительным листам книги покупок и продаж
