@@ -61,6 +61,9 @@ switch (formDataEvent) {
 def providerCache = [:]
 
 @Field
+def refBookCache = [:]
+
+@Field
 def refBookMap = [:]
 
 @Field
@@ -90,6 +93,11 @@ def getProvider(def long providerId) {
         providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
     }
     return providerCache.get(providerId)
+}
+
+// Разыменование с использованием кеширования
+def getRefBookValue(def long refBookId, def recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 void checkDepartmentParams(LogLevel logLevel) {
