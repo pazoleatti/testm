@@ -481,7 +481,7 @@ void generateXML() {
             }
 
             def formData724_10 = getFormData(formType_724_10, FormDataKind.CONSOLIDATED, bankDepartmentId, getPeriod4Id())
-            def rows724_10 = (formData724_10 ? formDataService.getDataRowHelper(formData724_10)?.getAll() : null)
+            def rows724_10 = (formData724_10?.state == WorkflowState.ACCEPTED ? formDataService.getDataRowHelper(formData724_10)?.getAll() : null)
             if (rows724_10) {
                 def order = getReportPeriod().order
 
@@ -518,10 +518,6 @@ void generateXML() {
                             sumNal040 = sumNal040 + (getXmlDecimal(reader, "СумНал") ?: 0)
                         }
                         if (isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'ОплПредПост'], elements)) {
-                            nalBaza070 = nalBaza070 + (getXmlDecimal(reader, "НалБаза") ?: 0)
-                            sumNal070 = sumNal070 + (getXmlDecimal(reader, "СумНал") ?: 0)
-                        }
-                        if (isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'КорРеалТов18'], elements)) {
                             nalBaza070 = nalBaza070 + (getXmlDecimal(reader, "НалБаза") ?: 0)
                             sumNal070 = sumNal070 + (getXmlDecimal(reader, "СумНал") ?: 0)
                         }
@@ -1747,7 +1743,7 @@ def prevSection3Check() {
             subMsg = String.format(", Дата сдачи корректировки: «%s»", correctionDate)
         }
         // сообщение 3
-        def msg = "Для заполнения строк 010-040, 070, 120, 170 раздела 3 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s»>»%s."
+        def msg = "Для заполнения строк 010-040, 070, 120, 170 раздела 3 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s»%s."
         logger.info(msg, formDataKind.title, formName, departmentName, periodName, subMsg)
     } else {
         // сообщение 4
@@ -1766,7 +1762,7 @@ def prevSection3Check() {
             subMsg = String.format(", Дата сдачи корректировки: «%s»", correctionDate)
         }
         // сообщение 5
-        def msg = "Для заполнения строки 105 раздела 3 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s»>»%s."
+        def msg = "Для заполнения строки 105 раздела 3 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s»%s."
         logger.info(msg, formDataKind.title, formName, departmentName, periodName, subMsg)
     } else {
         // сообщение 6
