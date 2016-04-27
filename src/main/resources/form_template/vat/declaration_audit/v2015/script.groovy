@@ -1732,6 +1732,10 @@ def prevSection3Check() {
     def forFormNamePeriod4Id = (getPeriod4Id() ?: declarationData.reportPeriodId)
 
     // 2. проверка формы 724.1.1
+    year = getReportPeriod()?.taxPeriod?.year
+    period = (getPeriod4Id() ? reportPeriodService.get(getPeriod4Id())?.name : 'четвёртый квартал')
+    periodName = year + ', ' + period
+
     def formTypeId = formType_724_1_1
     def formDataKind = FormDataKind.CONSOLIDATED
     def formName = formDataService.getFormTemplate(formTypeId, forFormNamePeriod4Id)?.name
