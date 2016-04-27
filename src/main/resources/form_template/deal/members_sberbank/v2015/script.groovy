@@ -143,8 +143,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def useCode = getPeriodOrder() == 3
-    def records520 = getRecords520(useCode)
+    def records520 = getRecords520()
     for (def row : dataRows) {
         def rowNum = row.getIndex()
 
@@ -174,11 +173,11 @@ void logicCheck() {
             logger.error("Строка $rowNum: Графа «${getColumnName(row, 'sign')}» должна принимать значение из следующего списка: «0» или «1»!")
         }
 
-        // 7. Проверка на отсутствие в списке не ВЗЛ ОРН
+        // 7. Проверка на отсутствие в списке не ВЗЛ
         def isVZL = records520?.find { it?.record_id?.value == row.name }
         if (row.name && records520 && !isVZL) {
             def value2 = getRefBookValue(520L, row.name)?.NAME?.value
-            logger.error(useCode ? "Строка %s: Организация «%s» не является взаимозависимым лицом с общим режимом налогообложения в данном отчетном периоде!" : "Строка %s: Организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, value2)
+            logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, value2)
         }
     }
 }
@@ -191,30 +190,13 @@ def records520 = null
  * @param useCode true для 9 месяцев, false для года
  * @return
  */
-def getRecords520(boolean useCode) {
+def getRecords520() {
     if (records520 != null) {
         return records520
     }
-    // получить id записи с кодом "2" из справочника "Специальный налоговый статус"
-    def provider
-    def records
-    def filter = null
-    if (useCode) {
-        provider = formDataService.getRefBookProvider(refBookFactory, 511L, providerCache)
-        filter = "CODE = 2"
-        records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
-        def taxStatusId
-        if (records && records.size() == 1) {
-            taxStatusId = records.get(0)?.record_id?.value
-        } else {
-            records520 =[]
-            return records520
-        }
-        filter = "TAX_STATUS = $taxStatusId"
-    }
     // получить записи из справочника "Участники ТЦО"
-    provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
-    records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+    def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
+    def records = provider.getRecords(getReportPeriodEndDate(), null, null, null)
     records520 = []
     records.each { record ->
         def start = record?.START_DATE?.value
