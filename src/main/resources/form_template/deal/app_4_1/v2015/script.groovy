@@ -408,13 +408,23 @@ def calc7or13(def record520, def sourceFormDatasMap, def sourceDataRowsMap, def 
     return result * 1000
 }
 
+@Field
+def caDepartmentId = null
+
+def getCaDepartmentId() {
+    if (caDepartmentId == null) {
+        caDepartmentId = formDataService.getRefBookRecordId(30, recordCache, providerCache, "SBRF_CODE", "99_0000_00", getReportPeriodEndDate(), -1, null, logger, true)
+    }
+    return caDepartmentId
+}
+
 def getNeedRowsForCalc7or13(def dataRows, def isCalc7) {
     def rows = []
     def findSection = isCalc7
     for (def row : dataRows) {
         if (isCalc7) {
             // строки доходов
-            if (!row.getAlias()) {
+            if (!row.getAlias() && row.sbrfCode1 == getCaDepartmentId()) {
                 rows.add(row)
             }
             if (row.getAlias() == '99.1') {
@@ -425,7 +435,7 @@ def getNeedRowsForCalc7or13(def dataRows, def isCalc7) {
             if (row.getAlias() == '99.1') {
                 findSection = true
             }
-            if (findSection && !row.getAlias()) {
+            if (findSection && !row.getAlias() && row.sbrfCode1 == getCaDepartmentId()) {
                 rows.add(row)
             }
             if (row.getAlias() == '99.2') {
