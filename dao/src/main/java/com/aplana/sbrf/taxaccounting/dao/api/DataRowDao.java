@@ -27,7 +27,8 @@ public interface DataRowDao {
 
 	/**
 	 * Копирование строк из НФ-источника в НФ-приемник.
-	 * Не копирует версию ручного ввода! Макеты источника и приемника должны быть одинаковыми
+	 * Не копирует версию ручного ввода! Макеты источника и приемника должны быть одинаковыми/
+	 * Перемещение данных происходит только в постоянном срезе
 	 *
 	 * @param formDataSourceId НФ источник
 	 * @param formDataDestinationId НФ приемник
@@ -36,7 +37,7 @@ public interface DataRowDao {
 
 	/**
 	 * Создает версию ручного ввода, предварительно удалив из нее старые данные. Новые данные извлекаются из
-	 * автоматической версии постоянного среза.
+	 * постоянного среза.
 	 * @param formData
 	 */
 	void createManual(FormData formData);
@@ -116,14 +117,6 @@ public interface DataRowDao {
 	void removeAllManualRows(FormData formData);
 
 	/**
-	 * Удаляет строки в диапазоне индексов.
-	 *
-	 * @param formData экземпляр НФ для которой выполняется удаление строк
-	 * @param range диапазон удаляемых строк, индекс начинается с 1
-	 */
-	void removeRows(FormData formData, DataRowRange range);
-
-	/**
 	 * Удаляет указанные строки
 	 *
 	 * @param formData
@@ -133,7 +126,8 @@ public interface DataRowDao {
 
 	/**
 	 * Сохранить отсортированные строки без учета остальных изменений. Обновятся только значения атрибута ORD.
-	 * Порядок задается последовательностью элементов в rows
+	 * Порядок задается последовательностью элементов в rows. Данный метод используется для пересортировки
+	 * всех строк НФ.
 	 */
 	void reorderRows(FormData formData, List<DataRow<Cell>> rows);
 
@@ -180,6 +174,6 @@ public interface DataRowDao {
 	/**
 	 * Обновляет существующие строки НФ
 	 */
-	void updateRows(FormData formData, Collection<DataRow<Cell>> rows);
+	void updateRows(FormData formData, List<DataRow<Cell>> rows);
 
 }

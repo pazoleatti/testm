@@ -1,7 +1,16 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AutoNumerationColumn;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DataRowType;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.NumerationType;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -14,7 +23,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -24,16 +32,13 @@ import java.util.Map;
  * @author sgoryachkin
  *
  */
-class DataRowMapper implements RowMapper<DataRow<Cell>> {
+public class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 	private static final Log LOG = LogFactory.getLog(DataRowMapper.class);
 
-	private static final char COLSPAN_CODE = 'c';
-	private static final char ROWSPAN_CODE = 'r';
 	private static final char EDITABLE_CODE = 'e';
 
 	private static final String COLUMN_PREFIX = "c";
-	private static final char STYLE_SEPARATOR = ';';
 	private static final char DECIMAL_SEPARATOR = '.';
 	private static final char WRONG_DECIMAL_SEPARATOR = ',';
 	private DecimalFormat decimalFormat;
@@ -107,7 +112,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	}
 
 	/**
-	 * Добавляет в sql запрос список столбцов по всем графам по шаблону <b>", cXXX, cXXX_style_id, ..., cXXX_rowspan"</b>
+	 * Добавляет в sql запрос список столбцов по всем графам по шаблону <b>", cXXX, cXXX_style"</b>
 	 * @param formData НФ
 	 * @param sql запрос, куда следует добавить перечень столбцов.
 	 */
@@ -170,42 +175,23 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @param cell
 	 * @param value
 	 */
-	static final void parseCellStyle(Cell cell, String value) {
-		// значения по умолчанию
-		cell.setStyle(FormStyle.DEFAULT_STYLE);
-		cell.setEditable(false);
-		cell.setColSpan(1);
-		cell.setRowSpan(1);
-		// разбираем стили
+	public static final void parseCellStyle(Cell cell, String value) {
 	 	if (value != null && !value.isEmpty()) {
-			String[] styles = StringUtils.split(value, STYLE_SEPARATOR);
-			for (String styleString : styles) {
-				char ch = styleString.charAt(0);
-				if (ch == EDITABLE_CODE) {
-					cell.setEditable(true);
-					if (styleString.length() != 1) { // никаких цифр быть не должно после буквы "e"
-						throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", value));
-					}
-				} else if (ch == FormStyle.STYLE_CODE) {
-					if (!styleCache.containsKey(styleString)) {
-						styleCache.put(styleString, FormStyle.valueOf(styleString));
-					}
-					cell.setStyle(styleCache.get(styleString));
-				} else {
-					String numStr = styleString.substring(1);
-					if (numStr.isEmpty()) { // хотя бы один символ должен быть
-						throw new IllegalArgumentException(String.format("Ошибка чтения стилей ячейки \"%s\"", value));
-					}
-					Integer num = Integer.valueOf(numStr);
-					switch (ch) {
-						case COLSPAN_CODE:
-							cell.setColSpan(num);
-							break;
-						case ROWSPAN_CODE:
-							cell.setRowSpan(num);
-							break;
-					}
+			String styleString;
+			// флаг редактируемости
+			if (value.charAt(0) == EDITABLE_CODE) {
+				cell.setEditable(true);
+				styleString = value.substring(1);
+			} else {
+				cell.setEditable(false);
+				styleString = value;
+			}
+			// разбираем стиль
+			if (!styleString.isEmpty() ) {
+				if (!styleCache.containsKey(styleString)) {
+					styleCache.put(styleString, FormStyle.valueOf(styleString));
 				}
+				cell.setStyle(styleCache.get(styleString));
 			}
 		}
 	}
@@ -218,22 +204,16 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	static final String formatCellStyle(Cell cell) {
 		FormStyle formStyle = cell.getStyle();
 		StringBuilder sb = new StringBuilder();
-		if (!FormStyle.DEFAULT_STYLE.equals(formStyle)) {
-			sb.append(formStyle.toString()).append(STYLE_SEPARATOR);
-		}
 		if (cell.isEditable()) {
-			sb.append(EDITABLE_CODE).append(STYLE_SEPARATOR);
+			sb.append(EDITABLE_CODE);
 		}
-		if (cell.getColSpan() > 1) {
-			sb.append(COLSPAN_CODE).append(cell.getColSpan()).append(STYLE_SEPARATOR);
+		if (!FormStyle.DEFAULT_STYLE.equals(formStyle)) {
+			sb.append(formStyle.toString());
 		}
-		if (cell.getRowSpan() > 1) {
-			sb.append(ROWSPAN_CODE).append(cell.getRowSpan()).append(STYLE_SEPARATOR);
+		if (sb.length() == 0) {
+			return null;
 		}
-		if (sb.length() > 0) {
-			return sb.substring(0, sb.length() - 1);
-		}
-		return null;
+		return sb.toString();
 	}
 
 	/**
@@ -294,4 +274,9 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			}
 		}
 	}
+
+	public FormData getFormData() {
+		return formData;
+	}
+
 }

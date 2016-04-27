@@ -318,8 +318,8 @@ alter table form_data_row add constraint form_data_row_unq unique (form_data_id,
 alter table form_data_row add constraint form_data_row_chk_temp check (temporary in (0, 1));
 alter table form_data_row add constraint form_data_row_chk_manual check (manual in (0, 1));
 
-alter table form_data_row_span add constraint form_data_row_span_pk primary key (id);
 alter table form_data_row_span add constraint form_data_row_span_fk foreign key (form_data_id) references form_data (id);
+alter table form_data_row_span add constraint form_data_row_span_fk_row foreign key(row_id) references form_data_row(id) on delete cascade;
 alter table form_data_row_span add constraint form_data_row_span_unq unique (form_data_id, temporary, manual, data_ord, ord);
 alter table form_data_row_span add constraint form_data_row_span_chk_dataord check (data_ord between 0 and 99);
 ------------------------------------------------------------------------------------------------------

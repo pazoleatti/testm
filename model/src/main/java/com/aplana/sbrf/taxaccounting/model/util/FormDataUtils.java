@@ -40,8 +40,7 @@ public final class FormDataUtils {
 			for (Entry<String, Object> entry : dataRow.entrySet()) {
 				@SuppressWarnings("rawtypes")
 				AbstractCell currentCell = ((MapEntry) entry).getCell();
-				AbstractCell ownerCell = valueOwners.get(new Pair<Integer, Integer>(
-						rowIdx, colIdx));
+				AbstractCell ownerCell = valueOwners.get(new Pair<Integer, Integer>(rowIdx, colIdx));
 				
 				// Проверяем - перекрыта ли ячейка с текущими индексами
 				if (ownerCell != null) {
@@ -54,10 +53,8 @@ public final class FormDataUtils {
 				// Заполняем мапу с перекрытыми ячейками для текущей ячейки.
 				if (currentCell.getColSpan() > 1
 						|| currentCell.getRowSpan() > 1) {
-					for (int overRowIdx = rowIdx; overRowIdx < rowIdx
-							+ currentCell.getRowSpan(); overRowIdx++) {
-						for (int overColIdx = colIdx; overColIdx < colIdx
-								+ currentCell.getColSpan(); overColIdx++) {
+					for (int overRowIdx = rowIdx; overRowIdx < rowIdx + currentCell.getRowSpan(); overRowIdx++) {
+						for (int overColIdx = colIdx; overColIdx < colIdx + currentCell.getColSpan(); overColIdx++) {
 							if (overRowIdx == rowIdx && overColIdx == colIdx) {
 								continue;
 							}

@@ -51,11 +51,14 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	@Override
 	public void setScriptComponentContext(ScriptComponentContext context) {}
 
+	/**
+	 * Метод полностью повторяет реализацию {@link #getAll()}
+	 * @return
+	 */
 	@Override
+	@Deprecated
 	public List<DataRow<Cell>> getAllSaved() {
-		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
-		FormDataUtils.setValueOwners(rows);
-		return rows;
+		return getAll();
 	}
 
 	@Override
@@ -65,8 +68,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public List<DataRow<Cell>> getAll() {
-        List<DataRow<Cell>> rows;
-        rows = dataRowDao.getRows(fd, null);
+        List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
 		FormDataUtils.setValueOwners(rows);
 		return rows;
 	}
@@ -126,16 +128,6 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	public void delete(List<DataRow<Cell>> dataRows) {
 		dataRowDao.removeRows(fd, dataRows);
         getAllCached().removeAll(dataRows);
-	}
-
-	@Override
-	public void commit() {
-		dataRowDao.removeCheckPoint(fd);
-	}
-
-	@Override
-	public void rollback() {
-		dataRowDao.restoreCheckPoint(fd);
 	}
 
 	@Override

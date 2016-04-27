@@ -193,11 +193,25 @@ public final class SqlUtils {
         return resultSet.wasNull()?null:ret;
     }
 
+	/**
+	 * Возвращает значение целочисленного столбца. Если значения нет, то вернет null
+	 * @param resultSet набор данных
+	 * @param columnLabel название столбца
+	 * @return целое число, либо null
+	 * @throws SQLException
+	 */
     public static Integer getInteger(ResultSet resultSet, String columnLabel) throws SQLException {
         Integer ret = resultSet.getInt(columnLabel);
         return resultSet.wasNull()?null:ret;
     }
 
+	/**
+	 * Возвращает значение целочисленного столбца. Если значения нет, то вернет null
+	 * @param resultSet набор данных
+	 * @param columnIndex индекс столбца
+	 * @return целое число, либо null
+	 * @throws SQLException
+	 */
     public static Integer getInteger(ResultSet resultSet, int columnIndex) throws SQLException{
         Integer ret = resultSet.getInt(columnIndex);
         return resultSet.wasNull()?null:ret;

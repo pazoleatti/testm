@@ -212,7 +212,7 @@ public class DataRowTest {
 	}
 	
 	@Test
-	public void fillValueOners() {
+	public void fillValueOwners() {
 		
 		List<DataRow<Cell>> dataRows = getTestDataRows();
 		

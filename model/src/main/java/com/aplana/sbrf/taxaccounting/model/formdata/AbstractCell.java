@@ -28,7 +28,7 @@ abstract public class AbstractCell implements Serializable {
 	/**
 	 * Ссылка на главную ячейку. Не должна быть null если ячейку перекрывает 
 	 * другая ячейка в таблице из-за объединения. (SBRFACCTAX-2082)
-	 * Значение не храниться не в БД не в XML. Вычисляется в соответствии с colSpan rowSpan
+	 * Значение не хранится не в БД не в XML. Вычисляется в соответствии с colSpan rowSpan
 	 */
 	private AbstractCell valueOwner;
 
@@ -36,7 +36,6 @@ abstract public class AbstractCell implements Serializable {
 	 * Конструктор только для сериализации
 	 */
 	public AbstractCell() {
-
 	}
 
 	public AbstractCell(Column column) {
@@ -70,12 +69,11 @@ abstract public class AbstractCell implements Serializable {
 	 * @throws IllegalArgumentException
 	 *             если задаётся значение меньше 1
 	 */
-	public void setColSpan(int colSpan) {
-		if (colSpan < 1) {
-			throw new IllegalArgumentException(
-					"colSpan value can not be less than 1");
+	public void setColSpan(Integer colSpan) {
+		if (colSpan != null && colSpan < 0) {
+			throw new IllegalArgumentException("colSpan value can not be less than 1");
 		}
-		this.colSpan = colSpan;
+		this.colSpan = colSpan == null ? 1 : colSpan;
 	}
 
 	/**
@@ -98,12 +96,11 @@ abstract public class AbstractCell implements Serializable {
 	 * @throws IllegalArgumentException
 	 *             если задаётся значение меньше 1
 	 */
-	public void setRowSpan(int rowSpan) {
-		if (rowSpan < 1) {
-			throw new IllegalArgumentException(
-					"rowSpan value can not be less than 1");
+	public void setRowSpan(Integer rowSpan) {
+		if (rowSpan != null && rowSpan < 0) {
+			throw new IllegalArgumentException("rowSpan value can not be less than 1");
 		}
-		this.rowSpan = rowSpan;
+		this.rowSpan = rowSpan == null ? 1 : rowSpan;
 	}
 
 	/**

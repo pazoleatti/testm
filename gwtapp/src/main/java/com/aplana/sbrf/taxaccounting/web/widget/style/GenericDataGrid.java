@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.style;
 
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.ResizableHeader;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.cell.client.AbstractCell;
@@ -12,12 +13,15 @@ import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HeaderPanel;
 
 
+import java.util.List;
+
 import static com.google.gwt.dom.client.Style.Unit;
 
 public class GenericDataGrid<T> extends DataGrid<T> implements HasEnabled{
 
     private DivElement glassElement;
     private boolean enabled;
+    private CustomTableBuilder<T> tableBuilder;
 
 	public GenericDataGrid() {
 		super(15, GWT.<GenericDataGridResources>create(GenericDataGridResources.class));
@@ -127,4 +131,20 @@ public class GenericDataGrid<T> extends DataGrid<T> implements HasEnabled{
         setColumnWidth(col, width, unit);
     }
 
+    @Override
+    public void setTableBuilder(CellTableBuilder<T> tableBuilder) {
+        super.setTableBuilder(tableBuilder);
+        if (tableBuilder instanceof CustomTableBuilder) {
+            this.tableBuilder = (CustomTableBuilder)tableBuilder;
+        } else {
+            this.tableBuilder = null;
+        }
+    }
+
+    @Override
+    public void setRowData(int start, List<? extends T> values) {
+        super.setRowData(start, values);
+        if (tableBuilder != null)
+            tableBuilder.clearGlobalSpans();
+    }
 }

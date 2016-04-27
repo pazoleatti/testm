@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEven
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -88,7 +89,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     private Label noResultLabel = new Label();
 
 	@UiField
-	DataGrid<DataRow<Cell>> formDataTable;
+    GenericDataGrid<DataRow<Cell>> formDataTable;
 	@UiField
 	FlexiblePager pager;
 	@UiField

@@ -193,6 +193,14 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
         return retVal;
     }
 
+	/**
+	 * Возвращает список ячеек
+	 * @return
+	 */
+	public List<C> getCells() {
+		return data;
+	}
+
 	public C getCell(String columnAlias) {
 		return getCell(columnAlias, true);
 	}

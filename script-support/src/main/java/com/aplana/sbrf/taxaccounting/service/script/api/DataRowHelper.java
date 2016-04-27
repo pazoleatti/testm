@@ -96,29 +96,12 @@ public interface DataRowHelper {
 	void delete(DataRow<Cell> dataRow);
 
 	/**
-	 * Удаление списка строк
+	 * Удаление списка строк.
 	 * 
 	 * @param dataRows
 	 */
+	@Deprecated //Метод не используется.
 	void delete(List<DataRow<Cell>> dataRows);
-
-	/**
-	 * Сохранение строк НФ
-	 * 
-	 * @deprecated Не должен вызываться из скриптов
-	 * 
-	 */
-	@Deprecated
-	void commit();
-
-	/**
-	 * Отмена изменений сток НФ
-	 * 
-	 * @deprecated Не должен вызываться из скриптов
-	 * 
-	 */
-	@Deprecated
-	void rollback();
 
     /**
      * Возвращает DataRow по алиасу

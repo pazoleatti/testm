@@ -57,13 +57,19 @@ public class Cell extends AbstractCell {
      */
     public Cell() {
         super();
+		init();
     }
 
     public Cell(Column column, List<FormStyle> formStyleList) {
         super(column);
-        this.style = FormStyle.DEFAULT_STYLE;
 		this.formStyleList = formStyleList;
+		init();
     }
+
+	private void init() {
+		this.style = FormStyle.DEFAULT_STYLE;
+		setEditable(false);
+	}
 
     @Override
     public Object getValue() {

@@ -62,13 +62,17 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		lastColumnStyle = " " + style.lastColumn();
 		selectedCellStyle = " " + style.selectedRowCell();
         rowCountWhenInitialize = cellTable.getRowCount();
-        globalSpans.clear();
+        clearGlobalSpans();
 	}
+
+    public void clearGlobalSpans(){
+        globalSpans.clear();
+    }
 
 	@Override
 	public void buildRowImpl(T rowValue, int absRowIndex) {
         if (cellTable.getRowCount() != rowCountWhenInitialize){
-            globalSpans.clear();
+            clearGlobalSpans();
             rowCountWhenInitialize = cellTable.getRowCount();
         }
 		// Calculate the row styles.
