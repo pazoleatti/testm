@@ -41,6 +41,7 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
+        preCalcCheck()
         checkFillDeclarationMap(true)
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
@@ -286,43 +287,35 @@ def declarationPurchaseMap
 
 void checkFillDeclarationMap(boolean showMessages) {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    // Проверка налогового периода
-    def errorNumbers = []
+    def reportPeriod = getReportPeriod(formData.reportPeriodId)
     def periodTypesSale = [] // Для заполнения граф 4(5), 7(8) по фиксированным строкам №16, 17
     def periodTypesPurchase = [] // Для заполнения графы 7(8) по фиксированной строке №22
     def head8Index = getDataRow(dataRows, 'head_8').getIndex()
     for (def row : dataRows) {
-        if (row.getAlias() == null) {
-            def periodType = getRefBookValue(8, row.period)
-            if (!periodNames.contains(periodType?.NAME?.stringValue)) {
-                errorNumbers.add(row.getIndex())
+        if (row.getAlias()) {
+            continue
+        }
+        def periodType = getRefBookValue(8, row.period)
+        if (!periodNames.contains(periodType?.NAME?.stringValue)) {
+            return
+        } else {
+            if (row.getIndex() < head8Index) {
+                periodTypesSale.add(periodType)
             } else {
-                if (row.getIndex() < head8Index) {
-                    periodTypesSale.add(periodType)
-                } else {
-                    periodTypesPurchase.add(periodType)
-                }
+                periodTypesPurchase.add(periodType)
             }
         }
     }
-    boolean isError = false
-    if (showMessages && !errorNumbers.isEmpty()) {
-        logger.error("Строки ${errorNumbers.join(', ')}: Графа «${getColumnName(dataRows[0], 'period')}» заполнена неверно! Возможные значения: «${periodNames.join('», «')}».")
-        isError = true
-    }
 
-    if (!isError) {
-        def reportPeriods = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
-        def unpName = departmentService.get(unpId).name
-        // разделы 1-7, продажи
-        if (declarationSaleMap == null) {
-            declarationSaleMap = checkGetSourceDeclaration(true, showMessages, periodTypesSale, reportPeriods, reportPeriod, unpName, declarationType9sources, declarationType9_1)
-        }
-        // разделы 8, 9, покупки
-        if (declarationPurchaseMap == null) {
-            declarationPurchaseMap = checkGetSourceDeclaration(false, showMessages, periodTypesPurchase, reportPeriods, reportPeriod, unpName, declarationType8sources, declarationType8_1)
-        }
+    def reportPeriods = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
+    def unpName = departmentService.get(unpId).name
+    // разделы 1-7, продажи
+    if (declarationSaleMap == null) {
+        declarationSaleMap = checkGetSourceDeclaration(true, showMessages, periodTypesSale, reportPeriods, reportPeriod, unpName, declarationType9sources, declarationType9_1)
+    }
+    // разделы 8, 9, покупки
+    if (declarationPurchaseMap == null) {
+        declarationPurchaseMap = checkGetSourceDeclaration(false, showMessages, periodTypesPurchase, reportPeriods, reportPeriod, unpName, declarationType8sources, declarationType8_1)
     }
 }
 
@@ -420,8 +413,9 @@ def checkGetSourceDeclaration(boolean isSale, boolean showMessages, def periodTy
                         "Дата сдачи корректировки: «меньше %s». При заполнении строк «ВСЕГО за %s» по доп. листу книги продаж по ставке 18%%, 10%% значения требуемых строк декларации-источника будут приняты за нулевые."
                 def MESSAGE_2_PURCHASE = "Не найдена декларация-источник со строкой «001» равной «0». Вид: «%s», Подразделение: «%s», Период: «%s, %s», " +
                         "Дата сдачи корректировки: «меньше %s». При заполнении строки «ВСЕГО за %s» по доп. листу книги покупок по ставке 18%% значение требуемой строки декларации-источника будет принято за нулевое."
+                def correctionDateStr = getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate.format("dd.MM.yyyy")
                 if (showMessages) {
-                    logger.warn(isSale ? MESSAGE_2_SALE : MESSAGE_2_PURCHASE, declarationTypeNameSecond, unpName, year, periodName, departmentReportPeriod.correctionDate.format("dd.MM.yyyy"),  periodName)
+                    logger.warn(isSale ? MESSAGE_2_SALE : MESSAGE_2_PURCHASE, declarationTypeNameSecond, unpName, year, periodName, correctionDateStr, periodName)
                 }
             }
         }
@@ -747,9 +741,9 @@ void logicCheck() {
             logger.error("Строка $index: Графы с суммой корректировки (+, -) налоговой базы (раздел 7-9) не должны быть заполнены!")
         }
 
-        // 3. Проверка на заполнение хотя бы одной из граф «+», «-» с суммой корректировки
-        // 4. Проверка положительности суммы корректировки
-        // 5. Проверка отрицательности суммы корректировки
+        // 4. Проверка на заполнение хотя бы одной из граф «+», «-» с суммой корректировки
+        // 5. Проверка положительности суммы корректировки
+        // 6. Проверка отрицательности суммы корректировки
         if (!isAfterSection6) {
             if (row.sumPlus == null && row.sumMinus == null) {
                 logger.error("Строка $index: Должна быть заполнена хотя бы одна из граф с суммой корректировки (+, -) налоговой базы (раздел 1-6)!")
@@ -772,7 +766,7 @@ void logicCheck() {
             logger.error("Строка $index: Графа с суммой корректировки (-) НДС (раздел 1-9) должна быть заполнена значением меньше «0»!")
         }
 
-        // 6. Проверка номера балансового счета
+        // 7. Проверка номера балансового счета
         if (row.numberNds != null) {
             def numberNds = getRefBookValue(101, row.numberNds).ACCOUNT.value
             def validNumbers = numberMap[section][0]
@@ -781,19 +775,40 @@ void logicCheck() {
             }
         }
 
-        // 7. Проверка ставки НДС
+        // 8. Проверка ставки НДС
         def validRate = rateMap[section][0]
         if (row.rateNds && validRate != row.rateNds) {
             logger.error("Строка $index: Графа «${getColumnName(row,'rateNds')}» заполнена неверно! Возможное значение (раздел ${rateMap[section][1]}): «$validRate».")
         }
 
-        // 8. Проверка суммы НДС по дополнительным листам книги покупок и продаж
+        // 9. Проверка суммы НДС по дополнительным листам книги покупок и продаж
         if (row.sum != null) {
             calcCheck10(row, row.sum)
         }
     }
     checkFillDeclarationMap(false) // заполняем декларации-источники
     compareSpecificTotalValues(dataRows, arrangeRows(dataRows))
+
+    // 15. Проверка разрядности итоговых значений, используемых для заполнения строк Раздела 3 декларации НДС, разрядность которых 14
+    def size = 14
+    def rows = []
+    def checkColumns = totalColumns1_6_Sale
+    ['total_1_', 'total_2_', 'total_3_', 'total_4_', 'total_5_', 'total_6_', 'total_8_', 'total_9_'].each { subAlias ->
+        def row = dataRows.find { it.getAlias()?.contains(subAlias) }
+        if (row) {
+            rows.add(row)
+        }
+    }
+    rows.each { row ->
+        checkColumns.each { alias ->
+            BigDecimal value = row[alias]
+            if (!checkOverflow(value, size)) {
+                logger.error("Строка %d: Округленное до целого значение графы «%s» (%s) превышает допустимую разрядность %d! " +
+                        "Значение данной графы используется для заполнения строки Раздела 3 декларации НДС, разрядность которой %d.",
+                        row.getIndex(), getColumnName(row, alias), value, size, size)
+            }
+        }
+    }
 }
 
 void checkDeclarationAccepted() {
@@ -802,7 +817,7 @@ void checkDeclarationAccepted() {
                               20 : 'Декларация по НДС (короткая, раздел 1-7)',
                               13 : 'Декларация по НДС (раздел 8.1)',
                               15 : 'Декларация по НДС (раздел 9.1)']
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def reportPeriod = getReportPeriod(formData.reportPeriodId)
     if (formData.kind == FormDataKind.CONSOLIDATED && formData.departmentId == unpId && reportPeriod.order == 4 && reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) != 0) {
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter()
         // ищем в корректирующем периоде
@@ -821,7 +836,7 @@ void checkDeclarationAccepted() {
                         logger.warn("Существуют принятые экземпляры деклараций-приемников:")
                         foundAccepted = true
                     }
-                    def period = reportPeriodService.get(drp.reportPeriod.id)
+                    def period = getReportPeriod(drp.reportPeriod.id)
                     declarations.each { declaration ->
                         logger.warn("Вид: «%s», Подразделение: «%s», Период: «%s, %s», Дата сдачи корректировки: «%s».",
                                 typeName, departmentService.get(declaration.departmentId), reportPeriod.taxPeriod.year, getRefBookValue(8, period.dictTaxPeriodId).NAME.value, drp.correctionDate.format('dd.MM.yyyy'))
@@ -1416,7 +1431,7 @@ def getDRPMapper() {
                 DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
                 departmentReportPeriod.setId(SqlUtils.getInteger(rs, "id"));
                 departmentReportPeriod.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
-                departmentReportPeriod.setReportPeriod(reportPeriodService.get(SqlUtils.getInteger(rs, "report_period_id")));
+                departmentReportPeriod.setReportPeriod(getReportPeriod(SqlUtils.getInteger(rs, "report_period_id")));
                 departmentReportPeriod.setActive(!SqlUtils.getInteger(rs, "is_active").equals(0));
                 departmentReportPeriod.setBalance(!SqlUtils.getInteger(rs, "is_balance_period").equals(0));
                 departmentReportPeriod.setCorrectionDate(rs.getDate("correction_date"));
@@ -1498,4 +1513,56 @@ def String getFilterString(DepartmentReportPeriodFilter filter) {
         return "";
     }
     return " where " + StringUtils.join(causeList, " and ");
+}
+
+// Предрасчетные проверки
+def preCalcCheck() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+
+    // Предрасчетная проверка 2. Проверка налогового периода
+    def errorNumbers = []
+    for (def row : dataRows) {
+        if (row.getAlias()) {
+            continue
+        }
+        def periodName = getRefBookValue(8, row.period)?.NAME?.value
+        if (!periodNames.contains(periodName)) {
+            errorNumbers.add(row.getIndex())
+        }
+    }
+    if (!errorNumbers.isEmpty()) {
+        logger.error("Строки %s: Графа «%s» заполнена неверно! Возможные значения: «%s».",
+                errorNumbers.join(', '), getColumnName(dataRows[0], 'period'), periodNames.join('», «'))
+    }
+}
+
+def checkOverflow(BigDecimal value, int size) {
+    if (value == null) {
+        return true
+    }
+    BigDecimal overpower = new BigDecimal("1E" + size)
+    if (value.abs().compareTo(overpower) != -1) {
+        return false
+    }
+    return true
+}
+
+@Field
+def reportPeriodMap = [:]
+
+def getReportPeriod(def id) {
+    if (reportPeriodMap[id] == null) {
+        reportPeriodMap[id] = reportPeriodService.get(id)
+    }
+    return reportPeriodMap[id]
+}
+
+@Field
+def departmentReportPeriodMap = [:]
+
+DepartmentReportPeriod getDepartmentReportPeriod(def id) {
+    if (departmentReportPeriodMap[id] == null) {
+        departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)
+    }
+    return departmentReportPeriodMap[id]
 }

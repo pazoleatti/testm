@@ -59,7 +59,7 @@
         <name>Данные бухгалтерского учёта. Величина корректировки налоговой базы. Сумма корректировки (+)</name>
         <order>5</order>
         <width>11</width>
-        <maxLength>16</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -69,7 +69,7 @@
         <name>Данные бухгалтерского учёта. Величина корректировки налоговой базы. Сумма корректировки (-)</name>
         <order>6</order>
         <width>11</width>
-        <maxLength>16</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -91,7 +91,7 @@
         <name>Данные бухгалтерского учёта. Величина корректировки НДС. Сумма корректировки (+)</name>
         <order>8</order>
         <width>11</width>
-        <maxLength>16</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -101,7 +101,7 @@
         <name>Данные бухгалтерского учёта. Величина корректировки НДС. Сумма корректировки (-)</name>
         <order>9</order>
         <width>11</width>
-        <maxLength>16</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -121,7 +121,7 @@
         <name>Сумма НДС по дополнительным листам книги продаж (разделы 1-7)/книги покупок (разделы 8-9)</name>
         <order>11</order>
         <width>11</width>
-        <maxLength>16</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <styles>
