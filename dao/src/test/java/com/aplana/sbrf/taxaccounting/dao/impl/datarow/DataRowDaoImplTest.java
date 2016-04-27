@@ -475,6 +475,8 @@ public class DataRowDaoImplTest extends Assert {
 		DataRow<Cell> row = formData.createDataRow();
 		row.setIndex(5);
 
+        List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
+        rows.add(row);
 		Connection conn = ((JdbcTemplate) jdbc.getJdbcOperations()).getDataSource().getConnection();
 		Statement stmt = conn.createStatement();
 		// выполняем основную операцию
@@ -484,7 +486,7 @@ public class DataRowDaoImplTest extends Assert {
 				"SELECT 4 AS row_id, 0 AS x, 4 AS y, 1 AS colspan, 2 AS rowspan, 'string_value' AS cell_value, '3-10' AS cell_style FROM DUAL UNION " +
 				"SELECT 4 AS row_id, 3 AS x, 4 AS y, 1 AS colspan, 2 AS rowspan, '52' AS cell_value, 'i0-4' AS cell_style FROM DUAL");
 			while (rs.next()) {
-				DataRowDaoImpl.updateChildCell(dataRowMapper, rs, row, null);
+				DataRowDaoImpl.updateChildCell(dataRowMapper, rs, rows, null);
 			}
 		} finally {
 			stmt.close();
@@ -495,8 +497,8 @@ public class DataRowDaoImplTest extends Assert {
 		assertEquals(2, row.getCell("numericColumn").getColSpan());
 		assertEquals(3, row.getCell("numericColumn").getRowSpan());
 		assertEquals(BigDecimal.valueOf(31.49), row.get("numericColumn"));
-		assertEquals(1, row.getCell("dateColumn").getColSpan());
-		assertEquals(1, row.getCell("dateColumn").getRowSpan());
+		assertEquals(0, row.getCell("dateColumn").getColSpan());
+		assertEquals(0, row.getCell("dateColumn").getRowSpan());
 		assertNull(row.get("dateColumn"));
 		assertEquals(1, row.getCell("autoNumerationColumn").getColSpan());
 		assertEquals(1, row.getCell("autoNumerationColumn").getRowSpan());
@@ -531,8 +533,8 @@ public class DataRowDaoImplTest extends Assert {
 
 		assertEquals(1, rows.get(0).getCell("numericColumn").getColSpan());
 		assertEquals(2, rows.get(0).getCell("numericColumn").getRowSpan());
-		assertEquals(1, rows.get(1).getCell("numericColumn").getColSpan());
-		assertEquals(1, rows.get(1).getCell("numericColumn").getRowSpan());
+		assertEquals(0, rows.get(1).getCell("numericColumn").getColSpan());
+		assertEquals(0, rows.get(1).getCell("numericColumn").getRowSpan());
 		assertEquals(1, rows.get(7).getCell("numericColumn").getColSpan());
 		assertEquals(1, rows.get(7).getCell("numericColumn").getRowSpan());
 

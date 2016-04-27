@@ -341,13 +341,18 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				ord = r.getIndex();
 			}
 		}
-		// взять самого первого и обновить у его родителей значения + спаны
-		Map<String, Object> rowParams = getRowParams(rows.get(0));
-		DataRowType temporary = (Integer) rowParams.get("temporary")  == 1 ? DataRowType.TEMP : DataRowType.SAVED;
-		updateParentCells(dataRowMapper, temporary, row);
-		//обновление спанов у существующих строк
-		removeSpan(rows);
-		insertSpan(dataRowMapper.getFormData(), temporary, rows, false);
+        for (Cell cell: row.getCells()) {
+            if (cell.getRowSpan() == 0 && cell.getColSpan() == 0)
+                // данный метод работает только для первой строки из пейджинга
+                return;
+        }
+        // взять самого первого и обновить у его родителей значения + спаны
+        Map<String, Object> rowParams = getRowParams(rows.get(0));
+        DataRowType temporary = (Integer) rowParams.get("temporary") == 1 ? DataRowType.TEMP : DataRowType.SAVED;
+        updateParentCells(dataRowMapper, temporary, row);
+        //обновление спанов у существующих строк
+        removeSpan(rows);
+        insertSpan(dataRowMapper.getFormData(), temporary, rows, false);
 	}
 
 	private static final String SQL_GET_ROW_PARAMS = "SELECT form_data_id, temporary, manual FROM form_data_row WHERE id = :row_id";
@@ -834,7 +839,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			// для постраничного отображения данных необходимо актуализировать ячейки с разорванным rowspan
 			// https://jira.aplana.com/browse/SBRFACCTAX-15026
 			if (range != null) {
-				updateChildCells(dataRowMapper, temporary, rows.get(0));
+				updateChildCells(dataRowMapper, temporary, rows);
 			}
 		}
 		return rows;
@@ -894,6 +899,19 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				Cell cell = row.getCell(column.getAlias());
 				cell.setColSpan(colSpan);
 				cell.setRowSpan(rowSpan);
+                if (colSpan == null) colSpan = 1;
+                if (rowSpan == null) rowSpan = 1;
+                for(int i = 0;i < rowSpan; i++)
+                    for(int j = 0;j < colSpan; j++){
+                        if (i != 0 || j != 0) {
+                            if (rows.size() > (ord - offset + i)) {
+                                DataRow<Cell> childRow = rows.get(ord - offset + i);
+                                Cell childCell = childRow.getCells().get(column.getOrder() + j - 1);
+                                childCell.setColSpan(0);
+                                childCell.setRowSpan(0);
+                            }
+                        }
+                    }
 			}
 		});
 	}
@@ -1107,11 +1125,11 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	/**
 	 * Ищет для первой строки (row) родительские ячейки и извлекает из них значения ячеек и спанов
 	 */
-	private void updateChildCells(final DataRowMapper dataRowMapper, DataRowType temporary, final DataRow<Cell> row) {
-		parentSpanExecute(dataRowMapper, temporary, row, new DataRowCallbackHandler() {
+	private void updateChildCells(final DataRowMapper dataRowMapper, DataRowType temporary, final List<DataRow<Cell>> rows) {
+		parentSpanExecute(dataRowMapper, temporary, rows.get(0), new DataRowCallbackHandler() {
 			@Override
 			public void processRow(ResultSet rs) throws SQLException {
-				updateChildCell(dataRowMapper, rs, row, this);
+				updateChildCell(dataRowMapper, rs, rows, this);
 			}
 		});
 	}
@@ -1136,7 +1154,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * Простая обертка с параметрами запроса
 	 */
 	static abstract class DataRowCallbackHandler implements RowCallbackHandler {
-		private Map<String, Object> params = new HashMap<String, Object>();;
+		private Map<String, Object> params = new HashMap<String, Object>();
 		public Map<String, Object> getParams() {
 			return params;
 		}
@@ -1227,12 +1245,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * Обновляет дочерние ячейки значениями из родительских
 	 * @param dataRowMapper маппер значений из результата запроса
 	 * @param rs результат запроса родительских ячеек
-	 * @param childRow текущая строка (дочерняя)
+	 * @param rows
 	 * @throws SQLException
 	 */
-	static void updateChildCell(DataRowMapper dataRowMapper, ResultSet rs, DataRow<Cell> childRow, DataRowCallbackHandler handler) throws SQLException {
+	static void updateChildCell(DataRowMapper dataRowMapper, ResultSet rs, List<DataRow<Cell>> rows, DataRowCallbackHandler handler) throws SQLException {
 		final List<Column> columns = dataRowMapper.getFormData().getFormColumns();
-		int childRowOrd = childRow.getIndex();
+		int childRowOrd = rows.get(0).getIndex();
 
 		int dataOrd = rs.getInt("x");
 		int parentRowOrd = rs.getInt("y");
@@ -1242,7 +1260,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		String parentStyle = rs.getString("cell_style");
 
 		Column column = getColumnByDataOrd(columns, dataOrd);
-		Cell cell = childRow.getCell(column.getAlias());
+		Cell cell = rows.get(0).getCell(column.getAlias());
 		// переносим из родительской ячейки стили и значения
 		if (parentColSpan != 0) {
 			cell.setColSpan(parentColSpan);
@@ -1252,6 +1270,19 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 		DataRowMapper.parseCellStyle(cell, parentStyle);
 		cell.setValue(dataRowMapper.parseCellValue(column.getColumnType(), parentValue), childRowOrd);
+        int colSpan = cell.getColSpan();
+        int rowSpan = cell.getRowSpan();
+        for (int i = 0; i < rowSpan; i++)
+            for (int j = 0; j < colSpan; j++) {
+                if (i != 0 || j != 0) {
+                    if (rows.size() > i) {
+                        DataRow<Cell> childRow = rows.get(i);
+                        Cell childCell = childRow.getCell(columns.get(column.getOrder() + j - 1).getAlias());
+                        childCell.setColSpan(0);
+                        childCell.setRowSpan(0);
+                    }
+                }
+            }
 	}
 
 	/**

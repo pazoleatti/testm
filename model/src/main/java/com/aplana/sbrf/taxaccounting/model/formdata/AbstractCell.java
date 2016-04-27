@@ -70,7 +70,7 @@ abstract public class AbstractCell implements Serializable {
 	 *             если задаётся значение меньше 1
 	 */
 	public void setColSpan(Integer colSpan) {
-		if (colSpan != null && colSpan < 1) {
+		if (colSpan != null && colSpan < 0) {
 			throw new IllegalArgumentException("colSpan value can not be less than 1");
 		}
 		this.colSpan = colSpan == null ? 1 : colSpan;
@@ -97,7 +97,7 @@ abstract public class AbstractCell implements Serializable {
 	 *             если задаётся значение меньше 1
 	 */
 	public void setRowSpan(Integer rowSpan) {
-		if (rowSpan != null && rowSpan < 1) {
+		if (rowSpan != null && rowSpan < 0) {
 			throw new IllegalArgumentException("rowSpan value can not be less than 1");
 		}
 		this.rowSpan = rowSpan == null ? 1 : rowSpan;
