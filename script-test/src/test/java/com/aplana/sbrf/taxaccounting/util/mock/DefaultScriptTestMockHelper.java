@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
+import com.aplana.sbrf.taxaccounting.service.script.impl.ReportPeriodServiceImpl;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import org.mockito.invocation.InvocationOnMock;
@@ -154,7 +155,7 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
 
     @Override
     public ReportPeriodService mockReportPeriodService() {
-        ReportPeriodService reportPeriodService = mock(ReportPeriodService.class);
+        ReportPeriodService reportPeriodService = mock(ReportPeriodServiceImpl.class);
         when(reportPeriodService.getStartDate(anyInt())).thenReturn(PERIOD_START_DATE);
         when(reportPeriodService.getEndDate(anyInt())).thenReturn(PERIOD_END_DATE);
         when(reportPeriodService.getReportDate(anyInt())).thenReturn(PERIOD_END_DATE);

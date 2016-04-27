@@ -3,14 +3,12 @@ package com.aplana.sbrf.taxaccounting.util;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.mock.DefaultScriptTestMockHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.*;
 
 import java.io.InputStream;
 import java.text.ParseException;
@@ -18,6 +16,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.when;
 
 /**
  * Базовый класс для тестов скриптов
@@ -168,5 +169,16 @@ public abstract class ScriptTestBase {
 
     protected void defaultCheckLoadData(List<String> aliases, int rowCount) {
         defaultCheckLoadData(aliases, rowCount, "2015");
+    }
+
+    @Test
+    public void checkScriptTest() {
+        when(testHelper.getReportPeriodService().getCalendarStartDate(anyInt())).thenCallRealMethod();
+        when(testHelper.getReportPeriodService().getStartDate(anyInt())).thenCallRealMethod();
+        when(testHelper.getReportPeriodService().getEndDate(anyInt())).thenCallRealMethod();
+        when(testHelper.getReportPeriodService().getReportDate(anyInt())).thenCallRealMethod();
+        when(testHelper.getReportPeriodService().get(anyInt())).thenCallRealMethod();
+        testHelper.execute(FormDataEvent.CHECK_SCRIPT);
+        checkLogger();
     }
 }
