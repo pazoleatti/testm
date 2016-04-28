@@ -569,11 +569,11 @@
             <name>Codehaus repository (for latest groovy, jackson, etc.)</name>
             <url>http://repository.codehaus.org</url>
         </repository>
-        <!--<repository>
+        <repository>
             <id>taxaccounting-thirdparty</id>
             <name>Сторонние библиотеки, используемые в проекте</name>
             <url>http://aplana.datateh.ru:8181/nexus/content/repositories/thirdparty/</url>
-        </repository>-->
+        </repository>
     </repositories>
 
 	<scm>
