@@ -243,7 +243,7 @@ void preXmlCheck() {
             formSource = form
             def dataRows = formDataService.getDataRowHelper(formSource).allSaved
             def periodCode = getRefBookValue(8, declarationReportPeriod.dictTaxPeriodId).CODE.value
-            def superRow = dataRows.find { it.getAlias() == ('super_purchase_18_' + periodCode) }
+            def superRow = dataRows.find { it.getAlias() == ('super_purchase_' + periodCode) }
             if (superRow != null) { // сообщение 3
                 sourceSuperRow = superRow
                 if (formDataEvent != FormDataEvent.CALCULATE) {
