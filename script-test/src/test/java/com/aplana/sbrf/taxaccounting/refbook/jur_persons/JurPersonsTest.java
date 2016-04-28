@@ -293,7 +293,7 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         Assert.assertEquals("11111", saveRecords.get(3).get("IKSR").getStringValue());
         // 5
         Assert.assertEquals("Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Поле «Дата наступления основания для включения в список» должно быть больше или равно полю «Дата наступления основания для исключении из списка»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Поле «START_DATE» должно быть меньше или равно полю «END_DATE»!", entries.get(i++).getMessage());
         Assert.assertEquals("Для ВЗЛ обязательно должны быть заполнены поля «VAT_STATUS»,«DEP_CRITERION»!", entries.get(i++).getMessage());
         Assert.assertNull(saveRecords.get(4).get("IKKSR").getStringValue());
         Assert.assertNull(saveRecords.get(4).get("IKSR").getStringValue());
