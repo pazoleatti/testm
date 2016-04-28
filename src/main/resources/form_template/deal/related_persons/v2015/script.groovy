@@ -343,7 +343,7 @@ void logicCheck() {
 
         // 1. Проверка заполнения обязательных полей (графа 2, 12)
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
-       // // проверка ссылочных графов обязательных для заполнения (графа 3, 4, 5, 10, 13, 15)
+       // // проверка ссылочных граф обязательных для заполнения (графа 3, 4, 5, 10, 13, 15)
        // nonEmptyColumnsMap.each { alias, refAlias ->
        //     def value = record?.get(refAlias)?.value
        //     if (value == null || '' == value) {
@@ -1213,8 +1213,8 @@ void insertHistory(def dataRows, def state) {
 def createSpecificReportHistory() {
     // для работы с эксель
     String TEMPLATE = ClassUtils.classPackageAsResourcePath(FormDataXlsmReportBuilder.class)+ "/acctax.xlsm"
-    InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE)
-    workBook = WorkbookFactory.create(templeteInputStream)
+    InputStream templateInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE)
+    workBook = WorkbookFactory.create(templateInputStream)
     sheet = workBook.getSheetAt(0)
     Row tmpRow
     Cell cell
@@ -1549,7 +1549,7 @@ XSSFColor getColor(Color color) {
 }
 
 enum ChangeType {
-    INSESRT(1, 'Лицо включено в список'),
+    INSERT(1, 'Лицо включено в список'),
     UPDATE(2, 'В отношении лица были внесены изменения в части %s (%s)'),
     DELETE(3, 'Лицо исключено из списка')
 
@@ -1737,7 +1737,7 @@ def getJurPersonChangeList(def dateFrom, def dateTo) {
         }
     }
 
-    // мапа с номерами графов (алиса графы нф -> cписок из двух элементов: номер графы и строковое значение в шапке)
+    // мапа с номерами граф (алиса графы нф -> cписок из двух элементов: номер графы и строковое значение в шапке)
     def aliasNumsMap = [
             'name'         : [  2, 'гр. 2',   ], // графа 2  (2)
             'address'      : [  3, 'гр. 3',   ], // графа 3  (3)
@@ -1763,7 +1763,7 @@ def getJurPersonChangeList(def dateFrom, def dateTo) {
             def record520 = versions[1]
             def actualDate = versionInfoMap[record520]?.versionStart
             def values = getValues520(record520, null)
-            ChangeType changeType = (record520?.END_DATE?.value ? ChangeType.DELETE : ChangeType.INSESRT)
+            ChangeType changeType = (record520?.END_DATE?.value ? ChangeType.DELETE : ChangeType.INSERT)
 
             ChangeItem item = new ChangeItem()
             item.date = actualDate
@@ -1792,14 +1792,16 @@ def getJurPersonChangeList(def dateFrom, def dateTo) {
                 item.type = ChangeType.DELETE
                 item.values = values
                 changeList.add(item)
-            } else if (equalsResult) {
+            }
+            equalsResult = equalsResult - 'endData'
+            if (equalsResult) {
                 // добавить изменение - «Изменение существующего ВЗЛ»
                 def record520 = version
                 def actualDate = versionInfoMap[record520]?.versionStart
                 def values = getValues520(record520, null)
                 ChangeType changeType = ChangeType.UPDATE
 
-                // названия и номера измененных графов
+                // названия и номера измененных граф
                 def columnNames = '"' + equalsResult.collect { getColumnName(tmpRow, it) }.join('", "') + '"'
                 def columnNums = equalsResult.collect { aliasNumsMap[it][1] }.join(', ')
                 // добавление предыдущих значении в скобках
@@ -1822,12 +1824,13 @@ def getJurPersonChangeList(def dateFrom, def dateTo) {
                 item.columnNums = columnNums
                 item.columnNames = columnNames
                 changeList.add(item)
-            } else if (equalsResult == null) {
+            }
+            if (equalsResult == null) {
                 // добавить изменения - «Включение лица в список ВЗЛ»
                 def record520 = version
                 def actualDate = versionInfoMap[record520]?.versionStart
                 def values = getValues520(record520, null)
-                ChangeType changeType = ChangeType.INSESRT
+                ChangeType changeType = ChangeType.INSERT
 
                 ChangeItem item = new ChangeItem()
                 item.date = actualDate
