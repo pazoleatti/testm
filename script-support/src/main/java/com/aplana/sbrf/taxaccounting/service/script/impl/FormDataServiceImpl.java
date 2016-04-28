@@ -540,7 +540,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public void checkReferenceValue(Long refBookId, String referenceValue, String expectedValue, int rowIndex, int colIndex,
                                     Logger logger, boolean required) {
-        checkReferenceValue(refBookId, referenceValue, Arrays.asList(expectedValue), rowIndex, colIndex, logger, required);
+        List<String> expectedValues = new ArrayList<String>();
+        expectedValues.add(expectedValue);
+        checkReferenceValue(refBookId, referenceValue, expectedValues, rowIndex, colIndex, logger, required);
     }
 
     @Override
