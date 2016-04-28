@@ -181,13 +181,7 @@ void consolidation() {
     def dataRows = []
 
     if (getPeriodOrder() == 4) {
-        for (row in sourceRows1) {
-            def record = getRefBookValue(520L, row.name)
-            def end = record?.END_DATE?.value
-            if (end == null || end > getReportPeriodEndDate()) {
-                samples.add(row)
-            }
-        }
+        samples.addAll(sourceRows1)
     }
 
     if (getPeriodOrder() == 3) {
@@ -195,10 +189,9 @@ void consolidation() {
         def taxStatus = getRecordId(511, 'CODE', '2')
         for (row in sourceRows1) {
             def record = getRefBookValue(520L, row.name)
-            def RefOrgCode = record?.ORG_CODE?.value
-            def RefTaxStatus = record?.TAX_STATUS?.value
-            def end = record?.END_DATE?.value
-            if (RefOrgCode == orgCode && RefTaxStatus == taxStatus && (end == null || end > getReportPeriodEndDate())) {
+            def refOrgCode = record?.ORG_CODE?.value
+            def refTaxStatus = record?.TAX_STATUS?.value
+            if (refOrgCode == orgCode && refTaxStatus == taxStatus) {
                 samples.add(row)
             }
         }
@@ -211,7 +204,7 @@ void consolidation() {
             tmpDataRows.add(sample)
         } else {
             for (row in sourceRows2) {
-                if (sample.name == row.name && row.sign == 0) {
+                if (sample.name == row.name && row.sign == 1) {
                     tmpDataRows.add(sample)
                     break
                 }
