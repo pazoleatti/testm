@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -57,7 +59,9 @@ public final class XmlSerializationUtils {
 
 	private static final String ENCODING = "utf-8";
 
-	private static final XmlSerializationUtils instance = new XmlSerializationUtils();
+    private static Pattern patternStyle = Pattern.compile("(e)|(.*\\d-\\d.*)");
+
+    private static final XmlSerializationUtils instance = new XmlSerializationUtils();
 
 	/**
 	 * @return экземпляр класса
@@ -382,7 +386,7 @@ public final class XmlSerializationUtils {
 		if (valueNode != null && valueNode.getNodeValue() != null) {
 			String styleString = valueNode.getNodeValue();
 			if(!styleString.isEmpty()) {
-				if (styleString.contains(String.valueOf(FormStyle.COLOR_SEPARATOR))) { // новый способ оформления стилей
+				if (patternStyle.matcher(styleString).matches()) { // новый способ оформления стилей
 					DataRowMapper.parseCellStyle(cell, styleString);
 				} else {
 					cell.setStyle(formTemplate.getStyle(styleString));
