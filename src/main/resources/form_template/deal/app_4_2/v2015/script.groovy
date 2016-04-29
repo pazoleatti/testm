@@ -80,7 +80,7 @@ switch (formDataEvent) {
         sortFormDataRows()
         break
     case FormDataEvent.GET_SPECIFIC_REPORT_TYPES:
-        //specificReportType.add("Контролируемые лица") TODO вернуть для 1.0
+        specificReportType.add("Контролируемые лица")
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         createSpecificReport()
