@@ -192,17 +192,19 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
                 }
 				Cell cell = currentRow.getCell(columns.get(colIndex - COLUMN_OFFSET).getAlias());
 
-				if (select) { // выделяем ячейки
-					element.getStyle().setBackgroundColor(SELECTED_CELL_BACKGROUND_COLOR);
-					selectedCells.add(cell);
-				} // выставляем прежний background color
-				else {
-					if (cell.getStyle() != null) {
-						element.getStyle().setBackgroundColor(convertColorToRGBString(cell.getStyle().getBackColor()));
-					} else {
-						element.getStyle().clearBackgroundColor();
-					}
-				}
+                if (element != null) {
+                    if (select) { // выделяем ячейки
+                        element.getStyle().setBackgroundColor(SELECTED_CELL_BACKGROUND_COLOR);
+                        selectedCells.add(cell);
+                    } // выставляем прежний background color
+                    else {
+                        if (cell.getStyle() != null) {
+                            element.getStyle().setBackgroundColor(convertColorToRGBString(cell.getStyle().getBackColor()));
+                        } else {
+                            element.getStyle().clearBackgroundColor();
+                        }
+                    }
+                }
 			}
 			topRowIndex++;
 		}
