@@ -391,14 +391,15 @@ def checkGetSourceDeclaration(boolean isSale, boolean showMessages, def periodTy
             if (!departmentReportPeriods.isEmpty()) {
                 departmentReportPeriods.remove(departmentReportPeriods.size() - 1)
             }
-            // начиная с последней корректировки ищем декларацию с ПризнСвед91 = 0
+            // начиная с последней корректировки ищем декларацию с ПризнСвед91/ПризнСвед81 = 0
+            def code001Name = (isSale ? 'ПризнСвед91' : 'ПризнСвед81')
             DepartmentReportPeriod drpTemp
             for (drp in departmentReportPeriods.reverse()) {
                 if (drp.reportPeriod.dictTaxPeriodId != periodTypeId) {
                     continue
                 }
                 def declarations = declarationService.find(typeSecond, drp.id)
-                if (declarations != null && declarations.size() == 1 && declarations[0].accepted && getDeclarationXmlAttr(declarations[0], ['Документ'], 'ПризнСвед91') == '0') {
+                if (declarations != null && declarations.size() == 1 && declarations[0].accepted && getDeclarationXmlAttr(declarations[0], ['Документ'], code001Name) == '0') {
                     declarationMap.put(periodTypeId, declarations[0])
                     drpTemp = drp
                     break
