@@ -843,7 +843,7 @@ void checkDeclarationAccepted() {
                     def period = getReportPeriod(drp.reportPeriod.id)
                     declarations.each { declaration ->
                         logger.warn("Вид: «%s», Подразделение: «%s», Период: «%s, %s», Дата сдачи корректировки: «%s».",
-                                typeName, departmentService.get(declaration.departmentId), reportPeriod.taxPeriod.year, getRefBookValue(8, period.dictTaxPeriodId).NAME.value, drp.correctionDate.format('dd.MM.yyyy'))
+                                typeName, departmentService.get(declaration.departmentId)?.name, reportPeriod.taxPeriod.year, getRefBookValue(8, period.dictTaxPeriodId).NAME.value, drp.correctionDate.format('dd.MM.yyyy'))
                     }
                 }
             }
