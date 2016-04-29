@@ -135,5 +135,16 @@ end;
 /
 
 -----------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-15587: 1.0. Изменить названия полей в справочнике "Участники ТЦО"
+update ref_book_attribute set ord = 100 + ord where ref_book_id = 520 and id not in (5210, 5211);
+
+merge into ref_book_attribute tgt
+using (select id, row_number() over (order by ord) ord from Ref_Book_Attribute where ref_book_id = 520) src
+on (tgt.id = src.id)
+when matched then update set tgt.ord = src.ord;
+
+update ref_book_attribute set name = 'Дата включения в ВЗЛ' when id = 5210;
+update ref_book_attribute set name = 'Дата исключения из ВЗЛ' when id = 5211;
+-----------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
