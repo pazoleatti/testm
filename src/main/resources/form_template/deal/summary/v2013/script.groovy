@@ -767,7 +767,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
     }
 
     // Графа 25
-    if (val25and26 != null && val23 == 2 && signTransaction == recYesId) {
+    if (val25and26 != null && val23 == 1 && signTransaction == recYesId) {
         def metal = getRefBookValue(17, val25and26)
         row.dealSubjectCode1 = metal.TN_VED_CODE.referenceValue
     } else {
