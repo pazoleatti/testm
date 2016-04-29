@@ -2132,7 +2132,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
         // 55. п. 090 "Адрес"
         colIndex++
-        formDataService.checkReferenceValue(9, values[colIndex], map.ADDRESS?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (map.ADDRESS?.stringValue != null ? map.ADDRESS?.stringValue : "")
+        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // Графа 53, 54, 55 - сменили тип для наглядности: что было видно какие данные попадут в уведомление
         // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
