@@ -496,7 +496,7 @@ void logicCheckXML(LogLevel logLevel) {
         while (reader.hasNext()) {
             if (reader.startElement) {
                 elements[reader.name.localPart] = true
-                if (!fileFound && isCurrentNode([], elements)) {
+                if (!fileFound && isCurrentNode(['Файл'], elements)) {
                     fileFound = true
                     idFile = getXmlValue(reader, 'ИдФайл')
                     versForm = getXmlValue(reader, 'ВерсФорм')
