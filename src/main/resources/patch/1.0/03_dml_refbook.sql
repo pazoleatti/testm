@@ -143,8 +143,8 @@ using (select id, row_number() over (order by ord) ord from Ref_Book_Attribute w
 on (tgt.id = src.id)
 when matched then update set tgt.ord = src.ord;
 
-update ref_book_attribute set name = 'Дата включения в ВЗЛ' when id = 5210;
-update ref_book_attribute set name = 'Дата исключения из ВЗЛ' when id = 5211;
+update ref_book_attribute set name = 'Дата включения в ВЗЛ' where id = 5210;
+update ref_book_attribute set name = 'Дата исключения из ВЗЛ' where id = 5211;
 -----------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
