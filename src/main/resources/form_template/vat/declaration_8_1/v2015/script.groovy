@@ -207,10 +207,10 @@ void preXmlCheck() {
         if (!departmentReportPeriods.isEmpty()) {
             departmentReportPeriods.remove(departmentReportPeriods.size() - 1)
         }
-        // начиная с последней корректировки ищем декларацию с ПризнСвед91 = 0
+        // начиная с последней корректировки ищем декларацию с ПризнСвед81 = 0
         for (drp in departmentReportPeriods.reverse()) {
             def declarations = declarationService.find(declarationType8_1, drp.id)
-            if (declarations != null && declarations.size() == 1 && declarations[0].accepted && getDeclarationXmlAttr(declarations[0], ['Документ'], 'ПризнСвед91') == '0') {
+            if (declarations != null && declarations.size() == 1 && declarations[0].accepted && getDeclarationXmlAttr(declarations[0], ['Документ'], 'ПризнСвед81') == '0') {
                 declarationSource = declarations[0]
                 declarationDRP = drp
                 break
