@@ -224,8 +224,9 @@ void preXmlCheck() {
             logger.error("Не найдена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s, %s». Расчет раздела 8.1 не будет выполнен.",
                     declarationTypeName, unpName, year, periodName)
         } else {
+            def correctionDateStr = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)?.correctionDate?.format("dd.MM.yyyy")
             logger.error("Не найдена декларация-источник со строкой «001» равной «0». Вид: «%s», Подразделение: «%s», Период: «%s, %s», Дата сдачи корректировки: «меньше %s». Расчет раздела 8.1 не будет выполнен.",
-                    declarationTypeName, unpName, year, periodName, declarationDRP.correctionDate.format("dd.MM.yyyy"))
+                    declarationTypeName, unpName, year, periodName, correctionDateStr)
         }
     } else { // сообщение №2
         if (formDataEvent != FormDataEvent.CALCULATE) {
