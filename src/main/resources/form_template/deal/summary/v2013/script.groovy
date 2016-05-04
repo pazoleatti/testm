@@ -242,20 +242,27 @@ void logicCheck() {
         checkDatePeriodExtLocal(logger, row, 'dealDoneDate', 'contractDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
 
         // 6. Проверка заполнения граф «ИНН, КПП организации»
-        def organizationCode = getRefBookValue(70, row.organInfo)?.CODE?.value
-        if (organizationCode == 1) {
-            // a
-            ['organINN', 'organKPP'].each { alias ->
-                def msg1 = getColumnName(row, alias)
-                def msg2 = getColumnName(row, 'organInfo')
-                logger.error("Строка $rowNum: Значение графы «$msg1» должно быть заполнено, т.к. значение графы «$msg2» равно «Российская организация»!")
+        if (row.organName) {
+            def val = getRefBookValue(9, row.organName)
+            if (val) {
+                def organizationCode = getRefBookValue(70, val.ORGANIZATION?.referenceValue)?.CODE?.value
+                if (organizationCode == 1) {
+                    // a
+                    def msg2 = getColumnName(row, 'organInfo')
+                    ['organINN', 'organKPP'].each { alias ->
+                        if (row[alias] == null) {
+                            def msg1 = getColumnName(row, alias)
+                            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть заполнено, т.к. значение графы «$msg2» равно «Российская организация»!")
+                        }
+                    }
+                } else if (organizationCode == 2 && row.organRegNum == null && row.taxpayerCode == null) {
+                    // b
+                    def msg1 = getColumnName(row, 'organRegNum')
+                    def msg2 = getColumnName(row, 'taxpayerCode')
+                    def msg3 = getColumnName(row, 'organInfo')
+                    logger.error("Строка $rowNum: Значение графы «$msg1» или графы «$msg2» должно быть заполнено, т.к. значение графы «$msg3» равно «Иностранная организация»!")
+                }
             }
-        } else if (organizationCode == 2) {
-            // b
-            def msg1 = getColumnName(row, 'organRegNum')
-            def msg2 = getColumnName(row, 'taxpayerCode')
-            def msg3 = getColumnName(row, 'organInfo')
-            logger.error("Строка $rowNum: Значение графы «$msg1» или графы «$msg2» должно быть заполнено, т.к. значение графы «$msg3» равно «Иностранная организация»!")
         }
     }
 }
