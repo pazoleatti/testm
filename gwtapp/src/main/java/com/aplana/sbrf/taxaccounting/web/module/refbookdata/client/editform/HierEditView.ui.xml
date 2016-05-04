@@ -63,7 +63,7 @@
                         <g:VerticalPanel width="100%">
                             <g:HorizontalPanel width="100%">
                                 <g:cell width="20%" horizontalAlignment="right">
-                                    <g:Label ui:field="startVersionDateLabel" wordWrap="false" text="Действует с:" addStyleNames="{style.labelStyle}"/>
+                                    <g:Label ui:field="startVersionDateLabel" wordWrap="false" text="Версия действует с:" addStyleNames="{style.labelStyle}"/>
                                 </g:cell>
                                 <g:cell width="80%">
                                     <g:HorizontalPanel>

@@ -120,7 +120,7 @@
                             <g:CheckBox ui:field="pickAll" wordWrap="false" text="Выделить все" checked="false"/>
                         </g:cell>
                         <g:cell horizontalAlignment="left" width="99%">
-                            <g:Label text="Дата актуальности:" wordWrap="false"
+                            <g:Label text="Версии, действующие на дату:" wordWrap="false"
                                      addStyleNames="{modal.marginRight10}, {modal.textAlign}"/>
                         </g:cell>
                         <d:DateMaskBoxPicker ui:field="versionDateBox" width="148px" addStyleNames="{modal.fix}"/>
