@@ -2074,7 +2074,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.locality2 = values[colIndex]
     // 40. п. 100 "Код условия поставки (заполняется только для товаров)"
     colIndex++
-    newRow.deliveryCode = getRecordIdImport(63, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.deliveryCode = getRecordIdImport(63, 'STRCODE', values[colIndex], fileRowIndex, colIndex + colOffset)
     // 41. п. 110 "Код единицы измерения по ОКЕИ"
     colIndex++
     newRow.okeiCode = getRecordIdImport(12, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
