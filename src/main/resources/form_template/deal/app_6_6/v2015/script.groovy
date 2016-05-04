@@ -207,26 +207,17 @@ void logicCheck() {
         }
 
         // 7. Заполнение граф 13 и 14 (сумма дохода, расхода)
-        boolean noOne = (row.incomeSum == null && row.outcomeSum == null)
-        boolean both = (row.incomeSum != null && row.outcomeSum != null)
-        if (noOne) {
-            String msg1 = row.getCell('outcomeSum').column.name
-            String msg2 = row.getCell('incomeSum').column.name
-            logger.error("Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
-        }
-        if (both) {
-            String msg1 = row.getCell('outcomeSum').column.name
-            String msg2 = row.getCell('incomeSum').column.name
-            logger.error("Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
+        if (row.incomeSum != null && row.outcomeSum != null && row.incomeSum > 0 && row.outcomeSum > 0) {
+            String msg1 = row.getCell('incomeSum').column.name
+            String msg2 = row.getCell('outcomeSum').column.name
+            logger.error("Строка $rowNum: Графа «$msg1» и графа «$msg2» одновременно не могут быть заполнены!")
         }
 
-        // 8. Проверка положительной суммы дохода/расхода
-        if (!noOne && !both) {
-            sum = (row.incomeSum != null) ? row.incomeSum : row.outcomeSum
-            if (sum < 0) {
-                String msg = (row.incomeSum != null) ? row.getCell('incomeSum').column.name : row.getCell('outcomeSum').column.name
-                logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
-            }
+        // 8. Проверка суммы дохода/расхода
+        if (row.incomeSum < 0 && row.outcomeSum < 0) {
+                String msg1 = row.getCell('incomeSum').column.name
+                String msg2 = row.getCell('outcomeSum').column.name
+                logger.error("Строка $rowNum: Значение графы «$msg1» или «$msg2» должно быть больше «0»!")
         }
 
         // 9. Проверка даты совершения сделки

@@ -85,7 +85,7 @@ public class App_6_6Test extends ScriptTestBase {
 
         // для попадания в ЛП:
         // 1. Проверка на заполнение графы
-        // 7. Заполнение граф 13 и 14 (сумма дохода, расхода)
+        // 8. Проверка суммы дохода/расхода
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
         dataRows.add(row);
@@ -101,7 +101,7 @@ public class App_6_6Test extends ScriptTestBase {
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Цена 1-ой части сделки, ед. валюты"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Код валюты расчетов по сделке"), entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Цена 1-ой части сделки, руб."), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» должна быть заполнена, если не заполнена графа «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма процентного дохода (руб.)» или «Сумма процентного расхода (руб.)» должно быть больше «0»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -110,7 +110,7 @@ public class App_6_6Test extends ScriptTestBase {
         // 3. Корректность даты заключения сделки
         // 5. Проверка корректности даты исполнения 1-ой части сделки
         // 6. Проверка корректности даты исполнения 2-ой части сделки
-        // 7. Заполнение граф 13 и 14 (сумма дохода, расхода)
+        // 8. Проверка суммы дохода/расхода
         // 9. Проверка даты совершения сделки
         row.getCell("name").setValue(1L, null);
         row.getCell("docNumber").setValue("string", null);
@@ -131,7 +131,7 @@ public class App_6_6Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Дата (заключения) сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата исполнения 1-ой части сделки» должно быть не меньше значения графы «Дата (заключения) сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата исполнения 2-ой части сделки» должно быть не меньше значения графы «Дата исполнения 1-ой части сделки» и не больше 31.12.2099!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» должна быть заполнена, если не заполнена графа «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма процентного дохода (руб.)» или «Сумма процентного расхода (руб.)» должно быть больше «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть равно «31.12.2014»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -158,7 +158,7 @@ public class App_6_6Test extends ScriptTestBase {
         entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals("Строка 1: Значение графы «Дата исполнения 1-ой части сделки» должно быть не меньше значения графы «Дата (заключения) сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» не может быть заполнена одновременно с графой «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма процентного дохода (руб.)» и графа «Сумма процентного расхода (руб.)» одновременно не могут быть заполнены!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -171,7 +171,7 @@ public class App_6_6Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Сумма процентного дохода (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма процентного дохода (руб.)» или «Сумма процентного расхода (руб.)» должно быть больше «0»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -182,7 +182,7 @@ public class App_6_6Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Сумма процентного расхода (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма процентного дохода (руб.)» или «Сумма процентного расхода (руб.)» должно быть больше «0»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

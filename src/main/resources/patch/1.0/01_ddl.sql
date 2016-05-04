@@ -1071,5 +1071,69 @@ END DECLARATION_PCKG;
 drop package pck_zip;
 drop java source "ZipBlob";
 --------------------------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-15555: SQLException при удалении подразделения, если существуют(существовали) ссылки в настройках подразделений
+CREATE OR REPLACE TRIGGER "DEPARTMENT_BEFORE_DELETE"    
+before delete on department
+for each row
+declare
+    pragma autonomous_transaction;
+
+    vCurrentDepartmentID number(9) := :old.id;
+    vCurrentDepartmentType number(9) := :old.type;
+    vHasLinks number(9) := -1;
+    vHasDescendant number(9) := -1;
+begin
+--Подразделение с типом "Банк"(type=1) не может быть удалено
+if vCurrentDepartmentType=1 then
+   raise_application_error(-20001, 'Подразделение с типом "Банк" не может быть удалено');
+end if;
+
+--Существуют дочерние подразделения
+select count(*) into vHasDescendant
+from department
+start with parent_id = vCurrentDepartmentID
+connect by parent_id = prior id;
+
+if vHasDescendant != 0 then
+   raise_application_error(-20002, 'Подразделение, имеющее дочерние подразделения, не может быть удалено');
+end if;
+
+--Ссылочная целостность
+--FORM_DATA
+select count(*) into  vHasLinks from form_data fd
+join department_report_period drp on drp.id = fd.department_report_period_id and drp.department_id = vCurrentDepartmentID;
+
+if vHasLinks !=0 then
+   raise_application_error(-20003, 'Подразделение не может быть удалено, если на него существует ссылка в FORM_DATA');
+end if;
+
+--DECLARATION_DATA
+select count(*) into  vHasLinks from declaration_data dd
+join department_report_period drp on drp.id = dd.department_report_period_id and drp.department_id = vCurrentDepartmentID;
+
+if vHasLinks !=0 then
+   raise_application_error(-20004, 'Подразделение не может быть удалено, если на него существует ссылка в DECLARATION_DATA');
+end if;
+
+--SEC_USER
+select count(*) into  vHasLinks from sec_user where department_id = vCurrentDepartmentID;
+
+if vHasLinks !=0 then
+   raise_application_error(-20005, 'Подразделение не может быть удалено, если на него существует ссылка в SEC_USER');
+end if;
+
+--REF_BOOK_VALUE
+select count(*) into  vHasLinks from ref_book_value rbv
+join ref_book_attribute rba on rba.id = rbv.attribute_id and rba.reference_id = 30
+where rbv.reference_value = vCurrentDepartmentID;
+
+if vHasLinks !=0 then
+   raise_application_error(-20006, 'Подразделение не может быть удалено, если на него существует ссылка в REF_BOOK_VALUE');
+end if;
+
+
+end department_before_delete;
+/
+--------------------------------------------------------------------------------------------------------------
 commit;
 exit;

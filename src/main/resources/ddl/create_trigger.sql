@@ -221,7 +221,7 @@ begin
 end DEP_REP_PER_BEFORE_INS_UPD;
 /
 
-CREATE OR REPLACE TRIGGER "DEPARTMENT_BEFORE_DELETE"
+CREATE OR REPLACE TRIGGER "DEPARTMENT_BEFORE_DELETE"    
 before delete on department
 for each row
 declare
@@ -229,13 +229,13 @@ declare
 
     vCurrentDepartmentID number(9) := :old.id;
     vCurrentDepartmentType number(9) := :old.type;
-    vHasLinks number(1) := -1;
-    vHasDescendant number(1) := -1;
+    vHasLinks number(9) := -1;
+    vHasDescendant number(9) := -1;
 begin
 --Подразделение с типом "Банк"(type=1) не может быть удалено
 if vCurrentDepartmentType=1 then
    raise_application_error(-20001, 'Подразделение с типом "Банк" не может быть удалено');
-end if; 
+end if;
 
 --Существуют дочерние подразделения
 select count(*) into vHasDescendant
@@ -253,7 +253,7 @@ select count(*) into  vHasLinks from form_data fd
 join department_report_period drp on drp.id = fd.department_report_period_id and drp.department_id = vCurrentDepartmentID;
 
 if vHasLinks !=0 then
-   raise_application_error(-20003, 'Подразделение не может быть удалено, если на него существует ссылка в FORM_DATA');   
+   raise_application_error(-20003, 'Подразделение не может быть удалено, если на него существует ссылка в FORM_DATA');
 end if;
 
 --DECLARATION_DATA
@@ -261,23 +261,23 @@ select count(*) into  vHasLinks from declaration_data dd
 join department_report_period drp on drp.id = dd.department_report_period_id and drp.department_id = vCurrentDepartmentID;
 
 if vHasLinks !=0 then
-   raise_application_error(-20004, 'Подразделение не может быть удалено, если на него существует ссылка в DECLARATION_DATA');   
+   raise_application_error(-20004, 'Подразделение не может быть удалено, если на него существует ссылка в DECLARATION_DATA');
 end if;
 
 --SEC_USER
 select count(*) into  vHasLinks from sec_user where department_id = vCurrentDepartmentID;
 
 if vHasLinks !=0 then
-   raise_application_error(-20005, 'Подразделение не может быть удалено, если на него существует ссылка в SEC_USER');   
+   raise_application_error(-20005, 'Подразделение не может быть удалено, если на него существует ссылка в SEC_USER');
 end if;
 
 --REF_BOOK_VALUE
 select count(*) into  vHasLinks from ref_book_value rbv
-join ref_book_attribute rba on rba.id = rbv.attribute_id and rba.reference_id = 30 
+join ref_book_attribute rba on rba.id = rbv.attribute_id and rba.reference_id = 30
 where rbv.reference_value = vCurrentDepartmentID;
 
 if vHasLinks !=0 then
-   raise_application_error(-20006, 'Подразделение не может быть удалено, если на него существует ссылка в REF_BOOK_VALUE');   
+   raise_application_error(-20006, 'Подразделение не может быть удалено, если на него существует ссылка в REF_BOOK_VALUE');
 end if;
 
 

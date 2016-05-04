@@ -154,8 +154,8 @@ void logicCheck() {
 
         // 2. Проверка суммы расходов
         if (row.outcomeSum && row.outcomeSum < 0) {
-            def name5 = row.getCell('outcomeSum').column.name
-            logger.error("Строка $rowNum: Значение графы «%s» должно быть больше или равно «0»!", name5)
+            def msg = row.getCell('outcomeSum').column.name
+            logger.warn("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // 3. Проверка корректности даты договора
