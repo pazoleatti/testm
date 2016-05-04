@@ -248,12 +248,15 @@ void logicCheck() {
                 def organizationCode = getRefBookValue(70, val.ORGANIZATION?.referenceValue)?.CODE?.value
                 if (organizationCode == 1) {
                     // a
-                    def msg2 = getColumnName(row, 'organInfo')
-                    ['organINN', 'organKPP'].each { alias ->
-                        if (row[alias] == null) {
-                            def msg1 = getColumnName(row, alias)
-                            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть заполнено, т.к. значение графы «$msg2» равно «Российская организация»!")
-                        }
+                    if(!val.INN_KIO?.stringValue){
+                        def msg1 = getColumnName(row, 'organINN')
+                        def msg2 = getColumnName(row, 'organInfo')
+                        logger.error("Строка $rowNum: Значение графы «$msg1» должно быть заполнено, т.к. значение графы «$msg2» равно «Российская организация»!")
+                    }
+                    if(!val.KPP?.stringValue){
+                        def msg1 = getColumnName(row, 'organKPP')
+                        def msg2 = getColumnName(row, 'organInfo')
+                        logger.error("Строка $rowNum: Значение графы «$msg1» должно быть заполнено, т.к. значение графы «$msg2» равно «Российская организация»!")
                     }
                 } else if (organizationCode == 2 && row.organRegNum == null && row.taxpayerCode == null) {
                     // b
