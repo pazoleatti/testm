@@ -13,27 +13,10 @@ import groovy.transform.Field
  * formTemplateId = 849
  *
  * TODO:
- *      - сверить алиасы и ТИПЫ столбцов старых источников с алиасами и ТИПАМИ новых источников (шестерок)
- *      - отладить скрипт консолидацией со всеми источниками
- *      - проверить логические проверки
- *      - проверить проверку перед консолидацией
- *      - добавить обработку формы 4.2
- *      - сделать/поправить загрузку из эксель
  *      - добавить тесты
- * Поправленные методы:
- *      - getReportClass
- *      - getGroupId
- *      - isGroupClass2
- * Остановился на строке "// копируем построчно - без группировки"
  */
 
-// TODO:
-//      - сверить алиасы старых источников с алиасами шестерок
-//
-//      - проверить логические проверки
-//      - проверить проверку перед консолидацией
-
-// 1.	name    					Наименование
+// 1.	groupName  					Наименование
 //									РАЗДЕЛ 1А. Сведения о контролируемой сделке (группе однородных сделок)
 // 2.	dealNum1					п. 010 "Порядковый номер сделки по уведомлению"
 // 3.	interdependenceSing			п. 100
@@ -60,7 +43,6 @@ import groovy.transform.Field
 // 23.	dealNum2					п. 010 "Порядковый номер сделки по уведомлению (из раздела 1А)"
 // 24.	dealType					п. 020 "Тип предмета сделки"
 // 25.	dealSubjectName				п. 030 "Наименование предмета сделки"
-// TODO (Ramil Timerbaev) сменился справочник
 // 26.	dealSubjectCode1			п. 040 "Код предмета сделки (код по ТН ВЭД)"
 // 27.	dealSubjectCode2			п. 043 "Код предмета сделки (код по ОКП)"
 // 28.	dealSubjectCode3			п. 045 "Код предмета сделки (код по ОКВЭД)"
@@ -86,18 +68,12 @@ import groovy.transform.Field
 // 47.	dealNum3					п. 010 "Порядковый номер сделки (из раздела 1А)"
 // 48.	dealMemberNum				п. 015 "Порядковый номер участника сделки (из раздела 1Б)"
 // 49.	organInfo					п. 020 "Сведения об организации"
-// TODO (Ramil Timerbaev) сменился тип
 // 50.	countryCode3				п. 030 "Код страны по классификатору ОКСМ"
 // 51.	organName					п. 040 "Наименование организации"
-// TODO (Ramil Timerbaev) сменился тип
 // 52.	organINN					п. 050 "ИНН организации"
-// TODO (Ramil Timerbaev) сменился тип
 // 53.	organKPP					п. 060 "КПП организации"
-// TODO (Ramil Timerbaev) сменился тип
 // 54.	organRegNum					п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
-// TODO (Ramil Timerbaev) сменился тип
 // 55.	taxpayerCode				п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
-// TODO (Ramil Timerbaev) сменился тип
 // 56.	address						п. 090 "Адрес"
 
 switch (formDataEvent) {
@@ -126,6 +102,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -144,12 +121,12 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
-// обязательные графы (1, 2, 4..19, 21, 23..25, 29..31, 42..51)
+// обязательные графы (4..19, 21, 24..25, 29..31, 42..46, 48..51)
 @Field
-def nonEmptyColumns = ['name', 'dealNum1', 'f121', 'f122', 'f123', 'f124', 'f131', 'f132', 'f133', 'f134', 'f135',
+def nonEmptyColumns = [/* 'groupName', 'dealNum1', */ 'f121', 'f122', 'f123', 'f124', 'f131', 'f132', 'f133', 'f134', 'f135',
         'similarDealGroup', 'dealNameCode', 'taxpayerSideCode', 'dealPriceSign', 'dealPriceCode', 'dealMemberCount',
-        'income', 'outcome', 'dealNum2', 'dealType', 'dealSubjectName', 'otherNum', 'contractNum', 'contractDate',
-        'okeiCode', 'count', 'price', 'total', 'dealDoneDate', 'dealNum3', 'dealMemberNum', 'organInfo', 'countryCode3', 'organName']
+        'income', 'outcome', /* 'dealNum2', */ 'dealType', 'dealSubjectName', 'otherNum', 'contractNum', 'contractDate',
+        'okeiCode', 'count', 'price', 'total', 'dealDoneDate', /* 'dealNum3', */ 'dealMemberNum', 'countryCode3', 'organName']
 
 @Field
 def startDate = null
@@ -157,6 +134,9 @@ def startDate = null
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+@Field
+def app4_2FormTypeId = 803
 
 void addNewRow() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
@@ -200,7 +180,7 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
         return null
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Разыменование записи справочника
@@ -210,7 +190,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Проверка при создании формы
 void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentReportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing);
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentReportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
     if (findForm != null) {
         logger.error('Отчет с указанными параметрами уже сформирован!')
     }
@@ -238,13 +218,11 @@ void logicCheck() {
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
         // 3. Проверка кода основания отнесения сделки к контролируемой
-        // TODO (Ramil Timerbaev) проверить
         def onlyNo = (row.f131 == recNoId && row.f132 == recNoId && row.f133 == recNoId && row.f134 == recNoId && row.f135 == recNoId)
         def haveNo = (row.f131 == recNoId || row.f132 == recNoId || row.f133 == recNoId || row.f134 == recNoId || row.f135 == recNoId)
-        if (((row.f122 == recYesId || row.f123 == recYesId) && !onlyNo) ||
-                (haveNo && (row.f122 != recYesId || row.f123 != recYesId))
-        ) {
-            def msg = "Строка %d: Не допускается одновременное заполнение значением «1» любой из граф «Наименование поля 5», «Наименование поля 6» с любой из граф «%s»!"
+        if ((row.f122 != row.f123 && (row.f122 == recYesId || row.f123 == recYesId) && !onlyNo) ||
+                (haveNo && (row.f122 != recYesId || row.f123 != recYesId))) {
+            def msg = "Строка %d: Не допускается одновременное заполнение значением «1» любой из граф «%s», «%s» с любой из граф «%s»!"
             def names = []
             ['f131', 'f132', 'f133', 'f134', 'f135'].each { alias ->
                 names.add(getColumnName(row, alias))
@@ -254,7 +232,6 @@ void logicCheck() {
         }
 
         // 4. Проверка одновременного заполнения доходов и расходов
-        // TODO (Ramil Timerbaev) проверить
         if (row.income != null && row.income > 0 && row.outcome != null && row.outcome > 0) {
             def msg = "Строка %d: Значение граф «%s» и  «%s» не должны быть одновременно больше «0»!"
             logger.error(msg, row.getIndex(), getColumnName(row, 'income'), getColumnName(row, 'outcome'))
@@ -262,7 +239,6 @@ void logicCheck() {
 
         // 5. Проверка неотрицательности доходов
         // 6. Проверка неотрицательности расходов
-        // TODO (Ramil Timerbaev) проверить
         ['income', 'outcome'].each { alias ->
             if (row[alias] != null && row[alias] < 0) {
                 def msg = "Строка %d: Значение графы «%s» должно быть больше или равно «0»!"
@@ -271,7 +247,6 @@ void logicCheck() {
         }
 
         // 7. Проверка одновременного заполнения полей «Код предмета сделки»
-        // TODO (Ramil Timerbaev) проверить
         if (row.dealSubjectCode1 != null && row.dealSubjectCode2 != null) {
             def msg = "Строка %d: Значение граф «%s» и «%s» не должны быть одновременно заполнены!"
             logger.error(msg, row.getIndex(), getColumnName(row, 'dealSubjectCode1'), getColumnName(row, 'dealSubjectCode2'))
@@ -286,17 +261,15 @@ void logicCheck() {
         }
         if (organInfo != null && organInfo == 1) {
             // a
-            // TODO (Ramil Timerbaev) проверить
-            ['organINN', 'organKPP'].each { alias ->
-                if (row[alias] == null) {
+            ['organINN' : 'INNKIO', 'organKPP' : 'KPP'].each { aliasRow, aliasAtribute ->
+                if (!record520[aliasAtribute]?.value) {
                     def msg = "Строка %d: Значение графы «%s» должно быть заполнено, т.к. значение графы «%s» равно «1»!"
-                    logger.error(msg, row.getIndex(), getColumnName(row, alias), getColumnName(row, 'organInfo'))
+                    logger.error(msg, row.getIndex(), getColumnName(row, aliasRow), getColumnName(row, 'organInfo'))
                 }
             }
         }
-        if (organInfo != null && organInfo == 2 && row.organRegNum == null && row.taxpayerCode == null) {
+        if (organInfo != null && organInfo == 2 && !record520?.RS?.value && !record520?.TAX_CODE_INCORPORATION?.value) {
             // b
-            // TODO (Ramil Timerbaev) проверить
             def msg = "Строка %d: Значение графы «%s» или графы «%s» должно быть заполнено, т.к. значение графы «%s» равно «2»!"
             logger.error(msg, row.getIndex(), getColumnName(row, 'organRegNum'), getColumnName(row, 'taxpayerCode'), getColumnName(row, 'organInfo'))
         }
@@ -319,25 +292,10 @@ void calc() {
     sortFormDataRows(false)
 }
 
-/**
- * Логические проверки перед консолидацией.
- *
- * @param departmentFormTypes список источников
- */
-def preConsolidationCheck(def departmentFormTypes) {
+/** Логические проверки перед консолидацией. */
+def preConsolidationCheck() {
     // 1. Проверка на наличие формы «Приложение 4.2»
-    def app4_2Id = 803
-    def app4_2Find = false
-    for (def departmentFormType : departmentFormTypes) {
-        if (departmentFormType.formTypeId == app4_2Id) {
-            def source = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                app4_2Find = true
-                break
-            }
-        }
-    }
-    if (!app4_2Find) {
+    if (!getFormDataApp4_2()) {
         def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
         def periodName = reportPeriod.name + ' ' + reportPeriod.taxPeriod.year
         logger.error("Не существует формы-источника «Приложение 4.2» в статусе «Принята» за период «%s»!", periodName)
@@ -346,29 +304,43 @@ def preConsolidationCheck(def departmentFormTypes) {
     return true
 }
 
+@Field
+def formDataApp4_2 = null
+
+def getFormDataApp4_2() {
+    if (formDataApp4_2 == null) {
+        def source = formDataService.getLast(app4_2FormTypeId, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
+        if (source != null && source.state == WorkflowState.ACCEPTED) {
+            formDataApp4_2 = source
+        }
+    }
+    return formDataApp4_2
+}
+
 // Консолидация
 void consolidation() {
-    def departmentFormTypes = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
-            getReportPeriodStartDate(), getReportPeriodEndDate())
-    // TODO (Ramil Timerbaev) проверить
-    if (!preConsolidationCheck(departmentFormTypes)) {
+    if (!preConsolidationCheck()) {
         return
     }
 
     def matrixRows = []
+    // row → строка источника
     def rowsMap = [:]
     // счетчик по группам для табл. 86
     def int i = 1
-    // мапа идентификаторов для группировки
+    // мапа идентификаторов для группировки (id группы -> номер группы)
     def groupStr = [:]
 
     // row → тип формы-источника
     def final typeMap = [:]
     // row → класс группы
     def final classMap = [:]
-    // row → id группы
+    // row → номер группы
     def final groupMap = [:]
 
+    // консолидация из шестерок
+    def departmentFormTypes = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id,
+            formData.kind, getReportPeriodStartDate(), getReportPeriodEndDate())
     departmentFormTypes.each {
         def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.DEAL) {
@@ -438,6 +410,17 @@ void consolidation() {
         summaryRows.add(getRow(mapForSummary, typeMap))
     }
 
+    // консолидация из 4.2
+    def source = getFormDataApp4_2()
+    formDataService.getDataRowHelper(source).allSaved.each { srcRow ->
+        if (srcRow.sign == getRecYesId()) {
+            mapForSummary.clear()
+            def matrixRow = getPreRow(srcRow, app4_2FormTypeId, typeMap, classMap)
+            mapForSummary.put(matrixRow, srcRow)
+            summaryRows.add(getRow(mapForSummary, typeMap))
+        }
+    }
+
     updateIndexes(summaryRows)
     formDataService.getDataRowHelper(formData).allCached = summaryRows
 }
@@ -454,43 +437,44 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
     // "Нет"
     def Long recNoId = getRecNoId()
 
-    // Графа 2
+    // Графа 3
     row.interdependenceSing = getRecordId(69, 'CODE', '1')
 
-    // Графа 3
-    // row.f121, заполняется после графы 50
-
     // Графа 4
+    // row.f121 - заполняется после графы 50
+
+    // Графа 5
     row.f122 = recNoId
+    // для 6.15 (18)
     if (formTypeId == 837 && srcRow.signPhis != null && srcRow.dependence == recNoId && srcRow.signTransaction == recYesId) {
         def signPhis = getRefBookValue(18, srcRow.signPhis)
-        if (signPhis != null && signPhis.SIGN.stringValue.equals("Физическая поставка")) {
+        if (signPhis?.SIGN?.value == 'Физическая поставка') {
             row.f122 = recYesId
         }
     }
 
-    // Графа 5
+    // Графа 6
     // row.f123, заполняется после графы 50
 
-    // Графа 6
+    // Графа 7
     row.f124 = recNoId
 
-    // Графа 7
+    // Графа 8
     // row.f131, заполняется после графы 50
 
-    // Графа 8
+    // Графа 9
     row.f132 = recNoId
 
-    // Графа 9
+    // Графа 10
     row.f133 = recNoId
 
-    // Графа 10
-    // row.f134, заполняется после графы 50
-
     // Графа 11
-    row.f135 = recNoId
+    // row.f134 - заполняется после графы 50
 
     // Графа 12
+    row.f135 = recNoId
+
+    // Графа 13
     switch (formTypeId) {
         case 812: // 6.3 (1)
         case 814: // 6.5 (2)
@@ -498,7 +482,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 813: // 6.4 (7)
         case 828: // 6.19 (20)
         case 833: // 6.24 (22)
-            row.similarDealGroup = getRecYesId()
+            row.similarDealGroup = recYesId
             break
         case 805: // 6.7 (4)
         case 819: // 6.12 (6)
@@ -506,7 +490,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 816: // 6.1 (12)
         case 832: // 6.23 (21)
         case 836: // 6.25 (26)
-            row.similarDealGroup = getRecNoId()
+            row.similarDealGroup = recNoId
             break
         case 815: // 6.8 (3)
         case 806: // 6.6 (8)
@@ -526,229 +510,197 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             break
     }
 
-    // Графа 13
-    def String val13 = null
-    switch (formTypeId) {
-        case 812: // 6.3 (1)
-            val13 = '002'
-            break
-        case 814: // 6.5 (2)
-        case 815: // 6.8 (3)
-        case 826: // 6.13 (5)
-        case 813: // 6.4 (7)
-        case 833: // 6.24 (22)
-            val13 = '019'
-            break
-        case 805: // 6.7 (4)
-        case 832: // 6.23 (21)
-            val13 = '016'
-            break
-        case 806: // 6.6 (8)
-        case 839: // 6.16 (16)
-        case 835: // 6.14 (17)
-            val13 = '032'
-            break
-        case 827: // 6.11 (9)
-        case 819: // 6.12 (6)
-        case 838: // 6.18 (19)
-            val13 = '015'
-            break
-        case 837: // 6.15 (18)
-            val13 = '032'
-            break
-        case 817: // 6.9 (10)
-        case 836: // 6.25 (26)
-            val13 = '029'
-            break
-        case 825: // 6.10.2 (11)
-        case 823: // 6.10.1 (13)
-        case 834: // 6.22 (24)
-        case 830: // 6.21 (25)
-            val13 = '003'
-            break
-        case 831: // 6.20 (23)
-            val13 = '012'
-            break
-        case 816: // 6.1 (12)
-        case 804: // 6.2 (14)
-            val13 = '012'
-            break
-        case 811: // 6.17 (15)
-            val13 = '017'
-            break
-        case 828: // 6.19 (20)
-            val13 = '004'
-            break
-    }
-    if (val13 != null) {
-        row.dealNameCode = getRecordId(67, 'CODE', "$val13")
-    }
-
     // Графа 14
-    def String val14 = null
+    def tmp = null
     switch (formTypeId) {
-        case 812: // 6.3 (1)
-            if (srcRow.incomeBankSum != null) {
-                val14 = '004'
-            } else if (srcRow.outcomeBankSum != null) {
-                val14 = '003'
-            }
+        case 816: // 6.1 (12)
+        case 804: // 6.2 (14)
+        case 831: // 6.20 (23)
+            tmp = '012'
             break
+        case 812: // 6.3 (1)
+            tmp = '002'
+            break
+        case 813: // 6.4 (7)
         case 814: // 6.5 (2)
         case 815: // 6.8 (3)
         case 826: // 6.13 (5)
-        case 833: // 6.24 (22)
-            val14 = '012'
-            break
-        case 805: // 6.7 (4)
         case 832: // 6.23 (21)
-            val14 = '028'
-            break
-            break
-        case 819: // 6.12 (6)
-            if ((srcRow.incomeSum ?: 0) == 0 && (srcRow.outcomeSum ?: 0) > 0) {
-                val14 = '026'
-            } else if ((srcRow.incomeSum ?: 0) > 0 && (srcRow.outcomeSum ?: 0) == 0) {
-                val14 = '027'
-            }
-            break
-        case 813: // 6.4 (7)
-            val14 = '011'
+        case 833: // 6.24 (22)
+            tmp = '019'
             break
         case 806: // 6.6 (8)
-        case 839: // 6.16 (16)
         case 835: // 6.14 (17)
         case 837: // 6.15 (18)
-            val14 = '052'
+        case 839: // 6.16 (16)
+            tmp = '032'
             break
-        case 827: // 6.11 (9)
-            if (getRecBuyId().equals(srcRow.transactionType)) {
-                val14 = '026'
-            } else if (getRecSellId().equals(srcRow.transactionType)) {
-                val14 = '027'
-            }
+        case 805: // 6.7 (4)
+            tmp = '016'
             break
         case 817: // 6.9 (10)
-        case 816: // 6.1 (12)
-        case 804: // 6.2 (14)
-            val14 = '022'
+        case 836: // 6.25 (26)
+            tmp = '029'
             break
         case 825: // 6.10.2 (11)
         case 823: // 6.10.1 (13)
-            val14 = '005'
+        case 830: // 6.21 (25)
+        case 834: // 6.22 (24)
+            tmp = '003'
+            break
+        case 827: // 6.11 (9)
+        case 819: // 6.12 (6)
+        case 838: // 6.18 (19)
+            tmp = '015'
             break
         case 811: // 6.17 (15)
-            val14 = '030'
-            break
-        case 838: // 6.18 (19)
-            def boolean dealBuy = getRecDealBuyId().equals(srcRow.dealFocus)
-            val14 = (dealBuy ? '026' : '027')
+            tmp = '017'
             break
         case 828: // 6.19 (20)
-            val14 = '007'
-            break
-        case 831: // 6.20 (23)
-            val14 = '020'
-            break
-        case 834: // 6.22 (24)
-        case 830: // 6.21 (25)
-            val14 = '002'
-            break
-        case 836: // 6.25 (26)
-            val14 = '048'
+            tmp = '004'
             break
     }
-    if (val14 != null) {
-        row.taxpayerSideCode = getRecordId(65, 'CODE', "$val14")
+    if (tmp != null) {
+        row.dealNameCode = getRecordId(67, 'CODE', tmp)
     }
 
     // Графа 15
-    // справочное, заполняется после графы 50, по-умолчанию 0
-    row.dealPriceSign = recNoId
+    tmp = null
+    switch (formTypeId) {
+        case 816: // 6.1 (12)
+        case 804: // 6.2 (14)
+        case 817: // 6.9 (10)
+            tmp = '022'
+            break
+        case 812: // 6.3 (1)
+            tmp = '004'
+            break
+        case 813: // 6.4 (7)
+        case 832: // 6.23 (21)
+            tmp = '011'
+            break
+        case 814: // 6.5 (2)
+        case 815: // 6.8 (3)
+        case 826: // 6.13 (5)
+        case 833: // 6.24 (22)
+            tmp = '012'
+            break
+        case 806: // 6.6 (8)
+        case 835: // 6.14 (17)
+        case 837: // 6.15 (18)
+        case 839: // 6.16 (16)
+            tmp = '052'
+            break
+        case 805: // 6.7 (4)
+            tmp = '028'
+            break
+        case 823: // 6.10.1 (13)
+        case 825: // 6.10.2 (11)
+            tmp = '005'
+            break
+        case 827: // 6.11 (9)
+            if (getRecBuyId() == srcRow.transactionType) {
+                tmp = '026'
+            } else if (getRecSellId() == srcRow.transactionType) {
+                tmp = '027'
+            }
+            break
+        case 819: // 6.12 (6)
+            if ((srcRow.incomeSum ?: 0) == 0 && (srcRow.outcomeSum ?: 0) > 0) {
+                tmp = '026'
+            } else if ((srcRow.incomeSum ?: 0) > 0 && (srcRow.outcomeSum ?: 0) == 0) {
+                tmp = '027'
+            }
+            break
+        case 811: // 6.17 (15)
+            tmp = '030'
+            break
+        case 838: // 6.18 (19)
+            tmp = (getRecDealBuyId() == srcRow.dealFocus ? '026' : '027')
+            break
+        case 828: // 6.19 (20)
+            tmp = '007'
+            break
+        case 831: // 6.20 (23)
+            tmp = '020'
+            break
+        case 830: // 6.21 (25)
+        case 834: // 6.22 (24)
+            tmp = '002'
+            break
+        case 836: // 6.25 (26)
+            tmp = '048'
+            break
+    }
+    if (tmp != null) {
+        row.taxpayerSideCode = getRecordId(65, 'CODE', tmp)
+    }
 
     // Графа 16
-    def int val16 = 0
+    // заполняется после графы 30 и 31
+
+    // Графа 17
+    tmp = 0
     switch (formTypeId) {
         case 817: // 6.9 (10)
-            val16 = 3
+            tmp = 3
             break
         case 827: // 6.11 (9)
             if (srcRow.dealMode != null) {
-                def val16Rec = getRefBookValue(14, srcRow.dealMode)
-                if (val16Rec.ID.value != 2) {
-                    val16 = 2
+                def record14 = getRefBookValue(14, srcRow.dealMode)
+                if (record14.ID.value != 2) {
+                    tmp = 2
                 }
             }
             break
     }
-    row.dealPriceCode = getRecordId(66, 'CODE', "$val16")
-
-    // Графа 17
-    row.dealMemberCount = 2
+    row.dealPriceCode = getRecordId(66, 'CODE', "$tmp")
 
     // Графа 18
+    row.dealMemberCount = 2
+
+    // Графа 19
     // заполняется предварительно для каждой строки getPreRow
     row.income = 0
 
-    // Графа 20
+    // Графа 21
     // заполняется предварительно для каждой строки getPreRow
     row.outcome = 0
 
-    // Графа 23
-    def int val23 = 2
+    // Графа 24
+    def int value24 = 2
     switch (formTypeId) {
         case 805: // 6.7 (4)
         case 817: // 6.9 (10)
         case 828: // 6.19 (20)
         case 831: // 6.20 (23)
         case 836: // 6.25 (26)
-            val23 = 3
+            value24 = 3
             break
         case 837: // 6.15 (18)
         case 838: // 6.18 (19)
-            // TODO (Ramil Timerbaev) проверить необходимость 837 тут
-            sign23 = formTypeId == 837 ? srcRow.signPhis : srcRow.deliverySign
-            def values23 = getRefBookValue(18, sign23)
-            if (values23 != null && values23.SIGN.stringValue.equals("ОМС")) {
-                val23 = 2
-            } else {
-                val23 = 1
-            }
+            def record18 = getRefBookValue(18, srcRow.signPhis)
+            value24 = (record18?.SIGN?.value == "ОМС") ? 2 : 1
             break
     }
-    row.dealType = getRecordId(64, 'CODE', "$val23")
+    row.dealType = getRecordId(64, 'CODE', "$value24")
 
-    // Графа 24
+    // Графа 25
     switch (formTypeId) {
+        case 816: // 6.1 (12)
+            row.dealSubjectName = 'Размещение денежных средств корпоративным клиентам - не регулируемые сделки'
+            break
+        case 804: // 6.2 (14)
+            row.dealSubjectName = 'Размещение денежных средств в межбанковские кредиты'
+            break
         case 812: // 6.3 (1)
-            if (srcRow.incomeBankSum != null) {
-                row.dealSubjectName = 'Предоставление помещений в аренду (субаренду)'
-            } else if (srcRow.outcomeBankSum != null) {
-                row.dealSubjectName = 'Получение помещений в аренду (субаренду)'
-            }
-            break
-        case 814: // 6.5 (2)
-            row.dealSubjectName = 'Услуги, связанные с обслуживанием недвижимости'
-            break
-        case 815: // 6.8 (3)
-            row.dealSubjectName = 'Услуги по разработке, внедрению и модификации программного обеспечения'
-            break
-        case 805: // 6.7 (4)
-            row.dealSubjectName = 'Услуги по предоставлению права пользования товарным знаком'
-            break
-        case 826: // 6.13 (5)
-            row.dealSubjectName = 'Приобретение услуг, связанных с организацией и проведением торгов по реализации имущества'
-            break
-        case 819: // 6.12 (6)
-            def String out = (getRecRPCId().equals(srcRow.dealSign) ? "" : "вне")
-            if ((srcRow.incomeSum ?: 0) == 0 && (srcRow.outcomeSum ?: 0) > 0) {
-                row.dealSubjectName = "Покупка акций и долей - " + out + "биржевые сделки"
-            } else if ((srcRow.incomeSum ?: 0) > 0 && (srcRow.outcomeSum ?: 0) == 0) {
-                row.dealSubjectName = "Продажа акций и долей - " + out + "биржевые сделки"
-            }
+            row.dealSubjectName = 'Предоставление помещений в аренду (субаренду)'
             break
         case 813: // 6.4 (7)
             row.dealSubjectName = 'Оказание банковских услуг'
+            break
+        case 814: // 6.5 (2)
+            row.dealSubjectName = 'Услуги, связанные с обслуживанием недвижимости'
             break
         case 806: // 6.6 (8)
             def String out = ('Да'.equals(srcRow.dealsMode) ? "" : "вне")
@@ -758,6 +710,21 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
                 row.dealSubjectName = "Операции РЕПО - " + out + "биржевые (процентный расход)"
             }
             break
+        case 805: // 6.7 (4)
+            row.dealSubjectName = 'Услуги по предоставлению права пользования товарным знаком'
+            break
+        case 815: // 6.8 (3)
+            row.dealSubjectName = 'Услуги по разработке, внедрению и модификации программного обеспечения'
+            break
+        case 817: // 6.9 (10)
+            row.dealSubjectName = 'Уступка прав требования - с обязательной оценкой'
+            break
+        case 823: // 6.10.1 (13)
+            row.dealSubjectName = 'Выдача гарантий'
+            break
+        case 825: // 6.10.2 (11)
+            row.dealSubjectName = 'Открытие аккредитивов и инструментов торгового финансирования'
+            break
         case 827: // 6.11 (9)
             def String out = (getRecDealsModeId().equals(srcRow.dealMode) ? "" : "вне")
             if (getRecBuyId().equals(srcRow.transactionType)) {
@@ -766,198 +733,195 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
                 row.dealSubjectName = "Продажа ЦБ - " + out + "биржевые сделки"
             }
             break
-        case 817: // 6.9 (10)
-            row.dealSubjectName = 'Уступка прав требования - с обязательной оценкой'
+        case 819: // 6.12 (6)
+            def String out = (getRecRPCId().equals(srcRow.dealSign) ? "" : "вне")
+            if ((srcRow.incomeSum ?: 0) == 0 && (srcRow.outcomeSum ?: 0) > 0) {
+                row.dealSubjectName = "Покупка акций и долей - " + out + "биржевые сделки"
+            } else if ((srcRow.incomeSum ?: 0) > 0 && (srcRow.outcomeSum ?: 0) == 0) {
+                row.dealSubjectName = "Продажа акций и долей - " + out + "биржевые сделки"
+            }
             break
-        case 825: // 6.10.2 (11)
-            row.dealSubjectName = 'открытие аккредитивов и инструментов торгового финансирования'
+        case 826: // 6.13 (5)
+            row.dealSubjectName = 'Приобретение услуг, связанных с организацией и проведением торгов по реализации имущества'
             break
-        case 816: // 6.1 (12)
-            row.dealSubjectName = 'Размещение денежных средств корпоративным клиентам - не регулируемые сделки'
+        case 835: // 6.14 (17)
+            if ((srcRow.income ?: 0) - (srcRow.outcome ?: 0) >= 0) {
+                row.dealSubjectName = 'Беспоставочные (расчетные) срочные сделки - доходные'
+            } else {
+                row.dealSubjectName = 'Беспоставочные (расчетные) срочные сделки - расходные'
+            }
             break
-        case 823: // 6.10.1 (13)
-            row.dealSubjectName = 'Выдача гарантий'
+        case 837: // 6.15 (18)
+            def buyOrSale = (getRecRUSId() == srcRow.dealCountryCode ? 'покупка' : 'продажа')
+            def incomeOrOutcome = ((srcRow.income ?: 0) - (srcRow.outcome ?: 0) >= 0 ? 'доход' : 'расход')
+            row.dealSubjectName = String.format('Срочные поставочные сделки купли-продажи драгоценных металлов (сделки с отсрочкой исполнения), %s, %s', buyOrSale, incomeOrOutcome)
             break
-        case 804: // 6.2 (14)
-            row.dealSubjectName = 'Размещение денежных средств в межбанковские кредиты'
+        case 839: // 6.16 (16)
+            if ((srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0) >= 0) {
+                row.dealSubjectName = 'Срочные поставочные конверсионные сделки (сделки с отсрочкой исполнения) - доход'
+            } else {
+                row.dealSubjectName = 'Срочные поставочные конверсионные сделки (сделки с отсрочкой исполнения) - расход'
+            }
             break
         case 811: // 6.17 (15)
-            if (srcRow.income != null) {
+            if ((srcRow.income ?: 0) - (srcRow.outcome ?: 0) >= 0) {
                 row.dealSubjectName = 'Кассовые конверсионные сделки - доходные'
             } else if (srcRow.outcome != null) {
                 row.dealSubjectName = 'Кассовые конверсионные сделки - расходные'
             }
             break
-        case 839: // 6.16 (16)
-        case 835: // 6.14 (17)
-        case 837: // 6.15 (18)
         case 838: // 6.18 (19)
-            // расчитывается дальше для группы
+            def buyOrSale = (getRecDealBuyId() == srcRow.dealFocus ? 'покупки' : 'продажи')
+            def incomeOrOutcome = ((srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0) >= 0 ? 'доходные' : 'расходные')
+            row.dealSubjectName = String.format('Кассовые сделки %s драгоценных металлов - %s', buyOrSale, incomeOrOutcome)
             break
         case 828: // 6.19 (20)
             row.dealSubjectName = 'Привлечение денежных средств'
             break
-        case 832: // 6.23 (21)
-        case 833: // 6.24 (22)
-            row.dealSubjectName = srcRow.serviceType
-            break
         case 831: // 6.20 (23)
             row.dealSubjectName = 'Привлечение средств на межбанковском рынке'
+            break
+        case 830: // 6.21 (25)
+            row.dealSubjectName = 'Привлечение гарантий (открытие аккредитивов и других инструментов торгового финансирования)'
             break
         case 834: // 6.22 (24)
             row.dealSubjectName = 'Привлечение гарантий'
             break
-        case 830: // 6.21 (25)
-            row.dealSubjectName = 'Привлечение гарантий (открытие аккредитивов и других инструментов торгового финансирования)'
+        case 832: // 6.23 (21)
+        case 833: // 6.24 (22)
+            row.dealSubjectName = srcRow.serviceType
             break
         case 836: // 6.25 (26)
             row.dealSubjectName = 'Приобретение прав требования'
             break
     }
 
-    def val25and26 = null
-    switch (formTypeId) {
-        case 837: // 6.15 (18)
-            val25and26 = srcRow.innerCode
-            break
-        case 838: // 6.18 (19)
-            val25and26 = srcRow.metalName
-            break
-    }
-    if (val25and26 != null && val23 == 1) {
-        def metal = getRefBookValue(17, val25and26)
-
-        // Графа 25
-        row.dealSubjectCode1 = metal.TN_VED_CODE.referenceValue
-
-        // Графа 26
-        def String innerCode = metal.INNER_CODE.stringValue
-        def String code = null;
-        if ("A33".equals(innerCode)) {
-            code = '17 5140'
-        } else if ("A76".equals(innerCode)) {
-            code = '17 5120'
-        } else if ("A98".equals(innerCode)) {
-            code = '17 5340'
-        } else if ("A99".equals(innerCode)) {
-            code = '17 5220'
-        }
-        if (code != null) {
-            row.dealSubjectCode2 = getRecordId(68, 'CODE', code)
-        }
-    }
-
+    // Графа 26
     // Графа 27
-    if (val23 in [2, 3]) {
-        def String val27 = null
+    if (value24 == 1) {
         switch (formTypeId) {
-            case 812: // 6.3 (1)
-                val27 = '70.20.2'
-                break
-            case 814: // 6.5 (2)
-                val27 = '70.32.2'
-                break
-            case 815: // 6.8 (3)
-                val27 = '72.20'
-                break
-            case 805: // 6.7 (4)
-            case 826: // 6.13 (5)
-                val27 = '74.8'
-                break
             case 837: // 6.15 (18)
+                row.dealSubjectCode1 = (srcRow.signTransaction == recYesId ? srcRow.innerCode : null)
+                row.dealSubjectCode2 = (srcRow.signTransaction == recNoId ? srcRow.innerCode : null)
+                break
             case 838: // 6.18 (19)
-                val27 = '65.12'
+                row.dealSubjectCode1 = (srcRow.foreignDeal == recYesId ? srcRow.metalName : null)
+                row.dealSubjectCode2 = (srcRow.foreignDeal == recNoId ? srcRow.metalName : null)
                 break
-            case 819: // 6.12 (6)
-            case 827: // 6.11 (9)
-            case 825: // 6.10.2 (11)
-            case 823: // 6.10.1 (13)
-            case 839: // 6.16 (16)
-            case 835: // 6.14 (17)
-            case 834: // 6.22 (24)
-            case 830: // 6.21 (25)
-                val27 = '65.23'
-                break
-            case 813: // 6.4 (7)
-                val27 = '65.12'
-                break
-            case 806: // 6.6 (8)
-            case 817: // 6.9 (10)
-            case 816: // 6.1 (12)
-            case 804: // 6.2 (14)
-            case 836: // 6.25 (26)
-                val27 = '65.22'
-                break
-            case 811: // 6.17 (15)
-            case 828: // 6.19 (20)
-            case 831: // 6.20 (23)
-                val27 = '65.12'
-                break
-            case 832: // 6.23 (21)
-            case 833: // 6.24 (22)
-                val27 = '74'
-                break
-        }
-        if (val27 != null) {
-            row.dealSubjectCode3 = getRecordId(34, 'CODE', "$val27")
         }
     }
 
     // Графа 28
+    if (value24 in [2, 3]) {
+        tmp = null
+        switch (formTypeId) {
+            case 816: // 6.1 (12)
+            case 804: // 6.2 (14)
+            case 806: // 6.6 (8)
+            case 817: // 6.9 (10)
+            case 836: // 6.25 (26)
+                tmp = '65.22'
+                break
+            case 812: // 6.3 (1)
+                tmp = '70.20.2'
+                break
+            case 813: // 6.4 (7)
+                tmp = '65.12'
+                break
+            case 814: // 6.5 (2)
+                tmp = '70.32.2'
+                break
+            case 805: // 6.7 (4)
+            case 826: // 6.13 (5)
+                tmp = '74.8'
+                break
+            case 815: // 6.8 (3)
+                tmp = '72.20'
+                break
+            case 825: // 6.10.2 (11)
+            case 823: // 6.10.1 (13)
+            case 827: // 6.11 (9)
+            case 819: // 6.12 (6)
+            case 835: // 6.14 (17)
+            case 839: // 6.16 (16)
+            case 830: // 6.21 (25)
+            case 834: // 6.22 (24)
+                tmp = '65.23'
+                break
+            case 837: // 6.15 (18)
+            case 811: // 6.17 (15)
+            case 838: // 6.18 (19)
+            case 828: // 6.19 (20)
+            case 831: // 6.20 (23)
+                tmp = '65.12'
+                break
+            case 832: // 6.23 (21)
+            case 833: // 6.24 (22)
+                tmp = '74'
+                break
+        }
+        if (tmp != null) {
+            row.dealSubjectCode3 = getRecordId(34, 'CODE', tmp)
+        }
+    }
+
+    // Графа 29
     row.otherNum = 1
 
     // Графа 48
     row.dealMemberNum = row.otherNum
 
-    // Графа 29
+    // Графа 30
     // заполняется предварительно для каждой строки getPreRow
     row.contractNum = matrixRow.contractNum
 
-    // Графа 30
+    // Графа 31
     // заполняется предварительно для каждой строки getPreRow
     row.contractDate = matrixRow.contractDate
 
-    // Графа 15
-    Calendar compareCalendar15 = Calendar.getInstance()
-    compareCalendar15.set(2011, 12, 28)
-    if (compareCalendar15.getTime().equals(row.contractDate) && "123".equals(row.contractNum)) {
+    // Графа 16
+    Calendar compareCalendar16 = Calendar.getInstance()
+    compareCalendar16.set(2011, 12, 28)
+    // TODO (Ramil Timerbaev) Значение "123" должно быть уточнено заказчиком в ходе внедрения
+    if (compareCalendar16.getTime().equals(row.contractDate) && "123".equals(row.contractNum)) {
         row.dealPriceSign = recYesId
+    } else {
+        row.dealPriceSign = recNoId
     }
 
-    // Графа 31
+    // Графа 32
     switch (formTypeId) {
         case 837: // 6.15 (18)
-            row.countryCode = srcRow.unitCountryCode
+            row.countryCode = srcRow.dealCountryCode
             break
         case 838: // 6.18 (19)
             row.countryCode = srcRow.countryCodeNumeric
             break
     }
 
-    // Графа 32, Графа 33, Графа 34, Графа 35
+    // Графа 33, 34, 35, 36
     if (formTypeId == 837 || formTypeId == 838) {
-        sign32 = formTypeId == 837 ? srcRow.signPhis : srcRow.deliverySign
-        if (sign32 != null) {
-            def values32 = getRefBookValue(18, sign32)
-            if (values32 != null && values32.SIGN.stringValue.equals("Физическая поставка")) {
-                if (formTypeId == 837) {
-                    row.countryCode1 = srcRow.countryCode2
-                    row.region1 = srcRow.region1
-                    row.city1 = srcRow.city1
-                    row.locality1 = srcRow.settlement1
-                }
-
-                if (formTypeId == 838) {
-                    row.countryCode1 = srcRow.countryCodeNumeric
-                    row.region1 = srcRow.regionCode
-                    row.city1 = srcRow.city
-                    row.locality1 = srcRow.locality
-                }
+        def record18 = getRefBookValue(18, srcRow.signPhis)
+        if (record18?.SIGN?.value == "Физическая поставка") {
+            if (formTypeId == 837) {
+                row.countryCode1 = srcRow.countryCode2
+                row.region1 = srcRow.region1
+                row.city1 = srcRow.city1
+                row.locality1 = srcRow.settlement1
+            } else if (formTypeId == 838) {
+                row.countryCode1 = srcRow.countryCodeNumeric
+                row.region1 = srcRow.regionCode
+                row.city1 = srcRow.city
+                row.locality1 = srcRow.locality
             }
         }
     }
 
-    // Графа 36, Графа 37, Графа 38, Графа 39
+    // Графа 37, 38, 39, 40
+    row.countryCode2 = getRecRUSId()
+    row.region2 = getRecordId(4, 'CODE', '77')
+    row.city2 = 'Москва'
+    row.locality2 = row.city2
     switch (formTypeId) {
         case 812: // 6.3 (1)
         case 814: // 6.5 (2)
@@ -967,27 +931,27 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             row.locality2 = srcRow.settlement
             break
         case 837: // 6.15 (18)
-            row.countryCode2 = srcRow.countryCode3
-            row.region2 = srcRow.region2
-            row.city2 = srcRow.city2
-            row.locality2 = srcRow.settlement2
+            def record18 = getRefBookValue(18, srcRow.signPhis)
+            if (record18?.SIGN?.value == "Физическая поставка") {
+                row.countryCode2 = srcRow.countryCode3
+                row.region2 = srcRow.region2
+                row.city2 = srcRow.city2
+                row.locality2 = srcRow.settlement2
+            }
             break
         case 838: // 6.18 (19)
-            row.countryCode2 = srcRow.countryCodeNumeric2
-            row.region2 = srcRow.region2
-            row.city2 = srcRow.city2
-            row.locality2 = srcRow.locality2
-            break
-        default:
-            row.countryCode2 = getRecRUSId()
-            row.region2 = getRecordId(4, 'CODE', '77')
-            row.city2 = 'Москва'
-            row.locality2 = row.city2
+            def record18 = getRefBookValue(18, srcRow.signPhis)
+            if (record18?.SIGN?.value == "Физическая поставка") {
+                row.countryCode2 = srcRow.countryCodeNumeric2
+                row.region2 = srcRow.region2
+                row.city2 = srcRow.city2
+                row.locality2 = srcRow.locality2
+            }
             break
     }
 
-    // Графа 40
-    if (val23 == 1) {
+    // Графа 41
+    if (value24 == 1) {
         if (formTypeId == 837) {
             row.deliveryCode = srcRow.conditionCode
         } else if (formTypeId == 838) {
@@ -995,114 +959,91 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         }
     }
 
-    // Графа 41
-    def String val41 = null
+    // Графа 42
+    tmp = null
     switch (formTypeId) {
         case 812: // 6.3 (1)
         case 814: // 6.5 (2)
-            val41 = '055'
+            tmp = '055'
             break
-        case 815: // 6.8 (3)
-        case 805: // 6.7 (4)
-        case 826: // 6.13 (5)
+        case 816: // 6.1 (12)
+        case 804: // 6.2 (14)
         case 813: // 6.4 (7)
         case 806: // 6.6 (8)
-        case 827: // 6.11 (9)
-        case 811: // 6.17 (15)
-        case 839: // 6.16 (16)
-        case 835: // 6.14 (17)
-        case 825: // 6.10.2 (11)
-        case 816: // 6.1 (12)
+        case 805: // 6.7 (4)
+        case 815: // 6.8 (3)
         case 823: // 6.10.1 (13)
-        case 804: // 6.2 (14)
+        case 825: // 6.10.2 (11)
+        case 827: // 6.11 (9)
+        case 826: // 6.13 (5)
+        case 835: // 6.14 (17)
         case 837: // 6.15 (18)
+        case 839: // 6.16 (16)
+        case 811: // 6.17 (15)
         case 838: // 6.18 (19)
         case 828: // 6.19 (20)
+        case 831: // 6.20 (23)
+        case 830: // 6.21 (25)
+        case 834: // 6.22 (24)
         case 832: // 6.23 (21)
         case 833: // 6.24 (22)
-        case 831: // 6.20 (23)
-        case 834: // 6.22 (24)
-        case 830: // 6.21 (25)
-            val41 = '796'
+            tmp = '796'
             break
-        case 819: // 6.12 (6)
         case 817: // 6.9 (10)
+        case 819: // 6.12 (6)
         case 836: // 6.25 (26)
             row.okeiCode = srcRow.okeiCode
             break
     }
-    if (val41 != null) {
-        row.okeiCode = getRecordId(12, 'CODE', "$val41")
+    if (tmp != null) {
+        row.okeiCode = getRecordId(12, 'CODE', tmp)
     }
 
-    // Графа 42
+    // Графа 43
     // заполняется после, для группы
     row.count = 0
 
-    // Графа 43
+    // Графа 44
     // заполняется позже, для группы
 
-    // Графа 44
+    // Графа 45
     // заполняется позже, для группы
     row.total = 0
 
-    // Графа 45
+    // Графа 46
     // заполняется предварительно для каждой строки getPreRow
     row.dealDoneDate = matrixRow.dealDoneDate
 
-    // Графа 49
-    // countryCode3 заполняется после графы 50
-
     // Графа 50
+    // countryCode3 заполняется после графы 51
+
+    // Графа 51
     // заполняется предварительно для каждой строки getPreRow
     row.organName = matrixRow.organName
 
     if (row.organName != null) {
-        // Графа 3
+        def record520 = getRefBookValue(520, row.organName)
+        def record525 = getRefBookValue(525, record520?.TYPE?.value)
+        def record511 = getRefBookValue(511, record520?.TAX_STATUS?.value)
 
-        // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
-        // «Организации – участники контролируемых сделок» атрибут «Резидент оффшорной зоны» = 1,
-        // то заполняется значением «0». В ином случае заполняется значением «1».
-        def val = getRefBookValue(9, row.organName)
-        row.f121 = (val.OFFSHORE.referenceValue == recYesId) ? recNoId : recYesId
+        // Графа 4
+        row.f121 = (record525?.CODE?.value == 'РОЗ') ? recNoId : recYesId
 
-        // Графа 5 (логика, обратная графе 3)
-        row.f123 = (row.f121 == recYesId) ? recNoId : recYesId
+        // Графа 6 (логика, обратная графе 4)
+        row.f123 = (row.f121 == recNoId) ? recYesId : recNoId
 
-        // Графа 7 (та же логика, что у графы 3)
-        row.f131 = row.f121
+        // Графа 8
+        row.f131 = (record525?.CODE?.value == 'ВЗЛ' && record511?.CODE?.value == 2) ? recYesId : recNoId
 
-        // Графа 10
-        // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
-        // «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является
-        // резидентом Сколково» = 1, то заполняется значением «1». В ином случае заполняется значением «0».
-        row.f134 = (val.SKOLKOVO.referenceValue == recYesId) ? recYesId : recNoId
+        // Графа 11
+        row.f134 = (record511?.CODE?.value == 1) ? recYesId : recNoId
 
-        // Графа 49
-        // Код страны
-        row.countryCode3 = val.COUNTRY?.referenceValue
-
-        // Графа 53, 54, 55 - сменили тип для наглядности: что было видно какие данные попадут в уведомление
-        def organizationCode = getRefBookValue(70, val.ORGANIZATION?.referenceValue)?.CODE?.value
-        // заполняются только для иностранных организации (код равен 2)
-        if (organizationCode == 2) {
-            // Графа 53
-            row.organRegNum = val?.REG_NUM?.value
-
-            // Графа 54
-            row.taxpayerCode = val?.TAXPAYER_CODE?.value
-
-            // Графа 55
-            row.address = val?.ADDRESS?.value
-
-            if (!row.organRegNum && !row.taxpayerCode) {
-                row.organRegNum = '0'
-            }
-        }
+        // Графа 50
+        row.countryCode3 = record520?.COUNTRY_CODE?.value
     }
 
-    // Графа 48, 51, 52
-    // зависимые в конфигураторе
+    // Графа 49, 52..56
+    // зависимые графы
 
     return row
 }
@@ -1144,7 +1085,13 @@ def getReportClass(def formTypeId) {
     }
 }
 
-// значение для группировки строки (табл. 86)
+/**
+ * Значение для группировки строки (табл. 112).
+ *
+ * @param matrixRow строка для сводной
+ * @param srcRow строка источника
+ * @param typeMap мапа (строка сводной -> тип формы источника)
+ */
 def String getGroupId(def matrixRow, def srcRow, def typeMap) {
     def StringBuilder group = new StringBuilder()
 
@@ -1196,18 +1143,14 @@ def String getGroupId(def matrixRow, def srcRow, def typeMap) {
     return group.toString()
 }
 
-// получение строки итогового отчета на основании группы строк (или одной строки) из "матрицы" и источника (табл. 87)
+/**
+ * Получение строки сводного отчета на основании группы строк (или одной строки) из "матрицы" и источника (табл. 87).
+ *
+ * @param map мапа (строка матрицы -> строка источника)
+ * @param typeMap
+ * @return
+ */
 def getRow(def map, def typeMap) {
-    // для отчетов 16..19 надо считать суммы по двум столбцам
-    def totalSum = 0
-    map.each { matrixRow, srcRow ->
-        if (typeMap.get(matrixRow) in [839, 838]) {
-            totalSum = (srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0)
-        } else if (typeMap.get(matrixRow) in [835, 837]) {
-            totalSum = (srcRow.incomeSum ?: 0) - (srcRow.consumptionSum ?: 0)
-        }
-    }
-
     def row = formData.createDataRow()
     def boolean first = true
     map.each { matrixRow, srcRow ->
@@ -1215,6 +1158,9 @@ def getRow(def map, def typeMap) {
             first = false
 
             row = buildRow(srcRow, matrixRow, typeMap)
+
+            // графа 13
+            // 6.2, 6.6, 6.8, 6.10.1, 6.10.2, 6.11, 6.14, 6.15, 6.16, 6.17, 6.18, 6.20, 6.21, 6.22
             if (typeMap.get(matrixRow) in [815, 806, 827, 825, 823, 804, 811, 839, 835, 837, 838, 831, 834, 830]) {
                 if (map.size() > 1) {
                     row.similarDealGroup = getRecYesId()
@@ -1224,46 +1170,54 @@ def getRow(def map, def typeMap) {
             }
         }
 
-        // Атрибут «п. 150 "Дата совершения сделки (цифрами день, месяц, год)"» всегда расчитывавется одинакого
+        // графа 46
         if (matrixRow.dealDoneDate != null && (row.dealDoneDate == null || matrixRow.dealDoneDate > row.dealDoneDate)) {
             row.dealDoneDate = matrixRow.dealDoneDate
         }
 
-        // Графа 42
+        // Графа 43
         switch (typeMap.get(matrixRow)) {
+            case 816: // 6.1 (12)
             case 812: // 6.3 (1)
             case 814: // 6.5 (2)
-            case 819: // 6.12 (6)
             case 817: // 6.9 (10)
-            case 816: // 6.1 (12)
-            case 804: // 6.2 (14)
+            case 827: // 6.11 (9)
+            case 819: // 6.12 (6)
             case 837: // 6.15 (18)
             case 838: // 6.18 (19)
             case 836: // 6.25 (26)
                 row.count = row.count + (srcRow.count ?: 0)
-                break
-            case 827: // 6.11 (9)
-                row.count = row.count + (srcRow.bondCount ?: 0)
                 break
             default:
                 row.count = 1
                 break
         }
 
-        // Графа 44 п. 140 "Итого стоимость без учета НДС, акцизов и пошлины, руб."
+        // Графа 45
         switch (typeMap.get(matrixRow)) {
-            case 812: // 6.3 (1)
-            case 814: // 6.5 (2)
-            case 815: // 6.8 (3)
-            case 805: // 6.7 (4)
-            case 826: // 6.13 (5)
-            case 819: // 6.12 (6)
-            case 813: // 6.4 (7)
             case 816: // 6.1 (12)
+            case 804: // 6.2 (14)
+            case 812: // 6.3 (1)
+            case 813: // 6.4 (7)
+            case 814: // 6.5 (2)
+            case 805: // 6.7 (4)
+            case 815: // 6.8 (3)
+            case 817: // 6.9 (10)
+            case 823: // 6.10.1 (13)
+            case 825: // 6.10.2 (11)
+            case 819: // 6.12 (6)
+            case 826: // 6.13 (5)
             case 835: // 6.14 (17)
+            case 837: // 6.15 (18)
+            case 839: // 6.16 (16)
+            case 811: // 6.17 (15)
             case 828: // 6.19 (20)
+            case 831: // 6.20 (23)
+            case 830: // 6.21 (25)
+            case 834: // 6.22 (24)
             case 832: // 6.23 (21)
             case 833: // 6.24 (22)
+            case 836: // 6.25 (26)
                 row.total = row.total + (srcRow.cost ?: 0)
                 break
             case 806: // 6.6 (8)
@@ -1273,116 +1227,52 @@ def getRow(def map, def typeMap) {
                     row.total = row.total + srcRow.outcomeSum
                 break
             case 827: // 6.11 (9)
-                row.total = row.total + (srcRow.transactionSumRub ?: 0)
+                row.total = row.total + (srcRow.sum ?: 0)
                 break
-            case 817: // 6.9 (10)
-            case 836: // 6.25 (26)
-                row.total = row.total + (srcRow.totalCost ?: 0)
-                break
-            case 825: // 6.10.2 (11)
-            case 823: // 6.10.1 (13)
-            case 804: // 6.2 (14)
-            case 811: // 6.17 (15)
-            case 839: // 6.16 (16)
             case 838: // 6.18 (19)
-            case 831: // 6.20 (23)
-            case 834: // 6.22 (24)
-            case 830: // 6.21 (25)
-                row.total = row.total + (srcRow.total ?: 0) // cost // TODO (Ramil Timerbaev)
-                break
-            case 837: // 6.15 (18)
-                row.total = row.total + (srcRow.totalNds ?: 0)
+                row.total = row.total + (srcRow.total ?: 0)
                 break
         }
 
+        // Графа 19 и 21
         switch (typeMap.get(matrixRow)) {
-            case 812: // 6.3 (1)
-            case 806: // 6.6 (8)
-            case 811: // 6.17 (15)
+            case 816: // 6.1 (12)
+            case 804: // 6.2 (14)
+            case 813: // 6.4 (7)
+            case 805: // 6.7 (4)
+            case 817: // 6.9 (10)
+            case 823: // 6.10.1 (13)
+            case 825: // 6.10.2 (11)
+            case 832: // 6.23 (21)
                 row.income = row.income + matrixRow.income
-                row.outcome = row.outcome + matrixRow.outcome
                 break
+            case 812: // 6.3 (1)
             case 814: // 6.5 (2)
             case 815: // 6.8 (3)
             case 826: // 6.13 (5)
             case 828: // 6.19 (20)
-            case 833: // 6.24 (22)
             case 831: // 6.20 (23)
-            case 834: // 6.22 (24)
             case 830: // 6.21 (25)
+            case 834: // 6.22 (24)
+            case 833: // 6.24 (22)
             case 836: // 6.25 (26)
                 row.outcome = row.outcome + matrixRow.outcome
                 break
-            case 805: // 6.7 (4)
-            case 813: // 6.4 (7)
-            case 817: // 6.9 (10)
-            case 825: // 6.10.2 (11)
-            case 816: // 6.1 (12)
-            case 823: // 6.10.1 (13)
-            case 804: // 6.2 (14)
-            case 832: // 6.23 (21)
-                row.income = row.income + matrixRow.income
-                break
-            case 819: // 6.12 (6)
-                if ((srcRow.incomeSum ?: 0) == 0 && (srcRow.outcomeSum ?: 0) > 0) {
-                    row.outcome = row.outcome + srcRow.outcomeSum
-                } else if ((srcRow.incomeSum ?: 0) > 0 && (srcRow.outcomeSum ?: 0) == 0) {
-                    row.income = row.income + srcRow.cost
-                }
-                break
+            case 806: // 6.6 (8)
             case 827: // 6.11 (9)
-                if (getRecBuyId().equals(srcRow.transactionType)) {
-                    row.outcome = row.outcome + srcRow.transactionSumRub
-                } else if (getRecSellId().equals(srcRow.transactionType)) {
-                    row.income = row.income + srcRow.transactionSumRub
-                }
-                break
-            case 839: // 6.16 (16)
-                def String dealName = 'Срочные поставочные конверсионные сделки (сделки с отсрочкой исполнения) - '
-                if (totalSum >= 0) {
-                    row.income = (row.income ?: 0) + (srcRow.price ?: 0)
-                    row.dealSubjectName = dealName + 'доход'
-                } else {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
-                    row.dealSubjectName = dealName + 'расход'
-                }
-                break
+            case 819: // 6.12 (6)
             case 835: // 6.14 (17)
-                def String dealName = 'Беспоставочные (расчетные) срочные сделки - '
-                if (totalSum >= 0) {
-                    row.income = (row.income ?: 0) + (srcRow.price ?: 0)
-                    row.dealSubjectName = dealName + 'доходные'
-                } else {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
-                    row.dealSubjectName = dealName + 'расходные'
-                }
-                break
             case 837: // 6.15 (18)
-                def String dealName = 'Срочные поставочные сделки купли-продажи драгоценных металлов (сделки с ' +
-                        'отсрочкой исполнения), ' + (getRecRUSId().equals(srcRow.unitCountryCode) ? "покупка, " : "продажа, ")
-                if (totalSum >= 0) {
-                    row.income = (row.income ?: 0) + (srcRow.priceOne ?: 0)
-                    row.dealSubjectName = dealName + 'доход'
-                } else {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.priceOne ?: 0)
-                    row.dealSubjectName = dealName + 'расход'
-                }
-                break
+            case 839: // 6.16 (16)
+            case 811: // 6.17 (15)
             case 838: // 6.18 (19)
-                def boolean dealBuy = getRecDealBuyId().equals(srcRow.dealFocus)
-                def String dealName = 'Кассовые сделки ' + (dealBuy ? "покупки " : "продажи ") + ' драгоценных металлов - '
-                if (totalSum >= 0) {
-                    row.income = (row.income ?: 0) + (srcRow.incomeSum ?: 0)
-                    row.dealSubjectName = dealName + 'доходные'
-                } else {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.outcomeSum ?: 0)
-                    row.dealSubjectName = dealName + 'расходные'
-                }
+                row.income = row.income + matrixRow.income
+                row.outcome = row.outcome + matrixRow.outcome
                 break
         }
     }
 
-    // п. 130 "Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."
+    // графа 44
     if ((row.count ?: 0) != 0) {
         if (row.income > 0) {
             row.price = row.income / row.count
@@ -1521,97 +1411,90 @@ def getPreRow(def srcRow, def formTypeId, def typeMap, def classMap) {
     // класс отчета
     classMap.put(row, getReportClass(formTypeId))
 
-    // Графа 18
+    // Графа 19
     switch (formTypeId) {
-        case 812: // 6.3 (1)
-            row.income = srcRow.incomeBankSum
-            break
-        case 805: // 6.7 (4)
-        case 825: // 6.10.2 (11)
-        case 823: // 6.10.1 (13)
-        case 804: // 6.2 (14)
-            row.income = srcRow.sum
-            break
-        case 819: // 6.12 (6)
         case 816: // 6.1 (12)
+        case 817: // 6.9 (10)
             row.income = srcRow.cost
             break
+        case 804: // 6.2 (14)
+        case 812: // 6.3 (1)
         case 813: // 6.4 (7)
+        case 805: // 6.7 (4)
+        case 823: // 6.10.1 (13)
+        case 825: // 6.10.2 (11)
         case 832: // 6.23 (21)
-            row.income = srcRow.bankIncomeSum
+            row.income = srcRow.sum
             break
         case 806: // 6.6 (8)
-            row.income = srcRow.incomeSum
+            row.income = (srcRow.incomeSum ?: 0)
+            break
+        case 819: // 6.12 (6)
+            row.income = ((srcRow.incomeSum ?: 0) > 0 && (srcRow.outcomeSum ?: 0) == 0 ? srcRow.cost : 0)
             break
         case 827: // 6.11 (9)
-            row.income = srcRow.transactionSumRub
-            break
-        case 817: // 6.9 (10)
-            row.income = srcRow.totalCost
-            break
-        case 811: // 6.17 (15)
-            row.income = srcRow.income
-            break
-        case 839: // 6.16 (16)
-            row.income = srcRow.price
+            row.income = (getRecSellId() == srcRow.transactionType ? srcRow.sum : 0)
             break
         case 835: // 6.14 (17)
-            row.income = srcRow.price
+            row.income = ((srcRow.income ?: 0) - (srcRow.outcome ?: 0) >= 0 ? srcRow.price : 0)
             break
         case 837: // 6.15 (18)
-            row.income = srcRow.priceOne
+        case 811: // 6.17 (15)
+            row.income = ((srcRow.income ?: 0) - (srcRow.outcome ?: 0) >= 0 ? srcRow.cost : 0)
+            break
+        case 839: // 6.16 (16)
+            row.income = ((srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0) >= 0 ? srcRow.price : 0)
             break
         case 838: // 6.18 (19)
-            row.income = srcRow.outcomeSum
+            row.income = ((srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0) >= 0 ? srcRow.total : 0)
             break
     }
     if (row.income == null) {
         row.income = 0
     }
 
-    // Графа 20
+    // Графа 21
     switch (formTypeId) {
-        case 812: // 6.3 (1)
-            row.outcome = srcRow.outcomeBankSum
-            break
         case 814: // 6.5 (2)
-            row.outcome = srcRow.bankSum
-            break
         case 815: // 6.8 (3)
-            row.outcome = srcRow.expensesSum
-            break
-        case 826: // 6.13 (5)
         case 828: // 6.19 (20)
-        case 831: // 6.20 (23)
+        case 830: // 6.21 (25)
         case 834: // 6.22 (24)
             row.outcome = srcRow.sum
             break
-        case 819: // 6.12 (6)
-        case 811: // 6.17 (15)
-            row.outcome = srcRow.outcome
-            break
-        case 830: // 6.21 (25)
-            row.outcome = srcRow.sum // outcomeSum // TODO (Ramil Timerbaev)
-            break
         case 806: // 6.6 (8)
+            row.outcome = (srcRow.outcomeSum ?: 0)
+            break
+        case 819: // 6.12 (6)
+            row.outcome = ((srcRow.incomeSum ?: 0) == 0 && (srcRow.outcomeSum ?: 0) > 0 ? srcRow.outcomeSum : 0)
+            break
+        case 826: // 6.13 (5)
             row.outcome = srcRow.outcomeSum
             break
         case 827: // 6.11 (9)
-            row.outcome = srcRow.transactionSumRub
+            row.outcome = (getRecBuyId() == srcRow.transactionType ? srcRow.sum : 0)
             break
-        case 839: // 6.16 (16)
         case 835: // 6.14 (17)
-        case 836: // 6.25 (26)
-            row.outcome = srcRow.price
+            row.outcome = ((srcRow.income ?: 0) - (srcRow.outcome ?: 0) < 0 ? srcRow.price : 0)
             break
         case 837: // 6.15 (18)
-            row.outcome = srcRow.priceOne
+        case 811: // 6.17 (15)
+            row.outcome = ((srcRow.income ?: 0) - (srcRow.outcome ?: 0) < 0 ? srcRow.cost : 0)
+            break
+        case 839: // 6.16 (16)
+            row.outcome = ((srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0) < 0 ? srcRow.price : 0)
             break
         case 838: // 6.18 (19)
-            row.outcome = srcRow.incomeSum
+            row.outcome = ((srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0) < 0 ? srcRow.total : 0)
+            break
+        case 831: // 6.20 (23)
+            row.outcome = srcRow.outcome
             break
         case 833: // 6.24 (22)
-            row.outcome = srcRow.bankIncomeSum
+            row.outcome = srcRow.cost
+            break
+        case 836: // 6.25 (26)
+            row.outcome = srcRow.price
             break
     }
     if (row.outcome == null) {
@@ -1619,162 +1502,36 @@ def getPreRow(def srcRow, def formTypeId, def typeMap, def classMap) {
     }
 
     // Графа 30
-    switch (formTypeId) {
-        case 812: // 6.3 (1)
-        case 814: // 6.5 (2)
-        case 813: // 6.4 (7)
-        case 806: // 6.6 (8)
-        case 827: // 6.11 (9)
-        case 817: // 6.9 (10)
-        case 835: // 6.14 (17)
-        case 837: // 6.15 (18)
-        case 832: // 6.23 (21)
-        case 833: // 6.24 (22)
-        case 836: // 6.25 (26)
-            row.contractDate = srcRow.contractDate
-            break
-        case 815: // 6.8 (3)
-        case 805: // 6.7 (4)
-        case 826: // 6.13 (5)
-        case 819: // 6.12 (6)
-        case 825: // 6.10.2 (11)
-        case 816: // 6.1 (12)
-        case 823: // 6.10.1 (13)
-        case 804: // 6.2 (14)
-        case 811: // 6.17 (15)
-        case 839: // 6.16 (16)
-        case 838: // 6.18 (19)
-        case 828: // 6.19 (20)
-        case 831: // 6.20 (23)
-        case 834: // 6.22 (24)
-        case 830: // 6.21 (25)
-            row.contractDate = srcRow.docDate
-            break
-    }
+    row.contractNum = (formTypeId != app4_2FormTypeId ? srcRow.docNumber : null)
 
-    switch (formTypeId) {
-        case 812: // 6.3 (1)
-        case 814: // 6.5 (2)
-        case 813: // 6.4 (7)
-        case 806: // 6.6 (8)
-        case 827: // 6.11 (9)
-        case 817: // 6.9 (10)
-        case 835: // 6.14 (17)
-        case 837: // 6.15 (18)
-        case 832: // 6.23 (21)
-        case 833: // 6.24 (22)
-        case 836: // 6.25 (26)
-            row.contractNum = srcRow.contractNum
-            break
-        case 815: // 6.8 (3)
-        case 805: // 6.7 (4)
-        case 826: // 6.13 (5)
-        case 819: // 6.12 (6)
-        case 825: // 6.10.2 (11)
-        case 816: // 6.1 (12)
-        case 823: // 6.10.1 (13)
-        case 804: // 6.2 (14)
-        case 839: // 6.16 (16)
-        case 838: // 6.18 (19)
-        case 828: // 6.19 (20)
-        case 834: // 6.22 (24)
-        case 830: // 6.21 (25)
-            row.contractNum = srcRow.docNumber
-            break
-        case 811: // 6.17 (15)
-        case 831: // 6.20 (23)
-            row.contractNum = srcRow.docNum
-            break
-    }
+    // Графа 31
+    row.contractDate = (formTypeId != app4_2FormTypeId ? srcRow.docDate : null)
 
-    // Графа 45
+    // Графа 46
     switch (formTypeId) {
-        case 812: // 6.3 (1)
-        case 814: // 6.5 (2)
-        case 813: // 6.4 (7)
-        case 806: // 6.6 (8)
-        case 817: // 6.9 (10)
-        case 835: // 6.14 (17)
-        case 837: // 6.15 (18)
-        case 832: // 6.23 (21)
-        case 833: // 6.24 (22)
-        case 836: // 6.25 (26)
-            row.dealDoneDate = srcRow.transactionDate
+        case app4_2FormTypeId: // 4.2
+            row.dealDoneDate = null
             break
-        case 815: // 6.8 (3)
-        case 805: // 6.7 (4)
-        case 819: // 6.12 (6)
-        case 816: // 6.1 (12)
-        case 828: // 6.19 (20)
+        case 827: // 6.11 (9)
             row.dealDoneDate = srcRow.dealDate
             break
-        case 826: // 6.13 (5)
-            row.dealDoneDate = srcRow.date
-            break
-        case 825: // 6.10.2 (11)
-        case 823: // 6.10.1 (13)
-        case 804: // 6.2 (14)
-        case 811: // 6.17 (15)
-        case 839: // 6.16 (16)
-        case 838: // 6.18 (19)
-        case 831: // 6.20 (23)
-        case 834: // 6.22 (24)
-        case 830: // 6.21 (25)
+        default:
             row.dealDoneDate = srcRow.dealDoneDate
-            break
-        case 827: // 6.11 (9)
-            row.dealDoneDate = srcRow.transactionDeliveryDate
             break
     }
 
-    // Графа 50
-    switch (formTypeId) {
-        case 812: // 6.3 (1)
-        case 814: // 6.5 (2)
-        case 813: // 6.4 (7)
-        case 806: // 6.6 (8)
-        case 832: // 6.23 (21)
-        case 833: // 6.24 (22)
-            row.organName = srcRow.jurName
-            break
-        case 815: // 6.8 (3)
-        case 805: // 6.7 (4)
-        case 826: // 6.13 (5)
-        case 819: // 6.12 (6)
-        case 816: // 6.1 (12)
-        case 828: // 6.19 (20)
-        case 831: // 6.20 (23)
-            row.organName = srcRow.fullNamePerson
-            break
-        case 827: // 6.11 (9)
-            row.organName = srcRow.contraName
-            break
-        case 817: // 6.9 (10)
-        case 835: // 6.14 (17)
-        case 837: // 6.15 (18)
-        case 836: // 6.25 (26)
-            row.organName = srcRow.name
-            break
-        case 825: // 6.10.2 (11)
-        case 823: // 6.10.1 (13)
-        case 804: // 6.2 (14)
-        case 811: // 6.17 (15)
-        case 839: // 6.16 (16)
-        case 838: // 6.18 (19)
-        case 834: // 6.22 (24)
-        case 830: // 6.21 (25)
-            row.organName = srcRow.fullName
-            break
-    }
+    // Графа 51
+    row.organName = srcRow.name
+
     return row
 }
 
 // Проставляет статические строки
 void addAllStatic(def dataRows) {
-    def temp = []
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
+    def temp = []
     def prevOrganName = null
     def boolean firstRow = true
     for (int i = 0; i < dataRows.size(); i++) {
@@ -1783,8 +1540,8 @@ void addAllStatic(def dataRows) {
             firstRow = false
             prevOrganName = row.organName
             def newRow = formData.createDataRow()
-            newRow.getCell('name').colSpan = 56
-            ['name', 'dealNum1', 'interdependenceSing', 'f121', 'f122', 'f123', 'f124',
+            newRow.getCell('groupName').colSpan = 56
+            ['groupName', 'dealNum1', 'interdependenceSing', 'f121', 'f122', 'f123', 'f124',
                     'f131', 'f132', 'f133', 'f134', 'f135', 'similarDealGroup', 'dealNameCode',
                     'taxpayerSideCode', 'dealPriceSign', 'dealPriceCode', 'dealMemberCount',
                     'income', 'incomeIncludingRegulation', 'outcome', 'outcomeIncludingRegulation',
@@ -1796,9 +1553,7 @@ void addAllStatic(def dataRows) {
                     'organName', 'organINN', 'organKPP', 'organRegNum', 'taxpayerCode', 'address'].each {
                 newRow.getCell(it).setStyleAlias('Раздел 2 уровня')
             }
-            if (row.organName != null) {
-                newRow.name = getRefBookValue(9, row.organName).NAME.stringValue
-            }
+            newRow.groupName = getRefBookValue(520, row.organName)?.NAME?.value
             newRow.setAlias('grp#'.concat(i.toString()))
             temp.add(newRow)
         }
@@ -1836,6 +1591,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 55
     int HEADER_ROW_COUNT = 4
+    // ищет со второй графы
     String TABLE_START_VALUE = 'РАЗДЕЛ 1А. Сведения о контролируемой сделке (группе однородных сделок)'
     String TABLE_END_VALUE = null
 
@@ -1862,7 +1618,6 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def boolean emptyRow = false
 
     // формирвание строк нф
@@ -1956,7 +1711,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[2][28]): getColumnName(tmpRow, 'contractNum')]),
             ([(headerRows[2][29]): getColumnName(tmpRow, 'contractDate')]),
             ([(headerRows[2][30]): getColumnName(tmpRow, 'countryCode')]),
-            ([(headerRows[2][31]): 'п. 080 Место отправки (погрузки) товара в соответствии с товаросопроводительными документами (заполняется только для товаров)']),
+            ([(headerRows[2][31]): 'п. 080 "Место отправки (погрузки) товара в соответствии с товаросопроводительными документами (заполняется только для товаров)"']),
             ([(headerRows[2][35]): 'п. 090 "Место совершения сделки (адрес места доставки (разгрузки товара), оказания услуги, работы, совершения сделки с иными объектами гражданских прав)"']),
             ([(headerRows[2][39]): getColumnName(tmpRow, 'deliveryCode')]),
             ([(headerRows[2][40]): getColumnName(tmpRow, 'okeiCode')]),
@@ -1984,14 +1739,14 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[3][8]) : getColumnName(tmpRow, 'f133')]),
             ([(headerRows[3][9]) : getColumnName(tmpRow, 'f134')]),
             ([(headerRows[3][10]): getColumnName(tmpRow, 'f135')]),
-            ([(headerRows[3][31]): getColumnName(tmpRow, 'countryCode1')]),
-            ([(headerRows[3][32]): getColumnName(tmpRow, 'region1')]),
-            ([(headerRows[3][33]): getColumnName(tmpRow, 'city1')]),
-            ([(headerRows[3][34]): getColumnName(tmpRow, 'locality1')]),
-            ([(headerRows[3][35]): getColumnName(tmpRow, 'countryCode2')]),
-            ([(headerRows[3][36]): getColumnName(tmpRow, 'region2')]),
-            ([(headerRows[3][37]): getColumnName(tmpRow, 'city2')]),
-            ([(headerRows[3][38]): getColumnName(tmpRow, 'locality2')])
+            ([(headerRows[3][31]): 'Код страны по классификатору ОКСМ (цифровой)']),
+            ([(headerRows[3][32]): 'Регион (код)']),
+            ([(headerRows[3][33]): 'Город']),
+            ([(headerRows[3][34]): 'Населенный пункт (село, поселок и т.д.)']),
+            ([(headerRows[3][35]): 'Код страны по классификатору ОКСМ (цифровой)']),
+            ([(headerRows[3][36]): 'Регион (код)']),
+            ([(headerRows[3][37]): 'Город']),
+            ([(headerRows[3][38]): 'Населенный пункт (село, поселок и т.д.)'])
     ]
     checkHeaderEquals(headerMapping, logger)
 }
@@ -2009,190 +1764,191 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // 2. п. 100
+    // 3. п. 100
     def colIndex = 1
     newRow.interdependenceSing = getRecordIdImport(69, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 3. п. 121
+    // 4. п. 121
     colIndex++
     newRow.f121 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
-    // 4. п. 122
+    // 5. п. 122
     colIndex++
     newRow.f122 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
-    // 5. п. 123
+    // 6. п. 123
     colIndex++
     newRow.f123 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
-    // 6. п. 124
+    // 7. п. 124
     colIndex++
     newRow.f124 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
-    // 7. п. 131
+    // 8. п. 131
     colIndex++
     newRow.f131 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
-    // 8. п. 132
+    // 9. п. 132
     colIndex++
     newRow.f132 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
-    // 9. п. 133
+    // 10. п. 133
     colIndex++
     newRow.f133 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
-    // 10. п. 134
+    // 11. п. 134
     colIndex++
     newRow.f134 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
-    // 11. п. 135 (до 2014 г. / после 2014 г.)
+    // 12. п. 135 (до 2014 г. / после 2014 г.)
     colIndex++
     newRow.f135 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
-    // 12. п. 200 "Группа однородных сделок"
+    // 13. п. 200 "Группа однородных сделок"
     colIndex++
     newRow.similarDealGroup = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
-    // 13. п. 210 "Код наименования сделки"
+    // 14. п. 210 "Код наименования сделки"
     colIndex++
     newRow.dealNameCode = getRecordIdImport(67, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 14. п. 211 "Код стороны сделки, которой является налогоплательщик"
+    // 15. п. 211 "Код стороны сделки, которой является налогоплательщик"
     colIndex++
     newRow.taxpayerSideCode = getRecordIdImport(65, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 15. п. 220 "Признак определения цены сделки с учетом особенностей, предусмотренных статьей 105.4 НК РФ (регулируемые цены)"
+    // 16. п. 220 "Признак определения цены сделки с учетом особенностей, предусмотренных статьей 105.4 НК РФ (регулируемые цены)"
     colIndex++
     newRow.dealPriceSign = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
-    // 16. п. 230 "Код определения цены сделки"
+    // 17. п. 230 "Код определения цены сделки"
     colIndex++
     newRow.dealPriceCode = getRecordIdImport(66, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 17. п. 260 "Количество участников сделки"
+    // 18. п. 260 "Количество участников сделки"
     colIndex++
     newRow.dealMemberCount = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // 18. п. 300 "Сумма доходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
+    // 19. п. 300 "Сумма доходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
     colIndex++
     newRow.income = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // 19. п. 301 "в том числе сумма доходов по сделкам, цены которых подлежат регулированию"
+    // 20. п. 301 "в том числе сумма доходов по сделкам, цены которых подлежат регулированию"
     colIndex++
     newRow.incomeIncludingRegulation = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // 20. п. 310 "Сумма расходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
+    // 21. п. 310 "Сумма расходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
     colIndex++
     newRow.outcome = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // 21.	п. 311 "в том числе сумма расходов по сделкам, цены которых подлежат регулированию"
+    // 22.	п. 311 "в том числе сумма расходов по сделкам, цены которых подлежат регулированию"
     colIndex++
     newRow.outcomeIncludingRegulation = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // 22.
+    // 23.
     colIndex++
-    // 23. п. 020 "Тип предмета сделки"
+    // 24. п. 020 "Тип предмета сделки"
     colIndex++
     newRow.dealType = getRecordIdImport(64, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 24. п. 030 "Наименование предмета сделки"
+    // 25. п. 030 "Наименование предмета сделки"
     colIndex++
     newRow.dealSubjectName = values[colIndex]
-    // 25. п. 040 "Код предмета сделки (код по ТН ВЭД)"
+    // 26. п. 040 "Код предмета сделки (код по ТН ВЭД)"
     colIndex++
-    newRow.dealSubjectCode1 = getRecordIdImport(73, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 26. п. 043 "Код предмета сделки (код по ОКП)"
+    def tmp = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    def record73Id = (tmp ? getRecordIdImport(73, 'CODE', tmp.toString(), fileRowIndex, colIndex + colOffset) : null)
+    if (record73Id) {
+        newRow.dealSubjectCode1 = getRecordIdImport(17, 'TN_VED_CODE', record73Id.toString(), fileRowIndex, colIndex + colOffset)
+    }
+    // 27. п. 043 "Код предмета сделки (код по ОКП)"
     colIndex++
-    newRow.dealSubjectCode2 = getRecordIdImport(68, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 27.	п. 045 "Код предмета сделки (код по ОКВЭД)"
+    def record68Id = getRecordIdImport(68, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    if (record68Id) {
+        newRow.dealSubjectCode2 = getRecordIdImport(17, 'OKP_CODE', record68Id.toString(), fileRowIndex, colIndex + colOffset)
+    }
+    // 28.	п. 045 "Код предмета сделки (код по ОКВЭД)"
     colIndex++
     newRow.dealSubjectCode3 = getRecordIdImport(34, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 28. п. 050 "Номер другого участника сделки"
+    // 29. п. 050 "Номер другого участника сделки"
     colIndex++
     newRow.otherNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // 29. п. 060 "Номер договора"
+    // 30. п. 060 "Номер договора"
     colIndex++
     newRow.contractNum = values[colIndex]
-    // 30. п. 065 "Дата договора"
+    // 31. п. 065 "Дата договора"
     colIndex++
     newRow.contractDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
-    // 31. п. 070 "Код страны происхождения предмета сделки по классификатору ОКСМ (цифровой)"
+    // 32. п. 070 "Код страны происхождения предмета сделки по классификатору ОКСМ (цифровой)"
     colIndex++
     newRow.countryCode = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 32. Код страны по классификатору ОКСМ (цифровой)
+    // 33. Код страны по классификатору ОКСМ (цифровой)
     colIndex++
     newRow.countryCode1 = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 33. Регион (код)
+    // 34. Регион (код)
     colIndex++
     newRow.region1 = getRecordIdImport(4, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 34. Город
+    // 35. Город
     colIndex++
     newRow.city1 = values[colIndex]
-    // 35. Населенный пункт (село, поселок и т.д.)
+    // 36. Населенный пункт (село, поселок и т.д.)
     colIndex++
     newRow.locality1 = values[colIndex]
-    // 36. Код страны по классификатору ОКСМ (цифровой)
+    // 37. Код страны по классификатору ОКСМ (цифровой)
     colIndex++
     newRow.countryCode2 = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 37. Регион (код)
+    // 38. Регион (код)
     colIndex++
     newRow.region2 = getRecordIdImport(4, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 38. Город
+    // 39. Город
     colIndex++
     newRow.city2 = values[colIndex]
-    // 39. Населенный пункт (село, поселок и т.д.)
+    // 40. Населенный пункт (село, поселок и т.д.)
     colIndex++
     newRow.locality2 = values[colIndex]
-    // 40. п. 100 "Код условия поставки (заполняется только для товаров)"
+    // 41. п. 100 "Код условия поставки (заполняется только для товаров)"
     colIndex++
-    newRow.deliveryCode = getRecordIdImport(63, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 41. п. 110 "Код единицы измерения по ОКЕИ"
+    newRow.deliveryCode = getRecordIdImport(63, 'STRCODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 42. п. 110 "Код единицы измерения по ОКЕИ"
     colIndex++
     newRow.okeiCode = getRecordIdImport(12, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 42. п. 120 "Количество"
+    // 43. п. 120 "Количество"
     colIndex++
     newRow.count = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // 43. п. 130 "Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."
+    // 44. п. 130 "Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."
     colIndex++
     newRow.price = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // 44. п. 140 "Итого стоимость без учета НДС, акцизов и пошлины, руб."
+    // 45. п. 140 "Итого стоимость без учета НДС, акцизов и пошлины, руб."
     colIndex++
     newRow.total = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // 45. п. 150 "Дата совершения сделки (цифрами день, месяц, год)"
+    // 46. п. 150 "Дата совершения сделки (цифрами день, месяц, год)"
     colIndex++
     newRow.dealDoneDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
-    // 46.
+    // 47.
     colIndex++
-    // 47. п. 015 "Порядковый номер участника сделки (из раздела 1Б)"
+    // 48. п. 015 "Порядковый номер участника сделки (из раздела 1Б)"
     colIndex++
     newRow.dealMemberNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // 48
+    // 49
     colIndex++
-    // 49. п. 030 "Код страны по классификатору ОКСМ"
+    // 50. п. 030 "Код страны по классификатору ОКСМ"
     colIndex++
     newRow.countryCode3 = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    // 50. п. 040 "Наименование организации"
+    // 51. п. 040 "Наименование организации"
     colIndex++
-    newRow.organName = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset)
-    def map = getRefBookValue(9, newRow.organName)
-    if (map != null) {
-        // 48. п. 020 "Сведения об организации"
+    newRow.organName = getRecordIdImport(520, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset)
+    def record520 = getRefBookValue(520, newRow.organName)
+    if (record520 != null) {
+        // 49. п. 020 "Сведения об организации"
         colIndex = 47
-        def map2 = getRefBookValue(70, map.ORGANIZATION?.referenceValue)
-        formDataService.checkReferenceValue(9, values[colIndex], map2.VALUE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        def record513 = getRefBookValue(513, record520.ORG_CODE?.value)
+        def parentColumnName = getColumnName(newRow, 'organName')
+        def parentColumnValue = record520?.NAME?.value
+        def expectedValue = record513?.CODE?.value?.toString()
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
 
-        // 51. п. 050 "ИНН организации"
+        // 52. п. 050 "ИНН организации"
         colIndex = 50
-        def expectedValue = (map.INN_KIO?.stringValue != null ? map.INN_KIO?.stringValue : "")
-        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (record520.INNKIO?.stringValue != null ? record520.INNKIO?.stringValue : "")
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
 
-        // 52. п. 060 "КПП организации"
+        // 53. п. 060 "КПП организации"
         colIndex++
-        expectedValue = (map.KPP?.stringValue != null ? map.KPP?.stringValue : "")
-        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (record520.KPP?.stringValue != null ? record520.KPP?.stringValue : "")
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
 
-        // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
+        // 54. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
         colIndex++
-        expectedValue = (map.REG_NUM?.stringValue != null ? map.REG_NUM?.stringValue : "")
-        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (record520.RS?.stringValue != null ? record520.RS?.stringValue : "")
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
 
-        // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
+        // 55. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
         colIndex++
-        expectedValue = (map.TAXPAYER_CODE?.stringValue != null ? map.TAXPAYER_CODE?.stringValue : "")
-        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (record520.TAX_CODE_INCORPORATION?.stringValue != null ? record520.TAX_CODE_INCORPORATION?.stringValue : "")
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
 
-        // 55. п. 090 "Адрес"
+        // 56. п. 090 "Адрес"
         colIndex++
-        formDataService.checkReferenceValue(9, values[colIndex], map.ADDRESS?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
-
-        // Графа 53, 54, 55 - сменили тип для наглядности: что было видно какие данные попадут в уведомление
-        // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
-        newRow.organRegNum = map.REG_NUM?.stringValue
-
-        // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
-        newRow.taxpayerCode = map.TAXPAYER_CODE?.stringValue
-
-        // 55. п. 090 "Адрес"
-        newRow.address = map.ADDRESS?.stringValue
+        expectedValue = (record520.ADDRESS?.stringValue != null ? record520.ADDRESS?.stringValue : "")
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
     }
 
     return newRow
@@ -2203,7 +1959,6 @@ def getYesNoByNumber(def number) {
         return getRecYesId()
     } else if (number == 0) {
         return getRecNoId()
-
     }
     return null
 }

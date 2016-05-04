@@ -3,17 +3,15 @@
     <fixedRows>false</fixedRows>
     <name>Сводный отчет для уведомления по КС</name>
     <fullName>Сводный отчет для уведомления по КС</fullName>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
-        <alias>name</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>groupName</alias>
         <checking>false</checking>
-        <columnType>REFBOOK</columnType>
+        <columnType>STRING</columnType>
         <name>Наименование</name>
         <order>1</order>
         <width>0</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>5201</nameAttributeId>
-        <refBookAttributeId>5201</refBookAttributeId>
-        <searchEnabled>true</searchEnabled>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>dealNum1</alias>
@@ -380,7 +378,7 @@
         <alias>region1</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>п. 080 Место отправки (погрузки) товара в соответствии с товаросопроводительными документами (заполняется только для товаров)&quot;. Регион (код)</name>
+        <name>п. 080 &quot;Место отправки (погрузки) товара в соответствии с товаросопроводительными документами (заполняется только для товаров)&quot;. Регион (код)</name>
         <order>34</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
