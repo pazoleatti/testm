@@ -233,7 +233,7 @@ void logicCheck() {
 
         // 4. Проверка одновременного заполнения доходов и расходов
         if (row.income != null && row.income > 0 && row.outcome != null && row.outcome > 0) {
-            def msg = "Строка %d: Значение граф «%s» и  «%s» не должны быть одновременно больше «0»!"
+            def msg = "Строка %d: Значение граф «%s» и «%s» не должны быть одновременно больше «0»!"
             logger.error(msg, row.getIndex(), getColumnName(row, 'income'), getColumnName(row, 'outcome'))
         }
 
