@@ -195,10 +195,13 @@ public class App_6_6Test extends ScriptTestBase {
         row.getCell("incomeSum").setValue(0, null);
         row.getCell("outcomeSum").setValue(null, null);
         testHelper.execute(FormDataEvent.CHECK);
-        Assert.assertEquals(0, testHelper.getLogger().getEntries().size());
+        i = 0;
+        Assert.assertEquals("Строка 1: Значение графы «Сумма процентного дохода (руб.)» или «Сумма процентного расхода (руб.)» должно быть больше «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
 
         // проверка неотрицательности суммы расходов;
-        row.getCell("outcomeSum").setValue(0, null);
+        row.getCell("outcomeSum").setValue(1, null);
         row.getCell("incomeSum").setValue(null, null);
         testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertEquals(0, testHelper.getLogger().getEntries().size());

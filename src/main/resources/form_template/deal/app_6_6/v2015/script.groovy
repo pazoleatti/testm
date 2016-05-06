@@ -214,7 +214,7 @@ void logicCheck() {
         }
 
         // 8. Проверка суммы дохода/расхода
-        if (row.incomeSum < 0 && row.outcomeSum < 0) {
+        if (row.incomeSum <= 0 && row.outcomeSum <= 0) {
                 String msg1 = row.getCell('incomeSum').column.name
                 String msg2 = row.getCell('outcomeSum').column.name
                 logger.error("Строка $rowNum: Значение графы «$msg1» или «$msg2» должно быть больше «0»!")
