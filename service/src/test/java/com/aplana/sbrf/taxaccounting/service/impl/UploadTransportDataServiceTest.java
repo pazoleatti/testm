@@ -2,10 +2,15 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
@@ -20,12 +25,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
@@ -38,6 +43,7 @@ public class UploadTransportDataServiceTest {
     private static String FILE_NAME_1 = "1290-39.2_______18_0000_00212014_1.rnu"; // Mock как справочник
     private static String FILE_NAME_2 = "Тестовый файл 2.zip"; // Архив
     private static String FILE_NAME_3 = "____101-1______________147212014__.rnu"; // Архив
+    private static String FILE_NAME_4 = "____101-1______________147212014_1.rnu"; // Месячная ТФ
     private static String FILE_NAME_2_EXTRACT_1 = "____852-4______________147212014__.rnu"; // ТФ НФ
     private static String FILE_NAME_2_EXTRACT_2 = "Тестовый файл 2.txt"; // Mock как неподходящий файл
 
@@ -51,6 +57,8 @@ public class UploadTransportDataServiceTest {
     @Autowired
     ConfigurationDao configurationDao;
     @Autowired
+    RefBookDao refBookDao;
+    @Autowired
     DepartmentService departmentService;
     @Autowired
     AuditService auditService;
@@ -60,6 +68,8 @@ public class UploadTransportDataServiceTest {
     FormTypeService formTypeService;
     @Autowired
     PeriodService periodService;
+    @Autowired
+    DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
@@ -102,18 +112,9 @@ public class UploadTransportDataServiceTest {
         final Department formDepartment = new Department();
         formDepartment.setId(TEST_DEPARTMENT_ID);
         formDepartment.setName("TestDepartment");
+        formDepartment.setActive(true);
 
-        when(departmentService.getDepartment(anyInt())).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                int departmentId = (Integer) invocation.getArguments()[0];
-                if (departmentId == TEST_DEPARTMENT_ID) {
-                    return formDepartment;
-                } else {
-                    return null;
-                }
-            }
-        });
+        doReturn(formDepartment).when(departmentService).getDepartment(eq(TEST_DEPARTMENT_ID));
         when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), any(Date.class), any(Date.class)))
                 .thenReturn(Arrays.asList(TEST_DEPARTMENT_ID));
         when(departmentService.getDepartmentBySbrfCode("147")).thenReturn(formDepartment);
@@ -140,6 +141,11 @@ public class UploadTransportDataServiceTest {
         when(departmentFormTypeDao.existAssignedForm(TEST_DEPARTMENT_ID, formType852_4.getId(), FormDataKind.PRIMARY)).thenReturn(true);
         when(departmentFormTypeDao.existAssignedForm(TEST_DEPARTMENT_ID, formType101_1.getId(), FormDataKind.PRIMARY)).thenReturn(true);
 
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        departmentReportPeriod.setId(1);
+        departmentReportPeriod.setActive(true);
+        when(departmentReportPeriodService.getLast(eq(TEST_DEPARTMENT_ID), eq(reportPeriod21.getId()))).thenReturn(departmentReportPeriod);
+
         FormTemplate ft = new FormTemplate();
         ft.setScript("case FormDataEvent."+FormDataEvent.IMPORT_TRANSPORT_FILE.name() + ":");
         FormTemplate ft2 = new FormTemplate();
@@ -150,6 +156,19 @@ public class UploadTransportDataServiceTest {
         when(formTemplateService.getActiveFormTemplateId(eq(2), any(Integer.class))).thenReturn(2);
         when(formTemplateService.get(eq(1), any(Logger.class))).thenReturn(ft);
         when(formTemplateService.get(eq(2), any(Logger.class))).thenReturn(ft2);
+
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+        HashMap<String, RefBookValue> values = new HashMap<String, RefBookValue>();
+        values.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "имя периода"));
+        result.add(values);
+        when(refBookDao.getRecords(eq(8L), any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(result);
+        RefBook refBook = new RefBook();
+        refBook.setName("Коды, определяющие налоговый (отчётный) период");
+        RefBookAttribute attribute = new RefBookAttribute();
+        attribute.setName("Код подразделения в нотации Сбербанка");
+        attribute.setAlias("SBRF_CODE");
+        refBook.setAttributes(Arrays.asList(attribute));
+        when(refBookDao.get(eq(30L))).thenReturn(refBook);
     }
 
     @AfterClass
@@ -270,7 +289,109 @@ public class UploadTransportDataServiceTest {
         user.setRoles(asList(role));
         Logger logger = new Logger();
         uploadTransportDataService.uploadFile(userInfo, FILE_NAME_3, getFileAsStream(FILE_NAME_3), logger);
-        Assert.assertEquals("Для налоговой формы загружаемого файла \"" + FILE_NAME_3 + "\" не предусмотрена обработка транспортного файла! Загрузка не выполнена.", logger.getEntries().get(3).getMessage());
+        Assert.assertEquals("Для налоговой формы загружаемого файла «" + FILE_NAME_3 + "» не предусмотрена обработка транспортного файла! Загрузка не выполнена.", logger.getEntries().get(3).getMessage());
+    }
+
+    // Макет не ежемесячный, а ТФ месячная
+    @Test
+    public void uploadFile8Test() throws IOException {
+        try {
+            TAUserInfo userInfo = new TAUserInfo();
+            TAUser user = new TAUser();
+            userInfo.setUser(user);
+            TARole role = new TARole();
+            role.setAlias(TARole.ROLE_CONTROL_UNP);
+            user.setRoles(asList(role));
+            Logger logger = new Logger();
+            UploadResult uploadResult = uploadTransportDataService.uploadFile(userInfo, FILE_NAME_4, getFileAsStream(FILE_NAME_4), logger);
+            Assert.assertEquals(0, uploadResult.getSuccessCounter());
+            Assert.assertEquals(1, uploadResult.getFailCounter());
+            Assert.assertEquals(6, logger.getEntries().size());
+            Assert.assertEquals(String.format(UploadTransportDataServiceImpl.U2, FILE_NAME_4), logger.getEntries().get(3).getMessage());
+            Assert.assertEquals(String.format(UploadTransportDataServiceImpl.U2_7, "101-1"), logger.getEntries().get(4).getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Макет ежемесячный, а ТФ немесячная
+    @Test
+    public void uploadFile9Test() throws IOException {
+        try {
+            FormTemplate ft = new FormTemplate();
+            ft.setScript("case FormDataEvent."+FormDataEvent.IMPORT_TRANSPORT_FILE.name() + ":");
+            ft.setMonthly(true);
+
+            when(formTemplateService.get(eq(2), any(Logger.class))).thenReturn(ft);
+
+            TAUserInfo userInfo = new TAUserInfo();
+            TAUser user = new TAUser();
+            userInfo.setUser(user);
+            TARole role = new TARole();
+            role.setAlias(TARole.ROLE_CONTROL_UNP);
+            user.setRoles(asList(role));
+            Logger logger = new Logger();
+            UploadResult uploadResult = uploadTransportDataService.uploadFile(userInfo, FILE_NAME_3, getFileAsStream(FILE_NAME_4), logger);
+            Assert.assertEquals(0, uploadResult.getSuccessCounter());
+            Assert.assertEquals(6, logger.getEntries().size());
+            Assert.assertEquals(String.format(UploadTransportDataServiceImpl.U2, FILE_NAME_3), logger.getEntries().get(3).getMessage());
+            Assert.assertEquals(String.format(UploadTransportDataServiceImpl.U2_5, "101-1"), logger.getEntries().get(4).getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Макет ежемесячный, а ТФ месячная, только другого периода
+    @Test
+    public void uploadFile10Test() throws IOException {
+        try {
+            FormTemplate ft = new FormTemplate();
+            ft.setScript("case FormDataEvent." + FormDataEvent.IMPORT_TRANSPORT_FILE.name() + ":");
+            ft.setMonthly(true);
+
+            when(formTemplateService.get(eq(2), any(Logger.class))).thenReturn(ft);
+
+            TAUserInfo userInfo = new TAUserInfo();
+            TAUser user = new TAUser();
+            userInfo.setUser(user);
+            TARole role = new TARole();
+            role.setAlias(TARole.ROLE_CONTROL_UNP);
+            user.setRoles(asList(role));
+            Logger logger = new Logger();
+            UploadResult uploadResult = uploadTransportDataService.uploadFile(userInfo, FILE_NAME_4, getFileAsStream(FILE_NAME_4), logger);
+            Assert.assertEquals(0, uploadResult.getSuccessCounter());
+            Assert.assertEquals(6, logger.getEntries().size());
+            Assert.assertEquals(String.format(UploadTransportDataServiceImpl.U2, FILE_NAME_4), logger.getEntries().get(3).getMessage());
+            Assert.assertEquals(String.format(UploadTransportDataServiceImpl.U2_6, "1", "21", " (имя периода)"), logger.getEntries().get(4).getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Неактивное подразделение
+    @Test
+    public void uploadFile11Test() throws IOException {
+        try {
+            final Department formDepartment = new Department();
+            formDepartment.setId(TEST_DEPARTMENT_ID);
+            formDepartment.setName("TestDepartment");
+            formDepartment.setActive(false);
+
+            when(departmentService.getDepartmentBySbrfCode(eq("147"))).thenReturn(formDepartment);
+            TAUserInfo userInfo = new TAUserInfo();
+            TAUser user = new TAUser();
+            userInfo.setUser(user);
+            TARole role = new TARole();
+            role.setAlias(TARole.ROLE_CONTROL_UNP);
+            user.setRoles(asList(role));
+            Logger logger = new Logger();
+            UploadResult uploadResult = uploadTransportDataService.uploadFile(userInfo, FILE_NAME_3, getFileAsStream(FILE_NAME_3), logger);
+            Assert.assertEquals(0, uploadResult.getSuccessCounter());
+            Assert.assertEquals(5, logger.getEntries().size());
+            Assert.assertEquals(String.format(UploadTransportDataServiceImpl.U3 + UploadTransportDataServiceImpl.U3_3, FILE_NAME_3, "TestDepartment", "Коды, определяющие налоговый (отчётный) период"), logger.getEntries().get(3).getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

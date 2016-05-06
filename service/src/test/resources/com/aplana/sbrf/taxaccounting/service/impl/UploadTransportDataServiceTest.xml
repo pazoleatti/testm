@@ -23,6 +23,9 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.PeriodService"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService"/>
+    </bean>
     <bean id="signService" class="com.aplana.sbrf.taxaccounting.service.impl.UploadTransportDataServiceImpl" />
 
 </beans>

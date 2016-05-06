@@ -7,11 +7,14 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
@@ -50,11 +53,16 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             return new SimpleDateFormat("HH:mm dd.MM.yyyy");
         }
     };
+    private static final long REF_BOOK_DEPARTMENT = 30L; // Подразделения
+    private static final long REF_BOOK_PERIOD_DICT = 8L; // Коды отчетных периодов
+    private static final String SBRF_CODE_ATTR_NAME = "SBRF_CODE";
 
     @Autowired
     private ConfigurationDao configurationDao;
     @Autowired
     private FormDataDao formDataDao;
+    @Autowired
+    private RefBookDao refBookDao;
     @Autowired
     private FormDataService formDataService;
     @Autowired
@@ -130,7 +138,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     public List<Integer> getTB(TAUserInfo userInfo, Logger logger) {
         // Выборка подразделений http://conf.aplana.com/pages/viewpage.action?pageId=13111363
         List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                Arrays.asList(TaxType.INCOME), null, null);
+                Arrays.asList(TaxType.values()), null, null);
 
         List<Department> departmentTBList = new LinkedList<Department>();
         if (departmentList != null) {
@@ -249,9 +257,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Указан несуществующий код налоговой формы
                 FormType formType = formTypeService.getByCode(formCode);
                 if (formType == null) {
-                    log(userInfo, LogData.L6, logger, lockId, fileName);
+                    log(userInfo, LogData.L6, logger, lockId, formCode);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), lockId, fileName))), logger, lockId);
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), lockId, formCode))), logger, lockId);
                     fail++;
                     continue;
                 }
@@ -261,9 +269,18 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Указан недопустимый код периода
                 ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
                 if (reportPeriod == null) {
-                    log(userInfo, LogData.L7, logger, lockId, fileName);
+                    String reportPeriodName = "";
+                    String filter = "CODE=" + reportPeriodCode + " AND " + formType.getTaxType().getCode() + "=1";
+                    PagingResult<Map<String, RefBookValue>> reportPeriodDicts = refBookDao.getRecords(REF_BOOK_PERIOD_DICT, null, null, filter, null);
+                    if (reportPeriodDicts.size() == 1) {
+                        reportPeriodName = reportPeriodDicts.get(0).get("NAME").getStringValue();
+                        if (reportPeriodName != null && !reportPeriodName.isEmpty()) {
+                            reportPeriodName = " (" + reportPeriodName + ")";
+                        }
+                    }
+                    log(userInfo, LogData.L7, logger, lockId, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), lockId, fileName))), logger, lockId);
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), lockId, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year))), logger, lockId);
                     fail++;
                     continue;
                 }
@@ -341,9 +358,10 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
                 // Указан несуществующий код подразделения
                 if (formDepartment == null) {
-                    log(userInfo, LogData.L5, logger, lockId, fileName);
+                    RefBook refBook = refBookDao.get(REF_BOOK_DEPARTMENT);
+                    log(userInfo, LogData.L5, logger, lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), lockId, fileName))), logger, lockId);
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode))), logger, lockId);
                     fail++;
                     continue;
                 }
@@ -355,10 +373,10 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 boolean existedAdditionalAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL);
                 // если нет назначения на первичную и выходную, то ошибка
                 if (!existedPrimaryAssigning && !existedAdditionalAssigning) {
-                    log(userInfo, LogData.L14, logger, lockId, formType.getName(), formDepartment.getName());
+                    log(userInfo, LogData.L14, logger, lockId, formDepartment.getName(), formType.getName());
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
                             Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L14.getText(),
-                                    lockId, formType.getName(), formDepartment.getName()))), logger, lockId);
+                                    lockId, formDepartment.getName(), formType.getName()))), logger, lockId);
                     fail++;
                     continue;
                 } else if (!existedPrimaryAssigning) {

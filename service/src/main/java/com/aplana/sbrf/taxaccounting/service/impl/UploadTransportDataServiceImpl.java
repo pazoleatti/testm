@@ -1,11 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -24,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Dmitriy Levykin
@@ -41,9 +46,15 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     @Autowired
     private ConfigurationDao configurationDao;
     @Autowired
+    private RefBookDao refBookDao;
+    @Autowired
+    private FormDataDao formDataDao;
+    @Autowired
     private AuditService auditService;
     @Autowired
     private PeriodService periodService;
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private LoadRefBookDataService loadRefBookDataService;
     @Autowired
@@ -55,14 +66,27 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     @Autowired
     private FormTemplateService formTemplateService;
 
+    private static final long REF_BOOK_DEPARTMENT = 30L; // Подразделения
+    private static final long REF_BOOK_PERIOD_DICT = 8L; // Коды отчетных периодов
+    private static final String SBRF_CODE_ATTR_NAME = "SBRF_CODE";
+
     // Сообщения при загрузке в каталоги
     static final String U1 = "В каталоге загрузки ранее загруженный файл «%s» был заменен!";
-    static final String U2 = "Файл «%s» не загружен, т.к. имеет некорректный формат имени!";
-    static final String U2_1 = " Код подразделения «%s» не существует в АС «Учет налогов»!";
-    static final String U2_2 = " Код налоговой формы «%s» не существует в АС «Учет налогов»!";
-    static final String U2_3 = " Код отчетного периода «%s» не существует в налоговом периоде %d года в АС «Учет налогов»!";
-    static final String U3_1 = "Указанное в транспортном файле подразделение «%s» недоступно текущему пользователю!";
-    static final String U3_2 = "Для подразделения «%s» не назначено первичной или выходной налоговой формы «%s»!";
+    static final String U2 = "Файл «%s» не загружен, так как:";
+    static final String U2_0 = "Файл «%s» не загружен, т.к. имеет некорректный формат имени!";
+    static final String U2_1 = "В справочнике «%s» отсутствует подразделение, поле «%s» которого равно «%s»!";
+    static final String U2_2 = "В Системе отсутствует налоговая форма с кодом «%s»!";
+    static final String U2_3 = "Для вида налога «%s» в Системе не создан период с кодом «%s»%s, календарный год «%s»!";
+    static final String U2_4 = "Файл имеет расширение отличное от «rnu»!";
+    static final String U2_5 = "В наименовании файла должен быть указан код месяца, т.к. налоговая форма с кодом «%s» ежемесячная!";
+    static final String U2_6 = "Код месяца «%s» не соответствует коду периода «%s»%s!";
+    static final String U2_7 = "В наименовании файла не должно быть кода месяца, т.к. налоговая форма с кодом «%s» неежемесячная!";
+    static final String U3 = "Файл «%s» не загружен, так как ";
+    static final String U3_1 = "подразделение «%s» недоступно текущему пользователю!";
+    static final String U3_2 = "для подразделения «%s» не назначено первичной или выходной налоговой формы «%s»!";
+    static final String U3_3 = "подразделение «%s» является недействующим (справочник «%s»)!";
+    static final String U3_4 = "для вида налога «%s» закрыт (либо еще не открыт) период с кодом «%s»%s, календарный год «%s»!";
+    static final String U3_5 = "налоговая форма существует и находится в состоянии, отличном от «" + WorkflowState.CREATED.getTitle() + "»";
     static final String U4 = "Загружаемая налоговая форма «%s» подразделения «%s» не относится ни к одному ТБ, " +
             "в связи с чем для нее не существует каталог загрузки в конфигурационных параметрах АС «Учет налогов»!";
 
@@ -89,7 +113,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         L34_2_2("Нет доступа к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, true),
         L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true),
         L37("При загрузке файла «%s» произошла непредвиденная ошибка: %s.", LogLevel.ERROR, true),
-        L48("Для налоговой формы загружаемого файла \"%s\" не предусмотрена обработка транспортного файла! Загрузка не выполнена.", LogLevel.ERROR, true);
+        L48("Для налоговой формы загружаемого файла «%s» не предусмотрена обработка транспортного файла! Загрузка не выполнена.", LogLevel.ERROR, true);
 
         private LogLevel level;
         private String text;
@@ -337,7 +361,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             // Не справочники Diasoft и не ТФ НФ
             if (!isFormData) {
-                logger.warn(U2, fileName);
+                logger.warn(U2_0, fileName);
                 return null;
             }
 
@@ -349,44 +373,90 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             String reportPeriodCode = transportDataParam.getReportPeriodCode();
             Integer year = transportDataParam.getYear();
             String departmentCode = transportDataParam.getDepartmentCode();
+            Integer monthCode = transportDataParam.getMonth();
 
             // Вывод результата разбора имени файла
             logger.info(U5, fileName);
             logger.info(U5_1, fileName);
-            if (transportDataParam.getMonth() == null) {
+            if (monthCode == null) {
                 logger.info(U6_1, getFileNamePart(formCode), getFileNamePart(departmentCode),
                         getFileNamePart(reportPeriodCode), getFileNamePart(year));
             } else {
                 logger.info(U6_2, getFileNamePart(formCode), getFileNamePart(departmentCode),
                         getFileNamePart(reportPeriodCode), getFileNamePart(year),
-                        getFileNamePart(transportDataParam.getMonth()));
+                        getFileNamePart(monthCode));
             }
 
             // Не задан код подразделения или код формы
             if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
-                logger.warn(U2, fileName);
+                logger.warn(U2_0, fileName);
                 return null;
             }
 
             // Указан несуществующий код налоговой формы
             FormType formType = formTypeService.getByCode(formCode);
             if (formType == null) {
-                logger.warn(U2 + U2_2, fileName, formCode);
+                logger.warn(U2, fileName);
+                logger.warn(U2_2, formCode);
                 return null;
             }
 
             // Указан несуществующий код подразделения
             Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode);
             if (formDepartment == null) {
-                logger.warn(U2 + U2_1, fileName, transportDataParam.getDepartmentCode());
+                logger.warn(U2, fileName);
+                RefBook refBook = refBookDao.get(REF_BOOK_DEPARTMENT);
+                logger.warn(U2_1, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(),transportDataParam.getDepartmentCode());
                 return null;
             }
 
+            String reportPeriodName = "";
+            String filter = "CODE=" + reportPeriodCode + " AND " + formType.getTaxType().getCode() + "=1";
+            PagingResult<Map<String, RefBookValue>> reportPeriodDicts = refBookDao.getRecords(REF_BOOK_PERIOD_DICT, null, null, filter, null);
+            if (reportPeriodDicts.size() == 1) {
+                reportPeriodName = reportPeriodDicts.get(0).get("NAME").getStringValue();
+                if (reportPeriodName != null && !reportPeriodName.isEmpty()) {
+                    reportPeriodName = " (" + reportPeriodName + ")";
+                }
+            }
             // Указан недопустимый код периода
             ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
             if (reportPeriod == null) {
-                logger.warn(U2 + U2_3, fileName, reportPeriodCode, year);
+                logger.warn(U2, fileName);
+                logger.warn(U2_3, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year);
                 return null;
+            }
+
+            // Ошибки ежемесячных форм
+            FormTemplate formTemplate = null;
+            if (formTemplateService.existFormTemplate(formType.getId(), reportPeriod.getId(), true)) {
+                formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId()), logger);
+            }
+            if (formTemplate != null) {
+                if (formTemplate.isMonthly()) {
+                    if (monthCode == null) {
+                        logger.warn(U2, fileName);
+                        logger.warn(U2_5, formCode);
+                        return null;
+                    } else {
+                        List<Months> availableMonthList = periodService.getAvailableMonthList(reportPeriod.getId());
+                        boolean foundMonth = false;
+                        for (Months month : availableMonthList) {
+                            if (month.getId() == monthCode) {
+                                foundMonth = true;
+                            }
+                        }
+                        if (!foundMonth) {
+                            logger.warn(U2, fileName);
+                            logger.warn(U2_6, monthCode, reportPeriodCode, reportPeriodName);
+                            return null;
+                        }
+                    }
+                } else if (monthCode != null) {
+                    logger.warn(U2, fileName);
+                    logger.warn(U2_7, formCode);
+                    return null;
+                }
             }
 
             // 40 - Выборка для доступа к экземплярам НФ/деклараций
@@ -394,19 +464,43 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                     Arrays.asList(formType.getTaxType()), null, null);
 
             if (!departmentList.contains(formDepartment.getId())) {
-                logger.warn(U3_1, formDepartment.getName());
+                logger.warn(U3 + U3_1, fileName, formDepartment.getName());
+                return null;
+            }
+
+            // Неактивное подразделение
+            if (!formDepartment.isActive()) {
+                RefBook refBook = refBookDao.get(REF_BOOK_DEPARTMENT);
+                logger.warn(U3 + U3_3, fileName, formDepartment.getName(), refBook.getName());
                 return null;
             }
 
             // Назначение подразделению типа и вида НФ
-            if (!departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY) &&
-                    !departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL)) {
-                logger.warn(U3_2, formDepartment.getName(), formType.getName());
+            boolean assignedPrimaryForm = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY);
+            boolean assignedAdditionalForm = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL);
+            if (!assignedPrimaryForm && !assignedAdditionalForm) {
+                logger.warn(U3 + U3_2, fileName, formDepartment.getName(), formType.getName());
+                return null;
+            }
+
+            // Период отсутствует либо закрыт
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(formDepartment.getId(), reportPeriod.getId());
+            if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
+                logger.warn(U3 + U3_4, fileName, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year);
+                return null;
+            }
+
+            FormDataKind formDataKind = assignedPrimaryForm ? FormDataKind.PRIMARY : FormDataKind.ADDITIONAL;
+            FormData formData = formDataDao.find(formType.getId(), formDataKind, departmentReportPeriod.getId().intValue(), transportDataParam.getMonth(), null, false);
+
+            // Экземпляр уже есть и не в статусе «Создана»
+            if (formData != null && formData.getState() != WorkflowState.CREATED) {
+                logger.warn(U3 + U3_5, fileName);
                 return null;
             }
 
             if (formTemplateService.existFormTemplate(formType.getId(), reportPeriod.getId(), true)) {
-                FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId()), logger);
+                formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId()), logger);
                 if (!TAAbstractScriptingServiceImpl.canExecuteScript(formTemplate.getScript(), FormDataEvent.IMPORT_TRANSPORT_FILE)) {
                     log(userInfo, LogData.L48, logger, fileName);
                     return null;
