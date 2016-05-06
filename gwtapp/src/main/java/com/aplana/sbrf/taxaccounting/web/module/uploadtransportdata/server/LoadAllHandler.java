@@ -76,7 +76,9 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
             files.addAll(loadFormDataService.getFormDataFiles(userInfo, loadFormDataService.getTB(userInfo, localLogger), null, localLogger));
             if (files.isEmpty()) {
                 logger.error("Нет файлов для обработки");
-                throw new ServiceLoggerException("Выполнение операции \"%s\" невозможно, т.к. нет файлов для обработки!", logEntryService.save(logger.getEntries()), reportType.getDescription());
+                result.setDialogMsg(String.format("Выполнение операции \"%s\" невозможно, т.к. нет файлов для обработки!", reportType.getDescription()));
+                result.setUuid(logEntryService.save(logger.getEntries()));
+                return result;
             }
 
             AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId());

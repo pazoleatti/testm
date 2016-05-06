@@ -6,8 +6,13 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.After;
@@ -24,10 +29,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -59,6 +61,8 @@ public class LoadFormDataServiceTest {
     private FormTemplateService formTemplateService;
     @Autowired
     private FormDataDao formDataDao;
+    @Autowired
+    private RefBookDao refBookDao;
     @Autowired
     private FormDataService formDataService;
     @Autowired
@@ -116,6 +120,7 @@ public class LoadFormDataServiceTest {
         mockDepartmentFormTypeDao();
         mockFormTemplateService();
         mockFormDataDao();
+        mockRefBookDao();
         mockLockDataService();
         mockFormDataService();
         mockLogBusinessService();
@@ -216,6 +221,21 @@ public class LoadFormDataServiceTest {
         formData.setFormType(formType);
         when(formDataDao.get(1L, false)).thenReturn(formData);
         when(formDataDao.find(1, FormDataKind.PRIMARY, 1, null, null, false)).thenReturn(formData);
+    }
+
+    private void mockRefBookDao() {
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+        HashMap<String, RefBookValue> values = new HashMap<String, RefBookValue>();
+        values.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "имя периода"));
+        result.add(values);
+        when(refBookDao.getRecords(eq(8L), any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(result);
+        RefBook refBook = new RefBook();
+        refBook.setName("Коды, определяющие налоговый (отчётный) период");
+        RefBookAttribute attribute = new RefBookAttribute();
+        attribute.setName("Код подразделения в нотации Сбербанка");
+        attribute.setAlias("SBRF_CODE");
+        refBook.setAttributes(Arrays.asList(attribute));
+        when(refBookDao.get(eq(30L))).thenReturn(refBook);
     }
 
     private void mockLockDataService() {
