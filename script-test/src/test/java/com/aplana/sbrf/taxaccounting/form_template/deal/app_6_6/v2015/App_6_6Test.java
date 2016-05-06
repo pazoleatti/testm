@@ -200,6 +200,15 @@ public class App_6_6Test extends ScriptTestBase {
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
+        // 7. Заполнение граф 13 и 14 (сумма дохода, расхода)
+        row.getCell("incomeSum").setValue(1, null);
+        row.getCell("outcomeSum").setValue(-1, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        Assert.assertEquals("Строка 1: Графа «Сумма процентного дохода (руб.)» и графа «Сумма процентного расхода (руб.)» одновременно не могут быть заполнены!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
         // проверка неотрицательности суммы расходов;
         row.getCell("outcomeSum").setValue(1, null);
         row.getCell("incomeSum").setValue(null, null);

@@ -207,7 +207,7 @@ void logicCheck() {
         }
 
         // 7. Заполнение граф 13 и 14 (сумма дохода, расхода)
-        if (row.incomeSum != null && row.outcomeSum != null && row.incomeSum > 0 && row.outcomeSum > 0) {
+        if ((row.incomeSum > 0 && row.outcomeSum) || (row.outcomeSum > 0 && row.incomeSum)) {
             String msg1 = row.getCell('incomeSum').column.name
             String msg2 = row.getCell('outcomeSum').column.name
             logger.error("Строка $rowNum: Графа «$msg1» и графа «$msg2» одновременно не могут быть заполнены!")
