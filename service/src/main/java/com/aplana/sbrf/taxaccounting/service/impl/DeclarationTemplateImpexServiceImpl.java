@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -119,10 +121,11 @@ public class DeclarationTemplateImpexServiceImpl implements
 		try {
             ZipInputStream zis = new ZipInputStream(is);
 			ZipEntry entry;
-            DeclarationTemplate dt = declarationTemplateService.get(id);
+            DeclarationTemplate dt = SerializationUtils.clone(declarationTemplateService.get(id));
             dt.setXsdId(null);
             dt.setJrxmlBlobId(null);
             dt.setCreateScript("");
+            dt.setSubreports(new ArrayList<DeclarationSubreport>());
             Map<String, byte[]> files = new HashMap<String, byte[]>();
             DeclarationTemplateContent dtc = null;
             while((entry = zis.getNextEntry())!=null){
@@ -153,13 +156,16 @@ public class DeclarationTemplateImpexServiceImpl implements
                     files.put(entry.getName(), baos.toByteArray());
                 }
             }
-            for(DeclarationSubreportContent declarationSubreportContent: dtc.getSubreports()) {
-                if (declarationSubreportContent.getBlobDataId() != null && files.get(declarationSubreportContent.getBlobDataId()) != null) {
-                    String uuid = blobDataService.create(new ByteArrayInputStream(files.get(declarationSubreportContent.getBlobDataId())), declarationSubreportContent.getFileName());
-                    declarationSubreportContent.setBlobDataId(uuid);
-                }
+            if (dtc != null) {
+                if (dtc.getSubreports() != null)
+                    for (DeclarationSubreportContent declarationSubreportContent : dtc.getSubreports()) {
+                        if (declarationSubreportContent.getBlobDataId() != null && files.get(declarationSubreportContent.getBlobDataId()) != null) {
+                            String uuid = blobDataService.create(new ByteArrayInputStream(files.get(declarationSubreportContent.getBlobDataId())), declarationSubreportContent.getFileName());
+                            declarationSubreportContent.setBlobDataId(uuid);
+                        }
+                    }
+                dtc.fillDeclarationTemplate(dt);
             }
-            dtc.fillDeclarationTemplate(dt);
             return dt;
 			
             /*if ("1.0".equals(version)){
