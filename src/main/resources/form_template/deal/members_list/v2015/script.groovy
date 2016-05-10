@@ -108,7 +108,7 @@ ReportPeriod getReportPeriod() {
 }
 
 def getPeriod() {
-    def period = reportPeriodService.get(formData.reportPeriodId)
+    def period = getReportPeriod()
     return period.name + " " + period.taxPeriod.year
 }
 
@@ -153,8 +153,8 @@ void consolidation() {
 
     def source1 = null
     def source2 = null
-    def sourceRows1 = [:]
-    def sourceRows2 = [:]
+    def sourceRows1 = []
+    def sourceRows2 = []
 
     source1 = formDataService.getLast(sourceFormTypeId1, FormDataKind.PRIMARY, formData.departmentId, getReportPeriod()?.id, null, null, false)
     def formName = formDataService.getFormTemplate(sourceFormTypeId1, getReportPeriod()?.id).name
@@ -174,6 +174,12 @@ void consolidation() {
             source2 = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             sourceRows2 = formDataService.getDataRowHelper(source2)?.allSaved
         }
+    }
+
+    formName = formDataService.getFormTemplate(sourceFormTypeId2, getReportPeriod()?.id).name
+    if (sourceRows2.isEmpty()) {
+        logger.error("Данные на форме «%s» за отчетный период %s отсутствуют!", formName, getPeriod())
+        return
     }
 
     def samples = []
