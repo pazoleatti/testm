@@ -145,6 +145,9 @@ when matched then update set tgt.ord = src.ord;
 
 update ref_book_attribute set name = 'Дата включения в ВЗЛ' where id = 5210;
 update ref_book_attribute set name = 'Дата исключения из ВЗЛ' where id = 5211;
+
+--https://jira.aplana.com/browse/SBRFACCTAX-15650: 1.0 Участники ТЦО. Не хватает пробела в названии поля "КИО"
+update ref_book_attribute set name = 'КИО (заполняется для нерезидентов)' where id = 5207;
 -----------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
