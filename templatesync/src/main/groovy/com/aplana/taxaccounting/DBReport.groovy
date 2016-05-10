@@ -37,8 +37,12 @@ class DBReport {
         }
         def sqlTemplate2 = sqlTemplate1
 
+        boolean shortNameExist1 = checkExistShortName(prefix1)
+        boolean shortNameExist2 = checkExistShortName(prefix2)
+        def isBefore1_0 = (!shortNameExist1 || !shortNameExist2)
+
         // Запросы на получение колонок
-        def sqlColumns1 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2, numeration_row from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
+        def sqlColumns1 = "select id, name, " + (isBefore1_0 ? "" : "short_name, data_ord, ") + "form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2, numeration_row from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
         def sqlColumns2 = sqlColumns1
 
         // Запросы на получение стилей
@@ -49,8 +53,8 @@ class DBReport {
         def allVersions = [:]
 
         // Макеты
-        def templates1 = getTemplates(prefix1, sqlTemplate1, sqlColumns1, sqlStyles1, allVersions)
-        def templates2 = getTemplates(prefix2, sqlTemplate2, sqlColumns2, sqlStyles2, allVersions)
+        def templates1 = getTemplates(prefix1, sqlTemplate1, sqlColumns1, sqlStyles1, allVersions, isBefore1_0)
+        def templates2 = getTemplates(prefix2, sqlTemplate2, sqlColumns2, sqlStyles2, allVersions, isBefore1_0)
 
         // Построение отчета
         def report = new File(Main.REPORT_DB_NAME)
@@ -236,6 +240,10 @@ class DBReport {
                                     def colDiff = null
                                     def headers = ['ord', 'alias', 'name', 'type', 'width', 'precision', 'max_length', 'checking', 'attribute_id',
                                             'format', 'filter', 'parent_alias', 'attribute_id2', 'numeration_row']
+                                    if (!isBefore1_0) {
+                                        headers.add('short_name')
+                                        headers.add('data_ord')
+                                    }
                                     if (columnsSet1 != null && columnsSet2 == null || columnsSet1 == null && columnsSet2 != null) {
                                         colDiff = "Нет в ${columnsSet1 == null ? prefix1 : prefix2}"
                                     } else if (columnsSet1 != null && columnsSet2 != null) {
@@ -454,9 +462,9 @@ class DBReport {
                     div(class: 'dlg', id: key, title: "Сравнение граф шаблона вида ${data.type_id} версии ${data.version} «${data.name}»") {
                         table(class: 'rt') {
                             // Вывод таблицы с колонками 1
-                            printColumnsTable(builder, data.changesMap, data.headers, data.prefix1, data.columnsSet1)
+                            printColumnsTable(builder, data.changesMap, data.headers, data.prefix1, data.columnsSet1, isBefore1_0)
                             // Вывод таблицы с колонками 2
-                            printColumnsTable(builder, data.changesMap, data.headers, data.prefix2, data.columnsSet2)
+                            printColumnsTable(builder, data.changesMap, data.headers, data.prefix2, data.columnsSet2, isBefore1_0)
                         }
                     }
                 }
@@ -487,7 +495,7 @@ class DBReport {
     }
 
     // Получение макетов
-    def private static getTemplates(def prefix, def sqlTemplate, def sqlColumns, def sqlStyles, def allVersions) {
+    def private static getTemplates(def prefix, def sqlTemplate, def sqlColumns, def sqlStyles, def allVersions, def isBefore1_0) {
         println("DBMS connect: $prefix")
         def retVal = new Expando()
 
@@ -542,6 +550,10 @@ class DBReport {
             def column = new Expando()
             column.id = it.id as Integer
             column.name = it.name
+            if (!isBefore1_0) {
+                column.short_name = it.short_name
+                column.data_ord = it.data_ord
+            }
             column.form_template_id = form_template_id
             column.ord = it.ord
             column.alias = it.alias
@@ -655,10 +667,11 @@ class DBReport {
     }
 
     // Вывод шапки для columns
-    def private static printColumnsTable(def builder, def changesMap, def headers, def prefix, def columnsSet) {
+    def public static printColumnsTable(def builder, def changesMap, def headers, def prefix, def columnsSet, def isBefore1_0) {
+        def colSpan = (isBefore1_0 ? 14 : 16)
         // Название таблицы
         builder.tr {
-            td(colspan: 13, class: 'hdr', prefix)
+            td(colspan: colSpan, class: 'hdr', prefix)
         }
         builder.tr {
             headers.each { header ->
@@ -1146,5 +1159,11 @@ class DBReport {
         println("Load DB ref_book from $prefix OK")
         return refbooks
 
+    }
+
+    def public static checkExistShortName(def prefix) {
+        Sql sql = Sql.newInstance(Main.DB_URL, prefix, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+        def map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_COLUMN' and column_name = 'SHORT_NAME'")
+        return (map.result as Integer) == 1
     }
 }

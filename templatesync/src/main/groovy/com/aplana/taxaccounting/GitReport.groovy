@@ -5,28 +5,48 @@ import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
 import org.xml.sax.SAXException
 import com.aplana.sbrf.taxaccounting.model.Color
+
 /**
  * Отчет сравнения Git и БД
  */
 class GitReport {
     // Загрузка из git в БД и отчет в html-файле
     def static void updateScripts(def versionsMap, def sql, def checkOnly = true) {
+        def isBefore1_0 = !DBReport.checkExistShortName(Main.DB_USER)
         def writer = new FileWriter(new File(Main.REPORT_GIT_NAME))
         def builder = new groovy.xml.MarkupBuilder(writer)
+        // Данные для отображения отличий в графах НФ
+        def columnTableData = [:]
         builder.html {
             head {
                 meta(charset: 'windows-1251')
                 title "Сравнение макетов git и БД ${Main.DB_USER}"
                 style(type: "text/css", Main.HTML_STYLE)
+                script('', type: 'text/javascript', src: 'http://code.jquery.com/jquery-1.9.1.min.js')
+                script('', type: 'text/javascript', src: 'http://code.jquery.com/ui/1.10.3/jquery-ui.min.js')
+                link('', rel: 'stylesheet', href: 'http://code.jquery.com/ui/1.10.3/themes/black-tie/jquery-ui.css')
             }
             body {
+                // Скрипт вызова диалога
+                script(type: 'text/javascript', '''
+                $(function() {
+                    $('.cln').click(function() {
+                        $($(this).data('tbl')).dialog("open");
+                    });
+                    $(".dlg").dialog({
+                            modal: true,
+                            autoOpen: false,
+                            position: ['center', 'top'],
+                    width: 1200
+                    });
+                });''')
                 p "Сравнение макетов в БД ${Main.DB_USER} и git:"
                 table(class: 'rt') {
                     Main.TAX_FOLDERS.keySet().each { folderName ->
-                        def scanResult = scanSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql)
+                        def scanResult = scanSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql, columnTableData, isBefore1_0)
                         if (!scanResult.isEmpty()) {
                             tr {
-                                td(colspan: 15, class: 'hdr', Main.TAX_FOLDERS[folderName])
+                                td(colspan: 16, class: 'hdr', Main.TAX_FOLDERS[folderName])
                             }
                             tr {
                                 th 'type_id'
@@ -39,11 +59,12 @@ class GitReport {
                                 th 'Название'
                                 th 'Версия git'
                                 th 'Версия БД'
-                                th 'Заголовок'
-                                th 'Сравнение скриптов'
-                                th 'Сравнение заголовка данных'
-                                th 'Сравнение фикс.строк'
-                                th 'Сравнение стилей'
+                                th 'Верхний колонтитул'
+                                th 'Скрипты'
+                                th 'Заголовки данных'
+                                th 'Начальные данные'
+                                th 'Стили'
+                                th 'Графы'
                             }
                             scanResult.each { result ->
                                 tr {
@@ -70,8 +91,24 @@ class GitReport {
                                     td(class: (result.errorHeader ? 'td_error' : 'td_ok'), result.checkHeader)
                                     td(class: (result.errorRows ? 'td_error' : 'td_ok'), result.checkRows)
                                     td(class: (result.errorStyle ? 'td_error' : 'td_ok'), result.checkStyle)
+                                    if (result.errorColumns) {
+                                        td(class: 'td_error cln', title: result.titleColumns, 'data-tbl': "#${result.tableColumns}", result.checkColumns)
+                                    } else {
+                                        td(class: 'td_ok', result.checkColumns)
+                                    }
                                 }
                             }
+                        }
+                    }
+                }
+                // Скрытый блок для отображения отличий в графах НФ
+                columnTableData.each() { key, data ->
+                    div(class: 'dlg', id: key, title: "Сравнение граф макета вида ${data.type_id} версии ${data.version} «${data.name}»") {
+                        table(class: 'rt') {
+                            // Вывод таблицы с колонками 1
+                            DBReport.printColumnsTable(builder, data.changesMap, data.headers, data.prefix1, data.columnsSet1, isBefore1_0)
+                            // Вывод таблицы с колонками 2
+                            DBReport.printColumnsTable(builder, data.changesMap, data.headers, data.prefix2, data.columnsSet2, isBefore1_0)
                         }
                     }
                 }
@@ -179,7 +216,7 @@ class GitReport {
     }
 
     // Сравнение git-версии с версией в БД и загрузка в случае отличий
-    def static scanSrcFolderAndUpdateDb(def versionsMap, def folderName, def sql) {
+    def static scanSrcFolderAndUpdateDb(def versionsMap, def folderName, def sql, def columnTableData, def isBefore1_0) {
         def scanResult = []
 
         XMLUnit.setIgnoreWhitespace(true)
@@ -259,6 +296,7 @@ class GitReport {
                                         }
                                     }
                                 }
+
                                 // Сравнение заголовка
                                 def headerFile = new File("$versionFolder/headers.xml")
                                 if (!headerFile.exists()) {
@@ -281,6 +319,7 @@ class GitReport {
                                         result.checkHeader = "Заголовок данных не обнаружен в БД"
                                     }
                                 }
+
                                 // Сравнение фикс.строк
                                 def rowsFile = new File("$versionFolder/rows.xml")
                                 if (!rowsFile.exists()) {
@@ -307,14 +346,12 @@ class GitReport {
                                         }
                                     }
                                 }
-                                // Сравнение стилей
+
                                 def contentFile = new File("$versionFolder/content.xml")
-                                if (!contentFile.exists()) {
-                                    result.checkStyle = "Файл со стилями не найден в «${contentFile.absolutePath}»"
-                                    result.errorStyle = true
-                                } else {
-                                    def Map mapStylesXml = [:]
-                                    def xml = new XmlSlurper().parseText(contentFile.getText())
+                                def xml = (contentFile.exists() ? new XmlSlurper().parseText(contentFile.getText()) : null)
+
+                                // fixed_rows, monthly, comparative, accruing, updating
+                                if (xml) {
                                     def codeXml = xml.header?.text() ?: xml.code?.text()
                                     def fixed_rowsXml = convertTextToBooleanInteger(xml.fixedRows?.text())
                                     def monthlyXml = convertTextToBooleanInteger(xml.monthly?.text())
@@ -333,6 +370,13 @@ class GitReport {
                                     compareDbXml(result, comparativeDB, comparativeXml, "checkComparative", "errorComparative")
                                     compareDbXml(result, accruingDB, accruingXml, "checkAccruing", "errorAccruing")
                                     compareDbXml(result, updatingDB, updatingXml, "checkUpdating", "errorUpdating")
+                                }
+
+                                // Сравнение стилей
+                                if (!contentFile.exists()) {
+                                    result.errorStyle = true
+                                } else {
+                                    def Map mapStylesXml = [:]
                                     def stylesDb = versions[version]?.styles
                                     // Собираем все стили из xml
                                     for (def styleXml : xml.styles) {
@@ -381,6 +425,102 @@ class GitReport {
                                     }
                                 }
 
+                                // Сравнение граф НФ
+                                if (!contentFile.exists()) {
+                                    result.errorColumns = true
+                                } else {
+                                    def Map mapColumnsXml = [:]
+                                    def columnsDb = versions[version]?.columns
+                                    // собрать все графы из xml
+                                    for (def columnXml : xml.columns) {
+                                        def column = new Expando()
+                                        column.name = columnXml.name.text() ?: null
+                                        column.ord = convertTextToInteger(columnXml.order.text())
+                                        column.alias = columnXml.alias.text()
+                                        // stringColumn, numericColumn, dateColumn, autoNumerationColumn, refBookColumn, referenceColumn
+                                        def type = columnXml.@"xsi:type".text()
+                                        column.type = (type ? type[0].toUpperCase() : null)
+                                        column.width = convertTextToInteger(columnXml.width.text()) ?: 0
+                                        column.precision = convertTextToInteger(columnXml.precision.text())
+                                        column.max_length = convertTextToInteger(columnXml.maxLength.text())
+                                        column.checking = convertTextToBooleanInteger(columnXml.checking.text()) ?: 0
+                                        column.attribute_id = convertTextToInteger(columnXml.refBookAttributeId.text())
+                                        column.format = convertTextToInteger(columnXml.formatId.text())
+                                        column.filter = columnXml.filter.text() ?: null
+                                        // parent_column_id
+                                        column.parentAlias = columnXml.parentAlias.text() ?: null
+                                        column.attribute_id2 = convertTextToInteger(columnXml.refBookAttributeId2.text())
+                                        // Тип нумерации строк для автонумеруемой графы (0 - последовательная, 1 - сквозная), раньше хрнилось в columns.type, теперь в columns.numerationType
+                                        def numerationType = columnXml.numerationType.text() == 'SERIAL' ? 0 : (columnXml.numerationType.text() == 'CROSS' ? 1 : null)
+                                        if (numerationType == null) {
+                                            numerationType = convertTextToInteger(columnXml.type.text())
+                                        }
+                                        column.numeration_row = numerationType
+                                        column.short_name = columnXml.shortName.text() ?: null
+                                        mapColumnsXml.put(columnXml.alias.text(), column)
+                                    }
+
+                                    def changesMap = [:]
+                                    def headers = ['name', 'ord', 'alias', 'type', 'width', 'precision', 'max_length',
+                                            'checking', 'attribute_id', 'format', 'filter', /* 'parent_column_id', */ 'parentAlias',
+                                            'attribute_id2', 'numeration_row']
+                                    if (!isBefore1_0) {
+                                        headers.add('short_name')
+                                    }
+                                    def columnsSet1 = mapColumnsXml.values().collect { it }
+                                    def columnsSet2 = columnsDb.values().collect { it }
+                                    for (def i = 0; i < Math.max(columnsSet1.size(), columnsSet2.size()); i++) {
+                                        def col1 = columnsSet1.size() > i ? columnsSet1.getAt(i) : null
+                                        def col2 = columnsSet2.size() > i ? columnsSet2.getAt(i) : null
+                                        headers.each { header ->
+                                            if (col1 == null || col2 == null || col1[header] != col2[header]) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add(header)
+                                            }
+                                        }
+                                    }
+                                    // Находим отсутсвтующие в гите столбцы
+                                    def absentColumns = columnsDb.findAll { alias, columnDb -> mapColumnsXml[alias] == null }
+                                    // Проходим по стилям из базы и удаляем повторяющиеся из найденных в xml
+                                    columnsDb.each { alias, styleDb ->
+                                        mapColumnsXml.remove(alias)
+                                    }
+
+                                    if (!absentColumns.isEmpty()) {
+                                        def tmpColumns = absentColumns.keySet().join("', '")
+                                        result.checkColumns = "В DB обнаружены графы '$tmpColumns' отсутствующие в Git. "
+                                        result.errorColumns = true
+                                    }
+                                    if (!mapColumnsXml.isEmpty()) {
+                                        def tmpColumns = mapColumnsXml.keySet().join("', '")
+                                        result.checkColumns = (result.checkColumns ?: "") + "В Git обнаружены графы '$tmpColumns' отсутствующие в DB. "
+                                        result.errorColumns = true
+                                    }
+                                    if (absentColumns.isEmpty() && mapColumnsXml.isEmpty() && changesMap.isEmpty()) {
+                                        result.checkColumns = "Ok"
+                                        result.errorColumns = false
+                                    }
+                                    if (!changesMap.isEmpty()) {
+                                        result.titleColumns = "Подробнее…"
+                                        result.checkColumns = "-"
+                                        result.errorColumns = true
+                                        result.tableColumns = "_${id}_${version}"
+                                        def data = new Expando()
+                                        data.name = result.name
+                                        data.changesMap = changesMap
+                                        data.headers = headers
+                                        data.columnsSet1 = columnsSet1
+                                        data.columnsSet2 = columnsSet2
+                                        data.type_id = id
+                                        data.version = version
+                                        data.versionEnd = version
+                                        data.prefix1 = 'git'
+                                        data.prefix2 = 'БД'
+                                        columnTableData.put(result.tableColumns, data)
+                                    }
+                                }
                                 // Удаляем из списка не найденных
                                 notExistVersions.remove(version)
                             }
@@ -429,6 +569,13 @@ class GitReport {
             case "true" : return 1
             case "false" : return 0
             case null : return null
+        }
+        return null
+    }
+
+    static Integer convertTextToInteger(String value) {
+        if (value) {
+            return value as Integer
         }
         return null
     }
@@ -755,6 +902,45 @@ class GitReport {
             map[type_id][version].styles.put(it.alias, style)
         }
         println("Load DB form_style OK")
+
+        def isBefore1_0 = !DBReport.checkExistShortName(Main.DB_USER)
+        def sqlQuery = "select ft.type_id, to_char(ft.version, 'RRRR') as version, fc.id, fc.name, fc.ord, fc.alias, " +
+                "fc.type, fc.width, fc.precision, fc.max_length, fc.checking, fc.attribute_id, fc.format, fc.filter, " +
+                "fc.parent_column_id, fc.attribute_id2, fc.numeration_row" + (isBefore1_0 ? "" : ", fc.short_name") +" \n" +
+                "from form_column fc, form_template ft \n" +
+                "where fc.form_template_id = ft.id and ft.status not in (-1, 2) " +
+                "order by fc.form_template_id, fc.ord "
+        sql.eachRow(sqlQuery) {
+            def type_id = it.type_id as Integer
+            def version = it.version
+            if (map[type_id][version].columns == null) {
+                map[type_id][version].columns = [:]
+            }
+            // Колонки версии макета
+            def column = new Expando()
+            def aliases = ['id', 'name', 'ord', 'alias', 'type', 'width', 'precision', 'max_length','checking',
+                    'attribute_id', 'format', 'filter', 'parent_column_id', 'attribute_id2', 'numeration_row']
+            if (!isBefore1_0) {
+                aliases.add('short_name')
+            }
+            aliases.each { alias ->
+                column[alias] = it[alias]
+            }
+            map[type_id][version].columns.put(it.alias, column)
+        }
+        // определить для зависимых столбцов алиасы родительких столбцов
+        map.each { type_id, versionMaps ->
+            versionMaps.each { version, versionMap ->
+                versionMap.columns.each { alias, column ->
+                    if (column.parent_column_id) {
+                        def parentColumn = versionMap.columns.find { tmpColumn -> tmpColumn.value.id == column.parent_column_id }
+                        column.parentAlias = parentColumn?.key
+                    }
+                }
+            }
+        }
+        println("Load DB form_column OK")
+
         return map
     }
 
@@ -823,5 +1009,4 @@ class GitReport {
         println("Load DB ref_book OK")
         return refbooks
     }
-
 }
