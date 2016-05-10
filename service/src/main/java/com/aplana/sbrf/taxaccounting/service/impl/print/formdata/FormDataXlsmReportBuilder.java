@@ -95,7 +95,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
          * @param formStyle стиль ячейки
          */
         public CellStyle getCellStyle(CellType cellType, String columnAlias, FormStyle formStyle){
-            String cacheKey = columnAlias + (formStyle != null ? formStyle.toString() : "");
+            String cacheKey = columnAlias + "_" + (formStyle != null ? formStyle.toString() : "");
             if (cellStyleMap.containsKey(cacheKey)) {
 				return cellStyleMap.get(cacheKey);
 			}
@@ -623,10 +623,17 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     /** Получить цвет по rgb. */
     private XSSFColor getColor(Color color) {
         // TODO (Ramil Timerbaev) если rgb = 0 0 0, то в excel'е цвет почему то задается белый (при 255 255 255 - черный)
-        if (!(color.getRed() == 0 && color.getGreen() == 0 && color.getBlue() == 0)) {
+        if (color.getRed() == 0 && color.getGreen() == 0 && color.getBlue() == 0) {
+            XSSFColor xssfColor = new XSSFColor();
+            xssfColor.setIndexed(IndexedColors.BLACK.getIndex());
+            return xssfColor;
+        } else if (color.getRed() == 255 && color.getGreen() == 255 && color.getBlue() == 255) {
+            XSSFColor xssfColor = new XSSFColor();
+            xssfColor.setIndexed(IndexedColors.WHITE.getIndex());
+            return xssfColor;
+        } else {
             return new XSSFColor(new java.awt.Color(color.getRed(), color.getGreen(), color.getBlue()));
         }
-        return null;
     }
 
     /** Получить шрифт по алиасу стиля. */
