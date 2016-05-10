@@ -33,8 +33,6 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
 
     @Autowired
     private RefBookFactory refBookFactory;
-    @Autowired
-    private RefBookDao refBookDao;
 
     enum RefBookType {
         CURRENCY(0),
