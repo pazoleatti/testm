@@ -21,6 +21,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
@@ -967,12 +968,25 @@ public class FormDataServiceImpl implements FormDataService {
                         for (DataRow<Cell> row : rows) {
                             if (row.getCell(column.getAlias()).getNumericValue() != null) {
                                 RefBookDataProvider provider;
+                                // провайдер отсутствует в мапе по наименованию
                                 if (!providers.containsKey(refBook.getTableName())) {
                                     provider = refBookFactory.getDataProvider(refBook.getId());
                                     providers.put(refBook.getTableName(), provider);
                                     references.put(provider, new ArrayList<Long>());
                                 } else {
-                                    provider = providers.get(refBook.getTableName());
+                                    if (refBook.getTableName() != null) {
+                                        provider = providers.get(refBook.getTableName());
+                                    } else {
+                                        RefBookDataProvider tempProvider = refBookFactory.getDataProvider(refBook.getId());
+                                        // Для универсального справочника используем ключ null
+                                        if (tempProvider instanceof RefBookUniversal) {
+                                            provider = providers.get(refBook.getTableName());
+                                        } else {
+                                            // Комбо-справочник (коды валют и металлов) не кладем к остальным в providers
+                                            provider = tempProvider;
+                                            references.put(provider, new ArrayList<Long>());
+                                        }
+                                    }
                                 }
                                 //Раскладываем значения ссылок по справочникам, на которые они ссылаются
                                 references.get(provider).add(row.getCell(column.getAlias()).getNumericValue().longValue());
@@ -1055,7 +1069,7 @@ public class FormDataServiceImpl implements FormDataService {
                             switch (inactiveRecord.getResult()) {
                                 case NOT_EXISTS:
                                     logger.error(String.format(REF_BOOK_LINK, referenceInfo.getRownum(),
-                                            ": значение графы", referenceInfo.getColumnName(),
+                                            ": Значение графы", referenceInfo.getColumnName(),
                                             " ссылается на несуществующую версию записи справочника!"));
                                     break;
                                 case NOT_CROSS:

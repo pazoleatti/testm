@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -32,6 +33,8 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
 
     @Autowired
     private RefBookFactory refBookFactory;
+    @Autowired
+    private RefBookDao refBookDao;
 
     enum RefBookType {
         CURRENCY(0),
@@ -408,7 +411,12 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
 
     @Override
     public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        throw new UnsupportedOperationException();
+        init();
+        List<Long> realRecordIds = new ArrayList<Long>();
+        for (Long fakeRecordId : recordIds) {
+            realRecordIds.add(fakeRecordId/10);
+        }
+        return refBookDataProviderCurrency.getInactiveRecordsInPeriod(realRecordIds, periodFrom, periodTo);
     }
 
 	@Override
