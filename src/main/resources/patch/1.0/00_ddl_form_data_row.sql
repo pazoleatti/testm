@@ -264,6 +264,7 @@ alter table form_data_row add constraint form_data_row_chk_temp check (TEMPORARY
 alter table form_data_row add constraint form_data_row_chk_manual check (MANUAL in (0, 1)) ;
 
 alter table form_data_row_span add constraint form_data_row_span_fk_row foreign key(row_id) references form_data_row(id) on delete cascade;
+create index i_form_data_row_span_fk_row on form_data_row_span (row_id);
 alter table form_data_row_span add constraint form_data_row_span_fk foreign key (form_data_id) references form_data (id);
 alter table form_data_row_span add constraint form_data_row_span_unq unique (form_data_id, temporary, manual, data_ord, ord);
 alter table form_data_row_span add constraint form_data_row_span_chk_dataord check (data_ord between 0 and 99);
