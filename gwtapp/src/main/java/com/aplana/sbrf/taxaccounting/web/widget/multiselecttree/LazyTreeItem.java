@@ -176,7 +176,7 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
             if (!getAdditionalAttributeMatches().isEmpty()){
                 StringBuilder sb = new StringBuilder("(");
                 for (RefBookRecordDereferenceValue value : getAdditionalAttributeMatches()){
-                    if (value.getValueAttrAlias().equals("PARENT_ID") || !value.getDereferenceValue().contains(textToHighLight))
+                    if (value.getValueAttrAlias().equals("PARENT_ID") || value.getDereferenceValue()==null || !value.getDereferenceValue().contains(textToHighLight))
                         continue;
                     sb.append(value.getAttrName()).append(": ").append(RegExp.compile(TextUtils.quote(textToHighLight), "gi").replace(value.getDereferenceValue(),
                             "<span style=\"color: #ff0000;\">$&</span>")).append("; ");
