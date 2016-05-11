@@ -85,7 +85,7 @@ public abstract class AbstractLoadTransportDataService {
         L29("Ошибка при удалении файла «%s» при перемещении в каталог архива! %s.", LogLevel.ERROR, true, false),
         L30("К каталогу загрузки для подразделения «%s» не указан корректный путь!", LogLevel.ERROR, true, false),
         L31("В каталоге загрузки для %s не найдены файлы!", LogLevel.ERROR, true, false),
-        L36("Обнаружена ошибка при использовании библиотеки для проверки ЭЦП! %s.", LogLevel.ERROR, true, false),
+        L36("ЭП файла «%s» не принята. Код ошибки «%s».", LogLevel.ERROR, true, false),
         L37("Не указан путь к каталогу загрузки для %s!", LogLevel.ERROR, true, false),
         L38("Не задан алгоритм загрузки для %s!", LogLevel.ERROR, true, false),
         L40("Обработка данных транспортного файла не выполнена, т.к. в данный момент выполняется операция \"%s\", инициированная пользователем \"%s\" в \"%s\".", LogLevel.ERROR, true, false),

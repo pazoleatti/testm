@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -39,8 +37,10 @@ public class SignServiceImpl implements SignService {
     private static final String ERR_NO_SIGN_MSG = "В проверяемом файле «%s» отсутствует ЭП.";
     private static final String ERR_SIGN_NO_REG_MSG = "Идентификатор ЭП файла «%s» не зарегистрирован в БОК.";
     private static final String ERR_OTHER_MSG = "ЭП файла «%s» не принята. Код ошибки «%s, %s».";
+    private static final String ERR_OTHER_MSG2 = "ЭП файла «%s» не принята. Код ошибки «%s».";
 
-    private static final String pattern = "(ERROR:)(.+?)(, )(\\d+ )(.*)(, )(.*)";
+    private static final String PATTERN_ERR = "(ERROR:)(.+?)(, )(\\d+ )(.*)(, )(.*)";
+    private static final String PATTERN_ERR2 = "(ERROR:)( )(.*)";
 
 
 	@Autowired
@@ -85,6 +85,7 @@ public class SignServiceImpl implements SignService {
             Process process;
             try {
                 LOG.info("Запускаем проверку ЭП.");
+                status.setCheck(false);
                 process = (new ProcessBuilder(params)).start();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
                 try {
@@ -97,15 +98,19 @@ public class SignServiceImpl implements SignService {
                         if (s.startsWith("UserId: ")) {
                             status.setMsg(String.format(USER_ID_MSG, fileName, s.substring(8)));
                         } else if (!s.startsWith("Result:") && !s.startsWith("Execution time:")) {
-                            status.setCheck(false);
-                            String code = s.replaceAll(pattern, "$5");
-                            if (code.equals("ERR_NO_SIGN")) {
-                                status.setMsg(String.format(ERR_NO_SIGN_MSG, fileName));
-                            } else if (code.equals("ERR_SIGN_NO_REG")) {
-                                status.setMsg(String.format(ERR_SIGN_NO_REG_MSG, fileName));
+                            Pattern pattern = Pattern.compile(PATTERN_ERR);
+                            if (pattern.matcher(s).matches()) {
+                                String code = s.replaceAll(PATTERN_ERR, "$5");
+                                if (code.equals("ERR_NO_SIGN")) {
+                                    status.setMsg(String.format(ERR_NO_SIGN_MSG, fileName));
+                                } else if (code.equals("ERR_SIGN_NO_REG")) {
+                                    status.setMsg(String.format(ERR_SIGN_NO_REG_MSG, fileName));
+                                } else {
+                                    String text = s.replaceAll(PATTERN_ERR, "$7");
+                                    status.setMsg(String.format(ERR_OTHER_MSG, fileName, code, text));
+                                }
                             } else {
-                                String text = s.replaceAll(pattern, "$7");
-                                status.setMsg(String.format(ERR_OTHER_MSG, fileName, code, text));
+                                status.setMsg(String.format(ERR_OTHER_MSG2, fileName, s.replaceAll(PATTERN_ERR2, "$3")));
                             }
                         }
                     } while ((s = reader.readLine()) != null);
@@ -113,12 +118,9 @@ public class SignServiceImpl implements SignService {
                     process.destroy();
                     reader.close();
                 }
-            } catch (UnsupportedEncodingException e) {
+            } catch (Exception e) {
                 LOG.error("", e);
-                throw new ServiceException("", e);
-            } catch (IOException e) {
-                LOG.error("", e);
-                throw new ServiceException("", e);
+                status.setMsg(String.format(ERR_OTHER_MSG2, fileName, e.getLocalizedMessage()));
             }
         }
     }
@@ -136,8 +138,8 @@ public class SignServiceImpl implements SignService {
             }
             if (Math.abs(new Date().getTime() - startTime) > VALIDATION_TIMEOUT) {
                 threadRunner.interrupt();
-                LOG.warn(String.format("Истекло время выполнения проверки ЭП. Проверка ЭП длилась более %d мс.", VALIDATION_TIMEOUT));
-                status.setMsg(String.format("Истекло время выполнения проверки ЭП. Проверка ЭП длилась более %d мс.", VALIDATION_TIMEOUT));
+                LOG.warn(String.format("Истекло время выполнения проверки ЭП файла «%s». Проверка ЭП длилась более %d мс.", fileName, VALIDATION_TIMEOUT));
+                status.setMsg(String.format("Истекло время выполнения проверки ЭП файла «%s». Проверка ЭП длилась более %d мс.", fileName, VALIDATION_TIMEOUT));
                 return false;
             }
             if (!threadRunner.isAlive()) {
