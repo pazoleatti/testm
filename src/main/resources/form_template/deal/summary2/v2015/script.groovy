@@ -218,9 +218,7 @@ void logicCheck() {
 
         // 3. Проверка кода основания отнесения сделки к контролируемой
         def onlyNo = (row.f131 == recNoId && row.f132 == recNoId && row.f133 == recNoId && row.f134 == recNoId && row.f135 == recNoId)
-        def haveNo = (row.f131 == recNoId || row.f132 == recNoId || row.f133 == recNoId || row.f134 == recNoId || row.f135 == recNoId)
-        if ((row.f122 != row.f123 && (row.f122 == recYesId || row.f123 == recYesId) && !onlyNo) ||
-                (haveNo && (row.f122 != recYesId || row.f123 != recYesId))) {
+        if ((row.f122 == recYesId || row.f123 == recYesId) && !onlyNo) {
             def msg = "Строка %d: Не допускается одновременное заполнение значением «1» любой из граф «%s», «%s» с любой из граф «%s»!"
             def names = []
             ['f131', 'f132', 'f133', 'f134', 'f135'].each { alias ->
@@ -249,28 +247,6 @@ void logicCheck() {
         if (row.dealSubjectCode1 != null && row.dealSubjectCode2 != null) {
             def msg = "Строка %d: Значение граф «%s» и «%s» не должны быть одновременно заполнены!"
             logger.error(msg, row.getIndex(), getColumnName(row, 'dealSubjectCode1'), getColumnName(row, 'dealSubjectCode2'))
-        }
-
-        // 8. Проверка заполнения граф «ИНН, КПП организации»
-        def organInfo = null
-        def record520 = getRefBookValue(520, row.organName)
-        if (record520?.ORG_CODE?.value) {
-            def record513 = getRefBookValue(513, record520?.ORG_CODE?.value)
-            organInfo = record513?.CODE?.value
-        }
-        if (organInfo != null && organInfo == 1) {
-            // a
-            ['organINN' : 'INNKIO', 'organKPP' : 'KPP'].each { aliasRow, aliasAtribute ->
-                if (!record520[aliasAtribute]?.value) {
-                    def msg = "Строка %d: Значение графы «%s» должно быть заполнено, т.к. значение графы «%s» равно «1»!"
-                    logger.error(msg, row.getIndex(), getColumnName(row, aliasRow), getColumnName(row, 'organInfo'))
-                }
-            }
-        }
-        if (organInfo != null && organInfo == 2 && !record520?.RS?.value && !record520?.TAX_CODE_INCORPORATION?.value) {
-            // b
-            def msg = "Строка %d: Значение графы «%s» или графы «%s» должно быть заполнено, т.к. значение графы «%s» равно «2»!"
-            logger.error(msg, row.getIndex(), getColumnName(row, 'organRegNum'), getColumnName(row, 'taxpayerCode'), getColumnName(row, 'organInfo'))
         }
     }
 }

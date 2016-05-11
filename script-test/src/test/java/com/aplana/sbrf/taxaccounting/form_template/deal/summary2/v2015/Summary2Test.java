@@ -165,7 +165,7 @@ public class Summary2Test extends ScriptTestBase {
         fillRow(row);
         String [] useColumn3 = { "f121", "f122", "f123", "f124", "f131", "f132", "f133", "f134", "f135" };
         for (String column : useColumn3) {
-            row.getCell(column).setValue(2L, row.getIndex());
+            row.getCell(column).setValue(1L, row.getIndex());
         }
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
@@ -225,35 +225,6 @@ public class Summary2Test extends ScriptTestBase {
         i = 0;
         msg = String.format("Строка %d: Значение граф «%s» и «%s» не должны быть одновременно заполнены!",
                 row.getIndex(), row.getCell("dealSubjectCode1").getColumn().getName(), row.getCell("dealSubjectCode2").getColumn().getName());
-        Assert.assertEquals(msg, entries.get(i++).getMessage());
-        Assert.assertEquals(i, entries.size());
-        testHelper.getLogger().clear();
-
-        // 8.a Проверка заполнения граф «ИНН, КПП организации»
-        fillRow(row);
-        row.getCell("organName").setValue(4L, row.getIndex());
-        testHelper.execute(FormDataEvent.CHECK);
-        i = 0;
-        String [] aliases = { "organINN", "organKPP" };
-        for (String alias : aliases) {
-            msg = String.format("Строка %d: Значение графы «%s» должно быть заполнено, т.к. значение графы «%s» равно «1»!",
-                    row.getIndex(), row.getCell(alias).getColumn().getName(), row.getCell("organInfo").getColumn().getName());
-            Assert.assertEquals(msg, entries.get(i++).getMessage());
-        }
-        Assert.assertEquals(i, entries.size());
-        testHelper.getLogger().clear();
-
-        // 8.b Проверка заполнения граф «ИНН, КПП организации»
-        fillRow(row);
-        row.getCell("organName").setValue(5L, row.getIndex());
-        testHelper.execute(FormDataEvent.CHECK);
-        i = 0;
-        msg = String.format("Строка %d: Значение графы «%s» или графы «%s» должно быть заполнено, т.к. значение графы «%s» равно «2»!",
-                row.getIndex(),
-                row.getCell("organRegNum").getColumn().getName(),
-                row.getCell("taxpayerCode").getColumn().getName(),
-                row.getCell("organInfo").getColumn().getName()
-        );
         Assert.assertEquals(msg, entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
