@@ -94,8 +94,8 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         break
-    case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED:
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
