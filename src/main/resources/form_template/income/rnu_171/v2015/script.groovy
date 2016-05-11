@@ -39,7 +39,7 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.AFTER_LOAD:
-        // afterLoad() TODO убрал в 0.9.3, вернуть в 1.0
+        afterLoad()
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -748,20 +748,13 @@ def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def ro
 }
 
 void afterLoad() {
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    def year = reportPeriod.taxPeriod.year
-    def periodName = ""
-    switch (reportPeriod.order) {
-        case 1 : periodName = "первый квартал"
-            break
-        case 2 : periodName = "полугодие"
-            break
-        case 3 : periodName = "9 месяцев"
-            break
-        case 4 : periodName = "год"
-            break
+    if (binding.variables.containsKey("specialPeriod")) {
+        // прибыль ТЦО
+        // "первый квартал", "полугодие", "девять месяцев", "год"
+        specialPeriod.name = reportPeriodService.get(formData.reportPeriodId).accName
+        // для справочников начало от 01.01.year (для прибыли start_date)
+        specialPeriod.calendarStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+        // конец периода
+        specialPeriod.endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
-    specialPeriod.name = periodName
-    specialPeriod.calendarStartDate = Date.parse("dd.MM.yyyy", "01.01.$year")
-    specialPeriod.endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 }
