@@ -212,12 +212,11 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         try {
                             check = signService.checkSign(fileName, currentFile.getPath(), 0, logger);
                         } catch (Exception e) {
-                            log(userInfo, LogData.L36, logger, lockId, e.getMessage());
+                            log(userInfo, LogData.L36, logger, lockId, fileName, e.getMessage());
                         }
                         if (!check.getFirst()) {
                             for(String msg: check.getSecond())
                                 log(userInfo, LogData.L0_ERROR, logger, lockId, msg);
-                            log(userInfo, LogData.L16, logger, lockId, fileName);
                             fail++;
                             if (move) {
                                 moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile, null, logger, lockId);
@@ -227,8 +226,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         }
                         for(String msg: check.getSecond())
                             log(userInfo, LogData.L0_INFO, logger, lockId, msg);
-
-                        log(userInfo, LogData.L15, logger, lockId, fileName);
                     } else {
                         log(userInfo, LogData.L15_1, logger, lockId, fileName);
                     }

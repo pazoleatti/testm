@@ -328,20 +328,21 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     try {
                         check = signService.checkSign(fileName, currentFile.getPath(), 0, logger);
                     } catch (Exception e) {
-                        log(userInfo, LogData.L36, logger, lockId, e.getMessage());
+                        log(userInfo, LogData.L36, logger, lockId, fileName, e.getMessage());
                     }
                     if (!check.getFirst()) {
-                        for(String msg: check.getSecond())
+                        ArrayList<LogEntry> logEntries = new ArrayList<LogEntry>();
+                        for(String msg: check.getSecond()) {
                             log(userInfo, LogData.L0_ERROR, logger, lockId, msg);
-                        log(userInfo, LogData.L16, logger, lockId, fileName);
+                            logEntries.add(new LogEntry(LogLevel.ERROR, String.format(LogData.L0_ERROR.getText(), logger, lockId, msg)));
+                        }
                         moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                                Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L16.getText(), lockId, fileName))), logger, lockId);
+                                logEntries, logger, lockId);
                         fail++;
                         continue;
                     }
                     for(String msg: check.getSecond())
                         log(userInfo, LogData.L0_INFO, logger, lockId, msg);
-                    log(userInfo, LogData.L15, logger, lockId, fileName);
                 } else {
                     log(userInfo, LogData.L15_1, logger, lockId, fileName);
                 }
