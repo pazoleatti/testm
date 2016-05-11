@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +67,19 @@ public class FormDataCSVReportBuilder extends AbstractReportBuilder {
                     oneRow.add(row.getCell(alias).getRefBookDereference());
                 } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
                     oneRow.add(row.getCell(alias).getValue() == null ? "" : row.getCell(alias).getNumericValue().toPlainString());
+                } else if (ColumnType.DATE.equals(column.getColumnType())) {
+                    String valueStr = "";
+                    if (row.getCell(alias).getValue() != null) {
+                        Formats formats = Formats.getById(((DateColumn) column).getFormatId());
+                        SimpleDateFormat sdf;
+                        if (formats.getId() == 0) {
+                            sdf = new SimpleDateFormat(Formats.DD_MM_YYYY.getFormat());
+                        } else {
+                            sdf = new SimpleDateFormat(formats.getFormat());
+                        }
+                        valueStr = sdf.format(row.getCell(alias).getDateValue());
+                    }
+                    oneRow.add(valueStr);
                 } else {
                     oneRow.add(row.getCell(alias).getValue() == null ? "" : row.getCell(alias).getValue().toString());
                 }
