@@ -1016,6 +1016,10 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
 
         // Графа 50
         row.countryCode3 = record520?.COUNTRY_CODE?.value
+
+        // Графа 56
+        def record513 = getRefBookValue(513, record520.ORG_CODE?.value)
+        row.address = (record513?.CODE?.value == 2 ? record520?.ADDRESS?.value : '')
     }
 
     // Графа 49, 52..56
@@ -1925,6 +1929,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         colIndex++
         expectedValue = (record520.ADDRESS?.stringValue != null ? record520.ADDRESS?.stringValue : "")
         formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
+        newRow.address = (record513?.CODE?.value == 2 ? record520?.ADDRESS?.value : '')
     }
 
     return newRow

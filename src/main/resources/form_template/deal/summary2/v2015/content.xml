@@ -607,15 +607,15 @@
         <parentAlias>organName</parentAlias>
         <refBookAttributeId>5219</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>address</alias>
         <checking>false</checking>
-        <columnType>REFERENCE</columnType>
+        <columnType>STRING</columnType>
         <name>п. 090 &quot;Адрес&quot;</name>
         <order>56</order>
-        <width>7</width>
-        <parentAlias>organName</parentAlias>
-        <refBookAttributeId>5202</refBookAttributeId>
+        <width>15</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <styles>
         <alias>Редактируемая</alias>
