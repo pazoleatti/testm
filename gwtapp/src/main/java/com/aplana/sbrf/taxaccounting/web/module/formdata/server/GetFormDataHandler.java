@@ -249,6 +249,10 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         /** Получаем специфичный период нф */
         Map<String, Object> params = new HashMap<String, Object>();
         ReportPeriod specialPeriod = new ReportPeriod();
+        // укладываем текущие значения
+        specialPeriod.setName(departmentReportPeriod.getReportPeriod().getName());
+        specialPeriod.setCalendarStartDate(departmentReportPeriod.getReportPeriod().getCalendarStartDate());
+        specialPeriod.setEndDate(departmentReportPeriod.getReportPeriod().getEndDate());
         params.put("specialPeriod", specialPeriod);
         formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_LOAD, logger, params);
         if (specialPeriod.getName() != null) {

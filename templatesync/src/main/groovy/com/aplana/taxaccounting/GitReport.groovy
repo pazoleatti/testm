@@ -1,8 +1,10 @@
 package com.aplana.taxaccounting
 
+import com.aplana.sbrf.taxaccounting.model.FormStyle
 import org.apache.commons.io.IOUtils
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
+import org.w3c.dom.Document
 import org.xml.sax.SAXException
 import com.aplana.sbrf.taxaccounting.model.Color
 
@@ -320,33 +322,6 @@ class GitReport {
                                     }
                                 }
 
-                                // Сравнение фикс.строк
-                                def rowsFile = new File("$versionFolder/rows.xml")
-                                if (!rowsFile.exists()) {
-                                    result.checkRows = "Файл фикс.строк не найден в «${scriptFile.absolutePath}»"
-                                    result.errorRows = true
-                                } else {
-                                    def dbRows = versions[version]?.data_rows
-                                    def gitRows = XMLUnit.buildControlDocument(rowsFile?.text?.replaceAll('stringValue=""', ''))
-                                    if (dbRows != null && gitRows != null) {
-                                        Diff diff = XMLUnit.compareXML(dbRows, gitRows)
-                                        def rowsEqual = diff.similar()
-                                        if (rowsEqual) {
-                                            result.checkRows = "Ok"
-                                        } else {
-                                            result.errorRows = true
-                                            result.checkRows = "Фикс.строки отличаются"
-                                        }
-                                    } else if (dbRows != null || gitRows != null) {
-                                        if (dbRows == null && gitRows != null && rowsFile?.text?.contains('<rows/>')) {
-                                            result.checkRows = "Ok"
-                                        } else {
-                                            result.errorRows = true
-                                            result.checkRows = "Фикс.строк нет в БД"
-                                        }
-                                    }
-                                }
-
                                 def contentFile = new File("$versionFolder/content.xml")
                                 def xml = (contentFile.exists() ? new XmlSlurper().parseText(contentFile.getText()) : null)
 
@@ -373,17 +348,17 @@ class GitReport {
                                 }
 
                                 // Сравнение стилей
+                                def Map mapStylesXml = [:]
+                                def stylesDb = versions[version]?.styles
                                 if (!contentFile.exists()) {
                                     result.errorStyle = true
                                 } else {
-                                    def Map mapStylesXml = [:]
-                                    def stylesDb = versions[version]?.styles
                                     // Собираем все стили из xml
                                     for (def styleXml : xml.styles) {
-                                        def style = new Expando()
+                                        FormStyle style = new FormStyle()
                                         style.alias = styleXml.alias.text()
-                                        style.back_color = Color[styleXml.backColor.text()]
-                                        style.font_color = Color[styleXml.fontColor.text()]
+                                        style.backColor = Color[styleXml.backColor.text()]
+                                        style.fontColor = Color[styleXml.fontColor.text()]
                                         style.bold = Boolean.parseBoolean(styleXml.bold.text())
                                         style.italic = Boolean.parseBoolean(styleXml.italic.text())
                                         mapStylesXml.put(styleXml.alias.text(), style)
@@ -396,7 +371,7 @@ class GitReport {
                                         def styleXml = mapStylesXml.remove(alias)
                                         if (styleXml != null) {
                                             def errorList = []
-                                            ['back_color', 'font_color', 'bold', 'italic'].each {
+                                            ['backColor', 'fontColor', 'bold', 'italic'].each {
                                                 if (styleXml[it] != styleDb[it]) {
                                                     errorList.add(it)
                                                 }
@@ -422,6 +397,35 @@ class GitReport {
                                     if (absentStyles.isEmpty() && mapStylesXml.isEmpty() && errorMap.isEmpty()){
                                         result.checkStyle = "Ok"
                                         result.errorStyle = false
+                                    }
+                                }
+
+                                // Сравнение фикс.строк
+                                def rowsFile = new File("$versionFolder/rows.xml")
+                                if (!rowsFile.exists()) {
+                                    result.checkRows = "Файл фикс.строк не найден в «${scriptFile.absolutePath}»"
+                                    result.errorRows = true
+                                } else {
+                                    def dbRows = versions[version]?.data_rows
+                                    def gitRows = XMLUnit.buildControlDocument(rowsFile?.text?.replaceAll('stringValue=""', ''))
+                                    if (dbRows != null && gitRows != null) {
+                                        updateStyleAliases(dbRows, stylesDb)
+                                        updateStyleAliases(gitRows, stylesDb + mapStylesXml)
+                                        Diff diff = XMLUnit.compareXML(dbRows, gitRows)
+                                        def rowsEqual = diff.similar()
+                                        if (rowsEqual) {
+                                            result.checkRows = "Ok"
+                                        } else {
+                                            result.errorRows = true
+                                            result.checkRows = "Фикс.строки отличаются"
+                                        }
+                                    } else if (dbRows != null || gitRows != null) {
+                                        if (dbRows == null && gitRows != null && rowsFile?.text?.contains('<rows/>')) {
+                                            result.checkRows = "Ok"
+                                        } else {
+                                            result.errorRows = true
+                                            result.checkRows = "Фикс.строк нет в БД"
+                                        }
                                     }
                                 }
 
@@ -893,10 +897,10 @@ class GitReport {
                 map[type_id][version].styles = [:]
             }
             // Стиль версии макета
-            def style = new Expando()
+            FormStyle style = new FormStyle()
             style.alias = it.alias
-            style.font_color = Color.getById(it.font_color as Integer)
-            style.back_color = Color.getById(it.back_color as Integer)
+            style.fontColor = Color.getById(it.font_color as Integer)
+            style.backColor = Color.getById(it.back_color as Integer)
             style.italic = it.italic == 1
             style.bold = it.bold == 1
             map[type_id][version].styles.put(it.alias, style)
@@ -1009,4 +1013,23 @@ class GitReport {
         println("Load DB ref_book OK")
         return refbooks
     }
+
+    static void updateStyleAliases(Document document, def styleMap) {
+        if (document == null) {
+            return
+        }
+        def nodeList = document.getElementsByTagName("cell")
+        for (int i = 0; i < nodeList.length; i++) {
+            def cell = nodeList.item(i)
+            def aliasNode = cell.attributes.getNamedItem("styleAlias")
+            if (aliasNode != null) {
+                def alias = aliasNode.getTextContent()
+                def FormStyle formStyle = styleMap[alias]
+                if (formStyle != null) {
+                    aliasNode.setTextContent(formStyle.toString())
+                }
+            }
+        }
+    }
 }
+
