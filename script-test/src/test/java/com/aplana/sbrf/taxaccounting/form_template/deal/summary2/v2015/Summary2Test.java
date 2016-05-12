@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.form_template.deal.summary2.v2015;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
@@ -287,9 +288,10 @@ public class Summary2Test extends ScriptTestBase {
     }
 
     // Консолидация - все источники по отдельности
-    // TODO (Ramil Timerbaev)
-    // @Test
+    @Test
     public void composeAllSourceTest() {
+        mockCheckApp4_2();
+
         HashMap<Integer, Integer> sourceExpectedMap = new LinkedHashMap<Integer, Integer>();
         sourceExpectedMap.put(816, 2);
         sourceExpectedMap.put(804, 2);
@@ -342,7 +344,6 @@ public class Summary2Test extends ScriptTestBase {
             testHelper.initRowData();
 
             // Консолидация
-            mockCheckApp4_2();
             testHelper.execute(FormDataEvent.COMPOSE);
 
             int expected = sourceExpectedMap.get(key);
@@ -354,12 +355,11 @@ public class Summary2Test extends ScriptTestBase {
     // Консолидация - все источники сразу
     @Test
     public void composeTest() {
-        int[] sourceTemplateIds = new int [] { 816, 804, 812, 813, 814, 806, 805, 815, 817, 823, 825, 827, 819, 826, 835, 837, 839, 811, 838, 828, 831, 830, 834, 832, 833, 836 };
+        int[] sourceTemplateIds = new int [] { 816, 804, 812, 813, 814, 806, 805, 815, 817, 823, 825, 827, 819, 826, 835, 837, 839, 811, 838, 828, 831, 830, 834, 832, 833, 836};
         List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>(sourceTemplateIds.length);
         FormDataKind kind = FormDataKind.CONSOLIDATED;
         for (int sourceTemplateId : sourceTemplateIds) {
             int sourceTypeId = formTypeIdByTemplateIdMap.get(sourceTemplateId);
-
 
             // источник
             DepartmentFormType departmentFormType = getSource(sourceTypeId, sourceTypeId, kind);
@@ -503,7 +503,18 @@ public class Summary2Test extends ScriptTestBase {
             case 833:
             case 836:
                 row = sourceFormData.createDataRow();
+                row.getCell("name").setValue(1L, null);
                 dataRows.add(row);
+                break;
+            case 803:
+                Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(520L);
+                Set<Long> ids = records.keySet();
+                for (Long id : ids) {
+                    DataRow<Cell> dataRow = sourceFormData.createDataRow();
+                    dataRow.getCell("name").setValue(id, null);
+                    dataRow.getCell("sign").setValue(1, null);
+                    dataRows.add(dataRow);
+                }
                 break;
         }
         return dataRows;
@@ -515,6 +526,12 @@ public class Summary2Test extends ScriptTestBase {
         FormData sourceFormData = getSourceFormData(app4_2FormTypeId, app4_2FormTypeId);
         when(testHelper.getFormDataService().getLast(eq(app4_2FormTypeId), eq(FormDataKind.SUMMARY), eq(DEPARTMENT_ID),
                 anyInt(), any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(sourceFormData);
+
+        // строки и хелпер источника
+        List<DataRow<Cell>> dataRows = getFillDataRows(app4_2FormTypeId, sourceFormData, 1L);
+        DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
+        sourceDataRowHelper.save(dataRows);
+        when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
     }
 
     private void fillRow(DataRow<Cell> row) {

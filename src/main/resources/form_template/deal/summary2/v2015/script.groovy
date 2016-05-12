@@ -313,6 +313,14 @@ void consolidation() {
     // row → номер группы
     def final groupMap = [:]
 
+    // собрать нужные контролируемые сделки из 4.2
+    def controlledTransactions = []
+    formDataService.getDataRowHelper(getFormDataApp4_2()).allSaved.each { srcRow ->
+        if (srcRow.sign == getRecYesId()) {
+            controlledTransactions.add(srcRow.name)
+        }
+    }
+
     // консолидация из шестерок
     def departmentFormTypes = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id,
             formData.kind, getReportPeriodStartDate(), getReportPeriodEndDate())
@@ -320,7 +328,7 @@ void consolidation() {
         def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.DEAL) {
             formDataService.getDataRowHelper(source).allSaved.each { srcRow ->
-                if (srcRow.getAlias() == null) {
+                if (srcRow.getAlias() == null && controlledTransactions.contains(srcRow.name)) {
                     def matrixRow = getPreRow(srcRow, source.formType.id, typeMap, classMap)
 
                     // идентификатор для группировки
@@ -383,17 +391,6 @@ void consolidation() {
 
     if (mapForSummary.size() > 0) {
         summaryRows.add(getRow(mapForSummary, typeMap))
-    }
-
-    // консолидация из 4.2
-    def source = getFormDataApp4_2()
-    formDataService.getDataRowHelper(source).allSaved.each { srcRow ->
-        if (srcRow.sign == getRecYesId()) {
-            mapForSummary.clear()
-            def matrixRow = getPreRow(srcRow, app4_2FormTypeId, typeMap, classMap)
-            mapForSummary.put(matrixRow, srcRow)
-            summaryRows.add(getRow(mapForSummary, typeMap))
-        }
     }
 
     updateIndexes(summaryRows)
@@ -1482,16 +1479,13 @@ def getPreRow(def srcRow, def formTypeId, def typeMap, def classMap) {
     }
 
     // Графа 30
-    row.contractNum = (formTypeId != app4_2FormTypeId ? srcRow.docNumber : null)
+    row.contractNum = srcRow.docNumber
 
     // Графа 31
-    row.contractDate = (formTypeId != app4_2FormTypeId ? srcRow.docDate : null)
+    row.contractDate = srcRow.docDate
 
     // Графа 46
     switch (formTypeId) {
-        case app4_2FormTypeId: // 4.2
-            row.dealDoneDate = null
-            break
         case 827: // 6.11 (9)
             row.dealDoneDate = srcRow.dealDate
             break

@@ -1,6 +1,6 @@
 record_id(N);NAME(S);COUNTRY_CODE(R);TYPE(R);TAX_STATUS(R);ORG_CODE(R);RS(S);TAX_CODE_INCORPORATION(S);REG_NUM(S);INNKIO(S);KPP(S);ADDRESS(S)
-1;nameA;1;1;1;1;testA;testA;testA;7736581290;773601001;testA
+1;nameA;1;1;1;2;testA;testA;testA;7736581290;773601001;testA
 2;nameB;2;2;2;2;testB;testB;testB;;;testB
-3;nameC;3;3;3;3;testC;testC;testC;;;testC
-4;nameC;3;3;3;1;testC;testC;testC;;;testC
+3;nameC;3;3;3;2;testC;testC;testC;;;testC
+4;nameC;3;3;3;2;testC;testC;testC;;;testC
 5;nameC;3;3;3;2;;;testC;;;testC
