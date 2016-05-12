@@ -289,7 +289,7 @@
         <columnType>REFBOOK</columnType>
         <name>п. 040 &quot;Код предмета сделки (код по ТН ВЭД)&quot;</name>
         <order>26</order>
-        <width>5</width>
+        <width>7</width>
         <hierarchical>true</hierarchical>
         <nameAttributeId>42</nameAttributeId>
         <refBookAttributeId>1743</refBookAttributeId>

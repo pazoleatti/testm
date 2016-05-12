@@ -557,12 +557,12 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 814: // 6.5 (2)
         case 815: // 6.8 (3)
         case 826: // 6.13 (5)
+        case 837: // 6.15 (18)
         case 833: // 6.24 (22)
             tmp = '012'
             break
         case 806: // 6.6 (8)
         case 835: // 6.14 (17)
-        case 837: // 6.15 (18)
         case 839: // 6.16 (16)
             tmp = '052'
             break
@@ -621,10 +621,11 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             tmp = 3
             break
         case 827: // 6.11 (9)
+            tmp = 2
             if (srcRow.dealMode != null) {
                 def record14 = getRefBookValue(14, srcRow.dealMode)
-                if (record14.ID.value != 2) {
-                    tmp = 2
+                if (record14.ID.value == 2) {
+                    tmp = 0
                 }
             }
             break
