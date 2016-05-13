@@ -2,7 +2,6 @@ package form_template.vat.declaration_8_1.v2015
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
@@ -14,12 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 import org.apache.commons.lang3.StringUtils
-import org.springframework.dao.EmptyResultDataAccessException
-import org.springframework.jdbc.core.RowMapper
 
 import javax.xml.stream.XMLStreamReader
-import java.sql.ResultSet
-import java.sql.SQLException
 
 /**
  * Декларация по НДС (раздел 8.1)
@@ -191,7 +186,7 @@ void preXmlCheck() {
         filter.yearStart = year
         filter.yearEnd = year
         filter.reportPeriodIdList = [declarationData.reportPeriodId]
-        def departmentReportPeriods = getListByFilter(filter)
+        def departmentReportPeriods = departmentReportPeriodService.getListByFilter(filter)
         def declarations = declarationService.find(declarationType8sources, departmentReportPeriods[0].id)
         declarationSource = declarations.find { it.accepted }
     } else if (corrNumber > 1) {
@@ -203,7 +198,7 @@ void preXmlCheck() {
         filter.yearStart = year
         filter.yearEnd = year
         filter.reportPeriodIdList = [declarationData.reportPeriodId]
-        def departmentReportPeriods = getListByFilter(filter)
+        def departmentReportPeriods = departmentReportPeriodService.getListByFilter(filter)
         if (!departmentReportPeriods.isEmpty()) {
             departmentReportPeriods.remove(departmentReportPeriods.size() - 1)
         }
@@ -502,14 +497,6 @@ def getCode005(def corrNumber) {
     return result
 }
 
-BigDecimal getXmlDecimal(def reader, String attrName) {
-    def value = reader?.getAttributeValue(null, attrName)
-    if (!value) {
-        return null
-    }
-    return new BigDecimal(value)
-}
-
 // Логические проверки (Проверки значений атрибутов формы настроек подразделения, атрибутов файла формата законодателя)
 void logicCheckXML(LogLevel logLevel) {
     // получение данных из xml'ки
@@ -600,103 +587,4 @@ boolean isCurrentNode(List<String> nodeNames, Map<String, Boolean> elements) {
     def tempNodes = nodeNames + 'Файл'
     def enteredNodes = elements.findAll { it.value }.keySet() // узлы в которые вошли, но не вышли еще
     return enteredNodes.containsAll(tempNodes) && enteredNodes.size() == tempNodes.size()
-}
-
-@Field
-def mapper
-
-def getDRPMapper() {
-    if (mapper == null) {
-        mapper = new RowMapper<DepartmentReportPeriod>() {
-            @Override
-            public DepartmentReportPeriod mapRow(ResultSet rs, int index) throws SQLException {
-                DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-                departmentReportPeriod.setId(SqlUtils.getInteger(rs, "id"));
-                departmentReportPeriod.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
-                departmentReportPeriod.setReportPeriod(reportPeriodService.get(SqlUtils.getInteger(rs, "report_period_id")));
-                departmentReportPeriod.setActive(!SqlUtils.getInteger(rs, "is_active").equals(0));
-                departmentReportPeriod.setBalance(!SqlUtils.getInteger(rs, "is_balance_period").equals(0));
-                departmentReportPeriod.setCorrectionDate(rs.getDate("correction_date"));
-                return departmentReportPeriod;
-            }
-        }
-    }
-    return mapper
-}
-
-def getLastDepartmentReportPeriod(def departmentId, def reportPeriodId) {
-    def declarationTemplateDao = declarationService.declarationTemplateDao
-    try {
-        return declarationTemplateDao.getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
-                "drp.is_active, drp.is_balance_period, drp.correction_date " +
-                "from " +
-                "department_report_period drp, " +
-                "(select max(correction_date) as correction_date, department_id, report_period_id " +
-                "from department_report_period " +
-                "where department_id = ? and report_period_id = ? " +
-                "group by department_id, report_period_id) m " +
-                "where drp.department_id = m.department_id " +
-                "and drp.report_period_id = m.report_period_id " +
-                "and (drp.correction_date = m.correction_date or (m.correction_date is null " +
-                "and drp.correction_date is null))",
-                [departmentId, reportPeriodId] as Object[], getDRPMapper());
-    } catch (EmptyResultDataAccessException e) {
-        return null;
-    }
-}
-
-def List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter filter) {
-    def declarationTemplateDao = declarationService.declarationTemplateDao
-    String QUERY_TEMPLATE_COMPOSITE_SORT = "select drp.id, drp.department_id, drp.report_period_id, drp.is_active, drp.is_balance_period, drp.correction_date \n" +
-            "          from \n" +
-            "          department_report_period drp \n" +
-            "          join report_period rp on drp.report_period_id = rp.id \n" +
-            "          join tax_period tp on rp.tax_period_id = tp.id \n" +
-            "            %s \n" +
-            "            order by tp.year, drp.CORRECTION_DATE NULLS FIRST";
-    return declarationTemplateDao.getNamedParameterJdbcTemplate().query(String.format(QUERY_TEMPLATE_COMPOSITE_SORT, getFilterString(filter)),
-            new HashMap<String, Object>(2) {{
-                put("yearStart", filter.getYearStart());
-                put("yearEnd", filter.getYearEnd());
-            }}, getDRPMapper());
-}
-
-def String getFilterString(DepartmentReportPeriodFilter filter) {
-    if (filter == null) {
-        return "";
-    }
-    List<String> causeList = new LinkedList<String>();
-    if (filter.isCorrection() != null) {
-        causeList.add("drp.correction_date is " + (filter.isCorrection() ? " not " : "") + " null");
-    }
-    if (filter.isBalance() != null) {
-        causeList.add("drp.is_balance_period " + (filter.isBalance() ? "<>" : "=") + " 0");
-    }
-    if (filter.isActive() != null) {
-        causeList.add("drp.is_active " + (filter.isActive() ? "<>" : "=") + " 0");
-    }
-    if (filter.getCorrectionDate() != null) {
-        causeList.add("drp.correction_date = to_date('" +
-                filter.getCorrectionDate().format('dd.MM.yyyy') +
-                "', 'DD.MM.YYYY')");
-    }
-    if (filter.getDepartmentIdList() != null) {
-        causeList.add(SqlUtils.transformToSqlInStatement("drp.department_id",
-                filter.getDepartmentIdList()));
-    }
-    if (filter.getReportPeriodIdList() != null) {
-        causeList.add(SqlUtils.transformToSqlInStatement("drp.report_period_id",
-                filter.getReportPeriodIdList()));
-    }
-    if (filter.getTaxTypeList() != null) {
-        causeList.add("tp.tax_type in " +
-                SqlUtils.transformTaxTypeToSqlInStatement(filter.getTaxTypeList()));
-    }
-    if (filter.getYearStart() != null || filter.getYearEnd() != null){
-        causeList.add("(:yearStart is null or tp.year >= :yearStart) and (:yearEnd is null or tp.year <= :yearEnd)");
-    }
-    if (causeList.isEmpty()) {
-        return "";
-    }
-    return " where " + StringUtils.join(causeList, " and ");
 }
