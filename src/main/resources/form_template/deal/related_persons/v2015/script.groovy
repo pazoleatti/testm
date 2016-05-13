@@ -1484,6 +1484,14 @@ def fillSection2(def rowIndex, def columnIndex, boolean fullExport) {
             RegionUtil.setBorderTop(CellStyle.BORDER_THIN, region, sheet, workBook)
             RegionUtil.setBorderRight(CellStyle.BORDER_THIN, region, sheet, workBook)
             RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, region, sheet, workBook)
+
+            // TODO (Ramil Timerbaev) КОСТЫЛЬ! увеличивает высоту row если текст большой (по 280 символов на строчку)
+            def symbols = title.size()
+            def symbolsInOneRow = 280 // приблизительное количество символов на одной строке
+            def countRows = (short) (symbols / symbolsInOneRow) + (symbols % symbolsInOneRow ? 1 : 0)
+            def heightRow = 15 * 20 // 15 высота строки, 20 - потому что размер высоты делится на 20
+            def height = heightRow * countRows
+            tmpRow.setHeight((short) height)
         }
 
         // вторая строка - данные (в скобках старые значения)
