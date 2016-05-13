@@ -149,5 +149,39 @@ update ref_book_attribute set name = 'Дата исключения из ВЗЛ'
 --https://jira.aplana.com/browse/SBRFACCTAX-15650: 1.0 Участники ТЦО. Не хватает пробела в названии поля "КИО"
 update ref_book_attribute set name = 'КИО (заполняется для нерезидентов)' where id = 5207;
 -----------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-15725: Транспорт. Доработать справочник "Средняя стоимость транспортных средств (с 2015)" (БД)
+update ref_book set name = 'Средняя стоимость транспортных средств (с 2015)' where id = 218;
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) 
+VALUES (2188, 218, 'Количество лет, прошедших с года выпуска', 'YOM_RANGE', 1, 7, null, null, 1, null, 10, 1, 0, null, null, 0, 120);
+
+begin
+	merge into ref_book_value tgt
+using (
+  with t as (
+  select rbr.id as record_id, 2188 as attribute_id, rbv_from.number_value as a, rbv_to.number_value as b
+  from ref_book_record rbr
+  left join ref_book_value rbv_from on rbv_from.record_id = rbr.id and rbv_from.attribute_id = 2186
+  left join ref_book_value rbv_to on rbv_to.record_id = rbr.id and rbv_to.attribute_id = 2187
+  where rbr.ref_book_id = 218)
+  select record_id, attribute_id,
+         case when a=0 and b<>0 then 'не более '||b||' '||'лет'
+              when a<>0 and b<>0 then 'от '||a||' до '||b||' лет' end as string_value 
+  from t
+  where a is not null and b is not null
+       ) src
+on (tgt.attribute_id = src.attribute_id and tgt.record_id = src.record_id)
+when matched then
+     update set tgt.string_value = src.string_value where tgt.string_value <> src.string_value
+when not matched then
+     insert (tgt.record_id, tgt.attribute_id, tgt.string_value) values (src.record_id, src.attribute_id, src.string_value);       
+	 
+dbms_output.put_line('REFBOOK (Transport YOM Range): '||sql%rowcount||' rows merged');
+	 
+end;	 
+/
+delete from ref_book_value where attribute_id in (2186, 2187);	 
+delete from ref_book_attribute where id in (2186, 2187);
+-----------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
