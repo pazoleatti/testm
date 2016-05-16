@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -43,6 +44,9 @@ public class GetPerformerHandler extends AbstractActionHandler<GetPerformerActio
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
+
     public GetPerformerHandler() {
         super(GetPerformerAction.class);
     }
@@ -54,7 +58,8 @@ public class GetPerformerHandler extends AbstractActionHandler<GetPerformerActio
         Logger logger = new Logger();
         FormData formData = formDataService.getFormData(userInfo, action.getFormData().getId(), action.getFormData().isManual(), logger);
         result.setFormData(formData);
-        if (formData.getState().equals(WorkflowState.CREATED) || formData.getState().equals(WorkflowState.PREPARED)) {
+        boolean isActivePeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId()).isActive();
+        if (isActivePeriod && (formData.getState().equals(WorkflowState.CREATED) || formData.getState().equals(WorkflowState.PREPARED))) {
             String key = formDataService.generateTaskKey(action.getFormData().getId(), ReportType.EDIT_FD);
             LockData lockData = lockService.getLock(key);
             if (lockData == null) {
