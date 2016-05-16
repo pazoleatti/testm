@@ -165,12 +165,12 @@ public final class MessageGenerator {
             "%s Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s %d\", Период сравнения: \"%s %d\",%s%s Версия: \"%s\"";
     private static final String MONTH = " Месяц: \"%s\",";
     private static final String CORRECTION_DATE  = " Дата сдачи корректировки: %s,";
-    private static final String DD_CORRECTION_DATE  = " ,Дата сдачи корректировки: %s";
+    private static final String DD_CORRECTION_DATE  = ", Дата сдачи корректировки: %s";
     private static final String COMPARISON_PERIOD = " Период сравнения: \"%s\", ";
     private static final String COMPLETE_DECLARATION =
             "%s Вид: \"%s\", Подразделение: \"%s\", Период: \"%s %d\"%s%s%s";
-    private static final String TAX_AUTHORITY = " ,Налоговый орган: \"%s\"";
-    private static final String KPP = " ,КПП: \"%s\"";
+    private static final String TAX_AUTHORITY = ", Налоговый орган: \"%s\"";
+    private static final String KPP = ", КПП: \"%s\"";
 
     private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
         @Override
