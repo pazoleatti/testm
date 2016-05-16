@@ -1,5 +1,6 @@
 package form_template.deal.summary.v2013
 
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -87,19 +88,15 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         break
-    case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED:
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
         logicCheck()
         break
 // Консолидация
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
-        logicCheck()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            formDataService.saveCachedDataRows(formData, logger)
-            logger.info('Формирование сводной формы прошло успешно.')
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -185,7 +182,105 @@ void checkCreation() {
 
 // Логические проверки
 void logicCheck() {
-    // ТЗ нет
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    if (dataRows.isEmpty()) {
+        return
+    }
+
+    // Общие значения
+    // "Да"
+    def Long recYesId = getRecYesId()
+
+    for (DataRow row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        def rowNum = row.getIndex()
+
+        // 1. Проверка кода основания отнесения сделки к контролируемой
+        def onlyNo = !(recYesId in [row.f131, row.f132, row.f133, row.f134, row.f135])
+        if ((row.f122 == recYesId || row.f123 == recYesId) && !onlyNo) {
+            def msg = "Строка %d: Не допускается одновременное заполнение значением «1» любой из граф «%s», «%s» с любой из граф «%s»!"
+            def names = []
+            ['f131', 'f132', 'f133', 'f134', 'f135'].each { alias ->
+                names.add(getColumnName(row, alias))
+            }
+            logger.error(msg, rowNum, getColumnName(row, 'f122'), getColumnName(row, 'f123'), names.join('», «'))
+        }
+
+        // 2. Проверка неотрицательности доходов и расходов
+        if (row.income && row.income < 0) {
+            def msg = getColumnName(row, 'income')
+            logger.error("Строка $rowNum: Значение атрибута «$msg» должно быть больше или равно «0»!")
+        }
+        if (row.outcome && row.outcome < 0) {
+            def msg = getColumnName(row, 'outcome')
+            logger.error("Строка $rowNum: Значение атрибута «$msg» должно быть больше или равно «0»!")
+        }
+
+        // 3. Проверка заполнения доходов и расходов
+        if (row.income == 0 && row.outcome == 0) {
+            def msg1 = getColumnName(row, 'income')
+            def msg2 = getColumnName(row, 'outcome')
+            logger.error("Строка $rowNum: Значения атрибутов «$msg1» и «$msg2» не должны быть одновременно равны «0»!")
+        }
+
+        // 4. Проверка одновременного заполнения полей «Код предмета сделки»
+        if (row.dealSubjectCode1 && row.dealSubjectCode2) {
+            def msg1 = getColumnName(row, 'dealSubjectCode1')
+            def msg2 = getColumnName(row, 'dealSubjectCode2')
+            logger.error("Строка $rowNum: Значения граф «$msg1» и «$msg2» не должны быть одновременно заполнены!")
+        }
+
+        // 5. Проверка корректности даты совершения сделки
+        // TODO (SBRFACCTAX-15094) заменить на checkDatePeriodExt
+        checkDatePeriodExtLocal(logger, row, 'dealDoneDate', 'contractDate', Date.parse('dd.MM.yyyy', '01.01.' + getReportPeriodEndDate().format('yyyy')), getReportPeriodEndDate(), true)
+
+        // 6. Проверка заполнения граф «ИНН, КПП организации»
+        if (row.organName) {
+            def val = getRefBookValue(9, row.organName)
+            if (val) {
+                def organizationCode = getRefBookValue(70, val.ORGANIZATION?.referenceValue)?.CODE?.value
+                if (organizationCode == 1) {
+                    // a
+                    if(!val.INN_KIO?.stringValue){
+                        def msg1 = getColumnName(row, 'organINN')
+                        def msg2 = getColumnName(row, 'organInfo')
+                        logger.error("Строка $rowNum: Значение графы «$msg1» должно быть заполнено, т.к. значение графы «$msg2» равно «Российская организация»!")
+                    }
+                    if(!val.KPP?.stringValue){
+                        def msg1 = getColumnName(row, 'organKPP')
+                        def msg2 = getColumnName(row, 'organInfo')
+                        logger.error("Строка $rowNum: Значение графы «$msg1» должно быть заполнено, т.к. значение графы «$msg2» равно «Российская организация»!")
+                    }
+                } else if (organizationCode == 2 && row.organRegNum == null && row.taxpayerCode == null) {
+                    // b
+                    def msg1 = getColumnName(row, 'organRegNum')
+                    def msg2 = getColumnName(row, 'taxpayerCode')
+                    def msg3 = getColumnName(row, 'organInfo')
+                    logger.error("Строка $rowNum: Значение графы «$msg1» или графы «$msg2» должно быть заполнено, т.к. значение графы «$msg3» равно «Иностранная организация»!")
+                }
+            }
+        }
+    }
+}
+
+// TODO (SBRFACCTAX-15094) удалить
+void checkDatePeriodExtLocal(logger, row, String alias, String startAlias, Date yearStartDate, Date endDate, boolean fatal) {
+    // дата проверяемой графы
+    Date docDate = row.getCell(alias).getDateValue();
+    // дата другой графы
+    Date startDate = row.getCell(startAlias).getDateValue();
+
+    if (docDate != null && startDate != null && (docDate.before(yearStartDate) || docDate.after(endDate) || docDate.before(startDate))) {
+        logger.error(String.format("Строка %d: Дата по графе «%s» должна принимать значение из диапазона %s - %s и быть больше либо равна дате по графе «%s»!",
+                row.getIndex(),
+                getColumnName(row, alias),
+                formatDate(yearStartDate, "dd.MM.yyyy"),
+                formatDate(endDate, "dd.MM.yyyy"),
+                getColumnName(row, startAlias)
+        ));
+    }
 }
 
 // Расчеты. Алгоритмы заполнения полей формы.
@@ -348,6 +443,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 382: // 7
         case 397: // 20
         case 399: // 22
+        case 404: // 26
             row.similarDealGroup = getRecYesId()
             break
         case 379: // 4
@@ -355,7 +451,6 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 385: // 10
         case 387: // 12
         case 398: // 21
-        case 404: // 26
             row.similarDealGroup = getRecNoId()
             break
         case 375: // 3
@@ -386,11 +481,11 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 375: // 3
         case 380: // 5
         case 382: // 7
+        case 398: // 21
         case 399: // 22
             val13 = '019'
             break
         case 379: // 4
-        case 398: // 21
             val13 = '016'
             break
         case 383: // 8
@@ -451,9 +546,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             val14 = '012'
             break
         case 379: // 4
-        case 398: // 21
             val14 = '028'
-            break
             break
         case 381: // 6
             if ((srcRow.incomeSum ?: 0) == 0 && (srcRow.outcomeSum ?: 0) > 0) {
@@ -463,6 +556,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             }
             break
         case 382: // 7
+        case 398: // 21
             val14 = '011'
             break
         case 383: // 8
@@ -665,21 +759,29 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
     }
 
     def val25and26 = null
+    def signTransaction = null
     switch (formTypeId) {
         case 393: // 18
             val25and26 = srcRow.innerCode
+            signTransaction = srcRow.signTransaction
             break
         case 394: // 19
             val25and26 = srcRow.metalName
+            signTransaction = srcRow.foreignDeal
             break
     }
-    if (val25and26 != null && val23 == 1) {
+
+    // Графа 25
+    if (val25and26 != null && val23 == 1 && signTransaction == recYesId) {
         def metal = getRefBookValue(17, val25and26)
-
-        // Графа 25
         row.dealSubjectCode1 = metal.TN_VED_CODE.referenceValue
+    } else {
+        row.dealSubjectCode1 = null
+    }
 
-        // Графа 26
+    // Графа 26
+    if (val25and26 != null && val23 == 1 && signTransaction == recNoId) {
+        def metal = getRefBookValue(17, val25and26)
         def String innerCode = metal.INNER_CODE.stringValue
         def String code = null;
         if ("A33".equals(innerCode)) {
@@ -1044,10 +1146,10 @@ def String getGroupId(def matrixRow, def srcRow, def typeMap) {
 
 // получение строки итогового отчета на основании группы строк (или одной строки) из "матрицы" и источника (табл. 87)
 def getRow(def map, def typeMap) {
-    // для отчетов 16..19 надо считать суммы по двум столбцам
+    // для отчетов 15..19 надо считать суммы по двум столбцам
     def totalSum = 0
     map.each { matrixRow, srcRow ->
-        if (typeMap.get(matrixRow) in [391, 394]) {
+        if (typeMap.get(matrixRow) in [390, 391, 394]) {
             totalSum = (srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0)
         } else if (typeMap.get(matrixRow) in [392, 393]) {
             totalSum = (srcRow.incomeSum ?: 0) - (srcRow.consumptionSum ?: 0)
@@ -1145,7 +1247,6 @@ def getRow(def map, def typeMap) {
         switch (typeMap.get(matrixRow)) {
             case 376: // 1
             case 383: // 8
-            case 390: // 15
                 row.income = row.income + matrixRow.income
                 row.outcome = row.outcome + matrixRow.outcome
                 break
@@ -1184,6 +1285,13 @@ def getRow(def map, def typeMap) {
                     row.income = row.income + srcRow.transactionSumRub
                 }
                 break
+            case 390: // 15
+                if (totalSum >= 0) {
+                    row.income = (row.income ?: 0) + (srcRow.total ?: 0)
+                } else {
+                    row.outcome = (row.outcome ?: 0) + (srcRow.total ?: 0)
+                }
+                break
             case 391: // 16
                 def String dealName = 'Срочные поставочные конверсионные сделки (сделки с отсрочкой исполнения) - '
                 if (totalSum >= 0) {
@@ -1219,10 +1327,10 @@ def getRow(def map, def typeMap) {
                 def boolean dealBuy = getRecDealBuyId().equals(srcRow.dealFocus)
                 def String dealName = 'Кассовые сделки ' + (dealBuy ? "покупки " : "продажи ") + ' драгоценных металлов - '
                 if (totalSum >= 0) {
-                    row.income = (row.income ?: 0) + (srcRow.incomeSum ?: 0)
+                    row.income = (row.income ?: 0) + (srcRow.total ?: 0)
                     row.dealSubjectName = dealName + 'доходные'
                 } else {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.outcomeSum ?: 0)
+                    row.outcome = (row.outcome ?: 0) + (srcRow.total ?: 0)
                     row.dealSubjectName = dealName + 'расходные'
                 }
                 break
@@ -1971,7 +2079,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.locality2 = values[colIndex]
     // 40. п. 100 "Код условия поставки (заполняется только для товаров)"
     colIndex++
-    newRow.deliveryCode = getRecordIdImport(63, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.deliveryCode = getRecordIdImport(63, 'STRCODE', values[colIndex], fileRowIndex, colIndex + colOffset)
     // 41. п. 110 "Код единицы измерения по ОКЕИ"
     colIndex++
     newRow.okeiCode = getRecordIdImport(12, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
@@ -2009,23 +2117,28 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
         // 51. п. 050 "ИНН организации"
         colIndex = 50
-        formDataService.checkReferenceValue(9, values[colIndex], map.INN_KIO?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        def expectedValue = (map.INN_KIO?.stringValue != null ? map.INN_KIO?.stringValue : "")
+        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 52. п. 060 "КПП организации"
         colIndex++
-        formDataService.checkReferenceValue(9, values[colIndex], map.KPP?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (map.KPP?.stringValue != null ? map.KPP?.stringValue : "")
+        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
         colIndex++
-        formDataService.checkReferenceValue(9, values[colIndex], map.REG_NUM?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (map.REG_NUM?.stringValue != null ? map.REG_NUM?.stringValue : "")
+        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
         colIndex++
-        formDataService.checkReferenceValue(9, values[colIndex], map.TAXPAYER_CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (map.TAXPAYER_CODE?.stringValue != null ? map.TAXPAYER_CODE?.stringValue : "")
+        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 55. п. 090 "Адрес"
         colIndex++
-        formDataService.checkReferenceValue(9, values[colIndex], map.ADDRESS?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        expectedValue = (map.ADDRESS?.stringValue != null ? map.ADDRESS?.stringValue : "")
+        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // Графа 53, 54, 55 - сменили тип для наглядности: что было видно какие данные попадут в уведомление
         // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
