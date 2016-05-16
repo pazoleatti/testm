@@ -90,30 +90,34 @@ public class SignServiceImpl implements SignService {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
                 try {
                     String s = reader.readLine();
-                    if (s != null && s.startsWith("Result: " + SUCCESS_FLAG)) {
-                        status.setCheck(true);
-                        LOG.info("Проверка ЭП завершена успешно.");
-                    }
-                    do {
-                        if (s.startsWith("UserId: ")) {
-                            status.setMsg(String.format(USER_ID_MSG, fileName, s.substring(8)));
-                        } else if (!s.startsWith("Result:") && !s.startsWith("Execution time:")) {
-                            Pattern pattern = Pattern.compile(PATTERN_ERR);
-                            if (pattern.matcher(s).matches()) {
-                                String code = s.replaceAll(PATTERN_ERR, "$5");
-                                if (code.equals("ERR_NO_SIGN")) {
-                                    status.setMsg(String.format(ERR_NO_SIGN_MSG, fileName));
-                                } else if (code.equals("ERR_SIGN_NO_REG")) {
-                                    status.setMsg(String.format(ERR_SIGN_NO_REG_MSG, fileName));
-                                } else {
-                                    String text = s.replaceAll(PATTERN_ERR, "$7");
-                                    status.setMsg(String.format(ERR_OTHER_MSG, fileName, code, text));
-                                }
-                            } else {
-                                status.setMsg(String.format(ERR_OTHER_MSG2, fileName, s.replaceAll(PATTERN_ERR2, "$3")));
-                            }
+                    if (s == null) {
+                        status.setMsg(String.format(ERR_OTHER_MSG2, fileName, "Не удалось выполнить проверку"));
+                    } else {
+                        if (s.startsWith("Result: " + SUCCESS_FLAG)) {
+                            status.setCheck(true);
+                            LOG.info("Проверка ЭП завершена успешно.");
                         }
-                    } while ((s = reader.readLine()) != null);
+                        do {
+                            if (s.startsWith("UserId: ")) {
+                                status.setMsg(String.format(USER_ID_MSG, fileName, s.substring(8)));
+                            } else if (!s.startsWith("Result:") && !s.startsWith("Execution time:")) {
+                                Pattern pattern = Pattern.compile(PATTERN_ERR);
+                                if (pattern.matcher(s).matches()) {
+                                    String code = s.replaceAll(PATTERN_ERR, "$5");
+                                    if (code.equals("ERR_NO_SIGN")) {
+                                        status.setMsg(String.format(ERR_NO_SIGN_MSG, fileName));
+                                    } else if (code.equals("ERR_SIGN_NO_REG")) {
+                                        status.setMsg(String.format(ERR_SIGN_NO_REG_MSG, fileName));
+                                    } else {
+                                        String text = s.replaceAll(PATTERN_ERR, "$7");
+                                        status.setMsg(String.format(ERR_OTHER_MSG, fileName, code, text));
+                                    }
+                                } else {
+                                    status.setMsg(String.format(ERR_OTHER_MSG2, fileName, s.replaceAll(PATTERN_ERR2, "$3")));
+                                }
+                            }
+                        } while ((s = reader.readLine()) != null);
+                    }
                 } finally {
                     process.destroy();
                     reader.close();
