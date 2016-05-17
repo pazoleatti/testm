@@ -85,17 +85,16 @@ public class DataRowServiceImpl implements DataRowService {
         PagingResult<FormDataSearchResult> results = new PagingResult<FormDataSearchResult>();
         List<FormDataSearchResult> resultsList = new ArrayList<FormDataSearchResult>();
         FormData formData = formDataDao.get(formDataId, manual);
-        List<Column> columnList = new ArrayList<Column>();
         boolean existCommonColumn = false; // признак наличия числовых, строковых и/или автонумеруемых граф
+        boolean existRefBookColumn = false; // признак наличия справочных граф
         for(Column column: formData.getFormColumns()) {
             if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType()) || ColumnType.DATE.equals(column.getColumnType()))
-                columnList.add(column);
+                existRefBookColumn = true;
             else
                 existCommonColumn = true;
         }
-        formData.setFormColumns(columnList);
         long index = 1;
-        if (columnList.size() > 0) {
+        if (existRefBookColumn) {
             List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);
             refBookHelper.dataRowsDereference(new Logger(), rows, formData.getFormColumns());
             String searchKey = key;
