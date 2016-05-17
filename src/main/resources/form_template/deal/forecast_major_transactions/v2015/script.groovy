@@ -20,6 +20,9 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
+    case FormDataEvent.AFTER_LOAD:
+        afterLoad()
+        break
     case FormDataEvent.AFTER_CREATE:
         create()
         formDataService.saveCachedDataRows(formData, logger)
@@ -356,4 +359,12 @@ def getRefBookRecord(def refBookId, def date, def filter) {
         return retVal
     }
     return null
+}
+
+void afterLoad() {
+    if (binding.variables.containsKey("specialPeriod")) {
+        // имя периода и конечная дата корректны
+        // устанавливаем дату для справочников
+        specialPeriod.calendarStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
 }
