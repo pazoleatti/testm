@@ -426,7 +426,7 @@ public class PeriodServiceImpl implements PeriodService {
         switch (taxType) {
             case PROPERTY:
             case TRANSPORT:
-                departmentIds = departmentService.getAllChildrenIds(drpId);
+                departmentIds = departmentService.getAllChildrenIds(drp.getDepartmentId());
                 break;
             case INCOME:
             case DEAL:
