@@ -282,6 +282,8 @@ drop view v_log_clob_query;
 drop table log_clob_query;
 drop sequence seq_log_query;
 drop sequence seq_log_query_session; 
+drop procedure delete_form_template;
+drop procedure delete_form_type;
 
 --https://jira.aplana.com/browse/SBRFACCTAX-15119: Удалить из таблицы FORM_STYLE поле ID
 alter table form_style drop constraint form_style_pk;
