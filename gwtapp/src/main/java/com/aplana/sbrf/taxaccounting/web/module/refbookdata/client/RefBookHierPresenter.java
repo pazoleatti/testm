@@ -139,7 +139,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         getView().setRefBookNameDesc(refBookName);
         setMode(mode);
         commonEditPresenter.setVersionMode(false);
-        commonEditPresenter.show(null);
+        commonEditPresenter.show(uniqueRecordId);
         //registrations[1].removeHandler();
     }
 
@@ -217,6 +217,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
+        uniqueRecordId = null;
         //Очистка слота в случае перехода прямо по ссылке, без перерисовки
         clearSlot(TYPE_editFormPresenter);
         setInSlot(TYPE_editFormPresenter, Department.REF_BOOK_ID.equals(refBookId) ? departmentEditPresenter : hierEditFormPresenter);
