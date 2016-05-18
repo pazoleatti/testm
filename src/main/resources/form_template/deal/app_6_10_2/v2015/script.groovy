@@ -31,6 +31,9 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
+    case FormDataEvent.AFTER_LOAD:
+        afterLoad()
+        break
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
@@ -495,5 +498,13 @@ void sortFormDataRows(def saveInDB = true) {
         dataRowHelper.saveSort()
     } else {
         updateIndexes(dataRows)
+    }
+}
+
+void afterLoad() {
+    if (binding.variables.containsKey("specialPeriod")) {
+        // имя периода и конечная дата корректны
+        // устанавливаем дату для справочников
+        specialPeriod.calendarStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
 }

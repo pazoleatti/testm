@@ -169,20 +169,6 @@ public interface FormTemplateDao {
 	 */
 	boolean checkExistLargeString(Long formTemplateId, Column column);
 
-    /**
-     * Метод для удаления таблиц НФ в новой структуре.
-     * НЕ ИСПОЛЬЗОВАТЬ нигде больше.
-     * @param ftId идентификатор версии макета НФ
-     */
-    void dropFDTable(int ftId);
-
-    /**
-     * Метод для удаления таблиц НФ в новой структуре.
-     * НЕ ИСПОЛЬЗОВАТЬ нигде больше.
-     * @param ftId идентификатор id версий макета {@link com.aplana.sbrf.taxaccounting.model.FormType}
-     */
-    void dropFTTable(List<Integer> ftId);
-
     boolean isFDTableExist(int ftId);
 
     /**

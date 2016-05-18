@@ -712,23 +712,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	}
 
     @Override
-    public void dropFDTable(int ftId) {
-        getJdbcTemplate().execute(String.format("drop table form_data_%d", ftId));
-    }
-
-    @Override
-    public void dropFTTable(final List<Integer> ftIds) {
-        getJdbcTemplate().call(new CallableStatementCreator() {
-            @Override
-            public CallableStatement createCallableStatement(Connection con) throws SQLException {
-                CallableStatement statement = con.prepareCall("call delete_form_template(?)");
-                statement.setObject(1, StringUtils.join(ftIds.toArray(), ','));
-                return statement;
-            }
-        }, new ArrayList<SqlParameter>(0));
-    }
-
-    @Override
     public boolean isFDTableExist(int ftId) {
         return getJdbcTemplate().queryForObject("SELECT * FROM USER_TABLES where table_name = ?",
                 new Object[]{String.format("form_data_%d", ftId)}, Integer.class) > 0;

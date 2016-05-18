@@ -38,7 +38,8 @@ public abstract class Column implements Ordered, Serializable {
 	private int order;
 	/** Номер столбца в таблице с данными. Принимает значения от MIN_DATA_ORDER до MAX_DATA_ORDER.
 	 * Также может иметь значение NULL для новых столбцов*/
-	private Integer dataOrder;
+
+    private Integer dataOrder;
     transient private ColumnFormatter formatter = new ColumnFormatter();
 	/**
 	 * Идентификатор столбца в БД
@@ -183,6 +184,7 @@ public abstract class Column implements Ordered, Serializable {
 	 * Порядковый номер столбца в таблице FORM_DATA_ROW
 	 * @return
 	 */
+    @XmlTransient
 	public Integer getDataOrder() {
 		return dataOrder;
 	}

@@ -224,10 +224,13 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         dictRegionId.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Long>> event) {
-                PickerContext pickerContext = new PickerContext();
-                Long attributeId = event.getValue().get(0);
-                pickerContext.setAttributeId(attributeId);
-                pickerContext.setRegionFilter(PickerContext.RegionFilter.DEPARTMENT_CONFIG_FILTER);
+                PickerContext pickerContext = null;
+                if (event.getValue() != null && !event.getValue().isEmpty()) {
+                    pickerContext = new PickerContext();
+                    Long attributeId = event.getValue().get(0);
+                    pickerContext.setAttributeId(attributeId);
+                    pickerContext.setRegionFilter(PickerContext.RegionFilter.DEPARTMENT_CONFIG_FILTER);
+                }
                 reorgFormCode.setPickerContext(pickerContext);
                 signatoryId.setPickerContext(pickerContext);
                 taxPlaceTypeCode.setPickerContext(pickerContext);

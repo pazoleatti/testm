@@ -169,6 +169,63 @@ public class App_6_20Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() throws ParseException {
+        mockBeforeImport();
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.execute(FormDataEvent.IMPORT);
+        checkLogger();
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+
+        // проверка расчетов
+        testHelper.execute(FormDataEvent.CALCULATE);
+        checkLogger();
+        checkAfterCalc(testHelper.getDataRowHelper().getAll());
+
+    }
+
+    @Test
+    public void importTransportFileTest() {
+        mockBeforeImport();
+        testHelper.setImportFileInputStream(getImportRnuInputStream());
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+        List<String> aliases = Arrays.asList("docNumber", "docDate", "dealNumber", "dealDate", "dealDoneDate");
+        defaultCheckLoadData(aliases, 4);
+
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+    }
+
+    // Проверить загруженные данные
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(1).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(2).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(1L, dataRows.get(3).getCell("name").getNumericValue().longValue());
+
+        Assert.assertEquals(1L, dataRows.get(0).getCell("count").getNumericValue().longValue());
+        Assert.assertEquals(1L, dataRows.get(1).getCell("count").getNumericValue().longValue());
+        Assert.assertEquals(1L, dataRows.get(2).getCell("count").getNumericValue().longValue());
+        Assert.assertEquals(1L, dataRows.get(3).getCell("count").getNumericValue().longValue());
+    }
+    // Проверить расчеты
+    void checkAfterCalc(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(1, dataRows.get(0).getCell("count").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(1).getCell("count").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(2).getCell("count").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(3).getCell("count").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(1, dataRows.get(0).getCell("outcome").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(1).getCell("outcome").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(2).getCell("outcome").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(3).getCell("outcome").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(4, dataRows.size());
+    }
+
+    private void mockBeforeImport() {
         // TODO тесты для логики поиска по iksr
         Long refbookId = 520L;
 
@@ -244,49 +301,6 @@ public class App_6_20Test extends ScriptTestBase {
                 return map;
             }
         });
-
-        testHelper.setImportFileInputStream(getImportXlsInputStream());
-        testHelper.execute(FormDataEvent.IMPORT);
-        checkLogger();
-        checkLoadData(testHelper.getDataRowHelper().getAll());
-
-        // проверка расчетов
-        testHelper.execute(FormDataEvent.CALCULATE);
-        checkLogger();
-        checkAfterCalc(testHelper.getDataRowHelper().getAll());
-
-    }
-
-    // Проверить загруженные данные
-    void checkLoadData(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(1).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(2).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(1L, dataRows.get(3).getCell("name").getNumericValue().longValue());
-
-        Assert.assertEquals(1L, dataRows.get(0).getCell("count").getNumericValue().longValue());
-        Assert.assertEquals(1L, dataRows.get(1).getCell("count").getNumericValue().longValue());
-        Assert.assertEquals(1L, dataRows.get(2).getCell("count").getNumericValue().longValue());
-        Assert.assertEquals(1L, dataRows.get(3).getCell("count").getNumericValue().longValue());
-    }
-    // Проверить расчеты
-    void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(1, dataRows.get(0).getCell("count").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(1).getCell("count").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(2).getCell("count").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(3).getCell("count").getNumericValue().doubleValue(), 0);
-
-        Assert.assertEquals(1, dataRows.get(0).getCell("outcome").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(1).getCell("outcome").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(2).getCell("outcome").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(3).getCell("outcome").getNumericValue().doubleValue(), 0);
-
-        Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
-
-        Assert.assertEquals(4, dataRows.size());
     }
 }
 

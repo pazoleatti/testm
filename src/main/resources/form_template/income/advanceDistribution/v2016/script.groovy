@@ -46,6 +46,9 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
+    case FormDataEvent.AFTER_LOAD:
+        afterLoad()
+        break
     case FormDataEvent.CHECK:
         logicalCheck()
         break
@@ -1890,4 +1893,12 @@ def getReportPeriod() {
         reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     }
     return reportPeriod
+}
+
+void afterLoad() {
+    // прибыль сводная
+    if (binding.variables.containsKey("specialPeriod") && formData.kind == FormDataKind.SUMMARY) {
+        // для справочников начало от 01.01.year (для прибыли start_date)
+        specialPeriod.calendarStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
 }

@@ -3,6 +3,7 @@ package form_template.income.output2_2.v2014
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -42,6 +43,9 @@ import groovy.transform.Field
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
+        break
+    case FormDataEvent.AFTER_LOAD:
+        afterLoad()
         break
     /*case FormDataEvent.CALCULATE:
         calc()
@@ -514,4 +518,12 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.sumTax = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+void afterLoad() {
+    // прибыль сводная
+    if (binding.variables.containsKey("specialPeriod") && formData.kind == FormDataKind.SUMMARY) {
+        // для справочников начало от 01.01.year (для прибыли start_date)
+        specialPeriod.calendarStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
 }

@@ -3,6 +3,7 @@ package form_template.income.pivot_table.v2015
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
@@ -45,6 +46,9 @@ import groovy.transform.Field
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
+        break
+    case FormDataEvent.AFTER_LOAD:
+        afterLoad()
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -197,20 +201,9 @@ void consolidation() {
 }
 
 void afterLoad() {
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    def year = reportPeriod.taxPeriod.year
-    def periodName = ""
-    switch (reportPeriod.order) {
-        case 1 : periodName = "первый квартал"
-            break
-        case 2 : periodName = "полугодие"
-            break
-        case 3 : periodName = "9 месяцев"
-            break
-        case 4 : periodName = "год"
-            break
+    // прибыль сводная
+    if (binding.variables.containsKey("specialPeriod") && formData.kind == FormDataKind.SUMMARY) {
+        // для справочников начало от 01.01.year (для прибыли start_date)
+        specialPeriod.calendarStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
-    specialPeriod.name = periodName
-    specialPeriod.calendarStartDate = Date.parse("dd.MM.yyyy", "01.01.$year")
-    specialPeriod.endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 }

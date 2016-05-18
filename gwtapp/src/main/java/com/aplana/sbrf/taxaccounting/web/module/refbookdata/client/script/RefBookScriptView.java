@@ -61,8 +61,12 @@ public class RefBookScriptView extends ViewWithUiHandlers<RefBookScriptUiHandler
         Dialog.infoMessage("Сообщение", "Скрипт справочника успешно обновлен", new DialogHandler() {
             @Override
             public void ok() {
-                if (getUiHandlers() != null && isRedirect) {
-                    getUiHandlers().cancelEdit();
+                if (getUiHandlers() != null) {
+                    if (isRedirect) {
+                        getUiHandlers().cancelEdit();
+                    } else {
+                        getUiHandlers().getScript();
+                    }
                 }
             }
         });

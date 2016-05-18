@@ -1,12 +1,8 @@
 package form_template.deal.app_6_2.v2015
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -35,6 +31,9 @@ import groovy.transform.Field
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
+        break
+    case FormDataEvent.AFTER_LOAD:
+        afterLoad()
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -66,6 +65,10 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
@@ -409,6 +412,140 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 
+void importTransportData() {
+    checkTF(ImportInputStream, UploadFileName)
+
+    int COLUMN_COUNT = 14
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
+
+    String[] rowCells
+    int fileRowIndex = 2    // номер строки в файле (1, 2, ..)
+    int rowIndex = 0        // номер строки в НФ (1, 2, ..)
+    def newRows = []
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+    try {
+        // проверить первые строки тф - заголовок и пустая строка
+        checkFirstRowsTF(reader, logger)
+
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                break
+            }
+            def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex, false)
+            if (newRow) {
+                newRows.add(newRow)
+            }
+        }
+    } finally {
+        reader.close()
+    }
+
+    // отображать ошибки переполнения разряда
+    showMessages(newRows, logger)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
+    }
+}
+
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return null
+    }
+
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+
+    def int colOffset = 1
+
+    if (!isTotal) {
+        def String iksrName = getColumnName(newRow, 'iksr')
+        def nameFromFile = pure(rowCells[2])
+        def recordId = getTcoRecordId(nameFromFile,  pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+        def map = getRefBookValue(520, recordId)
+
+        // графа 2
+        newRow.name = recordId
+
+        def countryMap
+        // графа 4.1
+        if (map != null) {
+            countryMap = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
+            if (countryMap != null) {
+                def expectedValues = [countryMap.NAME?.stringValue, countryMap.FULLNAME?.stringValue]
+                formDataService.checkReferenceValue(pure(rowCells[4]), expectedValues, getColumnName(newRow, 'countryName'), map.NAME.value, fileRowIndex, 4 + colOffset, logger, false)
+            }
+        }
+
+        // графа 4.2
+        if (countryMap != null) {
+            formDataService.checkReferenceValue(pure(rowCells[5]), [countryMap.CODE?.stringValue], getColumnName(newRow, 'countryCode'), map.NAME.value, fileRowIndex, 5 + colOffset, logger, false)
+        }
+
+        // графа 5
+        newRow.docNumber = pure(rowCells[6])
+
+        // графа 6
+        newRow.docDate = parseDate(pure(rowCells[7]), "dd.MM.yyyy", fileRowIndex, 7 + colOffset, logger, true)
+
+        // графа 7
+        newRow.dealNumber = pure(rowCells[8])
+
+        // графа 8
+        newRow.dealDate =  parseDate(pure(rowCells[9]), "dd.MM.yyyy", fileRowIndex, 9 + colOffset, logger, true)
+
+        // графа 9
+        newRow.count = parseNumber(pure(rowCells[10]), fileRowIndex, 10 + colOffset, logger, true)
+
+        // графа 10
+        newRow.sum = parseNumber(pure(rowCells[11]), fileRowIndex, 11 + colOffset, logger, true)
+
+        // графа 11
+        newRow.price = parseNumber(pure(rowCells[12]), fileRowIndex, 12 + colOffset, logger, true)
+
+        // графа 12
+        newRow.cost = parseNumber(pure(rowCells[13]), fileRowIndex, 13 + colOffset, logger, true)
+
+        // графа 13
+        newRow.dealDoneDate =  parseDate(pure(rowCells[14]), "dd.MM.yyyy", fileRowIndex, 14 + colOffset, logger, true)
+    }
+
+    return newRow
+}
+
+String pure(String cell) {
+    return StringUtils.cleanString(cell)?.intern()
+}
+
 // Сортировка групп и строк
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -418,5 +555,13 @@ void sortFormDataRows(def saveInDB = true) {
         dataRowHelper.saveSort()
     } else {
         updateIndexes(dataRows)
+    }
+}
+
+void afterLoad() {
+    if (binding.variables.containsKey("specialPeriod")) {
+        // имя периода и конечная дата корректны
+        // устанавливаем дату для справочников
+        specialPeriod.calendarStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
 }

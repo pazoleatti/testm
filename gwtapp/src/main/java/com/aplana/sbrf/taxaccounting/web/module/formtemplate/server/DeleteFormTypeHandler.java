@@ -79,10 +79,7 @@ public class DeleteFormTypeHandler extends AbstractActionHandler<DeleteFormTypeA
 
         try{
             DeleteFormTypeResult result = new DeleteFormTypeResult();
-            List<Integer> versionIds = formTemplateService.getFTVersionIdsByStatus(action.getFormTypeId(), VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL);
             mainOperatingService.deleteTemplate(action.getFormTypeId(), logger, securityService.currentUserInfo());
-            //Изменения уже не получится откатить
-            formTemplateDao.dropFTTable(versionIds);
 
             result.setUuid(logEntryService.save(logger.getEntries()));
             return result;

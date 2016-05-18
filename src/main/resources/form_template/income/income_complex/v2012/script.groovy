@@ -572,7 +572,7 @@ void calc35to40(def dataRows) {
 // Графа 16. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 35-40)
 def getDifferenceFor35to40(def row) {
     // «графа 16» = «графа 9» - ( «графа 15» – «графа 14»)
-    return row.incomeTaxSumS - (row.opuSumTotal - row.opuSumByTableD)
+    return (row.incomeTaxSumS ?: BigDecimal.ZERO) - ((row.opuSumTotal ?: BigDecimal.ZERO) - (row.opuSumByTableD ?: BigDecimal.ZERO))
 }
 
 // Графа 15. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 35-40)
@@ -644,7 +644,7 @@ void calc4to5(def dataRows) {
 // Графа 16. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)
 def getDifferenceFor4to5(def row) {
     // «графа 16» = («графа 13» + «графа 14») – «графа 15»
-    return (row.opuSumByEnclosure2 + row.opuSumByTableD) - row.opuSumTotal
+    return ((row.opuSumByEnclosure2 ?: BigDecimal.ZERO) + (row.opuSumByTableD ?: BigDecimal.ZERO)) - (row.opuSumTotal ?: BigDecimal.ZERO)
 }
 
 // Графа 15. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)
@@ -693,7 +693,7 @@ def getOpuSumByEnclosure2For4to5(def row) {
 
 // Графа 11. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)
 def getLogicalCheckFor4to5(def row) {
-    def result = row.incomeTaxSumS - (row.incomeBuhSumAccepted - row.incomeBuhSumPrevTaxPeriod)
+    def result = (row.incomeTaxSumS ?: BigDecimal.ZERO) - ((row.incomeBuhSumAccepted ?: BigDecimal.ZERO) - (row.incomeBuhSumPrevTaxPeriod ?: BigDecimal.ZERO))
     return  (result < 0 ? 'Требуется уточнение' : round(result).toString())
 }
 
