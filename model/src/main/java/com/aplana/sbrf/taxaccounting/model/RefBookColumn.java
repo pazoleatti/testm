@@ -4,6 +4,8 @@ package com.aplana.sbrf.taxaccounting.model;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 /**
  * Реализация {@link Column}, предназначенная для хранения значений
  * справочников.
@@ -79,6 +81,7 @@ public class RefBookColumn extends FilterColumn {
 		return validationStrategy;
 	}
 
+    @XmlTransient
     public RefBookAttribute getRefBookAttribute() {
         return refBookAttribute;
     }

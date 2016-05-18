@@ -97,6 +97,7 @@ public class ReferenceColumn extends Column {
         }
     }
 
+    @XmlTransient
     public RefBookAttribute getRefBookAttribute() {
         return refBookAttribute;
     }

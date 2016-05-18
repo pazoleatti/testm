@@ -46,7 +46,6 @@ public class DeleteVersionHandler extends AbstractActionHandler<DeleteVersionAct
         Logger logger = new Logger();
         DeleteVersionResult result = new DeleteVersionResult();
         result.setLastVersion(mainOperatingService.deleteVersionTemplate(action.getFormTemplateId(), logger, securityService.currentUserInfo()));
-        formTemplateDao.dropFDTable(action.getFormTemplateId());
         result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;
