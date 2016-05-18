@@ -939,7 +939,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (type == null) {
             return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId;
         }
-        return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + type.getReportType();
+        return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + type.getReportAlias();
     }
 
     @Override

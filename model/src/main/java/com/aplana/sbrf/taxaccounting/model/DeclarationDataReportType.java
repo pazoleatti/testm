@@ -51,7 +51,7 @@ public class DeclarationDataReportType implements Serializable {
         if (ReportType.SPECIFIC_REPORT_DEC.equals(reportType))
             this.subreport = subreport;
         else if (subreport != null)
-            throw new IllegalArgumentException("Некорректное тип отчета: " + subreport.getAlias());
+            throw new IllegalArgumentException("Некорректный тип отчета: " + subreport.getAlias());
     }
 
     public String getReportAlias() {
