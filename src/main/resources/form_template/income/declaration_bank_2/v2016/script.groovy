@@ -1596,9 +1596,6 @@ void createSpecificReportApp2() {
     File xmlFile = File.createTempFile(scriptSpecificReportHolder.fileName, ".xml", new File(System.getProperty("java.io.tmpdir")));
     FileWriter fileWriter = null
     ZipArchiveOutputStream zos = new ZipArchiveOutputStream(scriptSpecificReportHolder.getFileOutputStream());
-    JRPdfExporter exporter = new JRPdfExporter();
-    exporter.setParameter(JRPdfExporterParameter.CHARACTER_ENCODING, "Ansi");
-    exporter.getPropertiesUtil().setProperty(JRPdfExporterParameter.PROPERTY_SIZE_PAGE_TO_CONTENT, "true");
     def jrxml = getJrxml(scriptSpecificReportHolder.getFileInputStream())
     try {
         def groupedRowsApp2 = [:]
@@ -1631,6 +1628,9 @@ void createSpecificReportApp2() {
                 ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryFileNameList.last());
                 zos.putArchiveEntry(zipEntry);
 
+                JRPdfExporter exporter = new JRPdfExporter();
+                exporter.setParameter(JRPdfExporterParameter.CHARACTER_ENCODING, "Ansi");
+                exporter.getPropertiesUtil().setProperty(JRPdfExporterParameter.PROPERTY_SIZE_PAGE_TO_CONTENT, "true");
                 exporter.setParameter(JRPdfExporterParameter.JASPER_PRINT, jasperPrint);
                 exporter.setParameter(JRPdfExporterParameter.OUTPUT_STREAM, zos);
                 exporter.exportReport();
