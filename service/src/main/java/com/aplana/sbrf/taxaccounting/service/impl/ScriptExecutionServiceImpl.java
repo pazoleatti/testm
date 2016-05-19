@@ -45,6 +45,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
 
     final static String LOCK_MESSAGE = "%s \"%s\" заблокирован пользователем с логином \"%s\". Макет пропущен.";
+    final static String ZIP_ENCODING = "cp866";
 
     @Autowired
     private LogEntryService logEntryService;
@@ -137,9 +138,9 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
         boolean hasFatalError = false;
         Set<String> errorFolders = new HashSet<String>();
         try {
-            zis = new ZipArchiveInputStream(new BufferedInputStream(zipFile));
+            zis = new ZipArchiveInputStream(new BufferedInputStream(zipFile), ZIP_ENCODING);
             ArchiveEntry entry;
-            while((entry = zis.getNextEntry()) != null) {
+            while((entry = zis.getNextZipEntry()) != null) {
                 if (!entry.isDirectory()) {
                     if (!entry.getName().contains("/")) {
                         logger.error("Структура архива некорректна! Импорт файла отменен.");
