@@ -236,6 +236,11 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         horizontalPanel.add(reportPeriodPicker);
         horizontalPanel.add(correctionTag);
 
+        label = getLabel("Вид уведомления:");
+
+        horizontalPanel.add(label);
+        horizontalPanel.add(declarationTypePicker);
+
         label = getLabel("Подразделение:");
         horizontalPanel.add(label);
         horizontalPanel.add(departmentPicker);
@@ -244,8 +249,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         horizontalPanel.add(label);
         horizontalPanel.add(formStatePicker);
 
-        horizontalPanel.setCellWidth(departmentPicker, "50%");
-        horizontalPanel.setCellWidth(reportPeriodPicker, "50%");
+        horizontalPanel.setCellWidth(departmentPicker, "30%");
+        horizontalPanel.setCellWidth(reportPeriodPicker, "30%");
+        horizontalPanel.setCellWidth(declarationTypePicker, "30%");
         panel.add(horizontalPanel);
     }
 
