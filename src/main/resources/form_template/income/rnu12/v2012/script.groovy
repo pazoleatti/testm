@@ -464,8 +464,7 @@ void importData() {
             continue
         } else if (rowValues[INDEX_FOR_SKIP].toLowerCase().contains("итого по кну ")) {
             // для расчета уникального среди групп(groupColumns) ключа берем строку перед Подитоговой
-            def tmpRowValue = rows[-1]
-            def key = getKey(tmpRowValue)
+            def key = !rows.isEmpty() ? getKey(rows[-1]) : null
             def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
 
             // наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк

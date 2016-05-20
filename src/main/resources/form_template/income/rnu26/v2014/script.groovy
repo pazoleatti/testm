@@ -714,8 +714,12 @@ String pure(String cell) {
  */
 def getSubTotalRow(def rowNumber, def issuer, def key) {
     def alias = 'total' + key.toString() + '#' + rowNumber
-    def title = (!issuer || 'null'.equals(issuer?.trim()) ? '"Эмитент не задан"' : issuer?.trim()) + ' Итог'
+    def title = getTitle(issuer)
     return getTotalRow(title, alias)
+}
+
+String getTitle(def issuer) {
+    return (!issuer || 'null'.equals(issuer?.trim()) ? '"Эмитент не задан"' : issuer?.trim()) + ' Итог'
 }
 
 /** Получить общую итоговую строку с суммами. */
@@ -836,8 +840,7 @@ void importData() {
             continue
         } else if (rowValues[INDEX_FOR_SKIP].toLowerCase().contains(" итог")) {
             // для расчета уникального среди групп(groupColumns) ключа берем строку перед Подитоговой
-            def tmpRowValue = rows[-1]
-            def key = getKey(tmpRowValue)
+            def key = !rows.isEmpty() ? getKey(rows[-1]) : null
             def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
 
             // наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
@@ -1096,7 +1099,7 @@ void checkItog(def dataRows) {
     // все строки, кроме общего итога
     def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
     def testItogRows = testItogRowsMap.keySet().asList()
-    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, true, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
@@ -1111,13 +1114,27 @@ void checkItog(def dataRows) {
             }
             return null
         }
+    }, new ScriptUtils.CheckDiffGroup() {
+        @Override
+        Boolean check(DataRow<Cell> row1, DataRow<Cell> row2, List<String> groupColumns) {
+            if (groupColumns.find{ row1[it] != null } == null) {
+                return null // для строк с пустыми графами группировки не надо проверять итоги
+            }
+            if (row1.getAlias() == null && row2.getAlias() == null) {
+                return isDiffRow(row1, row2, groupColumns)
+            } else {
+                def value1 = (row1.getAlias() == null ? getTitle(row1.issuer) : row1.fix) ?: ""
+                def value2 = (row2.getAlias() == null ? getTitle(row2.issuer) : row2.fix) ?: ""
+                return !value1.equals(value2)
+            }
+        }
     })
 }
 
 // Возвращает строку со значениями полей строки по которым идет группировка
 String getValuesByGroupColumn(DataRow row) {
     // 2
-    return (row.issuer != null ? row.issuer : 'графа 2 не задана')
+    return (row.issuer != null ? row.issuer : 'Эмитент не задан')
 }
 
 /** Получить уникальный ключ группы. */

@@ -138,7 +138,7 @@ public class Rnu_171Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Доход (выручка) от уступки права требования (руб. коп.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Код налогового учета» должна принимать значение из следующего списка: «19540» или «19570»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Неверное значение граф: «Финансовый результат уступки права требования (руб. коп.)», «Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)», «Корректировка финансового результата (руб. коп.)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «10345» не имеет строки итога!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.GROUP_WRONG_ITOG, 10345), entries.get(i++).getMessage());
         Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();

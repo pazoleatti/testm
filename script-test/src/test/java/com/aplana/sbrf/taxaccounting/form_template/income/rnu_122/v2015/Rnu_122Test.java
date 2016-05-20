@@ -136,7 +136,7 @@ public class Rnu_122Test extends ScriptTestBase {
 
         i = 0;
         Assert.assertEquals("Строка 1: Графа «Код классификации дохода / расхода» должна принимать значение из следующего списка: «19300» или «19510»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «10345» не имеет строки итога!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.GROUP_WRONG_ITOG, 10345), entries.get(i++).getMessage());
         Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
