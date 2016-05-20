@@ -41,6 +41,7 @@ public class DeclarationListView extends
     public static final String DECLARATION_CREATE_TITLE_D = "Создание уведомления";
 
     public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
+    public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
     public static final String DEPARTMENT_TITLE = "Подразделение";
     public static final String TAX_ORGAN_CODE_TITLE = "Налоговый орган";
     public static final String TAX_ORGAN_CODE_TITLE_F = "Налоговый орган (кон.)";
@@ -245,6 +246,7 @@ public class DeclarationListView extends
         reportPeriodHeader = declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodColumn);
 
         if (taxType == TaxType.DEAL) {
+            declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
             declarationTable.addColumn(reportPeriodYearColumn, declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodYearColumn));
             declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
@@ -352,7 +354,7 @@ public class DeclarationListView extends
         } else {
             create.setText(DECLARATION_CREATE_D);
             create.setTitle(DECLARATION_CREATE_TITLE_D);
-            declarationTypeHeader.setTitle("");
+            declarationTypeHeader.setTitle(DECLARATION_TYPE_TITLE_D);
             reportPeriodHeader.setTitle("");
             declarationHeader.setText(DECLARATION_HEADER_D);
             reportPeriodHeader.setTitle(PERIOD_TITLE);
