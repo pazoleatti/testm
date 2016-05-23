@@ -174,7 +174,7 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
+        refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { (groupColumns + "code").contains(it.getAlias())})
         sortRows(dataRows, groupColumns)
 
         if (!isBalancePeriod() && formDataEvent != FormDataEvent.IMPORT) {
@@ -251,9 +251,13 @@ def getTotalRow(def dataRows) {
  * @param key ключ для сравнения подитоговых строк при импорте
  */
 def getSubTotalRow(def rowNumber, def code, def key) {
-    def title = 'Итого по КНУ ' + (!code || 'null'.equals(code?.trim()) ? '"КНУ не задано"' : code?.trim())
+    def title = getTitle(code)
     def alias = 'total' + key.toString() + '#' + rowNumber
     return getTotalRow(title, alias)
+}
+
+String getTitle(def code) {
+    return 'Итого по КНУ ' + (!code || 'null'.equals(code?.trim()) ? '"КНУ не задано"' : code?.trim())
 }
 
 def getTotalRow(def title, def alias) {
@@ -968,7 +972,7 @@ void checkItog(def dataRows) {
     // все строки, кроме общего итога
     def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
     def testItogRows = testItogRowsMap.keySet().asList()
-    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, true, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
@@ -983,7 +987,22 @@ void checkItog(def dataRows) {
             }
             return null
         }
+    }, new ScriptUtils.CheckDiffGroup() {
+        @Override
+        Boolean check(DataRow<Cell> row1, DataRow<Cell> row2, List<String> groupColumns) {
+            if (row1.code == null) {
+                return null // для строк с пустыми графами группировки не надо проверять итоги
+            }
+            return compareGroup(row1, row2)
+        }
     })
+}
+
+boolean compareGroup(def rowA, def rowB) {
+    String valueA = (rowA.getAlias() != null) ? rowA.helper : getTitle(getKnu(rowA.code))
+    String valueB = (rowB.getAlias() != null) ? rowB.helper : getTitle(getKnu(rowB.code))
+    def var = !valueA.equals(valueB)
+    return var
 }
 
 // Возвращает строку со значениями полей строки по которым идет группировка

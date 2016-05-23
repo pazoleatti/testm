@@ -898,7 +898,7 @@ public final class ScriptUtils {
                 if (prevRow.getAlias() == null) {
                     // может вернуть true (строки в разных группах), false (строки в одной группе) и null (первая строка не в группе так как групп. графы не заполнены)
                     Boolean isDiffGroup = checkDiffGroup.check(prevRow, row, groupColums);
-                    if (Boolean.TRUE == isDiffGroup) {
+                    if (Boolean.TRUE.equals(isDiffGroup)) {
                         itogRows.add(groupCount, null);
                         groupCount++;
                         String groupCols = groupString.getString(prevRow);
@@ -910,7 +910,7 @@ public final class ScriptUtils {
             }
             if (row.getAlias() != null) {
                 // итог после итога (или после строки из другой группы)
-                if (i < 1 || dataRows.get(i - 1).getAlias() != null || Boolean.FALSE != checkDiffGroup.check(dataRows.get(i - 1), row, groupColums)) {
+                if (i < 1 || dataRows.get(i - 1).getAlias() != null || !(Boolean.FALSE.equals(checkDiffGroup.check(dataRows.get(i - 1), row, groupColums)))) {
                     rowLog(logger, row, String.format(GROUP_WRONG_ITOG_ROW, row.getIndex()), logLevel);
                     // удаляем из проверяемых итогов строку без подчиненных строк
                     itogRows.remove(row);
@@ -919,7 +919,7 @@ public final class ScriptUtils {
                 }
             } else {
                 // нефиксированная строка и отсутствует последний итог
-                if (i == dataRows.size() - 1 && checkDiffGroup.check(row, row, groupColums) != null) {
+                if (i == dataRows.size() - 1 && (checkDiffGroup.check(row, row, groupColums) != null)) {
                     itogRows.add(groupCount, null);
                     groupCount++;
                     String groupCols = groupString.getString(row);
