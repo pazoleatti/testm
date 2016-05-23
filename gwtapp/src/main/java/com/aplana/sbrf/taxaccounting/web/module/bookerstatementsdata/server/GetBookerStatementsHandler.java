@@ -51,7 +51,7 @@ public class GetBookerStatementsHandler extends AbstractActionHandler<GetBookerS
     static {
         columns102 = new HashMap<String, String>();
         columns102.put("ITEM_NAME", "Наименование статьи");
-        columns102.put("OPU_CODE", "Код ОПУ");
+        columns102.put("OPU_CODE", "Код ОФР");
         columns102.put("TOTAL_SUM", "Сумма");
     }
 
