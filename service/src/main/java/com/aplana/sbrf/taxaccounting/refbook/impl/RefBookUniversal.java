@@ -396,7 +396,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                             !attribute.getAlias().equals("DEPARTMENT_ID")) {       //Подразделения не версионируются и их нет смысла проверять
                         Long id = values.get(attribute.getAlias()).getReferenceValue();
 
-                        RefBook attributeRefBook = rbFactory.getByAttribute(attribute.getId());
+                        RefBook attributeRefBook = rbFactory.getByAttribute(attribute.getRefBookAttributeId());
                         RefBookDataProvider provider;
                         if (!providers.containsKey(attributeRefBook.getTableName())) {
                             provider = rbFactory.getDataProvider(attributeRefBook.getId());
