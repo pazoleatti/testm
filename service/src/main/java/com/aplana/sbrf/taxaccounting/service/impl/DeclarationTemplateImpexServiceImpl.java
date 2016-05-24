@@ -157,13 +157,16 @@ public class DeclarationTemplateImpexServiceImpl implements
                 }
             }
             if (dtc != null) {
-                if (dtc.getSubreports() != null)
+                if (dtc.getSubreports() != null) {
                     for (DeclarationSubreportContent declarationSubreportContent : dtc.getSubreports()) {
                         if (declarationSubreportContent.getBlobDataId() != null && files.get(declarationSubreportContent.getBlobDataId()) != null) {
                             String uuid = blobDataService.create(new ByteArrayInputStream(files.get(declarationSubreportContent.getBlobDataId())), declarationSubreportContent.getFileName());
                             declarationSubreportContent.setBlobDataId(uuid);
                         }
                     }
+                } else {
+                    dtc.setSubreports(new ArrayList<DeclarationSubreportContent>());
+                }
                 dtc.fillDeclarationTemplate(dt);
             }
             return dt;
