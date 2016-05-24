@@ -1123,9 +1123,9 @@ void checkItog(def dataRows) {
             if (row1.getAlias() == null && row2.getAlias() == null) {
                 return isDiffRow(row1, row2, groupColumns)
             } else {
-                def value1 = (row1.getAlias() == null ? getTitle(row1.issuer) : row1.fix) ?: ""
-                def value2 = (row2.getAlias() == null ? getTitle(row2.issuer) : row2.fix) ?: ""
-                return !value1.equals(value2)
+                String value1 = (row1.getAlias() == null ? getTitle(row1.issuer) : row1.fix) ?: ""
+                String value2 = (row2.getAlias() == null ? getTitle(row2.issuer) : row2.fix) ?: ""
+                return !value1.equalsIgnoreCase(value2)
             }
         }
     })
