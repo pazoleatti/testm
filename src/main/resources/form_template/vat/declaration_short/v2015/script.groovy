@@ -3,17 +3,13 @@ package form_template.vat.declaration_short.v2015
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 import org.apache.commons.collections.map.HashedMap
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
-
-import java.sql.Connection
-import java.sql.ResultSet
 
 import javax.xml.stream.XMLStreamReader
-import java.sql.Statement
 
 /**
  * Декларация по НДС (короткая, раздел 1-7)
@@ -1655,12 +1651,15 @@ def getFormData(def formTypeId, def formDataKind, def departmentId, def reportPe
 @Field
 DepartmentReportPeriod prevDepartmentReportPeriod = null
 
-/** Получить предыдущий корректирующий период период банка. */
+/** Получить предыдущий корректирующий период банка. */
 DepartmentReportPeriod getPrevDepartmentReportPeriod() {
     if (prevDepartmentReportPeriod) {
         return prevDepartmentReportPeriod
     }
-    List<DepartmentReportPeriod> departmentReportPeriods = getDepartmentReportPeriods(declarationData.reportPeriodId, bankDepartmentId)
+    DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter()
+    filter.setDepartmentIdList([bankDepartmentId])
+    filter.setReportPeriodIdList([declarationData.reportPeriodId])
+    List<DepartmentReportPeriod> departmentReportPeriods = departmentReportPeriodService.getListByFilter(filter)
     // найти предыдущие корректирующие периоды
     for (int i = departmentReportPeriods.size() - 1; i >= 0 ; i--) {
         DepartmentReportPeriod dpr = departmentReportPeriods[i]
@@ -1712,8 +1711,7 @@ def prevSection3Check() {
 
     // 1. проверка декларации "Декларация по НДС (раздел 1-7)"
     if (correction != null && correction > 1) {
-        // TODO (Ramil Timerbaev) в 1.0 поменять на declarationService.getType(declarationType)
-        def declarationName = 'Декларация по НДС (раздел 1-7)'
+        def declarationName = (declarationService.getType(declarationType)?.name ?: 'Декларация по НДС (короткая, раздел 1-7)')
         DeclarationData declarationNDS1_7 = getPrevCorrectionDeclaration()
         DepartmentReportPeriod dpr = getPrevDepartmentReportPeriod()
         def correctionDate = (dpr?.correctionDate?.format('dd.MM.yyyy') ?: '')
@@ -1795,37 +1793,4 @@ def getFormData724_1_1() {
         }
     }
     return formData724_1_1
-}
-
-// TODO (Ramil Timerbaev) в 1.0 поменять на departmentReportPeriodService.getListByFilter()
-/** Получить список периодовов подразделения (корректирующих и некорректирующих). */
-List<DepartmentReportPeriod> getDepartmentReportPeriods(def periodId, def departmentId) {
-    def sql = "select * from department_report_period " +
-            " where report_period_id = %d and department_id = %s " +
-            " order by correction_date asc nulls first "
-    sql = String.format(sql, periodId, departmentId)
-    Connection connection = null
-    Statement stmt = null
-    ResultSet resultSet = null
-    List<DepartmentReportPeriod> departmentReportPeriods = []
-    try {
-        connection = dataSource.getConnection()
-        stmt = connection.createStatement()
-        resultSet = stmt.executeQuery(sql)
-        while (resultSet.next()) {
-            DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod()
-            departmentReportPeriod.setId(SqlUtils.getInteger(resultSet, "id"))
-            departmentReportPeriod.setDepartmentId(SqlUtils.getInteger(resultSet, "department_id"))
-            departmentReportPeriod.setReportPeriod(reportPeriodService.get(SqlUtils.getInteger(resultSet, "report_period_id")))
-            departmentReportPeriod.setActive(!SqlUtils.getInteger(resultSet, "is_active").equals(0))
-            departmentReportPeriod.setBalance(!SqlUtils.getInteger(resultSet, "is_balance_period").equals(0))
-            departmentReportPeriod.setCorrectionDate(resultSet.getDate("correction_date"))
-            departmentReportPeriods.add(departmentReportPeriod)
-        }
-    } finally {
-        resultSet.close()
-        stmt.close()
-        connection.close()
-    }
-    return departmentReportPeriods
 }
