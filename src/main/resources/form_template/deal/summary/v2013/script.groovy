@@ -190,8 +190,6 @@ void logicCheck() {
     // Общие значения
     // "Да"
     def Long recYesId = getRecYesId()
-    // "Нет"
-    def Long recNoId = getRecNoId()
 
     for (DataRow row in dataRows) {
         if (row.getAlias() != null) {
@@ -201,10 +199,7 @@ void logicCheck() {
 
         // 1. Проверка кода основания отнесения сделки к контролируемой
         def onlyNo = !(recYesId in [row.f131, row.f132, row.f133, row.f134, row.f135])
-        def haveNo = (recNoId in [row.f131, row.f132, row.f133, row.f134, row.f135])
-        if (((row.f122 == recYesId || row.f123 == recYesId) && !onlyNo) ||
-                (haveNo && (row.f122 != recYesId || row.f123 != recYesId))
-        ) {
+        if ((row.f122 == recYesId || row.f123 == recYesId) && !onlyNo) {
             def msg = "Строка %d: Не допускается одновременное заполнение значением «1» любой из граф «%s», «%s» с любой из граф «%s»!"
             def names = []
             ['f131', 'f132', 'f133', 'f134', 'f135'].each { alias ->
