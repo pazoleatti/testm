@@ -68,14 +68,18 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public DeclarationCreationView(Binder uiBinder, EventBus eventBus) {
         super(eventBus);
         initWidget(uiBinder.createAndBindUi(this));
-        init();
+        //init();
     }
 
     @Override
     public void init() {
         departmentPicker.setEnabled(false);
         declarationTypeId.setEnabled(false);
-        declarationTypeId.setTitle("Выбор вида декларации");
+        if (getUiHandlers().getTaxType().equals(TaxType.DEAL)) {
+            declarationTypeId.setTitle("Выбор вида уведомления");
+        } else {
+            declarationTypeId.setTitle("Выбор вида декларации");
+        }
         taxOrganCode.setEnabled(false);
         taxOrganKpp.setEnabled(false);
         correctionPanel.setVisible(false);
