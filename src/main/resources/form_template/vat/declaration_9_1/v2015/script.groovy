@@ -74,11 +74,11 @@ def declarationTypeId = 15
 def declarationType9_sources = 21
 
 @Field
-def bankDepartmentId = 1
+int bankDepartmentId = 1
 
 // id формы источника 724.1.1 (не требующего настройки пользователем, подтягивается скриптом)
 @Field
-def formType_724_1_1 = 848
+int formType_724_1_1 = 848
 
 @Field
 def empty = 0
@@ -594,7 +594,7 @@ def getCorrectionNumber(def id) {
 def period4 = null
 
 /** Получить четвертый отчетный период (4 квартал) текущего налогового периода. */
-def getPeriod4Id() {
+Integer getPeriod4Id() {
     if (period4 == null) {
         def year = getReportPeriod()?.taxPeriod?.year
         def start = Date.parse('dd.MM.yyyy', '01.01.' + year)
@@ -621,11 +621,16 @@ def formData724_1_1 = null
 /** Получить строки источника 724.1.1 (форма должна быть только в корректирующем периоде). */
 def getFormData724_1_1() {
     if (formData724_1_1 == null) {
-        def formData = formDataService.getLast(formType_724_1_1, FormDataKind.CONSOLIDATED, bankDepartmentId, getPeriod4Id(), null, null, false)
-        def correctionDate = (formData ? getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate : null)
-        // период только корректирующий
-        if (formData && formData.state == WorkflowState.ACCEPTED && correctionDate) {
-            formData724_1_1 = formData
+        def formData = null
+        if (getPeriod4Id() != null) {
+            formData = formDataService.getLast(formType_724_1_1, FormDataKind.CONSOLIDATED, bankDepartmentId, getPeriod4Id(), null, null, false)
+        }
+        if (formData != null) {
+            def correctionDate = getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate
+            // период только корректирующий
+            if (formData.state == WorkflowState.ACCEPTED && correctionDate) {
+                formData724_1_1 = formData
+            }
         }
     }
     return formData724_1_1
