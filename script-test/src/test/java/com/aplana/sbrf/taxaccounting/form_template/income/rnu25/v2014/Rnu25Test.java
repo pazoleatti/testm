@@ -307,6 +307,7 @@ public class Rnu25Test extends ScriptTestBase {
         row.getCell("reserveCreation").setValue(1, null);
         row.getCell("reserveRecovery").setValue(1, null);
         for (String alias : totalColumns) {
+            subTotalRow.getCell("fix").setValue("1 Итог", null);
             subTotalRow.getCell(alias).setValue(row.getCell(alias).getValue(), null);
             totalRow.getCell(alias).setValue(1, null);
             prevTotalRow.getCell(alias).setValue(totalRow.getCell(alias).getValue(), null);
@@ -754,6 +755,7 @@ public class Rnu25Test extends ScriptTestBase {
 
         // 15. Проверка обязательных полей
         // 16. Арифметические проверки
+        dataRows.remove(subTotalRow);
         row.getCell("rowNumber").setValue(null, null);
         row.getCell("regNumber").setValue(null, null);
         row.getCell("tradeNumber").setValue("1", null);
@@ -789,7 +791,6 @@ public class Rnu25Test extends ScriptTestBase {
 
         // 17.1 Проверка итоговых значений по ГРН
         // Проверка наличия всех фиксированных строк
-        dataRows.remove(subTotalRow);
         row.getCell("rowNumber").setValue(1, null);
         row.getCell("regNumber").setValue("1", null);
         row.getCell("tradeNumber").setValue("1", null);

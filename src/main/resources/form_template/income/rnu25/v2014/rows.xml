@@ -2,8 +2,8 @@
 <rows>
     <row alias="total">
         <cell alias="rowNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-        <cell alias="fix" colSpan="1" rowSpan="1" stringValue="" styleAlias="Контрольные суммы"/>
-        <cell alias="regNumber" colSpan="1" rowSpan="1" stringValue="Общий итог" styleAlias="Контрольные суммы"/>
+        <cell alias="fix" colSpan="2" rowSpan="1" stringValue="Общий итог" styleAlias="Контрольные суммы"/>
+        <cell alias="regNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="tradeNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="lotSizePrev" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="lotSizeCurrent" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>

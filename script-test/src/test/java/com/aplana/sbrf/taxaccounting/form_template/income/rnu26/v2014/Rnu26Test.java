@@ -279,7 +279,6 @@ public class Rnu26Test extends ScriptTestBase {
         DataRow<Cell> subTotalRow = formData.createDataRow();
         subTotalRow.setIndex(2);
         subTotalRow.setAlias("total1#1");
-        dataRows.add(subTotalRow);
 
         totalRow.setIndex(3);
         totalRow.setAlias("total");
@@ -316,6 +315,7 @@ public class Rnu26Test extends ScriptTestBase {
 
         // 3.1 Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде
         testHelper.getFormData().setKind(FormDataKind.PRIMARY);
+        dataRows.add(subTotalRow);
         prevRow.getCell("tradeNumber").setValue("2", null);
         row.getCell("rowNumber").setValue(0, null);
         row.getCell("fix").setValue(null, null);
@@ -337,6 +337,7 @@ public class Rnu26Test extends ScriptTestBase {
         row.getCell("reserveRecovery").setValue(0, null);
         for (String alias : totalColumns) {
             subTotalRow.getCell(alias).setValue(row.getCell(alias).getValue(), null);
+            subTotalRow.getCell("fix").setValue("1 Итог", null);
             totalRow.getCell(alias).setValue(row.getCell(alias).getValue(), null);
             prevTotalRow.getCell(alias).setValue(totalRow.getCell(alias).getValue(), null);
         }

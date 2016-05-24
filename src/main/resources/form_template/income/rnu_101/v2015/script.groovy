@@ -3,7 +3,6 @@ package form_template.income.rnu_101.v2015
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
@@ -678,7 +677,7 @@ void checkItog(def dataRows) {
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
     // все строки, кроме общего итога
     def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
-    checkItogRows(groupRows, testItogRows, itogRows, new ScriptUtils.GroupString() {
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, true, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return row.incomeCode
@@ -693,68 +692,15 @@ void checkItog(def dataRows) {
             }
             return null
         }
+    }, new ScriptUtils.CheckDiffGroup() {
+        @Override
+        Boolean check(DataRow<Cell> row1, DataRow<Cell> row2, List<String> groupColumns) {
+            if (groupColumns.find{ row1[it] != null } == null) {
+                return null // для строк с пустыми графами группировки не надо проверять итоги
+            }
+            return isDiffRow(row1, row2, groupColumns)
+        }
     })
-}
-
-// вынес метод в скрипт для правки проверок
-void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.GroupString groupString, ScriptUtils.CheckGroupSum checkGroupSum) {
-    // считает количество реальных групп данных
-    def groupCount = 0
-    // Итоговые строки были удалены
-    // Неитоговые строки были удалены
-    for (int i = 0; i < dataRows.size(); i++) {
-        DataRow<Cell> row = dataRows.get(i);
-        // строка или итог другой группы после строки без подитога между ними
-        if (i > 0) {
-            def prevRow = dataRows.get(i - 1)
-            if (prevRow.getAlias() == null && isDiffRow(prevRow, row, groupColumns)) { // TODO сравнение
-                itogRows.add(groupCount, null)
-                groupCount++
-                String groupCols = groupString.getString(prevRow);
-                if (groupCols != null) {
-                    logger.error("Группа «%s» не имеет строки итога!", groupCols); // итога (не  подитога)
-                }
-            }
-        }
-        if (row.getAlias() != null) {
-            // итог после итога (или после строки из другой группы)
-            if (i < 1 || dataRows.get(i - 1).getAlias() != null || isDiffRow(dataRows.get(i - 1), row, groupColumns)) { // TODO сравнение
-                logger.error("Строка %d: Строка итога не относится к какой-либо группе!", row.getIndex()); // итога (не  подитога)
-                // удаляем из проверяемых итогов строку без подчиненных строк
-                itogRows.remove(row)
-            } else {
-                groupCount++
-            }
-        } else {
-            // нефиксированная строка и отсутствует последний итог
-            if (i == dataRows.size() - 1) {
-                itogRows.add(groupCount, null)
-                groupCount++
-                String groupCols = groupString.getString(row);
-                if (groupCols != null) {
-                    logger.error("Группа «%s» не имеет строки итога!", groupCols); // итога (не  подитога)
-                }
-            }
-        }
-    }
-    if (testItogRows.size() == itogRows.size()) {
-        for (int i = 0; i < testItogRows.size(); i++) {
-            DataRow<Cell> testItogRow = testItogRows.get(i);
-            DataRow<Cell> realItogRow = itogRows.get(i);
-            if (realItogRow == null) {
-                continue
-            }
-            int rowIndex = dataRows.indexOf(realItogRow) - 1
-            def row = dataRows.get(rowIndex)
-            String groupCols = groupString.getString(row);
-            if (groupCols != null) {
-                String checkStr = checkGroupSum.check(testItogRow, realItogRow);
-                if (checkStr != null) {
-                    logger.error(String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr));
-                }
-            }
-        }
-    }
 }
 
 void afterLoad() {

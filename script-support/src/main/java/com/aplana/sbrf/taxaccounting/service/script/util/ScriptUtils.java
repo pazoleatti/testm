@@ -93,8 +93,8 @@ public final class ScriptUtils {
             "Количество строк в заголовке менее ожидаемого!";
     public static final String WRONG_HEADER_START = "Не удалось распознать заголовок таблицы. " +
             "Проверьте, что название первой графы в файле совпадает с названием первой графы в форме";
-    public static final String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
-    public static final String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
+    public static final String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки итога!";
+    public static final String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка итога не относится к какой-либо группе!";
     public static final String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
     public static final String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
     public static final String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
@@ -766,6 +766,7 @@ public final class ScriptUtils {
     /**
      * Сортировка строк (должна использоваться только для группировки). Не разыменовывает строки, т.к. не требуется.
      */
+    @Deprecated
     @SuppressWarnings("unused")
     public static void sortRows(List<DataRow<Cell>> dataRows, final List<String> groupColumns) {
         Collections.sort(dataRows, new Comparator<DataRow<Cell>>() {
@@ -851,7 +852,7 @@ public final class ScriptUtils {
             // Неитоговые строки были удалены
             for (int i = 0; i < dataRows.size(); i++) {
                 if (dataRows.get(i).getAlias() != null) {
-                    if (i < 1 || (dataRows.get(i - 1).getAlias() != null && dataRows.get(i).getAlias() != "total")) {
+                    if (i < 1 || (dataRows.get(i - 1).getAlias() != null && !"total".equals(dataRows.get(i).getAlias()))) {
                         logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
                     }
                 }
@@ -871,6 +872,77 @@ public final class ScriptUtils {
                         if (checkStr != null) {
                             logger.error(String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr));
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Проверка итоговых строк
+     */
+    @SuppressWarnings("unused")
+    public static void checkItogRows(List<DataRow<Cell>> dataRows, List<DataRow<Cell>> testItogRows, List<DataRow<Cell>> itogRows,
+                                     List<String> groupColums, Logger logger, boolean fatal, GroupString groupString,
+                                     CheckGroupSum checkGroupSum, CheckDiffGroup checkDiffGroup) {
+        LogLevel logLevel = fatal ? LogLevel.ERROR : LogLevel.WARNING;
+        // считает количество реальных групп данных
+        int groupCount = 0;
+        // Итоговые строки были удалены
+        // Неитоговые строки были удалены
+        for (int i = 0; i < dataRows.size(); i++) {
+            DataRow<Cell> row = dataRows.get(i);
+            // строка или итог другой группы после строки без подитога между ними
+            if (i > 0) {
+                DataRow<Cell> prevRow = dataRows.get(i - 1);
+                if (prevRow.getAlias() == null) {
+                    // может вернуть true (строки в разных группах), false (строки в одной группе) и null (первая строка не в группе так как групп. графы не заполнены)
+                    Boolean isDiffGroup = checkDiffGroup.check(prevRow, row, groupColums);
+                    if (Boolean.TRUE.equals(isDiffGroup)) {
+                        itogRows.add(groupCount, null);
+                        groupCount++;
+                        String groupCols = groupString.getString(prevRow);
+                        if (groupCols != null) {
+                            logger.log(logLevel, GROUP_WRONG_ITOG, groupCols);
+                        }
+                    }
+                }
+            }
+            if (row.getAlias() != null) {
+                // итог после итога (или после строки из другой группы)
+                if (i < 1 || dataRows.get(i - 1).getAlias() != null || !(Boolean.FALSE.equals(checkDiffGroup.check(dataRows.get(i - 1), row, groupColums)))) {
+                    rowLog(logger, row, String.format(GROUP_WRONG_ITOG_ROW, row.getIndex()), logLevel);
+                    // удаляем из проверяемых итогов строку без подчиненных строк
+                    itogRows.remove(row);
+                } else {
+                    groupCount++;
+                }
+            } else {
+                // нефиксированная строка и отсутствует последний итог
+                if (i == dataRows.size() - 1 && (checkDiffGroup.check(row, row, groupColums) != null)) {
+                    itogRows.add(groupCount, null);
+                    groupCount++;
+                    String groupCols = groupString.getString(row);
+                    if (groupCols != null) {
+                        logger.log(logLevel, GROUP_WRONG_ITOG, groupCols);
+                    }
+                }
+            }
+        }
+        if (testItogRows.size() == itogRows.size()) {
+            for (int i = 0; i < testItogRows.size(); i++) {
+                DataRow<Cell> testItogRow = testItogRows.get(i);
+                DataRow<Cell> realItogRow = itogRows.get(i);
+                if (realItogRow == null) {
+                    continue;
+                }
+                int rowIndex = dataRows.indexOf(realItogRow) - 1;
+                DataRow<Cell> row = dataRows.get(rowIndex);
+                String groupCols = groupString.getString(row);
+                if (groupCols != null) {
+                    String checkStr = checkGroupSum.check(testItogRow, realItogRow);
+                    if (checkStr != null) {
+                        rowLog(logger, row, String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr), logLevel);
                     }
                 }
             }
@@ -2132,6 +2204,14 @@ public final class ScriptUtils {
      */
     public interface CheckGroupSum {
         String check(DataRow<Cell> row1, DataRow<Cell> row2);
+    }
+
+    /**
+     * Интерфейс для сравнения принадлежности двух строк к одной группе
+     */
+    public interface CheckDiffGroup {
+        /** Нужно сравнить 1) две нефиксированные и 2) фиксированную и нефиксированную */
+        Boolean check(DataRow<Cell> row1, DataRow<Cell> row2, List<String> groupColumns);
     }
 
     static final class SheetHandler extends DefaultHandler {

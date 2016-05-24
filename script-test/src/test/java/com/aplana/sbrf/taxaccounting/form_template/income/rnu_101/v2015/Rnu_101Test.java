@@ -125,7 +125,7 @@ public class Rnu_101Test extends ScriptTestBase {
         row.getCell("sum3").setValue(12L, null);
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(String.format("Строка %d: Неверное значение граф: %s!", 1, "«Сумма дохода, соответствующая рыночному уровню (руб.)», «Сумма доначисления дохода до рыночного уровня (руб.)»"), entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «1» не имеет строки итога!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.GROUP_WRONG_ITOG, 1), entries.get(i++).getMessage());
         Assert.assertEquals("Отсутствует итоговая строка!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
