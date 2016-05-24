@@ -245,7 +245,7 @@ void logicCheck() {
     // 12. Проверка наличия всех фиксированных строк
     // 13. Проверка отсутствия лишних фиксированных строк
     // 14. Проверка итоговых значений по фиксированным строкам
-    checkItog(dataRows)
+    checkSub(dataRows, true)
 
     // 15. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
@@ -349,7 +349,6 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
     def totalRowFromFile = null
-    def totalRowFromFileMap = [:] // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 
     // формирование строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -371,10 +370,6 @@ void importData() {
             continue
         } else if (rowValues[INDEX_FOR_SKIP]?.trim()?.equalsIgnoreCase("Итого")) {
             def subTotalRow = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
-            if (totalRowFromFileMap[subTotalRow.getIndex()] == null) {
-                totalRowFromFileMap[subTotalRow.getIndex()] = []
-            }
-            totalRowFromFileMap[subTotalRow.getIndex()].add(subTotalRow)
             rows.add(subTotalRow)
 
             allValues.remove(rowValues)
@@ -390,32 +385,7 @@ void importData() {
     }
 
     // сравнение подитогов
-    if (!totalRowFromFileMap.isEmpty()) {
-        // получить посчитанные подитоги
-        def tmpSubTotalRows = calcSubTotalRows(rows)
-        tmpSubTotalRows.each { subTotalRow ->
-            def totalRows = totalRowFromFileMap[subTotalRow.getIndex()]
-            if (totalRows) {
-                totalRows.each { totalRow ->
-                    compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
-                }
-                totalRowFromFileMap.remove(subTotalRow.getIndex())
-            } else {
-                row = rows[subTotalRow.getIndex() - 1]
-                if (row.incomeCode != null) {
-                    rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, row.incomeCode))
-                }
-            }
-        }
-        if (!totalRowFromFileMap.isEmpty()) {
-            // для этих подитогов из файла нет групп
-            totalRowFromFileMap.each { key, totalRows ->
-                totalRows.each { totalRow ->
-                    rowWarning(logger, totalRow, String.format(GROUP_WRONG_ITOG_ROW, totalRow.getIndex()))
-                }
-            }
-        }
-    }
+    checkSub(rows, false)
 
     // сравнение итогов
     def totalRow = calcTotalRow(rows)
@@ -670,14 +640,14 @@ void sortFormDataRows(def saveInDB = true) {
 }
 
 // Проверки подитоговых сумм
-void checkItog(def dataRows) {
+void checkSub(def dataRows, boolean fatal) {
     // Рассчитанные строки итогов
     def testItogRows = calcSubTotalRows(dataRows)
     // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
     // все строки, кроме общего итога
     def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
-    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, true, new ScriptUtils.GroupString() {
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, fatal, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return row.incomeCode
