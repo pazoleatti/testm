@@ -183,8 +183,7 @@
         <alias>dealPriceSign</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>п. 220 &quot;Признак определения цены сделки с учетом особенностей, предусмотренных статьей 105.4 НК РФ
-            (регулируемые цены)&quot;</name>
+        <name>п. 220 &quot;Признак определения цены сделки с учетом особенностей, предусмотренных статьей 105.4 НК РФ (регулируемые цены)&quot;</name>
         <order>16</order>
         <width>8</width>
         <hierarchical>false</hierarchical>
@@ -601,8 +600,7 @@
         <alias>taxpayerCode</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>п. 080 &quot;Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если
-            имеется)&quot;</name>
+        <name>п. 080 &quot;Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)&quot;</name>
         <order>55</order>
         <width>9</width>
         <maxLength>2000</maxLength>

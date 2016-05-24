@@ -12,14 +12,13 @@
         улучшения арендованного и полученного по договору безвозмездного пользования имущества»
     </fullName>
     <header>852-46</header>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>invNumber</alias>
@@ -79,9 +78,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>usefulLifeWithUsed</alias>
         <checking>false</checking>
-        <name>Срок полезного использования с учётом срока эксплуатации предыдущими собственниками (арендодателями,
-            ссудодателями) либо установленный самостоятельно, (мес.)
-        </name>
+        <name>Срок полезного использования с учётом срока эксплуатации предыдущими собственниками (арендодателями, ссудодателями) либо установленный самостоятельно, (мес.)</name>
         <order>8</order>
         <width>8</width>
         <maxLength>15</maxLength>

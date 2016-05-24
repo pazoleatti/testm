@@ -1,1 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?><rows><row alias=""><cell alias="number" colSpan="1" rowSpan="2" value="№ пп"/><cell alias="fix" colSpan="1" rowSpan="1" value=""/><cell alias="operationDate" colSpan="1" rowSpan="2" value="Дата операции"/><cell alias="name" colSpan="2" rowSpan="1" value="Основное средство"/><cell alias="inventoryNumber" colSpan="1" rowSpan="1" value="Основное средство"/><cell alias="baseNumber" colSpan="2" rowSpan="1" value="Основание для восстановления амортизационной премии"/><cell alias="baseDate" colSpan="1" rowSpan="1" value="Основание для восстановления амортизационной премии"/><cell alias="summ" colSpan="1" rowSpan="2" value="Сумма восстановленной амортизационной премии"/></row><row alias=""><cell alias="number" colSpan="1" rowSpan="1" value="№ пп"/><cell alias="fix" colSpan="1" rowSpan="1" value=""/><cell alias="operationDate" colSpan="1" rowSpan="1" value="Дата операции"/><cell alias="name" colSpan="1" rowSpan="1" value="Наименование "/><cell alias="inventoryNumber" colSpan="1" rowSpan="1" value="Инвентарный номер"/><cell alias="baseNumber" colSpan="1" rowSpan="1" value="Номер"/><cell alias="baseDate" colSpan="1" rowSpan="1" value="Дата"/><cell alias="summ" colSpan="1" rowSpan="1" value="Сумма восстановленной амортизационной премии"/></row><row alias=""><cell alias="number" colSpan="1" rowSpan="1" value="1"/><cell alias="fix" colSpan="1" rowSpan="1" value=""/><cell alias="operationDate" colSpan="1" rowSpan="1" value="2"/><cell alias="name" colSpan="1" rowSpan="1" value="3"/><cell alias="inventoryNumber" colSpan="1" rowSpan="1" value="4"/><cell alias="baseNumber" colSpan="1" rowSpan="1" value="5"/><cell alias="baseDate" colSpan="1" rowSpan="1" value="6"/><cell alias="summ" colSpan="1" rowSpan="1" value="7"/></row></rows>
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="number" colSpan="1" rowSpan="2" value="№ пп"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="operationDate" colSpan="1" rowSpan="2" value="Дата операции"/>
+        <cell alias="name" colSpan="2" rowSpan="1" value="Основное средство"/>
+        <cell alias="inventoryNumber" colSpan="1" rowSpan="1" value="Основное средство"/>
+        <cell alias="baseNumber" colSpan="2" rowSpan="1" value="Основание для восстановления амортизационной премии"/>
+        <cell alias="baseDate" colSpan="1" rowSpan="1" value="Основание для восстановления амортизационной премии"/>
+        <cell alias="summ" colSpan="1" rowSpan="2" value="Сумма восстановленной амортизационной премии"/>
+    </row>
+    <row alias="">
+        <cell alias="number" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="operationDate" colSpan="1" rowSpan="1" value="Дата операции"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименование "/>
+        <cell alias="inventoryNumber" colSpan="1" rowSpan="1" value="Инвентарный номер"/>
+        <cell alias="baseNumber" colSpan="1" rowSpan="1" value="Номер"/>
+        <cell alias="baseDate" colSpan="1" rowSpan="1" value="Дата"/>
+        <cell alias="summ" colSpan="1" rowSpan="1" value="Сумма восстановленной амортизационной премии"/>
+    </row>
+    <row alias="">
+        <cell alias="number" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="operationDate" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="inventoryNumber" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="baseNumber" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="baseDate" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="summ" colSpan="1" rowSpan="1" value="7"/>
+    </row>
+</rows>

@@ -54,13 +54,13 @@
         <cell alias="sum42" colSpan="1" rowSpan="1" value="Сделки купли-продажи иностранной валюты"/>
         <cell alias="sum43" colSpan="1" rowSpan="1" value="Сделки купли-продажи драгоценных металлов"/>
         <cell alias="sum44" colSpan="1" rowSpan="1" value="Сделки, отраженные в Журнале взаиморасчетов"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1" value="Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов"/>
+        <cell alias="sum45" colSpan="1" rowSpan="1" value="Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов"/>
         <cell alias="sum46" colSpan="1" rowSpan="1" value="Сумма дополнительно начисленных налогооблагаемых доходов"/>
         <cell alias="sum51" colSpan="1" rowSpan="1" value="Сделки с ценными бумагами"/>
         <cell alias="sum52" colSpan="1" rowSpan="1" value="Сделки купли-продажи иностранной валюты"/>
         <cell alias="sum53" colSpan="1" rowSpan="1" value="Сделки купли-продажи драгоценных металлов"/>
         <cell alias="sum54" colSpan="1" rowSpan="1" value="Сделки, отраженные в Журнале взаиморасчетов"/>
-        <cell alias="sum55" colSpan="1" rowSpan="1" value="Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов"/>
+        <cell alias="sum55" colSpan="1" rowSpan="1" value="Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов"/>
         <cell alias="sum56" colSpan="1" rowSpan="1" value="Сумма дополнительно начисленных налогооблагаемых расходов"/>
         <cell alias="sum6" colSpan="1" rowSpan="1" value="Итого объем доходов и расходов, руб."/>
         <cell alias="category" colSpan="1" rowSpan="1" value="Категория Взаимозависимого лица на начало Отчетного периода"/>

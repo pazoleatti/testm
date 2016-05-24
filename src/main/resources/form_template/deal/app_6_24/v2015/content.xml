@@ -85,7 +85,7 @@
         <name>Вид услуг</name>
         <order>8</order>
         <width>10</width>
-        <maxLength>128</maxLength>
+        <maxLength>512</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">

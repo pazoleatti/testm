@@ -4,14 +4,13 @@
     <name>(РНУ-22) Регистр налогового учёта периодически взимаемых комиссий по операциям кредитования</name>
     <fullName>(РНУ-22) Регистр налогового учёта периодически взимаемых комиссий по операциям кредитования</fullName>
     <header>852-22</header>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>

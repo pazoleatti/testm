@@ -8,14 +8,13 @@
         закладными
     </fullName>
     <header>852-72</header>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>number</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>forLabel</alias>
@@ -64,9 +63,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost279</alias>
         <checking>false</checking>
-        <name>Стоимость права требования, закладной, подлежащая отнесению на расходы в соответствии с п.3 ст. 279 НК
-            РФ
-        </name>
+        <name>Стоимость права требования, закладной, подлежащая отнесению на расходы в соответствии с п.3 ст. 279 НК РФ</name>
         <order>7</order>
         <width>10</width>
         <maxLength>17</maxLength>

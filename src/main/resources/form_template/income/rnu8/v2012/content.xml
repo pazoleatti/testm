@@ -5,14 +5,13 @@
     <fullName>(РНУ-8) Простой регистр налогового учёта &quot;Требования&quot;</fullName>
     <code>РНУ-8</code>
     <header>852-8</header>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>number</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>

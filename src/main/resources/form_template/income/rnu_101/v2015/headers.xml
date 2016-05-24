@@ -2,7 +2,7 @@
 <rows>
     <row alias="">
         <cell alias="rowNumber" colSpan="2" rowSpan="2" value="№ пп"/>
-        <cell alias="fix" colSpan="1" rowSpan="2" value=""/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
         <cell alias="name" colSpan="1" rowSpan="2" value="Наименование Взаимозависимого лица (резидента оффшорной зоны)"/>
         <cell alias="iksr" colSpan="1" rowSpan="2" value="Идентификационный номер"/>
         <cell alias="countryName" colSpan="1" rowSpan="2" value="Страна регистрации"/>
