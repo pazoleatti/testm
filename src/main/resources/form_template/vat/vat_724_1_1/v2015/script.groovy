@@ -630,8 +630,7 @@ def getDeclarationAddValue(def periodTypeId, def rowAlias, def columnAlias) {
     if (declaration == null) {
         return BigDecimal.ZERO
     }
-    def declarationTemplateDao = declarationService.declarationTemplateDao
-    def declarationTypeId = declarationTemplateDao.get(declaration.declarationTemplateId).type.id as String
+    def declarationTypeId = declarationService.getTemplate(declaration.declarationTemplateId)?.type?.id as String
     def declTypeAttrMap = complexCalcMap[rowAlias][columnAlias]
     def addValueString = getDeclarationXmlAttr(declaration, declTypeAttrMap[declarationTypeId][0], declTypeAttrMap[declarationTypeId][1])
     return addValueString ? new BigDecimal(addValueString) : BigDecimal.ZERO

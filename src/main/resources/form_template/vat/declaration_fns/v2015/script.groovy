@@ -8,13 +8,8 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 import org.apache.commons.collections.map.HashedMap
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
-
-import java.sql.Connection
-import java.sql.ResultSet
 
 import javax.xml.stream.XMLStreamReader
-import java.sql.Statement
 
 /**
  * Декларация по НДС (раздел 1-7)
