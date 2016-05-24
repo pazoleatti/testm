@@ -2113,6 +2113,27 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // 50. п. 040 "Наименование организации"
     colIndex++
     newRow.organName = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // TODO (Ramil Timerbaev) КОСТЫЛЬ! если не найдена запись, то подменять ковычки на "«" и на "»"
+    def tmp = values[colIndex]
+    if (!newRow.organName && tmp != null && tmp.contains('"')) {
+        while (tmp.contains('"')) {
+            tmp = tmp.replaceFirst('"', '«')
+            tmp = tmp.replaceFirst('"', '»')
+        }
+        newRow.organName = getRecordIdImport(9, 'NAME', tmp, fileRowIndex, colIndex + colOffset)
+    }
+    // TODO (Ramil Timerbaev) КОСТЫЛЬ! если не найдена запись, то добавляет в конце строки пробелы
+    if (!newRow.organName) {
+        for (def i = 1; i <= 2; i++) {
+            tmp = tmp + ' '
+            newRow.organName = getRecordIdImport(9, 'NAME', tmp, fileRowIndex, colIndex + colOffset)
+            if (newRow.organName) {
+                break
+            }
+        }
+    }
+
     def map = getRefBookValue(9, newRow.organName)
     if (map != null) {
         // 48. п. 020 "Сведения об организации"
@@ -2130,30 +2151,33 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         expectedValue = (map.KPP?.stringValue != null ? map.KPP?.stringValue : "")
         formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
-        // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
-        colIndex++
-        expectedValue = (map.REG_NUM?.stringValue != null ? map.REG_NUM?.stringValue : "")
-        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
-
-        // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
-        colIndex++
-        expectedValue = (map.TAXPAYER_CODE?.stringValue != null ? map.TAXPAYER_CODE?.stringValue : "")
-        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
-
-        // 55. п. 090 "Адрес"
-        colIndex++
-        expectedValue = (map.ADDRESS?.stringValue != null ? map.ADDRESS?.stringValue : "")
-        formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
-
         // Графа 53, 54, 55 - сменили тип для наглядности: что было видно какие данные попадут в уведомление
-        // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
-        newRow.organRegNum = map.REG_NUM?.stringValue
+        // заполняются только для иностранных организации (код равен 2)
+        if (map2?.CODE?.value == 2) {
+            // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
+            colIndex++
+            expectedValue = (map.REG_NUM?.stringValue != null ? map.REG_NUM?.stringValue : "")
+            formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
-        // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
-        newRow.taxpayerCode = map.TAXPAYER_CODE?.stringValue
+            // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
+            colIndex++
+            expectedValue = (map.TAXPAYER_CODE?.stringValue != null ? map.TAXPAYER_CODE?.stringValue : "")
+            formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
 
-        // 55. п. 090 "Адрес"
-        newRow.address = map.ADDRESS?.stringValue
+            // 55. п. 090 "Адрес"
+            colIndex++
+            expectedValue = (map.ADDRESS?.stringValue != null ? map.ADDRESS?.stringValue : "")
+            formDataService.checkReferenceValue(9, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
+
+            // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
+            newRow.organRegNum = map.REG_NUM?.stringValue
+
+            // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
+            newRow.taxpayerCode = map.TAXPAYER_CODE?.stringValue
+
+            // 55. п. 090 "Адрес"
+            newRow.address = map.ADDRESS?.stringValue
+        }
     }
 
     return newRow
