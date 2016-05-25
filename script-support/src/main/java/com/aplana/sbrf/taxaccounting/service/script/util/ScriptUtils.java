@@ -1727,7 +1727,7 @@ public final class ScriptUtils {
             handler = new SheetHandler(sst, styles, allValues, headerValues, tableStartValue, tableEndValue, headerRowCount, paramsMap);
             parser.setContentHandler(handler);
             // обработать первый лист в книге
-            sheet1 = r.getSheet("rId1");
+            sheet1 = r.getSheetsData().next();
             sheetSource = new InputSource(sheet1);
             parser.parse(sheetSource);
         } catch (InvalidFormatException e) {
