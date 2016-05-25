@@ -470,8 +470,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 3
     if (map != null) {
-        def expectedValues = [ map.INN?.value, map.REG_NUM?.value, map.TAX_CODE_INCORPORATION?.value, map.SWIFT?.value, map.KIO?.value ]
-        expectedValues = expectedValues.unique().findAll{ it != null && it != '' }
+        def expectedValues = [map.INN?.value, map.REG_NUM?.value, map.TAX_CODE_INCORPORATION?.value, map.SWIFT?.value, map.KIO?.value]
+        expectedValues = expectedValues.unique().findAll { it != null && it != '' }
         formDataService.checkReferenceValue(values[colIndex], expectedValues, getColumnName(newRow, 'iksr'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
@@ -611,7 +611,7 @@ void sortFormDataRows(def saveInDB = true) {
     def dataRows = dataRowHelper.allCached
     def columns = sortColumns + (allColumns - sortColumns)
     // Сортировка (внутри групп)
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias()) })
     def newRows = []
     def tempRows = []
     for (def row : dataRows) {
@@ -665,7 +665,7 @@ void checkSub(def dataRows, boolean fatal) {
     }, new ScriptUtils.CheckDiffGroup() {
         @Override
         Boolean check(DataRow<Cell> row1, DataRow<Cell> row2, List<String> groupColumns) {
-            if (groupColumns.find{ row1[it] != null } == null) {
+            if (groupColumns.find { row1[it] != null } == null) {
                 return null // для строк с пустыми графами группировки не надо проверять итоги
             }
             return isDiffRow(row1, row2, groupColumns)
@@ -677,10 +677,15 @@ void afterLoad() {
     if (binding.variables.containsKey("specialPeriod")) {
         // прибыль ТЦО
         // "первый квартал", "полугодие", "девять месяцев", "год"
-        specialPeriod.name = reportPeriodService.get(formData.reportPeriodId).accName
+        switch (reportPeriodService.get(formData.reportPeriodId).order) {
+            case 2: specialPeriod.name = "полугодие"
+                break
+            case 3: specialPeriod.name = "девять месяцев"
+                break
+            case 4: specialPeriod.name = "год"
+                break
+        }
         // для справочников начало от 01.01.year (для прибыли start_date)
         specialPeriod.calendarStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
-        // конец периода
-        specialPeriod.endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
 }
