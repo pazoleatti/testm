@@ -437,7 +437,18 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        // 1. Проверка на заполнение поля (графа 1..9, 11..15, 21)
+        // 1. В справочнике «Параметры представления деклараций по транспортному налогу» существует хотя бы одна запись,
+        // удовлетворяющая условиям выборки, приведённой в алгоритме расчёта «Графы 2 и 3»
+        fillTaKpp(row, errorMsg)
+
+        // 2. Проверка налоговой ставки ТС
+        // В справочнике «Ставки транспортного налога» существует строка, удовлетворяющая условиям выборки,
+        // приведённой в алгоритме расчёта «графы 24» Табл. 3
+        // получение региона по ОКТМО
+        def region = getRegionByOKTMO(row.okato)
+        calc24(row, region, errorMsg, true)
+
+        // 3. Проверка на заполнение поля (графа 1..9, 11..15, 21)
         if (formDataEvent == FormDataEvent.COMPOSE) {
             checkNonEmptyColumns(row, index, ['taxAuthority', 'kpp'], logger, false)
             checkNonEmptyColumns(row, index, nonEmptyColumns - ['taxAuthority', 'kpp'], logger, true)
@@ -451,42 +462,31 @@ void logicCheck() {
         def sumR = row.benefitSumReduction
         def benefitSum = (sum != null) ? sum : ((sumD != null) ? sumD : ((sumR != null) ? sumR : null))
 
-        // 2. Поверка на соответствие дат использования льготы
+        // 4. Поверка на соответствие дат использования льготы
         if (benefitCode && row.benefitEndDate != null && (row.benefitStartDate == null || row.benefitStartDate > row.benefitEndDate)) {
             logger.error(errorMsg + "Дата начала(окончания) использования льготы неверная!")
         }
 
-        // 3. Проверка, что Сумма исчисления налога больше или равна Сумма налоговой льготы
+        // 5. Проверка, что Сумма исчисления налога больше или равна Сумма налоговой льготы
         if (row.calculatedTaxSum != null && benefitSum != null && row.calculatedTaxSum < benefitSum) {
             logger.error(errorMsg + 'Исчисленная сумма налога меньше Суммы налоговой льготы!')
         }
 
-        // 4. Проверка значения поля Кв
+        // 6. Проверка значения поля Кв
         if (row.coef362 != null && (row.coef362 < 0.0 || row.coef362 > 1.0)) {
             logger.error(errorMsg + 'Коэффициент, определяемый в соответствии с п.3 ст.362 НК РФ меньше нуля либо больше единицы!')
         }
 
-        // 5. Проверка значения поля Кл
+        // 7. Проверка значения поля Кл
         if (row.coefKl != null && (row.coefKl < 0.0 || row.coefKl > 1.0)) {
             logger.error(errorMsg + 'Коэффициент, определяемый в соответствии с законами субъектов РФ меньше нуля либо больше единицы!')
         }
 
-        // 6. Проверка одновременного заполнения данных о налоговой льготе
+        // 8. Проверка одновременного заполнения данных о налоговой льготе
         def notNull17_20 = row.benefitStartDate != null && row.benefitEndDate != null && row.coefKl != null && benefitSum != null
         if ((benefitCode != null) ^ notNull17_20) {
             logger.error(errorMsg + "Данные о налоговой льготе указаны не полностью.")
         }
-
-        // 7. В справочнике «Параметры представления деклараций по транспортному налогу» существует хотя бы одна запись,
-        // удовлетворяющая условиям выборки, приведённой в алгоритме расчёта «Графы 2 и 3»
-        fillTaKpp(row, errorMsg)
-
-        // 8. Проверка налоговой ставки ТС
-        // В справочнике «Ставки транспортного налога» существует строка, удовлетворяющая условиям выборки,
-        // приведённой в алгоритме расчёта «графы 24» Табл. 3
-        // получение региона по ОКТМО
-        def region = getRegionByOKTMO(row.okato)
-        calc24(row, region, errorMsg, true)
 
         // 9. Проверка на корректность заполнения кода НО и КПП согласно справочнику параметров представления деклараций
         checkTaKpp(row, errorMsg)
