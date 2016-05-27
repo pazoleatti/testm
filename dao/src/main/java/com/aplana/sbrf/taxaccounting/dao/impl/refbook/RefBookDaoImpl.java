@@ -3099,4 +3099,33 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         return result;
     }
+
+    @Override
+    public List<ReferenceCheckResult> getInactiveRecords(String tableName, @NotNull List<Long> uniqueRecordIds) {
+        final List<ReferenceCheckResult> result = new ArrayList<ReferenceCheckResult>();
+        Set<Long> recordIds = new HashSet<Long>(uniqueRecordIds);
+        List<Long> existRecords = new ArrayList<Long>();
+
+        //Исключаем несуществующие записи
+        String sql = String.format("select id from %s where %s", tableName, SqlUtils.transformToSqlInStatement("id", recordIds));
+        try {
+            //Получаем список существующих записей среди входного набора
+            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("id");
+                }
+            });
+        } catch (EmptyResultDataAccessException ignored) {}
+        for (Iterator<Long> it = recordIds.iterator(); it.hasNext();) {
+            Long recordId = it.next();
+            //Если запись не найдена среди существующих, то проставляем статус и удаляем ее из списка для остальных проверок
+            if (!existRecords.contains(recordId)) {
+                result.add(new ReferenceCheckResult(recordId, CheckResult.NOT_EXISTS));
+                it.remove();
+            }
+        }
+        return result;
+    }
+
 }
