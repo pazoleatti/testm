@@ -130,7 +130,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     continue;
                 }
                 for (String value : valueList) {
-                    // Проверка значения параметра "Проверять ЭЦП"
+                    // Проверка значения параметра "Проверять ЭП"
                     if (parameter.equals(parameter.SIGN_CHECK)) {
                         signCheck(value, logger);
                     }
@@ -265,7 +265,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                         } else if (isFolder) {
                             value = value + "/";
                         }
-                        // Проверка значения параметра "Проверять ЭЦП"
+                        // Проверка значения параметра "Проверять ЭП"
                         if (configurationParam.equals(configurationParam.SIGN_CHECK)) {
                             signCheck(value, logger);
                         }
@@ -420,7 +420,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return null;
     }
 
-    // Проверка значения параметра "Проверять ЭЦП"
+    // Проверка значения параметра "Проверять ЭП"
     private void signCheck(String value, Logger logger) {
         if (!"0".equals(value) && !"1".equals(value)) {
             logger.error(SIGN_CHECK_ERROR, value);

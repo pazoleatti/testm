@@ -82,7 +82,11 @@ public class LoadFormDataTask extends AbstractUserTask {
         lockDataService.lock(key, userId,
                 LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
         try {
-            loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, null, new Logger(), lockId, false);
+            Map<Integer, List<TaxType>> departmentTaxMap = new HashMap<Integer, List<TaxType>>();
+            for (Integer depId : departmentsIds) {
+                departmentTaxMap.put(depId, Arrays.asList(TaxType.values()));
+            }
+            loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentTaxMap, new Logger(), lockId, false);
         } finally {
             lockDataService.unlock(key, userId);
         }

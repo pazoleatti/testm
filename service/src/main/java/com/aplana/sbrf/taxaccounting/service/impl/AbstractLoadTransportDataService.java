@@ -64,12 +64,12 @@ public abstract class AbstractLoadTransportDataService {
         L12("Ошибка при архивировании транспортного файла! Загрузка файла не выполнена. %s.", LogLevel.ERROR, true, false),
         L13("Налоговая форма существует и имеет статус «" + WorkflowState.CREATED.getTitle() + "».", LogLevel.INFO, false, true),
         L14("Для подразделения «%s» не назначено первичной или выходной налоговой формы «%s»! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
-        L15("ЭЦП файла «%s» принята, начата загрузка данных файла.", LogLevel.INFO, true, true),
+        L15("ЭП файла «%s» принята, начата загрузка данных файла.", LogLevel.INFO, true, true),
         L15_FD("Из наименования транспортного файла получены следующие данные:", LogLevel.INFO, true, true),
         L15_RP("Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s", LogLevel.INFO, true, true),
         L15_M("Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s, месяц: %s", LogLevel.INFO, true, true),
-        L15_1("ЭЦП файла «%s» проверять не требуется, начата загрузка данных файла.", LogLevel.INFO, true, true),
-        L16("ЭЦП файла «%s» не принята или отсутствует! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
+        L15_1("ЭП файла «%s» проверять не требуется, начата загрузка данных файла.", LogLevel.INFO, true, true),
+        L16("ЭП файла «%s» не принята или отсутствует! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
         L17("Налоговая форма существует и находится в состоянии, отличном от «" + WorkflowState.CREATED.getTitle() + "»! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
         L18("Создана «%s» налоговая форма «%s» для подразделения «%s» в периоде «%s».", LogLevel.INFO, true, true),
         L19("«%s» налоговая форма «%s» для подразделения «%s» в периоде «%s» заполнена данными загруженного файла.", LogLevel.INFO, true, true),
@@ -78,7 +78,7 @@ public abstract class AbstractLoadTransportDataService {
         // L22("Итоговая сумма в графе «%s» строки %d в транспортном файле некорректна. Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
         L23("Запущена процедура загрузки транспортных файлов, содержащих данные справочников.", LogLevel.INFO, true, false),
         L24("Завершена процедура загрузки транспортных файлов, содержащих данные справочников. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true, false),
-        // L25("Не указан путь к корректному файлу ключей ЭЦП! Загрузка файла не выполнена.", LogLevel.ERROR, true, false),
+        // L25("Не указан путь к корректному файлу ключей ЭП! Загрузка файла не выполнена.", LogLevel.ERROR, true, false),
         L26("Транспортный файл размещен в каталоге ошибок в составе архива «%s».", LogLevel.INFO, true, false),
         L27("Транспортный файл не записан в каталог ошибок! Загрузка файла не выполнена. %s.", LogLevel.ERROR, true, false),
         L28("Ошибка при удалении файла «%s» при перемещении в каталог ошибок! %s.", LogLevel.ERROR, true, false),
@@ -94,6 +94,8 @@ public abstract class AbstractLoadTransportDataService {
         L42("Нет доступа %s ТБ «%s»! Загрузка не выполнена.", LogLevel.ERROR, true, false),
         L42_1("Нет доступа %s справочников! Загрузка не выполнена.", LogLevel.ERROR, true, false),
         L42_2("Нет доступа к каталогу загрузки «%s» %s! Загрузка не выполнена.", LogLevel.ERROR, true, false),
+        L52("Начата загрузка файлов из каталога загрузки для подразделения \"%s\"", LogLevel.INFO, true, false),
+        L53("Завершена загрузка файлов из каталога загрузки для подразделения \"%s\"", LogLevel.INFO, true, false),
         // Сообщения которых нет в постановке
         L_1("Не указан каталог ошибок в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false),
         L_2("Не указан каталог архива в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false),
@@ -106,7 +108,7 @@ public abstract class AbstractLoadTransportDataService {
         private boolean logSystem;
         private boolean isFormDepartmentId;
 
-        private LogData(String text, LogLevel level, boolean logSystem, boolean isFormDepartmentId) {
+        LogData(String text, LogLevel level, boolean logSystem, boolean isFormDepartmentId) {
             this.text = text;
             this.level = level;
             this.logSystem = logSystem;

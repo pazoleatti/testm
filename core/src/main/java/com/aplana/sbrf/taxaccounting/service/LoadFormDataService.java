@@ -2,10 +2,12 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.ImportCounter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TransportFileInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис загрузки ТФ НФ
@@ -23,13 +25,12 @@ public interface LoadFormDataService {
      * Загрузка ТФ НФ ТБ (FORM_UPLOAD_DIRECTORY)
      * Указанные ТБ и список имен файлов
      */
-    ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList, List<String> loadedFileNameList,
-                                 Logger logger, String lock, boolean isAsync);
+    ImportCounter importFormData(TAUserInfo userInfo, Map<Integer, List<TaxType>> departmentTaxMap, Logger logger, String lock, boolean isAsync);
 
-    List<TransportFileInfo> getFormDataFiles(TAUserInfo userInfo, List<Integer> departmentIdList,
-                                             List<String> loadedFileNameList, Logger logger);
+    List<TransportFileInfo> getFormDataFiles(TAUserInfo userInfo, Logger logger);
+
     /**
-     * Список доступных ТБ
+     * Карта: Доступные ТБ -> доступные виды налогов
      */
-    List<Integer> getTB(TAUserInfo userInfo, Logger logger);
+    Map<Integer, List<TaxType>> getTB(TAUserInfo userInfo, Logger logger);
 }
