@@ -34,8 +34,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
-
 /**
  *
  * @author dloshkarev
@@ -274,20 +272,44 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
      * @return
      */
     private PreparedStatementData getChildrenQuery(String tableName, RefBook refBook, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
-                                                 String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause) {
+                                                   String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause) {
         PreparedStatementData ps = new PreparedStatementData();
 
+        ps.appendQuery("with t as (select frb.id \n");
+        ps.appendQuery(" FROM ");
+        ps.appendQuery(tableName);
+        ps.appendQuery(" frb \n");
+        PreparedStatementData filterPS = new PreparedStatementData();
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+        simpleFilterTreeListener.setPs(filterPS);
+
+        Filter.getFilterQuery(filter, simpleFilterTreeListener);
+        if (filterPS.getJoinPartsOfQuery() != null) {
+            ps.appendQuery(filterPS.getJoinPartsOfQuery());
+        }
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" WHERE (");
+            ps.appendQuery(filterPS.getQuery().toString());
+            if (!filterPS.getParams().isEmpty()) {
+                ps.addParam(filterPS.getParams());
+            }
+            ps.appendQuery(") AND ");
+        } else {
+            ps.appendQuery(" WHERE ");
+        }
+
         if (version != null) {
-            ps.appendQuery(String.format(WITH_STATEMENT, tableName, tableName));
+            ps.appendQuery(String.format("frb.status = 0 and frb.version <= ? and " +
+                "not exists (select 1 from %s r2 where r2.record_id=frb.record_id and r2.status != -1 and r2.version between frb.version + interval '1' day and ?)\n", tableName));
             ps.addParam(version);
             ps.addParam(version);
         } else {
-            ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, tableName, tableName));
-            ps.addParam(uniqueRecordId);
-            ps.addParam(VersionedObjectStatus.NORMAL.getId());
+            ps.appendQuery("frb.status = 0");
         }
+        ps.appendQuery(") \n");
 
-        ps.appendQuery("SELECT  ");
+        ps.appendQuery("SELECT ");
         ps.appendQuery("record_id");
         if (isSupportOver() && sortAttribute != null) {
             ps.appendQuery(",");
@@ -296,7 +318,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             ps.appendQuery(" over (order by '");
             ps.appendQuery(sortAttribute.getAlias());
             ps.appendQuery("'");
-            ps.appendQuery(isSortAscending ? " ASC":" DESC");
+            ps.appendQuery(isSortAscending ? " ASC" : " DESC");
             ps.appendQuery(")");
             ps.appendQuery(" as row_number_over\n");
         } else {
@@ -308,19 +330,13 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             ps.appendQuery(", ");
             ps.appendQuery(attribute.getAlias());
         }
+        if (version == null) {
+            ps.appendQuery(", \"record_version_from\", (SELECT MIN(VERSION) FROM " + tableName + " rbo1 where rbo.record_id=rbo1.record_id and rbo1.VERSION>\"record_version_from\") \"record_version_to\" ");
+        }
 
         ps.appendQuery(" FROM ");
         ps.appendQuery("(select distinct ");
         ps.appendQuery("CONNECT_BY_ROOT frb.id as \"RECORD_ID\"");
-
-        if (version == null) {
-            ps.appendQuery(",  t.version as ");
-            ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
-            ps.appendQuery(",");
-
-            ps.appendQuery("  t.versionEnd as ");
-            ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
-        }
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", ");
@@ -330,57 +346,21 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             ps.appendQuery(attribute.getAlias());
             ps.appendQuery("\"");
         }
+        if (version == null) {
+            ps.appendQuery(", CONNECT_BY_ROOT frb.version AS \"record_version_from\"");
+        }
 
-        ps.appendQuery(" FROM t, ");
+        ps.appendQuery(" FROM ");
         ps.appendQuery(tableName);
         ps.appendQuery(" frb ");
 
-        PreparedStatementData filterPS = new PreparedStatementData();
-        SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
-        simpleFilterTreeListener.setRefBook(refBook);
-        simpleFilterTreeListener.setPs(filterPS);
-
-        Filter.getFilterQuery(filter, simpleFilterTreeListener);
-        if (filterPS.getJoinPartsOfQuery() != null){
-            ps.appendQuery(filterPS.getJoinPartsOfQuery());
-        }
-        if (filterPS.getQuery().length() > 0) {
-            ps.appendQuery(" WHERE (");
-            ps.appendQuery(filterPS.getQuery().toString());
-            if (!filterPS.getParams().isEmpty()) {
-                ps.addParam(filterPS.getParams());
-            }
-            ps.appendQuery(") ");
-        }
-        if (whereClause != null && !whereClause.trim().isEmpty()) {
-            if (filterPS.getQuery().length() > 0) {
-                ps.appendQuery(" AND ");
-            } else {
-                ps.appendQuery(" WHERE ");
-            }
-            ps.appendQuery(whereClause);
-        }
-
-        if (filterPS.getQuery().length() > 0 ||
-                (whereClause != null && !whereClause.trim().isEmpty() && filterPS.getQuery().length() == 0)) {
-            ps.appendQuery(" and ");
-        } else {
-            ps.appendQuery(" where ");
-        }
-        ps.appendQuery("(frb.version = t.version and frb.record_id = t.record_id)");
-
-        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR frb.id = frb.PARENT_ID");
-        ps.appendQuery(" START WITH ");
-        ps.appendQuery(uniqueRecordId == null ? " frb.PARENT_ID is null" : "frb.PARENT_ID = "+uniqueRecordId);
-
-        if (version == null) {
-            ps.appendQuery(" order by t.version\n");
-        }
-
-        ps.appendQuery(")");
+        ps.appendQuery("WHERE frb.id IN (SELECT id FROM t) \n");
+        ps.appendQuery(" CONNECT BY PRIOR ID = PARENT_ID ) rbo \n");
+        ps.appendQuery("WHERE ");
+        ps.appendQuery(uniqueRecordId == null ? "PARENT_ID is null" : "PARENT_ID = " + uniqueRecordId);
 
         if (pagingParams != null) {
-            ps.appendQuery(" where row_number_over BETWEEN ? AND ?");
+            ps.appendQuery(" and row_number_over BETWEEN ? AND ?");
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
         }
