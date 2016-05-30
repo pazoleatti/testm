@@ -294,9 +294,7 @@ void checkFillDeclarationMap(boolean showMessages) {
             continue
         }
         def periodType = getRefBookValue(8, row.period)
-        if (!periodNames.contains(periodType?.NAME?.stringValue)) {
-            return
-        } else {
+        if (periodNames.contains(periodType?.NAME?.stringValue)) {
             if (row.getIndex() < head8Index) {
                 if (!periodTypesSale.contains(periodType)) {
                     periodTypesSale.add(periodType)
