@@ -147,6 +147,8 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     public void onBackClicked() {
         hierEditFormPresenter.setPreviousURId(null);
         departmentEditPresenter.setPreviousURId(null);
+        uniqueRecordId = null;
+        commonEditPresenter.show(uniqueRecordId);
     }
 
     @Override

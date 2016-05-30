@@ -539,4 +539,12 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     public void setEnabled(boolean isEnabled) {
         tree.setEnabled(isEnabled);
     }
+
+    /**
+     * Прерывает последний отправленный запрос
+     */
+    public void cancelRequest() {
+        if (getUiHandlers() != null)
+            getUiHandlers().cancelRequest();
+    }
 }

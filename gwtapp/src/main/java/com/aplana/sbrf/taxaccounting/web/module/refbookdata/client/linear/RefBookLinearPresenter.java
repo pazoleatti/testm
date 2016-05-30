@@ -19,14 +19,13 @@ import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.dispatch.shared.DispatchRequest;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: avanteev
@@ -41,6 +40,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     private final TableDataProvider dataProvider = new TableDataProvider();
     private Long refBookDataId;
     private Long recordId;
+    private DispatchRequest dispatchRequest;
 
     @Inject
     public RefBookLinearPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
@@ -212,19 +212,22 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
             final Range range = display.getVisibleRange();
             GetRefBookTableDataAction action = new GetRefBookTableDataAction();
             action.setRecordId(recordId);
-            action.setRefBookId(refBookDataId);
+            final Long refBookId = refBookDataId;
+            action.setRefBookId(refBookId);
             action.setPagingParams(new PagingParams(range.getStart()+1, range.getLength()));
             action.setRelevanceDate(relevanceDate);
             action.setSearchPattern(searchPattern);
             action.setSortColumnIndex(getView().getSortColumnIndex());
             action.setAscSorting(getView().isAscSorting());
-            dispatchAsync.execute(action,
+            dispatchRequest = dispatchAsync.execute(action,
                     CallbackUtils.defaultCallbackNoLock(
                             new AbstractCallback<GetRefBookTableDataResult>() {
                                 @Override
                                 public void onSuccess(GetRefBookTableDataResult result) {
-                                    getView().setTableData(range.getStart(),
-                                            result.getTotalCount(), result.getDataRows(), recordId);
+                                    if (refBookDataId != null && refBookDataId.equals(refBookId)) {
+                                        getView().setTableData(range.getStart(),
+                                                result.getTotalCount(), result.getDataRows(), recordId);
+                                    }
                                 }
                             }, RefBookLinearPresenter.this));
         }
@@ -258,5 +261,23 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
 
     public boolean isAscSorting() {
         return getView().isAscSorting();
+    }
+
+    public void reset() {
+        recordId = null;
+        refBookDataId = null;
+        if (dispatchRequest != null && dispatchRequest.isPending()) {
+            dispatchRequest.cancel();
+            dispatchRequest = null;
+        }
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        if (dispatchRequest != null && dispatchRequest.isPending()) {
+            dispatchRequest.cancel();
+            dispatchRequest = null;
+        }
     }
 }
