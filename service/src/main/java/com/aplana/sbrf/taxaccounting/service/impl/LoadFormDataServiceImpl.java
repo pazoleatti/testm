@@ -381,11 +381,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     continue;
                 }
 
-                if (departmentReportPeriod.getCorrectionDate() != null) {
-                    String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
-                    log(userInfo, LogData.L8, logger, lockId, formType.getName(), reportPeriodName);
-                }
-
                 // Поиск экземпляра НФ
                 FormData formData;
 
@@ -414,12 +409,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                             localLogger.getEntries(), logger, lockId);
                     fail++;
                     continue;
-                }
-
-                // флаг того что форма уже создана
-                if (formData != null) {
-                    // 16А.1 Существует и имеет статус "Создана"
-                    log(userInfo, LogData.L13, logger, lockId);
                 }
 
                 // ЭП
@@ -557,7 +546,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
             int formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(),
                     departmentReportPeriod.getReportPeriod().getId());
-            long formDataId = formDataService.createFormData(localLogger, userInfo, formTemplateId,
+            long formDataId = formDataService.createFormData(localLogger, userService.getSystemUserInfo(), formTemplateId,
                     departmentReportPeriod.getId(), null, false, formDataKind, month, true);
             formData = formDataDao.get(formDataId, false);
         } else {
@@ -622,11 +611,15 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
             Department formDepartment = departmentDao.getDepartment(departmentReportPeriod.getDepartmentId());
 
-            // 16 если форма не была создана
+            // 22-23 если форма не была создана
             if (!formWasCreated) {
                 log(userInfo, LogData.L18, localLogger, lock, formDataKind.getTitle(), formType.getName(), formDepartment.getName(), reportPeriodName);
             } else {
-                // 13А.2 НФ корректно заполнена значениями из ТФ.
+                log(userInfo, LogData.L13, localLogger, lock);
+                if (departmentReportPeriod.getCorrectionDate() != null) {
+                    log(userInfo, LogData.L8, localLogger, lock, formType.getName(), reportPeriodName);
+                }
+                // 22Б.2 НФ корректно заполнена значениями из ТФ.
                 log(userInfo, LogData.L19, localLogger, lock, formDataKind.getTitle(), formType.getName(), formDepartment.getName(), reportPeriodName);
             }
             // 17 Перенос в архив
