@@ -38,7 +38,7 @@
             <g:FlowPanel addStyleNames="{style.footerPanel}">
                 <g:Button ui:field="yesButton" addStyleNames="{style.footerButton}" text="Да" visible="false"/>
                 <g:Button ui:field="noButton" addStyleNames="{style.footerButton}" text="Нет" visible="false"/>
-                <g:Button ui:field="okButton" addStyleNames="{style.footerButton}" text="Ок" visible="false"/>
+                <g:Button ui:field="okButton" addStyleNames="{style.footerButton}" text="OK" visible="false"/>
                 <g:Button ui:field="cancelButton" addStyleNames="{style.footerButton}" text="Отменить" visible="false"/>
                 <g:Button ui:field="closeButton" addStyleNames="{style.footerButton}" text="Закрыть" visible="false"/>
             </g:FlowPanel>

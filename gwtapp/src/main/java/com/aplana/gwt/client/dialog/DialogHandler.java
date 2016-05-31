@@ -20,7 +20,7 @@ public abstract class DialogHandler {
     public void cancel() {
     }
 
-    /** Вызывается при нажатии на кнопку Ок. */
+    /** Вызывается при нажатии на кнопку OK. */
     public void ok() {
     }
 
