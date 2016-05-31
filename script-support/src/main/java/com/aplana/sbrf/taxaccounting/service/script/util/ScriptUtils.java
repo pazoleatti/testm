@@ -766,7 +766,6 @@ public final class ScriptUtils {
     /**
      * Сортировка строк (должна использоваться только для группировки). Не разыменовывает строки, т.к. не требуется.
      */
-    @Deprecated
     @SuppressWarnings("unused")
     public static void sortRows(List<DataRow<Cell>> dataRows, final List<String> groupColumns) {
         Collections.sort(dataRows, new Comparator<DataRow<Cell>>() {
@@ -820,6 +819,7 @@ public final class ScriptUtils {
     /**
      * Проверка итоговых строк
      */
+    @Deprecated
     @SuppressWarnings("unused")
     public static void checkItogRows(List<DataRow<Cell>> dataRows, List<DataRow<Cell>> testItogRows, List<DataRow<Cell>> itogRows,
                                      List<String> groupColums, Logger logger, GroupString groupString,

@@ -491,7 +491,7 @@ void sortFormDataRows(def saveInDB = true) {
         def lastRow = getDataRow(dataRows, getLastRowAlias(section))
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
-        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+        def sectionsRows = (from < to ? dataRows.subList(from, to) : [])
 
         if (!isGroups) {
             // Массовое разыменование строк НФ

@@ -542,7 +542,7 @@ void sortFormDataRows(def saveInDB = true) {
         def lastRow = getDataRow(dataRows, "total$section")
         def from = firstRow.getIndex() - (section.isEmpty() ? 1 : 0)
         def to = lastRow.getIndex() - 1
-        def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
+        def sectionRows = (from < to ? dataRows.subList(from, to) : [])
 
         // Массовое разыменовывание граф НФ
         def columnNameList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
