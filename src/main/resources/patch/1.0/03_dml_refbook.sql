@@ -5,7 +5,6 @@ UPDATE ref_book_attribute SET name = 'Код налогового органа (
 -----------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15302: 0.8.4 Классификаторы доходов/расходов: Изменить название поля "Символ ОПУ" на "Символ ОФР"
 UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Символ ОФР' WHERE REF_BOOK_ID IN (27, 28) AND ALIAS = 'OPU';
-
 UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Код ОФР' WHERE REF_BOOK_ID = 52  AND ALIAS = 'OPU_CODE';
 
 --https://jira.aplana.com/browse/SBRFACCTAX-15342: 1.0 Сделать неактивными и неотображаемыми справочники с классификаторами
@@ -181,6 +180,34 @@ end;
 /
 delete from ref_book_value where attribute_id in (2186, 2187);	 
 delete from ref_book_attribute where id in (2186, 2187);
+-----------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-15863: 1.0 ТН. Сделать поле "Код ТС" справочным в справочнике
+
+SET SERVEROUTPUT ON SIZE 100000;
+BEGIN
+merge into ref_book_value tgt
+using ( select rbv.record_id, rbv.attribute_id, translate(rbv.string_value, '?', '0') as new_string_value, rfr.ref_book_record_id
+        from ref_book_value rbv
+        join ref_book_attribute a on a.id = rbv.attribute_id and a.type = 1
+        join ref_book_record rbr on rbr.id = rbv.record_id
+        left join (
+             select rbv.record_id as ref_book_record_id, rbv.string_value, rbr.version, lead(rbr.version) over (partition by rbr.record_id order by version) - interval '1' day as end_version  
+              from ref_book_value rbv
+              join ref_book_record rbr on rbv.record_id = rbr.id
+              where rbv.attribute_id = 422 and rbr.status <> -1) rfr on trim(rfr.string_value) =  trim(translate(rbv.string_value, '?', '0')) and rbr.version between rfr.version and nvl(rfr.end_version, to_date('31.12.9999', 'DD.MM.YYYY')) 
+        where rbv.attribute_id = 411) src
+on (src.record_id = tgt.record_id and src.attribute_id = tgt.attribute_id)        
+when matched then
+     update set tgt.reference_value = src.ref_book_record_id;
+
+dbms_output.put_line('REFBOOK(41): '||sql%rowcount);  
+
+update ref_book_attribute set type=4, reference_id = 42, attribute_id = 422, max_length = null where id = 411;     
+update ref_book_value set string_value = null where attribute_id = 411; 
+     
+END;
+/ 
+
 -----------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
