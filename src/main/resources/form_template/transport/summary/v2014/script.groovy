@@ -1,7 +1,6 @@
 package form_template.transport.summary.v2014
 
 import com.aplana.sbrf.taxaccounting.model.*
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
@@ -871,8 +870,6 @@ void placeError(DataRow row, String alias, ArrayList<String> errorFields, String
  */
 def calc24(def row, def region, def errorMsg, def check) {
     if (row.tsTypeCode != null && row.years != null && row.taxBase != null) {
-        def tsTypeCode = getRefBookValue(42, row.tsTypeCode)?.CODE?.stringValue
-
         // запрос по выборке данных из справочника
         def query = " and DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() +
                 " and ((MIN_POWER is null or MIN_POWER < " + row.taxBase + ") " +
@@ -885,13 +882,10 @@ def calc24(def row, def region, def errorMsg, def check) {
          * Переберем варианты
          * 1. код = коду ТС && регион указан
          * 2. код = коду ТС && регион НЕ указан
-         * 3. код = соответствует 2м двум символом кода ТС && регион указан
-         * 4. код = соответствует 2м двум символом кода ТС && регион НЕ указан
          */
         def regionSqlPartID = " and DICT_REGION_ID = " + region?.record_id?.numberValue
         def regionSqlPartNull = " and DICT_REGION_ID is null"
-        def queryLike = "CODE LIKE '" + tsTypeCode.substring(0, 3) + "%'" + query
-        def queryLikeStrictly = "CODE LIKE '" + tsTypeCode + "'" + query
+        def queryLikeStrictly = "CODE = " + row.tsTypeCode + query
 
         def reportDate = getReportDate()
 
@@ -901,18 +895,11 @@ def calc24(def row, def region, def errorMsg, def check) {
         if (record == null) {
             record = getRecord(41, queryLikeStrictly + regionSqlPartNull, reportDate)
         }
-        // вариант 3
-        if (record == null) {
-            record = getRecord(41, queryLike + regionSqlPartID, reportDate)
-        }
-        // вариант 4
-        if (record == null) {
-            record = getRecord(41, queryLike + regionSqlPartNull, reportDate)
-        }
 
         if (record != null) {
             return record.record_id.numberValue
         } else if (check) {
+            def tsTypeCode = getRefBookValue(42, row.tsTypeCode)?.CODE?.stringValue
             def String taxBaseOkeiUnit = getRefBookValue(12, row.taxBaseOkeiUnit).CODE.value ?: ''
             def String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = " + row.okato?.toString()
             def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
