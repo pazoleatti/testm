@@ -356,7 +356,7 @@ class Main {
     def static REFBOOK_FOLDER_NAME_TO_ID = [
             'account_plan'                 : 101,
             'bond'                         : 84,
-            'classificator_code_724_2_1'   : 102,
+//          'classificator_code_724_2_1'   : 102, // удалили из бд
             'classificator_country'        : 10,
             'classificator_currency'       : 15,
             'classificator_eco_activities' : 34,
@@ -426,12 +426,13 @@ class Main {
 
         // Построение отчета сравнения Git и БД
         try {
-            if ((DB_USER.contains("NEXT") || DB_USER.contains("PSI")) && (!checkOnlyFD || !checkOnlyDD)) {
-                println("На стендах NEXT и PSI ручное/автоматическое обновление скриптов запрещено! Будет произведено только сравнение.")
-                println("Manual/automatic scripts update forbidden on NEXT and PSI stands! Only comparison will be done.")
+            def isExceptionDb = DB_USER.contains("NEXT") || DB_USER.contains("PSI") || DB_USER.equals("TAX")
+            if (isExceptionDb && (!checkOnlyFD || !checkOnlyDD)) {
+                println("На стендах NEXT, PSI, TAX ручное/автоматическое обновление скриптов запрещено! Будет произведено только сравнение.")
+                println("Manual/automatic scripts update forbidden on NEXT, PSI, TAX stands! Only comparison will be done.")
             }
-            GitReport.updateScripts(GitReport.getDBVersions(sql), sql, DB_USER.contains("NEXT") || DB_USER.contains("PSI") || checkOnlyFD)
-            GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(sql), sql, DB_USER.contains("NEXT") || DB_USER.contains("PSI") || checkOnlyDD)
+            GitReport.updateScripts(GitReport.getDBVersions(sql), sql, isExceptionDb || checkOnlyFD)
+            GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(sql), sql, isExceptionDb || checkOnlyDD)
             GitReport.checkRefBooks(GitReport.getRefBookScripts(sql))
         } finally {
             sql.close()

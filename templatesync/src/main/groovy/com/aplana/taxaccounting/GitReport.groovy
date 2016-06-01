@@ -879,12 +879,12 @@ class GitReport {
             try {
                 version.data_rows = it.data_rows ? XMLUnit.buildControlDocument(it.data_rows?.stringValue()?.replaceAll('stringValue=""', '')) : null
             } catch (SAXException e) {
-                println("Ошибка при разборе DATA_ROWS id = ${it.id} \"${version.name}\"")
+                println("Error in parse DATA_ROWS id = ${it.id} \"${version.name}\"")
             }
             try {
                 version.data_headers = it.data_headers ? XMLUnit.buildControlDocument(it.data_headers?.stringValue()?.replaceAll('stringValue=""', '')) : null
             } catch (SAXException e) {
-                println("Ошибка при разборе DATA_HEADERS id = ${it.id} \"${version.name}\"")
+                println("Error in parse DATA_HEADERS id = ${it.id} \"${version.name}\"")
             }
             map[type_id].put(it.version, version)
         }
@@ -982,14 +982,14 @@ class GitReport {
                 try {
                     version.xsd = it.xsd ? XMLUnit.buildControlDocument(IOUtils.toString(it.xsd.binaryStream)) : null
                 } catch (SAXException e) {
-                    println("Ошибка при разборе XSD декларации id = ${it.id} \"${version.name}\"")
+                    println("Error in parse XSD declaration id = ${it.id} \"${version.name}\"")
                 }
             }
             if (it.jrxml) {
                 try {
                     version.jrxml = it.jrxml ? XMLUnit.buildControlDocument(IOUtils.toString(it.jrxml.binaryStream, "UTF-8")) : null
                 } catch (SAXException e) {
-                    println("Ошибка при разборе JRXML декларации id = ${it.id} \"${version.name}\"")
+                    println("Error in parse JRXML declaration id = ${it.id} \"${version.name}\"")
                 }
             }
             map[type_id].put(it.version, version)
@@ -1014,8 +1014,8 @@ class GitReport {
         return refbooks
     }
 
-    static void updateStyleAliases(Document document, def styleMap) {
-        if (document == null) {
+    def public static void updateStyleAliases(Document document, def styleMap) {
+        if (document == null || styleMap == null) {
             return
         }
         def nodeList = document.getElementsByTagName("cell")

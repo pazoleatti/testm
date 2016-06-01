@@ -1,6 +1,7 @@
 package com.aplana.taxaccounting
 
 import com.aplana.sbrf.taxaccounting.model.Color
+import com.aplana.sbrf.taxaccounting.model.FormStyle
 import groovy.sql.Sql
 import org.apache.commons.io.IOUtils
 import org.custommonkey.xmlunit.Diff
@@ -165,7 +166,7 @@ class DBReport {
                                         dataRowsEqual = diff.similar()
                                     } else if (tmp1?.data_rows != null || tmp2?.data_rows != null) { //один не null, другой null - проверяем не пустой ли
                                         def emptyDataRows = "<?xml version=\"1.0\" encoding=\"utf-8\"?><rows/>"
-                                        if (tmp1?.data_rows?.trim() != emptyDataRows && tmp2?.data_rows?.trim() != emptyDataRows) { // один null, другой не пустой
+                                        if (tmp1?.data_rows_inStr?.trim() != emptyDataRows && tmp2?.data_rows_inStr?.trim() != emptyDataRows) { // один null, другой не пустой
                                             dataRowsEqual = false
                                         }
                                     }
@@ -505,6 +506,28 @@ class DBReport {
         def columnsMap = [:]
         def stylesMap = [:]
 
+        // Стили
+        sql.eachRow(sqlStyles) {
+            def form_template_id = it.form_template_id as Integer
+            if (!stylesMap.containsKey(form_template_id)) {
+                stylesMap.put(form_template_id, [] as Set)
+            }
+            def style = new Expando()
+            style.alias = it.alias
+            style.font_color = Color.getById(it.font_color as Integer)
+            style.back_color = Color.getById(it.back_color as Integer)
+            style.italic = it.italic == 1
+            style.bold = it.bold == 1
+            stylesMap[form_template_id].add(style)
+        }
+
+        def styleByAliasMap = [:]
+        stylesMap.keySet().asList().each { form_template_id ->
+            styleByAliasMap[form_template_id] = [:]
+            stylesMap[form_template_id].each {
+                styleByAliasMap[form_template_id][it.alias] = new FormStyle(it.alias, it.font_color, it.back_color, it.italic, it.bold)
+            }
+        }
         def map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'COMPARATIVE'")
         boolean comparativeExist = (map.result as Integer) == 1
         map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'ACCRUING'")
@@ -520,7 +543,17 @@ class DBReport {
             def version = new Expando()
             version.id = it.id as Integer
             version.type_id = it.type_id as Integer
-            version.data_rows = it.data_rows?.stringValue()?.replaceAll('stringValue=""', '')
+            version.data_rows_inStr = it.data_rows?.stringValue()?.replaceAll('stringValue=""', '')
+            try {
+                def dataRows = null
+                if (version.data_rows_inStr) {
+                    dataRows = XMLUnit.buildControlDocument(version.data_rows_inStr)
+                    GitReport.updateStyleAliases(dataRows, styleByAliasMap[version.id])
+                }
+                version.data_rows = dataRows
+            } catch (SAXException e) {
+                println("Error in parse DATA_ROWS id = ${it.id} \"${version.name}\"")
+            }
             version.fixed_rows = it.fixed_rows as Integer
             version.name = it.name
             version.fullname = it.fullname
@@ -570,21 +603,6 @@ class DBReport {
             column.attribute_id2 = it.attribute_id2
             column.numeration_row = it.numeration_row
             columnsMap[form_template_id].add(column)
-        }
-
-        // Стили
-        sql.eachRow(sqlStyles) {
-            def form_template_id = it.form_template_id as Integer
-            if (!stylesMap.containsKey(form_template_id)) {
-                stylesMap.put(form_template_id, [] as Set)
-            }
-            def style = new Expando()
-            style.alias = it.alias
-            style.font_color = Color.getById(it.font_color as Integer)
-            style.back_color = Color.getById(it.back_color as Integer)
-            style.italic = it.italic == 1
-            style.bold = it.bold == 1
-            stylesMap[form_template_id].add(style)
         }
 
         sql.close()
@@ -1081,14 +1099,14 @@ class DBReport {
                     try {
                         version.xsd = XMLUnit.buildControlDocument(IOUtils.toString(it.xsd.binaryStream))
                     } catch (SAXException e) {
-                        println("Ошибка при разборе XSD декларации id = ${it.id} \"${version.name}\"")
+                        println("Error in parse XSD declaration id = ${it.id} \"${version.name}\"")
                     }
                 }
                 if (it.jrxml) {
                     try {
                         version.jrxml = XMLUnit.buildControlDocument(IOUtils.toString(it.jrxml.binaryStream, "UTF-8"))
                     } catch (SAXException e) {
-                        println("Ошибка при разборе JRXML декларации id = ${it.id} \"${version.name}\"")
+                        println("Error in parse JRXML declaration id = ${it.id} \"${version.name}\"")
                     }
                 }
                 templateMap[type_id].put(it.version, version)
