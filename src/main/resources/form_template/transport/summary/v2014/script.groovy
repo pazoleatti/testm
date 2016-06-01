@@ -361,14 +361,14 @@ def calc() {
         // Графа 37 - Исчисленная сумма налога, подлежащая уплате в бюджет.
         if (row.taxBenefitCode != null) {
             if (row.calculatedTaxSum != null) {
-                row.taxSumToPay = (row.calculatedTaxSum - (row.benefitSum ?: 0)).setScale(0, BigDecimal.ROUND_HALF_UP)
+                row.taxSumToPay = (0.25 * (row.calculatedTaxSum - (row.benefitSum ?: 0))).setScale(0, BigDecimal.ROUND_HALF_UP)
             } else {
                 row.taxSumToPay = null
                 placeError(row, 'taxSumToPay', ['calculatedTaxSum'], errorMsg)
             }
         } else {
             if (row.calculatedTaxSum != null) {
-                row.taxSumToPay = (row.calculatedTaxSum - (row.benefitSumDecrease ?: 0) - (row.benefitSumReduction ?: 0)).setScale(0, BigDecimal.ROUND_HALF_UP)
+                row.taxSumToPay = (0.25 * (row.calculatedTaxSum - (row.benefitSumDecrease ?: 0) - (row.benefitSumReduction ?: 0))).setScale(0, BigDecimal.ROUND_HALF_UP)
             } else {
                 row.taxSumToPay = null
                 placeError(row, 'taxSumToPay', ['calculatedTaxSum'], errorMsg)
