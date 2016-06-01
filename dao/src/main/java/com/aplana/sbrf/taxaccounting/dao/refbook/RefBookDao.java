@@ -206,6 +206,13 @@ public interface RefBookDao {
     List<ReferenceCheckResult> getInactiveRecordsInPeriod(String tableName, @NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo, boolean onlyExistence);
 
     /**
+     * Проверяет действуют ли записи справочника
+     * @param recordIds уникальные идентификаторы записей справочника
+     * @return список id записей при проверке которых были обнаружены ошибки + код ошибки
+     */
+    List<ReferenceCheckResult> getInactiveRecords(String tableName, @NotNull List<Long> recordIds);
+
+    /**
      * Проверка и поиск Id записи по:
      * @param refBookId Id справочника
      * @param version Версия

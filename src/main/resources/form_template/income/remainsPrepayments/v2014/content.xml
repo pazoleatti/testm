@@ -15,9 +15,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum2</alias>
         <checking>false</checking>
-        <name>Сумма начисленных авансовых платежей за отчетный (налоговый) период в бюджет субъекта Российской
-            Федерации
-        </name>
+        <name>Сумма начисленных авансовых платежей за отчетный (налоговый) период в бюджет субъекта Российской Федерации</name>
         <order>2</order>
         <width>20</width>
         <maxLength>15</maxLength>

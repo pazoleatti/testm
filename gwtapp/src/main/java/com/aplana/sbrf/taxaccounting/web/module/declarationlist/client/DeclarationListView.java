@@ -242,15 +242,16 @@ public class DeclarationListView extends
         declarationTaxOrganKppColumn.setSortable(true);
         stateColumn.setSortable(true);
 
-        declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
         reportPeriodHeader = declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodColumn);
 
         if (taxType == TaxType.DEAL) {
+            declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE_D, declarationTypeColumn);
             declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
             declarationTable.addColumn(reportPeriodYearColumn, declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodYearColumn));
             declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
         } else {
+            declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
             declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
             if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT) {

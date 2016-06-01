@@ -173,4 +173,9 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
         pickerState.setSearchPattern("");
         /*refbookDataTree.load(pickerState);*/
     }
+
+    @Override
+    public void cancelRequest() {
+        refbookDataTree.cancelRequest();
+    }
 }

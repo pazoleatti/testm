@@ -167,9 +167,7 @@
         <alias>usingReserve</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Изменение фактического резерва. Использование резерва на погашение процентов по безнадежным долгам в
-            отчетном периоде
-        </name>
+        <name>Изменение фактического резерва. Использование резерва на погашение процентов по безнадежным долгам в отчетном периоде</name>
         <order>17</order>
         <width>9</width>
         <maxLength>15</maxLength>

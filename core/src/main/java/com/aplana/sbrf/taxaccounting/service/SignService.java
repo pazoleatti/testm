@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import java.util.Set;
 
 /**
- * Сервис для проверки ЭЦП
+ * Сервис для проверки ЭП
  * чтобы его использовать необходимо добавить в PATH путь до библиотек:
  * "grn/grn64", "bicr4/bicr4_64", "bicr_adm/bicr_adm_64".
  */

@@ -53,13 +53,13 @@
         <cell alias="sum52" colSpan="1" rowSpan="1" value="Сделки купли-продажи иностранной валюты"/>
         <cell alias="sum53" colSpan="1" rowSpan="1" value="Сделки купли-продажи драгоценных металлов"/>
         <cell alias="sum54" colSpan="1" rowSpan="1" value="Сделки, отраженные в Журнале взаиморасчетов"/>
-        <cell alias="sum55" colSpan="1" rowSpan="1" value="Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов"/>
+        <cell alias="sum55" colSpan="1" rowSpan="1" value="Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов"/>
         <cell alias="sum56" colSpan="1" rowSpan="1" value="Сумма дополнительно начисленных налогооблагаемых доходов"/>
         <cell alias="sum61" colSpan="1" rowSpan="1" value="Сделки с ценными бумагами"/>
         <cell alias="sum62" colSpan="1" rowSpan="1" value="Сделки купли-продажи иностранной валюты"/>
         <cell alias="sum63" colSpan="1" rowSpan="1" value="Сделки купли-продажи драгоценных металлов"/>
         <cell alias="sum64" colSpan="1" rowSpan="1" value="Сделки, отраженные в Журнале взаиморасчетов"/>
-        <cell alias="sum65" colSpan="1" rowSpan="1" value="Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов"/>
+        <cell alias="sum65" colSpan="1" rowSpan="1" value="Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов"/>
         <cell alias="sum66" colSpan="1" rowSpan="1" value="Сумма дополнительно начисленных налогооблагаемых расходов"/>
         <cell alias="sum7" colSpan="1" rowSpan="1" value="Итого объем доходов и расходов, руб."/>
         <cell alias="thresholdValue" colSpan="1" rowSpan="1" value="Применимое Пороговое значение, руб."/>

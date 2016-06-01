@@ -182,6 +182,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     public void onBackClicked() {
         refBookId = null;
         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(RefBookListTokens.REFBOOK_LIST).build());
+        refBookLinearPresenter.reset();
+        editFormPresenter.show(null);
     }
 
     @Override
@@ -395,7 +397,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                         }, RefBookDataPresenter.this));
                                     }
                                 }, RefBookDataPresenter.this));
-
                 //Убираем изменение наименования в связи с изменениями в постановке
                 //http://jira.aplana.com/browse/SBRFACCTAX-12015?focusedCommentId=125046&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-125046
                 /*GetNameAction nameAction = new GetNameAction();

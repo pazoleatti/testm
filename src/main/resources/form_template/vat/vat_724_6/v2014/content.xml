@@ -73,7 +73,7 @@
         <name>Номер мемориального ордера</name>
         <order>7</order>
         <width>10</width>
-        <maxLength>8</maxLength>
+        <maxLength>256</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">

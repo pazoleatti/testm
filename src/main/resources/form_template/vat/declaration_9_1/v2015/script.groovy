@@ -1,6 +1,5 @@
 package form_template.vat.declaration_9_1.v2015
 
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -10,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
@@ -74,11 +74,11 @@ def declarationTypeId = 15
 def declarationType9_sources = 21
 
 @Field
-def bankDepartmentId = 1
+int bankDepartmentId = 1
 
 // id формы источника 724.1.1 (не требующего настройки пользователем, подтягивается скриптом)
 @Field
-def formType_724_1_1 = 848
+int formType_724_1_1 = 848
 
 @Field
 def empty = 0
@@ -594,7 +594,7 @@ def getCorrectionNumber(def id) {
 def period4 = null
 
 /** Получить четвертый отчетный период (4 квартал) текущего налогового периода. */
-def getPeriod4Id() {
+Integer getPeriod4Id() {
     if (period4 == null) {
         def year = getReportPeriod()?.taxPeriod?.year
         def start = Date.parse('dd.MM.yyyy', '01.01.' + year)
@@ -621,47 +621,19 @@ def formData724_1_1 = null
 /** Получить строки источника 724.1.1 (форма должна быть только в корректирующем периоде). */
 def getFormData724_1_1() {
     if (formData724_1_1 == null) {
-        def formData = formDataService.getLast(formType_724_1_1, FormDataKind.CONSOLIDATED, bankDepartmentId, getPeriod4Id(), null, null, false)
-        def correctionDate = (formData ? getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate : null)
-        // период только корректирующий
-        if (formData && formData.state == WorkflowState.ACCEPTED && correctionDate) {
-            formData724_1_1 = formData
+        def formData = null
+        if (getPeriod4Id() != null) {
+            formData = formDataService.getLast(formType_724_1_1, FormDataKind.CONSOLIDATED, bankDepartmentId, getPeriod4Id(), null, null, false)
+        }
+        if (formData != null) {
+            def correctionDate = getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate
+            // период только корректирующий
+            if (formData.state == WorkflowState.ACCEPTED && correctionDate) {
+                formData724_1_1 = formData
+            }
         }
     }
     return formData724_1_1
-}
-
-// TODO (Ramil Timerbaev) в 1.0 поменять на departmentReportPeriodService.getListByFilter()
-/** Получить список периодовов подразделения (корректирующих и некорректирующих). */
-List<DepartmentReportPeriod> getDepartmentReportPeriods(def periodId, def departmentId) {
-    def sql = "select * from department_report_period " +
-            " where report_period_id = %d and department_id = %s " +
-            " order by correction_date asc nulls first "
-    sql = String.format(sql, periodId, departmentId)
-    Connection connection = null
-    Statement stmt = null
-    ResultSet resultSet = null
-    List<DepartmentReportPeriod> departmentReportPeriods = []
-    try {
-        connection = dataSource.getConnection()
-        stmt = connection.createStatement()
-        resultSet = stmt.executeQuery(sql)
-        while (resultSet.next()) {
-            DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod()
-            departmentReportPeriod.setId(SqlUtils.getInteger(resultSet, "id"))
-            departmentReportPeriod.setDepartmentId(SqlUtils.getInteger(resultSet, "department_id"))
-            departmentReportPeriod.setReportPeriod(reportPeriodService.get(SqlUtils.getInteger(resultSet, "report_period_id")))
-            departmentReportPeriod.setActive(!SqlUtils.getInteger(resultSet, "is_active").equals(0))
-            departmentReportPeriod.setBalance(!SqlUtils.getInteger(resultSet, "is_balance_period").equals(0))
-            departmentReportPeriod.setCorrectionDate(resultSet.getDate("correction_date"))
-            departmentReportPeriods.add(departmentReportPeriod)
-        }
-    } finally {
-        resultSet.close()
-        stmt.close()
-        connection.close()
-    }
-    return departmentReportPeriods
 }
 
 /** Предварительные проверки перед расчетом раздела 9.1. */
@@ -675,8 +647,10 @@ void preCalcCheck() {
     def period = getReportPeriod()?.name
     def periodName = year + ', ' + period
     def sourceDeclarationTypeId = (correctionNumber == 1 ? declarationType9_sources : declarationTypeId)
-    // TODO (Ramil Timerbaev) в 1.0 поменять на declarationService.getType(sourceDeclarationTypeId)
-    def declarationName = (sourceDeclarationTypeId == declarationTypeId ? 'Декларация по НДС (раздел 9.1)' : 'Декларация по НДС (раздел 9 без консолид. формы)')
+    def declarationName = declarationService.getType(sourceDeclarationTypeId)?.name
+    if (!declarationName) {
+        declarationName = (sourceDeclarationTypeId == declarationTypeId ? 'Декларация по НДС (раздел 9.1)' : 'Декларация по НДС (раздел 9 без консолид. формы)')
+    }
 
     // проверка декларации-источника «Декларация по НДС (раздел 9 без консолид. формы)» / «Декларация по НДС (раздел 9.1)»
     DeclarationData declarationData9 = getSourceDeclaration()
@@ -758,7 +732,10 @@ DeclarationData getSourceDeclaration() {
     if (declarationSource != null) {
         return declarationSource
     }
-    List<DepartmentReportPeriod> departmentReportPeriods = getDepartmentReportPeriods(declarationData.reportPeriodId, bankDepartmentId)
+    DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter()
+    filter.setDepartmentIdList([bankDepartmentId])
+    filter.setReportPeriodIdList([declarationData.reportPeriodId])
+    List<DepartmentReportPeriod> departmentReportPeriods = departmentReportPeriodService.getListByFilter(filter)
     def correctionNumber = getCorrectionNumber(declarationData.departmentReportPeriodId)
     if (correctionNumber == 1) {
         // декларация по НДС (раздел 9 без консолид. формы)

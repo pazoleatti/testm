@@ -210,12 +210,12 @@ public class PeriodServiceImpl implements PeriodService {
         for (FormData fd : formDataList) {
             Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(fd.getId());
             if (lockType != null) {
-                logs.add(new LogEntry(LogLevel.WARNING,
+                logs.add(new LogEntry(LogLevel.ERROR,
                         "Форма " + fd.getFormType().getName() +
                                 " " + fd.getKind().getTitle() +
                                 " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
                                 " заблокирована пользователем " + userService.getUser(lockType.getSecond().getUserId()).getName() +
-                                "(запущена операция \"" + formDataService.getTaskName(lockType.getFirst(), fd.getId(), userService.getSystemUserInfo()) +"\")")
+                                " (запущена операция \"" + formDataService.getTaskName(lockType.getFirst(), fd.getId(), userService.getSystemUserInfo()) +"\")")
                 );
                 allGood = false;
             }

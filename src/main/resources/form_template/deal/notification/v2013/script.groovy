@@ -307,7 +307,7 @@ void generateXML() {
                                 organInfo = getRefBookValue(70, map.ORGANIZATION.referenceValue)?.CODE?.numberValue
                                 organName = map?.NAME?.stringValue
                                 organINN = map?.INN_KIO?.stringValue
-                                organKPP = map?.KPP?.numberValue
+                                organKPP = map?.KPP?.stringValue
                             }
                             organRegNum = row.organRegNum
                             taxpayerCode = row.taxpayerCode

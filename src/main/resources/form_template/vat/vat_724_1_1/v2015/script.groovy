@@ -1,6 +1,5 @@
 package form_template.vat.vat_724_1_1.v2015
 
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
@@ -12,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
-import org.apache.commons.lang3.StringUtils
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 import javax.xml.stream.XMLStreamReader
@@ -295,9 +294,7 @@ void checkFillDeclarationMap(boolean showMessages) {
             continue
         }
         def periodType = getRefBookValue(8, row.period)
-        if (!periodNames.contains(periodType?.NAME?.stringValue)) {
-            return
-        } else {
+        if (periodNames.contains(periodType?.NAME?.stringValue)) {
             if (row.getIndex() < head8Index) {
                 if (!periodTypesSale.contains(periodType)) {
                     periodTypesSale.add(periodType)
@@ -631,8 +628,7 @@ def getDeclarationAddValue(def periodTypeId, def rowAlias, def columnAlias) {
     if (declaration == null) {
         return BigDecimal.ZERO
     }
-    def declarationTemplateDao = declarationService.declarationTemplateDao
-    def declarationTypeId = declarationTemplateDao.get(declaration.declarationTemplateId).type.id as String
+    def declarationTypeId = declarationService.getTemplate(declaration.declarationTemplateId)?.type?.id as String
     def declTypeAttrMap = complexCalcMap[rowAlias][columnAlias]
     def addValueString = getDeclarationXmlAttr(declaration, declTypeAttrMap[declarationTypeId][0], declTypeAttrMap[declarationTypeId][1])
     return addValueString ? new BigDecimal(addValueString) : BigDecimal.ZERO
@@ -1266,12 +1262,13 @@ void compareSpecificTotalValues(def dataRows, def sectionMap) {
         def from = getDataRow(dataRows, fromAlias).getIndex()
         def to = (toAlias != 'head_10') ? (getDataRow(dataRows, toAlias).getIndex() - 1) : dataRows.size()
         def sectionRows = dataRows.subList(from, to).findAll{ row -> row.getAlias() == null || row.getAlias().startsWith("total_") }
-        checkItogRows(sectionRows, calcPeriodTotals, periodTotals, new GroupString() {
+        def fatal = formDataEvent != FormDataEvent.IMPORT
+        checkItogRows(sectionRows, calcPeriodTotals, periodTotals, groupColumns, logger, fatal, new ScriptUtils.GroupString() {
             @Override
             String getString(DataRow<Cell> row) {
                 return getRefBookValue(8, row.period)?.NAME?.stringValue
             }
-        }, new CheckGroupSum() {
+        }, new ScriptUtils.CheckGroupSum() {
             @Override
             String check(DataRow<Cell> row1, DataRow<Cell> row2) {
                 def columns
@@ -1286,6 +1283,14 @@ void compareSpecificTotalValues(def dataRows, def sectionMap) {
                     }
                 }
                 return null
+            }
+        }, new ScriptUtils.CheckDiffGroup() {
+            @Override
+            Boolean check(DataRow<Cell> row1, DataRow<Cell> row2, List<String> groupColumns) {
+                if (groupColumns.find{ row1[it] != null } == null) {
+                    return null // для строк с пустыми графами группировки не надо проверять итоги
+                }
+                return compareGroup(row1, row2)
             }
         })
     }
@@ -1342,82 +1347,10 @@ void compareSpecificTotalValues(def dataRows, def sectionMap) {
     }
 }
 
-// вынес метод в скрипт для правки проверок
-void checkItogRows(def dataRows, def testItogRows, def itogRows, GroupString groupString, CheckGroupSum checkGroupSum) {
-    def logLevel = formDataEvent == FormDataEvent.IMPORT ? LogLevel.WARNING : LogLevel.ERROR
-    // считает количество реальных групп данных
-    def groupCount = 0
-    // Итоговые строки были удалены
-    // Неитоговые строки были удалены
-    for (int i = 0; i < dataRows.size(); i++) {
-        DataRow<Cell> row = dataRows.get(i);
-        // строка или итог другой группы после строки без подитога между ними
-        if (i > 0) {
-            def prevRow = dataRows.get(i - 1)
-            if (prevRow.getAlias() == null && compareGroup(prevRow, row)) {
-                itogRows.add(groupCount, null)
-                groupCount++
-                String groupCols = groupString.getString(prevRow);
-                if (groupCols != null) {
-                    logger.log(logLevel, "Группа «%s» не имеет строки итога!", false, groupCols); // итога (не  подитога)
-                }
-            }
-        }
-        if (row.getAlias() != null) {
-            // итог после итога (или после строки из другой группы)
-            if (i < 1 || dataRows.get(i - 1).getAlias() != null || compareGroup(dataRows.get(i - 1), row)) {
-                rowLog(logger, row, String.format("Строка %d: Строка итога не относится к какой-либо группе!", row.getIndex()), logLevel); // итога (не  подитога)
-                // удаляем из проверяемых итогов строку без подчиненных строк
-                itogRows.remove(row)
-            } else {
-                groupCount++
-            }
-        } else {
-            // нефиксированная строка и отсутствует последний итог
-            if (i == dataRows.size() - 1) {
-                itogRows.add(groupCount, null)
-                groupCount++
-                String groupCols = groupString.getString(row);
-                if (groupCols != null) {
-                    rowLog(logger, row, String.format("Группа «%s» не имеет строки итога!", groupCols), logLevel); // итога (не  подитога)
-                }
-            }
-        }
-    }
-    if (testItogRows.size() == itogRows.size()) {
-        for (int i = 0; i < testItogRows.size(); i++) {
-            DataRow<Cell> testItogRow = testItogRows.get(i);
-            DataRow<Cell> realItogRow = itogRows.get(i);
-            if (realItogRow == null) {
-                continue
-            }
-            int rowIndex = dataRows.indexOf(realItogRow) - 1
-            def row = dataRows.get(rowIndex)
-            String groupCols = groupString.getString(row);
-            if (groupCols != null) {
-                String checkStr = checkGroupSum.check(testItogRow, realItogRow);
-                if (checkStr != null) {
-                    rowLog(logger, realItogRow, String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr), logLevel);
-                }
-            }
-        }
-    }
-}
-
 boolean compareGroup(def rowA, def rowB) {
-    def periodA = (rowA.getAlias() != null) ? rowA.fix?.replace('Итого за ','') : getValuesByGroupColumn(rowA)
-    def periodB = (rowB.getAlias() != null) ? rowB.fix?.replace('Итого за ','') : getValuesByGroupColumn(rowB)
+    def periodA = (rowA.getAlias() != null) ? rowA.fix?.replace('Итого за ','') : getRefBookValue(8, rowA.period)?.NAME?.stringValue
+    def periodB = (rowB.getAlias() != null) ? rowB.fix?.replace('Итого за ','') : getRefBookValue(8, rowB.period)?.NAME?.stringValue
     return periodA != periodB
-}
-
-// Возвращает строку со значениями полей строки по которым идет группировка
-String getValuesByGroupColumn(DataRow row) {
-    def value
-    // графа 12
-    if (row?.period) {
-        value = getRefBookValue(8, row.period)?.NAME?.stringValue
-    }
-    return value
 }
 
 def DepartmentReportPeriod getLastDepartmentReportPeriod(def departmentId, def reportPeriodId) {

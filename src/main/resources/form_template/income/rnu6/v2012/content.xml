@@ -4,14 +4,13 @@
     <name>(РНУ-6) Регистр налогового учёта для отражения доходов, учитываемых в РНУ-4, учет которых требует применения метода начисления</name>
     <fullName>(РНУ-6) Регистр налогового учёта для отражения доходов, учитываемых в РНУ-4, учет которых требует применения метода начисления</fullName>
     <header>852-6</header>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>number</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>helper</alias>

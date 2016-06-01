@@ -39,7 +39,7 @@ public class ClosePeriodHandler extends AbstractActionHandler<ClosePeriodAction,
 		List<LogEntry> logs = new ArrayList<LogEntry>();
 		reportPeriodService.close(action.getTaxType(), action.getDepartmentReportPeriodId(), logs, securityService.currentUserInfo());
 		ClosePeriodResult result = new ClosePeriodResult();
-        if (!logs.isEmpty() && logs.get(0).getLevel().equals(LogLevel.WARNING)) {
+        if (!logs.isEmpty() && logs.get(0).getLevel().equals(LogLevel.ERROR)) {
             result.setErrorBeforeClose(true);
         }
         result.setUuid(logEntryService.save(logs));

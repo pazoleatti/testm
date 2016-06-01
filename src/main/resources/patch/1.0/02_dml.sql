@@ -50,9 +50,3 @@ when matched then
 	
 commit;
 exit;
-
---https://jira.aplana.com/browse/SBRFACCTAX-15616
---Нужно применять при обновлении макета FORM_TEMPLATE_ID = 842 ("РНУ 115. Регистр налогового учёта доходов и расходов, возникающих в связи с применением в сделках с драгоценными металлами с Взаимозависимыми лицами и резидентами оффшорных зон курса, не соответствующего рыночному уровню")
-UPDATE form_data_row
-SET c10=c10*10+1, c12=c12*10+1
-WHERE form_data_id IN (SELECT id FROM form_data WHERE form_template_id=842);

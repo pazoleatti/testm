@@ -11,9 +11,11 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookUiTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.dispatch.shared.DispatchRequest;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
+import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
 
 import java.util.*;
 
@@ -29,6 +31,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     private PickerState ps;
     private boolean isNeedSelectFirstItem = false;
+    private DispatchRequest dispatchRequest;
 
     public interface MyView extends View, HasUiHandlers<RefBookTreePickerUiHandlers> {
 
@@ -99,11 +102,11 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
             return;
         }
 
-        dispatcher.execute(createLoadAction(null, null), CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookTreeValuesResult>() {
+        dispatchRequest = dispatcher.execute(createLoadAction(null, null), CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookTreeValuesResult>() {
             @Override
             public void onSuccess(GetRefBookTreeValuesResult result) {
                 getView().loadRoot(result.getPage(), false);
-                if(isNeedSelectFirstItem && !result.getPage().isEmpty()){
+                if (isNeedSelectFirstItem && !result.getPage().isEmpty()) {
                     isNeedSelectFirstItem = false;
                     ps.getSetIds().clear();
                     ps.getSetIds().add(result.getPage().get(0).getId());
@@ -157,7 +160,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         if (ps.getPickerContext() != null) {
             action.setFormDataId(ps.getPickerContext().getFormDataId());
         }
-        dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
+        dispatchRequest = dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
                 new AbstractCallback<GetRefBookTreeValuesResult>() {
                     @Override
                     public void onSuccess(GetRefBookTreeValuesResult result) {
@@ -209,7 +212,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         action.setRefBookAttrId(ps.getRefBookAttrId());
         action.setVersion(versionDate);
         action.setContext(ps.getPickerContext());
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetCountFilterValuesResult>() {
+        dispatchRequest = dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetCountFilterValuesResult>() {
             @Override
             public void onSuccess(GetCountFilterValuesResult result) {
                 checkValuesCountHandler.onGetValuesCount(result.getCount());
@@ -237,7 +240,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
             return;
         }
         RefBookTreeItem parent = uiTreeItem.getRefBookTreeItem();
-        dispatcher.execute(createLoadAction(parent, null), CallbackUtils.defaultCallback(
+        dispatchRequest = dispatcher.execute(createLoadAction(parent, null), CallbackUtils.defaultCallback(
                 new AbstractCallback<GetRefBookTreeValuesResult>() {
                     @Override
                     public void onSuccess(GetRefBookTreeValuesResult result) {
@@ -276,4 +279,12 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         return action;
     }
 
+    @Override
+    public void cancelRequest() {
+        if (dispatchRequest != null && dispatchRequest.isPending()) {
+            dispatchRequest.cancel();
+            LockInteractionEvent.fire(this, false);
+            dispatchRequest = null;
+        }
+    }
 }

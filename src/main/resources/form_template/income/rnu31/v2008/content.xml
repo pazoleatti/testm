@@ -51,9 +51,7 @@
         <checking>false</checking>
         <groupName>Ставка налога на прибыль. 15%.</groupName>
         <id>16743</id>
-        <name>Ставка налога на прибыль. 15%. Субфедеральные и муниципальные облигации, за исключением муниципальных
-            облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет
-        </name>
+        <name>Ставка налога на прибыль. 15%. Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет</name>
         <order>4</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -86,9 +84,7 @@
         <checking>false</checking>
         <groupName>Ставка налога на прибыль. 9%.</groupName>
         <id>16746</id>
-        <name>Ставка налога на прибыль. 9%. Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3
-            лет
-        </name>
+        <name>Ставка налога на прибыль. 9%. Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3 лет</name>
         <order>7</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -123,7 +119,7 @@
         <id>16749</id>
         <name>Ставка налога на прибыль 20%. Еврооблигации РФ</name>
         <order>10</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -134,7 +130,7 @@
         <id>16750</id>
         <name>Ставка налога на прибыль 20%. Прочие еврооблигации</name>
         <order>11</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -145,7 +141,7 @@
         <id>16751</id>
         <name>Ставка налога на прибыль 20%. Корпоративные облигации</name>
         <order>12</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

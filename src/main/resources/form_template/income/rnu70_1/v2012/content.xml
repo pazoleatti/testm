@@ -8,14 +8,13 @@
         договором срока погашения основного долга
     </fullName>
     <header>852-70.1</header>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
@@ -135,9 +134,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>perc</alias>
         <checking>false</checking>
-        <name>Проценты по долговому обязательству, рассчитанные с учётом ст. 269 НК РФ за период от даты уступки права
-            требования до даты платежа по договору
-        </name>
+        <name>Проценты по долговому обязательству, рассчитанные с учётом ст. 269 НК РФ за период от даты уступки права требования до даты платежа по договору</name>
         <order>15</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -146,9 +143,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>loss</alias>
         <checking>false</checking>
-        <name>Убыток, превышающий проценты по долговому обязательству, рассчитанные с учётом ст. 269 НК РФ за период от
-            даты уступки права требования до даты платежа по договору
-        </name>
+        <name>Убыток, превышающий проценты по долговому обязательству, рассчитанные с учётом ст. 269 НК РФ за период от даты уступки права требования до даты платежа по договору</name>
         <order>16</order>
         <width>10</width>
         <maxLength>17</maxLength>

@@ -38,9 +38,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>municipalBonds</alias>
         <checking>false</checking>
-        <name>Ставка налога на прибыль 15%. Субфедеральные и муниципальные облигации, за исключением муниципальных
-            облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет
-        </name>
+        <name>Ставка налога на прибыль 15%. Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет</name>
         <order>4</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -67,9 +65,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>municipalBondsBefore</alias>
         <checking>false</checking>
-        <name>Ставка налога на прибыль 9%. Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3
-            лет
-        </name>
+        <name>Ставка налога на прибыль 9%. Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3 лет</name>
         <order>7</order>
         <width>10</width>
         <maxLength>17</maxLength>

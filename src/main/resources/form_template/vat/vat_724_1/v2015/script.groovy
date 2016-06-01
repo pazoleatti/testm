@@ -491,7 +491,7 @@ void sortFormDataRows(def saveInDB = true) {
         def lastRow = getDataRow(dataRows, getLastRowAlias(section))
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
-        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+        def sectionsRows = (from < to ? dataRows.subList(from, to) : [])
 
         if (!isGroups) {
             // Массовое разыменование строк НФ
@@ -539,17 +539,8 @@ void sortFormDataRows(def saveInDB = true) {
     }
 }
 
-// TODO (SBRFACCTAX-15074) убрать
-void checkTFLocal(BufferedInputStream inputStream, String fileName) {
-    checkBeforeGetXml(inputStream, fileName);
-    if (fileName != null && !fileName.toLowerCase().endsWith(".rnu")) {
-        throw new ServiceException("Выбранный файл не соответствует формату rnu!");
-    }
-}
-
 void importTransportData() {
-    // TODO (SBRFACCTAX-15074) заменить на "ScriptUtils.checkTF(ImportInputStream, UploadFileName)"
-    checkTFLocal(ImportInputStream, UploadFileName)
+    checkTF(ImportInputStream, UploadFileName)
 
     int COLUMN_COUNT = 9
     def DEFAULT_CHARSET = "cp866"

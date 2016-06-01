@@ -352,7 +352,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         if (event.getValue().compareTo(NumericColumn.MAX_LENGTH) > 0){
             numericMaxLengthBox.setValue(NumericColumn.MAX_LENGTH);
         }
-		if (event.getValue() + precisionBox.getValue() > NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION) {
+		if (event.getValue() - precisionBox.getValue() > NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION) {
 			numericMaxLengthBox.setValue(NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION + precisionBox.getValue());
 		}
 		setNumValueRestrictions(numericMaxLengthBox.getValue(), precisionBox.getValue());

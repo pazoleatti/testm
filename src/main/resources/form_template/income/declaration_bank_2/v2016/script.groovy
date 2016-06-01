@@ -1582,25 +1582,22 @@ void createSpecificReportNoApp2() {
 def entryFileNameList = []
 
 void createSpecificReportApp2() {
-    // Отчётный период.
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-
-    // Приложение №2 должно формироваться только в случае если текущий экземпляр декларации относится к периоду «год»
-    if (reportPeriod.order != 4) {
-        logger.error("Невозможно сформировать отчет для текущего отчетного периода! Допустимый отчетный период: \"год\"") // TODO не утверждено. проверить как проработают в чтз
-        return
-    }
-
     boolean endCert = false
 
-    File xmlFile = File.createTempFile(scriptSpecificReportHolder.fileName, ".xml", new File(System.getProperty("java.io.tmpdir")));
+    File xmlFile
     FileWriter fileWriter = null
-    ZipArchiveOutputStream zos = new ZipArchiveOutputStream(scriptSpecificReportHolder.getFileOutputStream());
-    def jrxml = getJrxml(scriptSpecificReportHolder.getFileInputStream())
+    ZipArchiveOutputStream zos
     try {
         def groupedRowsApp2 = [:]
         // получил строки и расгруппировал их в карту
         def dataRowsApp2 = getDataRowsApp2(groupedRowsApp2)
+        if (dataRowsApp2 == null || dataRowsApp2.isEmpty()) {
+            return
+        }
+
+        xmlFile = File.createTempFile(scriptSpecificReportHolder.fileName, ".xml", new File(System.getProperty("java.io.tmpdir")));
+        zos = new ZipArchiveOutputStream(scriptSpecificReportHolder.getFileOutputStream());
+        def jrxml = getJrxml(scriptSpecificReportHolder.getFileInputStream())
         def firstCertNum = 0
         def startNumber = 0
         while (!endCert) {
@@ -1645,8 +1642,8 @@ void createSpecificReportApp2() {
         }
         scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name + ".zip")
     } finally {
-        xmlFile.delete()
-        zos.close()
+        xmlFile?.delete()
+        zos?.close()
     }
 }
 
@@ -1664,6 +1661,12 @@ String getJrxml(def jrxmlInputStream) {
 def getDataRowsApp2(def groupsApp2) {
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
 
+    if (formDataCollection.records.find { [415, 418].contains(it.getFormType().getId()) } == null ) {
+        logger.error("Формирование отчета невозможно, т.к. отсутствует форма-источник «%s»/«%s» в статусе «Принята»!",
+                formTypeService.get(415)?.name, formTypeService.get(418)?.name)
+        return null
+    }
+
     // Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
     def dataRowsApp2 = getDataRows(formDataCollection, 415)
     isCFOApp2 = false
@@ -1675,7 +1678,7 @@ def getDataRowsApp2(def groupsApp2) {
         dataRowsApp2 = dataRowsApp2CFO
     } else if (dataRowsApp2CFO != null) {
         logger.warn("Неверно настроены источники декларации Банка! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Формирование спецотчета произведено из «%s».",
-                formTypeService.get(415).name, formTypeService.get(418)?.name, formTypeService.get(415)?.name)
+                formTypeService.get(415)?.name, formTypeService.get(418)?.name, formTypeService.get(415)?.name)
     }
     // сортируем по ФИО, потом по остальным полям
     if (isCFOApp2 && dataRowsApp2 != null) {
@@ -1688,6 +1691,8 @@ def getDataRowsApp2(def groupsApp2) {
         if (isCFOApp2) {
             groupRows(dataRowsApp2, groupsApp2)
         }
+    } else {
+        logger.error("Формирование отчета невозможно, т.к. нет данных в форме-источнике «%s»!", formTypeService.get(isCFOApp2 ? 418 : 415)?.name)
     }
     return dataRowsApp2
 }
@@ -1771,7 +1776,7 @@ def generateXMLApp2(def xmlInputStream, def dataRowsApp2, def groupedRowsApp2, d
                         generateApp2Paging(builder, rows, certNumber, dataSprav, type)
                     }
                     // кончились справки
-                    if (certNumber != firstCertNum) {
+                    if (certNumber != firstCertNum || certNumber == 0) {
                         endCert = true
                     }
                 }

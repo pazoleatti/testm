@@ -10,14 +10,13 @@
         резидентов оффшорных зон
     </fullName>
     <header>852-71.2</header>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
@@ -144,9 +143,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>lossThisTaxPeriod</alias>
         <checking>false</checking>
-        <name>Убыток, относящийся к расходам текущего отчётного (налогового) периода, но полученный в предыдущем
-            квартале
-        </name>
+        <name>Убыток, относящийся к расходам текущего отчётного (налогового) периода, но полученный в предыдущем квартале</name>
         <order>16</order>
         <width>12</width>
         <maxLength>17</maxLength>
@@ -173,9 +170,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>correctThisPrev</alias>
         <checking>false</checking>
-        <name>Корректировка финансового результата в отношении убытка, относящегося к расходам текущего налогового
-            периода, но полученного в предыдущем налоговом периоде
-        </name>
+        <name>Корректировка финансового результата в отношении убытка, относящегося к расходам текущего налогового периода, но полученного в предыдущем налоговом периоде</name>
         <order>19</order>
         <width>12</width>
         <maxLength>17</maxLength>
@@ -184,9 +179,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>correctThisThis</alias>
         <checking>false</checking>
-        <name>Корректировка финансового результата в отношении убытка, относящегося к расходам текущего налогового
-            периода и полученного в текущем налоговом периоде (прибыли, полученной в текущем налоговом периоде)
-        </name>
+        <name>Корректировка финансового результата в отношении убытка, относящегося к расходам текущего налогового периода и полученного в текущем налоговом периоде (прибыли, полученной в текущем налоговом периоде)</name>
         <order>20</order>
         <width>20</width>
         <maxLength>17</maxLength>
@@ -195,9 +188,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>correctThisNext</alias>
         <checking>false</checking>
-        <name>Корректировка финансового результата в отношении убытка, относящегося полученного в текущем налоговом
-            периоде, но относящегося к расходам следующего налогового периода
-        </name>
+        <name>Корректировка финансового результата в отношении убытка, относящегося полученного в текущем налоговом периоде, но относящегося к расходам следующего налогового периода</name>
         <order>21</order>
         <width>12</width>
         <maxLength>17</maxLength>

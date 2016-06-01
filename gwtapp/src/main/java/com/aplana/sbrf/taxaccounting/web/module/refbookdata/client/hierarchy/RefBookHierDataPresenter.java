@@ -119,6 +119,8 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         void clearFilterInputBox();
 
         void searchButtonClicked(Date relevanceDate);
+
+        void cancelRequest();
     }
 
     @Inject
@@ -162,6 +164,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     @Override
     protected void onHide() {
         super.onHide();
+        getView().cancelRequest();
         /*clearSlot(TYPE_editFormPresenter);*/
     }
 

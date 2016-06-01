@@ -1,6 +1,5 @@
 package form_template.vat.declaration_8_1.v2015
 
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -12,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
-import org.apache.commons.lang3.StringUtils
 
 import javax.xml.stream.XMLStreamReader
 

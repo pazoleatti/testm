@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -73,7 +72,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
         if (!action.isForce()) {
             Logger localLogger = new Logger();
             List<TransportFileInfo> files = loadRefBookDataService.getRefBookTransportDataFiles(userInfo, localLogger);
-            files.addAll(loadFormDataService.getFormDataFiles(userInfo, loadFormDataService.getTB(userInfo, localLogger), null, localLogger));
+            files.addAll(loadFormDataService.getFormDataFiles(userInfo, localLogger));
             if (files.isEmpty()) {
                 logger.error("Нет файлов для обработки");
                 result.setDialogMsg(String.format("Выполнение операции \"%s\" невозможно, т.к. нет файлов для обработки!", reportType.getDescription()));

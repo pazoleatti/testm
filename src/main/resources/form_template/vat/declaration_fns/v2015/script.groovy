@@ -8,13 +8,8 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 import org.apache.commons.collections.map.HashedMap
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
-
-import java.sql.Connection
-import java.sql.ResultSet
 
 import javax.xml.stream.XMLStreamReader
-import java.sql.Statement
 
 /**
  * Декларация по НДС (раздел 1-7)
@@ -1785,11 +1780,16 @@ def formData724_1_1 = null
 /** Получить строки источника 724.1.1 (форма должна быть только в корректирующем периоде). */
 def getFormData724_1_1() {
     if (formData724_1_1 == null) {
-        def formData = getFormData(formType_724_1_1, FormDataKind.CONSOLIDATED, bankDepartmentId, getPeriod4Id())
-        def correctionDate = (formData ? getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate : null)
-        // период только корректирующий
-        if (formData && formData.state == WorkflowState.ACCEPTED && correctionDate) {
-            formData724_1_1 = formData
+        def formData = null
+        if (getPeriod4Id() != null) {
+            formData = formDataService.getLast(formType_724_1_1, FormDataKind.CONSOLIDATED, bankDepartmentId, getPeriod4Id(), null, null, false)
+        }
+        if (formData != null) {
+            def correctionDate = getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate
+            // период только корректирующий
+            if (formData.state == WorkflowState.ACCEPTED && correctionDate) {
+                formData724_1_1 = formData
+            }
         }
     }
     return formData724_1_1

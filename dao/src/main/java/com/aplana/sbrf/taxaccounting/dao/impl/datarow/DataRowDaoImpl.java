@@ -199,7 +199,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         }
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 		// копирование спанов из одной НФ в другую
-		copySpan(formDataSource, formDataTarget, DataRowType.SAVED, DataRowType.AUTO);
+		copySpan(formDataSource, formDataTarget, DataRowType.AUTO, DataRowType.SAVED, DataRowType.AUTO);
 	}
 
 	@Override
@@ -421,7 +421,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param temporary тип среза, откуда и куда копируются данные
 	 * @param targetManual в какую версию ввода копировать данные (авто или ручную)
 	 */
-	void copySpan(FormData formDataSource, FormData formDataTarget, DataRowType temporary, DataRowType targetManual) {
+	void copySpan(FormData formDataSource, FormData formDataTarget, DataRowType sourcetManual, DataRowType temporary, DataRowType targetManual) {
 		if (temporary != DataRowType.SAVED && temporary != DataRowType.TEMP) {
 			throw new IllegalArgumentException("Wrong value of 'temporary' argument");
 		}
@@ -434,7 +434,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		rowParams.put("form_data_id_target", formDataTarget.getId());
 		rowParams.put("temporary_source", DataRowType.SAVED.getCode());
 		rowParams.put("temporary_target", temporary.getCode());
-		rowParams.put("manual_source", DataRowType.AUTO.getCode());
+		rowParams.put("manual_source", sourcetManual.getCode());
 		rowParams.put("manual_target", targetManual.getCode());
 		getNamedParameterJdbcTemplate().update(SQL_COPY_SPAN, rowParams);
 	}
@@ -748,7 +748,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 		// копирование спанов источника
-		copySpan(formData, formData, DataRowType.SAVED, DataRowType.MANUAL);
+		copySpan(formData, formData, DataRowType.AUTO, DataRowType.SAVED, DataRowType.MANUAL);
 	}
 
 	@Override
@@ -774,7 +774,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 		// копируем спаны в резервный срез
-		copySpan(formData, formData, DataRowType.TEMP, formData.isManual() ? DataRowType.MANUAL : DataRowType.AUTO);
+		copySpan(formData, formData, formData.isManual() ? DataRowType.MANUAL : DataRowType.AUTO, DataRowType.TEMP, formData.isManual() ? DataRowType.MANUAL : DataRowType.AUTO);
 	}
 
 	@Override

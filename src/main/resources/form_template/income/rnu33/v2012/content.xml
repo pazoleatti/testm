@@ -11,14 +11,13 @@
         ГКО
     </fullName>
     <header>1290-33</header>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
@@ -203,9 +202,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>parPaper</alias>
         <checking>false</checking>
-        <name>Показатели для расчёта процентного дохода за время владения сквитованными облигациями. Номинал одной
-            бумаги, руб.коп.
-        </name>
+        <name>Показатели для расчёта процентного дохода за время владения сквитованными облигациями. Номинал одной бумаги, руб.коп.</name>
         <order>22</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -214,9 +211,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>averageWeightedPricePaper</alias>
         <checking>false</checking>
-        <name>Показатели для расчёта процентного дохода за время владения сквитованными облигациями. Средневзвешенная
-            цена одной бумаги на дату размещения, руб.коп.
-        </name>
+        <name>Показатели для расчёта процентного дохода за время владения сквитованными облигациями. Средневзвешенная цена одной бумаги на дату размещения, руб.коп.</name>
         <order>23</order>
         <width>10</width>
         <maxLength>21</maxLength>
@@ -225,9 +220,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>issueDays</alias>
         <checking>false</checking>
-        <name>Показатели для расчёта процентного дохода за время владения сквитованными облигациями. Срок обращения
-            согласно условиям выпуска, дней
-        </name>
+        <name>Показатели для расчёта процентного дохода за время владения сквитованными облигациями. Срок обращения согласно условиям выпуска, дней</name>
         <order>24</order>
         <width>7</width>
         <maxLength>15</maxLength>
@@ -236,9 +229,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>tenureSkvitovannymiBonds</alias>
         <checking>false</checking>
-        <name>Показатели для расчёта процентного дохода за время владения сквитованными облигациями. Срок владения
-            сквитованными облигациями, дней
-        </name>
+        <name>Показатели для расчёта процентного дохода за время владения сквитованными облигациями. Срок владения сквитованными облигациями, дней</name>
         <order>25</order>
         <width>7</width>
         <maxLength>15</maxLength>

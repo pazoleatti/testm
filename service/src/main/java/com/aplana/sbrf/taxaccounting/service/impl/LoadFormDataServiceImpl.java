@@ -93,18 +93,19 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     private AsyncTaskTypeDao asyncTaskTypeDao;
 
     @Override
-    public ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList,
-                                        List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync) {
+    public ImportCounter importFormData(TAUserInfo userInfo, Map<Integer, List<TaxType>> departmentTaxMap, Logger logger, String lockId, boolean isAsync) {
         log(userInfo, LogData.L1, logger, lockId);
         ImportCounter importCounter = new ImportCounter();
-        if (departmentIdList != null) {
+        List<Integer> departmentIdList = new ArrayList<Integer>();
+        departmentIdList.addAll(departmentTaxMap.keySet());
+        if (!departmentIdList.isEmpty()) {
             // По каталогам загрузки ТБ
             List<Integer> tbList = departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode());
             for (Object departmentIdObj : CollectionUtils.intersection(departmentIdList, tbList)) {
                 int departmentId = (Integer) departmentIdObj;
+                List<TaxType> taxTypeList = departmentTaxMap.get(departmentId);
                 try {
-                    importCounter.add(importDataFromFolder(userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId,
-                            loadedFileNameList, logger, lockId, isAsync));
+                    importCounter.add(importDataFromFolder(userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId, taxTypeList, logger, lockId, isAsync));
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                     logger.error("Ошибка при загрузке транспортных файлов подразделения «%s». %s", departmentService.getDepartment(departmentId).getName(), e.getMessage());
@@ -116,73 +117,84 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     }
 
     @Override
-    public List<TransportFileInfo> getFormDataFiles(TAUserInfo userInfo, List<Integer> departmentIdList,
-                                        List<String> loadedFileNameList, Logger logger) {
+    public List<TransportFileInfo> getFormDataFiles(TAUserInfo userInfo, Logger logger) {
         List<TransportFileInfo> fileList = new ArrayList<TransportFileInfo>();
-        if (departmentIdList != null) {
-            // По каталогам загрузки ТБ
-            List<Integer> tbList = departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode());
-            for (Object departmentIdObj : CollectionUtils.intersection(departmentIdList, tbList)) {
-                int departmentId = (Integer) departmentIdObj;
-                try {
-                    getFormDataTBFiles(fileList, userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId,
-                            loadedFileNameList, logger, "");
-                } catch (Exception e) {
-                }
+        Map<Integer, List<TaxType>> departmentTaxMap = getTB(userInfo, logger);
+        List<Integer> departmentIdList = new ArrayList<Integer>();
+        departmentIdList.addAll(departmentTaxMap.keySet());
+        // По каталогам загрузки ТБ
+        for (Integer departmentId : departmentIdList) {
+            try {
+                getFormDataTBFiles(fileList, userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId, departmentTaxMap.get(departmentId), logger, "");
+            } catch (Exception e) {
             }
         }
         return fileList;
     }
 
     @Override
-    public List<Integer> getTB(TAUserInfo userInfo, Logger logger) {
-        // Выборка подразделений http://conf.aplana.com/pages/viewpage.action?pageId=13111363
-        List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                Arrays.asList(TaxType.values()), null, null);
-
+    public Map<Integer, List<TaxType>> getTB(TAUserInfo userInfo, Logger logger) {
+        Map<Integer, List<TaxType>> departmentTaxMap = new HashMap<Integer, List<TaxType>>();
         List<Department> departmentTBList = new LinkedList<Department>();
-        if (departmentList != null) {
-            Collection<Department> departments = departmentService.getRequiredForTreeDepartments(
-                    new HashSet(departmentList)).values();
-            for (Department department : departments) {
-                if (department.getType() == DepartmentType.TERR_BANK) {
-                    departmentTBList.add(department);
+        for (TaxType taxType : TaxType.values()) {
+            // Выборка подразделений http://conf.aplana.com/pages/viewpage.action?pageId=13111363
+            List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(), Collections.singletonList(taxType), null, null);
+
+            List<Integer> departmentTBIdList = new LinkedList<Integer>();
+            if (departmentList != null) {
+                Collection<Department> departments = departmentService.getRequiredForTreeDepartments(new HashSet(departmentList)).values();
+                for (Department department : departments) {
+                    if (department.getType() == DepartmentType.TERR_BANK) {
+                        departmentTBIdList.add(department.getId());
+                        if (departmentTaxMap.get(department.getId()) == null) {
+                            departmentTBList.add(department);
+                        }
+                    }
                 }
             }
-        }
 
-        List<Integer> departmentTBIdList = new ArrayList<Integer>(departmentTBList.size());
+            for (Integer departmentId : departmentTBIdList) {
+                if (departmentTaxMap.get(departmentId) == null) {
+                    departmentTaxMap.put(departmentId, new ArrayList<TaxType>());
+                }
+                departmentTaxMap.get(departmentId).add(taxType);
+            }
+
+        }
 
         if (departmentTBList.isEmpty()) {
             logger.info("Не определено доступных для пользователя ТБ.");
         }
 
         if (departmentTBList.size() == 1) {
-            departmentTBIdList.add( departmentTBList.get(0).getId());
             logger.info("Определен доступный для пользователя ТБ: «%s».", departmentTBList.get(0).getName());
         }
 
         if (departmentTBList.size() > 1) {
             List<String> names = new ArrayList<String>(departmentTBList.size());
             for (Department department : departmentTBList) {
-                departmentTBIdList.add(department.getId());
                 names.add("«" + department.getName() + "»");
             }
             logger.info("Определены доступные для пользователя ТБ: %s.", StringUtils.join(names, ", "));
         }
-        return departmentTBIdList;
+
+        return departmentTaxMap;
     }
 
     @Override
     public ImportCounter importFormData(TAUserInfo userInfo, Logger logger, String lock, boolean isAsync) {
-        return importFormData(userInfo, departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode()), null, logger, lock, isAsync);
+        Map<Integer, List<TaxType>> departmentTaxMap = new HashMap<Integer, List<TaxType>>();
+        for (Integer depId : departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode())) {
+            departmentTaxMap.put(depId, Arrays.asList(TaxType.values()));
+        }
+        return importFormData(userInfo, departmentTaxMap, logger, lock, isAsync);
     }
 
     /**
      * Загрузка всех ТФ НФ из указанного каталога загрузки
      */
     private ImportCounter importDataFromFolder(TAUserInfo userInfo, ConfigurationParam param, Integer departmentId,
-                                               List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync) {
+                                               List<TaxType> taxTypeList, Logger logger, String lockId, boolean isAsync) {
         String path = getUploadPath(userInfo, param, departmentId, logger, lockId);
         if (path == null) {
             // Ошибка получения пути
@@ -213,12 +225,14 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             return wrongImportCounter;
         }
 
-        // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-        List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, loadedFileNameList, logger, wrongImportCounter, lockId, true);
+        // 5. Система проверяет каталог загрузки ТБ на наличие в нем ТФ, к которым пользователь-инициатор имеет доступ
+        List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, taxTypeList, logger, wrongImportCounter, lockId);
         if (workFilesList.isEmpty()) {
-            if (wrongImportCounter.getFailCounter() == 0) log(userInfo, LogData.L3, logger, lockId, departmentName);
+            //if (wrongImportCounter.getFailCounter() == 0) log(userInfo, LogData.L3, logger, lockId, departmentName); до 1.0
             return wrongImportCounter;
         }
+        // 6. Система создает запись о начале загрузки из каталога ТБ (вариант текста 52) в: Журнале аудита и "логгере".
+        log(userInfo, LogData.L52, logger, lockId, departmentName);
 
         long maxFileSize = 0;
         if (isAsync) {
@@ -226,13 +240,16 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         }
         // Обработка всех подходящих файлов, с получением списка на каждой итерации
         for (String fileName : workFilesList) {
+            if (ignoreFileSet.contains(fileName)) {
+                continue;
+            }
             ignoreFileSet.add(fileName);
             FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
 
             if (maxFileSize != 0 && currentFile.length() / 1024 > maxFileSize) {
                 log(userInfo, LogData.L47, logger, lockId, fileName, currentFile.length() / 1024, path, maxFileSize);
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), lockId, fileName, path))), logger, lockId);
+                        Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), lockId, fileName, path))), logger, lockId);
                 fail++;
                 continue;
             }
@@ -259,7 +276,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 if (formType == null) {
                     log(userInfo, LogData.L6, logger, lockId, formCode);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), lockId, formCode))), logger, lockId);
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), lockId, formCode))), logger, lockId);
                     fail++;
                     continue;
                 }
@@ -280,7 +297,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     }
                     log(userInfo, LogData.L7, logger, lockId, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), lockId, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year))), logger, lockId);
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), lockId, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year))), logger, lockId);
                     fail++;
                     continue;
                 }
@@ -293,7 +310,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     // Если шаблона нет, то не загружаем ТФ
                     log(userInfo, LogData.L21, logger, lockId, e.getMessage());
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L21.getText(), lockId, e.getMessage()))), logger, lockId);
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L21.getText(), lockId, e.getMessage()))), logger, lockId);
                     fail++;
                     continue;
                 }
@@ -303,7 +320,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 if (!TAAbstractScriptingServiceImpl.canExecuteScript(formTemplate.getScript(), FormDataEvent.IMPORT_TRANSPORT_FILE)) {
                     log(userInfo, LogData.L48, logger, lockId, fileName);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L48.getText(), logger, lockId, fileName))), logger, lockId);
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L48.getText(), logger, lockId, fileName))), logger, lockId);
                     fail++;
                     continue;
                 }
@@ -316,12 +333,85 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
                     log(userInfo, LogData.L4, logger, lockId, fileName, path);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), lockId, fileName, path))), logger, lockId);
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), lockId, fileName, path))), logger, lockId);
                     fail++;
                     continue;
                 }
 
-                // ЭЦП
+                // Указан несуществующий код подразделения
+                if (formDepartment == null) {
+                    RefBook refBook = refBookDao.get(REF_BOOK_DEPARTMENT);
+                    log(userInfo, LogData.L5, logger, lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode);
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode))), logger, lockId);
+                    fail++;
+                    continue;
+                }
+
+                FormDataKind formDataKind = FormDataKind.PRIMARY;
+
+                // Назначение подразделению типа и вида НФ
+                boolean existedPrimaryAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY);
+                boolean existedAdditionalAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL);
+                // если нет назначения на первичную и выходную, то ошибка
+                if (!existedPrimaryAssigning && !existedAdditionalAssigning) {
+                    log(userInfo, LogData.L14, logger, lockId, formDepartment.getName(), formType.getName());
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L14.getText(),
+                                    lockId, formDepartment.getName(), formType.getName()))), logger, lockId);
+                    fail++;
+                    continue;
+                } else if (!existedPrimaryAssigning) {
+                    // иначе если нет назначения на первичную, то ищем выходную
+                    formDataKind = FormDataKind.ADDITIONAL;
+                }
+
+                // Последний отчетный период подразделения для указанного отчетного периода
+                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.getLast(formDepartment.getId(),
+                        reportPeriod.getId());
+
+                // Открытость периода
+                if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
+                    String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
+                    log(userInfo, LogData.L9, logger, lockId, formType.getName(), reportPeriodName);
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L9.getText(),
+                                    lockId, formType.getName(), reportPeriodName))), logger, lockId);
+                    fail++;
+                    continue;
+                }
+
+                // Поиск экземпляра НФ
+                FormData formData;
+
+                // Признак ежемесячной формы по файлу
+                boolean monthly = transportDataParam.getMonth() != null;
+
+                if (monthly != formTemplate.isMonthly()) {
+                    log(userInfo, LogData.L4, logger, lockId, fileName, path);
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), lockId, fileName, path))), logger, lockId);
+                    fail++;
+                    continue;
+                }
+
+                formData = formDataDao.find(formType.getId(), formDataKind, departmentReportPeriod.getId().intValue(),
+                        monthly ? transportDataParam.getMonth() : null,
+                        null, false);
+
+                // Экземпляр уже есть и не в статусе «Создана»
+                if (formData != null && formData.getState() != WorkflowState.CREATED) {
+                    // Сообщение об ошибке в общий лог и в файл со списком ошибок
+                    Logger localLogger = new Logger();
+                    localLogger.error(String.format(LogData.L17.getText(), lockId, formType.getName(), formDepartment.getName()));
+                    log(userInfo, LogData.L17, logger, lockId, formType.getName(), formDepartment.getName());
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
+                            localLogger.getEntries(), logger, lockId);
+                    fail++;
+                    continue;
+                }
+
+                // ЭП
                 List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
                 if (signList != null && !signList.isEmpty() && SignService.SIGN_CHECK.equals(signList.get(0))) {
                     Pair<Boolean, Set<String>> check = new Pair<Boolean, Set<String>>(false, new HashSet<String>());
@@ -357,90 +447,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                             getFileNamePart(transportDataParam.getMonth()));
                 }
 
-                // Указан несуществующий код подразделения
-                if (formDepartment == null) {
-                    RefBook refBook = refBookDao.get(REF_BOOK_DEPARTMENT);
-                    log(userInfo, LogData.L5, logger, lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode);
-                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode))), logger, lockId);
-                    fail++;
-                    continue;
-                }
-
-                FormDataKind formDataKind = FormDataKind.PRIMARY;
-
-                // Назначение подразделению типа и вида НФ
-                boolean existedPrimaryAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY);
-                boolean existedAdditionalAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL);
-                // если нет назначения на первичную и выходную, то ошибка
-                if (!existedPrimaryAssigning && !existedAdditionalAssigning) {
-                    log(userInfo, LogData.L14, logger, lockId, formDepartment.getName(), formType.getName());
-                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L14.getText(),
-                                    lockId, formDepartment.getName(), formType.getName()))), logger, lockId);
-                    fail++;
-                    continue;
-                } else if (!existedPrimaryAssigning) {
-                    // иначе если нет назначения на первичную, то ищем выходную
-                    formDataKind = FormDataKind.ADDITIONAL;
-                }
-
-                // Последний отчетный период подразделения для указанного отчетного периода
-                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.getLast(formDepartment.getId(),
-                        reportPeriod.getId());
-
-                // Открытость периода
-                if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
-                    String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
-                    log(userInfo, LogData.L9, logger, lockId, formType.getName(), reportPeriodName);
-                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L9.getText(),
-                                    lockId, formType.getName(), reportPeriodName))), logger, lockId);
-                    fail++;
-                    continue;
-                }
-
-                if (departmentReportPeriod.getCorrectionDate() != null) {
-                    String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
-                    log(userInfo, LogData.L8, logger, lockId, formType.getName(), reportPeriodName);
-                }
-
-                // Поиск экземпляра НФ
-                FormData formData;
-
-                // Признак ежемесячной формы по файлу
-                boolean monthly = transportDataParam.getMonth() != null;
-
-                if (monthly != formTemplate.isMonthly()) {
-                    log(userInfo, LogData.L4, logger, lockId, fileName, path);
-                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), lockId, fileName, path))), logger, lockId);
-                    fail++;
-                    continue;
-                }
-
-                formData = formDataDao.find(formType.getId(), formDataKind, departmentReportPeriod.getId().intValue(),
-                        monthly ? transportDataParam.getMonth() : null,
-                        null, false);
-
-                // Экземпляр уже есть и не в статусе «Создана»
-                if (formData != null && formData.getState() != WorkflowState.CREATED) {
-                    // Сообщение об ошибке в общий лог и в файл со списком ошибок
-                    Logger localLogger = new Logger();
-                    localLogger.error(String.format(LogData.L17.getText(), lockId, formType.getName(), formDepartment.getName()));
-                    log(userInfo, LogData.L17, logger, lockId, formType.getName(), formDepartment.getName());
-                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            localLogger.getEntries(), logger, lockId);
-                    fail++;
-                    continue;
-                }
-
-                // флаг того что форма уже создана
-                if (formData != null) {
-                    // 13А.1 Существует и имеет статус "Создана"
-                    log(userInfo, LogData.L13, logger, lockId);
-                }
-
                 // Загрузка данных в НФ (скрипт)
                 Logger localLogger = new Logger();
                 boolean result;
@@ -473,11 +479,12 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
         }
 
+        log(userInfo, LogData.L53, logger, lockId, departmentName);
         return new ImportCounter(success, fail + wrongImportCounter.getFailCounter());
     }
 
     private void getFormDataTBFiles(List<TransportFileInfo> fileList, TAUserInfo userInfo, ConfigurationParam param, Integer departmentId,
-                                               List<String> loadedFileNameList, Logger logger, String lockId) {
+                                    List<TaxType> taxTypes, Logger logger, String lockId) {
         String path = getUploadPath(userInfo, param, departmentId, logger, lockId);
         if (path == null) {
             // Ошибка получения пути
@@ -493,7 +500,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
 
         // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-        List<String> workFilesList = getWorkTransportFiles(userInfo, path, new HashSet<String>(), loadedFileNameList, logger, new ImportCounter(), lockId, false);
+        List<String> workFilesList = getWorkTransportFiles(userInfo, path, new HashSet<String>(), taxTypes, logger, new ImportCounter(), lockId);
         if (workFilesList.isEmpty()) {
             return;
         }
@@ -539,7 +546,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
             int formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(),
                     departmentReportPeriod.getReportPeriod().getId());
-            long formDataId = formDataService.createFormData(localLogger, userInfo, formTemplateId,
+            long formDataId = formDataService.createFormData(localLogger, userService.getSystemUserInfo(), formTemplateId,
                     departmentReportPeriod.getId(), null, false, formDataKind, month, true);
             formData = formDataDao.get(formDataId, false);
         } else {
@@ -553,7 +560,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                             lock, formDataService.getTaskName(reportType, formData.getId(), userInfo), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.get().format(lockType.getSecond().getDateLock()));
                     // Переносим файл в каталог ошибок
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, localLogger, lock), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), lock, ""))), localLogger, lock);
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), lock, ""))), localLogger, lock);
                     return false;
                 }
             }
@@ -604,11 +611,15 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
             Department formDepartment = departmentDao.getDepartment(departmentReportPeriod.getDepartmentId());
 
-            // 16 если форма не была создана
+            // 22-23 если форма не была создана
             if (!formWasCreated) {
                 log(userInfo, LogData.L18, localLogger, lock, formDataKind.getTitle(), formType.getName(), formDepartment.getName(), reportPeriodName);
             } else {
-                // 13А.2 НФ корректно заполнена значениями из ТФ.
+                log(userInfo, LogData.L13, localLogger, lock);
+                if (departmentReportPeriod.getCorrectionDate() != null) {
+                    log(userInfo, LogData.L8, localLogger, lock, formType.getName(), reportPeriodName);
+                }
+                // 22Б.2 НФ корректно заполнена значениями из ТФ.
                 log(userInfo, LogData.L19, localLogger, lock, formDataKind.getTitle(), formType.getName(), formDepartment.getName(), reportPeriodName);
             }
             // 17 Перенос в архив
@@ -620,7 +631,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             } else {
                 // Если в архив не удалось перенести, то пытаемся перенести в каталог ошибок
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, localLogger, lock), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), lock, ""))), localLogger, lock);
+                        Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), lock, ""))), localLogger, lock);
             }
         } finally {
             // Снимаем блокировку
@@ -686,7 +697,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
     private List<String> getWorkTransportFiles(TAUserInfo userInfo, String folderPath, Set<String> ignoreFileSet,
-                                               List<String> loadedFileNameList, Logger logger, ImportCounter wrongImportCounter, String lock, boolean validateFileName) {
+                                               List<TaxType> taxTypeList, Logger logger, ImportCounter wrongImportCounter, String lock) {
         List<String> retVal = new LinkedList<String>();
         FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath + "/");
         for (String candidateStr : catalogFile.list()) {
@@ -694,16 +705,14 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 continue;
             }
 
-            if (loadedFileNameList != null && !loadedFileNameList.contains(candidateStr)) {
-                // Если задан список определенных имен, а имя не из списка, то не загружаем такой файл
-                continue;
-            }
-
             // Это файл, а не директория и соответствует формату имени ТФ
             FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + "/" + candidateStr);
             if (candidateFile.isFile()) {
-                if (!validateFileName || TransportDataParam.isValidName(candidateStr)) {
-                    retVal.add(candidateStr);
+                if (TransportDataParam.isValidName(candidateStr)) {
+                    FormType formType = formTypeService.getByCode(TransportDataParam.valueOf(candidateStr).getFormCode());
+                    if (formType == null || taxTypeList.contains(formType.getTaxType())) {
+                            retVal.add(candidateStr);
+                    }
                 } else {
                     log(userInfo, LogData.L4, logger, lock, candidateStr, folderPath);
                     wrongImportCounter.add(new ImportCounter(0, 1));

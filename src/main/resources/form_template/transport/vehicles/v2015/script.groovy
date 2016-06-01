@@ -373,7 +373,7 @@ def logicCheck() {
         }
 
         if (row.share != null) {
-            def columnName = row.getCell('share').column.shortName
+            def columnName = getColumnTitle(row, 'share')
             if (!(row.share ==~ /\d{1,10}\/\d{1,10}/)) {
                 loggerError(row, errorMsg + "Графа «$columnName» должна быть заполнена согласно формату «(от 1 до 10 знаков)/(от 1 до 10 знаков)»!")
             } else {
@@ -386,7 +386,7 @@ def logicCheck() {
 
         // 9. Проверка корректности заполнения «Графы 15»
         if (row.pastYear != calc15(row, reportPeriod.taxPeriod.year)) {
-            def columnName = getColumnName(row, 'pastYear')
+            def columnName = getColumnTitle(row, 'pastYear')
             loggerError(row, errorMsg + "Графа «$columnName» заполнена неверно!")
         }
 
@@ -415,7 +415,7 @@ def logicCheck() {
                     isError = (code != dictRegionCode) || !(taxBenefitCode in ["30200", "20200", "20210", "20220", "20230"])
                 }
                 if (isError) {
-                    def columnName = getColumnName(row, 'taxBenefitCode')
+                    def columnName = getColumnTitle(row, 'taxBenefitCode')
                     loggerError(row, errorMsg + "Графа «$columnName» заполнена неверно!")
                 }
             }
@@ -443,7 +443,7 @@ def logicCheck() {
 
         // 16. Проверка корректности заполнения «Графы 24»
         if (row.base != calc24(row)) {
-            def columnName = getColumnName(row, 'base')
+            def columnName = getColumnTitle(row, 'base')
             loggerError(row, errorMsg + "Графа «$columnName» заполнена неверно!")
         }
 
@@ -473,7 +473,7 @@ def logicCheck() {
                 }
             }
             if (hasError) {
-                def columnName = getColumnName(row, 'tsTypeCode')
+                def columnName = getColumnTitle(row, 'tsTypeCode')
                 loggerError(row, errorMsg + "Графа «$columnName» заполнена неверно!")
             }
         }
@@ -1093,7 +1093,7 @@ void sortFormDataRows(def saveInDB = true) {
         def firstRow = getDataRow(dataRows, section)
         def from = firstRow.getIndex()
         def to = getLastRowIndexInSection(dataRows, section)
-        def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
+        def sectionRows = (from < to ? dataRows.subList(from, to) : [])
 
         // Массовое разыменовывание граф НФ
         def columnNameList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
@@ -1573,4 +1573,19 @@ def getRegion(def record96Id) {
         return getRecord(4, filter, getReportPeriodEndDate())
     }
     return null
+}
+
+def getColumnTitle(def row, String alias) {
+    if (row == null || alias == null) {
+        return "";
+    }
+    def cell = row.getCell(alias);
+    if (cell == null) {
+        return "";
+    }
+    String name = cell.getColumn().getShortName();
+    if (name == null || name.isEmpty()) {
+        name = cell.getColumn().getName();
+    }
+    return name;
 }

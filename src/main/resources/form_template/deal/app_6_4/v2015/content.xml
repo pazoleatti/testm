@@ -55,7 +55,7 @@
         <refBookAttributeId>5204</refBookAttributeId>
         <refBookAttributeId2>50</refBookAttributeId2>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>serviceName</alias>
         <checking>false</checking>
         <name>Вид услуг</name>

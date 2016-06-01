@@ -42,9 +42,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sumTaxPeriodTotal</alias>
         <checking>false</checking>
-        <name>Сумма расходов в виде капитальных вложений, предусмотренных п. 9 ст. 258 НК РФ с начала налогового
-            периода
-        </name>
+        <name>Сумма расходов в виде капитальных вложений, предусмотренных п. 9 ст. 258 НК РФ с начала налогового периода</name>
         <order>4</order>
         <width>10</width>
         <maxLength>17</maxLength>

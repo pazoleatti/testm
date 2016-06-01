@@ -91,7 +91,7 @@
         <id>16698</id>
         <name>Расчётная величина резерва на предыдущую отчётную дату (руб.коп.)</name>
         <order>9</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -101,7 +101,7 @@
         <id>16699</id>
         <name>Стоимость по цене приобретения (руб.коп.)</name>
         <order>10</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -150,7 +150,7 @@
         <id>16704</id>
         <name>Стоимость по рыночной котировке (руб.коп.)</name>
         <order>15</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -160,7 +160,7 @@
         <id>16705</id>
         <name>Расчетная величина резерва на текущую отчётную дату (руб.коп.)</name>
         <order>16</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -170,7 +170,7 @@
         <id>16706</id>
         <name>Создание резерва (руб.коп.)</name>
         <order>17</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -180,7 +180,7 @@
         <id>16707</id>
         <name>Восстановление резерва (руб.коп.)</name>
         <order>18</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

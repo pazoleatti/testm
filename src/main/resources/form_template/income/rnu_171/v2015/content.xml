@@ -160,7 +160,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Корректировка финансового результата (руб. коп.)</name>
-        <order>20</order>
+        <order>16</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>

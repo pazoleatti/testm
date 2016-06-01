@@ -382,6 +382,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
         return new JrxmlFileExistEvent.JrxmlFileExistHandler() {
             @Override
             public void onJrxmlExist(final JrxmlFileExistEvent event) {
+                LockInteractionEvent.fire(DeclarationTemplateMainPresenter.this, false);
                 LogAddEvent.fire(DeclarationTemplateMainPresenter.this, event.getErrorUuid());
                 Dialog.confirmMessage("Загрузка jrxml файла", JRXML_INFO_MES,
                         new DialogHandler() {
