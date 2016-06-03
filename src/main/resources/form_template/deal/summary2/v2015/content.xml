@@ -490,7 +490,7 @@
         <columnType>NUMBER</columnType>
         <name>п. 130 &quot;Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.&quot;</name>
         <order>44</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -500,7 +500,7 @@
         <columnType>NUMBER</columnType>
         <name>п. 140 &quot;Итого стоимость без учета НДС, акцизов и пошлины, руб.&quot;</name>
         <order>45</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
