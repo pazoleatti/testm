@@ -559,7 +559,7 @@ def consolidation() {
                         departments.add(sDepartment)
 
                         if (alias != null && alias in groups) {
-                            def newRow = formNewRow(sRow)
+                            def newRow = formNewRow(sRow, source.formType.id, sDepartment.name)
                             dataRowsMap[alias].add(newRow)
                         }
                     }
@@ -593,7 +593,7 @@ def consolidation() {
     updateIndexes(dataRows)
 }
 
-def formNewRow(def sRow) {
+def formNewRow(def sRow, sFormTypeId, sDepartmentName) {
 // новая строка
     def newRow = formData.createDataRow()
     editableColumns.each {
@@ -672,7 +672,12 @@ def formNewRow(def sRow) {
         def records = getProvider(209L).getRecords(getReportPeriodEndDate(), null, filter, null)
         if (records.size() == 0) {
             // "Категории средней стоимости транспортных средств"
-            logger.error("Для средней стоимости ${getRefBookValue(211, avgPriceRecord.AVG_COST.value).NAME.value} нет данных в справочнике «Повышающие коэффициенты транспортного налога»!")
+            def sourceName = getFormType(sFormTypeId)?.name
+            def rowIndex = sRow.getIndex()
+            def value = getRefBookValue(211, avgPriceRecord.AVG_COST.value).NAME.value
+            def msg = "Форма-источник «%s», Подразделение «%s», строка %d: " +
+                    "Для средней стоимости %s нет данных в справочнике «Повышающие коэффициенты транспортного налога»!"
+            logger.error(msg, sourceName, sDepartmentName, rowIndex, value)
         } else if (records.size() == 1) {
             newRow.koefKp = records[0].COEF.value
         } else {
@@ -1452,4 +1457,14 @@ def getOkato(def codeOkato) {
         codeOkato = codeOkato?.substring(0, 2)
     }
     return codeOkato
+}
+
+@Field
+def formTypeMap = [:]
+
+def getFormType(def id) {
+    if (formTypeMap[id] == null) {
+        formTypeMap[id] = formTypeService.get(id)
+    }
+    return formTypeMap[id]
 }
