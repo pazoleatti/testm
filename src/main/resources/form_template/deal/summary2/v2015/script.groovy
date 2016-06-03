@@ -1921,8 +1921,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
         // 56. п. 090 "Адрес"
         colIndex++
-        expectedValue = (record520.ADDRESS?.stringValue != null ? record520.ADDRESS?.stringValue : "")
-        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
+        if(record513?.CODE?.value == 2) {
+            expectedValue = (record520.ADDRESS?.stringValue != null ? record520.ADDRESS?.stringValue : "")
+            formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
+        }
         newRow.address = (record513?.CODE?.value == 2 ? record520?.ADDRESS?.value : '')
     }
 
