@@ -47,9 +47,12 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     LinkButton sendQuery;
     @UiField
     DropdownButton printAnchor;
+    @UiField
+    LinkButton upload;
 
     private boolean isVersion, isVersioned;
     private LinkButton printToExcel, printToCSV;
+    private boolean uploadAvailable;
 
 	@Inject
 	public RefBookDataView(final Binder uiBinder) {
@@ -144,6 +147,13 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		}
 	}
 
+    @UiHandler("upload")
+    void showUploadDialog(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().showUploadDialogClicked();
+        }
+    }
+
     @UiHandler("cancelEdit")
     void cancelEditButtonClicked(ClickEvent event) {
         if (getUiHandlers().isFormModified()) {
@@ -171,7 +181,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @UiHandler("edit")
     void editButtonClicked(ClickEvent event) {
-        getUiHandlers().setMode(FormMode.EDIT);
+        getUiHandlers().editClicked();
     }
 
     @UiHandler("sendQuery")
@@ -210,6 +220,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(false);
+                upload.setVisible(uploadAvailable);
                 break;
             case READ:
                 addRow.setVisible(false);
@@ -220,6 +231,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
+                upload.setVisible(false);
                 break;
             case VIEW:
                 edit.setVisible(true);
@@ -230,6 +242,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
+                upload.setVisible(false);
                 break;
             case CREATE:
                 addRow.setVisible(false);
@@ -239,6 +252,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 separator.setVisible(false);
                 relevanceDate.setEnabled(false);
                 printAnchor.setVisible(false);
+                upload.setVisible(false);
                 break;
         }
         cancelEdit.setVisible(!isVersion&&mode==FormMode.EDIT);
@@ -305,5 +319,10 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
             });
             printAnchor.addItem(specificReportType, linkButton);
         }
+    }
+
+    @Override
+    public void setUploadAvailable(boolean uploadAvailable) {
+        this.uploadAvailable = uploadAvailable;
     }
 }

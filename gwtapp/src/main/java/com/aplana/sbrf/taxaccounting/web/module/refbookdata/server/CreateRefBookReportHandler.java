@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.CreateReportResult;
@@ -50,6 +51,16 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
     @Autowired
     private DepartmentService departmentService;
 
+    @Autowired
+    private TAUserService userService;
+
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd/MM/yyyy HH:mm z");
+        }
+    };
+
     private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -79,86 +90,95 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
         RefBook refBook = refBookFactory.get(action.getRefBookId());
         TAUser currentUser = securityService.currentUserInfo().getUser();
 
-        String filter = null;
-        if (refBook.getRegionAttribute() != null && !currentUser.hasRole("ROLE_CONTROL_UNP")) {
-            List<Department> deps = departmentService.getBADepartments(currentUser);
-            filter = RefBookPickerUtils.buildRegionFilterForUser(deps, refBook);
-            if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
-                //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи
-                // справочника - ни одна не должна быть ему доступна
-                logger.error("Нет доступных записей для выгрузки");
-                result.setUuid(logEntryService.save(logger.getEntries()));
-                return result;
-            }
-        }
-
-        String searchPattern = action.getSearchPattern();
-        if (searchPattern != null && !searchPattern.isEmpty()) {
-            if (filter != null && !filter.isEmpty()) {
-                filter += " and (" + refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId()) + ")";
-            } else {
-                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
-            }
-        }
-
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("refBookId", action.getRefBookId());
-        params.put("version", action.getVersion());
-        params.put("searchPattern", action.getSearchPattern());
-        params.put("filter", filter!=null?filter:"");
-        RefBookAttribute sortAttribute = null;
-        if (refBook.isHierarchic()) {
-            try {
-                sortAttribute = refBook.getAttribute("NAME");
-                params.put("sortAttribute", sortAttribute.getId());
-            } catch (IllegalArgumentException ignored) {
-            }
-        } else {
-            if (action.getSortColumnIndex() < 0) {
-                action.setSortColumnIndex(0);
-            }
-            List<RefBookAttribute> refBookAttributeList = new LinkedList<RefBookAttribute>();
-            for (RefBookAttribute attribute : refBook.getAttributes()) {
-                if (attribute.isVisible()) {
-                    refBookAttributeList.add(attribute);
+        LockData lockData = lockDataService.getLock(LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId());
+        if (lockData == null) {
+            String filter = null;
+            if (refBook.getRegionAttribute() != null && !currentUser.hasRole("ROLE_CONTROL_UNP")) {
+                List<Department> deps = departmentService.getBADepartments(currentUser);
+                filter = RefBookPickerUtils.buildRegionFilterForUser(deps, refBook);
+                if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
+                    //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи
+                    // справочника - ни одна не должна быть ему доступна
+                    logger.error("Нет доступных записей для выгрузки");
+                    result.setUuid(logEntryService.save(logger.getEntries()));
+                    return result;
                 }
             }
-            sortAttribute = refBookAttributeList.get(action.getSortColumnIndex());
-            params.put("sortAttribute", sortAttribute.getId());
+
+            String searchPattern = action.getSearchPattern();
+            if (searchPattern != null && !searchPattern.isEmpty()) {
+                if (filter != null && !filter.isEmpty()) {
+                    filter += " and (" + refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId()) + ")";
+                } else {
+                    filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
+                }
+            }
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("refBookId", action.getRefBookId());
+            params.put("version", action.getVersion());
+            params.put("searchPattern", action.getSearchPattern());
+            params.put("filter", filter != null ? filter : "");
+            RefBookAttribute sortAttribute = null;
+            if (refBook.isHierarchic()) {
+                try {
+                    sortAttribute = refBook.getAttribute("NAME");
+                    params.put("sortAttribute", sortAttribute.getId());
+                } catch (IllegalArgumentException ignored) {
+                }
+            } else {
+                if (action.getSortColumnIndex() < 0) {
+                    action.setSortColumnIndex(0);
+                }
+                List<RefBookAttribute> refBookAttributeList = new LinkedList<RefBookAttribute>();
+                for (RefBookAttribute attribute : refBook.getAttributes()) {
+                    if (attribute.isVisible()) {
+                        refBookAttributeList.add(attribute);
+                    }
+                }
+                sortAttribute = refBookAttributeList.get(action.getSortColumnIndex());
+                params.put("sortAttribute", sortAttribute.getId());
+            }
+            params.put("isSortAscending", action.isAscSorting());
+            if (reportType.equals(ReportType.SPECIFIC_REPORT_REF_BOOK))
+                params.put("specificReportType", reportName);
+
+            String keyTask = String.format("%s_%s_refBookId_%d_version_%s_filter_%s_%s_%s_%s",
+                    LockData.LockObjects.REF_BOOK.name(), reportType.getName(), action.getRefBookId(), SDF_DD_MM_YYYY.get().format(action.getVersion()), action.getSearchPattern(),
+                    (sortAttribute != null ? sortAttribute.getAlias() : null), action.isAscSorting(), UUID.randomUUID());
+            asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                @Override
+                public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                    return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                            refBookFactory.getTaskFullName(reportType, action.getRefBookId(), action.getVersion(), action.getSearchPattern(), reportName),
+                            LockData.State.IN_QUEUE.getText());
+                }
+
+                @Override
+                public void executePostCheck() {
+                }
+
+                @Override
+                public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                    return false;
+                }
+
+                @Override
+                public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                }
+
+                @Override
+                public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                    return refBookFactory.getTaskName(reportType, action.getRefBookId(), action.getReportName());
+                }
+            });
+        } else {
+            logger.info(LockData.LOCK_CURRENT,
+                    sdf.get().format(lockData.getDateLock()),
+                    userService.getUser(lockData.getUserId()).getName(),
+                    refBookFactory.getTaskName(reportType, action.getRefBookId(), action.getReportName()));
+            result.setErrorMsg("Для текущего справочника запущена операция, при которой формирование отчета невозможно");
         }
-        params.put("isSortAscending", action.isAscSorting());
-        if (reportType.equals(ReportType.SPECIFIC_REPORT_REF_BOOK))
-            params.put("specificReportType", reportName);
-
-        String keyTask = String.format("%s_%s_refBookId_%d_version_%s_filter_%s_%s_%s_%s",
-                LockData.LockObjects.REF_BOOK.name(), reportType.getName(), action.getRefBookId(), SDF_DD_MM_YYYY.get().format(action.getVersion()) , action.getSearchPattern(),
-                (sortAttribute!=null?sortAttribute.getAlias():null), action.isAscSorting(), UUID.randomUUID());
-        asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
-            @Override
-            public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
-                return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                        refBookFactory.getTaskFullName(reportType, action.getRefBookId(), action.getVersion(), action.getSearchPattern(), reportName),
-                        LockData.State.IN_QUEUE.getText());
-            }
-
-            @Override
-            public void executePostCheck() {
-            }
-
-            @Override
-            public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                return false;
-            }
-
-            @Override
-            public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-            }
-
-            @Override
-            public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                return refBookFactory.getTaskName(reportType, action.getRefBookId(), action.getReportName());
-            }
-        });
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }

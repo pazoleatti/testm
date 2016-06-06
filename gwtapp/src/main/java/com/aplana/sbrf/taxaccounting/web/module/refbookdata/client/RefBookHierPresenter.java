@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.AbstractEditPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.CheckModifiedHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.DepartmentEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.HierEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
@@ -15,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItem
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.upload.UploadDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.event.BackEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -51,21 +53,27 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     AbstractEditPresenter commonEditPresenter;
     RefBookVersionPresenter versionPresenter;
     RefBookHierDataPresenter refBookHierDataPresenter;
+    UploadDialogPresenter uploadDialogPresenter;
 
     public static final Object TYPE_editFormPresenter = new Object();
     public static final Object TYPE_mainFormPresenter = new Object();
+
+    private static final String NOT_EXIST_EVENT_MSG = "Не предусмотрена загрузка данных из файла в справочник ";
 
     private final HandlerRegistration[] registrations = new HandlerRegistration[2];
     private IRefBookExecutor dataInterface;
     private FormMode mode;
     private Long attrId, uniqueRecordId, refBookId;
     private String refBookName;
+    private boolean importScriptStatus;
+    private boolean isVersioned;
 
     @Inject
     public RefBookHierPresenter(EventBus eventBus, MyView view, MyProxy proxy,
                                 DispatchAsync dispatcher, PlaceManager placeManager,
                                 HierEditPresenter editFormPresenter, RefBookHierDataPresenter refBookHierDataPresenter,
-                                RefBookVersionPresenter versionPresenter, DepartmentEditPresenter departmentEditPresenter) {
+                                RefBookVersionPresenter versionPresenter, DepartmentEditPresenter departmentEditPresenter,
+                                UploadDialogPresenter uploadDialogPresenter) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
         this.placeManager = placeManager;
@@ -73,6 +81,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         this.refBookHierDataPresenter = refBookHierDataPresenter;
         this.versionPresenter = versionPresenter;
         this.departmentEditPresenter = departmentEditPresenter;
+        this.uploadDialogPresenter = uploadDialogPresenter;
         getView().setUiHandlers(this);
     }
 
@@ -196,6 +205,8 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         void setIsVersion(boolean isVersioned);
 
         void setSpecificReportTypes(List<String> specificReportTypes);
+
+        void setUploadAvailable(boolean uploadAvailable);
     }
 
     @Override
@@ -239,7 +250,10 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                             @Override
                             public void onSuccess(CheckRefBookResult result) {
                                 commonEditPresenter.init(refBookId, result.isVersioned());
+                                importScriptStatus = result.isScriptStatus();
+                                isVersioned = result.isVersioned();
                                 getView().setIsVersion(result.isVersioned());
+                                getView().setUploadAvailable(result.isUploadAvailable());
                                 registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(getClick());
                                 if (result.isAvailable()) {
                                     commonEditPresenter.setVersionMode(false);
@@ -404,7 +418,58 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                             @Override
                             public void onSuccess(CreateReportResult result) {
                                 LogAddEvent.fire(RefBookHierPresenter.this, result.getUuid());
+                                if (result.getErrorMsg() != null && !result.getErrorMsg().isEmpty())
+                                    Dialog.errorMessage("Ошибка", result.getErrorMsg());
                             }
                         }, RefBookHierPresenter.this));
     }
+
+    @Override
+    public void showUploadDialogClicked() {
+        if (!commonEditPresenter.isFormModified()) {
+            if (importScriptStatus) {
+                uploadDialogPresenter.open(refBookId, isVersioned);
+            } else {
+                Dialog.infoMessage(NOT_EXIST_EVENT_MSG + "\"" + refBookName + "\"");
+            }
+        } else {
+            commonEditPresenter.checkModified(new CheckModifiedHandler() {
+                @Override
+                public void openLoadDialog() {
+                    uploadDialogPresenter.open(refBookId, isVersioned);
+                }
+
+                @Override
+                public String getTitle() {
+                    return "Подтверждение изменений";
+                }
+
+                @Override
+                public String getText() {
+                    return "Выбранная запись была изменена. Сохранить изменения и загрузить файл? \"Да\" - загрузить с сохранением. \"Нет\" - загрузить без сохранения.";
+                }
+            });
+        }
+    }
+
+    @Override
+    public void editClicked() {
+        EditRefBookAction action = new EditRefBookAction();
+        action.setRefBookId(refBookId);
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<EditRefBookResult>() {
+                            @Override
+                            public void onSuccess(EditRefBookResult result) {
+                                LogAddEvent.fire(RefBookHierPresenter.this, result.getUuid());
+                                if (result.isLock()) {
+                                    Dialog.errorMessage("Ошибка", result.getLockMsg());
+                                } else {
+                                    setMode(FormMode.EDIT);
+                                }
+                            }
+                        }, RefBookHierPresenter.this));
+
+    }
+
 }

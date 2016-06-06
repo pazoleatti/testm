@@ -103,7 +103,6 @@ public class LoadRefBookDataServiceTest {
         model.put(ConfigurationParam.OKATO_UPLOAD_DIRECTORY, 0, Arrays.asList("file://" + uploadFolder.getPath() + "/"));
         model.put(ConfigurationParam.REGION_UPLOAD_DIRECTORY, 0, Arrays.asList("file://" + uploadFolder.getPath() + "/"));
         model.put(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY, 0, Arrays.asList("file://" + uploadFolder.getPath() + "/"));
-        model.put(ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY, 0, Arrays.asList("file://" + uploadFolder.getPath() + "/"));
         model.put(ConfigurationParam.REF_BOOK_ARCHIVE_DIRECTORY, 0, Arrays.asList("file://" + archiveFolder.getPath() + "/"));
         model.put(ConfigurationParam.REF_BOOK_ERROR_DIRECTORY, 0, Arrays.asList("file://" + errorFolder.getPath() + "/"));
         when(configurationDao.getByDepartment(anyInt())).thenReturn(model);
@@ -276,22 +275,6 @@ public class LoadRefBookDataServiceTest {
         Assert.assertEquals(1, uploadFolder.list().length);
         // Архив
         Assert.assertEquals(0, archiveFolder.list().length);
-        // Ошибки
-        Assert.assertEquals(0, errorFolder.list().length);
-    }
-
-    // Успешный импорт справочника "Средняя стоимость транспортных средств"
-    @Test
-    public void successAvgCostLoadTest() throws IOException {
-        File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_4);
-        file.createNewFile();
-        ImportCounter importCounter = service.importRefBookAvgCost(USER_INFO, new Logger(), "1", false);
-        // Счетчики
-        Assert.assertEquals(1, importCounter.getSuccessCounter());
-        // Каталог загрузки
-        Assert.assertEquals(0, uploadFolder.list().length);
-        // Архив
-        Assert.assertEquals(1, archiveFolder.list().length);
         // Ошибки
         Assert.assertEquals(0, errorFolder.list().length);
     }

@@ -337,7 +337,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     private CheckResult checkFileNameAccess(TAUserInfo userInfo, String fileName, Logger logger) {
         try {
             boolean isDiasoftRefBook = loadRefBookDataService.isDiasoftFile(fileName);
-            boolean isAvgCostRefBook = loadRefBookDataService.isAvgCostFile(fileName);
             boolean isFormData = TransportDataParam.isValidName(fileName);
 
             CheckResult checkResult = new CheckResult();
@@ -348,14 +347,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                         DIASOFT_NAME, LogData.L34_1_1, logger));
                 checkResult.setRefBook(true);
                 checkResult.setRefBookName(DIASOFT_NAME);
-                return checkResult;
-            }
-
-            if (isAvgCostRefBook) {
-                checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY, 0,
-                        AVG_COST_NAME, LogData.L34_1_1, logger));
-                checkResult.setRefBook(true);
-                checkResult.setRefBookName(AVG_COST_NAME);
                 return checkResult;
             }
 

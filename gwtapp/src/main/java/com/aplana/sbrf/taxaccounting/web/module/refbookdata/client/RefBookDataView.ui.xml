@@ -80,6 +80,8 @@
                             <g:Label ui:field="editModeLabel" visible="false" text="Режим редактирования" addStyleNames="{style.editModeLabel}, {style.marginRight5}"/>
                             <style:DropdownButton ui:field="printAnchor" text="Формирование отчетов" img="resources/img/printer-16.png"
                                                   title="Формирование отчетов" panelStyleName="{style.printAnchor}"/>
+                            <style:LinkButton ui:field="upload" text="Загрузить файл" img="resources/img/up_cc.png"
+                                                  title="Загрузить файл" addStyleNames="{style.printAnchor}"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
@@ -106,7 +108,7 @@
                         <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
                             <g:HTML ui:field="separator1" addStyleNames="{style.verSep}"/>
                             <g:TextBox width="210px" ui:field="filterText" addStyleNames="{style.marginRight5}"/>
-                            <g:Button title="Поиск" width="70px" text="Поиск" ui:field="search"/>
+                            <g:Button title="Найти" width="70px" text="Найти" ui:field="search"/>
                         </g:HorizontalPanel>
                     </g:cell>
 

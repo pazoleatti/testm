@@ -29,13 +29,12 @@ public class ConfigurationDaoTest {
     @Test
 	public void getAllTest() {
         ConfigurationParamModel model = dao.getAll();
-        Assert.assertEquals(8, model.size());
+        Assert.assertEquals(7, model.size());
         Assert.assertTrue(model.containsKey(ConfigurationParam.KEY_FILE));
         Assert.assertTrue(model.containsKey(ConfigurationParam.FORM_ERROR_DIRECTORY));
         Assert.assertTrue(model.containsKey(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY));
         Assert.assertTrue(model.containsKey(ConfigurationParam.OKATO_UPLOAD_DIRECTORY));
         Assert.assertTrue(model.containsKey(ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY));
-        Assert.assertTrue(model.containsKey(ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY));
         Assert.assertTrue(model.containsKey(ConfigurationParam.FORM_UPLOAD_DIRECTORY));
         Assert.assertTrue(model.containsKey(ConfigurationParam.FORM_ARCHIVE_DIRECTORY));
         Assert.assertEquals("test6", model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY, 1).get(0));

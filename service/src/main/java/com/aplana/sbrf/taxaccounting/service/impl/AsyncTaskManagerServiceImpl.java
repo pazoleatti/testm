@@ -50,7 +50,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
     @Override
     public Pair<Boolean, String> restartTask(String keyTask, String taskName, TAUserInfo userInfo, boolean force, Logger logger) {
         LockData lockDataTask = lockDataService.getLock(keyTask);
-        if (lockDataTask != null && lockDataTask.getUserId() == userInfo.getUser().getId()) {
+        if (lockDataTask != null && lockDataTask.isAsync() && lockDataTask.getUserId() == userInfo.getUser().getId()) {
             if (force) {
                 // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
                 lockDataService.interruptTask(lockDataTask, userInfo.getUser().getId(), false, "Выполнен перезапуск задачи");
@@ -61,7 +61,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
                         String.format(RESTART_MSG, taskName);
                 return new Pair<Boolean, String>(true, restartMsg);
             }
-        } else if (lockDataTask != null) {
+        } else if (lockDataTask != null && lockDataTask.isAsync()) {
             try {
                 lockDataService.addUserWaitingForLock(lockDataTask.getKey(), userInfo.getUser().getId());
                 logger.info(String.format(LOCK_INFO_MSG,
@@ -71,6 +71,8 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
             } catch (ServiceException e) {
             }
             return new Pair<Boolean, String>(false, null);
+        } else if (lockDataTask != null) {
+            throw new ServiceLoggerException("Невозможно запустить задачу. Заблокировано операцией: \"%s\"", lockDataTask.getDescription());
         }
         return null;
     }
@@ -113,11 +115,11 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
                     LOG.info(String.format("Постановка в очередь задачи с ключом %s", keyTask));
                     lockData = lockDataService.getLock(keyTask);
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
+                    LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
+                    lockDataService.updateQueue(keyTask, lockData.getDateLock(), queue);
                     asyncManager.executeAsync(
 							isProductionMode ? reportType.getAsyncTaskTypeId() : reportType.getDevModeAsyncTaskTypeId(),
 							params, balancingVariant);
-					LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
-                    lockDataService.updateQueue(keyTask, lockData.getDateLock(), queue);
 
                     // Шаг 8
                     logger.info(String.format(CREATE_TASK, handler.getTaskName(reportType, userInfo)));

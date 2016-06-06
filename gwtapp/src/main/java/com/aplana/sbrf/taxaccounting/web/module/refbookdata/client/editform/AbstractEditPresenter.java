@@ -313,6 +313,34 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         }
     }
 
+    public void checkModified(final CheckModifiedHandler handler) {
+        if (isFormModified) {
+            Dialog.confirmMessage(handler.getTitle(), handler.getText(), new DialogHandler() {
+                @Override
+                public void yes() {
+                    setIsFormModified(false);
+                    onSaveClicked(false);
+                    SetFormMode.fire(AbstractEditPresenter.this, FormMode.EDIT);
+                    RollbackTableRowSelection.fire(AbstractEditPresenter.this, previousURId);
+                    handler.openLoadDialog();
+                }
+
+                @Override
+                public void no() {
+                    setIsFormModified(false);
+                    showRecord(previousURId);
+                    getView().cleanErrorFields();
+                    SetFormMode.fire(AbstractEditPresenter.this, FormMode.EDIT);
+                    //В иерархических справониках выбирается предыдущий элемент
+                    RollbackTableRowSelection.fire(AbstractEditPresenter.this, previousURId);
+                    handler.openLoadDialog();
+                }
+            });
+        } else {
+            handler.openLoadDialog();
+        }
+    }
+
     @Override
     public void onSaveClicked(boolean isEditButtonClicked) {
         final String title = (currentUniqueRecordId != null ? "Запись не сохранена" : "Запись не создана");

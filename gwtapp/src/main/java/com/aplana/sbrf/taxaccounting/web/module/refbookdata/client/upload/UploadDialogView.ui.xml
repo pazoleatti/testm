@@ -1,0 +1,52 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+             xmlns:dw="urn:import:com.aplana.gwt.client">
+
+    <ui:style>
+
+        .footerPanel {
+            background-color: #E8E1CF;
+        }
+
+        .footerButton {
+            margin: 8px 10px 8px 0 !important;
+        }
+
+        .typicalFormBody {
+            border: solid 1px #aeaeac;
+            margin: 10px;
+        }
+
+    </ui:style>
+
+
+    <dw:ModalWindow ui:field="deadlineDialog" title="Загрузка файла">
+        <g:VerticalPanel width="100%" addStyleNames="aplana-ModalWindow-contentBackWhite">
+            <g:cell>
+                <g:VerticalPanel spacing="5" addStyleNames="{style.typicalFormBody}">
+                    <g:HorizontalPanel spacing="5" verticalAlignment="middle">
+                        <g:FormPanel ui:field="formPanel" encoding="multipart/form-data" method="post">
+                            <g:FileUpload ui:field="uploader" name="uploader" visible="true" width="400"/>
+                        </g:FormPanel>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel ui:field="datePanel" spacing="5" verticalAlignment="middle">
+                        <g:Label text="Новые версии действуют с:"/>
+                        <d:DateMaskBoxPicker ui:field="dateFrom" canBeEmpty="true" width="20px"/>
+                        <g:Label text="по:"/>
+                        <d:DateMaskBoxPicker ui:field="dateTo" canBeEmpty="true" width="20px"/>
+                    </g:HorizontalPanel>
+                </g:VerticalPanel>
+            </g:cell>
+            <g:cell horizontalAlignment="ALIGN_RIGHT">
+                <g:FlowPanel addStyleNames="{style.footerPanel}">
+                    <g:Button addStyleNames="{style.footerButton}" text="Продолжить" ui:field="okButton"/>
+                    <g:Button addStyleNames="{style.footerButton}" text="Закрыть" ui:field="cancelButton"/>
+                </g:FlowPanel>
+            </g:cell>
+        </g:VerticalPanel>
+
+    </dw:ModalWindow>
+
+</ui:UiBinder>

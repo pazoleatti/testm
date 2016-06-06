@@ -28,7 +28,7 @@ import java.util.UUID;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Component
-public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction, LoadRefBookResult> {
+public class LoadAllRefBookHandler extends AbstractActionHandler<LoadRefBookAction, LoadRefBookResult> {
 
     @Autowired
     private LoadRefBookDataService loadRefBookDataService;
@@ -45,7 +45,7 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
     @Autowired
     private LockDataService lockDataService;
 
-    public LoadRefBookHandler() {
+    public LoadAllRefBookHandler() {
         super(LoadRefBookAction.class);
     }
 
@@ -61,13 +61,11 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
         List<String> regionList = model.get(ConfigurationParam.REGION_UPLOAD_DIRECTORY, 0);
         List<String> diasoftList = model.get(ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0);
         List<String> accountPlanList = model.get(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY, 0);
-        List<String> avgCostList = model.get(ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY, 0);
         boolean hasOkato = okatoList != null && !okatoList.isEmpty();
         boolean hasRegion = regionList != null && !regionList.isEmpty();
         boolean hasDiasoft = diasoftList != null && !diasoftList.isEmpty();
         boolean hasAccountPlan = accountPlanList != null && !accountPlanList.isEmpty();
-        boolean hasAvgCost = avgCostList != null && !avgCostList.isEmpty();
-        if (hasOkato || hasRegion || hasDiasoft || hasAccountPlan || hasAvgCost) {
+        if (hasOkato || hasRegion || hasDiasoft || hasAccountPlan) {
             List<String> catalogStrList = new LinkedList<String>();
             if (hasOkato) {
                 catalogStrList.add(ConfigurationParam.OKATO_UPLOAD_DIRECTORY.getCaption());
@@ -80,9 +78,6 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
             }
             if (hasAccountPlan) {
                 catalogStrList.add(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY.getCaption());
-            }
-            if (hasAvgCost) {
-                catalogStrList.add(ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY.getCaption());
             }
             if (catalogStrList.size() == 1) {
                 logger.info("Получен: %s.", catalogStrList.get(0));

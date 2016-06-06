@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
@@ -259,6 +260,31 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
             showRecord(getPreviousURId());
             getView().cleanErrorFields();
             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+        }
+    }
+
+    public void checkModified(final CheckModifiedHandler handler) {
+        if (isFormModified) {
+            Dialog.confirmMessage(handler.getTitle(), handler.getText(), new DialogHandler() {
+                @Override
+                public void yes() {
+                    setIsFormModified(false);
+                    onSaveClicked(false);
+                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                    handler.openLoadDialog();
+                }
+
+                @Override
+                public void no() {
+                    setIsFormModified(false);
+                    showRecord(getPreviousURId());
+                    getView().cleanErrorFields();
+                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                    handler.openLoadDialog();
+                }
+            });
+        } else {
+            handler.openLoadDialog();
         }
     }
 }

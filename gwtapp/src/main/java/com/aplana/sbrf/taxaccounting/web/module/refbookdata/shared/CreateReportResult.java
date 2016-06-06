@@ -6,6 +6,7 @@ public class CreateReportResult implements Result {
     private static final long serialVersionUID = 1568435159879646561L;
 
     private String uuid;
+    private String errorMsg;
 
     public String getUuid() {
         return uuid;
@@ -13,5 +14,13 @@ public class CreateReportResult implements Result {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
     }
 }

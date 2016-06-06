@@ -11,6 +11,8 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.script.RefBoo
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.script.RefBookScriptView;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogView;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.upload.UploadDialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.upload.UploadDialogView;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionView;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
@@ -32,6 +34,7 @@ public class RefBookDataModule extends AbstractPresenterModule {
         bindSingletonPresenterWidget(RefBookVersionPresenter.class, RefBookVersionPresenter.MyView.class, RefBookVersionView.class);
         bindSingletonPresenterWidget(RefBookLinearPresenter.class, RefBookLinearPresenter.MyView.class, RefBookLinearView.class);
         bindPresenterWidget(RenameDialogPresenter.class, RenameDialogPresenter.MyView.class, RenameDialogView.class);
+        bindPresenterWidget(UploadDialogPresenter.class, UploadDialogPresenter.MyView.class, UploadDialogView.class);
         bindSingletonPresenterWidget(DialogPresenter.class, DialogPresenter.MyView.class, DialogView.class);
         bindSingletonPresenterWidget(RefBookHierDataPresenter.class, RefBookHierDataPresenter.MyView.class, RefBookHierDataView.class);
 

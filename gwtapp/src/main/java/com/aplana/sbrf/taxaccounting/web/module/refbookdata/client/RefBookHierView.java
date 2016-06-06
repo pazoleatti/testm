@@ -72,9 +72,12 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
     LinkAnchor backAnchor;
     @UiField
     DropdownButton printAnchor;
+    @UiField
+    LinkButton upload;
 
     private boolean isVersion, isVersioned;
     private LinkButton printToExcel, printToCSV;
+    private boolean uploadAvailable;
 
     @Override
     public void clearFilterInputBox() {
@@ -98,6 +101,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(false);
+                upload.setVisible(uploadAvailable);
                 break;
             case READ:
                 addRow.setVisible(false);
@@ -108,6 +112,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
+                upload.setVisible(false);
                 break;
             case VIEW:
                 edit.setVisible(true);
@@ -118,6 +123,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
+                upload.setVisible(false);
                 break;
             case CREATE:
                 addRow.setVisible(false);
@@ -127,9 +133,17 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 separator.setVisible(false);
                 relevanceDate.setEnabled(false);
                 printAnchor.setVisible(false);
+                upload.setVisible(false);
                 break;
         }
         cancelEdit.setVisible(!isVersion&&mode==FormMode.EDIT);
+    }
+
+    @UiHandler("upload")
+    void showUploadDialog(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().showUploadDialogClicked();
+        }
     }
 
     @Override
@@ -225,7 +239,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
 
     @UiHandler("edit")
     void editButtonClicked(ClickEvent event) {
-        getUiHandlers().setMode(EDIT);
+        getUiHandlers().editClicked();
     }
 
     @UiHandler("cancelEdit")
@@ -345,5 +359,10 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
             });
             printAnchor.addItem(specificReportType, linkButton);
         }
+    }
+
+    @Override
+    public void setUploadAvailable(boolean uploadAvailable) {
+        this.uploadAvailable = uploadAvailable;
     }
 }

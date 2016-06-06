@@ -219,6 +219,10 @@ public final class LockData {
         this.serverNode = serverNode;
     }
 
+    public boolean isAsync() {
+        return (getQueue() != null && !LockQueues.NONE.equals(getQueue()));
+    }
+
     @Override
     public String toString() {
         return "LockData{" +

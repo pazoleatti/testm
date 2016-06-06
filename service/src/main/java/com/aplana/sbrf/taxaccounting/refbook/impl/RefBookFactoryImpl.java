@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookAuditFieldList;
 import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookConfigurationParam;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -292,6 +293,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
         switch (reportType) {
             case EXCEL_REF_BOOK:
             case CSV_REF_BOOK:
+            case IMPORT_REF_BOOK:
+            case EDIT_REF_BOOK:
                 return String.format(reportType.getDescription(), refBook.getName());
             case SPECIFIC_REPORT_REF_BOOK:
                 return String.format(reportType.getDescription(), specificReportType, refBook.getName());
@@ -309,6 +312,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
                 return String.format("Формирование отчета справочника \"%s\" в %s-формате : Версия: %s, Фильтр: \"%s\"", refBook.getName(), reportType.getName(), sdf.get().format(version), filter);
             case SPECIFIC_REPORT_REF_BOOK:
                 return String.format("Формирование специфического отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), sdf.get().format(version), filter);
+            case IMPORT_REF_BOOK:
+                return String.format("Загрузка данных из файла в справочник \"%s\"", refBook.getName());
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }
@@ -333,5 +338,15 @@ public class RefBookFactoryImpl implements RefBookFactory {
             }
         }
         return specificReportTypes;
+    }
+
+    @Override
+    public boolean getEventScriptStatus(long refBookId, FormDataEvent event) {
+        String script = refBookScriptingService.getScript(refBookId);
+        if (script != null && !script.isEmpty()) {
+            return TAAbstractScriptingServiceImpl.canExecuteScript(script, event);
+        } else {
+            return false;
+        }
     }
 }

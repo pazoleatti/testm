@@ -7,6 +7,8 @@ public class CheckRefBookResult implements Result {
 
     private boolean available;
     private boolean versioned;
+    private boolean uploadAvailable;
+    private boolean scriptStatus;
 
     public boolean isAvailable() {
         return available;
@@ -22,5 +24,21 @@ public class CheckRefBookResult implements Result {
 
     public boolean isVersioned() {
         return versioned;
+    }
+
+    public boolean isUploadAvailable() {
+        return uploadAvailable;
+    }
+
+    public void setUploadAvailable(boolean uploadAvailable) {
+        this.uploadAvailable = uploadAvailable;
+    }
+
+    public boolean isScriptStatus() {
+        return scriptStatus;
+    }
+
+    public void setScriptStatus(boolean scriptStatus) {
+        this.scriptStatus = scriptStatus;
     }
 }

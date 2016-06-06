@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.CheckRefBookAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.CheckRefBookResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -18,6 +21,9 @@ public class CheckRefBookHandler extends AbstractActionHandler<CheckRefBookActio
     @Autowired
     private RefBookFactory refBookFactory;
 
+    @Autowired
+    private SecurityService securityService;
+
     public CheckRefBookHandler() {
         super(CheckRefBookAction.class);
     }
@@ -28,6 +34,8 @@ public class CheckRefBookHandler extends AbstractActionHandler<CheckRefBookActio
         CheckRefBookResult result = new CheckRefBookResult();
         result.setAvailable(refBook.isVisible());
         result.setVersioned(refBook.isVersioned());
+        result.setUploadAvailable(securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP));
+        result.setScriptStatus(refBookFactory.getEventScriptStatus(action.getRefBookId(), FormDataEvent.IMPORT));
         return result;
     }
 

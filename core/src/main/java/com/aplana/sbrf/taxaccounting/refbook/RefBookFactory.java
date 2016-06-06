@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -85,4 +86,6 @@ public interface RefBookFactory {
      * @return
      */
     List<String> getSpecificReportTypes(long refBookId, TAUserInfo userInfo, Logger logger);
+
+    boolean getEventScriptStatus(long refBookId, FormDataEvent event);
 }

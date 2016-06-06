@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -14,9 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
-import com.aplana.sbrf.taxaccounting.service.SignService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
@@ -30,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -55,6 +55,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private RefBookDao refBookDao;
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
+    @Autowired
+    private AuditService auditService;
+    @Autowired
+    private LogEntryService logEntryService;
 
     // ЦАС НСИ
     private static final long REF_BOOK_OKATO = 3L; // Коды ОКАТО
@@ -64,14 +68,11 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private static final long REF_BOOK_EMITENT = 100L; // Эмитенты
     private static final long REF_BOOK_BOND = 84L; // Ценные бумаги
 
-    private static final long REF_BOOK_AVG_COST = 208L; // Средняя стоимость транспортных средств
-
     private static final String OKATO_NAME = "справочника ОКАТО";
     private static final String REGION_NAME = "справочника «Субъекты РФ»";
     private static final String ACCOUNT_PLAN_NAME = "справочника «План счетов»";
     private static final String DIASOFT_NAME = "справочников Diasoft";
     private static final String NSI_NAME = "справочников ЦАС НСИ";
-    private static final String AVG_COST_NAME = "справочника «Средняя стоимость транспортных средств»";
     private static final String LOCK_MESSAGE = "Справочник «%s» заблокирован, попробуйте выполнить операцию позже!";
 
     //// Справочники ЦАС НСИ
@@ -86,11 +87,15 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     // Ценные бумаги и Эмитенты
     private static final Map<String, List<Pair<Boolean, Long>>> diasoftMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
 
-    // Справочник "Средняя стоимость транспортных средств"
-    private static final Map<String, List<Pair<Boolean, Long>>> avgCostMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
-
     // Сообщения, которые не учтены в постановка
     private static final String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов %s. %s";
+
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     static {
         // TODO Левыкин: Каждый конкретный справочник будет загружаться только архивом или только простым файлом, не обоими способами
@@ -98,9 +103,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         // Ценные бумаги + Эмитенты
         diasoftMappingMap.put("ds\\d{6}\\.nsi", asList(new Pair<Boolean, Long>(true, REF_BOOK_EMITENT),
                 new Pair<Boolean, Long>(true, REF_BOOK_BOND)));
-
-        // Средняя стоимость транспортных средств
-        avgCostMappingMap.put(".*\\.xlsx", asList(new Pair<Boolean, Long>(true, REF_BOOK_AVG_COST)));
 
         // Архив "Коды ОКАТО"
         nsiOkatoMappingMap.put("oka.{5}\\..{2}", asList(new Pair<Boolean, Long>(false, REF_BOOK_OKATO)));
@@ -523,34 +525,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         }
     }
 
-    public void getRefBookAvgCostFiles(List<TransportFileInfo> files, TAUserInfo userInfo, Logger logger, String lock) {
-        try {
-            getRefBookFiles(files, userInfo, logger, ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY,
-                    avgCostMappingMap, null, lock);
-        } catch (Exception e) {
-        }
-    }
-
-    @Override
-    public ImportCounter importRefBookAvgCost(TAUserInfo userInfo, Logger logger, String lock, boolean isAsync) {
-        return importRefBookAvgCost(userInfo, null, logger, lock, isAsync);
-    }
-
-    @Override
-    public ImportCounter importRefBookAvgCost(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync) {
-        ImportCounter importCounter = new ImportCounter();
-        try {
-            importCounter = importRefBook(userInfo, logger, ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY,
-                    avgCostMappingMap, AVG_COST_NAME, true, loadedFileNameList, lockId, isAsync);
-        } catch (Exception e) {
-            // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
-            logger.error(IMPORT_REF_BOOK_ERROR, AVG_COST_NAME, e.getMessage());
-            return importCounter;
-        }
-        log(userInfo, LogData.L24, logger, lockId, importCounter.getSuccessCounter(), importCounter.getFailCounter());
-        return importCounter;
-    }
-
     @Override
     public void saveRefBookRecords(long refBookId, Long uniqueRecordId, Long recordId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
                                    Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger) {
@@ -572,9 +546,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             // Diasoft
             lockService.updateState(lockId, lockDate, "Импорт справочников \"Diasoft\"");
             importRefBookDiasoft(userInfo, logger, lockId, isAsync);
-            // Средняя стоимость транспортных средств
-            lockService.updateState(lockId, lockDate, "Импорт справочника \"Средняя стоимость транспортных средств\"");
-            importRefBookAvgCost(userInfo, logger, lockId, isAsync);
         }
     }
 
@@ -584,8 +555,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         if (checkPathArchiveError(userInfo, logger, "")){
             // Diasoft
             getRefBookDiasoftFiles(files, userInfo, logger, "");
-            // Средняя стоимость транспортных средств
-            getRefBookAvgCostFiles(files, userInfo, logger, "");
         }
         return files;
     }
@@ -598,8 +567,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             importRefBookNsi(userInfo, logger, uuid, isAsync);
             // Импорт справочников из Diasoft Custody
             importRefBookDiasoft(userInfo, logger, uuid, isAsync);
-            // Импорт справочников в справочник "Средняя стоимость транспортных средств"
-            importRefBookAvgCost(userInfo, logger, uuid, isAsync);
         }
     }
 
@@ -653,11 +620,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         return name != null && mappingMatch(name, diasoftMappingMap.keySet()) != null;
     }
 
-    @Override
-    public boolean isAvgCostFile(String name) {
-        return name != null && mappingMatch(name, avgCostMappingMap.keySet()) != null;
-    }
-
     /**
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
@@ -692,4 +654,82 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         Collections.sort(retVal);
         return retVal;
     }
+
+    @Override
+    public void importRefBook(Logger logger, TAUserInfo userInfo, long refBookId, InputStream inputStream, String fileName, Date dateFrom, Date dateTo, LockStateLogger lockStateLogger) {
+        ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
+        Map<String, Object> additionalParameters = new HashMap<String, Object>();
+        additionalParameters.put("inputStream", inputStream);
+        additionalParameters.put("fileName", fileName);
+        additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
+        additionalParameters.put("dateFrom", dateFrom);
+        additionalParameters.put("dateTo", dateTo);
+
+        List<String> lockedObjects = new ArrayList<String>();
+        int userId = userInfo.getUser().getId();
+        boolean accept = false;
+        RefBook refBook = refBookDao.get(refBookId);
+        // Обращение к скрипту
+        try {
+            //Блокируем связанные справочники
+            List<RefBookAttribute> attributes = refBook.getAttributes();
+            for (RefBookAttribute attribute : attributes) {
+                if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                    RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
+                    String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                    if (!lockedObjects.contains(referenceLockKey)) {
+                        LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()));
+                        if (referenceLockData == null) {
+                            //Блокировка установлена
+                            lockedObjects.add(referenceLockKey);
+                        } else {
+                            throw new ServiceException(String.format(LOCK_MESSAGE, attributeRefBook.getName()));
+                        }
+                    }
+                }
+            }
+
+            //Выполняем логику скрипта
+            if (!refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT,
+                    logger, additionalParameters)) {
+                throw new ServiceException("Импорт данных не предусмотрен");
+            }
+            accept = true;
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+            for (String lock : lockedObjects) {
+                lockService.unlock(lock, userId);
+            }
+            String date = "";
+            if (refBook.isVersioned()) {
+                date = String.format("С %s по %s",
+                        sdf.get().format(dateFrom),
+                        dateTo != null ? sdf.get().format(dateTo) : "-");
+            }
+            if (accept) {
+                String msg = String.format("Загрузка данных из файла \"%s\" в справочник \"%s\" произошла успешно", fileName, refBook.getName());
+                auditService.add(FormDataEvent.IMPORT, userInfo, date, null, null, null, null, msg, logEntryService.save(logger.getEntries()));
+            } else {
+                String msg = String.format("При загрузке данных из файла \"%s\" в справочник \"%s\" произошла ошибка. Подробности записаны в журнал сервера", fileName, refBook.getName());
+                auditService.add(FormDataEvent.IMPORT, userInfo, date, null, null, null, null, msg, logEntryService.save(logger.getEntries()));
+            }
+        }
+    }
+
+    @Override
+    public void preLoadCheck(long refBookId, String fileName, Date dateFrom, Date dateTo, TAUserInfo userInfo, Logger logger) {
+        Map<String, Object> additionalParameters = new HashMap<String, Object>();
+        additionalParameters.put("fileName", fileName);
+        additionalParameters.put("dateFrom", dateFrom);
+        additionalParameters.put("dateTo", dateTo);
+        additionalParameters.put("scriptStatusHolder", new ScriptStatusHolder());
+        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.PRE_CALCULATION_CHECK, logger, additionalParameters);
+    }
+
 }

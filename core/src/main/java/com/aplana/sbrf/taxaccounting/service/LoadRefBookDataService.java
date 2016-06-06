@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.ImportCounter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TransportFileInfo;
@@ -7,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -40,16 +42,6 @@ public interface LoadRefBookDataService {
     ImportCounter importRefBookDiasoft(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync);
 
     /**
-     * Загрузка ТФ справочника Средняя стоимость транспортных средст (AVG_COST_UPLOAD_DIRECTORY)
-     */
-    ImportCounter importRefBookAvgCost(TAUserInfo userInfo, Logger logger, String lockId, boolean isAsync);
-
-    /**
-     * Загрузка ТФ справочника Средняя стоимость транспортных средст (AVG_COST_UPLOAD_DIRECTORY)
-     */
-    ImportCounter importRefBookAvgCost(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync);
-
-    /**
      * Проверка доступа к каталогам архива и ошибок
      * @param userInfo
      * @param logger
@@ -71,11 +63,6 @@ public interface LoadRefBookDataService {
      * «Эмитенты»
      */
     boolean isDiasoftFile(String name);
-
-    /**
-     * Соответствие имени файла ТФ справочника "Средняя стоимость транспортных средств"
-     */
-    boolean isAvgCostFile(String name);
 
     /**
      * TODO Перенести в отдельный сервис
@@ -103,4 +90,24 @@ public interface LoadRefBookDataService {
      * @return
      */
     List<TransportFileInfo> getRefBookTransportDataFiles(TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Метод для импорта данных из файлов(асинхронная задача)
+     * @param logger
+     * @param userInfo
+     * @param refBookId
+     * @param inputStream
+     * @param fileName
+     * @param lockStateLogger
+     */
+    void importRefBook(Logger logger, TAUserInfo userInfo, long refBookId, InputStream inputStream, String fileName, Date dateFrom, Date dateTo, LockStateLogger lockStateLogger);
+
+    /**
+     * Проверка перед импортом
+     * @param refBookId
+     * @param fileName
+     * @param userInfo
+     * @param logger
+     */
+    void preLoadCheck(long refBookId, String fileName, Date dateFrom, Date dateTo, TAUserInfo userInfo, Logger logger);
 }
