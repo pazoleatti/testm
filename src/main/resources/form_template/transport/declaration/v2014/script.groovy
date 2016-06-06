@@ -272,15 +272,15 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
                                     switch (order) {
                                         case 1:
                                             // АвПУКв1 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за первый квартал //// Заполняется в 1, 2, 3, 4 отчетном периоде.
-                                            resultMap[row.okato].amountOfTheAdvancePayment1 += (obligation ? 0.25 * row.taxBase * taxRate * row.coef362 : 0.0)
+                                            resultMap[row.okato].amountOfTheAdvancePayment1 += (obligation ? row.taxSumToPay : 0.0)
                                             break;
                                         case 2:
                                             // АвПУКв2 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за второй квартал //// Заполняется во 2, 3, 4 отчетном периоде.
-                                            resultMap[row.okato].amountOfTheAdvancePayment2 += (obligation ? 0.25 * row.taxBase * taxRate * row.coef362 : 0.0)
+                                            resultMap[row.okato].amountOfTheAdvancePayment2 += (obligation ? row.taxSumToPay : 0.0)
                                             break;
                                         case 3:
                                             // АвПУКв3 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за третий квартал //// Заполняется во 3, 4 отчетном периоде.
-                                            resultMap[row.okato].amountOfTheAdvancePayment3 += (obligation ? 0.25 * row.taxBase * taxRate * row.coef362 : 0.0)
+                                            resultMap[row.okato].amountOfTheAdvancePayment3 += (obligation ? row.taxSumToPay : 0.0)
                                             break;
                                     }
 
