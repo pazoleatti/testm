@@ -1897,7 +1897,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         def parentColumnName = getColumnName(newRow, 'organName')
         def parentColumnValue = record520?.NAME?.value
         def expectedValue = record513?.CODE?.value?.toString()
-        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
+        def expValueNumeric = new BigDecimal(expectedValue).setScale(1).toString()
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue, expValueNumeric], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 52. п. 050 "ИНН организации"
         colIndex = 50
