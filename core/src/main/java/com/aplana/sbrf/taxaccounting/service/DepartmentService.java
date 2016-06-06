@@ -77,7 +77,7 @@ public interface DepartmentService {
     /**
      * Получить подразделение
      */
-    Department getDepartmentBySbrfCode(String sbrfCode);
+    Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly);
 
     /**
      * 10 - Выборка подразделений для бизнес-администрирования

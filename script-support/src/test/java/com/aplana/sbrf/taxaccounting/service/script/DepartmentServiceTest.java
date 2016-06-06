@@ -53,8 +53,8 @@ public class DepartmentServiceTest {
         when(departmentDao.getDepartmentByName("Банк1")).thenReturn(new Department());
         when(departmentDao.getDepartmentByName("")).thenReturn(null);
 
-        when(departmentDao.getDepartmentBySbrfCode("123")).thenReturn(new Department());
-        when(departmentDao.getDepartmentBySbrfCode("321")).thenReturn(null);
+        when(departmentDao.getDepartmentBySbrfCode("123", true)).thenReturn(new Department());
+        when(departmentDao.getDepartmentBySbrfCode("321", true)).thenReturn(null);
 
         ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
     }

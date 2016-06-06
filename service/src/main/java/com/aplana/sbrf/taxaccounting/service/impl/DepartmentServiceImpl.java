@@ -83,8 +83,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public Department getDepartmentBySbrfCode(String sbrfCode) {
-        return departmentDao.getDepartmentBySbrfCode(sbrfCode);
+    public Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly) {
+        return departmentDao.getDepartmentBySbrfCode(sbrfCode, activeOnly);
     }
 
     @Override

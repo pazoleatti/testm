@@ -141,7 +141,7 @@ public class LoadFormDataServiceTest {
         department147 = new Department();
         department147.setId(147);
         department147.setName("147");
-        when(departmentService.getDepartmentBySbrfCode("147")).thenReturn(department147);
+        when(departmentService.getDepartmentBySbrfCode("147", false)).thenReturn(department147);
         when(departmentService.getDepartment(anyInt())).thenReturn(department147);
     }
 

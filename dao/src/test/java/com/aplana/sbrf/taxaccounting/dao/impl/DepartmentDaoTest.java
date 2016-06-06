@@ -61,7 +61,7 @@ public class DepartmentDaoTest {
     @Test
     public void getSbrfCode() {
         Department department;
-        department = departmentDao.getDepartmentBySbrfCode("tB3");
+        department = departmentDao.getDepartmentBySbrfCode("tB3", true);
         Assert.assertNotNull(department);
         Assert.assertTrue(true);
     }

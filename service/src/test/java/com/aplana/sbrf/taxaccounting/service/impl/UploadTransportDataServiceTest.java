@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -30,7 +29,6 @@ import java.util.*;
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
@@ -117,7 +115,7 @@ public class UploadTransportDataServiceTest {
         doReturn(formDepartment).when(departmentService).getDepartment(eq(TEST_DEPARTMENT_ID));
         when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), any(Date.class), any(Date.class)))
                 .thenReturn(Arrays.asList(TEST_DEPARTMENT_ID));
-        when(departmentService.getDepartmentBySbrfCode("147")).thenReturn(formDepartment);
+        when(departmentService.getDepartmentBySbrfCode("147", false)).thenReturn(formDepartment);
         when(departmentService.getParentTB(TEST_DEPARTMENT_ID)).thenReturn(formDepartment);
 
         FormType formType852_4 = new FormType();
@@ -377,7 +375,7 @@ public class UploadTransportDataServiceTest {
             formDepartment.setName("TestDepartment");
             formDepartment.setActive(false);
 
-            when(departmentService.getDepartmentBySbrfCode(eq("147"))).thenReturn(formDepartment);
+            when(departmentService.getDepartmentBySbrfCode(eq("147"), false)).thenReturn(formDepartment);
             TAUserInfo userInfo = new TAUserInfo();
             TAUser user = new TAUser();
             userInfo.setUser(user);

@@ -326,7 +326,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 }
 
                 // Подразделение НФ
-                Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode);
+                Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode, false);
                 formDepartmentId = formDepartment != null ? formDepartment.getId(): null;
 
                 // Не задан код подразделения или код формы

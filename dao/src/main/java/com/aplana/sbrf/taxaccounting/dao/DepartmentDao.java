@@ -77,7 +77,7 @@ public interface DepartmentDao {
      * Получение обособленного подразделения по значению 
      * «Код подразделения в нотации Сбербанка» 
      */
-    Department getDepartmentBySbrfCode(String sbrfCode);
+    Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly);
 
     /**
      * Получение обособленного подразделения по значению 

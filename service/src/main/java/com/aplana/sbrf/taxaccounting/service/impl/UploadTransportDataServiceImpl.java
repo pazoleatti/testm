@@ -402,7 +402,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             }
 
             // Указан несуществующий код подразделения
-            Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode);
+            Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode, false);
             if (formDepartment == null) {
                 logger.warn(U2, fileName);
                 RefBook refBook = refBookDao.get(REF_BOOK_DEPARTMENT);
