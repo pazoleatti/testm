@@ -1597,6 +1597,8 @@ void createSpecificReportApp2() {
 
         xmlFile = File.createTempFile(scriptSpecificReportHolder.fileName, ".xml", new File(System.getProperty("java.io.tmpdir")));
         zos = new ZipArchiveOutputStream(scriptSpecificReportHolder.getFileOutputStream());
+        zos.setEncoding("cp866");
+        zos.setUseLanguageEncodingFlag(true);
         def jrxml = getJrxml(scriptSpecificReportHolder.getFileInputStream())
         def firstCertNum = 0
         def startNumber = 0
@@ -1640,7 +1642,7 @@ void createSpecificReportApp2() {
                 fileInputStream.close()
             }
         }
-        scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name + ".zip")
+        scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name.replace(" ", "_") + ".zip")
     } finally {
         xmlFile?.delete()
         zos?.close()
