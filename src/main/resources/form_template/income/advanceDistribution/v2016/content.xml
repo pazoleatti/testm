@@ -2,8 +2,7 @@
 <formTemplateContent>
     <fixedRows>false</fixedRows>
     <name>Расчет распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации</name>
-    <fullName>Расчет распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации
-    </fullName>
+    <fullName>Расчет распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации</fullName>
     <header>787/1/1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>number</alias>

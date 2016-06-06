@@ -750,27 +750,15 @@ class DBReport {
 
     // Сравнение шаблонов деклараций в БД
     def static void compareDBDeclarationTemplate(def prefix1, def prefix2) {
-        // Запросы на получение макетов
-        def sqlTemplate1 = "select dt1.id," +
-                " dt1.declaration_type_id as type_id," +
-                " dt1.name," +
-                " to_char(dt1.version, 'RRRR') AS version," +
-                " (select to_char(MIN(dt2.version) - INTERVAL '1' day, 'RRRR') from declaration_template dt2 where dt1.declaration_type_id = dt2.declaration_type_id AND TRUNC(dt2.version, 'DD') > dt1.version AND dt2.STATUS IN (0,1,2) group by dt2.declaration_type_id) AS versionEnd," +
-                " dt1.status," +
-                " dt1.create_script as script, " +
-                " (select data from blob_data where id = dt1.xsd) As xsd, " +
-                " (select data from blob_data where id = dt1.jrxml) As jrxml " +
-                "from declaration_template dt1 " +
-                "where" +
-                " dt1.status not in (-1,2)"
-        def sqlTemplate2 = sqlTemplate1
-
         // Перечень всех версий в БД (заполняется в getDeclarationTemplates)
         def allVersions = [:]
+        // Данные для отображения отличий в спецотчетах декларации
+        def subreportTableData = [:]
+        def isBefore1_0 = !checkExistShortName(prefix1) || !checkExistShortName(prefix2)
 
         // Макеты
-        def templates1 = getDeclarationTemplates(prefix1, sqlTemplate1, allVersions)
-        def templates2 = getDeclarationTemplates(prefix2, sqlTemplate2, allVersions)
+        def templates1 = getDeclarationTemplates(prefix1, allVersions, isBefore1_0)
+        def templates2 = getDeclarationTemplates(prefix2, allVersions, isBefore1_0)
 
         // Построение отчета
         def report = new File(Main.REPORT_DECL_DB_NAME)
@@ -789,6 +777,20 @@ class DBReport {
                 link('', rel: 'stylesheet', href: 'http://code.jquery.com/ui/1.10.3/themes/black-tie/jquery-ui.css')
             }
             body {
+                // Скрипт вызова диалога
+                script(type: 'text/javascript', '''
+                $(function() {
+                    $('.cln').click(function() {
+                        $($(this).data('tbl')).dialog("open");
+                    });
+                    $(".dlg").dialog({
+                            modal: true,
+                            autoOpen: false,
+                            position: ['center', 'top'],
+                    width: 1200
+                    });
+                });''')
+
                 p "Сравнение макетов деклараций в БД $prefix1 и $prefix2:"
                 table(class: 'rt') {
                     Main.TAX_FOLDERS.keySet().each { taxName ->
@@ -796,12 +798,13 @@ class DBReport {
                             td(colspan: 11, class: 'hdr', Main.TAX_FOLDERS[taxName])
                         }
                         tr {
+                            def colspan = (isBefore1_0 ? 6 : 7)
                             th(rowspan: 2, 'type_id')
                             th(rowspan: 2, 'Название')
                             th(rowspan: 2, 'Версия')
                             th(rowspan: 2, "$prefix1 id")
                             th(rowspan: 2, "$prefix2 id")
-                            th(colspan: 6, 'Результат сравнения')
+                            th(colspan: colspan, 'Результат сравнения')
                         }
                         tr {
                             th 'name'
@@ -810,6 +813,9 @@ class DBReport {
                             th 'script'
                             th 'xsd'
                             th 'jrxml'
+                            if (!isBefore1_0) {
+                                th 'спецотчеты'
+                            }
                         }
 
                         // Сортировка
@@ -849,6 +855,102 @@ class DBReport {
                                         jrxmlEquals = diff.similar()
                                     } else if (tmp1?.jrxml != null || tmp2?.jrxml != null) {
                                         jrxmlEquals = false
+                                    }
+
+                                    // Сравнение спецотчетов
+                                    def checkSubreport = null
+                                    def errorSubreport = null
+                                    def titleSubreports = null
+                                    def tableSubreports = null
+                                    if (isBefore1_0) {
+                                        checkSubreport = "+"
+                                        errorSubreport = false
+                                    } else {
+                                        def subreportsDb1 = (tmp1?.subreports ?: [:])
+                                        def subreportsDb2 = (tmp2?.subreports ?: [:])
+
+                                        def changesMap = [:]
+                                        def headers = ['name', 'ord', 'alias']
+                                        def subreportsSet1 = subreportsDb1.values().collect { it }
+                                        def subreportsSet2 = subreportsDb2.values().collect { it }
+                                        for (def i = 0; i < Math.max(subreportsSet1.size(), subreportsSet2.size()); i++) {
+                                            def col1 = subreportsSet1.size() > i ? subreportsSet1.getAt(i) : new Expando()
+                                            def col2 = subreportsSet2.size() > i ? subreportsSet2.getAt(i) : new Expando()
+                                            // сравнение обычных полей
+                                            headers.each { header ->
+                                                if (col1 == null || col1.getProperties().isEmpty() ||
+                                                        col2 == null || col2.getProperties().isEmpty() ||
+                                                        col1[header] != col2[header]) {
+                                                    if (!changesMap.containsKey(i)) {
+                                                        changesMap.put(i, [])
+                                                    }
+                                                    changesMap[i].add(header)
+                                                }
+                                            }
+                                            // сравнение jrxml
+                                            def jrxmlDb1 = col1?.jrxml
+                                            def jrxmlDb2 = col2?.jrxml
+                                            col1.jrxmlInfo = 'Ok'
+                                            col2.jrxmlInfo = 'Ok'
+                                            if (jrxmlDb2 != null && jrxmlDb1 != null) {
+                                                Diff jrxmlDiff = XMLUnit.compareXML(jrxmlDb2, jrxmlDb1)
+                                                def jrxmlEqual = jrxmlDiff.similar()
+                                                if (!jrxmlEqual) {
+                                                    col1.jrxmlInfo = 'Макеты Jasper отличаются'
+                                                    col2.jrxmlInfo = 'Макеты Jasper отличаются'
+                                                    if (!changesMap.containsKey(i)) {
+                                                        changesMap.put(i, [])
+                                                    }
+                                                    changesMap[i].add('jrxmlInfo')
+                                                }
+                                            } else if (jrxmlDb2 != null || jrxmlDb1 != null) {
+                                                if (jrxmlDb1 == null) {
+                                                    col1.jrxmlInfo = 'нет в git'
+                                                }
+                                                if (jrxmlDb2 == null) {
+                                                    col2.jrxmlInfo = 'нет в БД'
+                                                }
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add('jrxmlInfo')
+                                            }
+                                        }
+                                        headers = headers + 'jrxmlInfo'
+                                        // Находим отсутсвтующие в БД1 спецотчеты
+                                        def absentSubreports = subreportsDb1.findAll { alias, columnDb -> subreportsDb2[alias] == null }
+                                        // Проходим по спецотчетам из базы 1 и удаляем повторяющиеся из найденных в бд 2
+                                        subreportsDb1.each { alias, styleDb ->
+                                            subreportsDb2.remove(alias)
+                                        }
+
+                                        if (!absentSubreports.isEmpty() || !subreportsDb2.isEmpty()) {
+                                            checkSubreport = '—'
+                                            errorSubreport = true
+                                        }
+                                        if (absentSubreports.isEmpty() && subreportsDb2.isEmpty() && changesMap.isEmpty()) {
+                                            checkSubreport = '+'
+                                            errorSubreport = false
+                                        }
+                                        if (!changesMap.isEmpty()) {
+                                            titleSubreports = "Подробнее…"
+                                            checkSubreport = '—'
+                                            errorSubreport = true
+                                            tableSubreports = "_${type_id}_${version}"
+
+                                            def data = new Expando()
+                                            data.name = tmp1.name
+                                            data.changesMap = changesMap
+                                            data.headers = headers
+                                            data.subreportsSet1 = subreportsSet1
+                                            data.subreportsSet2 = subreportsSet2
+                                            data.type_id = type_id
+                                            data.version = version
+                                            data.versionEnd = version
+                                            data.prefix1 = prefix1
+                                            data.prefix2 = prefix2
+                                            subreportTableData.put(tableSubreports, data)
+                                        }
                                     }
 
                                     // Признак сравнения
@@ -900,10 +1002,28 @@ class DBReport {
                                         } else {
                                             td(class: 'td_error', title: 'См. БД', jrxmlC)
                                         }
+
+                                        if (!isBefore1_0) {
+                                            if (errorSubreport) {
+                                                td(class: 'td_error cln', title: titleSubreports, 'data-tbl': "#$tableSubreports", checkSubreport)
+                                            } else {
+                                                td(class: 'td_ok', checkSubreport)
+                                            }
+                                        }
                                     }
                                 }
                             }
-
+                        }
+                    }
+                }
+                // Скрытый блок для отображения отличий в спецотчетах
+                subreportTableData.each() { key, data ->
+                    div(class: 'dlg', id: key, title: "Сравнение спецотчетов макета вида ${data.type_id} версии ${data.version} «${data.name}»") {
+                        table(class: 'rt') {
+                            // Вывод таблицы со спецотчетами 1
+                            printSubreportsTable(builder, data.changesMap, data.headers, data.prefix1, data.subreportsSet1)
+                            // Вывод таблицы со спецотчетами 2
+                            printSubreportsTable(builder, data.changesMap, data.headers, data.prefix2, data.subreportsSet2)
                         }
                     }
                 }
@@ -1093,7 +1213,7 @@ class DBReport {
         println("See ${Main.REPORT_REFBOOK_DB_NAME} for details")
     }
 
-    def private static getDeclarationTemplates(def prefix, def sqlTemplate, def allVersions) {
+    def private static getDeclarationTemplates(def prefix, def allVersions, def isBefore1_0) {
         println("DBMS connect: $prefix")
         def retVal = new Expando()
 
@@ -1102,6 +1222,29 @@ class DBReport {
         def sql = Sql.newInstance(Main.DB_URL, prefix, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
 
         try {
+            // макеты декларации
+            def sqlTemplate = """
+select
+    dt1.id,
+    dt1.declaration_type_id as type_id,
+    dt1.name,
+    to_char(dt1.version, 'RRRR') AS version,
+    (
+        select
+            to_char(MIN(dt2.version) - INTERVAL '1' day, 'RRRR')
+    	from declaration_template dt2
+    	where
+            dt1.declaration_type_id = dt2.declaration_type_id AND TRUNC(dt2.version, 'DD') > dt1.version AND dt2.STATUS IN (0,1,2) group by dt2.declaration_type_id
+    ) AS versionEnd,
+    dt1.status,
+    dt1.create_script as script,
+    (select data from blob_data where id = dt1.xsd) As xsd,
+    (select data from blob_data where id = dt1.jrxml) As jrxml
+from
+    declaration_template dt1
+where
+    dt1.status not in (-1, 2)
+"""
             sql.eachRow(sqlTemplate) {
                 def type_id = it.type_id as Integer
                 if (templateMap[type_id] == null) {
@@ -1136,13 +1279,46 @@ class DBReport {
                 }
                 allVersions[type_id].add(version.version)
             }
+
+            // спецотчеты
+            if (!isBefore1_0) {
+                def sqlQuery = """
+select
+    dt.declaration_type_id as type_id,
+    to_char(dt.version, 'RRRR') as version,
+    ds.id,
+    ds.declaration_template_id,
+    ds.name,
+    ds.ord,
+    ds.alias,
+    (select data from blob_data where id = ds.blob_data_id) as jrxml
+from
+    declaration_subreport ds,
+    declaration_template dt
+where
+    ds.declaration_template_id = dt.id and dt.status not in (-1, 2)
+order by ds.declaration_template_id, ds.ord
+"""
+                sql.eachRow(sqlQuery) {
+                    def type_id = it.type_id as Integer
+                    def version = it.version
+                    if (templateMap[type_id][version].subreports == null) {
+                        templateMap[type_id][version].subreports = [:]
+                    }
+                    def subreport = new Expando()
+                    ['id', 'name', 'ord', 'alias'].each { alias ->
+                        subreport[alias] = it[alias]
+                    }
+                    subreport.jrxml = it.jrxml ? XMLUnit.buildControlDocument(IOUtils.toString(it.jrxml.binaryStream, "UTF-8")) : null
+                    templateMap[type_id][version].subreports.put(it.alias, subreport)
+                }
+            }
         } finally {
             sql.close()
         }
         println("Load DB declaration_template from $prefix OK")
         retVal.templateMap = templateMap
         return retVal
-
     }
 
     def private static getFormDeclarationTypes(def prefix, def sqlTemplate) {
