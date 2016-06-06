@@ -1567,7 +1567,7 @@ void createSpecificReportNoApp2() {
         try {
             def jasperPrint = declarationService.createJasperReport(fileInputStream, getJrxml(scriptSpecificReportHolder.getFileInputStream()), jrSwapFile, null);
             declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream())
-            scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name + ".pdf")
+            scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name.replace(" ", "_") + ".pdf")
         } finally {
             if (jrSwapFile != null)
                 jrSwapFile.dispose();

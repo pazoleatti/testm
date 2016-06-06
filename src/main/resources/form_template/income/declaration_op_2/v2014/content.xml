@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<declarationTemplateContent>
+    <subreports>
+        <alias>declaration_op</alias>
+        <name>Декларация по прибыли</name>
+        <order>1</order>
+        <blobDataId>report_op.jrxml</blobDataId>
+        <fileName>report_op.jrxml</fileName>
+    </subreports>
+</declarationTemplateContent>

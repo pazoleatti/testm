@@ -1,10 +1,13 @@
 package form_template.income.declaration_op_2.v2014
 
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
+import net.sf.jasperreports.engine.util.JRSwapFile
+import org.apache.commons.io.IOUtils
 
 import javax.xml.stream.XMLStreamReader
 
@@ -38,7 +41,14 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
         def readerBank = checkDeclarationBank(false)
-        generateXML(readerBank)
+        generateXML(readerBank, xml)
+        break
+    case FormDataEvent.CALCULATE_TASK_COMPLEXITY:
+        calcTaskComplexity()
+        break
+    case FormDataEvent.CREATE_SPECIFIC_REPORT:
+        def readerBank = checkDeclarationBank(false)
+        createSpecificReport(readerBank)
         break
     default:
         return
@@ -290,7 +300,7 @@ String getDocumentMessage(String place, String printName, String xmlName, String
 }
 
 // Запуск генерации XML.
-void generateXML(XMLStreamReader readerBank) {
+void generateXML(XMLStreamReader readerBank, def xml) {
 
     def empty = 0
     def knd = '1151006'
@@ -785,4 +795,57 @@ def generateXmlFileId(String taxOrganCodeProm, String taxOrganCode) {
         return fileId
     }
     return null
+}
+
+void calcTaskComplexity() {
+    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
+    taskComplexityHolder.setValue(getCellCount(formDataCollection, [500])) // декларацию не считаю
+}
+
+def getCellCount(def formDataCollection, def formTypeIdList) {
+    List<FormData> formList = formDataCollection.records.findAll { formTypeIdList.contains(it.getFormType().getId()) }
+    def cellCount = 0
+    for (def form : formList) {
+        cellCount += ((formDataService.getDataRowHelper(form)?.count ?: 0) * (form.getFormColumns().size()))
+    }
+    return cellCount
+}
+
+void createSpecificReport(def readerBank) {
+    File xmlFile = File.createTempFile(scriptSpecificReportHolder.fileName, ".xml", new File(System.getProperty("java.io.tmpdir")));
+    FileWriter fileWriter = null
+    FileInputStream fileInputStream
+    try {
+        try {
+            fileWriter = new FileWriter(xmlFile);
+            fileWriter.write("<?xml version=\"1.0\" encoding=\"windows-1251\"?>");
+            generateXML(readerBank, fileWriter)
+        } finally {
+            fileWriter?.close();
+        }
+        fileInputStream = new FileInputStream(xmlFile)
+        JRSwapFile jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
+        try {
+            def jasperPrint = declarationService.createJasperReport(fileInputStream, getJrxml(scriptSpecificReportHolder.getFileInputStream()), jrSwapFile, null);
+            declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream())
+            scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name.replace(" ", "_") + ".pdf")
+        } finally {
+            if (jrSwapFile != null)
+                jrSwapFile.dispose();
+        }
+    } finally {
+        fileInputStream?.close()
+        xmlFile?.delete()
+    }
+}
+
+String getJrxml(def jrxmlInputStream) {
+    StringWriter writer = new StringWriter();
+    try {
+        IOUtils.copy(jrxmlInputStream, writer, "UTF-8");
+        return writer.toString();
+    } finally {
+        IOUtils.closeQuietly(jrxmlInputStream);
+        IOUtils.closeQuietly(writer);
+    }
 }
