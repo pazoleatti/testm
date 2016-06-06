@@ -727,6 +727,27 @@ class DBReport {
         }
     }
 
+    // Вывод шапки для спецотчетов
+    def public static printSubreportsTable(def builder, def changesMap, def headers, def prefix, def subreportsSet) {
+        // Название таблицы
+        builder.tr {
+            td(colspan: 4, class: 'hdr', prefix)
+        }
+        builder.tr {
+            headers.each { header ->
+                th header
+            }
+        }
+        // Содержимое таблицы
+        subreportsSet.eachWithIndex { column, i ->
+            builder.tr {
+                headers.each { header ->
+                    td((changesMap[i]?.contains(header) ? [class: 'td_error'] : [:]), column[header])
+                }
+            }
+        }
+    }
+
     // Сравнение шаблонов деклараций в БД
     def static void compareDBDeclarationTemplate(def prefix1, def prefix2) {
         // Запросы на получение макетов

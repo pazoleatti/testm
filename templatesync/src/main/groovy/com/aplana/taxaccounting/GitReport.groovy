@@ -123,22 +123,43 @@ class GitReport {
 
     // Загрузка скриптов деклараций из git в БД и отчет в html-файле
     def static void updateDeclarationScripts(def versionsMap, def sql, def checkOnly = true) {
+        def isBefore1_0 = !DBReport.checkExistShortName(Main.DB_USER)
         def writer = new FileWriter(new File(Main.REPORT_DECL_GIT_NAME))
         def builder = new groovy.xml.MarkupBuilder(writer)
+        // Данные для отображения отличий в спецотчетах декларации
+        def subreportTableData = [:]
         builder.html {
             head {
                 meta(charset: 'windows-1251')
                 title "Сравнение макетов деклараций git и БД ${Main.DB_USER}"
                 style(type: "text/css", Main.HTML_STYLE)
+                script('', type: 'text/javascript', src: 'http://code.jquery.com/jquery-1.9.1.min.js')
+                script('', type: 'text/javascript', src: 'http://code.jquery.com/ui/1.10.3/jquery-ui.min.js')
+                link('', rel: 'stylesheet', href: 'http://code.jquery.com/ui/1.10.3/themes/black-tie/jquery-ui.css')
             }
             body {
+                // Скрипт вызова диалога
+                script(type: 'text/javascript', '''
+                $(function() {
+                    $('.cln').click(function() {
+                        $($(this).data('tbl')).dialog("open");
+                    });
+                    $(".dlg").dialog({
+                            modal: true,
+                            autoOpen: false,
+                            position: ['center', 'top'],
+                    width: 1200
+                    });
+                });''')
+
                 p "Сравнение макетов деклараций в БД ${Main.DB_USER} и git:"
                 table(class: 'rt') {
                     Main.TAX_FOLDERS.keySet().each { folderName ->
-                        def scanResult = scanDeclarationSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql)
+                        def scanResult = scanDeclarationSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql, subreportTableData, isBefore1_0)
                         if (scanResult && !scanResult.isEmpty()) {
                             tr {
-                                td(colspan: 8, class: 'hdr', Main.TAX_FOLDERS[folderName])
+                                def colspan = (isBefore1_0 ? 8 : 9)
+                                td(colspan: colspan, class: 'hdr', Main.TAX_FOLDERS[folderName])
                             }
                             tr {
                                 th 'type_id'
@@ -149,6 +170,9 @@ class GitReport {
                                 th 'Сравнение скриптов'
                                 th 'Сравнение jrxml'
                                 th 'Сравнение xsd'
+                                if (!isBefore1_0) {
+                                    th 'Сравнение спецотчетов'
+                                }
                             }
                             scanResult.each { result ->
                                 tr {
@@ -168,8 +192,26 @@ class GitReport {
                                     td(class: (result.error ? 'td_error' : 'td_ok'), result.check)
                                     td(class: (result.jrxmlError ? 'td_error' : 'td_ok'), result.jrxmlCheck)
                                     td(class: (result.xsdError ? 'td_error' : 'td_ok'), result.xsdCheck)
+                                    if (!isBefore1_0) {
+                                        if (result.errorSubreport) {
+                                            td(class: 'td_error cln', title: result.titleSubreports, 'data-tbl': "#${result.tableSubreports}", result.checkSubreport)
+                                        } else {
+                                            td(class: 'td_ok', result.checkSubreport)
+                                        }
+                                    }
                                 }
                             }
+                        }
+                    }
+                }
+                // Скрытый блок для отображения отличий в спецотчетах
+                subreportTableData.each() { key, data ->
+                    div(class: 'dlg', id: key, title: "Сравнение спецотчетов макета вида ${data.type_id} версии ${data.version} «${data.name}»") {
+                        table(class: 'rt') {
+                            // Вывод таблицы со спецотчетами 1
+                            DBReport.printSubreportsTable(builder, data.changesMap, data.headers, data.prefix1, data.subreportsSet1)
+                            // Вывод таблицы со спецотчетами 2
+                            DBReport.printSubreportsTable(builder, data.changesMap, data.headers, data.prefix2, data.subreportsSet2)
                         }
                     }
                 }
@@ -595,7 +637,7 @@ class GitReport {
     }
 
     // Сравнение git-версии декларации с версией в БД и загрузка в случае отличий
-    def static scanDeclarationSrcFolderAndUpdateDb(def versionsMap, def folderName, def sql) {
+    def static scanDeclarationSrcFolderAndUpdateDb(def versionsMap, def folderName, def sql, def subreportTableData, def isBefore1_0) {
         def scanResult = []
 
         XMLUnit.setIgnoreWhitespace(true)
@@ -669,6 +711,7 @@ class GitReport {
                                         }
                                     }
                                 }
+
                                 // Сравнение JRXML
                                 def jrxmlFile = new File("$versionFolder/report.jrxml")
                                 if (!jrxmlFile.exists()) {
@@ -691,6 +734,7 @@ class GitReport {
                                         result.jrxmlCheck = "Макет Jasper не обнаружен в БД"
                                     }
                                 }
+
                                 // Сравнение XSD
                                 def xsdFiles = new File("$versionFolder").listFiles(new FilenameFilter() {
                                     @Override
@@ -723,6 +767,123 @@ class GitReport {
                                 } else {
                                     result.xsdCheck = "Файл XSD не найден в «${versionFolder.absolutePath}»"
                                     result.xsdError = true
+                                }
+
+                                // Сравнение спецотчетов
+                                if (isBefore1_0) {
+                                    result.checkSubreport = "Ok"
+                                    result.errorSubreport = false
+                                } else {
+                                    def Map mapSubreportsXml = [:]
+                                    def subreportsDb = (versions[version]?.subreports ?: [:])
+                                    // собрать все спецотчеты из xml
+                                    def contentFile = new File("$versionFolder/content.xml")
+                                    def xml = (contentFile.exists() ? new XmlSlurper().parseText(contentFile.getText()) : null)
+                                    xml?.subreports?.each { subreportXml ->
+                                        def subreport = new Expando()
+                                        subreport.name = subreportXml.name.text() ?: null
+                                        subreport.ord = convertTextToInteger(subreportXml.order.text())
+                                        subreport.alias = subreportXml.alias.text()
+                                        subreport.fileName = subreportXml.fileName.text() ?: null
+                                        // JRXML
+                                        subreport.jrxml = null
+                                        if (subreport.fileName) {
+                                            def subreportJrxmlFile = new File("$versionFolder/" + subreport.fileName)
+                                            if (subreportJrxmlFile.exists()) {
+                                                subreport.jrxml = XMLUnit.buildControlDocument(subreportJrxmlFile?.text)
+                                            }
+                                        }
+                                        mapSubreportsXml.put(subreportXml.alias.text(), subreport)
+                                    }
+
+                                    def changesMap = [:]
+                                    def headers = ['name', 'ord', 'alias']
+                                    def subreportsSet1 = mapSubreportsXml.values().collect { it }
+                                    def subreportsSet2 = subreportsDb.values().collect { it }
+                                    for (def i = 0; i < Math.max(subreportsSet1.size(), subreportsSet2.size()); i++) {
+                                        def col1 = subreportsSet1.size() > i ? subreportsSet1.getAt(i) : new Expando()
+                                        def col2 = subreportsSet2.size() > i ? subreportsSet2.getAt(i) : new Expando()
+                                        // сравнение обычных полей
+                                        headers.each { header ->
+                                            if (col1 == null || col1.getProperties().isEmpty() ||
+                                                    col2 == null || col2.getProperties().isEmpty() ||
+                                                    col1[header] != col2[header]) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add(header)
+                                            }
+                                        }
+                                        // сравнение jrxml
+                                        def gitJrxml = col1?.jrxml
+                                        def dbJrxml = col2?.jrxml
+                                        col1.jrxmlInfo = 'Ok'
+                                        col2.jrxmlInfo = 'Ok'
+                                        if (dbJrxml != null && gitJrxml != null) {
+                                            Diff diff = XMLUnit.compareXML(dbJrxml, gitJrxml)
+                                            def jrxmlEqual = diff.similar()
+                                            if (!jrxmlEqual) {
+                                                col1.jrxmlInfo = 'Макеты Jasper отличаются'
+                                                col2.jrxmlInfo = 'Макеты Jasper отличаются'
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add('jrxmlInfo')
+                                            }
+                                        } else if (dbJrxml != null || gitJrxml != null) {
+                                            if (gitJrxml == null) {
+                                                col1.jrxmlInfo = 'нет в git'
+                                            }
+                                            if (dbJrxml == null) {
+                                                col2.jrxmlInfo = 'нет в БД'
+                                            }
+                                            if (!changesMap.containsKey(i)) {
+                                                changesMap.put(i, [])
+                                            }
+                                            changesMap[i].add('jrxmlInfo')
+                                        }
+                                    }
+                                    headers = headers + 'jrxmlInfo'
+                                    // Находим отсутсвтующие в гите спецотчеты
+                                    def absentSubreports = subreportsDb.findAll { alias, columnDb -> mapSubreportsXml[alias] == null }
+                                    // Проходим по спецотчетам из базы и удаляем повторяющиеся из найденных в xml
+                                    subreportsDb.each { alias, styleDb ->
+                                        mapSubreportsXml.remove(alias)
+                                    }
+
+                                    if (!absentSubreports.isEmpty()) {
+                                        def tmpSubreports = absentSubreports.keySet().join("', '")
+                                        result.checkSubreport = "В DB обнаружены спецотчеты '$tmpSubreports' отсутствующие в git. "
+                                        result.errorSubreport = true
+                                    }
+                                    if (!mapSubreportsXml.isEmpty()) {
+                                        def tmpSubreports = mapSubreportsXml.keySet().join("', '")
+                                        result.checkSubreport = (result.checkSubreport ?: "") + "В git обнаружены спецотчеты '$tmpSubreports' отсутствующие в БД. "
+                                        result.errorSubreport = true
+                                    }
+                                    if (absentSubreports.isEmpty() && mapSubreportsXml.isEmpty() && changesMap.isEmpty()) {
+                                        result.checkSubreport = "Ok"
+                                        result.errorSubreport = false
+                                    }
+                                    if (!changesMap.isEmpty()) {
+                                        result.titleSubreports = "Подробнее…"
+                                        result.checkSubreport = "-"
+                                        result.errorSubreport = true
+                                        result.tableSubreports = "_${id}_${version}"
+
+                                        def data = new Expando()
+                                        data.name = result.name
+                                        data.changesMap = changesMap
+                                        data.headers = headers
+                                        data.subreportsSet1 = subreportsSet1
+                                        data.subreportsSet2 = subreportsSet2
+                                        data.type_id = id
+                                        data.version = version
+                                        data.versionEnd = version
+                                        data.prefix1 = 'git'
+                                        data.prefix2 = 'БД'
+                                        subreportTableData.put(result.tableSubreports, data)
+                                    }
                                 }
 
                                 // Удаляем из списка не найденных
@@ -908,12 +1069,30 @@ class GitReport {
         println("Load DB form_style OK")
 
         def isBefore1_0 = !DBReport.checkExistShortName(Main.DB_USER)
-        def sqlQuery = "select ft.type_id, to_char(ft.version, 'RRRR') as version, fc.id, fc.name, fc.ord, fc.alias, " +
-                "fc.type, fc.width, fc.precision, fc.max_length, fc.checking, fc.attribute_id, fc.format, fc.filter, " +
-                "fc.parent_column_id, fc.attribute_id2, fc.numeration_row" + (isBefore1_0 ? "" : ", fc.short_name") +" \n" +
-                "from form_column fc, form_template ft \n" +
-                "where fc.form_template_id = ft.id and ft.status not in (-1, 2) " +
-                "order by fc.form_template_id, fc.ord "
+        def sqlQuery = """
+select
+	ft.type_id,
+	to_char(ft.version, 'RRRR') as version,
+	fc.id,
+	fc.name,
+	fc.ord, fc.alias,
+	fc.type,
+	fc.width,
+	fc.precision,
+	fc.max_length,
+	fc.checking,
+	fc.attribute_id,
+	fc.format, fc.filter,
+	fc.parent_column_id,
+	fc.attribute_id2,
+	fc.numeration_row""" + (isBefore1_0 ? "" : ", fc.short_name") + """
+from
+	form_column fc,
+	form_template ft
+where
+	fc.form_template_id = ft.id and ft.status not in (-1, 2)
+order by fc.form_template_id, fc.ord
+"""
         sql.eachRow(sqlQuery) {
             def type_id = it.type_id as Integer
             def version = it.version
@@ -994,6 +1173,42 @@ class GitReport {
             }
             map[type_id].put(it.version, version)
         }
+
+        // спецотчеты
+        def isBefore1_0 = !DBReport.checkExistShortName(Main.DB_USER)
+        if (!isBefore1_0) {
+            def sqlQuery = """
+select
+    dt.declaration_type_id as type_id,
+    to_char(dt.version, 'RRRR') as version,
+    ds.id,
+    ds.declaration_template_id,
+    ds.name,
+    ds.ord,
+    ds.alias,
+    (select data from blob_data where id = ds.blob_data_id) as jrxml
+from
+    declaration_subreport ds,
+    declaration_template dt
+where
+    ds.declaration_template_id = dt.id and dt.status not in (-1, 2)
+order by ds.declaration_template_id, ds.ord
+"""
+            sql.eachRow(sqlQuery) {
+                def type_id = it.type_id as Integer
+                def version = it.version
+                if (map[type_id][version].subreports == null) {
+                    map[type_id][version].subreports = [:]
+                }
+                def subreport = new Expando()
+                ['id', 'name', 'ord', 'alias'].each { alias ->
+                    subreport[alias] = it[alias]
+                }
+                subreport.jrxml = it.jrxml ? XMLUnit.buildControlDocument(IOUtils.toString(it.jrxml.binaryStream, "UTF-8")) : null
+                map[type_id][version].subreports.put(it.alias, subreport)
+            }
+        }
+
         println("Load DB declaration_template OK")
         return map
     }
