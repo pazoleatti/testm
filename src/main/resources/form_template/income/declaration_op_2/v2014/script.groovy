@@ -47,8 +47,7 @@ switch (formDataEvent) {
         calcTaskComplexity()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
-        def readerBank = checkDeclarationBank(false)
-        createSpecificReport(readerBank)
+        createSpecificReport()
         break
     default:
         return
@@ -811,22 +810,13 @@ def getCellCount(def formDataCollection, def formTypeIdList) {
     return cellCount
 }
 
-void createSpecificReport(def readerBank) {
-    File xmlFile = File.createTempFile(scriptSpecificReportHolder.fileName, ".xml", new File(System.getProperty("java.io.tmpdir")));
-    FileWriter fileWriter = null
-    FileInputStream fileInputStream
+void createSpecificReport() {
+    String xmlString = declarationService.getXmlData(declarationData.id)
+    InputStream xmlInputStream = new ByteArrayInputStream(xmlString.bytes)
     try {
-        try {
-            fileWriter = new FileWriter(xmlFile);
-            fileWriter.write("<?xml version=\"1.0\" encoding=\"windows-1251\"?>");
-            generateXML(readerBank, fileWriter)
-        } finally {
-            fileWriter?.close();
-        }
-        fileInputStream = new FileInputStream(xmlFile)
         JRSwapFile jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
         try {
-            def jasperPrint = declarationService.createJasperReport(fileInputStream, getJrxml(scriptSpecificReportHolder.getFileInputStream()), jrSwapFile, null);
+            def jasperPrint = declarationService.createJasperReport(xmlInputStream, getJrxml(scriptSpecificReportHolder.getFileInputStream()), jrSwapFile, null);
             declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream())
             scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name.replace(" ", "_") + ".pdf")
         } finally {
@@ -834,8 +824,7 @@ void createSpecificReport(def readerBank) {
                 jrSwapFile.dispose();
         }
     } finally {
-        fileInputStream?.close()
-        xmlFile?.delete()
+        xmlInputStream?.close()
     }
 }
 
