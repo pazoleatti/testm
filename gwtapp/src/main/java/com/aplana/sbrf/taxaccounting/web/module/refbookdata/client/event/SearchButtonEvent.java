@@ -14,6 +14,7 @@ public class SearchButtonEvent extends GwtEvent<SearchButtonEvent.SearchHandler>
 
     private Date relevanceDate;
     private String searchPattern;
+    private boolean exactSearch;
 
     public Date getRelevanceDate() {
         return relevanceDate;
@@ -23,9 +24,14 @@ public class SearchButtonEvent extends GwtEvent<SearchButtonEvent.SearchHandler>
         return searchPattern;
     }
 
-    public SearchButtonEvent(Date relevanceDate, String searchPattern) {
+    public boolean isExactSearch() {
+        return exactSearch;
+    }
+
+    public SearchButtonEvent(Date relevanceDate, String searchPattern, boolean exactSearch) {
         this.relevanceDate = relevanceDate;
         this.searchPattern = searchPattern;
+        this.exactSearch = exactSearch;
     }
 
     private static final GwtEvent.Type<SearchHandler> TYPE = new GwtEvent.Type<SearchHandler>();
@@ -48,7 +54,7 @@ public class SearchButtonEvent extends GwtEvent<SearchButtonEvent.SearchHandler>
         void onSearch(SearchButtonEvent event);
     }
 
-    public static void fire(HasHandlers source, Date date, String pattern) {
-        source.fireEvent(new SearchButtonEvent(date, pattern));
+    public static void fire(HasHandlers source, Date date, String pattern, boolean exactSearch) {
+        source.fireEvent(new SearchButtonEvent(date, pattern, exactSearch));
     }
 }

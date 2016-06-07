@@ -128,10 +128,7 @@
                     <g:HorizontalPanel spacing="0" width="100%" addStyleNames="{modal.datePanel}"
                                        verticalAlignment="middle" horizontalAlignment="right">
                         <g:cell horizontalAlignment="left" width="50%">
-                            <g:CheckBox ui:field="pickAll" wordWrap="false" text="Выделить все"/>
-                        </g:cell>
-                        <g:cell horizontalAlignment="left" width="50%">
-                            <g:CheckBox ui:field="selectChild" wordWrap="false" text="Включая подчиненные"/>
+                            <g:CheckBox ui:field="exactSearch" wordWrap="false" text="Искать по точному совпадению"/>
                         </g:cell>
                         <g:cell horizontalAlignment="right" width="50%">
                             <g:CheckBox ui:field="showDisabled" wordWrap="false" text="Отображать *недействующие подразделения" />
@@ -145,11 +142,17 @@
 
                     <g:HorizontalPanel spacing="0" horizontalAlignment="right" verticalAlignment="middle"
                                        width="100%" addStyleNames="{modal.buttons}">
-                        <g:cell horizontalAlignment="left" width="99%">
+                        <g:cell horizontalAlignment="left" width="25%">
                             <g:HorizontalPanel ui:field="itemsInfoPanel">
                                 <g:Label ui:field="countItemsLabel" text="Выделено:"/>
                                 <g:Label ui:field="countItems" width="3em" addStyleNames="{modal.forCountSelected}" />
                             </g:HorizontalPanel>
+                        </g:cell>
+                        <g:cell horizontalAlignment="left" width="20%">
+                            <g:CheckBox ui:field="pickAll" wordWrap="false" text="Выделить все"/>
+                        </g:cell>
+                        <g:cell horizontalAlignment="left" width="30%">
+                            <g:CheckBox ui:field="selectChild" wordWrap="false" text="Включая подчиненные"/>
                         </g:cell>
                         <g:Button ui:field="ok" text="Выбрать" width="70px" addStyleNames="{modal.marginRight10}"/>
                         <g:Button ui:field="cancel" text="Закрыть" width="70px"/>

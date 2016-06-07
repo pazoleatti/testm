@@ -59,7 +59,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     @ProxyEvent
     @Override
     public void onSearch(SearchButtonEvent event) {
-        getView().setPickerState(event.getRelevanceDate(), event.getSearchPattern());
+        getView().setPickerState(event.getRelevanceDate(), event.getSearchPattern(), event.isExactSearch());
         searchButtonClicked(event.getRelevanceDate());
     }
 
@@ -109,7 +109,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
 
         void setAttributeId(Long attrId);
 
-        void setPickerState(Date relevanceDate, String searchPattern);
+        void setPickerState(Date relevanceDate, String searchPattern, boolean exactSearch);
 
         PickerState getPickerState();
 
@@ -327,9 +327,9 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         getView().setAttributeId(attrId);
     }
 
-    public void initPickerState(Date relevanceDate, String searchPattern) {
+    public void initPickerState(Date relevanceDate, String searchPattern, boolean exactSearch) {
         this.relevanceDate = relevanceDate;
-        getView().setPickerState(relevanceDate, searchPattern);
+        getView().setPickerState(relevanceDate, searchPattern, exactSearch);
     }
 
     @Override
@@ -387,5 +387,9 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
 
     public String getSearchPattern() {
         return getView().getPickerState().getSearchPattern();
+    }
+
+    public boolean isExactSearch() {
+        return getView().getPickerState().isExactSearch();
     }
 }

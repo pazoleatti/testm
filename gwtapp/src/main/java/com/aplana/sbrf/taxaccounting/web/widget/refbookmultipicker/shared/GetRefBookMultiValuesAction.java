@@ -25,6 +25,7 @@ public class GetRefBookMultiValuesAction extends UnsecuredActionImpl<GetRefMulti
     private Integer sortAttributeIndex;
     private boolean isSortAscending;
     private PickerContext context;
+    private boolean exactSearch;
 
     // идентификаторы которые нужно выделить
     // может быть пустой
@@ -97,6 +98,14 @@ public class GetRefBookMultiValuesAction extends UnsecuredActionImpl<GetRefMulti
     @Override
     public String getName() {
         return "Получение значений справочника";
+    }
+
+    public boolean isExactSearch() {
+        return exactSearch;
+    }
+
+    public void setExactSearch(boolean exactSearch) {
+        this.exactSearch = exactSearch;
     }
 
     @Override

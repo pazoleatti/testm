@@ -40,6 +40,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @UiField
     Button search, cancelEdit;
     @UiField
+    CheckBox exactSearch;
+    @UiField
     HTML separator, separator1;
     @UiField
     TextBox filterText;
@@ -217,6 +219,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 separator.setVisible(true);
                 edit.setVisible(false);
                 search.setEnabled(true);
+                exactSearch.setEnabled(true);
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(false);
@@ -228,6 +231,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 separator.setVisible(false);
                 edit.setVisible(false);
                 search.setEnabled(true);
+                exactSearch.setEnabled(true);
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
@@ -239,6 +243,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 deleteRow.setVisible(false);
                 separator.setVisible(false);
                 search.setEnabled(true);
+                exactSearch.setEnabled(true);
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
@@ -248,6 +253,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
                 search.setEnabled(false);
+                exactSearch.setEnabled(false);
                 filterText.setEnabled(false);
                 separator.setVisible(false);
                 relevanceDate.setEnabled(false);
@@ -277,6 +283,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         relevanceDateLabel.setVisible(!isVersion&&isVersioned);
         separator.setVisible(!isVersion);
         search.setVisible(!isVersion);
+        exactSearch.setVisible(!isVersion);
         separator1.setVisible(!isVersion&&isVersioned);
         cancelEdit.setVisible(!isVersion);
         printAnchor.setVisible(!isVersion);
@@ -293,6 +300,11 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @Override
     public String getSearchPattern() {
         return filterText.getText();
+    }
+
+    @Override
+    public Boolean getExactSearch() {
+        return exactSearch.getValue();
     }
 
     @Override

@@ -20,7 +20,7 @@ public interface RefBookMultiPickerUiHandlers extends UiHandlers {
 
     void onSort(Integer columnIndex, boolean isSortAscending);
 
-    void find(String searchPattern);
+    void find(String searchPattern, boolean exactSearch);
 
-    void getValuesCount(String text, CheckValuesCountHandler checkValuesCountHandler);
+    void getValuesCount(String text, boolean exactSearch, CheckValuesCountHandler checkValuesCountHandler);
 }

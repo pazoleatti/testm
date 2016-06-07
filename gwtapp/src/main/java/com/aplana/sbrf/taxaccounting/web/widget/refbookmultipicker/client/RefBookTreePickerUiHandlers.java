@@ -32,7 +32,7 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
      * Загрузка дерева с указанием фильтра
      * @param searchPattern строка поиска
      */
-    void find(String searchPattern);
+    void find(String searchPattern, boolean exactSearch);
 
     /**
      * Перезагрузка верхушки дерева
@@ -61,7 +61,7 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
 
     void highLightItem(RefBookUiTreeItem uiTreeItem);
 
-    void getValuesCount(String text, Date versionDate, CheckValuesCountHandler checkValuesCountHandler);
+    void getValuesCount(String text, Date versionDate, boolean exactSearch, CheckValuesCountHandler checkValuesCountHandler);
 
     void updatePS(Date date, String searchPattern);
 

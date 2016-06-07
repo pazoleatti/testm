@@ -12,6 +12,7 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 	PagingParams pagingParams;
 	Date relevanceDate;
     private String searchPattern;
+    private boolean exactSearch;
     private Long recordId;
     private int sortColumnIndex;
 
@@ -71,6 +72,14 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 
     public boolean isAscSorting() {
         return ascSorting;
+    }
+
+    public boolean isExactSearch() {
+        return exactSearch;
+    }
+
+    public void setExactSearch(boolean exactSearch) {
+        this.exactSearch = exactSearch;
     }
 
     @Override

@@ -190,7 +190,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     @Override
     public void reloadForDate(Date relevanceDate) {
-        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect()), false);
+        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect(), ps.isExactSearch()), false);
     }
 
     @Override
@@ -204,10 +204,11 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     @Override
-    public void getValuesCount(String text, Date versionDate, final CheckValuesCountHandler checkValuesCountHandler) {
+    public void getValuesCount(String text, Date versionDate, boolean exactSearch, final CheckValuesCountHandler checkValuesCountHandler) {
         GetCountFilterValuesAction action = new GetCountFilterValuesAction();
         action.setHierarchy(true);
         action.setSearchPattern(text);
+        action.setExactSearch(exactSearch);
         action.setFilter(ps.getFilter());
         action.setRefBookAttrId(ps.getRefBookAttrId());
         action.setVersion(versionDate);
@@ -227,8 +228,8 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     @Override
-    public void find(String searchPattern) {
-        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), searchPattern, ps.getVersionDate(), ps.isMultiSelect()), false);
+    public void find(String searchPattern, boolean exactSearch) {
+        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), searchPattern, ps.getVersionDate(), ps.isMultiSelect(), exactSearch), false);
     }
 
     @Override
@@ -260,6 +261,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                 WidgetUtils.isWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
                 WidgetUtils.isWasChange(ps.getSearchPattern(), newPs.getSearchPattern()) ||
                 WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate()) ||
+                WidgetUtils.isWasChange(ps.isExactSearch(), newPs.isExactSearch()) ||
                 newPs.isNeedReload();
     }
 
@@ -268,6 +270,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         GetRefBookTreeValuesAction action = new GetRefBookTreeValuesAction();
 
         action.setSearchPattern(ps.getSearchPattern());
+        action.setExactSearch(ps.isExactSearch());
         action.setFilter(ps.getFilter());
         action.setRefBookAttrId(ps.getRefBookAttrId());
         action.setVersion(ps.getVersionDate());
