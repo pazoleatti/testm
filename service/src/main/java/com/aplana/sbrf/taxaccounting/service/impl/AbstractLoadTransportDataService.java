@@ -31,7 +31,7 @@ public abstract class AbstractLoadTransportDataService {
 	private static final Log LOG = LogFactory.getLog(AbstractLoadTransportDataService.class);
 
     @Autowired
-    private AuditService auditService;
+    protected AuditService auditService;
 
     // Константы
     final static String ZIP_ENCODING = "cp866";

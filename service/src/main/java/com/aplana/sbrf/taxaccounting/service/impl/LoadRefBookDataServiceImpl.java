@@ -56,8 +56,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
-    private AuditService auditService;
-    @Autowired
     private LogEntryService logEntryService;
 
     // ЦАС НСИ
