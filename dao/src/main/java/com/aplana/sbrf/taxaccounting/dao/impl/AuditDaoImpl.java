@@ -127,7 +127,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "              fk.name       form_kind_name,\n" +
                     "              ls.note,\n" +
                     "              ls.user_department_name,\n" +
-                    "              ls.blob_data_id\n" +
+                    "              ls.blob_data_id," +
+                    "              ls.server\n" +
                     "            FROM log_system ls\n" +
                     "              LEFT JOIN event ev ON ls.event_id = ev.\"ID\"\n" +
                     "              LEFT JOIN form_kind fk ON ls.form_kind_id = fk.\"ID\"\n" +
