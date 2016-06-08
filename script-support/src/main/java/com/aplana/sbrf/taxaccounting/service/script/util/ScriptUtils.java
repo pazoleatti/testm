@@ -1201,9 +1201,9 @@ public final class ScriptUtils {
                 if (totalSums.get(alias).compareTo(totalValue) != 0) {
                     String msg = String.format(WRONG_TOTAL, getColumnName(totalRow, alias));
                     if (required) {
-                        logger.error(msg);
+                        logger.error("%s", msg);
                     } else {
-                        logger.warn(msg);
+                        logger.warn("%s", msg);
                     }
                 }
             }
@@ -1266,9 +1266,9 @@ public final class ScriptUtils {
                 if (totalSums.get(sub).get(alias).compareTo(totalValue) != 0) {
                     String msg = String.format(WRONG_SUBTOTAL, sub, getColumnName(dataRows.get(0), alias));
                     if (required) {
-                        logger.error(msg);
+                        logger.error("%s", msg);
                     } else {
-                        logger.warn(msg);
+                        logger.warn("%s", msg);
                     }
                 }
             }

@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
@@ -79,6 +78,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
+        calc()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
@@ -99,13 +99,17 @@ def allColumns = ['taCategory', 'financialYear', 'taxPeriod', 'emitent', 'inn', 
                   'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
                   'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']
 
-// обязательные поля (графа 1..2, 4..31)
+// обязательные поля (графа 1..2, 4..23, 26..31)
 @Field
 def nonEmptyColumns = allColumns - ['inn', 'dividendAgentAll', 'dividendAgentWithStavka0']
 
 // редактируемые поля (графа 1..31)
 @Field
 def editableColumns = allColumns
+
+// Атрибуты итоговых строк для которых вычисляются суммы (графа 27, 28, 29, 31)
+@Field
+def totalColumns = ['dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumLast']
 
 // 7, 8 графа источника (группировка при консолидации для старого алгоритма)
 @Field
@@ -158,7 +162,12 @@ def getLastReportPeriod() {
 }
 
 void calc() {
-    // расчетов нет, все поля редактируемые
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    deleteAllAliased(dataRows)
+
+    // итоговая строка
+    def totalRow = calcTotalRow(dataRows)
+    dataRows.add(totalRow)
 }
 
 void logicCheck() {
@@ -167,38 +176,41 @@ void logicCheck() {
     boolean wasError = false
 
     for (def row in dataRows) {
+        if (row.getAlias()) {
+            continue
+        }
         def rowNum = row.getIndex()
-        def errorMsg = "Строка $rowNum: "
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // 2. Проверка на заполнение «Графы 3»
         if ((row.taCategory == 2) != (row.inn != null && !row.inn.isEmpty())) {
-            rowError(logger, row, errorMsg + "Графа «${getColumnName(row, 'inn')}» должна быть заполнена в случае если графа «${getColumnName(row, 'taCategory')}» равна «2»!")
+            rowError(logger, row, "Строка $rowNum: Графа «${getColumnName(row, 'inn')}» должна быть заполнена в случае если графа «${getColumnName(row, 'taCategory')}» равна «2»!")
         }
 
         // 3. Проверка допустимых значений «Графы 1»
-        if (row.taCategory != 1 && row.taCategory != 2) {
-            errorMessage(row, 'taCategory', errorMsg)
+        if (row.taCategory != null && row.taCategory != 1 && row.taCategory != 2) {
+            errorMessage(row, 'taCategory', [1, 2])
         }
+        // №3, 4, 5, 8, 9, 10, 11, 12
 
         // 4. Проверка допустимых значений «Графы 7»
-        if (!['13', '21', '31', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43',
-                                 '44', '45', '46', '50'].contains(row.taxPeriod)) {
-            errorMessage(row, 'taxPeriod', errorMsg)
+        def possibleValues = ['13', '21', '31', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '50']
+        if (row.taxPeriod != null && !possibleValues.contains(row.taxPeriod)) {
+            errorMessage(row, 'taxPeriod', possibleValues)
         }
 
         // 5. Проверка допустимых значений «Графы 5»
-        if (!['1', '2'].contains(row.dividendType)) {
-            errorMessage(row, 'dividendType', errorMsg)
+        if (row.dividendType != null && !['1', '2'].contains(row.dividendType)) {
+            errorMessage(row, 'dividendType', ['1', '2'])
         }
 
         // 6. Проверка значения «Графы 1». Если «Графа 1» = «2», то «Графа 24» и «Графа 25» равны значению «0»
         if (row.taCategory == 2) {
             ['dividendAgentAll', 'dividendAgentWithStavka0'].each {
                 if (row[it] != null && row[it] != 0) {
-                    errorMessage(row, it, errorMsg)
+                    errorMessage(row, it)
                 }
             }
         }
@@ -213,23 +225,26 @@ void logicCheck() {
         }
 
         // 8. Проверка правильности расчета «Графы 9»
-        if (row.dividendSumRaspredPeriod != calc9(row)) {
+        if (row.dividendSumRaspredPeriod != null && row.dividendSumRaspredPeriod != calc9(row)) {
             warnMessageCondition(row, 'dividendSumRaspredPeriod', '«Графа 9» = «Графа 10» + «Графа 15» + «Графа 16» + «Графа 17» + «Графа 22»')
         }
 
         // 9. Проверка правильности расчета «Графы 10»
-        if (row.dividendRussianTotal != calc10(row)) {
+        if (row.dividendRussianTotal != null && row.dividendRussianTotal != calc10(row)) {
             warnMessageCondition(row, 'dividendRussianTotal', '«Графа 10» = «Графа 11» + «Графа 12» + «Графа 13» + «Графа 14»')
         }
+
         // 10. Проверка паттернов + 11 проверка контрольной суммы
         if (row.inn && checkPattern(logger, row, 'inn', row.inn, INN_JUR_PATTERN, wasError ? null : INN_JUR_MEANING, true)) {
             checkControlSumInn(logger, row, 'inn', row.inn, true)
         } else if (row.inn){
             wasError = true
         }
+
         // 12 Проверка правильности заполнения «Графы 26»
         // «Графа 26» = («Графа 8» - «Графа 25») ИЛИ («Графа 9» + «Графа 23» - «Графа 25»)
-        if ((row.dividendD1D2 ?: 0) != ((row.totalDividend ?: 0) - (row.dividendAgentWithStavka0 ?: 0)) &&
+        if (row.dividendD1D2 != null &&
+                (row.dividendD1D2 ?: 0) != ((row.totalDividend ?: 0) - (row.dividendAgentWithStavka0 ?: 0)) &&
                 (row.dividendD1D2 ?: 0) != ((row.dividendSumRaspredPeriod ?: 0) + (row.dividendNonIncome ?: 0) - (row.dividendAgentWithStavka0 ?: 0))) {
             warnMessageCondition(row, 'dividendD1D2', "«Графа 26» = («Графа 8» - «Графа 25») ИЛИ («Графа 9» + «Графа 23» - «Графа 25»)")
         }
@@ -242,6 +257,9 @@ void logicCheck() {
         // 18. Проверка возможности заполнения «Графы 29», «Графы 31»
         // выполняются при консолидации
     }
+
+    // 19. Проверка итоговых значений по фиксированной строке
+    checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
 // «Графа 9» = «Графа 10» + «Графа 15» + «Графа16» + «Графа 17» + «Графа 22»
@@ -262,14 +280,21 @@ def calc10( def row) {
     return roundValue(tmp)
 }
 
-void errorMessage(def row, def alias, def errorMsg) {
-    rowError(logger, row, errorMsg + "Графа «${getColumnName(row, alias)}» заполнена неверно!")
+void errorMessage(def row, def alias, def possibleValues = null) {
+    def msg
+    if (possibleValues == null) {
+        msg = String.format("Строка %d: Графа «%s» заполнена неверно!", row.getIndex(), getColumnName(row, alias))
+
+    } else {
+        msg = String.format("Строка %d: Графа «%s» заполнена неверно (%s)! Возможные значения: %s",
+                row.getIndex(), getColumnName(row, alias), row[alias], possibleValues.join(', '))
+    }
+    rowError(logger, row, msg)
 }
 
 void warnMessageCondition(def row, def alias, def condition) {
-    def index = row.getIndex()
-    def name = getColumnName(row, alias)
-    logger.warn("Строка $index: Графа «$name» заполнена неверно! Не выполняется условие: $condition")
+    logger.warn("Строка %d: Графа «%s» заполнена неверно! Не выполняется условие: %s",
+            row.getIndex(), getColumnName(row, alias), condition)
 }
 
 void consolidation() {
@@ -632,7 +657,8 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
                 logger.warn("Строка ${rowIndex}: Графа «Исчисленная сумма налога, подлежащая уплате в бюджет» заполнена неверно! Не выполняется условие: " +
                         "«Графа 29» = Сумма по «Графа 27» для строк формы-источника «Расчет налога на прибыль организаций " +
                         "с доходов, удерживаемого налоговым агентом (источником выплаты доходов)», " +
-                        "в которых «Графа 3» = «${row.inn}» и «Графа 7» = «${row.decisionNumber}», «Графа 16» не равна «2» и «Графа 17» = «1»!")
+                        "в которых «Графа 3» = «%s» и «Графа 7» = «%s», «Графа 16» не равна «2» и «Графа 17» = «1»!",
+                        row.inn, row.decisionNumber)
             }
         }
 
@@ -749,6 +775,7 @@ void importData() {
     int HEADER_ROW_COUNT = 5
     String TABLE_START_VALUE = 'Категория налогового агента'
     String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -773,7 +800,7 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -785,6 +812,13 @@ void importData() {
             rowValues.clear()
             break
         }
+        // Пропуск итоговых строк
+        if (rowValues[INDEX_FOR_SKIP]?.trim()?.equalsIgnoreCase("Итого") && !rowValues[0] && !rowValues[2] && !rowValues[3]) {
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
         // простая строка
         rowIndex++
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
@@ -792,6 +826,14 @@ void importData() {
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
         rowValues.clear()
+    }
+
+    // сравнение итогов
+    def totalRow = getTotalRow()
+    rows.add(totalRow)
+    updateIndexes(rows)
+    if (totalRowFromFile) {
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
     }
 
     showMessages(rows, logger)
@@ -917,4 +959,56 @@ Department getDepartment(def id) {
         departmentMap[id] = departmentService.get(id)
     }
     return departmentMap[id]
+}
+
+/** Сформировать и посчитать итоговую строку. */
+def calcTotalRow(def dataRows) {
+    def totalRow = getTotalRow()
+    totalRow.setIndex(dataRows.size() + 1)
+    BigDecimal tmpValue
+    for (def column : totalColumns) {
+        tmpValue = getSum(dataRows, column)
+        totalRow[column] = checkOverflow(tmpValue, totalRow, column, 15)
+    }
+    return totalRow
+}
+
+/** Сформировать итоговую строку. */
+def getTotalRow() {
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
+    newRow.setAlias('total')
+    newRow.emitent = 'Итого'
+    allColumns.each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    return newRow
+}
+
+// Получить сумму для столбца columnName
+BigDecimal getSum(def dataRows, def columnName) {
+    return dataRows.sum { row -> (!row.getAlias() && row[columnName] ? row[columnName] : BigDecimal.ZERO) }
+}
+
+/**
+ * Условия выполнения расчетов.
+ * Проверка разрядности итоговых значении.
+ *
+ * @param value проверяемое значение
+ * @param row строка
+ * @param alias алиас столбца проверяемого значения
+ * @param size размер числа
+ * @return вернет null и запишет в лог фатальное сообщение - если разрядность нарушена, иначе вернет проверяемое значение
+ */
+def checkOverflow(BigDecimal value, def row, def alias, int size) {
+    if (value == null) {
+        return value
+    }
+    BigDecimal overpower = new BigDecimal("1E" + size)
+    if (value.abs().compareTo(overpower) != -1) {
+        String columnName = getColumnName(row, alias)
+        def msg = "Строка %d: Значение графы «%s» превышает допустимую разрядность. Должно быть не более %d знакомест. Устанавливаемое значение: %s"
+        logger.error(msg, row.getIndex(), columnName, size, value)
+        return null
+    }
+    return value
 }

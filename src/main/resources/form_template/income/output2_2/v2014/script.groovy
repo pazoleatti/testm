@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
@@ -47,11 +46,11 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_LOAD:
         afterLoad()
         break
-    /*case FormDataEvent.CALCULATE:
+    case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
-        break*/
+        break
     case FormDataEvent.CHECK:
         logicCheck()
         break
@@ -71,6 +70,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
+        calc()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
@@ -89,7 +89,7 @@ def providerCache = [:]
 def recordCache = [:]
 
 @Field
-def allColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'zipCode', 'subdivisionRF', 'area',
+def allColumns = ['rowNumber', 'emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'zipCode', 'subdivisionRF', 'area',
                   'city', 'region', 'street', 'homeNumber', 'corpNumber', 'apartment', 'surname', 'name', 'patronymic',
                   'phone', 'dividendDate', 'sumDividend', 'sumTax']
 
@@ -102,6 +102,10 @@ def editableColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'titl
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'subdivisionRF', 'dividendDate', 'sumDividend', 'sumTax']
+
+// Атрибуты итоговых строк для которых вычисляются суммы (графа 22, 23)
+@Field
+def totalColumns = ['sumDividend', 'sumTax']
 
 @Field
 def lastSourceFormType = 314 // с 9 месяцев 2015
@@ -138,7 +142,12 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 }
 
 void calc() {
-    // расчетов нет
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    deleteAllAliased(dataRows)
+
+    // итоговая строка
+    def totalRow = calcTotalRow(dataRows)
+    dataRows.add(totalRow)
 }
 
 void logicCheck() {
@@ -147,6 +156,9 @@ void logicCheck() {
     def wasError = [false, false]
 
     for (row in dataRows) {
+        if (row.getAlias()) {
+            continue
+        }
         def rowNum = row.getIndex()
         def recType = (String) row.recType;
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
@@ -173,6 +185,9 @@ void logicCheck() {
             checkDateValid(logger, row, 'dividendDate', row.dividendDate, true)
         }
     }
+
+    // 7. Проверка итоговых значений по фиксированной строке
+    checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
 void consolidation() {
@@ -238,7 +253,7 @@ Map<String,DataRow<Cell>> getDataRowsMap(def dataRows, boolean isComplex) {
 
 // делаем сложный ключ по всем значениям строки кроме 6-й графы
 String getComplexRowKey(def row) {
-    return (allColumns - 'recType').collect { alias -> row[alias]?.toString()}.join("#")
+    return (allColumns - 'recType' - 'rowNumber').collect { alias -> row[alias]?.toString()}.join("#")
 }
 
 // делаем простой ключ по ИНН и КПП
@@ -352,6 +367,7 @@ void importData() {
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = '№ пп.'
     String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -376,7 +392,7 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -388,6 +404,13 @@ void importData() {
             rowValues.clear()
             break
         }
+        // Пропуск итоговых строк
+        if (rowValues[INDEX_FOR_SKIP]?.trim()?.equalsIgnoreCase("Итого") && !rowValues[0] && !rowValues[2] && !rowValues[3]) {
+            totalRowFromFile = getNewTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
         // простая строка
         rowIndex++
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
@@ -395,6 +418,14 @@ void importData() {
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
         rowValues.clear()
+    }
+
+    // сравнение итогов
+    def totalRow = getTotalRow()
+    rows.add(totalRow)
+    updateIndexes(rows)
+    if (totalRowFromFile) {
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
     }
 
     showMessages(rows, logger)
@@ -520,10 +551,86 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 
+/**
+ * Получить итоговую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 22
+    def colIndex = 21
+    newRow.sumDividend = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 23
+    colIndex++
+    newRow.sumTax = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    return newRow
+}
+
 void afterLoad() {
     // прибыль сводная
     if (binding.variables.containsKey("specialPeriod") && formData.kind == FormDataKind.SUMMARY) {
         // для справочников начало от 01.01.year (для прибыли start_date)
         specialPeriod.calendarStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
+}
+
+/** Сформировать и посчитать итоговую строку. */
+def calcTotalRow(def dataRows) {
+    def totalRow = getTotalRow()
+    totalRow.setIndex(dataRows.size() + 1)
+    BigDecimal tmpValue
+    for (def column : totalColumns) {
+        tmpValue = getSum(dataRows, column)
+        totalRow[column] = checkOverflow(tmpValue, totalRow, column, 15)
+    }
+    return totalRow
+}
+
+/** Сформировать итоговую строку. */
+def getTotalRow() {
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
+    newRow.setAlias('total')
+    newRow.emitent = 'Итого'
+    allColumns.each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    return newRow
+}
+
+// Получить сумму для столбца columnName
+BigDecimal getSum(def dataRows, def columnName) {
+    return dataRows.sum { row -> (!row.getAlias() && row[columnName] ? row[columnName] : BigDecimal.ZERO) }
+}
+
+/**
+ * Условия выполнения расчетов.
+ * Проверка разрядности итоговых значении.
+ *
+ * @param value проверяемое значение
+ * @param row строка
+ * @param alias алиас столбца проверяемого значения
+ * @param size размер числа
+ * @return вернет null и запишет в лог фатальное сообщение - если разрядность нарушена, иначе вернет проверяемое значение
+ */
+def checkOverflow(BigDecimal value, def row, def alias, int size) {
+    if (value == null) {
+        return value
+    }
+    BigDecimal overpower = new BigDecimal("1E" + size)
+    if (value.abs().compareTo(overpower) != -1) {
+        String columnName = getColumnName(row, alias)
+        def msg = "Строка %d: Значение графы «%s» превышает допустимую разрядность. Должно быть не более %d знакомест. Устанавливаемое значение: %s"
+        logger.error(msg, row.getIndex(), columnName, size, value)
+        return null
+    }
+    return value
 }
