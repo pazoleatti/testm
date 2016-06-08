@@ -121,7 +121,7 @@ private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
     def sourceFormType = formTypeService.get(sourceFormTypeId)
     def success = true
 
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
+    def formDataCollection = getAcceptedFormDataSources()
     def departmentFormType = formDataCollection?.records?.find { it.formType.id == sourceFormTypeId }
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     if (departmentFormType == null) {
@@ -552,7 +552,7 @@ void generateXML(def xml, boolean showApp2) {
 
     // Данные налоговых форм.
 
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
+    def formDataCollection = getAcceptedFormDataSources()
 
     /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
     def dataRowsComplexIncome = getDataRows(formDataCollection, 302)
@@ -1661,7 +1661,7 @@ String getJrxml(def jrxmlInputStream) {
 }
 
 def getDataRowsApp2(def groupsApp2) {
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
+    def formDataCollection = getAcceptedFormDataSources()
 
     if (formDataCollection.records.find { [415, 418].contains(it.getFormType().getId()) } == null ) {
         logger.error("Формирование отчета невозможно, т.к. отсутствует форма-источник «%s»/«%s» в статусе «Принята»!",
@@ -3203,13 +3203,23 @@ void calcTaskComplexity() {
 }
 
 void calcTaskComplexityApp2() {
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
+    def formDataCollection = getAcceptedFormDataSources()
 
     taskComplexityHolder.setValue(getCellCount(formDataCollection, [415, 418]))
 }
 
 void calcTaskComplexityNoApp2() {
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
+    def formDataCollection = getAcceptedFormDataSources()
 
     taskComplexityHolder.setValue(getCellCount(formDataCollection, [302, 305, 301, 305, 303, 304, 310, 500, 414, 416, 412, 309, 421]))
+}
+
+@Field
+def acceptedFormDataSources = null
+
+def getAcceptedFormDataSources() {
+    if (acceptedFormDataSources == null) {
+        acceptedFormDataSources = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
+    }
+    return acceptedFormDataSources
 }

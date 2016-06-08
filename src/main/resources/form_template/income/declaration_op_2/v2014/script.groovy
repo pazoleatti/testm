@@ -432,7 +432,7 @@ void generateXML(XMLStreamReader readerBank, def xml) {
 
     // Данные налоговых форм.
 
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
+    def formDataCollection = getAcceptedFormDataSources()
 
     /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
     def dataRowsAdvance = getDataRows(formDataCollection, 500)
@@ -797,7 +797,7 @@ def generateXmlFileId(String taxOrganCodeProm, String taxOrganCode) {
 }
 
 void calcTaskComplexity() {
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
+    def formDataCollection = getAcceptedFormDataSources()
     taskComplexityHolder.setValue(getCellCount(formDataCollection, [500])) // декларацию не считаю
 }
 
@@ -837,4 +837,14 @@ String getJrxml(def jrxmlInputStream) {
         IOUtils.closeQuietly(jrxmlInputStream);
         IOUtils.closeQuietly(writer);
     }
+}
+
+@Field
+def acceptedFormDataSources = null
+
+def getAcceptedFormDataSources() {
+    if (acceptedFormDataSources == null) {
+        acceptedFormDataSources = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
+    }
+    return acceptedFormDataSources
 }
