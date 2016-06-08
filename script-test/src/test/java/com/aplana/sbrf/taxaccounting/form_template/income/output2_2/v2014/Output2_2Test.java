@@ -203,7 +203,7 @@ public class Output2_2Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        int expected = 2; // в файле 2 строки
+        int expected = 2 + 1; // в файле 2 строки + строка итога
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
@@ -327,7 +327,7 @@ public class Output2_2Test extends ScriptTestBase {
 
         // Консолидация
         testHelper.execute(FormDataEvent.COMPOSE);
-        int expected = 1; // в источнике 1 строка
+        int expected = 1 + 1; // в источнике 1 строка + строка итога
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
 
         checkLogger();
