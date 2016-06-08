@@ -51,6 +51,7 @@ public class SignServiceImpl implements SignService {
     class Status {
         private boolean check;
         private String msg;
+        private boolean signNotReg;
 
         public boolean isCheck() {
             return check;
@@ -66,6 +67,14 @@ public class SignServiceImpl implements SignService {
 
         public void setMsg(String msg) {
             this.msg = msg;
+        }
+
+        public boolean isSignNotReg() {
+            return signNotReg;
+        }
+
+        public void setSignNotReg(boolean signNotReg) {
+            this.signNotReg = signNotReg;
         }
     }
 
@@ -108,6 +117,7 @@ public class SignServiceImpl implements SignService {
                                         status.setMsg(String.format(ERR_NO_SIGN_MSG, fileName));
                                     } else if (code.equals("ERR_SIGN_NO_REG")) {
                                         status.setMsg(String.format(ERR_SIGN_NO_REG_MSG, fileName));
+                                        status.setSignNotReg(true);
                                     } else {
                                         String text = s.replaceAll(PATTERN_ERR, "$7");
                                         status.setMsg(String.format(ERR_OTHER_MSG, fileName, code, text));
@@ -256,16 +266,30 @@ public class SignServiceImpl implements SignService {
             }
 
             params[0] = checkSign.getAbsolutePath();
-            params[2] = String.valueOf(delFlag);
+            params[2] = "0";
             params[3] = pathToSignFile;
 
             String[] keyTempFiles = keyTempDir.list();
+            boolean signNotReg = true;
+            List<Status> statusList = new ArrayList<Status>();
             for (String keyFileName: keyTempFiles) {
                 params[1] = keyTempDir.getAbsolutePath()+ "\\" + keyFileName;
                 final Status status = new Status();
                 if (check(params, fileName, status)) {
+                    if (delFlag == 1) {
+                        params[2] = String.valueOf(delFlag);
+                        check(params, fileName, status);
+                    }
                     return new Pair<Boolean, Set<String>>(true, new HashSet<String>(){{add(status.getMsg());}});
                 } else {
+                    signNotReg &= status.isSignNotReg();
+                    if (signNotReg || !status.isSignNotReg()) {
+                        statusList.add(status);
+                    }
+                }
+            }
+            for(Status status: statusList) {
+                if (signNotReg || !status.isSignNotReg()) {
                     msgs.add(status.getMsg());
                 }
             }

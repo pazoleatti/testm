@@ -238,8 +238,7 @@ public class FormDataServiceImpl implements FormDataService {
 					try {
 						LOG.info(String.format("Проверка ЭП: %s", key));
 						check = signService.checkSign(fileName, dataFile.getAbsolutePath(), 1, logger);
-                        if (check.getFirst()) {
-                        } else {
+                        if (!check.getFirst()) {
                             for(String msg: check.getSecond()) {
                                 logger.error(msg);
                             }
