@@ -62,8 +62,7 @@ public class RefBookListPresenter extends AbstractRefBookListPresenter<RefBookLi
                 CallbackUtils.defaultCallback(new AbstractCallback<GetCurrentUserResult>() {
                     @Override
                     public void onSuccess(GetCurrentUserResult result) {
-                        getView().hideLoadButton(result.getUser().hasRole("ROLE_OPER")
-                                && (result.getUser().getRoles().size() == 1));
+                        getView().hideLoadButton(!result.getUser().hasRole("ROLE_CONTROL_UNP"));
                     }
                 }, this));
         super.prepareFromRequest(request);
