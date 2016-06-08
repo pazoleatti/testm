@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
@@ -42,6 +43,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     private RecordChanges recordChanges;
     private Date relevanceDate;
 
+    private final EditFormPresenter editFormPresenter;
     private final DispatchAsync dispatcher;
 
     @ProxyEvent
@@ -124,9 +126,10 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     }
 
     @Inject
-    public RefBookHierDataPresenter(final EventBus eventBus, final MyView view,
+    public RefBookHierDataPresenter(final EventBus eventBus, EditFormPresenter editFormPresenter, final MyView view,
                                     DispatchAsync dispatcher) {
         super(eventBus, view);
+        this.editFormPresenter = editFormPresenter;
         this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
     }
@@ -209,6 +212,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                                 Dialog.errorMessage("Удаление записи справочника",
                                         "Обнаружены фатальные ошибки!");
                             } else {
+                                editFormPresenter.setIsFormModified(false);
                                 getView().deleteItem(selected);
                                 getView().setSelection(parentRefBookItem);
                                 if (parentRefBookItem == null)
@@ -247,6 +251,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                                         ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);
                                         /*editPresenter.clean();
                                         editPresenter.setNeedToReload();*/
+                                        editFormPresenter.setIsFormModified(false);
                                         getView().deleteItem(selected);
                                         getView().setSelection(parentRefBookItem);
                                     }
@@ -259,6 +264,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                             }
                         });
                     } else {
+                        editFormPresenter.setIsFormModified(false);
                         LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
                         //editPresenter.show(null);
                         ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);

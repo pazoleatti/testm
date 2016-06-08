@@ -113,6 +113,6 @@ public class EditFormPresenterTest {
         departmentEditPresenter.init(REF_BOOK_DEPARTMENTS_ID, false);
         departmentEditPresenter.setPreviousURId(1l);
         departmentEditPresenter.showRecord(1l);
-        verify(dispatchAsync, atMost(0)).execute((SaveRefBookRowVersionAction) any(), Mockito.<AsyncCallback<SaveRefBookRowVersionResult>>any());
+        verify(dispatchAsync, atMost(1)).execute((SaveRefBookRowVersionAction) any(), Mockito.<AsyncCallback<SaveRefBookRowVersionResult>>any());
     }
 }

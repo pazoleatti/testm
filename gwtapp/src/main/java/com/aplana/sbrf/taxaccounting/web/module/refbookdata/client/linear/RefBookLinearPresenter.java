@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
@@ -40,11 +41,13 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     private final TableDataProvider dataProvider = new TableDataProvider();
     private Long refBookDataId;
     private Long recordId;
+    private final EditFormPresenter editFormPresenter;
     private DispatchRequest dispatchRequest;
 
     @Inject
-    public RefBookLinearPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
+    public RefBookLinearPresenter(EventBus eventBus, EditFormPresenter editFormPresenter, MyView view, DispatchAsync dispatchAsync) {
         super(eventBus, view);
+        this.editFormPresenter = editFormPresenter;
         this.dispatchAsync = dispatchAsync;
         getView().assignDataProvider(getView().getPageSize(), dataProvider);
         getView().setUiHandlers(this);
@@ -94,6 +97,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                 if (result.isException()) {
                                     Dialog.errorMessage("Удаление записи справочника", "Обнаружены фатальные ошибки!");
                                 }
+                                editFormPresenter.setIsFormModified(false);
                                 /*editPresenter.setMode(mode);*/
                                 ShowItemEvent.fire(RefBookLinearPresenter.this, null, recordId);
                                 getView().updateTable();
