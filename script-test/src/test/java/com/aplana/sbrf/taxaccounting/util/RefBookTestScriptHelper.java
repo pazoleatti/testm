@@ -16,6 +16,8 @@ import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +59,7 @@ public class RefBookTestScriptHelper {
     private Long recordCommonId;
     private List<Map<String, RefBookValue>> saveRecords;
     private boolean isNewRecords;
-    private ScriptStatusHolder scriptStatusHolder;
+    private ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
     private InputStream importFileInputStream;
     private final ScriptTestMockHelper mockHelper;
 
@@ -120,8 +122,18 @@ public class RefBookTestScriptHelper {
 
         if (formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE) {
             bindings.put("inputStream", importFileInputStream);
-            bindings.put("scriptStatusHolder", scriptStatusHolder);
             bindings.put("fileName", "test-file-name.rnu");
+        }
+
+        if (formDataEvent == FormDataEvent.IMPORT) {
+            bindings.put("inputStream", importFileInputStream);
+            bindings.put("fileName", "test-file-name.xml");
+            try {
+                bindings.put("dateFrom", new SimpleDateFormat("dd.MM.yyyy").parse("01.01.2016"));
+                bindings.put("dateTo", new SimpleDateFormat("dd.MM.yyyy").parse("01.07.2016"));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
 
         try {
