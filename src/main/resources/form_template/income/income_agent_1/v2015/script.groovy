@@ -156,6 +156,11 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
 // Алгоритмы заполнения полей формы
 void calc() {
 }
@@ -169,6 +174,7 @@ def logicCheck() {
     def period = reportPeriodService.get(formData.reportPeriodId)
     def year = period?.taxPeriod?.year
     def departmentInn = getDepartmentParams(formDataDepartment.id)?.INN?.value
+    def departmentCode = getRefBookValue(30, formDataDepartment.id)?.CODE?.value
     def userDepartmentInn = getDepartmentParams(userDepartment.id)?.INN?.value
     def yearRowMap = [:]
 
@@ -269,17 +275,19 @@ def logicCheck() {
                     getColumnName(row, 'type'), getColumnName(row, 'withheldSum'))
         }
 
-        // 14. Проверка заполнения ИНН для подразделения
-        if (!userDepartmentInn) {
-            def periodName = period?.taxPeriod?.year + ' ' + period?.name
-            logger.error("В настройках подразделения «%s» за период «%s» не заполнен атрибут «ИНН»!", userDepartment.name, periodName)
-        }
+        if(departmentCode != '15521') {
+            // 14. Проверка заполнения ИНН для подразделения
+            if (!userDepartmentInn) {
+                def periodName = period?.taxPeriod?.year + ' ' + period?.name
+                logger.error("В настройках подразделения «%s» за период «%s» не заполнен атрибут «ИНН»!", userDepartment.name, periodName)
+            }
 
-        // 15. Проверка заполнения «Графы 4», «Графы 5»
-        if (userDepartmentInn && row.dividends > 0 && row.sum > 0 && row.withheldSum >= 0 && row.emitentInn == userDepartmentInn) {
-            ['all', 'rateZero'].each { alias ->
-                if (row[alias] == null) {
-                    logger.warn("Строка $index: Графа «%s» должна быть заполнена, т.к. значение используется при консолидации в сводную форму 03А!", getColumnName(row, alias))
+            // 15. Проверка заполнения «Графы 4», «Графы 5»
+            if (userDepartmentInn && row.dividends > 0 && row.sum > 0 && row.withheldSum >= 0 && row.emitentInn == userDepartmentInn) {
+                ['all', 'rateZero'].each { alias ->
+                    if (row[alias] == null) {
+                        logger.warn("Строка $index: Графа «%s» должна быть заполнена, т.к. значение используется при консолидации в сводную форму 03А!", getColumnName(row, alias))
+                    }
                 }
             }
         }
