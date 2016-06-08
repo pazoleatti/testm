@@ -66,6 +66,9 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     Label countItems;
 
     @UiField
+    CheckBox exactSearch;
+
+    @UiField
     CheckBox pickAll;
 
     @UiField
@@ -198,8 +201,13 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         }
     }
 
+    @UiHandler("exactSearch")
+    void onExactSearchValueChange(ValueChangeEvent<Boolean> event) {
+        tree.setExactSearch(exactSearch.getValue());
+    }
+
     private void find(){
-        tree.filter(filter.getText().trim());
+        tree.filter(filter.getText().trim(), exactSearch.getValue());
         if (tree.getValue().size() >= 100) {
             Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений");
         } else {

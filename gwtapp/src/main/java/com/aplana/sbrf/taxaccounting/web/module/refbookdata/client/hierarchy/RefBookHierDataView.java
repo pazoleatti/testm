@@ -125,9 +125,10 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     }
 
     @Override
-    public void setPickerState(Date relevanceDate, String searchPattern) {
+    public void setPickerState(Date relevanceDate, String searchPattern, boolean exactSearch) {
         pickerState.setVersionDate(relevanceDate);
         pickerState.setSearchPattern(searchPattern);
+        pickerState.setExactSearch(exactSearch);
     }
 
     @Override
@@ -140,7 +141,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
         if (getUiHandlers() != null) {
             if (pickerState.getSearchPattern()!= null && !pickerState.getSearchPattern().isEmpty()){
                 pickerState.setNeedReload(false);
-                refbookDataTree.checkCount(pickerState.getSearchPattern().trim(), relevanceDate, new CheckValuesCountHandler() {
+                refbookDataTree.checkCount(pickerState.getSearchPattern().trim(), relevanceDate, pickerState.isExactSearch(), new CheckValuesCountHandler() {
                     @Override
                     public void onGetValuesCount(Integer count) {
                         if (count != null && count < 100 && count>0) {

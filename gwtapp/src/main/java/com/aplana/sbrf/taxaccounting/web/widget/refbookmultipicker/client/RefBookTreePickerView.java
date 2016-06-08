@@ -270,8 +270,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     @Override
-    public void find(String searchPattern) {
-        getUiHandlers().find(searchPattern);
+    public void find(String searchPattern, boolean exactSearch) {
+        getUiHandlers().find(searchPattern, exactSearch);
     }
 
     @Override
@@ -495,8 +495,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     @Override
-    public void checkCount(String text, Date relevanceDate, CheckValuesCountHandler checkValuesCountHandler) {
-        getUiHandlers().getValuesCount(text, relevanceDate, checkValuesCountHandler);
+    public void checkCount(String text, Date relevanceDate, boolean exactSearch, CheckValuesCountHandler checkValuesCountHandler) {
+        getUiHandlers().getValuesCount(text, relevanceDate, exactSearch, checkValuesCountHandler);
     }
 
     @Override

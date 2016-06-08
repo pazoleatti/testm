@@ -19,6 +19,7 @@ public class GetCountFilterValuesAction extends UnsecuredActionImpl<GetCountFilt
     private Date version;
     private PickerContext context;
     private boolean isHierarchy = false;
+    private boolean exactSearch = false;
 
     public long getRefBookAttrId() {
         return refBookAttrId;
@@ -66,6 +67,14 @@ public class GetCountFilterValuesAction extends UnsecuredActionImpl<GetCountFilt
 
     public void setHierarchy(boolean isHierarchy) {
         this.isHierarchy = isHierarchy;
+    }
+
+    public boolean isExactSearch() {
+        return exactSearch;
+    }
+
+    public void setExactSearch(boolean exactSearch) {
+        this.exactSearch = exactSearch;
     }
 
     @Override

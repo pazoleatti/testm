@@ -89,7 +89,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     public void onRelevanceDateChanged(Date relevanceDate) {
         commonEditPresenter.clean(false);
         commonEditPresenter.setNeedToReload();
-        SearchButtonEvent.fire(this, relevanceDate, getView().getSearchPattern());
+        SearchButtonEvent.fire(this, relevanceDate, getView().getSearchPattern(), getView().getExactSearch());
     }
 
     @Override
@@ -123,7 +123,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
 
     @Override
     public void searchButtonClicked() {
-        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern());
+        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
     }
 
     @Override
@@ -189,6 +189,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         Date getRelevanceDate();
         void updateView(FormMode mode);
         String getSearchPattern();
+        Boolean getExactSearch();
         //Показывает/скрывает поля, которые необходимы только для версионирования
         void setVersionedFields(boolean isVisible);
         void setRefBookNameDesc(String desc);
@@ -283,7 +284,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                                     refBookHierDataPresenter.clearAll();
                                                     refBookHierDataPresenter.setAttributeId(attrId);
                                                     refBookHierDataPresenter.setMode(mode);
-                                                    refBookHierDataPresenter.initPickerState(getView().getRelevanceDate(), getView().getSearchPattern());
+                                                    refBookHierDataPresenter.initPickerState(getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
                                                     refBookHierDataPresenter.loadAndSelect();
                                                     commonEditPresenter.createFields(result.getColumns());
                                                     commonEditPresenter.setMode(mode);
@@ -411,6 +412,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         action.setRefBookId(refBookId);
         action.setVersion(refBookHierDataPresenter.getRelevanceDate());
         action.setSearchPattern(refBookHierDataPresenter.getSearchPattern());
+        action.setExactSearch(refBookHierDataPresenter.isExactSearch());
         action.setAscSorting(true);
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(

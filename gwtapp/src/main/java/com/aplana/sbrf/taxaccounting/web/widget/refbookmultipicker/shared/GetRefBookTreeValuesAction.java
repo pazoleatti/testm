@@ -27,6 +27,8 @@ public class GetRefBookTreeValuesAction extends UnsecuredActionImpl<GetRefBookTr
     // используется только при попытке выделения засеченный виджету значений
     private List<Long> idsTofind;
 
+    private boolean exactSearch;
+
     public GetRefBookTreeValuesAction() {
     }
 
@@ -84,6 +86,14 @@ public class GetRefBookTreeValuesAction extends UnsecuredActionImpl<GetRefBookTr
 
     public void setFormDataId(Long formDataId) {
         this.formDataId = formDataId;
+    }
+
+    public boolean isExactSearch() {
+        return exactSearch;
+    }
+
+    public void setExactSearch(boolean exactSearch) {
+        this.exactSearch = exactSearch;
     }
 
     @Override

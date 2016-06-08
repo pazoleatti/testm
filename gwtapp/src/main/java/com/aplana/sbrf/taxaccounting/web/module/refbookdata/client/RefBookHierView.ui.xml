@@ -102,12 +102,15 @@
                         <d:DateMaskBoxPicker ui:field="relevanceDate" width="110px"/>
                     </g:HorizontalPanel>
 
-                    <g:cell width="99%">
+                    <g:cell width="20%">
                         <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
                             <g:HTML ui:field="separatorVersion" addStyleNames="{style.verSep}"/>
                             <g:TextBox width="210px" ui:field="filterText" addStyleNames="{style.marginRight5}" maxLength="200"/>
                             <g:Button title="Найти" width="70px" text="Найти" ui:field="search"/>
                         </g:HorizontalPanel>
+                    </g:cell>
+                    <g:cell horizontalAlignment="left" width="90%">
+                        <g:CheckBox ui:field="exactSearch" wordWrap="false" text="Искать по точному совпадению"/>
                     </g:cell>
 
                     <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">

@@ -34,11 +34,12 @@ public class RefBookPickerFilterBuilder {
      *
      * @param filter        технический филтььтр
      * @param searchPattern строка поиска
+     * @param exactSearch   точное соответствие
      * @param refBook       ссылка на справочник
      * @param context       контекст справочника
      * @return sql для запроса
      */
-    public String buildMultiPickerFilter(String filter, String searchPattern, RefBook refBook, PickerContext context) {
+    public String buildMultiPickerFilter(String filter, String searchPattern, boolean exactSearch, RefBook refBook, PickerContext context) {
         StringBuilder resultFilter = new StringBuilder();
         if (filter != null && !filter.trim().isEmpty()) {
             resultFilter.append(filter.trim());
@@ -77,7 +78,7 @@ public class RefBookPickerFilterBuilder {
 
         }
 
-        String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
+        String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), exactSearch);
 
         if (resultFilter.length() > 0 && resultSearch != null && !resultSearch.isEmpty()) {
             return "(" + resultFilter.toString() + ") and (" + resultSearch + ")";
@@ -96,10 +97,11 @@ public class RefBookPickerFilterBuilder {
      *
      * @param filter        технический филтььтр
      * @param searchPattern строка поиска
+     * @param exactSearch   точное соответствие
      * @param refBook       ссылка на справочник
      * @return sql для запроса
      */
-    public String buildTreePickerFilter(String filter, String searchPattern, RefBook refBook) {
+    public String buildTreePickerFilter(String filter, String searchPattern, boolean exactSearch, RefBook refBook) {
         StringBuilder resultFilter = new StringBuilder();
         if (filter != null && !filter.trim().isEmpty()) {
             resultFilter.append(filter.trim());
@@ -117,7 +119,7 @@ public class RefBookPickerFilterBuilder {
             resultFilter.append("(" + regionFilter + ")");
         }
 
-        String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
+        String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), exactSearch);
         if (resultFilter.length() > 0 && resultSearch != null && !resultSearch.isEmpty()) {
             return "(" + resultFilter.toString() + ") and (" + resultSearch + ")";
         } else if (resultFilter.length() > 0 && resultSearch != null && resultSearch.isEmpty()) {

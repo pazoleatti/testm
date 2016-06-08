@@ -99,6 +99,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         Date getRelevanceDate();
         /** Метод для получения строки с поля фильтрации*/
         String getSearchPattern();
+        /** Метод для получения признака точного соответствия*/
+        Boolean getExactSearch();
         /** Сброс значения поля поиска */
         void resetSearchInputBox();
         /** Обновление вьюшки для определенного состояния */
@@ -185,7 +187,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void onRelevanceDateChanged() {
         /*dataInterface.initState(getView().getRelevanceDate(), getView().getSearchPattern());*/
-        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern());
+        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
     }
 
     @Override
@@ -248,7 +250,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                                     getView().updateMode(mode);
                                                                     refBookLinearPresenter.setMode(mode);
                                                             /*refBookLinearPresenter.setRange(new Range(0, 500));*/
-                                                                    refBookLinearPresenter.initState(getView().getRelevanceDate(), getView().getSearchPattern());
+                                                                    refBookLinearPresenter.initState(getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
                                                                     refBookLinearPresenter.updateTable();
                                                                     //т.к. не срабатывает событие onSelectionChange приповторном переходе
 //                                                            editFormPresenter.show(recordId);
@@ -340,7 +342,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
     @Override
     public void onSearchClick() {
-        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern());
+        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
         /*dataInterface.initState(getView().getRelevanceDate(), getView().getSearchPattern());
         dataInterface.updateData();*/
     }
@@ -453,6 +455,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         action.setRefBookId(refBookId);
         action.setVersion(refBookLinearPresenter.getRelevanceDate());
         action.setSearchPattern(refBookLinearPresenter.getSearchPattern());
+        action.setExactSearch(refBookLinearPresenter.getExactSearch());
         action.setSortColumnIndex(refBookLinearPresenter.getSortColumnIndex());
         action.setAscSorting(refBookLinearPresenter.isAscSorting());
         dispatcher.execute(action,

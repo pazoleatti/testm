@@ -66,7 +66,7 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         result.setRefBookId(refBook.getId());
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
 
-        String filter = buildFilter.buildTreePickerFilter(action.getFilter(), action.getSearchPattern(), refBook);
+        String filter = buildFilter.buildTreePickerFilter(action.getFilter(), action.getSearchPattern(), action.isExactSearch(), refBook);
 
         if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
             //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи справочника - ни одна не должна быть ему доступна

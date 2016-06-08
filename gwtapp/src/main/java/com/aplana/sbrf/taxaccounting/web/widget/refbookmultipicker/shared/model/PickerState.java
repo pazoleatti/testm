@@ -18,26 +18,29 @@ public class PickerState{
     private String searchPattern;
     private List<Long> setIds = new LinkedList<Long>();
     private boolean needReload;
+    private boolean exactSearch;
 
     private PickerContext pickerContext;
 
     public PickerState() {
     }
 
-    public PickerState(Long refBookAttrId, String filter, String searchPattern, Date versionDate, Boolean multiSelect) {
+    public PickerState(Long refBookAttrId, String filter, String searchPattern, Date versionDate, Boolean multiSelect, boolean exactSearch) {
         this.refBookAttrId = refBookAttrId;
         this.filter = filter;
         this.searchPattern = searchPattern;
         this.versionDate = versionDate;
         this.multiSelect = multiSelect;
+        this.exactSearch = exactSearch;
     }
 
-    public PickerState(Long refBookAttrId, String filter, String searchPattern, Date versionDate, Boolean multiSelect, List<Long> longList) {
+    public PickerState(Long refBookAttrId, String filter, String searchPattern, Date versionDate, Boolean multiSelect, boolean exactSearch, List<Long> longList) {
         this.refBookAttrId = refBookAttrId;
         this.filter = filter;
         this.searchPattern = searchPattern;
         this.versionDate = versionDate;
         this.multiSelect = multiSelect;
+        this.exactSearch = exactSearch;
         this.setIds = new LinkedList<Long>(longList);
     }
 
@@ -48,6 +51,7 @@ public class PickerState{
         this.versionDate = newState.getVersionDate();
         this.multiSelect = newState.isMultiSelect();
         this.pickerContext = newState.getPickerContext();
+        this.exactSearch = newState.isExactSearch();
 
         this.setIds = newState.getSetIds() != null ? new LinkedList<Long>(newState.getSetIds()) : null;
     }
@@ -132,6 +136,14 @@ public class PickerState{
 
     public void setPickerContext(PickerContext pickerContext) {
         this.pickerContext = pickerContext;
+    }
+
+    public boolean isExactSearch() {
+        return exactSearch;
+    }
+
+    public void setExactSearch(boolean exactSearch) {
+        this.exactSearch = exactSearch;
     }
 
     @Override

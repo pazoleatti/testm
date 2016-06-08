@@ -108,7 +108,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
 
     @Override
     public void reload(Date relevanceDate) {
-        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect()));
+        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect(), ps.isExactSearch()));
     }
 
     @Override
@@ -171,6 +171,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     private GetRefBookMultiValuesAction getRowsLoadAction(PagingParams pagingParams, List<Long> idToFinds) {
         GetRefBookMultiValuesAction action = new GetRefBookMultiValuesAction();
         action.setSearchPattern(ps.getSearchPattern());
+        action.setExactSearch(ps.isExactSearch());
         action.setFilter(ps.getFilter());
         action.setSortAscending(isSortAscending);
         action.setSortAttributeIndex(sortColumnIndex);
@@ -190,14 +191,16 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     }
 
     @Override
-    public void find(String searchPattern) {
+    public void find(String searchPattern, boolean exactSearch) {
         ps.setSearchPattern(searchPattern);
+        ps.setExactSearch(exactSearch);
     }
 
     @Override
-    public void getValuesCount(String text, final CheckValuesCountHandler checkValuesCountHandler) {
+    public void getValuesCount(String text, boolean exactSearch, final CheckValuesCountHandler checkValuesCountHandler) {
         GetCountFilterValuesAction action = new GetCountFilterValuesAction();
         action.setSearchPattern(text);
+        action.setExactSearch(exactSearch);
         action.setFilter(ps.getFilter());
         action.setRefBookAttrId(ps.getRefBookAttrId());
         action.setVersion(ps.getVersionDate());
@@ -216,6 +219,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                 WidgetUtils.isWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
                 WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate()) ||
                 WidgetUtils.isWasChange(ps.getFilter(), newPs.getFilter()) ||
-                WidgetUtils.isWasChange(ps.getSearchPattern(), newPs.getSearchPattern());
+                WidgetUtils.isWasChange(ps.getSearchPattern(), newPs.getSearchPattern()) ||
+                WidgetUtils.isWasChange(ps.isExactSearch(), newPs.isExactSearch());
     }
 }

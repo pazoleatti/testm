@@ -70,7 +70,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
 
         RefBookDataProvider refBookDataProvider = refBookCacher.getDataProvider(refBook.getId());
 
-        String filter = buildFilter.buildMultiPickerFilter(action.getFilter(), action.getSearchPattern(), refBook, context);
+        String filter = buildFilter.buildMultiPickerFilter(action.getFilter(), action.getSearchPattern(), action.isExactSearch(), refBook, context);
         if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
             //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи справочника - ни одна не должна быть ему доступна
             result.setPage(new PagingResult<RefBookItem>(new LinkedList<RefBookItem>(), 0));

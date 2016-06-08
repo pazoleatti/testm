@@ -121,6 +121,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     public void onSearch(SearchButtonEvent event) {
         dataProvider.relevanceDate = event.getRelevanceDate();
         dataProvider.searchPattern = event.getSearchPattern();
+        dataProvider.exactSearch = event.isExactSearch();
         getView().updateTable();
     }
 
@@ -170,9 +171,10 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         getView().updateTable();
     }
 
-    public void initState(Date relevanceDate, String searchPattern) {
+    public void initState(Date relevanceDate, String searchPattern, boolean exactSearch) {
         dataProvider.relevanceDate = relevanceDate;
         dataProvider.searchPattern = searchPattern;
+        dataProvider.exactSearch = exactSearch;
         /*getView().updateTable();*/
     }
 
@@ -205,6 +207,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
 
         Date relevanceDate;
         String searchPattern;
+        Boolean exactSearch;
 
         @Override
         protected void onRangeChanged(HasData<RefBookDataRow> display) {
@@ -217,6 +220,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
             action.setPagingParams(new PagingParams(range.getStart()+1, range.getLength()));
             action.setRelevanceDate(relevanceDate);
             action.setSearchPattern(searchPattern);
+            action.setExactSearch(exactSearch);
             action.setSortColumnIndex(getView().getSortColumnIndex());
             action.setAscSorting(getView().isAscSorting());
             dispatchRequest = dispatchAsync.execute(action,
@@ -253,6 +257,10 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
 
     public String getSearchPattern() {
         return dataProvider.searchPattern;
+    }
+
+    public Boolean getExactSearch() {
+        return dataProvider.exactSearch;
     }
 
     public int getSortColumnIndex() {

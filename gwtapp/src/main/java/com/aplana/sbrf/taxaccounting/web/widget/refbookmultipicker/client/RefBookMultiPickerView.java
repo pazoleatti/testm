@@ -223,8 +223,8 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     }
 
     @Override
-    public void find(String searchPattern) {
-        getUiHandlers().find(searchPattern);
+    public void find(String searchPattern, boolean exactSearch) {
+        getUiHandlers().find(searchPattern, exactSearch);
         filterText = searchPattern;
         refresh(true);
     }
@@ -439,8 +439,8 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     }
 
     @Override
-    public void checkCount(String text, Date date, CheckValuesCountHandler checkValuesCountHandler) {
-        getUiHandlers().getValuesCount(text, checkValuesCountHandler);
+    public void checkCount(String text, Date date, boolean exactSearch, CheckValuesCountHandler checkValuesCountHandler) {
+        getUiHandlers().getValuesCount(text, exactSearch, checkValuesCountHandler);
     }
 
     @Override

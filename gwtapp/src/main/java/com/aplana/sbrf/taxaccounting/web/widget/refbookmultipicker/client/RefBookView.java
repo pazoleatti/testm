@@ -23,7 +23,7 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
 
     void reload(List<Long> needToSelectIds);
 
-    void find(String searchPattern);
+    void find(String searchPattern, boolean exactSearch);
 
     void reloadOnDate(Date version);
 
@@ -86,7 +86,7 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
      * @param text текст
      * @param checkValuesCountHandler хендлер который исполниться после получения количества попавщих под фильтр записей
      */
-    void checkCount(String text, Date relevanceDate, CheckValuesCountHandler checkValuesCountHandler);
+    void checkCount(String text, Date relevanceDate, boolean exactSearch, CheckValuesCountHandler checkValuesCountHandler);
 
     void cleanValues();
 }

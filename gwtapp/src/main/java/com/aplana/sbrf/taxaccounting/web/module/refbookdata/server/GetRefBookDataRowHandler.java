@@ -75,9 +75,9 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
         String searchPattern = action.getSearchPattern();
         if (searchPattern != null && !searchPattern.isEmpty()) {
             if (filter != null && !filter.isEmpty()) {
-                filter += " and (" + refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId()) + ")";
+                filter += " and (" + refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch()) + ")";
             } else {
-                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
+                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch());
             }
         }
 

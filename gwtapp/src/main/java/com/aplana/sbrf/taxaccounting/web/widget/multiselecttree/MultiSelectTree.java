@@ -51,6 +51,9 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     /** Признак возможности выбора нескольких узлов дерева. */
     protected boolean multiSelection;
 
+    /** Признак поиска на точное соответствие. */
+    protected boolean exactSearch;
+
     private final String groupName = "treeGroup_" + this.hashCode();
 
     public interface Style extends CssResource {
@@ -445,8 +448,9 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
      * Фильтр элементов дерева по названию.
      *
      * @param filter строка для фильтра
+     * @param exactSearch точное соответствие
      */
-    public void filter(String filter) {
+    public void filter(String filter, boolean exactSearch) {
         String lowerFilter = filter.toLowerCase();
         if ("".equals(filter)) {
             for (T item : getItems()) {
@@ -458,7 +462,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
         for (T item : getItems()) {
             item.highLightText(filter);
             String itemValue = item.getText().toLowerCase();
-            if (itemValue.contains(lowerFilter)) {
+            if (!exactSearch && itemValue.contains(lowerFilter) || exactSearch && itemValue.equals(lowerFilter)) {
                 item.setVisible(true);
                 T parent = (T) item.getParentItem();
                 while (parent != null) {
@@ -475,4 +479,11 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
         ValueChangeEvent.fire(this, getValue());
     }
 
+    public boolean isExactSearch() {
+        return exactSearch;
+    }
+
+    public void setExactSearch(boolean exactSearch) {
+        this.exactSearch = exactSearch;
+    }
 }

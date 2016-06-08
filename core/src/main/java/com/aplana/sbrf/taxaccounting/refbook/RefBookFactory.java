@@ -54,8 +54,13 @@ public interface RefBookFactory {
      * определенному строковому ключу
      *
      * @param query - ключ для поиска
+     * @param refBookId - справочник
+     * @param exactSearch - точное соответствие
+     *
      * @return строку фильтрации для поиска по справочнику
      */
+    String getSearchQueryStatement(String query, Long refBookId, boolean exactSearch);
+
     String getSearchQueryStatement(String query, Long refBookId);
 
     /**

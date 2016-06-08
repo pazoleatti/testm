@@ -75,6 +75,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     HorizontalPanel versionPanel;
     @UiField
     CheckBox pickAll;
+    @UiField
+    CheckBox exactSearch;
 
     @UiField
     FlowPanel modalBodyWrapper;
@@ -187,12 +189,12 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     void onSearchButtonClicked(ClickEvent event) {
         final String text = searchTextBox.getText();
         if (text != null && !text.trim().isEmpty()) {
-            refBookView.checkCount(text.trim(), versionDateBox.getValue(), new CheckValuesCountHandler() {
+            refBookView.checkCount(text.trim(), versionDateBox.getValue(), state.isExactSearch(), new CheckValuesCountHandler() {
                 @Override
                 public void onGetValuesCount(Integer count) {
                     if (count != null && count < (isHierarchical() ? 50 : 100)) {
                         state.setSearchPattern(text);
-                        refBookView.find(text);
+                        refBookView.find(text, state.isExactSearch());
                     } else {
                         Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений.");
                     }
@@ -200,7 +202,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             });
         } else {
             state.setSearchPattern(text);
-            refBookView.find(text);
+            refBookView.find(text, state.isExactSearch());
         }
     }
 
@@ -277,6 +279,11 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
                 }
             });
         }
+    }
+
+    @UiHandler("exactSearch")
+    void onExactSearchValueChange(ValueChangeEvent<Boolean> event) {
+        state.setExactSearch(event.getValue());
     }
 
     private void clearAndSetValues(Collection<Long> longs) {

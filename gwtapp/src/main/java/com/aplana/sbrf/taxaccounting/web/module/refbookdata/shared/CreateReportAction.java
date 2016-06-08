@@ -16,6 +16,7 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
     private String searchPattern;
     private int sortColumnIndex;
     private boolean ascSorting;
+    private boolean exactSearch;
 
     public long getRefBookId() {
         return refBookId;
@@ -63,6 +64,14 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
 
     public void setAscSorting(boolean ascSorting) {
         this.ascSorting = ascSorting;
+    }
+
+    public boolean isExactSearch() {
+        return exactSearch;
+    }
+
+    public void setExactSearch(boolean exactSearch) {
+        this.exactSearch = exactSearch;
     }
 
     @Override

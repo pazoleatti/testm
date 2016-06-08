@@ -157,6 +157,11 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     @Override
     public String getSearchQueryStatement(String query, Long refBookId) {
+        return getSearchQueryStatement(query, refBookId, false);
+    }
+
+    @Override
+    public String getSearchQueryStatement(String query, Long refBookId, boolean exactSearch) {
         if (query == null || query.isEmpty()){
             return null;
         }
@@ -225,11 +230,19 @@ public class RefBookFactoryImpl implements RefBookFactory {
             }
 
             if (attribute.getAttributeType() != RefBookAttributeType.DATE) {
-                resultSearch
-                        .append(" like ")
-                        .append("'%")
-                        .append(q)
-                        .append("%'");
+                if (exactSearch) {
+                    resultSearch
+                            .append(" like ")
+                            .append("'")
+                            .append(q)
+                            .append("'");
+                } else {
+                    resultSearch
+                            .append(" like ")
+                            .append("'%")
+                            .append(q)
+                            .append("%'");
+                }
             }
         }
 

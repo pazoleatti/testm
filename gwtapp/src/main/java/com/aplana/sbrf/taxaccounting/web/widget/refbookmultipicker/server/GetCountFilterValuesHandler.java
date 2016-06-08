@@ -60,9 +60,9 @@ public class GetCountFilterValuesHandler extends AbstractActionHandler<GetCountF
 
         String filter;
         if (action.isHierarchy()) {
-            filter = buildFilter.buildTreePickerFilter(action.getFilter(), action.getSearchPattern(), refBook);
+            filter = buildFilter.buildTreePickerFilter(action.getFilter(), action.getSearchPattern(), action.isExactSearch(), refBook);
         } else {
-            filter = buildFilter.buildMultiPickerFilter(action.getFilter(), action.getSearchPattern(), refBook, action.getContext());
+            filter = buildFilter.buildMultiPickerFilter(action.getFilter(), action.getSearchPattern(), action.isExactSearch(), refBook, action.getContext());
         }
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());

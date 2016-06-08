@@ -65,6 +65,8 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
     @UiField
     Button search;
     @UiField
+    CheckBox exactSearch;
+    @UiField
     TextBox filterText;
     @UiField
     LinkButton backToRefBookAnchor;
@@ -98,6 +100,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 separator.setVisible(true);
                 edit.setVisible(false);
                 search.setEnabled(true);
+                exactSearch.setEnabled(true);
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(false);
@@ -109,6 +112,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 separator.setVisible(false);
                 edit.setVisible(false);
                 search.setEnabled(true);
+                exactSearch.setEnabled(true);
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
@@ -120,6 +124,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 deleteRow.setVisible(false);
                 separator.setVisible(false);
                 search.setEnabled(true);
+                exactSearch.setEnabled(true);
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
@@ -129,6 +134,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
                 search.setEnabled(false);
+                exactSearch.setEnabled(false);
                 filterText.setEnabled(false);
                 separator.setVisible(false);
                 relevanceDate.setEnabled(false);
@@ -149,6 +155,11 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
     @Override
     public String getSearchPattern() {
         return filterText.getText();
+    }
+
+    @Override
+    public Boolean getExactSearch() {
+        return exactSearch.getValue();
     }
 
     @Override
