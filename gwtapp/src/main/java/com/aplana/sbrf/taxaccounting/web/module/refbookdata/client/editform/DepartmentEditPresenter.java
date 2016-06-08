@@ -62,9 +62,6 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
             getView().updateRefBookPickerPeriod();
             return;
         }
-        if (getPreviousURId()!=null&&getPreviousURId().equals(refBookRecordId)){
-            return;
-        }
         setPreviousURId(refBookRecordId);
         GetRefBookRecordAction action = new GetRefBookRecordAction();
         action.setRefBookId(currentRefBookId);
