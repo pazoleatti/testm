@@ -1716,7 +1716,7 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sourceRow, def sumNal, 
     if (sumNal == null || sourceRow.baseTaxOf == null || !checkColumn11(sourceRow.baseTaxOf)) {
         row.taxSumOutside = 0
     } else {
-        row.taxSumOutside = roundValue(sumNal * 0.9 * new BigDecimal(sourceRow.baseTaxOf) / 100, 0)
+        row.taxSumOutside = roundValue(roundValue(sumNal * 0.9, 0) * new BigDecimal(sourceRow.baseTaxOf) / 100, 0)
     }
 
     // графа 16
