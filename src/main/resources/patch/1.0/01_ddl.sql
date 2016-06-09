@@ -30,6 +30,9 @@ end;
 /
 
 ----------------------------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-15795: Поиск по ОКТМО
+create index I_REF_BOOK_OKTMO_PARENT_ID on REF_BOOK_OKTMO (PARENT_ID);
+----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-13720: 1.0 Добавить в ЖА поле "Сервер" по аналогии с блокировками
 alter table log_system add server varchar2(200);
 comment on column log_system.server is 'Сервер'; 
