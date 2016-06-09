@@ -5,6 +5,8 @@ UPDATE ref_book_attribute SET name = 'Код налогового органа (
 -----------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15302: 0.8.4 Классификаторы доходов/расходов: Изменить название поля "Символ ОПУ" на "Символ ОФР"
 UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Символ ОФР' WHERE REF_BOOK_ID IN (27, 28) AND ALIAS = 'OPU';
+
+--https://jira.aplana.com/browse/SBRFACCTAX-15805: Переименовать "Код ОПУ" в "Код ОФР" в отображении "Форма 102" БО
 UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Код ОФР' WHERE REF_BOOK_ID = 52  AND ALIAS = 'OPU_CODE';
 
 --https://jira.aplana.com/browse/SBRFACCTAX-15342: 1.0 Сделать неактивными и неотображаемыми справочники с классификаторами
