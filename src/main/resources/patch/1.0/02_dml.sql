@@ -12,7 +12,7 @@ where attribute_id = 5102 and record_id in (
 --https://jira.aplana.com/browse/SBRFACCTAX-14735: Формирование специфического отчета декларации
 INSERT INTO async_task_type (id, name, handler_jndi, limit_kind, dev_mode) values (26, 'Формирование специфического отчета декларации', 'ejb/taxaccounting/async-task.jar/SpecificReportDeclarationDataAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote', 'Сумма по всем формам-источникам. Ячейки = строки * графы', 0);
 
-// https://jira.aplana.com/browse/SBRFACCTAX-15840: 1.0 Справочники. Реализовать возможность загрузки данных из файла в справочник
+--https://jira.aplana.com/browse/SBRFACCTAX-15840: 1.0 Справочники. Реализовать возможность загрузки данных из файла в справочник
 INSERT INTO async_task_type (id, name, handler_jndi, limit_kind, dev_mode) values (27, 'Загрузка данных из файла в справочник', 'ejb/taxaccounting/async-task.jar/UploadRefBookAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote', 'Размер файла (Кбайт)', 0);
 
 --https://jira.aplana.com/browse/SBRFACCTAX-15059: Обновить справочник цветов в БД в соответствии с ENUM
