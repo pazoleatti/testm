@@ -27,8 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -203,14 +202,24 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     fail++;
                     continue;
                 }
-
+                File dataFile = null;
                 try {
+                    dataFile = File.createTempFile("dataFile", ".original");
+                    OutputStream dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
+                    InputStream currentFileInputStream = currentFile.getInputStream();
+                    try {
+                        IOUtils.copy(currentFileInputStream, dataFileOutputStream);
+                    } finally {
+                        IOUtils.closeQuietly(currentFileInputStream);
+                        IOUtils.closeQuietly(dataFileOutputStream);
+                    }
+
                     // ЭП
                     List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
                     if (signList != null && !signList.isEmpty() && SignService.SIGN_CHECK.equals(signList.get(0))) {
                         Pair<Boolean, Set<String>> check = new Pair<Boolean, Set<String>>(false, new HashSet<String>());
                         try {
-                            check = signService.checkSign(fileName, currentFile.getPath(), 0, logger);
+                            check = signService.checkSign(fileName, dataFile.getPath(), 1, logger);
                         } catch (Exception e) {
                             log(userInfo, LogData.L36, logger, lockId, fileName, e.getMessage());
                         }
@@ -249,7 +258,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         localLoggerList.add(new Logger());
                         ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
                         try {
-                            is = new BufferedInputStream(currentFile.getInputStream());
+                            is = new BufferedInputStream(new FileInputStream(dataFile));
                             if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
                                 ZipInputStream zis = new ZipInputStream(is);
                                 ZipEntry zipFileName = zis.getNextEntry();
@@ -365,9 +374,14 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         }
                         fail++;
                     }
+                } catch (IOException e) {
+                    throw new ServiceException(e.getLocalizedMessage(), e);
                 } finally {
                     //Снимаем блокировки
                     lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                    if (dataFile != null) {
+                        dataFile.delete();
+                    }
                 }
             }
         }
