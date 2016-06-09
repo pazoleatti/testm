@@ -161,6 +161,7 @@ commit;
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14699
 alter table declaration_report drop constraint decl_report_pk; 
+drop index decl_report_pk; 
 alter table declaration_report modify blob_data_id not null;
 alter table declaration_report drop constraint decl_report_chk_type;
 alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3, 4));
