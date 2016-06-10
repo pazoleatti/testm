@@ -1,0 +1,4 @@
+record_id(N);NAME(S);CODE(S);PARENT_ID(R)
+1;A;A;1
+2;B;B;2
+3;C;C;3
