@@ -101,7 +101,9 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                         public void onSuccess(CreateDeclarationResult result) {
                             if (result.getDeclarationId() == null) {
                                 LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
-                                Dialog.infoMessage("Создание декларации", "Декларация не создана");
+                                String title = (taxType.equals(TaxType.DEAL) ? "Создание уведомления" : "Создание декларации");
+                                String msg = (taxType.equals(TaxType.DEAL) ? "Уведомление не создано" : "Декларация не создана");
+                                Dialog.infoMessage(title, msg);
                             } else {
                                 onHide();
                                 placeManager
@@ -151,7 +153,9 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                 || ((taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.INCOME))
                 && (filter.getTaxOrganKpp() == null || filter.getTaxOrganKpp().isEmpty()))
         ){
-            Dialog.errorMessage("Создание декларации", "Заполнены не все параметры декларации");
+            String title = (taxType.equals(TaxType.DEAL) ? "Создание уведомления" : "Создание декларации");
+            String msg = (taxType.equals(TaxType.DEAL) ? "Заполнены не все параметры уведомления" : "Заполнены не все параметры декларации");
+            Dialog.errorMessage(title, msg);
             return false;
         }
         return true;
