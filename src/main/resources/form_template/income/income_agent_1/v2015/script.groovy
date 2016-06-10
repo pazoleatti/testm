@@ -178,6 +178,12 @@ def logicCheck() {
     def userDepartmentInn = getDepartmentParams(userDepartment.id)?.INN?.value
     def yearRowMap = [:]
 
+    // 14. Проверка заполнения ИНН для подразделения
+    if (departmentCode != '15521' && !userDepartmentInn) {
+        def periodName = period?.taxPeriod?.year + ' ' + period?.name
+        logger.error("В настройках подразделения «%s» за период «%s» не заполнен атрибут «ИНН»!", userDepartment.name, periodName)
+    }
+
     for (def row in dataRows) {
         def index = row.getIndex()
         def rowYear = row.year?.format('yyyy')?.toInteger()
@@ -275,19 +281,11 @@ def logicCheck() {
                     getColumnName(row, 'type'), getColumnName(row, 'withheldSum'))
         }
 
-        if(departmentCode != '15521') {
-            // 14. Проверка заполнения ИНН для подразделения
-            if (!userDepartmentInn) {
-                def periodName = period?.taxPeriod?.year + ' ' + period?.name
-                logger.error("В настройках подразделения «%s» за период «%s» не заполнен атрибут «ИНН»!", userDepartment.name, periodName)
-            }
-
-            // 15. Проверка заполнения «Графы 4», «Графы 5»
-            if (userDepartmentInn && row.dividends > 0 && row.sum > 0 && row.withheldSum >= 0 && row.emitentInn == userDepartmentInn) {
-                ['all', 'rateZero'].each { alias ->
-                    if (row[alias] == null) {
-                        logger.warn("Строка $index: Графа «%s» должна быть заполнена, т.к. значение используется при консолидации в сводную форму 03А!", getColumnName(row, alias))
-                    }
+        // 15. Проверка заполнения «Графы 4», «Графы 5»
+        if (departmentCode != '15521' && userDepartmentInn && row.dividends > 0 && row.sum > 0 && row.withheldSum >= 0 && row.emitentInn == userDepartmentInn) {
+            ['all', 'rateZero'].each { alias ->
+                if (row[alias] == null) {
+                    logger.warn("Строка $index: Графа «%s» должна быть заполнена, т.к. значение используется при консолидации в сводную форму 03А!", getColumnName(row, alias))
                 }
             }
         }
