@@ -376,8 +376,7 @@ void calcCaTotalRow(def dataRows, def prevDataRows, def caTotalRow, def totalRow
         switch (reportPeriod.order) {
             case 1: // Период формы «1 квартал»:
                 // Принимает значение «графы 14» подразделения «Центральный аппарат»
-                // TODO (Ramil Timerbaev) правильно ли округлять?
-                tempValue = roundValue(caRow.taxSum, 0)
+                tempValue = caRow.taxSum
                 break
             case 4: // Период формы "год"
                 tempValue = null

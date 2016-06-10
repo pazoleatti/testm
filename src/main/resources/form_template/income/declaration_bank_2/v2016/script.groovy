@@ -123,7 +123,7 @@ private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
 
     def formDataCollection = getAcceptedFormDataSources()
     def departmentFormType = formDataCollection?.records?.find { it.formType.id == sourceFormTypeId }
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    def reportPeriod = getReportPeriod()
     if (departmentFormType == null) {
         if (loggerNeed) {
             logger.log(logLevel, "Не найден экземпляр «${sourceFormType.name}» за ${reportPeriod.name} ${reportPeriod.taxPeriod.year} в статусе «Принята» (налоговая форма не назначена источником декларации Банка/назначена источником, но не создана/назначена источником, создана, но не принята). При расчёте экземпляра декларации строка 240 Листа 02 будет заполнена значением «0»!")
@@ -446,7 +446,7 @@ void generateXML(def xml, boolean showApp2) {
     def approveOrgName = incomeParamsTable?.APPROVE_ORG_NAME?.value
 
     // Отчётный период.
-    def reportPeriod = reportPeriodService.get(reportPeriodId)
+    def reportPeriod = getReportPeriod()
 
     /** Предыдущий отчётный период. */
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId)
@@ -585,7 +585,7 @@ void generateXML(def xml, boolean showApp2) {
     }
 
     /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
-    def dataRowsAdvance = getDataRows(formDataCollection, 500)
+    def dataRowsAdvance = getDataRows(formDataCollection, getAdvanceTypeId())
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
     def dataRowsDividend = getDataRows(formDataCollection, 414)
@@ -3026,11 +3026,21 @@ List<String> getErrorTable(record) {
 }
 
 @Field
+def reportPeriod = null
+
+def getReportPeriod() {
+    if (reportPeriod == null) {
+        reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    }
+    return reportPeriod
+}
+
+@Field
 def declarationReportPeriod
 
 boolean useTaxOrganCodeProm() {
     if (declarationReportPeriod == null) {
-        declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        declarationReportPeriod = getReportPeriod()
     }
     return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
 }
@@ -3211,7 +3221,7 @@ void calcTaskComplexityApp2() {
 void calcTaskComplexityNoApp2() {
     def formDataCollection = getAcceptedFormDataSources()
 
-    taskComplexityHolder.setValue(getCellCount(formDataCollection, [302, 305, 301, 305, 303, 304, 310, 500, 414, 416, 412, 309, 421]))
+    taskComplexityHolder.setValue(getCellCount(formDataCollection, [302, 305, 301, 305, 303, 304, 310, getAdvanceTypeId(), 414, 416, 412, 309, 421]))
 }
 
 @Field
@@ -3222,4 +3232,11 @@ def getAcceptedFormDataSources() {
         acceptedFormDataSources = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
     }
     return acceptedFormDataSources
+}
+
+/** Получить form_type_id "авансовых платежей". До 1 кв 2016 (включительно) используется макет 500, после - 507. */
+def getAdvanceTypeId() {
+    def reportPeriod = getReportPeriod()
+    def isAfterFirstQuarter2016 = (reportPeriod?.taxPeriod?.year > 2016 || reportPeriod?.order > 1)
+    return (isAfterFirstQuarter2016 ? 507 : 500)
 }
