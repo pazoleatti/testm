@@ -44,6 +44,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
             changes.setEvent(FormDataEvent.getByCode(SqlUtils.getInteger(rs, "event")));
             changes.setFormTemplateId(SqlUtils.getInteger(rs,"form_template_id"));
             changes.setDeclarationTemplateId(SqlUtils.getInteger(rs,"declaration_template_id"));
+            changes.setRefBookId(SqlUtils.getInteger(rs,"ref_book_id"));
             return changes;
         }
     }
@@ -52,11 +53,11 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     public int add(TemplateChanges templateChanges) {
         try {
             int templateEventId = generateId("seq_template_changes", Integer.class);
-            getJdbcTemplate().update("INSERT INTO template_changes(id, event, date_event, author, form_template_id, declaration_template_id)" +
-                    " VALUES(?, ?, ?, ?, ?, ?)",
+            getJdbcTemplate().update("INSERT INTO template_changes(id, event, date_event, author, form_template_id, declaration_template_id, ref_book_id)" +
+                    " VALUES(?, ?, ?, ?, ?, ?, ?)",
                     new Object[]{templateEventId, templateChanges.getEvent().getCode(), templateChanges.getEventDate(), templateChanges.getAuthor().getId(),
-                            templateChanges.getFormTemplateId(), templateChanges.getDeclarationTemplateId()},
-                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.TIMESTAMP, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC});
+                            templateChanges.getFormTemplateId(), templateChanges.getDeclarationTemplateId(), templateChanges.getRefBookId()},
+                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.TIMESTAMP, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC});
             return templateEventId;
         } catch (DataAccessException e){
             LOG.error("Ошибка при добавлении истории событий.", e);
@@ -68,7 +69,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     @Override
     public List<TemplateChanges> getByFormTemplateId(int ftId, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
         StringBuilder sql = new StringBuilder(
-                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id\n" +
+                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id, ref_book_id\n" +
                         "FROM template_changes tch\n");
         if (ordering == VersionHistorySearchOrdering.EVENT)
             sql.append("LEFT JOIN event ev on tch.event=ev.\"ID\"\n");
@@ -87,9 +88,31 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     }
 
     @Override
+    public List<TemplateChanges> getByRefBookId(int refBookId, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id, ref_book_id\n" +
+                        "FROM template_changes tch\n");
+        if (ordering == VersionHistorySearchOrdering.EVENT)
+            sql.append("LEFT JOIN event ev on tch.event=ev.\"ID\"\n");
+        sql.append("WHERE ref_book_id = ?\n");
+        sql.append(sortingClause(ordering, isAscSorting));
+
+        try {
+            return getJdbcTemplate().query(sql.toString(),
+                    new Object[]{refBookId},
+                    new int[]{Types.NUMERIC},
+                    new TemplateChangesMapper());
+        } catch (DataAccessException e) {
+            LOG.error("Ошибка при получении истории изменнений.", e);
+            throw new DaoException("Ошибка при получении истории изменнений.", e);
+        }
+    }
+
+
+    @Override
     public List<TemplateChanges> getByDeclarationTemplateId(int dtId, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
         StringBuilder sql = new StringBuilder(
-                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id\n" +
+                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id, ref_book_id\n" +
                         "FROM template_changes tch\n");
         if (ordering == VersionHistorySearchOrdering.EVENT)
             sql.append("LEFT JOIN event ev on tch.event=ev.\"ID\"\n");
@@ -109,7 +132,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     @Override
     public List<TemplateChanges> getByFormTypeIds(int ftTypeId, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
         StringBuilder sql = new StringBuilder(
-                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id\n" +
+                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id, ref_book_id\n" +
                         "FROM template_changes tch\n");
         if (ordering == VersionHistorySearchOrdering.EVENT)
             sql.append("LEFT JOIN event ev on tch.event=ev.\"ID\"\n");
@@ -128,7 +151,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     }
 
     private static final String GET_TEMPLATE_CHANGES =
-            "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id\n" +
+            "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id, ref_book_id\n" +
             "FROM template_changes tch\n" +
             "WHERE form_template_id IN\n" +
             "(:ftIds)\n" +
@@ -179,7 +202,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     @Override
     public List<TemplateChanges> getByDeclarationTypeId(int dtTypeId, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
         StringBuilder sql = new StringBuilder(
-                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id\n" +
+                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id, ref_book_id\n" +
                         "FROM template_changes tch\n");
         if (ordering == VersionHistorySearchOrdering.EVENT)
             sql.append("LEFT JOIN event ev on tch.event=ev.\"ID\"\n");

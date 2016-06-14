@@ -24,6 +24,7 @@ public interface TemplateChangesService {
      */
     List<TemplateChanges> getByFormTypeIds(int ftTypeId, VersionHistorySearchOrdering searchOrdering, boolean isAscSorting);
     List<TemplateChanges> getByDeclarationTypeIds(int dtTypeId, VersionHistorySearchOrdering ordering, boolean isAscSorting);
+    List<TemplateChanges> getByRefBookIds(int refBookId, VersionHistorySearchOrdering searchOrdering, boolean isAscSorting);
     void delete(Collection<Integer> ids);
 
     /**

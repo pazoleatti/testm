@@ -253,7 +253,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         String lockUser = canImportScript(LockData.LockObjects.REF_BOOK.name() + "_" + refBookId, userInfo.getUser());
                         if (lockUser == null) {
                             try {
-                                refBookScriptingService.saveScript(refBookId, script, logger);
+                                refBookScriptingService.importScript(refBookId, script, logger, userInfo);
                             } catch (ServiceLoggerException e) {
                                 logger.error("Справочник \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен.", refBook.getName(), scriptFileName);
                                 continue;

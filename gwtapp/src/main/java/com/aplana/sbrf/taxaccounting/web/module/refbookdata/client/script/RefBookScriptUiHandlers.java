@@ -11,4 +11,6 @@ public interface RefBookScriptUiHandlers extends UiHandlers {
     void cancelEdit();
 
     void getScript();
+
+    void onHistoryClicked();
 }

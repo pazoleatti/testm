@@ -48,6 +48,11 @@ public class TemplateChangesServiceImpl implements TemplateChangesService {
     }
 
     @Override
+    public List<TemplateChanges> getByRefBookIds(int refBookId, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
+        return templateChangesDao.getByRefBookId(refBookId, ordering, isAscSorting);
+    }
+
+    @Override
     public void delete(Collection<Integer> ids) {
         templateChangesDao.delete(ids);
     }

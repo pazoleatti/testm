@@ -720,7 +720,8 @@ create table template_changes (
  declaration_template_id number(9),
  event number(9),
  author number(9) not null,
- date_event date
+ date_event date,
+ ref_book_id number(9),
 );
 
 comment on table template_changes is 'Изменение версий налоговых шаблонов';
@@ -730,6 +731,7 @@ comment on column template_changes.declaration_template_id is 'Идентифи�
 comment on column template_changes.event is 'Событие версии';
 comment on column template_changes.author is 'Автор изменения';
 comment on column template_changes.date_event is 'Дата изменения';
+comment on column template_changes.ref_book_id is 'Идентификатор справочника';
 --------------------------------------------------------------------------------------------------------
 create table event
 (

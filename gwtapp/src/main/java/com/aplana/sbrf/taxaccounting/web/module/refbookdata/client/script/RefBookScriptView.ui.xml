@@ -25,23 +25,9 @@
             background: #FFFFFF;
         }
 
-        .marginRight5 {
-            margin-right: 5px;
-        }
-
-        .separator {
-            height: 26px;
-            margin: 0 9px;
-            border-right: 1px solid #aeaeac;
-        }
-
         .btnFind {
             margin-left: 6px;
             margin-right: 15px;
-        }
-
-        .labelBlockMargin {
-            margin-right: 5px;
         }
 
         .horSep {
@@ -75,15 +61,18 @@
 
         <fm:body>
             <fm:BodyContainer>
-                <g:HorizontalPanel verticalAlignment="middle" spacing="2" addStyleNames="{style.btnPanel}">
+                <g:HorizontalPanel verticalAlignment="middle" spacing="2" addStyleNames="{style.btnPanel}" width="100%">
                     <g:cell horizontalAlignment="left">
-                        <g:Button ui:field="saveButton" addStyleNames="{style.btnFind}" text="Сохранить"/>
+                        <style:LeftBar>
+                            <g:Button ui:field="saveButton" addStyleNames="{style.btnFind}" text="Сохранить"/>
+                            <g:Button ui:field="resetButton" addStyleNames="{style.btnFind}" text="Сбросить"/>
+                            <g:Button ui:field="cancelButton" addStyleNames="{style.btnFind}" text="Отменить"/>
+                        </style:LeftBar>
                     </g:cell>
-                    <g:cell horizontalAlignment="left">
-                        <g:Button ui:field="resetButton" addStyleNames="{style.btnFind}" text="Сбросить"/>
-                    </g:cell>
-                    <g:cell horizontalAlignment="left">
-                        <g:Button ui:field="cancelButton" addStyleNames="{style.btnFind}" text="Отменить"/>
+                    <g:cell horizontalAlignment="right">
+                        <style:RightBar addStyleNames="{style.btnPanel}">
+                            <style:LinkButton text="История изменений" ui:field="historyVersion"/>
+                        </style:RightBar>
                     </g:cell>
                 </g:HorizontalPanel>
 

@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookScript;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -37,6 +38,9 @@ public class RefBookScriptView extends ViewWithUiHandlers<RefBookScriptUiHandler
 
     @UiField
     Label pageTitle;
+
+    @UiField
+    LinkButton historyVersion;
 
     @Inject
     public RefBookScriptView(Binder uiBinder, MyDriver driver) {
@@ -121,6 +125,14 @@ public class RefBookScriptView extends ViewWithUiHandlers<RefBookScriptUiHandler
     @UiHandler("returnAnchor")
     void onReturnAnchor(ClickEvent event) {
         onCancelClicked(event);
+    }
+
+
+    @UiHandler("historyVersion")
+    void onHistoryClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onHistoryClicked();
+        }
     }
 
     interface Binder extends UiBinder<Widget, RefBookScriptView> {

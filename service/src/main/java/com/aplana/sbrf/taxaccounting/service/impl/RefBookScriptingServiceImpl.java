@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -14,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
@@ -29,6 +31,7 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
@@ -52,6 +55,8 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     private RefBookDao refBookDao;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private TemplateChangesService templateChangesService;
     @Autowired
     @Qualifier("versionInfoProperties")
     private Properties versionInfoProperties;
@@ -180,7 +185,16 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     }
 
     @Override
-    public void saveScript(long refBookId, String script, Logger log) {
+    public void saveScript(long refBookId, String script, Logger log, TAUserInfo userInfo) {
+        saveScript(refBookId, script, FormDataEvent.TEMPLATE_MODIFIED, log, userInfo);
+    }
+
+    @Override
+    public void importScript(long refBookId, String script, Logger log, TAUserInfo userInfo) {
+        saveScript(refBookId, script, FormDataEvent.SCRIPTS_IMPORT, log, userInfo);
+    }
+
+    private void saveScript(long refBookId, String script, FormDataEvent formDataEvent, Logger log, TAUserInfo userInfo) {
         RefBook refBook = refBookFactory.get(refBookId);
         if (script != null && !script.trim().isEmpty()) {
             InputStream inputStream;
@@ -203,6 +217,12 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
                 blobDataService.delete(refBook.getScriptId());
             }
         }
+        TemplateChanges templateChanges = new TemplateChanges();
+        templateChanges.setRefBookId(Long.valueOf(refBookId).intValue());
+        templateChanges.setEvent(formDataEvent);
+        templateChanges.setAuthor(userInfo.getUser());
+        templateChanges.setEventDate(new Date());
+        templateChangesService.save(templateChanges);
     }
 
     /**

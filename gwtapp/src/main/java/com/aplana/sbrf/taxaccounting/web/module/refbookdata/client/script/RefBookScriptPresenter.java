@@ -3,9 +3,12 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.script;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.RefBookHistoryPresenter;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -29,11 +32,14 @@ public class RefBookScriptPresenter extends Presenter<RefBookScriptPresenter.MyV
     private final DispatchAsync dispatchAsync;
     private final PlaceManager placeManager;
 
+    private final RefBookHistoryPresenter versionHistoryPresenter;
+
     @Inject
-    public RefBookScriptPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatchAsync, PlaceManager placeManager) {
+    public RefBookScriptPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatchAsync, PlaceManager placeManager, RefBookHistoryPresenter refBookVersionPresenter) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatchAsync = dispatchAsync;
         this.placeManager = placeManager;
+        this.versionHistoryPresenter = refBookVersionPresenter;
         getView().setUiHandlers(this);
     }
 
@@ -90,5 +96,14 @@ public class RefBookScriptPresenter extends Presenter<RefBookScriptPresenter.MyV
     @ProxyStandard
     @NameToken(RefBookDataTokens.REFBOOK_SCRIPT)
     public interface MyProxy extends ProxyPlace<RefBookScriptPresenter> {
+    }
+
+    @Override
+    public void onHistoryClicked() {
+        Integer id = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(RefBookDataTokens.REFBOOK_DATA_ID, ""));
+        if (id == 0)
+            return;
+        versionHistoryPresenter.init(id);
+        addToPopupSlot(versionHistoryPresenter);
     }
 }

@@ -38,6 +38,15 @@ public interface TemplateChangesDao {
     List<TemplateChanges> getByDeclarationTemplateId(int dtId, VersionHistorySearchOrdering ordering, boolean isAscSorting);
 
     /**
+     * Получает список изменений справочника
+     * @param refBookId
+     * @param ordering
+     * @param isAscSorting
+     * @return
+     */
+    List<TemplateChanges> getByRefBookId(int refBookId, VersionHistorySearchOrdering ordering, boolean isAscSorting);
+
+    /**
      * Получает список изменений макета НФ.
      * Не использовать для получения изменений для удаления, т.к. все версии шаблонов могут быть на тот момент уже все удалены.
      * Пользоваться {@link #getByFormTemplateIds(java.util.List, com.aplana.sbrf.taxaccounting.model.VersionHistorySearchOrdering, boolean)}

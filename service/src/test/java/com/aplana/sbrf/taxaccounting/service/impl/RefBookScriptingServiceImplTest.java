@@ -2,12 +2,15 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -61,6 +64,8 @@ public class RefBookScriptingServiceImplTest {
         LogEntryService logEntryService = mock(LogEntryService.class);
         ReflectionTestUtils.setField(rbScriptingService, "logEntryService", logEntryService);
 
+        ReflectionTestUtils.setField(rbScriptingService, "templateChangesService", mock(TemplateChangesService.class));
+
         TransactionHelper tx = new TransactionHelper() {
             @Override
             public <T> T executeInNewTransaction(TransactionLogic<T> logic) {
@@ -82,19 +87,21 @@ public class RefBookScriptingServiceImplTest {
 
     @Test
     public void saveScript1() throws IOException {
+        TAUserInfo userInfo = new TAUserInfo();
         long refBookId = 0L;
         InputStream stream = RefBookScriptingServiceImplTest.class.getResourceAsStream("saveRefBookScript1.groovy");
         String script = IOUtils.toString(stream, "UTF-8");
         Logger logger = new Logger();
-        rbScriptingService.saveScript(refBookId, script, logger);
+        rbScriptingService.saveScript(refBookId, script, logger, userInfo);
     }
 
     @Test(expected = ServiceLoggerException.class)
     public void saveScript2() throws IOException {
+        TAUserInfo userInfo = new TAUserInfo();
         long refBookId = 0L;
         InputStream stream = RefBookScriptingServiceImplTest.class.getResourceAsStream("saveRefBookScript2.groovy");
         String script = IOUtils.toString(stream, "UTF-8");
         Logger logger = new Logger();
-        rbScriptingService.saveScript(refBookId, script, logger);
+        rbScriptingService.saveScript(refBookId, script, logger, userInfo);
     }
 }

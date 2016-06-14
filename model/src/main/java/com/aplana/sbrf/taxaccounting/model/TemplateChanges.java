@@ -18,6 +18,11 @@ public class TemplateChanges implements Serializable {
      * Идентификатор декларации
      */
     private Integer declarationTemplateId;
+
+    /**
+     * Идентификатор справочника
+     */
+    private Integer refBookId;
     private FormDataEvent event;
 
     /**
@@ -52,6 +57,14 @@ public class TemplateChanges implements Serializable {
 
     public void setDeclarationTemplateId(Integer declarationTemplateId) {
         this.declarationTemplateId = declarationTemplateId;
+    }
+
+    public Integer getRefBookId() {
+        return refBookId;
+    }
+
+    public void setRefBookId(Integer refBookId) {
+        this.refBookId = refBookId;
     }
 
     public FormDataEvent getEvent() {
