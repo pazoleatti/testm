@@ -71,8 +71,7 @@ public class EditRefBookHandler extends AbstractActionHandler<EditRefBookAction,
                         userService.getUser(lockData.getUserId()).getName(),
                         refBookFactory.getTaskName(ReportType.EDIT_REF_BOOK, action.getRefBookId(), null));
             }
-            result.setLockMsg("Для текущего справочника запущена операция, при которой формирование отчета невозможно");
-
+            result.setLockMsg("Для текущего справочника запущена операция, при которой редактирование невозможно");
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
