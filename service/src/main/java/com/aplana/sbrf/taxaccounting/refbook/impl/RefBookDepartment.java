@@ -499,7 +499,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 List<Long> dftIds = departmentFormTypeService.getIdsByPerformerId(depId);
                 departmentFormTypeService.deleteByIds(dftIds);
 
-                List<Long> income101Ids =  refBookIncome101.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
+                List<Long> income101Ids = refBookIncome101.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
                 if (!income101Ids.isEmpty())
                     refBookIncome101.deleteRecordVersions(logger, income101Ids, false);
                 List<Long> income102Ids = refBookIncome102.getUniqueRecordIds(null,
@@ -542,6 +542,11 @@ public class RefBookDepartment implements RefBookDataProvider {
                     provider.deleteRecordVersions(logger, uniqueIds, false);
                 }
                 provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_VAT);
+                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
+                if (!uniqueIds.isEmpty()){
+                    provider.deleteRecordVersions(logger, uniqueIds, false);
+                }
+                provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_PROPERTY);
                 uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
                 if (!uniqueIds.isEmpty()){
                     provider.deleteRecordVersions(logger, uniqueIds, false);
