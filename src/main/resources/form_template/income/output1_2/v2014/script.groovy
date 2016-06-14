@@ -54,6 +54,9 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
+    case FormDataEvent.AFTER_CREATE:
+        addTotalRow()
+        break
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
@@ -66,7 +69,9 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
-        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
@@ -156,7 +161,7 @@ def getReportPeriodEndDate() {
 }
 
 def getLastReportPeriod() {
-    ReportPeriod period = reportPeriodService.get(formData.reportPeriodId)
+    ReportPeriod period = getReportPeriod()
     List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(period.taxPeriod.id)
     return periodList.max{ ReportPeriod rp -> rp.order }
 }
@@ -324,7 +329,7 @@ void consolidation() {
         graph3String = departmentParams?.get(0)?.INN?.stringValue
     }
     if (graph3String == null || graph3String == '') {
-        def period = reportPeriodService.get(formData.reportPeriodId)
+        def period = getReportPeriod()
         def periodName = period?.taxPeriod?.year + ' ' + period?.name
         def msg = 'В настройках подразделения «%s» за период «%s» не заполнен атрибут «ИНН»!'
         logger.error(msg, userDepartment.name, periodName)
@@ -1011,4 +1016,33 @@ def checkOverflow(BigDecimal value, def row, def alias, int size) {
         return null
     }
     return value
+}
+
+void addTotalRow() {
+    def reportPeriod = getReportPeriod()
+    def isAfterFirstQuarter2016 = (reportPeriod?.taxPeriod?.year > 2016 ||
+            reportPeriod?.taxPeriod?.year > 2016 && reportPeriod?.order > 1)
+    if (!isAfterFirstQuarter2016) {
+        return
+    }
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    def totalRow = dataRows.find { it.getAlias() == 'total' }
+    if (totalRow) {
+        return
+    }
+
+    // итоговая строка
+    totalRow = getTotalRow()
+    dataRows.add(totalRow)
+    formDataService.saveCachedDataRows(formData, logger)
+}
+
+@Field
+ReportPeriod reportPeriod = null
+
+ReportPeriod getReportPeriod() {
+    if (reportPeriod == null) {
+        reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    }
+    return reportPeriod
 }
