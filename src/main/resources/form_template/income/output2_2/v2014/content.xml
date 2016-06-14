@@ -221,7 +221,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма дивидендов в рублях</name>
         <order>22</order>
-        <width>9</width>
+        <width>10</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -231,7 +231,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма налога в рублях</name>
         <order>23</order>
-        <width>9</width>
+        <width>10</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
