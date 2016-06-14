@@ -3,11 +3,8 @@ package form_template.income.advanceDistribution.v2016
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
-import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 /**
@@ -672,9 +669,8 @@ void logicalCheckAfterCalc() {
 
     boolean wasError = false
 
-    def tmpRows = dataRows.findAll { !it.getAlias() }
-    def propertyPriceSumm = getSumAll(tmpRows, "propertyPrice")
-    def workersCountSumm = getSumAll(tmpRows, "workersCount")
+    def propertyPriceSumm = getSumAll(dataRows, "propertyPrice")
+    def workersCountSumm = getSumAll(dataRows, "workersCount")
 
     // Распределяемая налоговая база за отчетный период.
     def taxBase
@@ -1216,32 +1212,9 @@ void setTotalStyle(def row) {
     }
 }
 
-/**
- * Получить сумму столбца (за исключением значении фиксированных строк).
- *
- * @param data данные нф (helper)
- * @param columnAlias алилас столбца по которому считать сумму
- * @return
- */
-def getSum(def dataRows, def columnAlias) {
-    def from = 0
-    def to = dataRows.size() - 2
-    if (from > to) {
-        return 0
-    }
-    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
-}
-
-/**
- * Получить сумму столбца (сумма значении всех строк).
- */
+/** Получить сумму столбца (сумма значении всех строк). */
 def getSumAll(def dataRows, def columnAlias) {
-    def from = 0
-    def to = dataRows.size() - 1
-    if (from > to) {
-        return 0
-    }
-    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
+    return dataRows.sum { it.getAlias() ? BigDecimal.ZERO : it[columnAlias] }
 }
 
 // Получить данные сводной
