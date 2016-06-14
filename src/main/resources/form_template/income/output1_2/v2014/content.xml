@@ -290,8 +290,8 @@
         <name>Исчисленная сумма налога, подлежащая уплате в бюджет</name>
         <order>29</order>
         <width>10</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>taxSumFromPeriod</alias>
