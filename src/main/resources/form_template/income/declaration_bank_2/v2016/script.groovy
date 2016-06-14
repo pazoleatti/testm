@@ -1313,7 +1313,10 @@ void generateXML(def xml, boolean showApp2) {
                 // 0..1
                 НалУдНА() {
                     if (dataRowsDividend != null) {
-                        dataRowsDividend.each { row ->
+                        for (row in dataRowsDividend) {
+                            if (row.getAlias() != null) {
+                                continue
+                            }
                             // Лист 03 А
                             // 0..n
                             НалДохДив(
@@ -1321,7 +1324,7 @@ void generateXML(def xml, boolean showApp2) {
                                         (row.inn ? [ИННЮЛ_ЭмЦБ : row.inn] : [:]) +
                                     [ВидДив : row.dividendType,
                                     НалПер : row.taxPeriod,
-                                    ОтчетГод : row.financialYear.format('yyyy'),
+                                    ОтчетГод : row.financialYear?.format('yyyy'),
                                     ДивРаспрПол : getLong(row.totalDividend),
                                     ДивВсего : getLong(row.dividendSumRaspredPeriod),
                                     ДивФЛРез : getLong(row.dividendRussianPersonal),
