@@ -215,7 +215,8 @@ void logicCheck() {
         if (row.taCategory == 2) {
             ['dividendAgentAll', 'dividendAgentWithStavka0'].each {
                 if (row[it] != null && row[it] != 0) {
-                    errorMessage(row, it)
+                    logger.error("Строка %s: Графа «%s» должна быть не заполнена либо заполнена значением «0», т.к. графа «%s» заполнена значением «2»!",
+                            row.getIndex(), getColumnName(row, it), getColumnName(row, "taCategory"))
                 }
             }
         }
@@ -224,7 +225,7 @@ void logicCheck() {
             // графа 27..31
             ['dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast'].each {
                 if (row[it] != 0) {
-                    logger.warn("Графа «%s» заполнена неверно!", getColumnName(row, it))
+                    logger.warn("Графа «%s» должна быть заполнена значением «0», т.к. графа «%s» заполнена значением меньше «0»!", getColumnName(row, it), getColumnName(row, "dividendD1D2"))
                 }
             }
         }
