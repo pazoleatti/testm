@@ -155,6 +155,9 @@ update ref_book set name = 'Средняя стоимость транспорт
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) 
 VALUES (2188, 218, 'Количество лет, прошедших с года выпуска', 'YOM_RANGE', 1, 7, null, null, 1, null, 10, 1, 0, null, null, 0, 120);
 
+-- -- https://jira.aplana.com/browse/SBRFACCTAX-15963: 1.0 Справочник "Средняя стоимость транспортных средств (с 2015)". Изменить уникальность полей
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 2188;
+
 begin
 	merge into ref_book_value tgt
 using (
