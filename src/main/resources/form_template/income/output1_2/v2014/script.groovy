@@ -225,7 +225,8 @@ void logicCheck() {
             // графа 27..31
             ['dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast'].each {
                 if (row[it] != 0) {
-                    logger.warn("Графа «%s» должна быть заполнена значением «0», т.к. графа «%s» заполнена значением меньше «0»!", getColumnName(row, it), getColumnName(row, "dividendD1D2"))
+                    logger.warn("Строка %s: Графа «%s» должна быть заполнена значением «0», т.к. графа «%s» заполнена значением меньше «0»!",
+                            row.getIndex(), getColumnName(row, it), getColumnName(row, "dividendD1D2"))
                 }
             }
         }
