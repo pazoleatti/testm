@@ -555,7 +555,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		reportPeriodLabel.setTitle(reportPeriod);
 		stateLabel.setText(state);
 		factory.setDateRange(startDate, endDate);
-        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR)) {
+        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR) && !taxType.equals(TaxType.MARKET)) {
             formKindTitle.setText(FORM_DATA_KIND_TITLE);
         } else {
             formKindTitle.setText(FORM_DATA_KIND_TITLE_D);

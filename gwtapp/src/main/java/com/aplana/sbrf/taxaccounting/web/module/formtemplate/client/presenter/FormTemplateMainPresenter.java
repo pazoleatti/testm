@@ -198,13 +198,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                 if (!result.isSetStatusSuccessfully()) { //
                     Dialog.confirmMessage("Информация",
                             "Найдены экземпляры " +
-                                    (
-                                            formTemplate.getType().getTaxType() == TaxType.DEAL
-                                                    ||
-                                            formTemplate.getType().getTaxType() == TaxType.ETR
-                                                    ? "форм" : "налоговых форм"
-                                    )
-                                    + ", использующие версию макета. Изменить статус версии?",
+                                    MessageGenerator.mesSpeckPluralD(formTemplate.getType().getTaxType()) +
+                                    ", использующие версию макета. Изменить статус версии?",
                             new DialogHandler() {
                                 @Override
                                 public void yes() {

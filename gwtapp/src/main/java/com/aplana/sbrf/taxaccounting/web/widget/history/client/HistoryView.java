@@ -74,7 +74,7 @@ public class HistoryView extends PopupViewWithUiHandlers<AplanaUiHandlers> imple
     public void updateTitle(TaxType taxType) {
         if (taxType.equals(TaxType.DEAL)) {
             modalWindowTitle.setText(MODAL_WINDOW_TITLE_D);
-        } else if (taxType.equals(TaxType.ETR)) {
+        } else if (taxType.equals(TaxType.ETR) || taxType.equals(TaxType.MARKET)) {
             modalWindowTitle.setText(MODAL_WINDOW_TITLE_E);
         } else {
             modalWindowTitle.setText(MODAL_WINDOW_TITLE);

@@ -27,6 +27,7 @@ public class GetFieldNamesHandler extends AbstractActionHandler<GetFieldsNames, 
 		switch (getFieldsNames.getTaxType()) {
 			case DEAL:
             case ETR:
+            case MARKET:
 				names.put(FormDataElementName.HEADER, "Список форм");
 				names.put(FormDataElementName.FORM_KIND, "Тип формы");
 				names.put(FormDataElementName.FORM_TYPE, "Вид формы");

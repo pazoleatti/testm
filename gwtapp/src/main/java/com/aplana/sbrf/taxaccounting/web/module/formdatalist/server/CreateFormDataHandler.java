@@ -104,7 +104,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                 List<DepartmentFormType> sources = sourceService.getDFTSourcesByDFT(departmentReportPeriod.getDepartmentId(),
                         formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
                 if (!sources.isEmpty()){
-                    if (formType.getTaxType() == TaxType.ETR || formType.getTaxType() == TaxType.DEAL) {
+                    if (formType.getTaxType() == TaxType.ETR || formType.getTaxType() == TaxType.DEAL || formType.getTaxType() == TaxType.MARKET) {
                         logger.warn("Форма является приемником данных для других форм.");
                     } else {
                         logger.warn("Налоговая форма является приемником данных для других налоговых форм.");
@@ -117,7 +117,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                 List<DepartmentFormType> formDestinations = sourceService.getFormDestinations(
                         departmentReportPeriod.getDepartmentId(), formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
                 if (declarationDestinations.isEmpty() && formDestinations.isEmpty()){
-                    if (formType.getTaxType() == TaxType.ETR || formType.getTaxType() == TaxType.DEAL) {
+                    if (formType.getTaxType() == TaxType.ETR || formType.getTaxType() == TaxType.DEAL || formType.getTaxType() == TaxType.MARKET) {
                         logger.warn(String.format(NOT_EXIST_DESTINATIONS_ETR, (formType.getTaxType() == TaxType.ETR ? "других форм" : "других форм и уведомления")));
                     } else {
                         logger.warn(NOT_EXIST_DESTINATIONS_OTHER);

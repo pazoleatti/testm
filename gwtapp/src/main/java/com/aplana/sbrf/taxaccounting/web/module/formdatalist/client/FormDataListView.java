@@ -241,18 +241,22 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 
     @Override
     public void updateFormDataTable(TaxType taxType) {
-        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR)) {
+        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR) && !taxType.equals(TaxType.MARKET)) {
             create.setText(FormDataListUtils.FORM_DATA_CREATE);
             create.setTitle(FormDataListUtils.FORM_DATA_CREATE_TITLE);
             formKindHeader.setTitle(FormDataListUtils.FORM_DATA_KIND_TITLE);
             formTypeHeader.setTitle(FormDataListUtils.FORM_DATA_TYPE_TITLE);
-            periodMonthHeader.setTitle(FormDataListUtils.PERIOD_MONTH_TITLE);
-            formDataTable.setColumnWidth(periodMonthColumn, 6, Style.Unit.EM);
         } else {
             create.setText(FormDataListUtils.FORM_DATA_CREATE_D);
             create.setTitle(FormDataListUtils.FORM_DATA_CREATE_TITLE_D);
             formKindHeader.setTitle(FormDataListUtils.FORM_DATA_KIND_TITLE_D);
             formTypeHeader.setTitle(FormDataListUtils.FORM_DATA_TYPE_TITLE_D);
+        }
+        if (taxType.equals(TaxType.INCOME) || taxType.equals(TaxType.VAT) || taxType.equals(TaxType.PROPERTY)
+                || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.MARKET)) {
+            periodMonthHeader.setTitle(FormDataListUtils.PERIOD_MONTH_TITLE);
+            formDataTable.setColumnWidth(periodMonthColumn, 6, Style.Unit.EM);
+        } else {
             periodMonthHeader.setTitle("");
             formDataTable.setColumnWidth(periodMonthColumn, 0, Style.Unit.EM);
         }

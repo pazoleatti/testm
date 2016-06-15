@@ -65,7 +65,7 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 		nameBox.setValue(name);
 		fullnameBox.setValue(fullName);
         headerBox.setValue(header);
-        if (Arrays.asList(TaxType.INCOME, TaxType.VAT, TaxType.TRANSPORT, TaxType.PROPERTY).contains(taxType)) {
+        if (Arrays.asList(TaxType.INCOME, TaxType.VAT, TaxType.TRANSPORT, TaxType.PROPERTY, TaxType.MARKET).contains(taxType)) {
             monthlyCheckBox.setEnabled(true);
         } else {
             monthlyCheckBox.setEnabled(false);

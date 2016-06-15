@@ -142,19 +142,19 @@ public final class MessageGenerator {
     }
 
     public static String mesSpeckPlural(TaxType taxType){
-        return  taxType == TaxType.DEAL || taxType == TaxType.ETR ? "формы" : "налоговые формы";
+        return  taxType == TaxType.DEAL || taxType == TaxType.ETR || taxType == TaxType.MARKET ? "формы" : "налоговые формы";
     }
 
     public static String mesSpeckPluralD(TaxType taxType){
-        return  taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форм" : "налоговых форм";
+        return  taxType == TaxType.DEAL || taxType == TaxType.ETR || taxType == TaxType.MARKET ? "форм" : "налоговых форм";
     }
 
     public static String mesSpeckSingle(TaxType taxType){
-        return  taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форма" : "налоговая форма";
+        return  taxType == TaxType.DEAL || taxType == TaxType.ETR || taxType == TaxType.MARKET ? "форма" : "налоговая форма";
     }
 
     public static String mesSpeckSingleD(TaxType taxType){
-        return  taxType == TaxType.DEAL || taxType == TaxType.ETR ? "формы" : "налоговой формы";
+        return  taxType == TaxType.DEAL || taxType == TaxType.ETR || taxType == TaxType.MARKET ? "формы" : "налоговой формы";
     }
 
     private static final String COMPLETE_FORM =

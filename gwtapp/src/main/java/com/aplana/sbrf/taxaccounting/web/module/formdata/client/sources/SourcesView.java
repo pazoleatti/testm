@@ -369,20 +369,17 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     private void updateSwitchMode() {
         boolean isTaxTypeDeal = TaxType.DEAL.equals(getUiHandlers().getTaxType());
         boolean isTaxTypeETR = TaxType.ETR.equals(getUiHandlers().getTaxType());
+        boolean isTaxTypeMarket = TaxType.MARKET.equals(getUiHandlers().getTaxType());
 
-        if (isTaxTypeETR) {
+        if (isTaxTypeETR || isTaxTypeMarket) {
             verSep.setVisible(false);
             formDecAnchor.setVisible(false);
         } else {
             verSep.setVisible(true);
             formDecAnchor.setVisible(true);
-            formDecAnchor.setText(isForm ?
-                    (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
-                    (isTaxTypeDeal ? TITLE_FORM : TITLE_FORM));
+            formDecAnchor.setText(isForm ? (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) : TITLE_FORM);
         }
-        formDecLabel.setText(!isForm ?
-                (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
-                (isTaxTypeDeal || isTaxTypeETR ? TITLE_FORM : TITLE_FORM));
+        formDecLabel.setText(!isForm ? (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) : TITLE_FORM);
 
         source.setVisible(isForm);
     }

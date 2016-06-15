@@ -1498,8 +1498,7 @@ public class FormDataServiceImpl implements FormDataService {
 
                 logger.error(
                         MessageGenerator.getFDMsg(
-                                String.format(MSG_IS_EXIST_FORM,
-                                        ft.getType().getTaxType() == TaxType.ETR || ft.getType().getTaxType() == TaxType.DEAL ? "форм" : "налоговых форм"),
+                                String.format(MSG_IS_EXIST_FORM, MessageGenerator.mesSpeckPluralD(ft.getType().getTaxType())),
                                 formData,
                                 departmentService.getDepartment(departmentId).getName(),
                                 formData.isManual(),
@@ -1634,6 +1633,7 @@ public class FormDataServiceImpl implements FormDataService {
                 if (--size > 0) {
                     stringBuilder.append(", ");
                 }
+                // TODO https://conf.aplana.com/pages/viewpage.action?pageId=19665518 8A.2
                 msg = "Сквозная нумерация обновлена в налоговых формах следующих периодов текущей сквозной нумерации: " +
                         stringBuilder.toString();
             }
@@ -1856,6 +1856,7 @@ public class FormDataServiceImpl implements FormDataService {
             case CONSOLIDATE_FD:
                 logger.error(
                         String.format(
+                                // TODO https://conf.aplana.com/pages/viewpage.action?pageId=19664135 4A.1
                                 LOCK_CURRENT_1,
                                 user.getName(),
                                 SDF_HH_MM_DD_MM_YYYY.get().format(lockType.getSecond().getDateLock()),
