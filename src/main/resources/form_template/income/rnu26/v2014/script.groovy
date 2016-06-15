@@ -976,6 +976,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // графа 7
     colIndex = 7
     newRow.lotSizeCurrent = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
+    // графа 8
+    colIndex = 8
+    newRow.reserveCalcValuePrev = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
     // графа 9
     colIndex = 9
     newRow.cost = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
@@ -991,23 +994,18 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // + графа 13 - так как после импорта эта графа 13 не должна пересчитываться
     colIndex = 13
     newRow.marketQuotationInRub = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
-    if (getBalancePeriod()) {// в балансовом периоде грузим рассчитываемые графы
-        // графа 8
-        colIndex = 8
-        newRow.reserveCalcValuePrev = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
-        // графа 14
-        colIndex = 14
-        newRow.costOnMarketQuotation = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
-        // графа 15
-        colIndex = 15
-        newRow.reserveCalcValue = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
-        // графа 16
-        colIndex = 16
-        newRow.reserveCreation = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
-        // графа 17
-        colIndex = 17
-        newRow.reserveRecovery = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
-    }
+    // графа 14
+    colIndex = 14
+    newRow.costOnMarketQuotation = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
+    // графа 15
+    colIndex = 15
+    newRow.reserveCalcValue = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
+    // графа 16
+    colIndex = 16
+    newRow.reserveCreation = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
+    // графа 17
+    colIndex = 17
+    newRow.reserveRecovery = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
 
     return newRow
 }
