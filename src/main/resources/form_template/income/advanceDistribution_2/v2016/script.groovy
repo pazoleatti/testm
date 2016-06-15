@@ -564,7 +564,7 @@ def calc18_22(def prevDataRows, def dataRows, def row, def reportPeriod) {
 
 // графа 18, 19, 20 расчитываются после графы 21
 void calc18_19_20(def row, def reportPeriod) {
-    if (reportPeriod.order == 4) {
+    if (reportPeriod.order == 4 || row.everyMontherPaymentAfterPeriod == null) {
         row.everyMontherPayment1 = null
         row.everyMontherPayment2 = null
         row.everyMontherPayment3 = null
