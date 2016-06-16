@@ -141,7 +141,7 @@ public class DataRowServiceImpl implements DataRowService {
         }
         PagingResult<FormDataSearchResult> daoResults;
         if (existCommonColumn) {
-            daoResults = dataRowDao.searchByKey(formDataId, range, key, isCaseSensitive, manual);
+            daoResults = dataRowDao.searchByKey(formDataId, formData.getFormTemplateId(), range, key, isCaseSensitive, manual);
         } else {
             // если нет *обычных*(числовых, строковых, автонумеруемых) граф, то нет смысла проводить поиск
             daoResults = new PagingResult<FormDataSearchResult>();

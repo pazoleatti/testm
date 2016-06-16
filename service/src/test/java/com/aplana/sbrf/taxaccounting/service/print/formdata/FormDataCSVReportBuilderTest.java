@@ -188,7 +188,7 @@ public class FormDataCSVReportBuilderTest {
         while ((s = reader.readLine())!=null)
             builder.append(s);
         List<DataRow<HeaderCell>> headerCells =
-                xmlSerializationUtils.deserialize(builder.toString(), formTemplate, HeaderCell.class);
+                xmlSerializationUtils.deserialize(builder.toString(), formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class);
         formTemplate.getHeaders().addAll(headerCells);
 
         builder = new StringBuilder();
@@ -197,7 +197,7 @@ public class FormDataCSVReportBuilderTest {
         while ((s = reader.readLine())!=null)
             builder.append(s);
         dataRows.addAll(
-                xmlSerializationUtils.deserialize(builder.toString(), formTemplate, Cell.class)
+                xmlSerializationUtils.deserialize(builder.toString(), formTemplate.getColumns(), formTemplate.getStyles(), Cell.class)
         );
 
         for (int i = 0; i < 100; i++)

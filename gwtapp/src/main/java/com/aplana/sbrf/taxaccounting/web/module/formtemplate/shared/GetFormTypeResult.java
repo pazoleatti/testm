@@ -13,7 +13,6 @@ import java.util.List;
 public class GetFormTypeResult implements Result {
     private FormType formType;
     private List<RefBook> refBookList;
-    private List<FormStyle> styles;
 
     public FormType getFormType() {
         return formType;
@@ -29,13 +28,5 @@ public class GetFormTypeResult implements Result {
 
     public void setRefBookList(List<RefBook> refBookList) {
         this.refBookList = refBookList;
-    }
-
-    public List<FormStyle> getStyles() {
-        return styles;
-    }
-
-    public void setStyles(List<FormStyle> styles) {
-        this.styles = styles;
     }
 }

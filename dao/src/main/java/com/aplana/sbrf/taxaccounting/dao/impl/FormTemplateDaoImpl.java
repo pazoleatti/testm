@@ -72,7 +72,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			String dataRowXml = rs.getString("data_rows");
 			if (dataRowXml != null && !dataRowXml.trim().isEmpty()) {
 				List<DataRow<Cell>> fixedRows =
-					xmlSerializationUtils.deserialize(dataRowXml, formTemplate, Cell.class);
+					xmlSerializationUtils.deserialize(dataRowXml, formTemplate.getColumns(), formTemplate.getStyles(), Cell.class);
 				FormDataUtils.setValueOwners(fixedRows);
 				formTemplate.getRows().addAll(fixedRows);
 			}
@@ -80,7 +80,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			String headerDataXml = rs.getString("data_headers");
 			if (headerDataXml != null && !headerDataXml.trim().isEmpty()) {
 				List<DataRow<HeaderCell>> headerRows =
-					xmlSerializationUtils.deserialize(headerDataXml, formTemplate, HeaderCell.class);
+					xmlSerializationUtils.deserialize(headerDataXml, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class);
 				FormDataUtils.setValueOwners(headerRows);
 				formTemplate.getHeaders().addAll(headerRows);
 			}
@@ -155,10 +155,34 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     formTemplate.isUpdating(),
                     formTemplateId
             );
-			formStyleDao.saveFormStyles(formTemplate);
 
-			//todo http://jira.aplana.com/browse/SBRFACCTAX-14414 Изменить структуру хранения НФ.
-			columnDao.updateFormColumns(formTemplate);
+            //http://jira.aplana.com/browse/SBRFACCTAX-11384
+            final Collection<Integer> removedStyleIds = formStyleDao.saveFormStyles(formTemplate);
+            final Map<ColumnKeyEnum, Collection<Long>> columns  = columnDao.updateFormColumns(formTemplate);
+
+            //Очистка полей содержащих значения удаленных стилей
+            if (!removedStyleIds.isEmpty()){
+                ArrayList<Long> allColumnsForUpdate = new ArrayList<Long>() {{
+                    addAll(columns.get(ColumnKeyEnum.UPDATED)!=null?columns.get(ColumnKeyEnum.UPDATED):new ArrayList<Long>(0));
+                    addAll(columns.get(ColumnKeyEnum.ADDED)!=null?columns.get(ColumnKeyEnum.ADDED):new ArrayList<Long>(0));
+                }};
+                StringBuilder sb = new StringBuilder();
+                for (Long colId : allColumnsForUpdate) {
+                    sb.append(SqlUtils.transformToSqlInStatement(String.format("c%d_style_id", colId), removedStyleIds));
+                    sb.append(" OR ");
+                }
+                if (!sb.toString().isEmpty()){
+                    String sqlForUpdateStyles = sb.toString().substring(0, sb.toString().lastIndexOf("OR") - 1);
+
+                    int num = getJdbcTemplate().update(
+                            String.format(
+                                    "update form_data_%d set %s where %s",
+                                    formTemplate.getId(),
+                                    transformForCleanColumns(allColumnsForUpdate, "_style_id"), sqlForUpdateStyles)
+                    );
+                    LOG.info("Number of updated styles " + num);
+                }
+            }
 
             return formTemplateId;
         } catch (DataAccessException e){
@@ -696,20 +720,46 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
     }*/
 
-    private static final String COUNT_EXIST_LARGE_STRING =
-			"SELECT COUNT(*) FROM form_data_row WHERE length(c%d) > :max_length AND" +
-			" form_data_id IN (SELECT id FROM form_data WHERE form_template_id = :form_template_id)";
+    private static final String COUNT_EXIST_LARGE_STRING = "SELECT COUNT(*) FROM form_data_%d WHERE length(c%d) > ?";
 	@Override
-	public boolean checkExistLargeString(Long formTemplateId, Column column) {
-		if (!(ColumnType.STRING.equals(column.getColumnType()))) {
-			throw new IllegalArgumentException("Column must be an instance of \"StringColumn\" class");
-		}
-		String sql = String.format(COUNT_EXIST_LARGE_STRING, column.getDataOrder());
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("form_template_id", formTemplateId);
-		params.put("max_length", ((StringColumn) column).getMaxLength());
-		return getNamedParameterJdbcTemplate().queryForObject(sql, params, Integer.class) > 0;
+	public boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength) {
+        return getJdbcTemplate().queryForObject(
+                String.format(COUNT_EXIST_LARGE_STRING, formTemplateId, columnId),
+                new Object[]{maxLength},
+                new int[]{Types.INTEGER},
+                Integer.class) > 0;
 	}
+
+    @Override
+    public void createFDTable(final int ftId) {
+        getJdbcTemplate().call(new CallableStatementCreator() {
+            @Override
+            public CallableStatement createCallableStatement(Connection con) throws SQLException {
+                CallableStatement statement = con.prepareCall("call create_form_data_nnn(?)");
+                statement.setInt(1, ftId);
+                return statement;
+            }
+        }, new ArrayList<SqlParameter>() {{
+            add(new SqlParameter("FT_ID", ftId));
+        }});
+    }
+
+    @Override
+    public void dropFDTable(int ftId) {
+        getJdbcTemplate().execute(String.format("drop table form_data_%d", ftId));
+    }
+
+    @Override
+    public void dropFTTable(final List<Integer> ftIds) {
+        getJdbcTemplate().call(new CallableStatementCreator() {
+            @Override
+            public CallableStatement createCallableStatement(Connection con) throws SQLException {
+                CallableStatement statement = con.prepareCall("call delete_form_template(?)");
+                statement.setObject(1, StringUtils.join(ftIds.toArray(), ','));
+                return statement;
+            }
+        }, new ArrayList<SqlParameter>(0));
+    }
 
     @Override
     public boolean isFDTableExist(int ftId) {

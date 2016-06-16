@@ -16,7 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.StyleService;
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
@@ -81,8 +81,6 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private TAUserDao userDao;
     @Autowired
     private SourceService sourceService;
-	@Autowired
-	private StyleService styleService;
 
     private Map<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
@@ -220,13 +218,13 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         if (editableColumns != null) {
             for (String alias : editableColumns) {
                 row.getCell(alias).setEditable(true);
-                row.getCell(alias).setStyle(styleService.get(FormStyle.EDITABLE_STYLE_ALIAS));
+                row.getCell(alias).setStyleAlias(EDITABLE_CELL_STYLE);
             }
         }
         // Стиль для автозаполняемых
         if (autoFillColumns != null) {
             for (String alias : autoFillColumns) {
-                row.getCell(alias).setStyle(styleService.get(FormStyle.AUTO_FILL_STYLE_ALIAS));
+                row.getCell(alias).setStyleAlias(AUTO_FILL_CELL_STYLE);
             }
         }
 

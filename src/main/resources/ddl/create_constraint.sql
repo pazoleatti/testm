@@ -37,18 +37,13 @@ alter table color add constraint color_chk_rgb_limits check ((r between 0 and 25
 alter table form_style add constraint form_style_fk_font_color foreign key(font_color) references color(id);
 alter table form_style add constraint form_style_fk_back_color foreign key(back_color) references color(id);
 
-alter table form_style add constraint form_style_pk primary key (form_template_id, alias);
+alter table form_style add constraint form_style_pk primary key (id);
 alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template(id) on delete cascade;
 alter table form_style add constraint form_style_chk_font_color check (font_color in (0,1,2,3,4,5,6,7,8,9,10,11,12,13));
 alter table form_style add constraint form_style_chk_back_color check (back_color in (0,1,2,3,4,5,6,7,8,9,10,11,12,13));
 alter table form_style add constraint form_style_chk_italic check (italic in (0,1));
 alter table form_style add constraint form_style_chk_bold check (bold in (0,1));
-
-alter table style add constraint style_pk primary key(alias);
-alter table style add constraint style_fk_color_font foreign key(font_color) references color(id);
-alter table style add constraint style_fk_color_back foreign key(back_color) references color(id);
-alter table style add constraint style_chk_italic check(italic in (0, 1));
-alter table style add constraint style_chk_bold check(bold in (0, 1));
+alter table form_style add constraint form_style_uniq_alias unique (form_template_id, alias);
 
 alter table blob_data add constraint blob_data_pk primary key(id);
 
@@ -104,8 +99,6 @@ alter table form_column add constraint form_column_fk_attribute_id2 foreign key 
 alter table form_column add constraint form_column_fk_parent_id foreign key (parent_column_id) references form_column(id);
 alter table form_column add constraint form_column_chk_filt_parent check ((type='R' and ((parent_column_id is null) and (filter is not null)) or ((parent_column_id is not null) and (filter is null)) or ((parent_column_id is null) and (filter is null))) or (type<>'R'));
 alter table form_column add constraint form_column_chk_numrow check (numeration_row in (0, 1) or type <> 'A');
-alter table form_column add constraint form_column_unique_data_ord unique (form_template_id, data_ord);
-alter table form_column add constraint form_column_check_data_ord check (data_ord between 0 and 99);
 
 alter table department_type add constraint department_type_pk primary key (id);
 
@@ -312,16 +305,6 @@ alter table log_system_report add constraint log_system_report_fk_sec_user forei
 alter table log_system_report add constraint log_system_report_chk_type check (type in (0, 1));
 alter table log_system_report add constraint log_system_report_unq_sec_user unique(sec_user_id);
 
-alter table form_data_row add constraint form_data_row_pk primary key (id);
-alter table form_data_row add constraint form_data_row_fk_form_data foreign key(form_data_id) references form_data(id) on delete cascade;
-alter table form_data_row add constraint form_data_row_unq unique (form_data_id, temporary, manual, ord);
-alter table form_data_row add constraint form_data_row_chk_temp check (temporary in (0, 1));
-alter table form_data_row add constraint form_data_row_chk_manual check (manual in (0, 1));
-
-alter table form_data_row_span add constraint form_data_row_span_fk foreign key (form_data_id) references form_data (id);
-alter table form_data_row_span add constraint form_data_row_span_fk_row foreign key(row_id) references form_data_row(id) on delete cascade;
-alter table form_data_row_span add constraint form_data_row_span_unq unique (form_data_id, temporary, manual, data_ord, ord);
-alter table form_data_row_span add constraint form_data_row_span_chk_dataord check (data_ord between 0 and 99);
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);
@@ -345,4 +328,3 @@ create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
 create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 create index i_decl_subrep_blob_data_id on declaration_subreport(blob_data_id);
 create index i_notification_report_id on notification (report_id);
-create index i_form_data_row_span_fk_row on form_data_row_span (row_id);

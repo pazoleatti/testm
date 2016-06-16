@@ -182,7 +182,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
 
-        formDataDao.delete(1L);
+        formDataDao.delete(1, 1L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(1);
@@ -216,7 +216,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
 
-        formDataDao.delete(3L);
+        formDataDao.delete(1, 3L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(3);
@@ -249,7 +249,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(3)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(4)));
 
-        formDataDao.delete(6L);
+        formDataDao.delete(1, 6L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(4);
@@ -293,7 +293,7 @@ public class SourcesOracleTest {
         assertEquals("10, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2004\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(13)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2004\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(14)));
 
-        formDataDao.delete(8L);
+        formDataDao.delete(1, 8L);
         formData.setId(null);
         formData.setFormTemplateId(5);
         formData.setDepartmentReportPeriodId(5);
@@ -330,7 +330,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-11\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2024\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2024\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
 
-        formDataDao.delete(11L);
+        formDataDao.delete(1, 11L);
         formData.setId(null);
         formData.setFormTemplateId(4);
         formData.setDepartmentReportPeriodId(6);
@@ -359,7 +359,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-11\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
         assertEquals("15, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
 
-        formDataDao.delete(13L);
+        formDataDao.delete(1, 13L);
         formData.setId(null);
         formData.setFormTemplateId(4);
         formData.setDepartmentReportPeriodId(7);
@@ -391,7 +391,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(4)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(5)));
 
-        formDataDao.delete(16L);
+        formDataDao.delete(1, 16L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(10);
@@ -430,7 +430,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(9)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(10)));
 
-        formDataDao.delete(1016L);
+        formDataDao.delete(1, 1016L);
         formData.setId(null);
         formData.setFormTemplateId(5);
         formData.setDepartmentReportPeriodId(10);
@@ -469,7 +469,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
 
-        formDataDao.delete(18L);
+        formDataDao.delete(1, 18L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(12);
@@ -525,7 +525,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(3)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(4)));
 
-        formDataDao.delete(20L);
+        formDataDao.delete(1, 20L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(15);
@@ -558,7 +558,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
 
-        formDataDao.delete(23L);
+        formDataDao.delete(1, 23L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(17);
@@ -591,7 +591,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(3)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(4)));
 
-        formDataDao.delete(223L);
+        formDataDao.delete(1, 223L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(117);
@@ -616,7 +616,7 @@ public class SourcesOracleTest {
         assertEquals(1, relations.size());
         assertEquals("27, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2009\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"первый квартал 2009\"", getShortFormInfo(relations.get(0)));
 
-        formDataDao.delete(26L);
+        formDataDao.delete(1, 26L);
         formData.setId(null);
         formData.setFormTemplateId(6);
         formData.setDepartmentReportPeriodId(19);
@@ -640,7 +640,7 @@ public class SourcesOracleTest {
         assertEquals(1, relations.size());
         assertEquals("29, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2010\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2010\"", getShortFormInfo(relations.get(0)));
 
-        formDataDao.delete(28L);
+        formDataDao.delete(1, 28L);
         formData.setId(null);
         formData.setFormTemplateId(6);
         formData.setDepartmentReportPeriodId(20);
@@ -666,7 +666,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-205\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(2)));
 
-        formDataDao.delete(30L);
+        formDataDao.delete(1, 30L);
         formData.setId(null);
         formData.setFormTemplateId(8);
         formData.setDepartmentReportPeriodId(21);
@@ -694,7 +694,7 @@ public class SourcesOracleTest {
         assertEquals("1035, Тип: \"Первичная\", Вид: \"НДС-205\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(1)));
         assertEquals("34, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(2)));
 
-        formDataDao.delete(33L);
+        formDataDao.delete(1, 33L);
         formData.setId(null);
         formData.setFormTemplateId(8);
         formData.setDepartmentReportPeriodId(22);
@@ -721,7 +721,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2026\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал (9 месяцев) 2026\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-89\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2026\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
 
-        formDataDao.delete(133L);
+        formDataDao.delete(1, 133L);
         formData.setId(null);
         formData.setFormTemplateId(88);
         formData.setDepartmentReportPeriodId(122);
@@ -1061,7 +1061,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(3)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-9\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"false\", Статус: \"Не создана\"", getShortFormInfo(relations.get(4)));
 
-        formDataDao.delete(2L);
+        formDataDao.delete(1, 2L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(1);
@@ -1090,7 +1090,7 @@ public class SourcesOracleTest {
         assertEquals("42, Тип: \"Консолидированная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("43, Тип: \"Консолидированная\", Вид: \"РНУ-9\", Подразделение: \"Волго-Вятский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(1)));
 
-        formDataDao.delete(41L);
+        formDataDao.delete(1, 41L);
         formData.setId(null);
         formData.setFormTemplateId(10);
         formData.setDepartmentReportPeriodId(3);
@@ -1114,7 +1114,7 @@ public class SourcesOracleTest {
         }
         assertEquals(0, relations.size());
 
-        formDataDao.delete(7L);
+        formDataDao.delete(1, 7L);
         formData.setId(null);
         formData.setFormTemplateId(3);
         formData.setDepartmentReportPeriodId(4);
@@ -1137,7 +1137,7 @@ public class SourcesOracleTest {
         assertEquals("47, Тип: \"Консолидированная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2004\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(2)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2004\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(3)));
 
-        formDataDao.delete(44L);
+        formDataDao.delete(1, 44L);
         formData.setId(null);
         formData.setFormTemplateId(11);
         formData.setDepartmentReportPeriodId(5);
@@ -1167,7 +1167,7 @@ public class SourcesOracleTest {
         assertEquals("48, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(2)));
 
 
-        formDataDao.delete(15L);
+        formDataDao.delete(1, 15L);
         formData.setId(null);
         formData.setFormTemplateId(4);
         formData.setDepartmentReportPeriodId(7);
@@ -1195,7 +1195,7 @@ public class SourcesOracleTest {
         assertEquals("50, Тип: \"Консолидированная\", Вид: \"РНУ-13\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-33\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2005\"", getShortFormInfo(relations.get(1)));
 
-        formDataDao.delete(49L);
+        formDataDao.delete(1, 49L);
         formData.setId(null);
         formData.setFormTemplateId(12);
         formData.setDepartmentReportPeriodId(10);
@@ -1218,7 +1218,7 @@ public class SourcesOracleTest {
         assertEquals("52, Тип: \"Консолидированная\", Вид: \"РНУ-13\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"15.01.2006\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-33\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2006\"", getShortFormInfo(relations.get(1)));
 
-        formDataDao.delete(51L);
+        formDataDao.delete(1, 51L);
         formData.setId(null);
         formData.setFormTemplateId(12);
         formData.setDepartmentReportPeriodId(12);
@@ -1244,7 +1244,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-13\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"10.01.2007\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-33\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"10.01.2007\"", getShortFormInfo(relations.get(1)));
 
-        formDataDao.delete(34L);
+        formDataDao.delete(1, 34L);
         formData.setId(null);
         formData.setFormTemplateId(12);
         formData.setDepartmentReportPeriodId(15);
@@ -1273,7 +1273,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-13\", Подразделение: \"Волго-Вятский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
         assertEquals("61, Тип: \"Консолидированная\", Вид: \"РНУ-33\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(3)));
 
-        formDataDao.delete(55L);
+        formDataDao.delete(1, 55L);
         formData.setId(null);
         formData.setFormTemplateId(12);
         formData.setDepartmentReportPeriodId(17);
@@ -1295,7 +1295,7 @@ public class SourcesOracleTest {
         assertEquals("60, Тип: \"Консолидированная\", Вид: \"РНУ-13\", Подразделение: \"Волго-Вятский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"15.01.2008\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-33\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2008\"", getShortFormInfo(relations.get(2)));
 
-        formDataDao.delete(56L);
+        formDataDao.delete(1, 56L);
         formData.setId(null);
         formData.setFormTemplateId(12);
         formData.setDepartmentReportPeriodId(27);
@@ -1321,7 +1321,7 @@ public class SourcesOracleTest {
         assertEquals(1, relations.size());
         assertEquals("63, Тип: \"Консолидированная\", Вид: \"РНУ-15\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2009\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"первый квартал 2009\"", getShortFormInfo(relations.get(0)));
 
-        formDataDao.delete(62L);
+        formDataDao.delete(1, 62L);
         formData.setId(null);
         formData.setFormTemplateId(14);
         formData.setDepartmentReportPeriodId(19);
@@ -1345,7 +1345,7 @@ public class SourcesOracleTest {
         assertEquals(1, relations.size());
         assertEquals("65, Тип: \"Консолидированная\", Вид: \"РНУ-15\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2010\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2010\"", getShortFormInfo(relations.get(0)));
 
-        formDataDao.delete(64L);
+        formDataDao.delete(1, 64L);
         formData.setId(null);
         formData.setFormTemplateId(14);
         formData.setDepartmentReportPeriodId(20);
@@ -1369,7 +1369,7 @@ public class SourcesOracleTest {
         assertEquals(1, relations.size());
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-15\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(0)));
 
-        formDataDao.delete(66L);
+        formDataDao.delete(1, 66L);
         formData.setId(null);
         formData.setFormTemplateId(16);
         formData.setDepartmentReportPeriodId(21);
@@ -1394,7 +1394,7 @@ public class SourcesOracleTest {
         assertEquals(1, relations.size());
         assertEquals("70, Тип: \"Консолидированная\", Вид: \"РНУ-15\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(0)));
 
-        formDataDao.delete(69L);
+        formDataDao.delete(1, 69L);
         formData.setId(null);
         formData.setFormTemplateId(16);
         formData.setDepartmentReportPeriodId(22);
@@ -1417,7 +1417,7 @@ public class SourcesOracleTest {
         assertEquals("74, Тип: \"Консолидированная\", Вид: \"РНУ-13\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2026\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"15.01.2026\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-33\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2026\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2026\"", getShortFormInfo(relations.get(2)));
 
-        formDataDao.delete(72L);
+        formDataDao.delete(1, 72L);
         formData.setId(null);
         formData.setFormTemplateId(17);
         formData.setDepartmentReportPeriodId(122);
@@ -1445,7 +1445,7 @@ public class SourcesOracleTest {
         assertEquals("127, Тип: \"Консолидированная\", Вид: \"РНУ-20\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-21\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"05.01.2008\"", getShortFormInfo(relations.get(2)));
 
-        formDataDao.delete(124L);
+        formDataDao.delete(1, 124L);
         formData.setId(null);
         formData.setFormTemplateId(19);
         formData.setDepartmentReportPeriodId(17);
@@ -1465,7 +1465,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-20\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2008\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-21\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2008\"", getShortFormInfo(relations.get(1)));
 
-        formDataDao.delete(125L);
+        formDataDao.delete(1, 125L);
         formData.setId(null);
         formData.setFormTemplateId(19);
         formData.setDepartmentReportPeriodId(18);
@@ -1687,7 +1687,7 @@ public class SourcesOracleTest {
         assertEquals("1, Тип: \"Д-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"false\", Налоговый орган: \"111\", КПП: \"222\", Статус: \"Принята\"", getShortDeclarationInfo(relations.get(0)));
         assertEquals("null, Тип: \"Д-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Не создана\"", getShortDeclarationInfo(relations.get(1)));
 
-        formDataDao.delete(1L);
+        formDataDao.delete(1, 1L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(1);
@@ -1709,7 +1709,7 @@ public class SourcesOracleTest {
         assertEquals(1, relations.size());
         assertEquals("2, Тип: \"Д-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Принята\"", getShortDeclarationInfo(relations.get(0)));
 
-        formDataDao.delete(37L);
+        formDataDao.delete(1, 37L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(2);
@@ -1731,7 +1731,7 @@ public class SourcesOracleTest {
         assertEquals("9, Тип: \"Д-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2009\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Принята\"", getShortDeclarationInfo(relations.get(0)));
         assertEquals("10, Тип: \"Д-1\", Подразделение: \"Волго-Вятский банк\", Период: \"первый квартал 2009\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Принята\"", getShortDeclarationInfo(relations.get(1)));
 
-        formDataDao.delete(76L);
+        formDataDao.delete(1, 76L);
         formData.setId(null);
         formData.setFormTemplateId(18);
         formData.setDepartmentReportPeriodId(19);
@@ -1752,7 +1752,7 @@ public class SourcesOracleTest {
         List<Relation> relations = sourceDao.getDeclarationDestinationsInfo(formData, true, false, null);
         assertEquals(0, relations.size());
 
-        formDataDao.delete(38L);
+        formDataDao.delete(1, 38L);
         formData.setId(null);
         formData.setFormTemplateId(3);
         formData.setDepartmentReportPeriodId(4);
@@ -1772,7 +1772,7 @@ public class SourcesOracleTest {
         assertEquals(1, relations.size());
         assertEquals("4, Тип: \"Д-3\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2004\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Принята\"", getShortDeclarationInfo(relations.get(0)));
 
-        formDataDao.delete(9L);
+        formDataDao.delete(1, 9L);
         formData.setId(null);
         formData.setFormTemplateId(4);
         formData.setDepartmentReportPeriodId(5);
@@ -1794,7 +1794,7 @@ public class SourcesOracleTest {
         assertEquals("5, Тип: \"Д-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Принята\", Дата сдачи корректировки: \"15.01.2005\"", getShortDeclarationInfo(relations.get(0)));
         assertEquals("13, Тип: \"Д-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Принята\", Дата сдачи корректировки: \"15.01.2005\"", getShortDeclarationInfo(relations.get(1)));
 
-        formDataDao.delete(77L);
+        formDataDao.delete(1, 77L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(10);
@@ -1817,7 +1817,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Д-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2006\"", getShortDeclarationInfo(relations.get(0)));
         assertEquals("null, Тип: \"Д-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2006\"", getShortDeclarationInfo(relations.get(1)));
 
-        formDataDao.delete(18L);
+        formDataDao.delete(1, 18L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(12);
@@ -1841,7 +1841,7 @@ public class SourcesOracleTest {
         assertEquals("14, Тип: \"Д-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Принята\", Дата сдачи корректировки: \"05.01.2008\"", getShortDeclarationInfo(relations.get(1)));
         assertEquals("null, Тип: \"Д-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Не создана\", Дата сдачи корректировки: \"05.01.2008\"", getShortDeclarationInfo(relations.get(2)));
 
-        formDataDao.delete(23L);
+        formDataDao.delete(1, 23L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(17);
@@ -1861,7 +1861,7 @@ public class SourcesOracleTest {
         assertEquals("null, Тип: \"Д-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2008\"", getShortDeclarationInfo(relations.get(0)));
         assertEquals("null, Тип: \"Д-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Налоговый орган: \"null\", КПП: \"null\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2008\"", getShortDeclarationInfo(relations.get(1)));
 
-        formDataDao.delete(40L);
+        formDataDao.delete(1, 40L);
         formData.setId(null);
         formData.setFormTemplateId(1);
         formData.setDepartmentReportPeriodId(18);

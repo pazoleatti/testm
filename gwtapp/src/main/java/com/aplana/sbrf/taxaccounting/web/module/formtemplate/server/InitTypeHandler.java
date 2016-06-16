@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.StyleService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.InitTypeAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.InitTypeResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -20,9 +19,6 @@ public class InitTypeHandler extends AbstractActionHandler<InitTypeAction, InitT
     @Autowired
     private RefBookFactory refBookFactory;
 
-    @Autowired
-    private StyleService styleService;
-
     public InitTypeHandler() {
         super(InitTypeAction.class);
     }
@@ -31,7 +27,6 @@ public class InitTypeHandler extends AbstractActionHandler<InitTypeAction, InitT
     public InitTypeResult execute(InitTypeAction action, ExecutionContext executionContext) throws ActionException {
         InitTypeResult result = new InitTypeResult();
         result.setRefBookList(refBookFactory.getAll(false));
-        result.setStyles(styleService.getAll());
         return result;
     }
 

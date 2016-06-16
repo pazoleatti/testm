@@ -35,13 +35,7 @@ public class Cell extends AbstractCell {
     private FormStyle style;
     /** Временный стиль ячейки. Используется только в режиме ручного ввода и не сохраняется в бд */
     private FormStyle clientStyle;
-	/**
-	 * Список стилей версии макета НФ
-	 *
-	 * Поле помечено аннотацией @Deprecated, так как в дальнейшем планируется отказаться
-	 * от стилей в рамках макетов НФ
-	 */
-	@Deprecated
+
     private List<FormStyle> formStyleList;
     /** Сообщение, формируемое при проверке ячеек */
     private String errorMessage;
@@ -57,19 +51,12 @@ public class Cell extends AbstractCell {
      */
     public Cell() {
         super();
-		init();
     }
 
     public Cell(Column column, List<FormStyle> formStyleList) {
         super(column);
-		this.formStyleList = formStyleList;
-		init();
+        this.formStyleList = formStyleList;
     }
-
-	private void init() {
-		this.style = FormStyle.DEFAULT_STYLE;
-		setEditable(false);
-	}
 
     @Override
     public Object getValue() {
@@ -287,6 +274,7 @@ public class Cell extends AbstractCell {
         this.editable = editable;
     }
 
+
     /**
      * Получить {@link FormStyle стиль}, связанный с ячейкой.
      * Если значение стиля равно null, то нужно использовать стиль по-умолчанию.
@@ -294,47 +282,59 @@ public class Cell extends AbstractCell {
      * @return стиль, связанный с ячейкой
      */
     public FormStyle getStyle() {
+        if (!ModelUtils.containsLink(formStyleList, style)) {
+            // Обнуляем отсутствующий стиль
+            style = null;
+        }
         return style;
     }
 
-	/**
-	 * Задать {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой.
-	 * Стиль с таким алиасом должен быть определён в
-	 * {@link FormTemplate#getStyles() коллекции стилей}, связанных с шаблоном
-	 * налоговой формы
-	 *
-	 * Метод помечен аннотацией @Deprecated, так как в дальнейшем планируется отказаться
-	 * от стилей в рамках макетов НФ
-	 *
-	 * @param styleAlias {@link FormStyle#getAlias() алиас стиля}, связанного с
-	 *                   ячейкой.
-	 */
-	@Deprecated
-	public void setStyleAlias(String styleAlias) {
-		if (styleAlias == null) {
-			style = null;
-			return;
-		}
-		for (FormStyle formStyle : formStyleList) {
-			if (formStyle.getAlias() != null && formStyle.getAlias().equals(styleAlias)) {
-				setStyle(formStyle);
-				return;
-			}
-		}
-		throw new IllegalArgumentException("Стиля с алиасом '" + styleAlias + "' не существует в шаблоне");
-	}
+    /**
+     * Задать {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой.
+     * Стиль с таким алиасом должен быть определён в
+     * {@link FormTemplate#getStyles() коллекции стилей}, связанных с шаблоном
+     * налоговой формы
+     *
+     * @param styleAlias {@link FormStyle#getAlias() алиас стиля}, связанного с
+     *                   ячейкой.
+     */
+    public void setStyleAlias(String styleAlias) {
+        if (styleAlias == null) {
+            style = null;
+            return;
+        }
+        for (FormStyle formStyle : formStyleList) {
+            if (formStyle.getAlias() != null
+                    && formStyle.getAlias().equals(styleAlias)) {
+                style = formStyle;
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Стиля с алиасом '" + styleAlias
+                + "' не существует в шаблоне");
+    }
 
-	/**
-	 * Задает стиль для ячейки
-	 * @param style
-	 */
-	public void setStyle(FormStyle style) {
-		if (style == null) {
-			this.style = FormStyle.DEFAULT_STYLE;
-		} else {
-			this.style = style;
-		}
-	}
+
+    public void setStyleId(Integer styleId) {
+        if (styleId == null) {
+            style = null;
+            return;
+        }
+        for (FormStyle formStyle : formStyleList) {
+            if (formStyle.getAlias() != null
+                    && formStyle.getId().equals(styleId)) {
+                style = formStyle;
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Стиля с id '" + styleId
+                + "' не существует в шаблоне");
+    }
+
+
+    public String getStyleAlias() {
+        return style != null ? style.getAlias() : null;
+    }
 
     /**
      * Возвращает разименованное значение справочника
@@ -367,12 +367,20 @@ public class Cell extends AbstractCell {
     }
 
     /**
-	 * Устанавливает цвет фона и шрифта. Использовать только в режиме ручного ввода для жесткого задания цвета ячеек!
-	 * @param clientStyle устанавливаемый клиенсткий стиль
-	 */
-	public void setClientStyle(FormStyle clientStyle) {
-		this.clientStyle = clientStyle;
-	}
+     * Устанавливает цвет фона и шрифта. Использовать только в режиме ручного ввода для жесткого задания цвета ячеек!
+     * @param alias алиас для нового стиля
+     * @param fontColor цвет шрифта
+     * @param backColor цвет фона
+     */
+    public void setClientStyle(String alias, Color fontColor, Color backColor) {
+        if (formStyleList != null && !formStyleList.isEmpty()) {
+            clientStyle = new FormStyle();
+            clientStyle.setAlias(alias);
+            clientStyle.setBackColor(backColor);
+            clientStyle.setFontColor(fontColor);
+            formStyleList.add(clientStyle);
+        }
+    }
 
     public FormStyle getClientStyle() {
         return clientStyle;
@@ -397,7 +405,7 @@ public class Cell extends AbstractCell {
 		sb.append("; dereference=").append(getRefBookDereference());
 		sb.append("; colspan=").append(getColSpan());
 		sb.append("; rowspan=").append(getRowSpan());
-		sb.append("; style=").append(getStyle().toString());
+		sb.append("; style=").append(getStyle());
 		sb.append("; editable=").append(isEditable());
 		sb.append('}');
 

@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,8 +18,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.datarow.DataRowMapper;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -59,9 +55,7 @@ public final class XmlSerializationUtils {
 
 	private static final String ENCODING = "utf-8";
 
-    private static Pattern patternStyle = Pattern.compile("(e)|(.*\\d-\\d.*)");
-
-    private static final XmlSerializationUtils instance = new XmlSerializationUtils();
+	private static final XmlSerializationUtils instance = new XmlSerializationUtils();
 
 	/**
 	 * @return экземпляр класса
@@ -178,11 +172,13 @@ public final class XmlSerializationUtils {
 		}
 		element.setAttribute(ATTR_COLSPAN, String.valueOf(cell.getColSpan()));
 		element.setAttribute(ATTR_ROWSPAN, String.valueOf(cell.getRowSpan()));
-		if (!FormStyle.DEFAULT_STYLE.equals(cell.getStyle())) {
-			element.setAttribute(ATTR_STYLE_ALIAS, cell.getStyle().toString());
+		if (cell.getStyle() != null) {
+			element.setAttribute(ATTR_STYLE_ALIAS,
+					String.valueOf(cell.getStyle().getAlias()));
 		}
 		if (cell.isEditable()){
-			element.setAttribute(ATTR_CELL_EDITABLE, String.valueOf(true));
+			element.setAttribute(ATTR_CELL_EDITABLE,
+					String.valueOf(true));
 		}
 		return element;
 	}
@@ -244,42 +240,49 @@ public final class XmlSerializationUtils {
 	/**
 	 * Десериализует из XML-строки строки банковской формы.
 	 * 
-	 * @param str XML-строка
-	 * @param formTemplate версия макета НФ
-	 * @return список строк формы @throws XmlSerializationException любая ошибка
+	 * @param str
+	 *            XML-строка
+	 * @param columns
+	 *            список столбцов формы
+	 * @return список строк формы
+	 * @throws XmlSerializationException
+	 *             любая ошибка
 	 */
-	public <T extends AbstractCell> List<DataRow<T>> deserialize(String str, FormTemplate formTemplate, Class<T> clazz) {
+	public <T extends AbstractCell> List<DataRow<T>> deserialize(String str, List<Column> columns, List<FormStyle> styles, Class<T> clazz) {
 		List<DataRow<T>> rows = new ArrayList<DataRow<T>>();
 
 		Document document = stringToDocument(str);
 		Element root = document.getDocumentElement();
 		NodeList nodeList = root.getElementsByTagName(TAG_ROW);
 		for (int i = 0; i < nodeList.getLength(); i++) {
-			DataRow<T> dataRow = parseDataRow((Element) nodeList.item(i), formTemplate, clazz);
-			//Устанавливаем нумерацию строк в заголовках, так же как внутри таблицы. Необходимо для построения xlsm представления
-			dataRow.setIndex(i + 1);
-			rows.add(dataRow);
+			rows.add((DataRow<T>) parseDataRow((Element) nodeList.item(i), columns, styles, clazz));
 		}
+
 		return rows;
 	}
 
 	/**
 	 * Разбирает строку данных
 	 * 
-	 * @param element элемент строки данных
-	 * @param formTemplate список столбцов формы
+	 * @param element
+	 *            елемент строки данных
+	 * @param columns
+	 *            список столбцов формы
 	 */
-	private <T extends AbstractCell> DataRow<T> parseDataRow(Element element, FormTemplate formTemplate, Class<T> clazz) {
+	@SuppressWarnings("unchecked")
+	private <T extends AbstractCell> DataRow<T> parseDataRow(Element element, List<Column> columns, List<FormStyle> styles, Class<T> clazz) {
+
 		// Value
 		NodeList cells = element.getElementsByTagName(TAG_CELL);
 		
 		DataRow<T> dataRow = null;
 		if (Cell.class.equals(clazz)){
-			dataRow = new DataRow<T>((List<T>) FormDataUtils.createCells(formTemplate));
+			dataRow = new DataRow<T>((List<T>) FormDataUtils.createCells(columns, styles));
 		} else if (HeaderCell.class.equals(clazz)){ 
-			dataRow = new DataRow<T>((List<T>) FormDataUtils.createHeaderCells(formTemplate.getColumns()));
+			dataRow = new DataRow<T>((List<T>) FormDataUtils.createHeaderCells(columns));
 		}
 		
+
 		for (int j = 0; j < cells.getLength(); j++) {
 			Node cellNode = cells.item(j);
 			NamedNodeMap attributes = cellNode.getAttributes();
@@ -292,11 +295,11 @@ public final class XmlSerializationUtils {
 			AbstractCell cell = dataRow.getCell(columnAlias);
 			
 
-			parseAbstractCell(cell, cellNode, formTemplate.getColumns(), formTemplate.getStyles());
+			parseAbstractCell(cell, cellNode, columns, styles);
 			if (cell instanceof Cell){
-				parseCell((Cell)cell, cellNode, formTemplate);
+				parseCell((Cell)cell, cellNode, columns, styles);
 			} else if (cell instanceof HeaderCell){
-				parseHeaderCell((HeaderCell)cell, cellNode, formTemplate.getColumns(), formTemplate.getStyles());
+				parseHeaderCell((HeaderCell)cell, cellNode, columns, styles);
 			} else {
 				throw new XmlSerializationException("Неподдерживается ячейка типа " + cell.getClass().getName());
 			}
@@ -308,6 +311,7 @@ public final class XmlSerializationUtils {
 		if (aliasNode != null) {
 			dataRow.setAlias(aliasNode.getNodeValue());
 		}
+
 
 		return dataRow;
 	}
@@ -354,14 +358,19 @@ public final class XmlSerializationUtils {
 	 * 
 	 * @param cell
 	 * @param cellNode
+	 * @param columns
+	 * @param styles
 	 */
-	private void parseCell(Cell cell, Node cellNode, FormTemplate formTemplate) {
+	private void parseCell(Cell cell, Node cellNode, List<Column> columns, List<FormStyle> styles) {
+
 		NamedNodeMap attributes = cellNode.getAttributes();
+
 		// String value
 		Node valueNode = attributes.getNamedItem(ATTR_STRING_VALUE);
 		if (valueNode != null) {
 			cell.setValue(valueNode.getNodeValue(), null);
 		}
+
 		// Date value
 		valueNode = attributes.getNamedItem(ATTR_DATE_VALUE);
 		if (valueNode != null) {
@@ -372,6 +381,7 @@ public final class XmlSerializationUtils {
 				throw new XmlSerializationException(e);
 			}
 		}
+
 		// Numeric value
 		valueNode = attributes.getNamedItem(ATTR_NUMERIC_VALUE);
 		if (valueNode != null) {
@@ -382,16 +392,11 @@ public final class XmlSerializationUtils {
 				throw new XmlSerializationException(e);
 			}
 		}
+
 		valueNode = attributes.getNamedItem(ATTR_STYLE_ALIAS);
-		if (valueNode != null && valueNode.getNodeValue() != null) {
-			String styleString = valueNode.getNodeValue();
-			if(!styleString.isEmpty()) {
-				if (patternStyle.matcher(styleString).matches()) { // новый способ оформления стилей
-					DataRowMapper.parseCellStyle(cell, styleString);
-				} else {
-					cell.setStyle(formTemplate.getStyle(styleString));
-				}
-			}
+		if (valueNode != null) {
+			cell.setStyleAlias(
+					valueNode.getNodeValue());
 		}
 		valueNode = attributes.getNamedItem(ATTR_CELL_EDITABLE);
 		if (valueNode != null) {

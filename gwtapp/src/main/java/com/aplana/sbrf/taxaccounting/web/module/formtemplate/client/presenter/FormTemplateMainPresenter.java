@@ -53,7 +53,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<InitTypeResult>() {
             @Override
             public void onSuccess(InitTypeResult result) {
-                formTemplateExt.setStyles(result.getStyles());
                 FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, result.getRefBookList());
             }
         }, FormTemplateMainPresenter.this));
@@ -85,7 +84,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         formTemplateExt = new FormTemplateExt();
                         formTemplate = new FormTemplate();
                         formTemplateExt.setFormTemplate(formTemplate);
-                        formTemplateExt.setStyles(result.getStyles());
                         formTemplate.setVersion(new Date());
                         formTemplate.setType(result.getFormType());
                         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());

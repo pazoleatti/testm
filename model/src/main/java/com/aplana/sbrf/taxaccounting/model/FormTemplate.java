@@ -195,7 +195,6 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 		throw new IllegalArgumentException("Wrong columnAlias: " + columnAlias);
 	}
 
-
 	/**
 	 * Получить версию формы: для каждого типа формы может существовать
 	 * несколько версий
@@ -246,7 +245,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	public void addColumn(int position, Column column) {
 		columns.add(position, column);
 		for (DataRow<Cell> row : rows) {
-			row.addColumn(position, new Cell(column, getStyles()));
+			row.addColumn(position, new Cell(column, styles));
 		}
 		for (DataRow<HeaderCell> row : headers) {
 			row.addColumn(position,  createHeaderCell(column));
@@ -260,7 +259,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	public void addColumn(Column column) {
 		columns.add(column);
 		for (DataRow<Cell> row : rows) {
-			row.addColumn(new Cell(column, getStyles()));
+			row.addColumn(new Cell(column, styles));
 		}
 		for (DataRow<HeaderCell> row : headers) {
 			row.addColumn(createHeaderCell(column));
@@ -292,7 +291,6 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	 * @throws IllegalArgumentException
 	 *             если
 	 */
-	@Deprecated // планируется удалить стили из макетов
 	public FormStyle getStyle(String alias) {
 		if (alias == null) {
 			throw new IllegalArgumentException("Style alias cannot be null");
@@ -392,7 +390,6 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	}
 
 
-
     /** Получить копию строки. */
     private List<DataRow<Cell>> getCloneRows(List<DataRow<Cell>> dataRows) {
         // клонировать список
@@ -410,7 +407,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
         for (DataRow<Cell> row : dataRows) {
             cells.clear();
             for (String key : row.keySet()) {
-                Cell cell = new Cell(row.getCell(key).getColumn(), getStyles());
+                Cell cell = new Cell(row.getCell(key).getColumn(),  formStyleList);
                 cells.add(cell);
             }
             DataRow<Cell> newRow = new DataRow<Cell>(row.getAlias(), cells);
@@ -428,7 +425,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
                 newCell.setEditable(cell.isEditable());
                 newCell.setColSpan(cell.getColSpan());
                 newCell.setRowSpan(cell.getRowSpan());
-                newCell.setStyle(cell.getStyle());
+                newCell.setStyleAlias(cell.getStyleAlias());
             }
             clone.add(newRow);
         }

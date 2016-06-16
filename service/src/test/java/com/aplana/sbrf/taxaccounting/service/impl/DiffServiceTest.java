@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DiffService;
-import com.aplana.sbrf.taxaccounting.service.StyleService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class DiffServiceTest {
     private final DiffService diffService = new DiffServiceImpl();
@@ -33,19 +31,9 @@ public class DiffServiceTest {
     private static final String ALIAS_4 = "column4";
     private static final String ALIAS_5 = "column5";
 
-	private StyleService styleService;
-
     @Before
     public void init() {
         ReflectionTestUtils.setField(diffService, "refBookHelper", mock(RefBookHelper.class));
-		styleService = mock(StyleService.class);
-		when(styleService.get(FormStyle.NO_CHANGE_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.NO_CHANGE_STYLE_ALIAS, Color.BLACK, Color.GREY, false, false));
-		when(styleService.get(FormStyle.INSERT_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.INSERT_STYLE_ALIAS, Color.BLACK, Color.PALE_GREEN, false, false));
-		when(styleService.get(FormStyle.DELETE_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.DELETE_STYLE_ALIAS, Color.BLACK, Color.LIGHT_CORAL, false, false));
-		when(styleService.get(FormStyle.CHANGE_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.CHANGE_STYLE_ALIAS, Color.RED, Color.WHITE, false, true));
-		when(styleService.get(FormStyle.EDITABLE_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.EDITABLE_STYLE_ALIAS, Color.BLACK, Color.LIGHT_BLUE, false, false));
-		when(styleService.get(FormStyle.AUTO_FILL_STYLE_ALIAS)).thenReturn(new FormStyle(FormStyle.AUTO_FILL_STYLE_ALIAS, Color.DARK_GREEN, Color.WHITE, false, true));
-		ReflectionTestUtils.setField(diffService, "styleService", styleService);
     }
 
     @Test
@@ -159,10 +147,8 @@ public class DiffServiceTest {
 
     @Test
     public void getRowAsStringTest() {
-        List<Column> columns = getColumnList();
-		FormTemplate formTemplate = new FormTemplate();
-		formTemplate.getColumns().addAll(columns);
-        DataRow<Cell> dataRow = new DataRow<Cell>(FormDataUtils.createCells(formTemplate));
+        List<Column> columnList = getColumnList();
+        DataRow<Cell> dataRow = new DataRow<Cell>(FormDataUtils.createCells(columnList, null));
 
         // Null-значения
         String string = diffService.getRowAsString(dataRow);
@@ -180,27 +166,22 @@ public class DiffServiceTest {
 
     @Test
     public void getDiffTest() {
-        List<FormStyle> styles = new LinkedList<FormStyle>();
+        List<FormStyle> formStyleList = new LinkedList<FormStyle>();
         FormStyle formStyle = new FormStyle();
-        formStyle.setAlias(FormStyle.CHANGE_STYLE_ALIAS);
-        styles.add(formStyle);
+        formStyle.setAlias(DiffService.STYLE_CHANGE);
+        formStyleList.add(formStyle);
         formStyle = new FormStyle();
-        formStyle.setAlias(FormStyle.NO_CHANGE_STYLE_ALIAS);
-        styles.add(formStyle);
+        formStyle.setAlias(DiffService.STYLE_NO_CHANGE);
+        formStyleList.add(formStyle);
         formStyle = new FormStyle();
-        formStyle.setAlias(FormStyle.INSERT_STYLE_ALIAS);
-        styles.add(formStyle);
+        formStyle.setAlias(DiffService.STYLE_INSERT);
+        formStyleList.add(formStyle);
         formStyle = new FormStyle();
-        formStyle.setAlias(FormStyle.DELETE_STYLE_ALIAS);
-        styles.add(formStyle);
-        List<Column> columns = getColumnList();
-
-		FormTemplate formTemplate = new FormTemplate();
-		formTemplate.getColumns().addAll(columns);
-		formTemplate.getStyles().addAll(styles);
-
-        DataRow<Cell> dataRow1 = new DataRow<Cell>(FormDataUtils.createCells(formTemplate));
-        DataRow<Cell> dataRow2 = new DataRow<Cell>(FormDataUtils.createCells(formTemplate));
+        formStyle.setAlias(DiffService.STYLE_DELETE);
+        formStyleList.add(formStyle);
+        List<Column> columnList = getColumnList();
+        DataRow<Cell> dataRow1 = new DataRow<Cell>(FormDataUtils.createCells(columnList, formStyleList));
+        DataRow<Cell> dataRow2 = new DataRow<Cell>(FormDataUtils.createCells(columnList, formStyleList));
         Date date = new Date();
         dataRow1.getCell(ALIAS_1).setStringValue("str1");
         dataRow1.getCell(ALIAS_2).setNumericValue(BigDecimal.valueOf(1));
@@ -226,13 +207,13 @@ public class DiffServiceTest {
         List<String> styleList = new LinkedList<String>();
         for (String key : dataRow.keySet()) {
             Cell cell = dataRow.getCell(key);
-            styleList.add(cell.getStyle().toString());
+            styleList.add(cell.getStyleAlias());
         }
-        Assert.assertEquals(styleService.get(FormStyle.NO_CHANGE_STYLE_ALIAS).toString(), styleList.get(0));
-        Assert.assertEquals(styleService.get(FormStyle.CHANGE_STYLE_ALIAS).toString(), styleList.get(1));
-        Assert.assertEquals(styleService.get(FormStyle.CHANGE_STYLE_ALIAS).toString(), styleList.get(2));
-        Assert.assertEquals(styleService.get(FormStyle.CHANGE_STYLE_ALIAS).toString(), styleList.get(3));
-        Assert.assertEquals(styleService.get(FormStyle.CHANGE_STYLE_ALIAS).toString(), styleList.get(4));
+        Assert.assertEquals(DiffService.STYLE_NO_CHANGE, styleList.get(0));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(1));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(2));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(3));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(4));
     }
 
     // Тестовые графы

@@ -53,6 +53,15 @@ public class CreateNewTypeHandler extends AbstractActionHandler<CreateNewTypeAct
         CreateNewTypeResult result = new CreateNewTypeResult();
         makeDates(action);
         int formTemplateId = mainOperatingService.createNewType(formTemplate, action.getVersionEndDate(), logger, securityService.currentUserInfo());
+        try {
+            formTemplateDao.createFDTable(formTemplateId);
+        } catch (Exception e){
+            if (formTemplateDao.isFDTableExist(formTemplateId)){
+                formTemplateDao.dropFDTable(formTemplateId);
+            }
+            formTemplateService.delete(formTemplateId);
+            throw new ServiceException("", e);
+        }
         result.setFormTemplateId(formTemplateId);
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));
