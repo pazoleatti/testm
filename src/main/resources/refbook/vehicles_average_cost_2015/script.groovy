@@ -1,33 +1,20 @@
 package refbook.vehicles_average_cost_2015
 
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormLink
 import com.aplana.sbrf.taxaccounting.model.RefBookTableRef
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult
-import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-import com.aplana.sbrf.taxaccounting.model.util.Pair
-import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookFactoryImpl
+import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils
-import org.apache.commons.lang3.ArrayUtils;
 import groovy.transform.Field
+import org.apache.commons.lang3.ArrayUtils
 import org.springframework.dao.DataAccessException
 
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamException
 import java.text.SimpleDateFormat
-
 /**
  * blob_data.id = '54def165-b118-4d1e-a52c-be429ebd832e'
  *
@@ -95,6 +82,9 @@ Long getRecordId (def provider, Long uniqueRecordId) {
 }
 
 void importFromXML() {
+    SimpleDateFormat sdf = new SimpleDateFormat('dd.MM.yyyy')
+    String datesString = String.format("с %s по %s", sdf.format(dateFrom), dateTo ? sdf.format(dateTo) : "\"-\"")
+    logger.info("Период действия новых версий, заданный в окне загрузки файла: %s", datesString)
     if (inputStream == null) {
         logger.error('Файл не содержит данных!')
         return
@@ -102,19 +92,23 @@ void importFromXML() {
 
     def dataProvider = formDataService.getRefBookProvider(refBookFactory, REFBOOK_ID, providerCache)
     def refBook = refBookFactory.get(REFBOOK_ID)
-    SimpleDateFormat sdf = new SimpleDateFormat('dd.MM.yyyy')
 
     List<Map<String, RefBookValue>> fileRecords = new ArrayList<Map<String, RefBookValue>>()
     def List<Map<String, RefBookValue>> createList = new ArrayList<Map<String, RefBookValue>>() // Новые элементы
     def Map<Long, Map<String, RefBookValue>> intersectMap = new HashMap<Long, Map<String, RefBookValue>>() // Пересекающиеся элементы, совпадающие по уник графам
     def Map<Long, Map<String, RefBookValue>> nearMap = new HashMap<Long, Map<String, RefBookValue>>() // Непересекающиеся элементы, совпадающие по уник графам
-    def List<Map<String, RefBookValue>> existList = new ArrayList<Map<String, RefBookValue>>() // Существующие элементы
-    def recordIdsUsed = []
+    def Map<Long, Map<String, RefBookValue>> existMap = new HashMap<Long, Map<String, RefBookValue>>() // Существующие элементы
+    List<Long> recordIdsUsed = new ArrayList<Long>()
 
     try {
         def tableRows = []
         // парсим xml на строчки
-        parseXml(inputStream, tableRows)
+        try {
+            parseXml(inputStream, tableRows)
+        } catch (XMLStreamException e) {
+            logger.error("Таблица файла не соответствует требуемой структуре!")
+            return
+        }
         if (tableRows.isEmpty()) {
             logger.error("В таблице файла отсутствуют строки с данными!")
             return
@@ -174,7 +168,7 @@ void importFromXML() {
 
         // для неточного соответствия данных в справочнике (уникальные графы)
         String filterFuzzy = "(" + fileRecords.collect { recordsMap ->
-            getFuzzyFilter(recordsMap)
+            return getFuzzyFilter(recordsMap)
         }.join(") OR (") + ")"
         // 5. Система получает записи справочника с аналогичными значениями уникальных атрибутов (без даты)
         List<Long> recordIds = dataProvider.getUniqueRecordIds(null, filterFuzzy)
@@ -184,11 +178,11 @@ void importFromXML() {
             fuzzyRecords = dataProvider.getRecordData(recordIds)
         }
         //logger.info("fuzzyRecords = " + fuzzyRecords.toString())
-        def fuzzyRecordsMap = [:]
+        Map<String, Map<Long, Map<String, RefBookValue>>> fuzzyRecordsMap = new HashMap<String, Map<Long, Map<String, RefBookValue>>>()
         fuzzyRecords.each { Long uniqueRecordId, Map<String, RefBookValue> recordsMap ->
             String key = getFuzzyFilter(recordsMap).toLowerCase()
             if (fuzzyRecordsMap[key] == null) {
-                fuzzyRecordsMap.put(key, [:])
+                fuzzyRecordsMap.put(key, new HashMap<Long, Map<String, RefBookValue>>())
             }
             fuzzyRecordsMap.get(key).put(uniqueRecordId, recordsMap)
         }
@@ -204,21 +198,22 @@ void importFromXML() {
                 if (recordsMapMap == null){
                     return false
                 }
+                boolean found = false
                 for (Long uniqueRecordId in recordsMapMap.keySet()) {
                     Map<String, RefBookValue> recordsMap = recordsMapMap[uniqueRecordId]
                     // полное совпадение
                     def checkAliases = allAliases - uniqueAliases
-                    boolean notEquals = checkAliases.find { !fileValueMap[it].value.equals(recordsMap[it].value) }
+                    boolean notEquals = checkAliases.find { !(fileValueMap[it].value.equals(recordsMap[it].value)) } != null
                     if (!notEquals) {
                         fileValueMap.put(RefBook.RECORD_ID_ALIAS, recordsMap[RefBook.RECORD_ID_ALIAS])
-                        return true
+                        recordIdsUsed.add(getRecordId(dataProvider, uniqueRecordId))
+                        existMap.put(uniqueRecordId, fileValueMap)
+                        found = true
                     }
                 }
-                return false
+                return found
             }
-            if (existFileValueMap != null) {
-                existList.add(existFileValueMap)
-            } else {
+            if (existFileValueMap == null) {
                 // неполное совпадение
                 recordsMapMap.each { Long uniqueRecordId, Map<String, RefBookValue> recordsMap ->
                     RefBookRecordVersion recordVersion = getRefBookRecordVersion(dataProvider, uniqueRecordId)
@@ -230,8 +225,12 @@ void importFromXML() {
                         // если есть пересечение
                         if ((!(start < dateFrom) && (dateTo == null || !(dateTo < start))) ||
                                 (!(dateFrom < start) && (end == null || !(end < dateFrom)))) {
-                            intersectMap.put(uniqueRecordId, fileValueMap)
-                        } else { // если нет пересечения, то
+                            if (end != null) {
+                                intersectMap.put(uniqueRecordId, fileValueMap)
+                            } else { // если с открытым концом, то в список похожих записей
+                                nearMap.put(uniqueRecordId, fileValueMap)
+                            }
+                        } else { // если нет пересечения, то в список похожих записей
                             nearMap.put(uniqueRecordId, fileValueMap)
                         }
                     }
@@ -240,7 +239,7 @@ void importFromXML() {
         }
         //logger.info("intersectMap = " + intersectMap.toString())
         //logger.info("nearMap = " + nearMap.toString())
-        def nearFuzzyMap = [:]
+        Map<String, List<Map<String, RefBookValue>>> nearFuzzyMap = new HashMap<String, List<Map<String, RefBookValue>>> ()
         // версии справочников с такими же уникальными графами, но не пересекаются
         nearMap.each { def uniqueRecordId, fileValueMap ->
             String key = getFuzzyFilter(fileValueMap).toLowerCase()
@@ -252,13 +251,14 @@ void importFromXML() {
 
         //logger.info("nearFuzzyMap = " + nearFuzzyMap.toString())
         nearFuzzyMap.each { String key, List<Map<String, RefBookValue>> fuzzyMapList ->
-            // если больше двух записей с версиями похожими на загружаемую (по уник графам), то создаем новую запись
+            // если больше двух записей с версиями похожими на загружаемую (по уник графам), то создаем новую запись, иначе только версию
             def valueMap = fileRecordsMap[key][0]
             def recordId = fuzzyMapList.size() == 1 ? fuzzyMapList[0][RefBook.RECORD_ID_ALIAS].value : null
             valueMap.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
             createList.add(valueMap)
         }
 
+        // проходим по записям и если id не проставлен, то считаем что запись надо создать
         fileRecordsMap.each { String key, List<Map<String, RefBookValue>> fileValueMapList ->
             fileValueMapList.each { fileValueMap ->
                 if (fileValueMap[RefBook.RECORD_ID_ALIAS] == null) {
@@ -272,26 +272,39 @@ void importFromXML() {
         //logger.info(createList.toString())
         // создаем новые версии/записи справочника
         if (!createList.empty) {
-            def recordList = []
+            List<RefBookRecord> recordList = []
             createList.each { map ->
                 RefBookRecord record = new RefBookRecord()
                 Long recordId = map[RefBook.RECORD_ID_ALIAS]?.value
-                recordIdsUsed.add(recordId)
+                if (recordId != null) {
+                    recordIdsUsed.add(recordId)
+                }
                 record.setRecordId(recordId)
                 record.setValues(map)
                 recordList.add(record)
             }
-            createRecordVersionWithoutLock(logger, dateFrom, dateTo, recordList, errorRecords)
+            recordList = recordList.sort { recordA, recordB ->
+                int compare = recordA.values.AVG_COST.value <=> recordB.values.AVG_COST.value
+                if (compare == 0) {
+                    compare = recordA.values.N.value <=> recordB.values.N.value
+                }
+                return compare
+            }
+            def newUniqueIds = createRecordVersionWithoutLock(logger, dateFrom, dateTo, recordList, errorRecords)
+            if (newUniqueIds != null) {
+                newUniqueIds.each { id ->
+                    recordIdsUsed.add(getRecordId(dataProvider, id))
+                }
+            }
         }
 
         // Сообщения по группе строк "Запись создана"
         def avgRowNumMap = [:]
         if (intersectMap.isEmpty() && errorRecords.isEmpty()) {
             if (fileRecords.size() == createList.size()) {
-                logger.info("Все строки таблицы файла: В справочнике созданы записи, действующие с %s по %s.",
-                        sdf.format(dateFrom), dateTo ? sdf.format(dateTo) : "\"-\"")
+                logger.info("Все строки таблицы файла: В справочнике созданы записи, действующие %s.", datesString)
             } else {
-                createList.each { fileValueMap ->
+                for (fileValueMap in createList) {
                     def avgId = fileValueMap.AVG_COST.value
                     if (avgRowNumMap[avgId] == null) {
                         avgRowNumMap.put(avgId, [])
@@ -301,31 +314,32 @@ void importFromXML() {
                 avgRowNumMap.keySet().sort().each { avgId ->
                     def avgCost = getAvgCostRecords().find { map -> map.record_id.value == avgId }.NAME.value
                     def rowNumbers = avgRowNumMap[avgId].sort { it as Integer }
-                    logger.info("\"%s\", строки %s таблицы файла: В справочнике созданы записи, действующие с %s по %s.",
-                            avgCost, rowNumbers.join(", "), sdf.format(dateFrom), dateTo ? sdf.format(dateTo) : "\"-\"")
+                    logger.info("\"%s\", строки %s таблицы файла: В справочнике созданы записи, действующие %s.",
+                            avgCost, rowNumbers, datesString)
                 }
             }
 
         }
 
         // Сообщения по группе строк "Запись не создана, т.к. в справочнике уже есть такая запись"
-        if (existList.size() != 0 && fileRecords.size() == existList.size()) {
-            logger.info("Все строки таблицы файла: В справочнике уже существуют такие записи, действующие с %s по %s.",
-                    sdf.format(dateFrom), dateTo ? sdf.format(dateTo) : "\"-\"")
-        } else {
-            avgRowNumMap = [:]
-            existList.each { fileValueMap ->
-                def avgId = fileValueMap.AVG_COST.value
-                if (avgRowNumMap[avgId] == null) {
-                    avgRowNumMap.put(avgId, [])
+        if (existMap.size() != 0) {
+            if (fileRecords.size() == existMap.size()) {
+                logger.info("Все строки таблицы файла: В справочнике уже существуют такие записи, действующие %s.", datesString)
+            } else {
+                avgRowNumMap = [:]
+                existMap.each { uniqueRecordId, fileValueMap ->
+                    def avgId = fileValueMap.AVG_COST.value
+                    if (avgRowNumMap[avgId] == null) {
+                        avgRowNumMap.put(avgId, [])
+                    }
+                    avgRowNumMap.get(avgId).add(fileValueMap.N.value)
                 }
-                avgRowNumMap.get(avgId).add(fileValueMap.N.value)
-            }
-            avgRowNumMap.keySet().sort().each { avgId ->
-                def avgCost = getAvgCostRecords().find { map -> map.record_id.value == avgId }.NAME.value
-                def rowNumbers = avgRowNumMap[avgId].sort { it as Integer }
-                logger.info("\"%s\", строки %s таблицы файла: В справочнике уже существуют такие записи, действующие с %s по %s.",
-                        avgCost, rowNumbers.join(", "), sdf.format(dateFrom), dateTo ? sdf.format(dateTo) : "\"-\"")
+                avgRowNumMap.keySet().sort().each { avgId ->
+                    def avgCost = getAvgCostRecords().find { map -> map.record_id.value == avgId }.NAME.value
+                    def rowNumbers = avgRowNumMap[avgId].sort { it as Integer }
+                    logger.info("\"%s\", строки %s таблицы файла: В справочнике уже существуют такие записи, действующие %s.",
+                            avgCost, rowNumbers.join(", "), datesString)
+                }
             }
         }
 
@@ -354,8 +368,8 @@ void importFromXML() {
             def keyIdValueMap = keyIdValueMapOriginal.sort { (it.value?.values()?.getAt(0)?.get(0)?.get("N")?.value as Integer) }
             keyIdValueMap.each { def key, def versionValuesMap ->
                 def fileValueMapFirst = versionValuesMap.entrySet()[0].value[0]
-                logger.error("\"%s\", строка %s таблицы файла: Нарушено требование к уникальности, уже существуют записи, действующие с %s по %s, с такими же значениями атрибутов \"Марка\", \"Модель (Версия)\", \"Объем двигателя\", \"Тип двигателя\", \"Количество лет, прошедших с года выпуска\" !",
-                        avgCost, fileValueMapFirst.N.value, sdf.format(dateFrom), dateTo ? sdf.format(dateTo) : "\"-\"")
+                logger.error("\"%s\", строка %s таблицы файла: Нарушено требование к уникальности, уже существуют записи, действующие %s, с такими же значениями атрибутов \"Марка\", \"Модель (Версия)\", \"Объем двигателя\", \"Тип двигателя\", \"Количество лет, прошедших с года выпуска\" !",
+                        avgCost, fileValueMapFirst.N.value, datesString)
                 versionValuesMap.each { Long recordId, def fileValueMapList ->
                     RefBookRecordVersion recordVersion = getRefBookRecordVersion(dataProvider, recordId)
                     def attrValueString = uniqueAliases.collect { alias ->
@@ -370,22 +384,25 @@ void importFromXML() {
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
         def uniqueRecordIds = dataProvider.getUniqueRecordIds(dateFrom, null)
-        def recordDataMap = dataProvider.getRecordData(uniqueRecordIds)
-        def closeRecordsData = recordDataMap.findAll { def uniqueRecordId, map ->
-            (getRefBookRecordVersion(dataProvider, uniqueRecordId).versionEnd == null) && !(recordIdsUsed.contains(getRecordId(dataProvider, uniqueRecordId)))
-        }
-        Logger localLogger = new Logger()
-        closeRecordsData.each { def uniqueRecordId, closeRecordData ->
-            updateRecordVersionWithoutLock(logger, uniqueRecordId, getRefBookRecordVersion(dataProvider, uniqueRecordId).versionStart, dateFrom - 1, closeRecordData)
-            RefBookRecordVersion recordVersion = getRefBookRecordVersion(dataProvider, uniqueRecordId)
-            def attrValueString = uniqueAliases.collect { alias ->
-                return "\"" + refBook.getAttribute(alias).name + "\" = \"" + closeRecordData[alias].value + "\""
-            }.join(", ")
-            localLogger.info("Установлена дата окончания действия для записи, по которой нет данных в файле: %s, действует с %s по %s",
-                    attrValueString, sdf.format(recordVersion.versionStart), sdf.format(dateFrom - 1))
-        }
-        if (!localLogger.containsLevel(LogLevel.ERROR)) {
-            logger.entries.addAll(localLogger.entries)
+        if (!uniqueRecordIds.isEmpty()) {
+            def recordDataMap = dataProvider.getRecordData(uniqueRecordIds)
+            def closeRecordsData = recordDataMap.findAll { def uniqueRecordId, map ->
+                (getRefBookRecordVersion(dataProvider, uniqueRecordId).versionEnd == null) &&
+                        !(recordIdsUsed.contains(getRecordId(dataProvider, uniqueRecordId)))
+            }
+            Logger localLogger = new Logger()
+            closeRecordsData.each { def uniqueRecordId, closeRecordData ->
+                updateRecordVersionWithoutLock(logger, uniqueRecordId, getRefBookRecordVersion(dataProvider, uniqueRecordId).versionStart, dateFrom - 1, closeRecordData)
+                RefBookRecordVersion recordVersion = getRefBookRecordVersion(dataProvider, uniqueRecordId)
+                def attrValueString = uniqueAliases.collect { alias ->
+                    return "\"" + refBook.getAttribute(alias).name + "\" = \"" + closeRecordData[alias].value + "\""
+                }.join(", ")
+                localLogger.info("Установлена дата окончания действия для записи, по которой нет данных в файле: %s, действует с %s по %s",
+                        attrValueString, sdf.format(recordVersion.versionStart), sdf.format(dateFrom - 1))
+            }
+            if (!localLogger.containsLevel(LogLevel.ERROR)) {
+                logger.entries.addAll(localLogger.entries)
+            }
         }
     }
 }
@@ -428,6 +445,7 @@ void parseXml(def inputStream, def tableRows) {
                         elements.remove(tName)
                     } catch (XMLStreamException e) {
                         // для случаев когда текст лежит не в t
+                        logger.warn(e.getMessage())
                     }
                 }
             } else if (reader.endElement) {
@@ -578,10 +596,8 @@ void putRowNumInMap(def rowsMap, def avgCostId, def alias, def rowNumber) {
     }
 }
 
-@Field
-RefBookDao refBookDao = ((RefBookFactoryImpl) refBookFactory).refBookDao
-
 def List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records, List<RefBookRecord> errorRecords) {
+    def avgNMap = [:]
     try {
         def dataProvider = formDataService.getRefBookProvider(refBookFactory, REFBOOK_ID, providerCache)
         RefBook refBook = refBookFactory.get(REFBOOK_ID);
@@ -602,7 +618,7 @@ def List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, D
                 record.setVersionTo(versionTo);
             } else {
                 //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
-                RefBookRecordVersion nextVersion = refBookDao.getNextVersion(REFBOOK_ID, record.getRecordId(), versionFrom);
+                RefBookRecordVersion nextVersion = refBookService.getNextVersion(REFBOOK_ID, record.getRecordId(), versionFrom);
                 if (nextVersion != null) {
                     Date versionEnd = SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1);
                     if (versionEnd != null && versionFrom.after(versionEnd)) {
@@ -626,7 +642,7 @@ def List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, D
             for (RefBookRecord record : records) {
                 //Проверка пересечения версий
                 if (record.getRecordId() != null) {
-                    def crossResults = refBookDao.checkCrossVersions(REFBOOK_ID, record.getRecordId(), versionFrom, record.getVersionTo(), null)
+                    def crossResults = refBookService.checkCrossVersions(REFBOOK_ID, record.getRecordId(), versionFrom, record.getVersionTo(), null)
                     boolean needToCreateFakeVersion = crossVersionsProcessing(crossResults, versionFrom, record.getVersionTo(), record.getValues(), record, errorRecords, logger);
                     if (!needToCreateFakeVersion) {
                         //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
@@ -649,11 +665,21 @@ def List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, D
             }
         }
         records.each { record ->
-            record.getValues().remove('N')
+            def avgId = record.values.AVG_COST.value
+            if (avgNMap[avgId] == null) {
+                avgNMap[avgId] = [:]
+            }
+            avgNMap.get(avgId).put(record.getValues().remove('N').stringValue, record)
         }
         return dataProvider.createVersions(refBook, versionFrom, versionTo, records, countIds, excludedVersionEndRecords, logger);
     } catch (DataAccessException e) {
         throw new ServiceException("Запись не сохранена. Обнаружены фатальные ошибки!", e);
+    } finally {
+        avgNMap.each { avgId, nMap ->
+            nMap.each { nValue, RefBookRecord record ->
+                record.getValues().put('N', new RefBookValue(RefBookAttributeType.STRING, nValue))
+            }
+        }
     }
 }
 
@@ -674,14 +700,15 @@ boolean crossVersionsProcessing(List<CheckCrossVersionsResult> results, Date ver
             //Ищем все ссылки на запись справочника в новом периоде
             Logger usageLogger = checkUsages(Arrays.asList(result.getRecordId()), versionFrom, versionTo, true);
 
+            def refBook = refBookFactory.get(REFBOOK_ID)
+            def attrValueString = allAliases.collect { alias ->
+                return "\"" + refBook.getAttribute(alias).name + "\" = \"" + values[alias].value + "\""
+            }.join(", ")
             if (!usageLogger.containsLevel(LogLevel.ERROR)) {
-                logger.info("Установлена дата окончания актуальности версии "+ format.format(SimpleDateUtils.addDayToDate(versionFrom, -1))+" для предыдущей версии");
+                logger.info("Установлена дата окончания действия для предыдущей версии: %s, действует с %s по %s",
+                        attrValueString, format.format(versionFrom), dateTo ? format.format(dateTo) : "\"-\"");
             } else {
                 errorRecords.add(record)
-                def refBook = refBookFactory.get(REFBOOK_ID)
-                def attrValueString = allAliases.collect { alias ->
-                    return "\"" + refBook.getAttribute(alias).name + "\" = \"" + values[alias].value + "\""
-                }.join(", ")
                 def avgCost = getAvgCostRecords().find { map -> map.record_id.value == values.AVG_COST.value }.NAME.value
                 logger.error("\"%s\", строка %s таблицы файла: При создании записи в справочнике не удалось установить дату окончания действия %s для предыдущей версии записи: %s, действует с %s, по %s! Т.к. для предыдущей версии записи:",
                         avgCost, values.N.value, format.format(versionFrom-1), attrValueString, format.format(versionFrom), versionTo ? format.format(versionTo) : "\"-\"")
@@ -690,11 +717,11 @@ boolean crossVersionsProcessing(List<CheckCrossVersionsResult> results, Date ver
             }
         }
         if (result.getResult() == CrossResult.NEED_CHANGE) {
-            refBookDao.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
+            refBookService.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
             return false;
         }
         if (result.getResult() == CrossResult.NEED_DELETE) {
-            refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(result.getRecordId()));
+            refBookService.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(result.getRecordId()));
         }
     }
     return true;
@@ -704,7 +731,7 @@ Logger checkUsages(List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
     Logger localLogger = new Logger()
 
     //Проверка использования в справочниках
-    List<String> refBooks = refBookDao.isVersionUsedInRefBooks(REFBOOK_ID, uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
+    List<String> refBooks = refBookService.isVersionUsedInRefBooks(REFBOOK_ID, uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
             RefBookTableRef.getTablesIdByRefBook(REFBOOK_ID) != null ?
                     Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(REFBOOK_ID))) : null);
     for (String refBookMsg : refBooks) {
@@ -712,13 +739,13 @@ Logger checkUsages(List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
     }
 
     //Проверка использования в нф
-    List<FormLink> forms = refBookDao.isVersionUsedInForms(REFBOOK_ID, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
+    List<FormLink> forms = refBookService.isVersionUsedInForms(REFBOOK_ID, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
     for (FormLink form : forms) {
         localLogger.error(form.getMsg());
     }
 
     //Проверка использования в настройках подразделений
-    List<String> configs = refBookDao.isVersionUsedInDepartmentConfigs(REFBOOK_ID, uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
+    List<String> configs = refBookService.isVersionUsedInDepartmentConfigs(REFBOOK_ID, uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
             RefBookTableRef.getTablesIdByRefBook(REFBOOK_ID) != null ?
                     Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(REFBOOK_ID))) : null);
     for (String configMsg : configs) {
@@ -730,21 +757,20 @@ Logger checkUsages(List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
 void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
     def format = new SimpleDateFormat("dd.MM.yyyy")
     def dataProvider = formDataService.getRefBookProvider(refBookFactory, REFBOOK_ID, providerCache)
-    RefBook refBook = refBookDao.get(REFBOOK_ID);
-    List<RefBookAttribute> attributes = refBook.getAttributes();
+    RefBook refBook = refBookFactory.get(REFBOOK_ID);
     boolean isJustNeedValuesUpdate = (versionFrom == null && versionTo == null);
 
     //Получаем идентификатор записи справочника без учета версий
-    Long recordId = refBookDao.getRecordId(uniqueRecordId);
+    Long recordId = getRecordId(dataProvider, uniqueRecordId);
     //Получаем еще неотредактированную версию
-    RefBookRecordVersion oldVersionPeriod = refBookDao.getRecordVersionInfo(uniqueRecordId);
+    RefBookRecordVersion oldVersionPeriod = getRefBookRecordVersion(dataProvider, uniqueRecordId);
 
     RefBookRecord refBookRecord = new RefBookRecord();
     refBookRecord.setUniqueRecordId(uniqueRecordId);
     refBookRecord.setValues(records);
     if (versionTo == null) {
         //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
-        RefBookRecordVersion nextVersion = refBookDao.getNextVersion(REFBOOK_ID, recordId, versionFrom);
+        RefBookRecordVersion nextVersion = refBookService.getNextVersion(REFBOOK_ID, recordId, versionFrom);
         if (nextVersion != null) {
             Date versionEnd = SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1);
             assert versionFrom != null;
@@ -760,8 +786,8 @@ void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date ver
         refBookRecord.setVersionTo(versionTo);
     }
 
-    //Проверка корректности
-    dataProvider.checkCorrectness(logger, refBook, uniqueRecordId, versionFrom, attributes, Arrays.asList(refBookRecord));
+    //Проверка корректности (пропускаем, т.к. надо только закрыть)
+    //checkCorrectness(logger, refBook, uniqueRecordId, versionFrom, attributes, Arrays.asList(refBookRecord));
 
     boolean isRelevancePeriodChanged = false;
     RefBookRecordVersion previousVersion = null;
@@ -774,7 +800,7 @@ void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date ver
         if (isRelevancePeriodChanged) {
             //Проверка пересечения версий
             //Проверяем следующую версию после даты окочания
-            RefBookRecordVersion oldNextVersion = refBookDao.getNextVersion(REFBOOK_ID, recordId, versionStart);
+            RefBookRecordVersion oldNextVersion = refBookService.getNextVersion(REFBOOK_ID, recordId, versionStart);
             if (versionTo != null && oldNextVersion != null && (versionTo.equals(oldNextVersion.getVersionStart()) || versionTo.after(oldNextVersion.getVersionStart()))) {
                 def attrValueString = allAliases.collect { alias ->
                     return "\"" + refBook.getAttribute(alias).name + "\" = \"" + records[alias].value + "\""
@@ -785,7 +811,7 @@ void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date ver
                 return
             }
             //Проверяем предыдущую версию до даты начала
-            previousVersion = refBookDao.getPreviousVersion(REFBOOK_ID, recordId, versionStart);
+            previousVersion = refBookService.getPreviousVersion(REFBOOK_ID, recordId, versionStart);
             if (previousVersion != null &&
                     (previousVersion.isVersionEndFake() && (versionFrom.equals(previousVersion.getVersionEnd())
                             || versionFrom.before(previousVersion.getVersionEnd())
@@ -839,55 +865,55 @@ void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date ver
             List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
             if (previousVersion != null && (previousVersion.isVersionEndFake() && SimpleDateUtils.addDayToDate(previousVersion.getVersionEnd(), 1).equals(versionFrom))) {
                 //Если установлена дата окончания, которая совпадает с существующей фиктивной версией - то она удаляется
-                Long previousVersionEnd = refBookDao.findRecord(REFBOOK_ID, recordId, versionFrom);
-                refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(previousVersionEnd));
+                Long previousVersionEnd = refBookService.findRecord(REFBOOK_ID, recordId, versionFrom);
+                refBookService.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(previousVersionEnd));
             }
 
             boolean delayedUpdate = false;
             if (versionEnd != null && versionFrom.equals(versionEnd)) {
                 //Обновляем дату начала актуальности, если не совпадает с датой окончания
-                refBookDao.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
+                refBookService.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
             } else {
                 delayedUpdate = true;
             }
 
             //Получаем запись - окончание версии. Если = null, то версия не имеет конца
-            List<Long> relatedVersions = refBookDao.getRelatedVersions(uniqueIdAsList);
+            List<Long> relatedVersions = refBookService.getRelatedVersions(uniqueIdAsList);
             if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
                 logger.error("Обнаружено несколько фиктивных версий");
                 return
             }
             if (versionTo != null) {
                 //Существует другая версия, дата начала которой = нашей новой дате окончания?
-                boolean isVersionEndAlreadyExists = refBookDao.isVersionsExist(REFBOOK_ID, Arrays.asList(recordId), SimpleDateUtils.addDayToDate(versionTo, 1));
+                boolean isVersionEndAlreadyExists = refBookService.isVersionsExist(REFBOOK_ID, Arrays.asList(recordId), SimpleDateUtils.addDayToDate(versionTo, 1));
                 if (relatedVersions.isEmpty() && !isVersionEndAlreadyExists) {
                     //Создаем новую фиктивную версию - дату окончания
-                    refBookDao.createFakeRecordVersion(REFBOOK_ID, recordId, SimpleDateUtils.addDayToDate(versionTo, 1));
+                    refBookService.createFakeRecordVersion(REFBOOK_ID, recordId, SimpleDateUtils.addDayToDate(versionTo, 1));
                 }
 
                 if (!relatedVersions.isEmpty() && !versionEnd.equals(versionTo)) {
                     if (!isVersionEndAlreadyExists) {
                         //Изменяем существующую дату окончания
-                        refBookDao.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
+                        refBookService.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
                     } else {
                         //Удаляем дату окончания. Теперь дата окончания задается началом следующей версии
-                        refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
+                        refBookService.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
                     }
                 }
             }
 
             if (!relatedVersions.isEmpty() && versionTo == null) {
                 //Удаляем фиктивную запись - теперь у версии нет конца
-                refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
+                refBookService.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
             }
 
             if (delayedUpdate) {
                 //Обновляем дату начала актуальности, если ранее это было отложено т.к она совпадала с датой окончания (теперь она изменена)
-                refBookDao.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
+                refBookService.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
             }
         }
     }
 
     //Обновление значений атрибутов версии
-    refBookDao.updateRecordVersion(REFBOOK_ID, uniqueRecordId, records);
+    refBookService.updateRecordVersion(REFBOOK_ID, uniqueRecordId, records);
 }
