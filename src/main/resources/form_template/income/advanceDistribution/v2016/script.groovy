@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 /**
@@ -669,8 +670,9 @@ void logicalCheckAfterCalc() {
 
     boolean wasError = false
 
-    def propertyPriceSumm = getSumAll(dataRows, "propertyPrice")
-    def workersCountSumm = getSumAll(dataRows, "workersCount")
+    def tmpRows = dataRows.findAll { !it.getAlias() }
+    def propertyPriceSumm = getSumAll(tmpRows, "propertyPrice")
+    def workersCountSumm = getSumAll(tmpRows, "workersCount")
 
     // Распределяемая налоговая база за отчетный период.
     def taxBase
@@ -1214,7 +1216,12 @@ void setTotalStyle(def row) {
 
 /** Получить сумму столбца (сумма значении всех строк). */
 def getSumAll(def dataRows, def columnAlias) {
-    return dataRows.sum { it.getAlias() ? BigDecimal.ZERO : it[columnAlias] }
+    def from = 0
+    def to = dataRows.size() - 1
+    if (from > to) {
+        return 0
+    }
+    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
 // Получить данные сводной
