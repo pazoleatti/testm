@@ -1,5 +1,36 @@
+set serveroutput on size 1000000;
+
 --Удаление всех текущих блокировок
 delete from lock_data;
+
+--Удаление временного среза
+declare ifTableExists varchar2(256);
+begin
+  for x in (select * from form_template ft where status <> 2 order by id) loop
+  
+       select coalesce(max(ifExists), 0) into ifTableExists from (
+          select 1 as ifExists
+            from dual
+            where exists (select 1 from user_tables where table_name = 'FORM_DATA_'||x.id));
+            
+       if ifTableExists = 1 then
+          execute immediate 'delete from form_data_'||x.id||' where temporary=1';
+				if sql%rowcount <> 0 then
+					dbms_output.put_line('form_data_'||x.id||': '||sql%rowcount||' row(s) deleted.');
+				end if;
+		end if;     
+  end loop;
+end;
+/
+commit;
+
+--Пересбор статистики
+declare running_user varchar2(30);
+begin
+	select user into running_user from dual;
+	dbms_stats.gather_schema_stats(running_user); 
+end;
+/
 
 --http://jira.aplana.com/browse/SBRFACCTAX-14449: Дублирование текста в значении справочника "Статус по НДС"
 update ref_book_value
@@ -50,6 +81,127 @@ when matched then
                 color_tbl.g = color_enum.g, 
                 color_tbl.b = color_enum.b, 
                 color_tbl.hex = color_enum.hex;
+commit;				
+---------------------------------------------------------------------------------------------------------				
+--https://jira.aplana.com/browse/SBRFACCTAX-15546: Замена кавычек и переносов строк
+
+set serveroutput on size 1000000;
+
+--Переносы строк
+begin
+dbms_output.put_line('SBRFACCTAX-15546: Line breaks removal');
+-- -- Средняя стоимость транспортных средств (2015) / Модель (Версия)
+	UPDATE ref_book_value SET    string_value = regexp_replace(string_value, chr(10), '') WHERE  attribute_id = 2183 AND regexp_replace(string_value, chr(10), '') <> string_value;
+	dbms_output.put_line('ref_book_id = 218 (avg transport costs): '||sql%rowcount||' row(s) updated');
+
+-- -- План счетов бухгалтерского учета / Наименование счета
+	UPDATE ref_book_value SET string_value = trim(regexp_replace(string_value, chr(10), '')) WHERE  attribute_id = 901 AND regexp_replace(string_value, chr(10), '') <> string_value;
+	dbms_output.put_line('ref_book_id = 101 (accounting plan - char 10): '||sql%rowcount||' row(s) updated');
+	UPDATE ref_book_value SET string_value = trim(regexp_replace(string_value, chr(13), '')) WHERE attribute_id = 901 AND regexp_replace(string_value, chr(13), '') <> string_value;
+	dbms_output.put_line('ref_book_id = 101 (accounting plan - char 13): '||sql%rowcount||' row(s) updated');
+
+-- -- Параметры подразделения по УКС / Наименование для тит.листа + Наименование организации представителя
+	UPDATE ref_book_value SET string_value = trim(regexp_replace(string_value, chr(10), '')) WHERE  attribute_id = 243 AND regexp_replace(string_value, chr(10), '') <> string_value;
+	dbms_output.put_line('ref_book_id = 37 (Deals.orgname): '||sql%rowcount||' row(s) updated');
+	UPDATE ref_book_value SET string_value = trim(regexp_replace(string_value, chr(10), '')) WHERE  attribute_id = 191 AND regexp_replace(string_value, chr(10), '') <> string_value;
+	dbms_output.put_line('ref_book_id = 37 (Deals.titlename): '||sql%rowcount||' row(s) updated');
+
+-- -- Параметры подразделения по налогу на прибыль (таблица) / Наименование для титульного листа
+	UPDATE ref_book_value SET string_value = trim(regexp_replace(string_value, chr(10), '')) WHERE  attribute_id = 3307 AND regexp_replace(string_value, chr(10), '') <> string_value;
+	dbms_output.put_line('ref_book_id = 330 (Income_params): '||sql%rowcount||' row(s) updated');
+end;
+/
+
+--Подразделения (кавычки и двойные пробелы)
+BEGIN
+	dbms_output.put_line('Spaces');
 	
+	UPDATE department SET name = regexp_replace(name, '\s{2,}', ' ') WHERE  regexp_like(name, '\s{2,}');
+	dbms_output.put_line('department (name): '||sql%rowcount||' row(s) updated');	
+	UPDATE department SET shortname = regexp_replace(shortname, '\s{2,}', ' ') WHERE  regexp_like(shortname, '\s{2,}');
+	dbms_output.put_line('department (shortname): '||sql%rowcount||' row(s) updated');
+	
+	dbms_output.put_line('Quotes');
+	
+	UPDATE department SET name = translate(name, '«»', '""') where name <> translate(name, '«»', '""');
+	dbms_output.put_line('department (name): '||sql%rowcount||' row(s) updated');	
+	UPDATE department SET shortname = translate(shortname, '«»', '""') where name <> translate(shortname, '«»', '""');
+	dbms_output.put_line('department (shortname): '||sql%rowcount||' row(s) updated');
+END;
+/
+
+--ОКТМО:
+--Подразделения (кавычки и двойные пробелы)
+BEGIN
+	UPDATE ref_book_oktmo SET name = regexp_replace(name, '\s{2,}', ' ') WHERE regexp_like(name, '\s{2,}');
+	dbms_output.put_line('oktmo (spaces): '||sql%rowcount||' row(s) updated');	
+
+	UPDATE ref_book_oktmo SET name = translate(name, '«»“”', '""""') where name <> translate(name, '«»“”', '""""');
+	dbms_output.put_line('oktmo (quotes): '||sql%rowcount||' row(s) updated');	
+END;
+/
+
+BEGIN
+	dbms_output.put_line('---------------------------------------------------------------------------------');
+	for x in (
+	  with t as (
+		select attribute_id, count(*) as cnt
+		from ref_book_value
+		where string_value like '% %' and string_value <> translate(string_value, ' ', ' ')
+		group by attribute_id)
+	  select r.name||'.'||a.name||': '||t.cnt as str from t
+	  join ref_book_attribute a on a.id = t.attribute_id
+	  join ref_book r on r.id = a.ref_book_id
+	  where r.id <> 3) loop
+	  
+	dbms_output.put_line(x.str);  
+	end loop;  	
+	dbms_output.put_line('---------------------------------------------------------------------------------');
+	
+	update ref_book_value set string_value = trim(translate(string_value, ' ', ' ')) where string_value like '% %' and string_value <> translate(string_value, ' ', ' ');
+	dbms_output.put_line('Universal structure (nbsp): '||sql%rowcount||' row(s) updated');	
+	
+	dbms_output.put_line('---------------------------------------------------------------------------------');
+	for x in (
+	  with t as (
+		select attribute_id, count(*) as cnt
+		from ref_book_value
+		where regexp_like(string_value, '\s{2,}')
+		group by attribute_id)
+	  select r.name||'.'||a.name||': '||t.cnt as str from t
+	  join ref_book_attribute a on a.id = t.attribute_id
+	  join ref_book r on r.id = a.ref_book_id
+	  where r.id <> 3) loop
+	  
+	dbms_output.put_line(x.str);  
+	end loop;  	
+	dbms_output.put_line('---------------------------------------------------------------------------------');
+	
+	UPDATE ref_book_value SET string_value = trim(regexp_replace(string_value, '\s{2,}', ' ')) WHERE regexp_like(string_value, '\s{2,}') and attribute_id not in (select id from ref_book_attribute where ref_book_id = 3);
+	dbms_output.put_line('Universal structure (double+ spaces): '||sql%rowcount||' row(s) updated');
+	
+	dbms_output.put_line('---------------------------------------------------------------------------------');
+	for x in (
+	  with t as (
+		select attribute_id, count(*) as cnt
+		from ref_book_value
+		where string_value <> translate(string_value, '«»“”', '""""')
+		group by attribute_id)
+	  select r.name||'.'||a.name||': '||t.cnt as str from t
+	  join ref_book_attribute a on a.id = t.attribute_id
+	  join ref_book r on r.id = a.ref_book_id
+	  where r.id <> 3) loop
+	  
+	dbms_output.put_line(x.str);  
+	end loop;  	
+	dbms_output.put_line('---------------------------------------------------------------------------------');
+	
+	UPDATE ref_book_value SET string_value = trim(translate(string_value, '«»“”', '""""')) WHERE string_value <> translate(string_value, '«»“”', '""""') and attribute_id not in (select id from ref_book_attribute where ref_book_id = 3);
+	dbms_output.put_line('Universal structure (quotes): '||sql%rowcount||' row(s) updated');
+
+END;
+/
+				
+---------------------------------------------------------------------------------------------------------					
 commit;
 exit;
