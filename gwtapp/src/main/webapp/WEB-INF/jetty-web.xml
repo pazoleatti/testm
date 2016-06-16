@@ -37,7 +37,7 @@
 					<Put name="url">
                         jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL
 					</Put>
-					<Put name="user">TAX_NEXT_1_0</Put>
+					<Put name="user">TAX_1_0</Put>
 					<Put name="password">TAX</Put>
 				</Get>
                 <Call name="init" />
