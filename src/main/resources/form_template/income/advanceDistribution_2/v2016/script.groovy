@@ -570,7 +570,7 @@ void calc18_19_20(def row, def reportPeriod) {
         row.everyMontherPayment2 = null
         row.everyMontherPayment3 = null
     } else {
-        def a = roundValue(row.everyMontherPaymentAfterPeriod, 0)
+        def a = roundValue(row.everyMontherPaymentAfterPeriod / 3, 0)
         def b = a * 3
         def c = row.everyMontherPaymentAfterPeriod - b
         row.everyMontherPayment1 = (c == -1 ? a - 1 : a)

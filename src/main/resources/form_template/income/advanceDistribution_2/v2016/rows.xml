@@ -33,7 +33,7 @@
     </row>
     <row alias="total">
         <cell alias="number" colSpan="1" rowSpan="1" styleAlias="Итоговая"/>
-        <cell alias="fix" colSpan="2" rowSpan="1" stringValue="Сбербанк России" styleAlias="Итоговая"/>
+        <cell alias="fix" colSpan="5" rowSpan="1" stringValue="Сбербанк России" styleAlias="Итоговая"/>
         <cell alias="regionBank" colSpan="1" rowSpan="1" styleAlias="Итоговая"/>
         <cell alias="regionBankDivision" colSpan="1" rowSpan="1" styleAlias="Итоговая"/>
         <cell alias="divisionName" colSpan="1" rowSpan="1" styleAlias="Итоговая"/>
