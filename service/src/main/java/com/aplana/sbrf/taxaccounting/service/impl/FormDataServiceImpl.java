@@ -96,8 +96,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String SAVE_ERROR = "Найдены ошибки при сохранении формы!";
     private static final String SORT_ERROR = "Найдены ошибки при сортировке строк формы!";
     private static final String FD_NOT_IN_RANGE = "Найдена форма: ";
-    private static final String LOCK_CURRENT_1 =
-            "Текущая налоговая форма заблокирована пользователем \"%s\" в \"%s\". Попробуйте выполнить операцию позже";
+    private static final String LOCK_CURRENT_1 = "Текущая %s заблокирована пользователем \"%s\" в \"%s\". Попробуйте выполнить операцию позже";
     private static final String SOURCE_MSG_ERROR =
             "существует форма-приёмник, статус которой отличен от \"Создана\". Консолидация возможна только в том случае, если форма-приёмник не существует или имеет статус \"Создана\"";
     //Выводит информацию о НФ в определенном формате
@@ -1614,6 +1613,8 @@ public class FormDataServiceImpl implements FormDataService {
         if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
             // Получить налоговый период
             TaxPeriod taxPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod();
+            // Получить тип налога
+            TaxType taxType = formData.getFormType().getTaxType();
             // Получить список экземпляров НФ следующих периодов
             List<FormData> formDataList = formDataDao.getNextFormDataList(formData, taxPeriod);
 
@@ -1633,8 +1634,9 @@ public class FormDataServiceImpl implements FormDataService {
                 if (--size > 0) {
                     stringBuilder.append(", ");
                 }
-                // TODO https://conf.aplana.com/pages/viewpage.action?pageId=19665518 8A.2
-                msg = "Сквозная нумерация обновлена в налоговых формах следующих периодов текущей сквозной нумерации: " +
+                msg = "Сквозная нумерация обновлена в " +
+                        (taxType == TaxType.DEAL || taxType == TaxType.ETR || taxType == TaxType.MARKET ? "формах" : "налоговых формах") +
+                        " следующих периодов текущей сквозной нумерации: " +
                         stringBuilder.toString();
             }
 
@@ -1856,8 +1858,8 @@ public class FormDataServiceImpl implements FormDataService {
             case CONSOLIDATE_FD:
                 logger.error(
                         String.format(
-                                // TODO https://conf.aplana.com/pages/viewpage.action?pageId=19664135 4A.1
                                 LOCK_CURRENT_1,
+                                MessageGenerator.mesSpeckSingle(formData.getFormType().getTaxType()),
                                 user.getName(),
                                 SDF_HH_MM_DD_MM_YYYY.get().format(lockType.getSecond().getDateLock()),
                                 getTaskName(lockType.getFirst(), formDataId, userInfo))
