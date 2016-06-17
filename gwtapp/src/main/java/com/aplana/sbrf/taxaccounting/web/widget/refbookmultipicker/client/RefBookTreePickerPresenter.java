@@ -222,9 +222,10 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     @Override
-    public void updatePS(Date date, String searchPattern) {
-        ps.setVersionDate(date);
-        ps.setSearchPattern(searchPattern);
+    public void cleanPS() {
+        ps.setVersionDate(null);
+        ps.setSearchPattern(null);
+        ps.setExactSearch(false);
     }
 
     @Override
