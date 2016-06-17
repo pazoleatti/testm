@@ -43,7 +43,7 @@ class DBReport {
         def isBefore1_0 = (!shortNameExist1 || !shortNameExist2)
 
         // Запросы на получение колонок
-        def sqlColumns1 = "select id, name, " + (isBefore1_0 ? "" : "short_name, data_ord, ") + "form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2, numeration_row from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
+        def sqlColumns1 = "select id, name, " + (isBefore1_0 ? "" : "short_name, ") + "form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2, numeration_row from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
         def sqlColumns2 = sqlColumns1
 
         // Запросы на получение стилей
@@ -243,7 +243,7 @@ class DBReport {
                                             'format', 'filter', 'parent_alias', 'attribute_id2', 'numeration_row']
                                     if (!isBefore1_0) {
                                         headers.add('short_name')
-                                        headers.add('data_ord')
+                                        // headers.add('data_ord')
                                     }
                                     if (columnsSet1 != null && columnsSet2 == null || columnsSet1 == null && columnsSet2 != null) {
                                         colDiff = "Нет в ${columnsSet1 == null ? prefix1 : prefix2}"
@@ -548,7 +548,7 @@ class DBReport {
                 def dataRows = null
                 if (version.data_rows_inStr) {
                     dataRows = XMLUnit.buildControlDocument(version.data_rows_inStr)
-                    GitReport.updateStyleAliases(dataRows, styleByAliasMap[version.id])
+                    // GitReport.updateStyleAliases(dataRows, styleByAliasMap[version.id])
                 }
                 version.data_rows = dataRows
             } catch (SAXException e) {
@@ -585,7 +585,7 @@ class DBReport {
             column.name = it.name
             if (!isBefore1_0) {
                 column.short_name = it.short_name
-                column.data_ord = it.data_ord
+                // column.data_ord = it.data_ord
             }
             column.form_template_id = form_template_id
             column.ord = it.ord
@@ -686,7 +686,7 @@ class DBReport {
 
     // Вывод шапки для columns
     def public static printColumnsTable(def builder, def changesMap, def headers, def prefix, def columnsSet, def isBefore1_0) {
-        def colSpan = (isBefore1_0 ? 14 : 16)
+        def colSpan = (isBefore1_0 ? 14 : 15)
         // Название таблицы
         builder.tr {
             td(colspan: colSpan, class: 'hdr', prefix)
