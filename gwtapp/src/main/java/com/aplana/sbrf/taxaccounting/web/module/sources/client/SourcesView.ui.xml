@@ -142,7 +142,7 @@
                                     <g:Label addStyleNames="{style.searchLabel}" text="Налог:"/>
                                 </g:cell>
                                 <g:cell horizontalAlignment="left">
-                                    <w:ValueListBox ui:field="taxTypeList" width="200px" addStyleNames="{style.marginRight5}"/>
+                                    <w:ValueListBox ui:field="taxTypeList" width="250px" addStyleNames="{style.marginRight5}"/>
                                 </g:cell>
                                 <g:cell width="100%" horizontalAlignment="right">
                                     <g:Label addStyleNames="{style.searchLabel}" text="Назначение:"/>
