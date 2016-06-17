@@ -124,7 +124,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
                     cell.setValue(numeration, rowNum);
                 }
             } else {
-                cell.setValue(getCellValue(cell.getColumn(), rs, String.format("c%s", columnId)), rowNum);
+                cell.setValue(getCellValue(cell.getColumn(), rs, String.format("c%s", columnId)), rowNum, true);
             }
             // Styles
             BigDecimal styleId = rs.getBigDecimal(String.format("c%s_style_id", columnId));

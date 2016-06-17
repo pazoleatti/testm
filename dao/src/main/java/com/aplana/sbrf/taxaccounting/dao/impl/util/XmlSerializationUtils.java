@@ -368,7 +368,7 @@ public final class XmlSerializationUtils {
 		// String value
 		Node valueNode = attributes.getNamedItem(ATTR_STRING_VALUE);
 		if (valueNode != null) {
-			cell.setValue(valueNode.getNodeValue(), null);
+			cell.setValue(valueNode.getNodeValue(), null, true);
 		}
 
 		// Date value
@@ -376,7 +376,7 @@ public final class XmlSerializationUtils {
 		if (valueNode != null) {
 			try {
 				cell.setValue(FormatUtils.getShortDateFormat()
-						.parse(valueNode.getNodeValue()), null);
+						.parse(valueNode.getNodeValue()), null, true);
 			} catch (ParseException e) {
 				throw new XmlSerializationException(e);
 			}
@@ -387,7 +387,7 @@ public final class XmlSerializationUtils {
 		if (valueNode != null) {
 			try {
 				cell.setValue(FormatUtils.getSimpleNumberFormat().parse(
-						valueNode.getNodeValue()), null);
+						valueNode.getNodeValue()), null, true);
 			} catch (ParseException e) {
 				throw new XmlSerializationException(e);
 			}

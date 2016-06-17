@@ -235,50 +235,51 @@ public class FormTemplateImpexServiceImpl implements
         } catch (IOException e) {
             throw new ServiceException("Ошибки при создании временной директории.");
         }
-        List<DeclarationTemplate> declarationTemplates = declarationTemplateService.listAll();
-        ArrayList<String> paths = new ArrayList<String>(declarationTemplates.size());
-        for (DeclarationTemplate template : declarationTemplates){
-            String translatedName = Translator.transliterate(template.getType().getName());
-            String folderTemplateName =
-                    Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
-                            template.getType().getTaxType().name().toLowerCase(),
-                            template.getType().getId(),
-                            translatedName.length() > MAX_NAME_OF_DIR
-                                    ? translatedName.substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
-                                    : translatedName.trim().replaceAll(REG_EXP,""),
-                            SIMPLE_DATE_FORMAT_YEAR.get().format(template.getVersion())));
-            try {
-                File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
-                folderTemplate.delete();
-                if (!folderTemplate.mkdirs())
-                    LOG.warn(String.format("Can't create temporary directory %s", folderTemplate.getAbsolutePath()));
-                //
-                FileOutputStream tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + VERSION_FILE));
-                tempFile.write("1.0".getBytes());
-                tempFile.close();
-                //
-                tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + SCRIPT_FILE));
-                String ftScript = declarationTemplateService.getDeclarationTemplateScript(template.getId());
-                if (ftScript != null) {
-                    tempFile.write(ftScript.getBytes(ENCODING));
-                }
-                tempFile.close();
-                //
-                tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + DeclarationTemplateImpexServiceImpl.REPORT_FILE));
-                String dtJrxm = declarationTemplateService.getJrxml(template.getId());
-                if (dtJrxm != null)
-                    tempFile.write(dtJrxm.getBytes(ENCODING));
-                tempFile.close();
-
-                paths.add(folderTemplateName);
-            } catch (IOException e) {
-                LOG.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
-                throw new ServiceException("Ошибки при создании временной директории.");
-            }
-        }
-
-        String pathPattern = File.separator + "%s" + File.separator + "%s";
         try {
+
+            List<DeclarationTemplate> declarationTemplates = declarationTemplateService.listAll();
+            ArrayList<String> paths = new ArrayList<String>(declarationTemplates.size());
+            for (DeclarationTemplate template : declarationTemplates){
+                String translatedName = Translator.transliterate(template.getType().getName());
+                String folderTemplateName =
+                        Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
+                                template.getType().getTaxType().name().toLowerCase(),
+                                template.getType().getId(),
+                                (translatedName.length() > MAX_NAME_OF_DIR
+                                        ? translatedName.substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
+                                        : translatedName.trim().replaceAll(REG_EXP,"")).trim(),
+                                SIMPLE_DATE_FORMAT_YEAR.get().format(template.getVersion())));
+                try {
+                    File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
+                    folderTemplate.delete();
+                    if (!folderTemplate.mkdirs())
+                        LOG.warn(String.format("Can't create temporary directory %s", folderTemplate.getAbsolutePath()));
+                    //
+                    FileOutputStream tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + VERSION_FILE));
+                    tempFile.write("1.0".getBytes());
+                    tempFile.close();
+                    //
+                    tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + SCRIPT_FILE));
+                    String ftScript = declarationTemplateService.getDeclarationTemplateScript(template.getId());
+                    if (ftScript != null) {
+                        tempFile.write(ftScript.getBytes(ENCODING));
+                    }
+                    tempFile.close();
+                    //
+                    tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + DeclarationTemplateImpexServiceImpl.REPORT_FILE));
+                    String dtJrxm = declarationTemplateService.getJrxml(template.getId());
+                    if (dtJrxm != null)
+                        tempFile.write(dtJrxm.getBytes(ENCODING));
+                    tempFile.close();
+
+                    paths.add(folderTemplateName);
+                } catch (IOException e) {
+                    LOG.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
+                    throw new ServiceException("Ошибки при создании временной директории.");
+                }
+            }
+
+            String pathPattern = File.separator + "%s" + File.separator + "%s";
             ZipArchiveEntry ze;
             for (String path : paths){
                 // Version
@@ -336,71 +337,70 @@ public class FormTemplateImpexServiceImpl implements
             LOG.error("Ошибки при создании временной директории.", e);
             throw new ServiceException("Ошибки при создании временной директории.");
         }
-
-        List<FormTemplate> formTemplates = formTemplateService.listAll();
-        ArrayList<String> paths = new ArrayList<String>(formTemplates.size());
-        for (FormTemplate template : formTemplates){
-            String translatedName = Translator.transliterate(template.getType().getName());
-            String folderTemplateName =
-                   String.format(TEMPLATE_OF_FOLDER_NAME,
-                            template.getType().getTaxType().name().toLowerCase(),
-                            template.getType().getId(),
-                            translatedName.length() > MAX_NAME_OF_DIR
-                                    ? translatedName.substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
-                                    : translatedName.trim().replaceAll(REG_EXP, ""),
-                            SIMPLE_DATE_FORMAT_YEAR.get().format(template.getVersion()));
-            try {
-                File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
-                folderTemplate.delete();
-                if (!folderTemplate.mkdirs()){
-                    LOG.warn(String.format("Can't create temporary directory %s", folderTemplate.getAbsolutePath()));
-                    continue;
-                }
-                //
-                FileOutputStream tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + VERSION_FILE));
-                tempFile.write("1.0".getBytes());
-                tempFile.close();
-                //
-                tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + CONTENT_FILE));
-                FormTemplateContent ftc = new FormTemplateContent();
-                ftc.fillFormTemplateContent(template);
-                JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
-                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-                jaxbMarshaller.marshal(ftc, tempFile);
-                tempFile.close();
-                //
-                tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + SCRIPT_FILE));
-                String ftScript = template.getScript();
-                if (ftScript != null) {
-                    tempFile.write(ftScript.getBytes(ENCODING));
-                }
-                tempFile.close();
-                //
-                tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + ROWS_FILE));
-                try {
-                    tempFile.write(xmlSerializationUtils.serialize(template.getRows()).getBytes(ENCODING));
-                } catch (DaoException ignore){
-
-                }
-                tempFile.close();
-                //
-                tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + HEADERS_FILE));
-                try {
-                    tempFile.write(xmlSerializationUtils.serialize(template.getHeaders()).getBytes(ENCODING));
-                } catch (DaoException ignore){
-
-                }
-                tempFile.close();
-                paths.add(folderTemplateName);
-
-            } catch (IOException e) {
-                LOG.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
-            } catch (JAXBException e) {
-                throw new ServiceException("Ошибка экспорта. Шаблон " + template.getName());
-            }
-        }
-
         try {
+            List<FormTemplate> formTemplates = formTemplateService.listAll();
+            ArrayList<String> paths = new ArrayList<String>(formTemplates.size());
+            for (FormTemplate template : formTemplates){
+                String translatedName = Translator.transliterate(template.getType().getName());
+                String folderTemplateName =
+                       String.format(TEMPLATE_OF_FOLDER_NAME,
+                                template.getType().getTaxType().name().toLowerCase(),
+                                template.getType().getId(),
+                                translatedName.length() > MAX_NAME_OF_DIR
+                                        ? translatedName.substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
+                                        : translatedName.trim().replaceAll(REG_EXP, ""),
+                                SIMPLE_DATE_FORMAT_YEAR.get().format(template.getVersion())).trim();
+                try {
+                    File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
+                    folderTemplate.delete();
+                    if (!folderTemplate.mkdirs()){
+                        LOG.warn(String.format("Can't create temporary directory %s", folderTemplate.getAbsolutePath()));
+                        continue;
+                    }
+                    //
+                    FileOutputStream tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + VERSION_FILE));
+                    tempFile.write("1.0".getBytes());
+                    tempFile.close();
+                    //
+                    tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + CONTENT_FILE));
+                    FormTemplateContent ftc = new FormTemplateContent();
+                    ftc.fillFormTemplateContent(template);
+                    JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
+                    Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+                    jaxbMarshaller.marshal(ftc, tempFile);
+                    tempFile.close();
+                    //
+                    tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + SCRIPT_FILE));
+                    String ftScript = template.getScript();
+                    if (ftScript != null) {
+                        tempFile.write(ftScript.getBytes(ENCODING));
+                    }
+                    tempFile.close();
+                    //
+                    tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + ROWS_FILE));
+                    try {
+                        tempFile.write(xmlSerializationUtils.serialize(template.getRows()).getBytes(ENCODING));
+                    } catch (DaoException ignore){
+
+                    }
+                    tempFile.close();
+                    //
+                    tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + HEADERS_FILE));
+                    try {
+                        tempFile.write(xmlSerializationUtils.serialize(template.getHeaders()).getBytes(ENCODING));
+                    } catch (DaoException ignore){
+
+                    }
+                    tempFile.close();
+                    paths.add(folderTemplateName);
+
+                } catch (IOException e) {
+                    LOG.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
+                } catch (JAXBException e) {
+                    throw new ServiceException("Ошибка экспорта. Шаблон " + template.getName());
+                }
+            }
+
             String pathPattern = File.separator + "%s" + File.separator + "%s";
             for (String path : paths){
                 ZipArchiveEntry ze;
