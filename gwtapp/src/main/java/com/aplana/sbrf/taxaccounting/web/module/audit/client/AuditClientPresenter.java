@@ -305,7 +305,6 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     protected void onReveal() {
         super.onReveal();
         setInSlot(TYPE_AUDIT_FILTER_PRESENTER, auditFilterPresenter);
-        auditFilterPresenter.initFilterData();
         getView().startTimerReport(ReportType.CSV_AUDIT);
         getView().startTimerReport(ReportType.ARCHIVE_AUDIT);
     }

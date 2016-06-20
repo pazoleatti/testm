@@ -91,8 +91,9 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     public void init() {
         searchResults.setValue(false);
         searchCriteria.setText("");
-        driver.edit(new LogSystemAuditFilter());
-        auditFieldList.setValue(Arrays.asList(AuditFieldList.ALL.getId()));
+        LogSystemAuditFilter logSystemAuditFilter = new LogSystemAuditFilter();
+        logSystemAuditFilter.setAuditFieldList(Arrays.asList(AuditFieldList.ALL.getId()));
+        driver.edit(logSystemAuditFilter);
     }
 
     @Inject
