@@ -112,7 +112,7 @@
                         </g:HorizontalPanel>
                     </g:cell>
                     <g:cell horizontalAlignment="left" width="100%">
-                        <g:CheckBox ui:field="exactSearch" wordWrap="false" text="Искать по точному совпадению"/>
+                        <g:CheckBox ui:field="exactSearch" wordWrap="false" text="Искать по точному совпадению" visible="false" enabled="false"/>
                     </g:cell>
 
                     <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
