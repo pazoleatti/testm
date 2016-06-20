@@ -252,7 +252,7 @@ void logicCheck() {
 
         if (deliveryPhis != null && deliveryPhis) {
             def isHaveNotEmptyField = false
-            def msg1 = row.getCell('deliverySign').column.name
+            def msg1 = getColumnName(row, 'deliverySign')
             def checkField = ['countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2', 'locality2', 'deliveryCode']
             for (it in checkField) {
                 isHaveNotEmptyField = row.getCell(it).value != null && !row.getCell(it).value.toString().isEmpty()
@@ -300,7 +300,7 @@ void logicCheck() {
         }
 
         // Проверка доходов/расходов и стоимости
-        def msgPrice = row.getCell('price').column.name
+        def msgPrice = getColumnName(row, 'price')
         if (incomeSumCell.value != null && outcomeSumCell.value != null && row.price != null) {
             if (row.price.abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
                 logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна разнице графы «$msgIn» и «$msgOut» по модулю!")
@@ -314,12 +314,12 @@ void logicCheck() {
 
         // Проверка количества
         if (row.count != 1) {
-            def msg = row.getCell('count').column.name
+            def msg = getColumnName(row, 'count')
             logger.warn("Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
         }
 
         // Проверка внешнеторговой сделки
-        def msg14 = row.getCell('foreignDeal').column.name
+        def msg14 = getColumnName(row, 'foreignDeal')
 
         // "Да"
         def recYesId = getRecordId(38, 'CODE', '1', date, rowNum-2, msg14, false)
@@ -362,8 +362,8 @@ void logicCheck() {
         if (row.countryCodeNumeric != null) {
             def country = getRefBookValue(10, row.countryCodeNumeric).CODE.stringValue
             if (country != null) {
-                def regionName = row.getCell('regionCode').column.name
-                def countryName = row.getCell('countryCodeNumeric').column.name
+                def regionName = getColumnName(row, 'regionCode')
+                def countryName = getColumnName(row, 'countryCodeNumeric')
                 if (country == '643' && row.regionCode == null) {
                     logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
                 } else if (country != '643' && row.regionCode != null) {
@@ -376,8 +376,8 @@ void logicCheck() {
         if (row.countryCodeNumeric2 != null) {
             def country = getRefBookValue(10, row.countryCodeNumeric2).CODE.stringValue//refBookService.getStringValue(10, row.countryCodeNumeric2, 'CODE')
             if (country != null) {
-                def regionName = row.getCell('region2').column.name
-                def countryName = row.getCell('countryCodeNumeric2').column.name
+                def regionName = getColumnName(row, 'region2')
+                def countryName = getColumnName(row, 'countryCodeNumeric2')
                 if (country == '643' && row.region2 == null) {
                     logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
                 } else if (country != '643' && row.region2 != null) {
@@ -533,9 +533,9 @@ void calc() {
         }
 
         if (row.countryCodeNumeric == row.countryCodeNumeric2 || deliveryPhis) {
-            row.foreignDeal = getRecordId(38, 'CODE', '0', date, index-3,  row.getCell('foreignDeal').column.name, false)
+            row.foreignDeal = getRecordId(38, 'CODE', '0', date, index-3,  getColumnName(row, 'foreignDeal'), false)
         } else {
-            row.foreignDeal = getRecordId(38, 'CODE', '1', date, index-3, row.getCell('foreignDeal').column.name, false)
+            row.foreignDeal = getRecordId(38, 'CODE', '1', date, index-3, getColumnName(row, 'foreignDeal'), false)
         }
     }
 
@@ -885,12 +885,12 @@ def addData(def xml, int headRowCount) {
         newRow.rowNum = xmlIndexRow - headRowCount
 
         // графа 2.1
-        newRow.fullName = getRecordId(9, 'NAME', row.cell[xmlIndexCell].text(), date, xmlIndexRow, newRow.getCell('fullName').column.name, false)
+        newRow.fullName = getRecordId(9, 'NAME', row.cell[xmlIndexCell].text(), date, xmlIndexRow, getColumnName(newRow, 'fullName'), false)
         def map = newRow.fullName == null ? null : getRefBookValue(9, newRow.fullName)
         xmlIndexCell++
 
         // графа 2.2
-        newRow.interdependence = getRecordId(38, 'VALUE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, newRow.getCell('interdependence').column.name, false)
+        newRow.interdependence = getRecordId(38, 'VALUE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, getColumnName(newRow, 'interdependence'), false)
         xmlIndexCell++
 
         // графа 3
@@ -926,7 +926,7 @@ def addData(def xml, int headRowCount) {
         xmlIndexCell++
 
         // графа 6
-        newRow.docDate = getDate(row.cell[xmlIndexCell].text(), xmlIndexRow, newRow.getCell('docDate').column.name)
+        newRow.docDate = getDate(row.cell[xmlIndexCell].text(), xmlIndexRow, getColumnName(newRow, 'docDate'))
         xmlIndexCell++
 
         // графа 7
@@ -934,27 +934,27 @@ def addData(def xml, int headRowCount) {
         xmlIndexCell++
 
         // графа 8
-        newRow.dealDate = getDate(row.cell[xmlIndexCell].text(), xmlIndexRow, newRow.getCell('dealDate').column.name)
+        newRow.dealDate = getDate(row.cell[xmlIndexCell].text(), xmlIndexRow, getColumnName(newRow, 'dealDate'))
         xmlIndexCell++
 
         // графа 9
-        newRow.dealFocus = getRecordId(20, 'DIRECTION', row.cell[xmlIndexCell].text(), date, xmlIndexRow, newRow.getCell('dealFocus').column.name, false)
+        newRow.dealFocus = getRecordId(20, 'DIRECTION', row.cell[xmlIndexCell].text(), date, xmlIndexRow, getColumnName(newRow, 'dealFocus'), false)
         xmlIndexCell++
 
         // графа 10
-        newRow.deliverySign = getRecordId(18, 'SIGN', row.cell[xmlIndexCell].text(), date, xmlIndexRow, newRow.getCell('deliverySign').column.name, false)
+        newRow.deliverySign = getRecordId(18, 'SIGN', row.cell[xmlIndexCell].text(), date, xmlIndexRow, getColumnName(newRow, 'deliverySign'), false)
         xmlIndexCell++
 
         // графа 11
-        newRow.metalName = getRecordId(17, 'INNER_CODE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, newRow.getCell('metalName').column.name, false)
+        newRow.metalName = getRecordId(17, 'INNER_CODE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, getColumnName(newRow, 'metalName'), false)
         xmlIndexCell++
 
         // графа 12
-        newRow.foreignDeal = getRecordId(38, 'VALUE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, newRow.getCell('foreignDeal').column.name, false)
+        newRow.foreignDeal = getRecordId(38, 'VALUE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, getColumnName(newRow, 'foreignDeal'), false)
         xmlIndexCell++
 
         // графа 13.1
-        newRow.countryCodeNumeric = getRecordId(10, 'CODE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, newRow.getCell('countryCodeNumeric').column.name, false)
+        newRow.countryCodeNumeric = getRecordId(10, 'CODE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, getColumnName(newRow, 'countryCodeNumeric'), false)
         xmlIndexCell++
 
         // графа 13.2
@@ -962,7 +962,7 @@ def addData(def xml, int headRowCount) {
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.regionCode = getRecordId(4, 'CODE', code, date, xmlIndexRow, newRow.getCell('regionCode').column.name, false)
+        newRow.regionCode = getRecordId(4, 'CODE', code, date, xmlIndexRow, getColumnName(newRow, 'regionCode'), false)
         xmlIndexCell++
 
         // графа 13.3
@@ -974,7 +974,7 @@ def addData(def xml, int headRowCount) {
         xmlIndexCell++
 
         // графа 14.1
-        newRow.countryCodeNumeric2 = getRecordId(10, 'CODE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, newRow.getCell('countryCodeNumeric2').column.name, false)
+        newRow.countryCodeNumeric2 = getRecordId(10, 'CODE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, getColumnName(newRow, 'countryCodeNumeric2'), false)
         xmlIndexCell++
 
         // графа 14.2
@@ -982,7 +982,7 @@ def addData(def xml, int headRowCount) {
         if (code.length() == 1) {    //для кодов 1, 2, 3...9
             code = "0".concat(code)
         }
-        newRow.region2 = getRecordId(4, 'CODE', code, date, xmlIndexRow, newRow.getCell('region2').column.name, false)
+        newRow.region2 = getRecordId(4, 'CODE', code, date, xmlIndexRow, getColumnName(newRow, 'region2'), false)
         xmlIndexCell++
 
         // графа 14.3
@@ -994,18 +994,18 @@ def addData(def xml, int headRowCount) {
         xmlIndexCell++
 
         // графа 15
-        newRow.deliveryCode = getRecordId(63, 'STRCODE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, newRow.getCell('deliveryCode').column.name, false)
+        newRow.deliveryCode = getRecordId(63, 'STRCODE', row.cell[xmlIndexCell].text(), date, xmlIndexRow, getColumnName(newRow, 'deliveryCode'), false)
         xmlIndexCell++
 
         // графа 16
         xmlIndexCell++
 
         // графа 17
-        newRow.incomeSum = getNumber(row.cell[xmlIndexCell].text(), xmlIndexRow, newRow.getCell('incomeSum').column.name)
+        newRow.incomeSum = getNumber(row.cell[xmlIndexCell].text(), xmlIndexRow, getColumnName(newRow, 'incomeSum'))
         xmlIndexCell++
 
         // графа 18
-        newRow.outcomeSum = getNumber(row.cell[xmlIndexCell].text(), xmlIndexRow, newRow.getCell('outcomeSum').column.name)
+        newRow.outcomeSum = getNumber(row.cell[xmlIndexCell].text(), xmlIndexRow, getColumnName(newRow, 'outcomeSum'))
         xmlIndexCell++
 
         // графа 19
@@ -1015,7 +1015,7 @@ def addData(def xml, int headRowCount) {
         xmlIndexCell++
 
         // графа 21
-        newRow.dealDoneDate = getDate(row.cell[xmlIndexCell].text(), xmlIndexRow, newRow.getCell('dealDoneDate').column.name)
+        newRow.dealDoneDate = getDate(row.cell[xmlIndexCell].text(), xmlIndexRow, getColumnName(newRow, 'dealDoneDate'))
         rows.add(newRow)
     }
     dataRowHelper.save(rows)

@@ -311,8 +311,8 @@ void logicCheck() {
         // 4. Проверка, что не отображаются данные одновременно по бухгалтерскому и по налоговому учету
         if (row.taxAccountingRuble && row.ruble) {
             rowWarning(logger, row, errorMsg + "Одновременно указаны данные по налоговому  «"  +
-                    row.getCell('taxAccountingRuble').column.name + "» и бухгалтерскому «" +
-                    row.getCell('ruble').column.name+"» учету.")
+                    getColumnName(row, 'taxAccountingRuble') + "» и бухгалтерскому «" +
+                    getColumnName(row, 'ruble')+"» учету.")
         }
 
         // 5. Проверка даты совершения операции и границ отчётного периода

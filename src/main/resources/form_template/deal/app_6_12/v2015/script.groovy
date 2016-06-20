@@ -151,14 +151,14 @@ void logicCheck() {
         // 2. Проверка заполнения граф сумма дохода, расхода
         // 2.1
         if (row.incomeSum == null && row.outcomeSum == null) {
-            def msg1 = row.getCell('outcomeSum').column.name
-            def msg2 = row.getCell('incomeSum').column.name
+            def msg1 = getColumnName(row, 'outcomeSum')
+            def msg2 = getColumnName(row, 'incomeSum')
             logger.error("Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
         }
         // 2.2
         else if (row.incomeSum != null && row.outcomeSum != null) {
-            def msg1 = row.getCell('outcomeSum').column.name
-            def msg2 = row.getCell('incomeSum').column.name
+            def msg1 = getColumnName(row, 'outcomeSum')
+            def msg2 = getColumnName(row, 'incomeSum')
             logger.error("Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
         }
 
@@ -166,7 +166,7 @@ void logicCheck() {
         else {
             def sum = (row.incomeSum != null) ? row.incomeSum : row.outcomeSum
             if (sum < 0) {
-                def msg = (row.incomeSum != null) ? row.getCell('incomeSum').column.name : row.getCell('outcomeSum').column.name
+                def msg = (row.incomeSum != null) ? getColumnName(row, 'incomeSum') : getColumnName(row, 'outcomeSum')
                 logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
             }
         }
@@ -176,7 +176,7 @@ void logicCheck() {
         if (row.okeiCode) {
             okei = getRefBookValue(12, row.okeiCode)?.CODE?.stringValue
             if (okei != '796' && okei != '744') {
-                def msg = row.getCell('okeiCode').column.name
+                def msg = getColumnName(row, 'okeiCode')
                 logger.error("Строка $rowNum: Графа «$msg» может содержать только одно из значений: 796 (штука), 744 (проценты)!")
             }
         }
@@ -185,22 +185,22 @@ void logicCheck() {
         if (row.count != null) {
             // 5.1
             if (okei == '796' && row.count <= 0) {
-                def msg1 = row.getCell('count').column.name
-                def msg2 = row.getCell('okeiCode').column.name
+                def msg1 = getColumnName(row, 'count')
+                def msg2 = getColumnName(row, 'okeiCode')
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть больше «0.00», если значение графы «$msg2» равно «796» (штука)!")
             }
             // 5.2
             else if (okei == '744' && row.count < 0) {
-                def msg1 = row.getCell('count').column.name
-                def msg2 = row.getCell('okeiCode').column.name
+                def msg1 = getColumnName(row, 'count')
+                def msg2 = getColumnName(row, 'okeiCode')
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть больше или равно «0.00», если значение графы «$msg2» равно «744» (проценты)!")
             }
         }
 
         // 6. Проверка количества для ед. измерения «штуки»
         if (row.count && okei == '796' && row.count.doubleValue() % 1 != 0) {
-            def msg1 = row.getCell('count').column.name
-            def msg2 = row.getCell('okeiCode').column.name
+            def msg1 = getColumnName(row, 'count')
+            def msg2 = getColumnName(row, 'okeiCode')
             logger.error("Строка $rowNum: Дробная часть числа значения графы «$msg1» должна быть равна «0.00», " +
                     "если значение графы «$msg2» равно «796» (штука)!")
         }
@@ -209,16 +209,16 @@ void logicCheck() {
         if (row.price != null && okei == '796' && row.count > 0 && row.count.doubleValue() % 1 == 0) {
             // 7.1
             if (row.incomeSum && !row.outcomeSum && row.price != round((BigDecimal) (row.incomeSum / row.count), 2)) {
-                def msg1 = row.getCell('price').column.name
-                def msg2 = row.getCell('incomeSum').column.name
-                def msg3 = row.getCell('count').column.name
+                def msg1 = getColumnName(row, 'price')
+                def msg2 = getColumnName(row, 'incomeSum')
+                def msg3 = getColumnName(row, 'count')
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно отношению значений граф «$msg2» и «$msg3»!")
             }
             // 7.2
             else if (!row.incomeSum && row.outcomeSum && row.price != round((BigDecimal) (row.outcomeSum / row.count), 2)) {
-                def msg1 = row.getCell('price').column.name
-                def msg2 = row.getCell('outcomeSum').column.name
-                def msg3 = row.getCell('count').column.name
+                def msg1 = getColumnName(row, 'price')
+                def msg2 = getColumnName(row, 'outcomeSum')
+                def msg3 = getColumnName(row, 'count')
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно отношению значений граф «$msg2» и «$msg3»!")
             }
         }
@@ -226,14 +226,14 @@ void logicCheck() {
         if (row.price != null && okei == '744' && row.count >= 0) {
             // 8.1
             if (row.incomeSum && !row.outcomeSum && row.price != row.incomeSum) {
-                def msg1 = row.getCell('price').column.name
-                def msg2 = row.getCell('incomeSum').column.name
+                def msg1 = getColumnName(row, 'price')
+                def msg2 = getColumnName(row, 'incomeSum')
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
             }
             // 8.2
             else if (!row.incomeSum && row.outcomeSum && row.price != row.outcomeSum) {
-                def msg1 = row.getCell('price').column.name
-                def msg2 = row.getCell('outcomeSum').column.name
+                def msg1 = getColumnName(row, 'price')
+                def msg2 = getColumnName(row, 'outcomeSum')
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
             }
         }
@@ -242,14 +242,14 @@ void logicCheck() {
         if (row.cost != null) {
             // 9.1
             if (row.incomeSum && !row.outcomeSum && row.cost != row.incomeSum) {
-                def msg1 = row.getCell('cost').column.name
-                def msg2 = row.getCell('incomeSum').column.name
+                def msg1 = getColumnName(row, 'cost')
+                def msg2 = getColumnName(row, 'incomeSum')
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
             }
             // 9.2
             else if (!row.incomeSum && row.outcomeSum && row.cost != row.outcomeSum) {
-                def msg1 = row.getCell('cost').column.name
-                def msg2 = row.getCell('outcomeSum').column.name
+                def msg1 = getColumnName(row, 'cost')
+                def msg2 = getColumnName(row, 'outcomeSum')
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
             }
         }

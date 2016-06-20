@@ -144,12 +144,12 @@ void logicCheck() {
         def contractDate = row.contractDate
 
         //Наименования колонок
-        def contractDateName = row.getCell('contractDate').column.name
-        def transactionDateName = row.getCell('transactionDate').column.name
-        def priceName = row.getCell('price').column.name
-        def bankSumName = row.getCell('bankSum').column.name
-        def countName = row.getCell('count').column.name
-        def costName = row.getCell('cost').column.name
+        def contractDateName = getColumnName(row, 'contractDate')
+        def transactionDateName = getColumnName(row, 'transactionDate')
+        def priceName = getColumnName(row, 'price')
+        def bankSumName = getColumnName(row, 'bankSum')
+        def countName = getColumnName(row, 'count')
+        def costName = getColumnName(row, 'cost')
 
         //Проверка стоимости
         if (price == null || count != null && cost != price * count) {
@@ -193,8 +193,8 @@ void logicCheck() {
         if (row.country != null) {
             def country = refBookService.getStringValue(10, row.country, 'CODE')
             if (country != null) {
-                def regionName = row.getCell('region').column.name
-                def countryName = row.getCell('country').column.name
+                def regionName = getColumnName(row, 'region')
+                def countryName = getColumnName(row, 'country')
                 if (country == '643' && row.region == null) {
                     logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
                 } else if (country != '643' && row.region != null) {
@@ -205,8 +205,8 @@ void logicCheck() {
 
         // Проверка заполненности одного из атрибутов
         if (row.city != null && !row.city.toString().isEmpty() && row.settlement != null && !row.settlement.toString().isEmpty()) {
-            def cityName = row.getCell('city').column.name
-            def settleName = row.getCell('settlement').column.name
+            def cityName = getColumnName(row, 'city')
+            def settleName = getColumnName(row, 'settlement')
             logger.warn("Строка $rowNum: Если заполнена графа «$settleName», то графа «$cityName» не должна быть заполнена!")
         }
 

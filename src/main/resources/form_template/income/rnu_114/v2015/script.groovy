@@ -185,36 +185,36 @@ void logicCheck() {
 
         // Проверка положительности курса
         if (row.courseCB != null && row.courseCB <= 0) {
-            def msg1 = row.getCell('courseCB').column.name
+            def msg1 = getColumnName(row, 'courseCB')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть больше «0»!")
         }
 
         // Проверка количества календарных дней
         if (row.period != null && row.period <= 0) {
-            def msg1 = row.getCell('period').column.name
+            def msg1 = getColumnName(row, 'period')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть больше «0»!")
         }
 
         // Проверка базы года
         if (row.base != null && !(row.base.intValue() in [360, 365, 366])) {
-            def msg1 = row.getCell('base').column.name
+            def msg1 = getColumnName(row, 'base')
             logger.error("Строка $rowNum: Графа «$msg1» должна принимать значение из следующего списка: «360», «365», «366»!")
         }
 
         // Проверка соотношения процентных ставок
         if (row.rate1 != null && row.rate2 != null && row.rate1 > row.rate2) {
-            def msg1 = row.getCell('rate1').column.name
-            def msg2 = row.getCell('rate2').column.name
+            def msg1 = getColumnName(row, 'rate1')
+            def msg2 = getColumnName(row, 'rate2')
             logger.error("Строка $rowNum: Значение графы «$msg2» должно быть больше или равно значению графы «$msg1»!")
         }
 
         def values = []
         // Проверка расчётных граф
         if (row.deviation != calc15(row)) {
-            values.add(row.getCell('deviation').column.name)
+            values.add(getColumnName(row, 'deviation'))
         }
         if (row.sum1 != calc16(row)) {
-            values.add(row.getCell('sum1').column.name)
+            values.add(getColumnName(row, 'sum1'))
         }
         if (!values.empty) {
             def str = values.join("», «")

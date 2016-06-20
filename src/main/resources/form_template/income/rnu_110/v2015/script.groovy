@@ -173,25 +173,25 @@ void logicCheck() {
 
         // Проверка положительного значения арендной ставки
         if (row.rent != null && row.rent < 0) {
-            def msg = row.getCell('rent').column.name
+            def msg = getColumnName(row, 'rent')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // Проверка положительного значения арендной ставки
         if (row.taxRent != null && row.taxRent < 0) {
-            def msg = row.getCell('taxRent').column.name
+            def msg = getColumnName(row, 'taxRent')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // Проверка положительной суммы арендной платы
         if (row.sum1 != null && row.sum1 < 0) {
-            def msg = row.getCell('sum1').column.name
+            def msg = getColumnName(row, 'sum1')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // Проверка положительной суммы арендной платы
         if (row.sum2 != null && row.sum2 < 0) {
-            def msg = row.getCell('sum2').column.name
+            def msg = getColumnName(row, 'sum2')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 

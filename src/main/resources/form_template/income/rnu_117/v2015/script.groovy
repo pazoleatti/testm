@@ -165,8 +165,8 @@ void logicCheck() {
 
         // 4. Проверка значения граф 9, 11
         if(row.sum1 != null && row.sum2 != null && row.sum1 < row.sum2){
-            def col9Name = row.getCell('sum1').column.name
-            def col11Name = row.getCell('sum2').column.name
+            def col9Name = getColumnName(row, 'sum1')
+            def col11Name = getColumnName(row, 'sum2')
             rowWarning(logger, row, "Строка $rowNum: Значение графы «$col9Name» должно быть не меньше значения графы «$col11Name»!")
         }
 

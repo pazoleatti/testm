@@ -148,15 +148,15 @@ void logicCheck() {
 
         // Проверка стоимости
         if (row.totalCost != row.price) {
-            def msg1 = row.getCell('totalCost').column.name
-            def msg2 = row.getCell('price').column.name
+            def msg1 = getColumnName(row, 'totalCost')
+            def msg2 = getColumnName(row, 'price')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
         // Корректность даты сделки
         if (row.transactionDate < row.contractDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('contractDate').column.name
+            def msg1 = getColumnName(row, 'transactionDate')
+            def msg2 = getColumnName(row, 'contractDate')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 

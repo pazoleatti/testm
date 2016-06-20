@@ -148,7 +148,7 @@ void logicCheck() {
 
         // Проверка количества
         if (row.count != 1) {
-            def msg = row.getCell('count').column.name
+            def msg = getColumnName(row, 'count')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg» может быть только «1»!")
         }
 

@@ -191,7 +191,7 @@ void logicCheck() {
 
         // Проверка вида сделки
         if (row.dealType && (row.dealType != dealType1 && row.dealType != dealType2 && row.dealType != dealType3)) {
-            def msg = row.getCell('dealType').column.name
+            def msg = getColumnName(row, 'dealType')
             logger.error("Строка $rowNum: Графа «$msg» может содержать только одно из значений: «Кассовая сделка», «Срочная сделка», «Премия по опциону»!")
         }
 
@@ -201,8 +201,8 @@ void logicCheck() {
         // Проверка корректности даты заключения сделки
         if (row.dealDate && row.dealDoneDate && (row.dealDoneDate.before(getReportPeriodStartDate()) ||
                 row.dealDoneDate.after(getReportPeriodEndDate()) || row.dealDoneDate < row.dealDate)) {
-            def msg4 = row.getCell('dealDate').column.name
-            def msg5 = row.getCell('dealDoneDate').column.name
+            def msg4 = getColumnName(row, 'dealDate')
+            def msg5 = getColumnName(row, 'dealDoneDate')
             def dateFrom = getReportPeriodStartDate()?.format('dd.MM.yyyy')
             def dateTo = getReportPeriodEndDate()?.format('dd.MM.yyyy')
             logger.error("Строка $rowNum: Дата по графе «$msg5» должна принимать значение из диапазона $dateFrom - $dateTo и быть больше либо равна дате по графе «$msg4»!")
@@ -210,7 +210,7 @@ void logicCheck() {
 
         // Проверка типа сделки
         if (row.dealFocus && (row.dealFocus != direction1 && row.dealFocus != direction2)) {
-            def msg = row.getCell('dealFocus').column.name
+            def msg = getColumnName(row, 'dealFocus')
             logger.error("Строка $rowNum: Графа «$msg» может содержать только одно из значений: «покупка», продажа»!")
         }
 
@@ -225,15 +225,15 @@ void logicCheck() {
         // Проверка корректности суммы требований
         if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) &&
                 row.reqSum != ScriptUtils.round(row.reqVolume * row.reqCourse, row.getCell('reqSum').getColumn().precision).abs()) {
-            def msg1 = row.getCell('reqSum').column.name
-            def msg2 = row.getCell('reqVolume').column.name
-            def msg3 = row.getCell('reqCourse').column.name
+            def msg1 = getColumnName(row, 'reqSum')
+            def msg2 = getColumnName(row, 'reqVolume')
+            def msg3 = getColumnName(row, 'reqCourse')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно равняться модулю произведения «$msg2» и «$msg3»!")
         }
 
         // Проверка суммы обязательств
         if (row.guarSum != null && row.guarSum > 0) {
-            def msg = row.getCell('guarSum').column.name
+            def msg = getColumnName(row, 'guarSum')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть меньше или равно «0»!")
         }
 
@@ -241,15 +241,15 @@ void logicCheck() {
         if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) &&
                 row.guarSum != -1 * ScriptUtils.round(row.guarVolume * row.guarCourse, row.getCell('guarSum').getColumn().precision).abs()) {
             flag = false
-            def msg1 = row.getCell('guarSum').column.name
-            def msg2 = row.getCell('guarVolume').column.name
-            def msg3 = row.getCell('guarCourse').column.name
+            def msg1 = getColumnName(row, 'guarSum')
+            def msg2 = getColumnName(row, 'guarVolume')
+            def msg3 = getColumnName(row, 'guarCourse')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно равняться модулю произведения граф «$msg2» и «$msg3» со знаком «-»!")
         }
 
         // Проверка рыночной цены
         if (row.marketPrice != null && row.marketPrice <= 0) {
-            def msg = row.getCell('marketPrice').column.name
+            def msg = getColumnName(row, 'marketPrice')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 

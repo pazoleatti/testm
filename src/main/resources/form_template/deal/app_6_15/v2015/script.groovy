@@ -199,8 +199,8 @@ void logicCheck() {
 
         // Проверка корректности даты заключения сделки
         if (row.docDate && row.dealDate && (row.docDate > row.dealDate || row.dealDate > getReportPeriodEndDate())) {
-            def msg1 = row.getCell('dealDate').column.name
-            def msg2 = row.getCell('docDate').column.name
+            def msg1 = getColumnName(row, 'dealDate')
+            def msg2 = getColumnName(row, 'docDate')
             def msg3 = getReportPeriodEndDate().format('dd.MM.yyyy')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2» и не больше $msg3!")
         }
@@ -212,14 +212,14 @@ void logicCheck() {
 
         // Проверка признака физической поставки
         if (row.signPhis && !isOMS && !isPhysics) {
-            def msg = row.getCell('signPhis').column.name
+            def msg = getColumnName(row, 'signPhis')
             logger.error("Строка $rowNum: Графа «$msg» может содержать только одно из значений: ОМС, Физическая поставка!")
         }
 
         // Проверка признака внешнеторговой сделки
         if (row.signTransaction && row.countryCode2 && row.countryCode3) {
             if (row.countryCode2 != row.countryCode3 && row.signTransaction != recYesId || row.countryCode2 == row.countryCode3 && row.signTransaction != recNoId) {
-                def msg = row.getCell('signTransaction').column.name
+                def msg = getColumnName(row, 'signTransaction')
                 logger.error("Строка $rowNum: Значение графы «$msg» не соответствует сведениям о стране отправки и стране доставки драгоценных металлов!")
             }
         }
@@ -230,7 +230,7 @@ void logicCheck() {
             def checkField = ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode']
             for (it in checkField) {
                 if (row.getCell(it).value) {
-                    def msg = row.getCell('signPhis').column.name
+                    def msg = getColumnName(row, 'signPhis')
                     logger.error("Строка $rowNum: Графы 12.1-12.4, 13.1-13.4, 14 не должны быть заполнены, т.к. в графе «$msg» указано значение «ОМС»!")
                     break
                 }
@@ -238,9 +238,9 @@ void logicCheck() {
         } else if (row.signPhis && isPhysics) {
             // i. Графы 16, 20 должны быть заполнены
             if (row.countryCode2 == null || row.countryCode3 == null) {
-                def msg1 = row.getCell('signPhis').column.name
-                def msg2 = row.getCell('countryCode2').column.name
-                def msg3 = row.getCell('countryCode3').column.name
+                def msg1 = getColumnName(row, 'signPhis')
+                def msg2 = getColumnName(row, 'countryCode2')
+                def msg3 = getColumnName(row, 'countryCode3')
                 logger.error("Строка $rowNum: Графы «$msg2», «$msg3» должны быть заполнены, т.к. в графе «$msg1» указано значение «Физическая поставка»!")
             }
 
@@ -248,7 +248,7 @@ void logicCheck() {
             // iii. Если графа 16 заполнена элементом с кодом, отличным от 643, то графа 17 должна быть не заполнена
             def country = getRefBookValue(10, row.countryCode2)?.CODE?.stringValue
             if (country != null) {
-                def regionName = row.getCell('region1').column.name
+                def regionName = getColumnName(row, 'region1')
                 if (country == '643' && row.region1 == null) {
                     logger.error("Строка $rowNum: Графа «$regionName» должна быть заполнена, т.к. указанная страна отправки Россия!")
                 } else if (country != '643' && row.region1 != null) {
@@ -260,7 +260,7 @@ void logicCheck() {
             // v. Если графа 20 заполнена элементом с кодом, отличным от 643, то графа 21 должна быть не заполнена
             country = getRefBookValue(10, row.countryCode3)?.CODE?.stringValue
             if (country != null) {
-                def regionName = row.getCell('region2').column.name
+                def regionName = getColumnName(row, 'region2')
                 if (country == '643' && row.region2 == null) {
                     logger.error("Строка $rowNum: Графа «$regionName» должна быть заполнена, т.к. указанная страна доставки Россия!")
                 } else if (country != '643' && row.region2 != null) {
@@ -270,22 +270,22 @@ void logicCheck() {
 
             // vi. Должна быть заполнена графа 18 или 19
             if (row.city1 == null && row.settlement1 == null) {
-                def msg1 = row.getCell('city1').column.name
-                def msg2 = row.getCell('settlement1').column.name
+                def msg1 = getColumnName(row, 'city1')
+                def msg2 = getColumnName(row, 'settlement1')
                 logger.error("Строка $rowNum: Должна быть заполнена одна из граф «$msg1» или «$msg2»!")
             }
 
             // vii. Должна быть заполнена графа 22 или 23
             if (row.city2 == null && row.settlement2 == null) {
-                msg1 = row.getCell('city2').column.name
-                msg2 = row.getCell('settlement2').column.name
+                msg1 = getColumnName(row, 'city2')
+                msg2 = getColumnName(row, 'settlement2')
                 logger.error("Строка $rowNum: Должна быть заполнена одна из граф «$msg1» или «$msg2»!")
             }
         }
 
         // Проверка количества
         if (row.count != null && row.count != 1) {
-            msg = row.getCell('count').column.name
+            msg = getColumnName(row, 'count')
             logger.error("Строка $rowNum: Графа «$msg» должна быть заполнена значением «1»!")
         }
 

@@ -159,7 +159,7 @@ void logicCheck() {
 
         // 3. Проверка значения базы для расчёта процентного дохода
         if (row.base != null && (row.base <= 0 || row.base >= 367)) {
-            msg = row.getCell('base').column.name
+            msg = getColumnName(row, 'base')
             rowError(logger, row, "Строка $rowNum: Графа «$msg» должна принимать значение из диапазона: 1 - 366!")
         }
 

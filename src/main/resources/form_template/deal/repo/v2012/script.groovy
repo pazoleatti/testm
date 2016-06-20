@@ -148,34 +148,34 @@ void logicCheck() {
 
         // Заполнение граф 13 и 14
         if (percentIncomeSum == null && percentConsumptionSum == null) {
-            def msg1 = row.getCell('percentIncomeSum').column.name
-            def msg2 = row.getCell('percentConsumptionSum').column.name
+            def msg1 = getColumnName(row, 'percentIncomeSum')
+            def msg2 = getColumnName(row, 'percentConsumptionSum')
             logger.warn("Строка $rowNum: Должна быть заполнена графа «$msg1» или графа «$msg2»!")
         }
         if (percentIncomeSum != null && percentConsumptionSum != null) {
-            def msg1 = row.getCell('percentIncomeSum').column.name
-            def msg2 = row.getCell('percentConsumptionSum').column.name
+            def msg1 = getColumnName(row, 'percentIncomeSum')
+            def msg2 = getColumnName(row, 'percentConsumptionSum')
             logger.warn("Строка $rowNum: Графа «$msg1» и графа «$msg2» не могут быть заполнены одновременно!")
         }
 
         // Корректность даты договора
         def dt = contractDate
         if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = row.getCell('contractDate').column.name
+            def msg = getColumnName(row, 'contractDate')
             logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
 
         // Корректность даты (заключения) сделки
         if (transactionDeliveryDate < contractDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('contractDate').column.name
+            def msg1 = getColumnName(row, 'transactionDate')
+            def msg2 = getColumnName(row, 'contractDate')
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         // Корректность даты исполнения 1–ой части сделки
         def dt1 = row.date1
         if (dt1 != null && (dt1 < dFrom || dt1 > dTo)) {
-            def msg = row.getCell('date1').column.name
+            def msg = getColumnName(row, 'date1')
 
             if (dt1 > dTo) {
                 logger.warn("Строка $rowNum: «$msg» не может быть больше даты окончания отчётного периода!")
@@ -188,8 +188,8 @@ void logicCheck() {
 
         // Корректность даты совершения сделки
         if (transactionDate< transactionDeliveryDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('transactionDeliveryDate').column.name
+            def msg1 = getColumnName(row, 'transactionDate')
+            def msg2 = getColumnName(row, 'transactionDeliveryDate')
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 

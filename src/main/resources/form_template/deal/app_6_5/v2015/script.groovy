@@ -157,7 +157,7 @@ void logicCheck() {
 
         // 2. Проверка суммы расходов
         if (row.sum != null && row.sum < 0) {
-            def msg = row.getCell('sum').column.name
+            def msg = getColumnName(row, 'sum')
             logger.warn("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
@@ -166,49 +166,49 @@ void logicCheck() {
 
         // Проверка заполнения кода региона
         if (row.country == country643 && !row.region) {
-            def msg = row.getCell('region').column.name
+            def msg = getColumnName(row, 'region')
             logger.error("Строка $rowNum: Графа «$msg» должна быть заполнена, т.к. указанная страна местонахождения объекта недвижимости Россия!")
         }
         if (row.country && row.country != country643 && row.region) {
-            def msg = row.getCell('region').column.name
+            def msg = getColumnName(row, 'region')
             logger.error("Строка $rowNum: Графа «$msg» не должна быть заполнена, т.к. указанная страна местонахождения объекта недвижимости не Россия!")
         }
 
         // Проверка заполнения населенного пункта
         if (!row.city && !row.settlement) {
-            def msg1 = row.getCell('city').column.name
-            def msg2 = row.getCell('settlement').column.name
+            def msg1 = getColumnName(row, 'city')
+            def msg2 = getColumnName(row, 'settlement')
             logger.error("Строка $rowNum: Должна быть заполнена графа «$msg1» или «$msg2»!")
         }
 
         // Проверка количества
         if (row.count != null && row.count <= 0) {
-            def countName = row.getCell('count').column.name
+            def countName = getColumnName(row, 'count')
             logger.error("Строка $rowNum: Значение графы «$countName» должно быть больше «0»!")
         }
 
         // Проверка цены с учетом количества
         if (row.sum && row.count > 0 && row.price != round((BigDecimal) (row.sum / row.count), 2)) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('sum').column.name
-            def msg3 = row.getCell('count').column.name
+            def msg1 = getColumnName(row, 'price')
+            def msg2 = getColumnName(row, 'sum')
+            def msg3 = getColumnName(row, 'count')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно отношению графы «$msg2» к графе «$msg3»," +
                     " если графа «$msg3» заполнена (значением > 0)!")
         }
 
         // Проверка цены без учета количества
         if (row.sum != null && row.count == null && row.price != row.sum) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('sum').column.name
-            def msg3 = row.getCell('count').column.name
+            def msg1 = getColumnName(row, 'price')
+            def msg2 = getColumnName(row, 'sum')
+            def msg3 = getColumnName(row, 'count')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»," +
                     " если графа «$msg3» не заполнена!")
         }
 
         // Проверка стоимости
         if (row.sum != null && row.cost != row.sum) {
-            def msg1 = row.getCell('cost').column.name
-            def msg2 = row.getCell('sum').column.name
+            def msg1 = getColumnName(row, 'cost')
+            def msg2 = getColumnName(row, 'sum')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 

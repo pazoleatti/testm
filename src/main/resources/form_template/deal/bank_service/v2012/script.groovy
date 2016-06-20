@@ -135,28 +135,28 @@ void logicCheck() {
         // Корректность даты договора
         def dt = contractDate
         if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = row.getCell('contractDate').column.name
+            def msg = getColumnName(row, 'contractDate')
             logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
 
         // Проверка доходности
         if (bankIncomeSum != price) {
-            def msg1 = row.getCell('bankIncomeSum').column.name
-            def msg2 = row.getCell('price').column.name
+            def msg1 = getColumnName(row, 'bankIncomeSum')
+            def msg2 = getColumnName(row, 'price')
             logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
 
         // Проверка доходности
         if (bankIncomeSum != cost) {
-            def msg1 = row.getCell('bankIncomeSum').column.name
-            def msg2 = row.getCell('cost').column.name
+            def msg1 = getColumnName(row, 'bankIncomeSum')
+            def msg2 = getColumnName(row, 'cost')
             logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
 
         // Корректность даты сделки
         if (transactionDate < contractDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('contractDate').column.name
+            def msg1 = getColumnName(row, 'transactionDate')
+            def msg2 = getColumnName(row, 'contractDate')
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 

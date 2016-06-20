@@ -171,8 +171,8 @@ void logicCheck() {
         // 2. Проверка даты совершения сделки
         if (row.reasonDate && row.transDoneDate && (row.transDoneDate.before(getReportPeriodStartDate()) ||
                 row.transDoneDate.after(getReportPeriodEndDate()) || row.transDoneDate < row.reasonDate)) {
-            def msg7 = row.getCell('reasonDate').column.name
-            def msg4 = row.getCell('transDoneDate').column.name
+            def msg7 = getColumnName(row, 'reasonDate')
+            def msg4 = getColumnName(row, 'transDoneDate')
             def dateFrom = getReportPeriodStartDate()?.format('dd.MM.yyyy')
             def dateTo = getReportPeriodEndDate()?.format('dd.MM.yyyy')
             logger.error("Строка $rowNum: Дата по графе «$msg4» должна принимать значение из диапазона $dateFrom - $dateTo и быть больше либо равна дате по графе «$msg7»!")
@@ -183,14 +183,14 @@ void logicCheck() {
 
         // 4. Проверка положительной суммы дохода
         if (row.sum2 != null && row.sum2 < 0) {
-            def msg = row.getCell('sum2').column.name
+            def msg = getColumnName(row, 'sum2')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // 5. Проверка положительной суммы доначисления доходов
         if (row.sum2 != null && row.sum3 != null && row.sum3 < row.sum2) {
-            def msg = row.getCell('sum2').column.name
-            def msg1 = row.getCell('sum3').column.name
+            def msg = getColumnName(row, 'sum2')
+            def msg1 = getColumnName(row, 'sum3')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg»!")
         }
 

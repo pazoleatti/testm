@@ -167,7 +167,7 @@ void logicCheck() {
         }
 
         // Проверка вычисления цены
-        def msgPrice = row.getCell('price').column.name
+        def msgPrice = getColumnName(row, 'price')
         if (row.incomeSum && !row.outcomeSum && row.price != row.incomeSum) {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
         } else if (row.outcomeSum && !row.incomeSum && row.price != row.outcomeSum) {
@@ -178,8 +178,8 @@ void logicCheck() {
 
         // Проверка корректности стоимости сделки
         if (row.total != row.price) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('total').column.name
+            def msg1 = getColumnName(row, 'price')
+            def msg2 = getColumnName(row, 'total')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 

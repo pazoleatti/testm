@@ -215,7 +215,7 @@ void logicCheck() {
 
         // 3. Проверка суммы гарантии/ аккредитива
         if (row.sum1 != null && row.sum1 < 0) {
-            def msg = row.getCell('sum1').column.name
+            def msg = getColumnName(row, 'sum1')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
@@ -224,7 +224,7 @@ void logicCheck() {
         ['transDoneDate', 'taxDoneDate'].each { alias ->
             if (row.docDate && row[alias] && (row[alias].before(getReportPeriodStartDate()) ||
                     row[alias].after(getReportPeriodEndDate()) || row[alias] < row.docDate)) {
-                def msg7 = row.getCell('docDate').column.name
+                def msg7 = getColumnName(row, 'docDate')
                 def msg = row.getCell(alias).column.name
                 def dateFrom = getReportPeriodStartDate()?.format('dd.MM.yyyy')
                 def dateTo = getReportPeriodEndDate()?.format('dd.MM.yyyy')
@@ -260,7 +260,7 @@ void logicCheck() {
 
         // 11. Проверка количества дней
         if (row.base != null && row.base < 1) {
-            def msg = row.getCell('base').column.name
+            def msg = getColumnName(row, 'base')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «1»!")
         }
 
@@ -280,12 +280,12 @@ void logicCheck() {
         def maxValueColumn23 = 100_000_000_000
         if (!flag23 && calcCol23 != null && calcCol23 >= maxValueColumn23) {
             // a.
-            def msg = row.getCell('tradePay').column.name
+            def msg = getColumnName(row, 'tradePay')
             logger.error("Строка $rowNum: Значение графы «%s» должно быть меньше значения «100 000 000 000»!", msg)
 
         } else if (flag23 && calcCol23 != null && calcCol23 * 100 >= maxValueColumn23) {
             // b.
-            def msg = row.getCell('tradePay').column.name
+            def msg = getColumnName(row, 'tradePay')
             logger.error("Строка $rowNum: Значение графы «%s» должно быть меньше значения «100 000 000 000%%»!", msg)
         }
 
@@ -306,11 +306,11 @@ void logicCheck() {
 
         // 16. Проверка корректности суммы доначисления  дохода до рыночного уровня по данным налогового учета
         if (row.sum4 && row.sum7 && row.sum8 && row.sum9 && row.sum10) {
-            def msg22 = row.getCell('sum4').column.name
-            def msg26 = row.getCell('sum7').column.name
-            def msg27 = row.getCell('sum8').column.name
-            def msg28 = row.getCell('sum9').column.name
-            def msg29 = row.getCell('sum10').column.name
+            def msg22 = getColumnName(row, 'sum4')
+            def msg26 = getColumnName(row, 'sum7')
+            def msg27 = getColumnName(row, 'sum8')
+            def msg28 = getColumnName(row, 'sum9')
+            def msg29 = getColumnName(row, 'sum10')
             if (getPeriodOrder() == 1 && row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 - row.sum9) {
                 // a
                 logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности значений граф «$msg26» и «$msg22» или разности значений граф «$msg27» и «$msg28»!")

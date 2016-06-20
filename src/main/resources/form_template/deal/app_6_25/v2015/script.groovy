@@ -165,33 +165,33 @@ void logicCheck() {
         if (row.okeiCode) {
             okei = getRefBookValue(12, row.okeiCode)?.CODE?.stringValue
             if (okei != '796') {
-                def msg = row.getCell('okeiCode').column.name
+                def msg = getColumnName(row, 'okeiCode')
                 logger.error("Строка $rowNum: Графа «$msg» должна быть заполнена значением «796»!")
             }
         }
 
         // 4. Проверка количества
         if (row.count != null && row.count != 1) {
-            def msg = row.getCell('count').column.name
+            def msg = getColumnName(row, 'count')
             logger.error("Строка $rowNum: Графа «$msg» должна быть заполнена значением «1»!")
         }
 
         // 5. Проверка финансового результата
         if (row.finResult != null && row.finResult < 0) {
-            def msg = row.getCell('finResult').column.name
+            def msg = getColumnName(row, 'finResult')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // 6. Проверка цены
         if (row.price != null && row.price < 0) {
-            def msg = row.getCell('price').column.name
+            def msg = getColumnName(row, 'price')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // 7. Проверка стоимости
         if (row.finResult != null && row.cost != row.finResult) {
-            def msg1 = row.getCell('cost').column.name
-            def msg2 = row.getCell('finResult').column.name
+            def msg1 = getColumnName(row, 'cost')
+            def msg2 = getColumnName(row, 'finResult')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 

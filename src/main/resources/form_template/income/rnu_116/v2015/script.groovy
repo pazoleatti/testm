@@ -213,40 +213,40 @@ void logicCheck() {
 
         // Проверка объема покупаемой валюты
         if (row.reqVolume != null && row.reqVolume < 0) {
-            def msg = row.getCell('reqVolume').column.name
+            def msg = getColumnName(row, 'reqVolume')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // Проверка объема продаваемой валюты
         if (row.guarVolume != null && row.guarVolume < 0) {
-            def msg = row.getCell('guarVolume').column.name
+            def msg = getColumnName(row, 'guarVolume')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // Проверка курса сделки
         if (row.price != null && row.price <= 0) {
-            def msg = row.getCell('price').column.name
+            def msg = getColumnName(row, 'price')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // Проверка курса в отношении требования
         if (row.reqCourse != null && row.reqCourse <= 0) {
-            def msg = row.getCell('reqCourse').column.name
+            def msg = getColumnName(row, 'reqCourse')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // Проверка курса в отношении обязательства
         if (row.guarCourse != null && row.guarCourse <= 0) {
-            def msg = row.getCell('guarCourse').column.name
+            def msg = getColumnName(row, 'guarCourse')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // Проверка корректности суммы требований
         if (row.dealType != null && row.reqVolume != null && row.reqCourse != null && row.reqSum != null) {
             if (row.dealType == dealType3 && row.reqSum != calc17(row)) {
-                def msg = row.getCell('reqSum').column.name
-                def msg1 = row.getCell('reqVolume').column.name
-                def msg2 = row.getCell('reqCourse').column.name
+                def msg = getColumnName(row, 'reqSum')
+                def msg1 = getColumnName(row, 'reqVolume')
+                def msg2 = getColumnName(row, 'reqCourse')
                 logger.error("Строка $rowNum: Значение графы «$msg» должно равняться модулю произведения «$msg1» и «$msg2»!")
             }
         }
@@ -254,16 +254,16 @@ void logicCheck() {
         // Проверка корректности суммы обязательств
         if (row.dealType != null && row.guarVolume != null && row.guarCourse != null && row.guarSum != null) {
             if (row.dealType == dealType3 && row.guarSum != calc18(row)) {
-                def msg = row.getCell('guarSum').column.name
-                def msg1 = row.getCell('guarVolume').column.name
-                def msg2 = row.getCell('guarCourse').column.name
+                def msg = getColumnName(row, 'guarSum')
+                def msg1 = getColumnName(row, 'guarVolume')
+                def msg2 = getColumnName(row, 'guarCourse')
                 logger.error("Строка $rowNum: Значение графы «$msg» должно равняться модулю произведения «$msg1» и «$msg2» со знаком «-»!")
             }
         }
 
         // Проверка рыночной цены
         if (row.marketPrice != null && row.marketPrice <= 0) {
-            def msg = row.getCell('marketPrice').column.name
+            def msg = getColumnName(row, 'marketPrice')
             logger.error("Строка $rowNum: Графа «$msg» должна быть больше «0»!")
         }
 

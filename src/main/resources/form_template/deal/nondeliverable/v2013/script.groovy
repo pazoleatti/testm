@@ -163,13 +163,13 @@ void logicCheck() {
 
         // Корректность даты заключения сделки
         if (transactionDeliveryDate < contractDate) {
-            def msg1 = row.getCell('transactionDeliveryDate').column.name
-            def msg2 = row.getCell('contractDate').column.name
+            def msg1 = getColumnName(row, 'transactionDeliveryDate')
+            def msg2 = getColumnName(row, 'contractDate')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
         // Проверка доходов/расходов и стоимости
-        def msgPrice = row.getCell('price').column.name
+        def msgPrice = getColumnName(row, 'price')
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
             if ((row.price ?: 0).abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
                 rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разнице значений граф «$msgIn» и «$msgOut» по модулю!")
@@ -183,15 +183,15 @@ void logicCheck() {
 
         // Проверка стоимости сделки
         if (cost != price) {
-            def msg1 = row.getCell('cost').column.name
-            def msg2 = row.getCell('price').column.name
+            def msg1 = getColumnName(row, 'cost')
+            def msg2 = getColumnName(row, 'price')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
         // Корректность дат сделки
         if (transactionDate < transactionDeliveryDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('transactionDeliveryDate').column.name
+            def msg1 = getColumnName(row, 'transactionDate')
+            def msg2 = getColumnName(row, 'transactionDeliveryDate')
             rowError(logger, row, "Строка $rowNum: «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
     }

@@ -171,17 +171,17 @@ void logicCheck() {
 
         // Проверка вычисления цены
         if (incomeSumCell.value != null && outcomeSumCell.value == null && row.price != incomeSumCell.value) {
-            def msgPrice = row.getCell('price').column.name
+            def msgPrice = getColumnName(row, 'price')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
         } else if (outcomeSumCell.value != null && incomeSumCell.value == null && row.price != outcomeSumCell.value) {
-            def msgPrice = row.getCell('price').column.name
+            def msgPrice = getColumnName(row, 'price')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
         }
 
         // Проверка корректности стоимости сделки
         if (row.total != row.price) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('total').column.name
+            def msg1 = getColumnName(row, 'price')
+            def msg2 = getColumnName(row, 'total')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 

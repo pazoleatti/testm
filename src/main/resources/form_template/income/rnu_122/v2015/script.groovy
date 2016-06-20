@@ -180,7 +180,7 @@ void logicCheck() {
 
         // 2. Проверка кода налогового учета
         if (row.code != null && !['19300', '19510'].contains(row.code)) {
-            def msg = row.getCell('code').column.name
+            def msg = getColumnName(row, 'code')
             logger.error("Строка $rowNum: Графа «$msg» должна принимать значение из следующего списка: «19300» или «19510»!")
         }
 
@@ -189,15 +189,15 @@ void logicCheck() {
 
         // 4. Проверка суммы кредита
         if (row.sum1 != null && row.sum1 < 0) {
-            def msg = row.getCell('sum1').column.name
+            def msg = getColumnName(row, 'sum1')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // 5. Проверка даты фактического отражения операции
         if (row.docDate && row.transDoneDate && (row.transDoneDate.before(getReportPeriodStartDate()) ||
                 row.transDoneDate.after(getReportPeriodEndDate()) || row.transDoneDate < row.docDate)) {
-            def msg7 = row.getCell('docDate').column.name
-            def msg10 = row.getCell('transDoneDate').column.name
+            def msg7 = getColumnName(row, 'docDate')
+            def msg10 = getColumnName(row, 'transDoneDate')
             def dateFrom = getReportPeriodStartDate()?.format('dd.MM.yyyy')
             def dateTo = getReportPeriodEndDate()?.format('dd.MM.yyyy')
             logger.error("Строка $rowNum: Дата по графе «$msg10» должна принимать значение из диапазона $dateFrom - $dateTo и быть больше либо равна дате по графе «$msg7»!")
@@ -205,20 +205,20 @@ void logicCheck() {
 
         // 6. Проверка курса валюты
         if (row.course2 != null && row.course2 <= 0) {
-            def msg = row.getCell('course2').column.name
+            def msg = getColumnName(row, 'course2')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // 7. Проверка расчетного периода
         if (row.startDate && row.endDate && row.endDate < row.startDate) {
-            def msg12 = row.getCell('startDate').column.name
-            def msg13 = row.getCell('endDate').column.name
+            def msg12 = getColumnName(row, 'startDate')
+            def msg13 = getColumnName(row, 'endDate')
             logger.error("Строка $rowNum: Дата по графе «$msg13» должна быть не меньше даты по графе «$msg12»!")
         }
 
         // 8. Проверка количества дней
         if (row.base != null && row.base < 1) {
-            def msg = row.getCell('base').column.name
+            def msg = getColumnName(row, 'base')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «1»!")
         }
 

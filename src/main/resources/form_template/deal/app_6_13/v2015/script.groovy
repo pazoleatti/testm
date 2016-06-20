@@ -157,7 +157,7 @@ void logicCheck() {
 
         // 2. Проверка суммы расходов
         if (row.outcomeSum && row.outcomeSum < 0) {
-            def msg = row.getCell('outcomeSum').column.name
+            def msg = getColumnName(row, 'outcomeSum')
             logger.warn("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
@@ -166,21 +166,21 @@ void logicCheck() {
 
         // 4. Проверка цены
         if (row.price != null && row.price != calc9(row)) {
-            def name5 = row.getCell('outcomeSum').column.name
-            def name9= row.getCell('price').column.name
+            def name5 = getColumnName(row, 'outcomeSum')
+            def name9= getColumnName(row, 'price')
             logger.error("Строка $rowNum: Значение графы «%s» должно быть равно значению графы «%s»!", name9, name5)
         }
 
         // 5. Проверка стоимости
         if (row.cost != null && row.cost != calc10(row)) {
-            def name5 = row.getCell('outcomeSum').column.name
-            def name10 = row.getCell('cost').column.name
+            def name5 = getColumnName(row, 'outcomeSum')
+            def name10 = getColumnName(row, 'cost')
             logger.error("Строка $rowNum: Значение графы «%s» должно быть равно значению графы «%s»!", name10, name5)
         }
 
         // 6. Проверка количества
         if (row.count != null && row.count < 1) {
-            def name8 = row.getCell('count').column.name
+            def name8 = getColumnName(row, 'count')
             logger.error("Строка $rowNum: Значение графы «%s» должно быть больше «0»!", name8)
         }
 

@@ -171,8 +171,8 @@ void logicCheck() {
 
         // 3. Корректность даты заключения сделки
         if (row.dealDate && row.docDate && (row.dealDate < row.docDate || getReportPeriodEndDate() < row.dealDate)) {
-            String name9 = row.getCell('dealDate').column.name
-            String name7 = row.getCell('docDate').column.name
+            String name9 = getColumnName(row, 'dealDate')
+            String name7 = getColumnName(row, 'docDate')
             logger.error("Строка $rowNum: Значение графы «%s» должно быть не меньше значения графы «%s» и не больше %s!", name9, name7, endDateInStr)
         }
 
@@ -188,46 +188,46 @@ void logicCheck() {
             }
         }
         if (countryCode && row.dealsMode != calc10(row.name)) {
-            String msg1 = row.getCell('dealsMode').column.name
-            String msg2 = row.getCell('countryCode').column.name
+            String msg1 = getColumnName(row, 'dealsMode')
+            String msg2 = getColumnName(row, 'countryCode')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению «Да», " +
                     "если графа «$msg2» равна значению «643»!")
         }
 
         // 5. Проверка корректности даты исполнения 1-ой части сделки
         if (row.date1 && row.dealDate && (row.date1 < row.dealDate || getReportPeriodEndDate() < row.date1)) {
-            String name9 = row.getCell('dealDate').column.name
-            String name11 = row.getCell('date1').column.name
+            String name9 = getColumnName(row, 'dealDate')
+            String name11 = getColumnName(row, 'date1')
             logger.error("Строка $rowNum: Значение графы «%s» должно быть не меньше значения графы «%s» и не больше %s!", name11, name9, endDateInStr)
         }
 
         // 6. Проверка корректности даты исполнения 2-ой части сделки
         if (row.date2 && row.date1 && (row.date2 < row.date1 || lastDate2099 < row.date2)) {
-            String name11 = row.getCell('date1').column.name
-            String name12 = row.getCell('date2').column.name
+            String name11 = getColumnName(row, 'date1')
+            String name12 = getColumnName(row, 'date2')
             logger.error("Строка $rowNum: Значение графы «%s» должно быть не меньше значения графы «%s» и не больше 31.12.2099!", name12, name11)
         }
 
         // 7. Заполнение граф 13 и 14 (сумма дохода, расхода)
         if ((row.incomeSum > 0 && row.outcomeSum) || (row.outcomeSum > 0 && row.incomeSum)) {
-            String msg1 = row.getCell('incomeSum').column.name
-            String msg2 = row.getCell('outcomeSum').column.name
+            String msg1 = getColumnName(row, 'incomeSum')
+            String msg2 = getColumnName(row, 'outcomeSum')
             logger.error("Строка $rowNum: Графа «$msg1» и графа «$msg2» одновременно не могут быть заполнены!")
         }
 
         // 8. Проверка суммы дохода/расхода
         if (row.incomeSum <= 0 && row.outcomeSum <= 0) {
-                String msg1 = row.getCell('incomeSum').column.name
-                String msg2 = row.getCell('outcomeSum').column.name
+                String msg1 = getColumnName(row, 'incomeSum')
+                String msg2 = getColumnName(row, 'outcomeSum')
                 logger.error("Строка $rowNum: Значение графы «$msg1» или «$msg2» должно быть больше «0»!")
         }
 
         // 9. Проверка даты совершения сделки
         if (row.date2) {
-            String name19 = row.getCell('dealDoneDate').column.name
+            String name19 = getColumnName(row, 'dealDoneDate')
             if (row.date2 >= getReportPeriodStartDate() && row.date2 <= getReportPeriodEndDate()) {
                 if(row.dealDoneDate != row.date2) {
-                    String name12 = row.getCell('date2').column.name
+                    String name12 = getColumnName(row, 'date2')
                     logger.error("Строка $rowNum: Значение графы «$name19» должно быть равно значению графы «$name12»!")
                 }
             } else if (row.dealDoneDate != getReportPeriodEndDate()) {

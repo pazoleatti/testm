@@ -149,7 +149,7 @@ void logicCheck() {
 
         // 2. Проверка суммы доходов
         if (row.sum && row.sum < 0) {
-            def msg = row.getCell('sum').column.name
+            def msg = getColumnName(row, 'sum')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
@@ -158,21 +158,21 @@ void logicCheck() {
 
         // 4. Проверка количества
         if (row.count != null && row.count != 1) {
-            def msg = row.getCell('count').column.name
+            def msg = getColumnName(row, 'count')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно значению «1»!")
         }
 
         // 5. Проверка цены
         if (row.sum != null && row.price != row.sum) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('sum').column.name
+            def msg1 = getColumnName(row, 'price')
+            def msg2 = getColumnName(row, 'sum')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
         // 6. Проверка стоимости
         if (row.sum != null && row.cost != row.sum) {
-            def msg1 = row.getCell('cost').column.name
-            def msg2 = row.getCell('sum').column.name
+            def msg1 = getColumnName(row, 'cost')
+            def msg2 = getColumnName(row, 'sum')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 

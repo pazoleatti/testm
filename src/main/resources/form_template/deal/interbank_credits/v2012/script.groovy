@@ -140,7 +140,7 @@ void logicCheck() {
         }
         // Проверка количества
         if (row.count != 1) {
-            def msg = row.getCell('count').column.name
+            def msg = getColumnName(row, 'count')
             logger.warn("Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
         }
         //  Корректность даты договора

@@ -215,8 +215,8 @@ void logicCheck() {
         }
         // Проверка заполнения стоимости сделки
         if (row.total != row.price) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('total').column.name
+            def msg1 = getColumnName(row, 'price')
+            def msg2 = getColumnName(row, 'total')
             logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
         // Корректность дат сделки  dealDate - 9гр, dealDoneDate - 16гр

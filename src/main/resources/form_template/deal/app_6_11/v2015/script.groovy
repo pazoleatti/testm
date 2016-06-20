@@ -196,15 +196,15 @@ void logicCheck() {
 
         // 5. Проверка количества бумаг
         if (row.count != null && row.count <= 0) {
-            def msg = row.getCell('count').column.name
+            def msg = getColumnName(row, 'count')
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // 6. Проверка цены сделки
         if (row.price != null && row.count && row.price != round((BigDecimal) (row.sum / row.count), 2)) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('sum').column.name
-            def msg3 = row.getCell('count').column.name
+            def msg1 = getColumnName(row, 'price')
+            def msg2 = getColumnName(row, 'sum')
+            def msg3 = getColumnName(row, 'count')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно отношению значений граф «$msg2» и «$msg3»!")
         }
     }

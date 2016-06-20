@@ -199,22 +199,22 @@ void logicCheck() {
                         builder.append(", ")
                     }
                 }
-                def msg1 = row.getCell('signPhis').column.name
+                def msg1 = getColumnName(row, 'signPhis')
                 rowError(logger, row, "Строка $rowNum: Графы ${builder.toString()} не должны быть заполнены, т.к. в графе «$msg1» указано значение «ОМС»!")
             }
         } else if(isPhysics){
             // 2a
             if(row.countryCode2 == null || row.countryCode3 == null){
-                def msg1 = row.getCell('signPhis').column.name
-                def msg2 = row.getCell('countryCode2').column.name
-                def msg3 = row.getCell('countryCode3').column.name
+                def msg1 = getColumnName(row, 'signPhis')
+                def msg2 = getColumnName(row, 'countryCode2')
+                def msg3 = getColumnName(row, 'countryCode3')
                 rowError(logger, row, "Строка $rowNum: Графы «$msg2», «$msg3» должны быть заполнены, т.к. в графе «$msg1» указано значение «Физическая поставка»!")
             }
             // 2bc
             def country = getRefBookValue(10, row.countryCode2)?.CODE?.stringValue
             if (country != null) {
-                def regionName = row.getCell('region1').column.name
-                def countryName = row.getCell('countryCode2').column.name
+                def regionName = getColumnName(row, 'region1')
+                def countryName = getColumnName(row, 'countryCode2')
                 if (country == '643' && row.region1 == null) {
                     rowError(logger, row, "Строка $rowNum: Графа «$regionName» должна быть заполнена, т.к. в графе «$countryName» указан код 643!")
                 } else if (country != '643' && row.region1 != null) {
@@ -224,8 +224,8 @@ void logicCheck() {
             // 2de
             country = getRefBookValue(10, row.countryCode3)?.CODE?.stringValue
             if (country != null) {
-                def regionName = row.getCell('region2').column.name
-                def countryName = row.getCell('countryCode3').column.name
+                def regionName = getColumnName(row, 'region2')
+                def countryName = getColumnName(row, 'countryCode3')
                 if (country == '643' && row.region2 == null) {
                     rowError(logger, row, "Строка $rowNum: Графа «$regionName» должна быть заполнена, т.к. в графе «$countryName» указан код 643!")
                 } else if (country != '643' && row.region2 != null) {
@@ -234,27 +234,27 @@ void logicCheck() {
             }
             // 2fg
             if (row.city1 == null && row.settlement1 == null) {
-                def msg1 = row.getCell('city1').column.name
-                def msg2 = row.getCell('settlement1').column.name
+                def msg1 = getColumnName(row, 'city1')
+                def msg2 = getColumnName(row, 'settlement1')
                 rowError(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
             }
             // 2hi
             if (row.city2 == null && row.settlement2 == null) {
-                msg1 = row.getCell('city2').column.name
-                msg2 = row.getCell('settlement2').column.name
+                msg1 = getColumnName(row, 'city2')
+                msg2 = getColumnName(row, 'settlement2')
                 rowError(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
             }
         }
 
         // Корректность даты заключения сделки
         if (transactionDeliveryDate < contractDate) {
-            def msg1 = row.getCell('transactionDeliveryDate').column.name
-            def msg2 = row.getCell('contractDate').column.name
+            def msg1 = getColumnName(row, 'transactionDeliveryDate')
+            def msg2 = getColumnName(row, 'contractDate')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
         // Корректность заполнения признака внешнеторговой сделки
-        def msg14 = row.getCell('signTransaction').column.name
+        def msg14 = getColumnName(row, 'signTransaction')
         if (row.countryCode2 == row.countryCode3 && row.signTransaction != recNoId ||
                 row.countryCode2 != row.countryCode3 && row.signTransaction != recYesId) {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg14» не соответствует сведениям о стране отправке и о стране доставки драгоценных металлов!")
@@ -266,7 +266,7 @@ void logicCheck() {
         }
 
         // Проверка доходов/расходов и стоимости
-        def msgPrice = row.getCell('priceOne').column.name
+        def msgPrice = getColumnName(row, 'priceOne')
         if (row.incomeSum && !row.consumptionSum && row.priceOne != row.incomeSum) {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
         } else if (row.consumptionSum && !row.incomeSum && row.priceOne != row.consumptionSum) {
@@ -277,21 +277,21 @@ void logicCheck() {
 
         // Проверка количества
         if (count != null && count != 1) {
-            def msg = row.getCell('count').column.name
+            def msg = getColumnName(row, 'count')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg» может быть только «1»!")
         }
 
         // Корректность дат сделки
         if (transactionDate < transactionDeliveryDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('transactionDeliveryDate').column.name
+            def msg1 = getColumnName(row, 'transactionDate')
+            def msg2 = getColumnName(row, 'transactionDeliveryDate')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
         // Проверка заполнения стоимости сделки
         if (priceOne != totalNds) {
-            def msg1 = row.getCell('priceOne').column.name
-            def msg2 = row.getCell('totalNds').column.name
+            def msg1 = getColumnName(row, 'priceOne')
+            def msg2 = getColumnName(row, 'totalNds')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 

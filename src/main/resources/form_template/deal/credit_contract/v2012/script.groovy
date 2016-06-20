@@ -144,28 +144,28 @@ void logicCheck() {
 
         // Проверка количества
         if (row.count != 1) {
-            def msg = row.getCell('transactionDate').column.name
+            def msg = getColumnName(row, 'transactionDate')
             logger.warn("Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
         }
 
         // Корректность даты договора
         def dt = contractDate
         if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = row.getCell('contractDate').column.name
+            def msg = getColumnName(row, 'contractDate')
             logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('contractDate').column.name
+            def msg1 = getColumnName(row, 'transactionDate')
+            def msg2 = getColumnName(row, 'contractDate')
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         // Проверка заполнения стоимости сделки
         if (totalCost != price) {
-            def msg1 = row.getCell('totalCost').column.name
-            def msg2 = row.getCell('price').column.name
+            def msg1 = getColumnName(row, 'totalCost')
+            def msg2 = getColumnName(row, 'price')
             logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
 

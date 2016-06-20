@@ -141,21 +141,21 @@ void logicCheck() {
         def contractDate = row.contractDate
 
         def bankSum = null
-        def msgBankSum = row.getCell('incomeBankSum').column.name
+        def msgBankSum = getColumnName(row, 'incomeBankSum')
         if (row.incomeBankSum !=null && row.outcomeBankSum ==null){
             bankSum = row.incomeBankSum
         }
         if (row.outcomeBankSum !=null && row.incomeBankSum ==null) {
             bankSum = row.outcomeBankSum
-            msgBankSum = row.getCell('outcomeBankSum').column.name
+            msgBankSum = getColumnName(row, 'outcomeBankSum')
         }
 
         //Наименования колонок
-        def contractDateName = row.getCell('contractDate').column.name
-        def transactionDateName = row.getCell('transactionDate').column.name
-        def priceName = row.getCell('price').column.name
-        def countName = row.getCell('count').column.name
-        def costName = row.getCell('cost').column.name
+        def contractDateName = getColumnName(row, 'contractDate')
+        def transactionDateName = getColumnName(row, 'transactionDate')
+        def priceName = getColumnName(row, 'price')
+        def countName = getColumnName(row, 'count')
+        def costName = getColumnName(row, 'cost')
 
         // Корректность даты договора
         def dt = contractDate
@@ -179,13 +179,13 @@ void logicCheck() {
 
         // Заполнение граф 5.1 и 5.2
         if (incomeBankSum == null && outcomeBankSum == null) {
-            def msg1 = row.getCell('incomeBankSum').column.name
-            def msg2 = row.getCell('outcomeBankSum').column.name
+            def msg1 = getColumnName(row, 'incomeBankSum')
+            def msg2 = getColumnName(row, 'outcomeBankSum')
             logger.warn("Строка $rowNum: Должна быть заполнена графа «$msg1» или графа «$msg2»!")
         }
         if (incomeBankSum != null && outcomeBankSum != null) {
-            def msg1 = row.getCell('incomeBankSum').column.name
-            def msg2 = row.getCell('outcomeBankSum').column.name
+            def msg1 = getColumnName(row, 'incomeBankSum')
+            def msg2 = getColumnName(row, 'outcomeBankSum')
             logger.warn("Строка $rowNum: Графа «$msg1» и графа «$msg2» не могут быть заполнены одновременно!")
         }
 
@@ -201,8 +201,8 @@ void logicCheck() {
 
         // Проверка заполненности одного из атрибутов
         if (row.city != null && !row.city.toString().isEmpty() && row.settlement != null && !row.settlement.toString().isEmpty()) {
-            def cityName = row.getCell('city').column.name
-            def settleName = row.getCell('settlement').column.name
+            def cityName = getColumnName(row, 'city')
+            def settleName = getColumnName(row, 'settlement')
             logger.warn("Строка $rowNum: Если заполнена графа «$cityName», то графа «$settleName» не должна быть заполнена!")
         }
 
@@ -210,8 +210,8 @@ void logicCheck() {
         if (row.country != null) {
             def country = refBookService.getStringValue(10, row.country, 'CODE')
             if (country != null) {
-                def regionName = row.getCell('region').column.name
-                def countryName = row.getCell('country').column.name
+                def regionName = getColumnName(row, 'region')
+                def countryName = getColumnName(row, 'country')
                 if (country == '643' && row.region == null) {
                     logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
                 } else if (country != '643' && row.region != null) {

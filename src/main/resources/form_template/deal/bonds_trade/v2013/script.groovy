@@ -155,16 +155,16 @@ void logicCheck() {
 
         // Проверка конверсии
         if (courseCB == null || transactionSumCurrency == null || transactionSumRub != (courseCB * transactionSumCurrency).setScale(0, RoundingMode.HALF_UP)) {
-            def msg1 = row.getCell('transactionSumRub').column.name
-            def msg2 = row.getCell('transactionSumCurrency').column.name
-            def msg3 = row.getCell('courseCB').column.name
+            def msg1 = getColumnName(row, 'transactionSumRub')
+            def msg2 = getColumnName(row, 'transactionSumCurrency')
+            def msg3 = getColumnName(row, 'courseCB')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно произведению значений графы «$msg2» и графы «$msg3»!")
         }
 
         // Корректность даты заключения сделки
         if (transactionDate < contractDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('contractDate').column.name
+            def msg1 = getColumnName(row, 'transactionDate')
+            def msg2 = getColumnName(row, 'contractDate')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
@@ -174,9 +174,9 @@ void logicCheck() {
             res = (transactionSumRub / bondCount).setScale(0, RoundingMode.HALF_UP)
         }
         if (transactionSumRub == null || bondCount == null || priceOne != res) {
-            def msg1 = row.getCell('priceOne').column.name
-            def msg2 = row.getCell('transactionSumRub').column.name
-            def msg3 = row.getCell('bondCount').column.name
+            def msg1 = getColumnName(row, 'priceOne')
+            def msg2 = getColumnName(row, 'transactionSumRub')
+            def msg3 = getColumnName(row, 'bondCount')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно отношению значений граф «$msg2» и «$msg3»!")
         }
 

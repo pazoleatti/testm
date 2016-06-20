@@ -178,7 +178,7 @@ void logicCheck() {
         // Зависимости от признака физической поставки
         if (getRefBookValue(18, row.deliverySign)?.CODE?.numberValue == 1) {
             def isHaveNotEmptyField = false
-            def msg1 = row.getCell('deliverySign').column.name
+            def msg1 = getColumnName(row, 'deliverySign')
             def checkField = ['countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2', 'locality2', 'deliveryCode']
             for (it in checkField) {
                 isHaveNotEmptyField = row.getCell(it).value != null && !row.getCell(it).value.toString().isEmpty()
@@ -201,16 +201,16 @@ void logicCheck() {
         } else if (getRefBookValue(18, row.deliverySign)?.CODE?.numberValue == 2) {
             // a
             if(row.countryCodeNumeric == null || row.countryCodeNumeric2 == null){
-                def msg1 = row.getCell('deliverySign').column.name
-                def msg2 = row.getCell('countryCodeNumeric').column.name
-                def msg3 = row.getCell('countryCodeNumeric2').column.name
+                def msg1 = getColumnName(row, 'deliverySign')
+                def msg2 = getColumnName(row, 'countryCodeNumeric')
+                def msg3 = getColumnName(row, 'countryCodeNumeric2')
                 rowError(logger, row, "Строка $rowNum: Графы «$msg2», «$msg3» должны быть заполнены, т.к. в графе «$msg1» указано значение «Физическая поставка»!")
             }
             // 2bc
             def country = getRefBookValue(10, row.countryCodeNumeric)?.CODE?.stringValue
             if (country != null) {
-                def regionName = row.getCell('regionCode').column.name
-                def countryName = row.getCell('countryCodeNumeric').column.name
+                def regionName = getColumnName(row, 'regionCode')
+                def countryName = getColumnName(row, 'countryCodeNumeric')
                 if (country == '643' && row.regionCode == null) {
                     rowError(logger, row, "Строка $rowNum: Графа «$regionName» должна быть заполнена, т.к. в графе «$countryName» указан код 643!")
                 } else if (country != '643' && row.regionCode != null) {
@@ -220,8 +220,8 @@ void logicCheck() {
             // 2de
             country = getRefBookValue(10, row.countryCodeNumeric2)?.CODE?.stringValue
             if (country != null) {
-                def regionName = row.getCell('region2').column.name
-                def countryName = row.getCell('countryCodeNumeric2').column.name
+                def regionName = getColumnName(row, 'region2')
+                def countryName = getColumnName(row, 'countryCodeNumeric2')
                 if (country == '643' && row.region2 == null) {
                     rowError(logger, row, "Строка $rowNum: Графа «$regionName» должна быть заполнена, т.к. в графе «$countryName» указан код 643!")
                 } else if (country != '643' && row.region2 != null) {
@@ -230,14 +230,14 @@ void logicCheck() {
             }
             // 2fg
             if (row.city == null && row.locality == null) {
-                def msg1 = row.getCell('city').column.name
-                def msg2 = row.getCell('locality').column.name
+                def msg1 = getColumnName(row, 'city')
+                def msg2 = getColumnName(row, 'locality')
                 rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
             }
             // 2hi
             if (row.city2 == null && row.locality2 == null) {
-                msg1 = row.getCell('city2').column.name
-                msg2 = row.getCell('locality2').column.name
+                msg1 = getColumnName(row, 'city2')
+                msg2 = getColumnName(row, 'locality2')
                 rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
             }
         }
@@ -248,7 +248,7 @@ void logicCheck() {
         }
 
         // Проверка доходов/расходов и стоимости
-        def msgPrice = row.getCell('price').column.name
+        def msgPrice = getColumnName(row, 'price')
         if (row.incomeSum && !row.outcomeSum && row.price != row.incomeSum) {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
         } else if (row.outcomeSum && !row.incomeSum && row.price != row.outcomeSum) {
@@ -259,7 +259,7 @@ void logicCheck() {
 
         // Проверка количества
         if (row.count != 1) {
-            def msg = row.getCell('count').column.name
+            def msg = getColumnName(row, 'count')
             rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» может быть только «1»!")
         }
 
@@ -268,7 +268,7 @@ void logicCheck() {
         if (row.deliverySign != null) {
             deliveryPhis = getRefBookValue(18, row.deliverySign)?.CODE?.numberValue == 1
         }
-        def msg14 = row.getCell('foreignDeal').column.name
+        def msg14 = getColumnName(row, 'foreignDeal')
         if (row.countryCodeNumeric == row.countryCodeNumeric2) {
             if (row.foreignDeal != recNoId) {
                 rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg14» должно быть равно «Нет»!")

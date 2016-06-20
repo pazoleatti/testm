@@ -169,8 +169,8 @@ void logicCheck() {
 
         // Проверка корректности даты заключения сделки
         if (row.docDate && row.dealDate && (row.docDate > row.dealDate || row.dealDate > getReportPeriodEndDate())) {
-            def msg1 = row.getCell('dealDate').column.name
-            def msg2 = row.getCell('docDate').column.name
+            def msg1 = getColumnName(row, 'dealDate')
+            def msg2 = getColumnName(row, 'docDate')
             def msg3 = getReportPeriodEndDate().format('dd.MM.yyyy')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2» и не больше $msg3!")
         }

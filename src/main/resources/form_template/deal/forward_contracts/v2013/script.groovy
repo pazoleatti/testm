@@ -163,7 +163,7 @@ void logicCheck() {
         }
 
         // Проверка доходов/расходов и стоимости
-        def msgPrice = row.getCell('price').column.name
+        def msgPrice = getColumnName(row, 'price')
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
             if ((row.price ?: 0).abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
                 rowError(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разнице значений граф «$msgIn» и «$msgOut» по модулю!")
@@ -185,7 +185,7 @@ void logicCheck() {
 
         // Проверка заполнения стоимости сделки
         if (row.total != row.price) {
-            def msg1 = row.getCell('total').column.name
+            def msg1 = getColumnName(row, 'total')
             rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msgPrice»!")
         }
 

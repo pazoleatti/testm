@@ -163,7 +163,7 @@ void logicCheck() {
 
         // 2. Проверка на положительное значение ожидаемого дохода
         if (row.sum && row.sum < 0) {
-            def msg1 = row.getCell('sum').column.name
+            def msg1 = getColumnName(row, 'sum')
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» не может быть меньше «0»!")
         }
 

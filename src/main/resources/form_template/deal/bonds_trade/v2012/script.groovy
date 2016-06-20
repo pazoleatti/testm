@@ -158,30 +158,30 @@ void logicCheck() {
 
         // Корректность даты сделки
         if (transactionDeliveryDate < transactionDate) {
-            def msg1 = row.getCell('transactionDeliveryDate').column.name
-            def msg2 = row.getCell('transactionDate').column.name
+            def msg1 = getColumnName(row, 'transactionDeliveryDate')
+            def msg2 = getColumnName(row, 'transactionDate')
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         // Проверка конверсии
         if (courseCB == null || transactionSumCurrency == null || transactionSumRub != (courseCB * transactionSumCurrency).setScale(0, RoundingMode.HALF_UP)) {
-            def msg1 = row.getCell('transactionSumRub').column.name
-            def msg2 = row.getCell('courseCB').column.name
-            def msg3 = row.getCell('transactionSumCurrency').column.name
+            def msg1 = getColumnName(row, 'transactionSumRub')
+            def msg2 = getColumnName(row, 'courseCB')
+            def msg3 = getColumnName(row, 'transactionSumCurrency')
             logger.warn("Строка $rowNum: «$msg1» не соответствует «$msg2» с учетом данных «$msg3»!")
         }
 
         // Корректность даты договора
         def dt = contractDate
         if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = row.getCell('contractDate').column.name
+            def msg = getColumnName(row, 'contractDate')
             logger.warn("Строка $rowNum: «$msg» в строке $rowNum не может быть вне налогового периода!")
         }
 
         // Корректность даты заключения сделки
         if (transactionDeliveryDate < contractDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('contractDate').column.name
+            def msg1 = getColumnName(row, 'transactionDate')
+            def msg2 = getColumnName(row, 'contractDate')
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
@@ -193,9 +193,9 @@ void logicCheck() {
         }
 
         if (transactionSumRub == null || bondCount == null || priceOne != res) {
-            def msg1 = row.getCell('priceOne').column.name
-            def msg2 = row.getCell('transactionSumRub').column.name
-            def msg3 = row.getCell('bondCount').column.name
+            def msg1 = getColumnName(row, 'priceOne')
+            def msg2 = getColumnName(row, 'transactionSumRub')
+            def msg3 = getColumnName(row, 'bondCount')
             logger.warn("Строка $rowNum: «$msg1» не равно отношению «$msg2» и «$msg3»!")
         }
 
