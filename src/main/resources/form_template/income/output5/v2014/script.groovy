@@ -179,7 +179,7 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
 
     // графа 1
     colIndex++
-    tmpRow.rowNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    tmpRow.rowNum = round(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true), 0)
     // графа 2
     colIndex++
     tmpRow.name = values[colIndex]
@@ -321,7 +321,7 @@ def fillRow(def dataRow, String[] rowCells, def columnCount, def fileRowIndex, d
 
         // графа 1
         colIndex = 1
-        values.rowNum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+        values.rowNum = round(parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true), 0)
 
         // графа 2
         colIndex = 2
