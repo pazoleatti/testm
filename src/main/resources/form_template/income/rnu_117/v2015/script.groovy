@@ -324,19 +324,19 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
 
     def headerMapping = [
             ([(headerRows[0][6]): 'Основание для совершения операции']),
-            ([(headerRows[1][0]): getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[1][2]): getColumnName(tmpRow, 'name')]),
-            ([(headerRows[1][3]): getColumnName(tmpRow, 'countryName')]),
-            ([(headerRows[1][4]): getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[1][5]): getColumnName(tmpRow, 'code')]),
+            ([(headerRows[1][0]): tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[1][2]): tmpRow.getCell('name').column.name]),
+            ([(headerRows[1][3]): tmpRow.getCell('countryName').column.name]),
+            ([(headerRows[1][4]): tmpRow.getCell('iksr').column.name]),
+            ([(headerRows[1][5]): tmpRow.getCell('code').column.name]),
             ([(headerRows[1][6]): 'номер']),
             ([(headerRows[1][7]): 'дата']),
-            ([(headerRows[1][8]): getColumnName(tmpRow, 'rate')]),
-            ([(headerRows[1][9]): getColumnName(tmpRow, 'sum1')]),
-            ([(headerRows[1][10]): getColumnName(tmpRow, 'rate1')]),
-            ([(headerRows[1][11]): getColumnName(tmpRow, 'sum2')]),
-            ([(headerRows[1][12]): getColumnName(tmpRow, 'rate2')]),
-            ([(headerRows[1][13]): getColumnName(tmpRow, 'sum3')]),
+            ([(headerRows[1][8]): tmpRow.getCell('rate').column.name]),
+            ([(headerRows[1][9]): tmpRow.getCell('sum1').column.name]),
+            ([(headerRows[1][10]): tmpRow.getCell('rate1').column.name]),
+            ([(headerRows[1][11]): tmpRow.getCell('sum2').column.name]),
+            ([(headerRows[1][12]): tmpRow.getCell('rate2').column.name]),
+            ([(headerRows[1][13]): tmpRow.getCell('sum3').column.name]),
             ([(headerRows[2][0]): '1'])
     ]
     (2..12).each {

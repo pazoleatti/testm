@@ -772,7 +772,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 23
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -891,27 +891,27 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'firstRecordNumber')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'operationDate')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('firstRecordNumber').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('operationDate').column.name]),
             ([(headerRows[0][4]) : 'Основание для совершения операции (первичный документ)']),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'invNumber')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'price')]),
-            ([(headerRows[0][9]) : getColumnName(tmpRow, 'amort')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'expensesOnSale')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'sum')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'sumInFact')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'costProperty')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'marketPrice')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'sumIncProfit')]),
-            ([(headerRows[0][16]): getColumnName(tmpRow, 'profit')]),
-            ([(headerRows[0][17]): getColumnName(tmpRow, 'loss')]),
-            ([(headerRows[0][18]): getColumnName(tmpRow, 'usefullLifeEnd')]),
-            ([(headerRows[0][19]): getColumnName(tmpRow, 'monthsLoss')]),
-            ([(headerRows[0][20]): getColumnName(tmpRow, 'expensesSum')]),
-            ([(headerRows[0][21]): getColumnName(tmpRow, 'saledPropertyCode')]),
-            ([(headerRows[0][22]): getColumnName(tmpRow, 'saleCode')]),
+            ([(headerRows[0][6]) : tmpRow.getCell('invNumber').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('price').column.name]),
+            ([(headerRows[0][9]) : tmpRow.getCell('amort').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('expensesOnSale').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('sum').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('sumInFact').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('costProperty').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('marketPrice').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('sumIncProfit').column.name]),
+            ([(headerRows[0][16]): tmpRow.getCell('profit').column.name]),
+            ([(headerRows[0][17]): tmpRow.getCell('loss').column.name]),
+            ([(headerRows[0][18]): tmpRow.getCell('usefullLifeEnd').column.name]),
+            ([(headerRows[0][19]): tmpRow.getCell('monthsLoss').column.name]),
+            ([(headerRows[0][20]): tmpRow.getCell('expensesSum').column.name]),
+            ([(headerRows[0][21]): tmpRow.getCell('saledPropertyCode').column.name]),
+            ([(headerRows[0][22]): tmpRow.getCell('saleCode').column.name]),
             ([(headerRows[1][4]) : 'номер']),
             ([(headerRows[1][5]) : 'дата']),
             ([(headerRows[2][0]) : '1'])

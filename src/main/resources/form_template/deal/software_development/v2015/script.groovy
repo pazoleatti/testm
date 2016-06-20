@@ -259,17 +259,17 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     def headerMapping = [
             ([(headerRows[0][0]) : 'Общая информация']),
             ([(headerRows[0][5]) : 'Сведения о сделке']),
-            ([(headerRows[1][0]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[1][1]) : getColumnName(tmpRow, 'fullNamePerson')]),
-            ([(headerRows[1][2]) : getColumnName(tmpRow, 'inn')]),
-            ([(headerRows[1][3]) : getColumnName(tmpRow, 'countryCode')]),
-            ([(headerRows[1][4]) : getColumnName(tmpRow, 'expensesSum')]),
-            ([(headerRows[1][5]) : getColumnName(tmpRow, 'docNumber')]),
-            ([(headerRows[1][6]) : getColumnName(tmpRow, 'docDate')]),
-            ([(headerRows[1][7]) : getColumnName(tmpRow, 'serviceType')]),
-            ([(headerRows[1][8]) : getColumnName(tmpRow, 'price')]),
-            ([(headerRows[1][9]) : getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[1][10]): getColumnName(tmpRow, 'dealDate')])
+            ([(headerRows[1][0]) : tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[1][1]) : tmpRow.getCell('fullNamePerson').column.name]),
+            ([(headerRows[1][2]) : tmpRow.getCell('inn').column.name]),
+            ([(headerRows[1][3]) : tmpRow.getCell('countryCode').column.name]),
+            ([(headerRows[1][4]) : tmpRow.getCell('expensesSum').column.name]),
+            ([(headerRows[1][5]) : tmpRow.getCell('docNumber').column.name]),
+            ([(headerRows[1][6]) : tmpRow.getCell('docDate').column.name]),
+            ([(headerRows[1][7]) : tmpRow.getCell('serviceType').column.name]),
+            ([(headerRows[1][8]) : tmpRow.getCell('price').column.name]),
+            ([(headerRows[1][9]) : tmpRow.getCell('cost').column.name]),
+            ([(headerRows[1][10]): tmpRow.getCell('dealDate').column.name])
     ]
     (0..10).each{
         headerMapping.add(([(headerRows[2][it]): 'гр. ' + (it + 1).toString()]))

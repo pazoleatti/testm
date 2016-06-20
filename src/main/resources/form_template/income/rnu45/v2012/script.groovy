@@ -499,7 +499,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 12
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -585,17 +585,17 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'inventoryNumber')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'buyDate')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'usefulLife')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'expirationDate')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'startCost')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'depreciationRate')]),
-            ([(headerRows[0][9]) : getColumnName(tmpRow, 'amortizationMonth')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'amortizationSinceYear')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'amortizationSinceUsed')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('inventoryNumber').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('buyDate').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('usefulLife').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('expirationDate').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('startCost').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('depreciationRate').column.name]),
+            ([(headerRows[0][9]) : tmpRow.getCell('amortizationMonth').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('amortizationSinceYear').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('amortizationSinceUsed').column.name]),
             ([(headerRows[1][0]) : '1'])
     ]
     (2..11).each {

@@ -325,7 +325,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 5
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'paymentType')
+    String TABLE_START_VALUE = tmpRow.getCell('paymentType').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -391,11 +391,11 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'paymentType')]),
-            ([(headerRows[0][1]): getColumnName(tmpRow, 'okatoCode')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'budgetClassificationCode')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'dateOfPayment')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'sumTax')]),
+            ([(headerRows[0][0]): tmpRow.getCell('paymentType').column.name]),
+            ([(headerRows[0][1]): tmpRow.getCell('okatoCode').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('budgetClassificationCode').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('dateOfPayment').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('sumTax').column.name]),
     ]
     (0..4).each { index ->
         headerMapping.add(([(headerRows[1][index]): (index + 1).toString()]))

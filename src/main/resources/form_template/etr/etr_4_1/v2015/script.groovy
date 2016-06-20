@@ -369,7 +369,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 7
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -441,9 +441,9 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
-            ([(headerRows[0][1]): getColumnName(tmpRow, 'taxName')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'symbol102')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNum').column.name]),
+            ([(headerRows[0][1]): tmpRow.getCell('taxName').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('symbol102').column.name]),
             ([(headerRows[0][3]): ('Период сравнения, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[0][4]): ('Период, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[0][5]): 'Изменение за период']),

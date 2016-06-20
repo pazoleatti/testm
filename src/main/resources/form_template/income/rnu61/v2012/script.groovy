@@ -517,7 +517,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 15
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -601,21 +601,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'billNumber'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'creationDate'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'nominal'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'currencyCode'),
+            (headerRows[0][0]) : tmpRow.getCell('rowNumber').column.name,
+            (headerRows[0][2]) : tmpRow.getCell('billNumber').column.name,
+            (headerRows[0][3]) : tmpRow.getCell('creationDate').column.name,
+            (headerRows[0][4]) : tmpRow.getCell('nominal').column.name,
+            (headerRows[0][5]) : tmpRow.getCell('currencyCode').column.name,
             (headerRows[0][6]) : 'Курс Банка России',
             (headerRows[1][6]) : 'на дату составления векселя',
             (headerRows[1][7]) : 'на дату совершения операции',
-            (headerRows[0][8]) : getColumnName(tmpRow, 'paymentStart'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'paymentEnd'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'interestRate'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'operationDate'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'sum70606'),
-            (headerRows[0][13]): getColumnName(tmpRow, 'sumLimit'),
-            (headerRows[0][14]): getColumnName(tmpRow, 'percAdjustment'),
+            (headerRows[0][8]) : tmpRow.getCell('paymentStart').column.name,
+            (headerRows[0][9]) : tmpRow.getCell('paymentEnd').column.name,
+            (headerRows[0][10]): tmpRow.getCell('interestRate').column.name,
+            (headerRows[0][11]): tmpRow.getCell('operationDate').column.name,
+            (headerRows[0][12]): tmpRow.getCell('sum70606').column.name,
+            (headerRows[0][13]): tmpRow.getCell('sumLimit').column.name,
+            (headerRows[0][14]): tmpRow.getCell('percAdjustment').column.name,
             (headerRows[2][0]) : '1'
     ]
     (2..14).each { index ->

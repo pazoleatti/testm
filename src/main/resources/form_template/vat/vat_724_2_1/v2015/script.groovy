@@ -346,7 +346,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 5
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 2
 
@@ -435,11 +435,11 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
 
     // для проверки шапки
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
-            ([(headerRows[0][1]): getColumnName(tmpRow, 'code')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'realizeCost')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'obtainCost')])
+            ([(headerRows[0][0]): tmpRow.getCell('rowNum').column.name]),
+            ([(headerRows[0][1]): tmpRow.getCell('code').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('realizeCost').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('obtainCost').column.name])
     ]
     (1..5).each { index ->
         headerMapping.add(([(headerRows[1][index - 1]): index.toString()]))

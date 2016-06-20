@@ -112,7 +112,7 @@ void logicCheck() {
 void importData() {
     def tmpRow = formData.createDataRow()
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE =  getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы

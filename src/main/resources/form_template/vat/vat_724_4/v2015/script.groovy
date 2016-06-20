@@ -518,7 +518,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 8
     int HEADER_ROW_COUNT = 4
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -645,9 +645,9 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNum').column.name]),
             ([(headerRows[0][2]): 'Данные бухгалтерского учёта']),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'nds')]),
+            ([(headerRows[0][7]): tmpRow.getCell('nds').column.name]),
 
             ([(headerRows[1][2]): 'Налоговая база']),
             ([(headerRows[1][5]): 'НДС']),

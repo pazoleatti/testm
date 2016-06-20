@@ -678,7 +678,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 19
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_START_VALUE = tmpRow.getCell('number').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 0
 
@@ -793,24 +793,24 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
 
     def headerMapping = [
             // название первого столбца хранится в нулевой скрытой графе
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'code')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'issuer')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'regNumber')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'shortPositionData')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'faceValue')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'countsBonds')]),
-            ([(headerRows[0][9]) : getColumnName(tmpRow, 'averageWeightedPrice')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'termBondsIssued')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'maturityDate')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'currentPeriod')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'currentCouponRate')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'incomeCurrentCoupon')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'incomePrev')]),
-            ([(headerRows[0][16]): getColumnName(tmpRow, 'incomeShortPosition')]),
-            ([(headerRows[0][17]): getColumnName(tmpRow, 'percIncome')]),
-            ([(headerRows[0][18]): getColumnName(tmpRow, 'totalPercIncome')])
+            ([(headerRows[0][0]) : tmpRow.getCell('number').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('code').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('issuer').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('regNumber').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('shortPositionData').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('faceValue').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('countsBonds').column.name]),
+            ([(headerRows[0][9]) : tmpRow.getCell('averageWeightedPrice').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('termBondsIssued').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('maturityDate').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('currentPeriod').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('currentCouponRate').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('incomeCurrentCoupon').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('incomePrev').column.name]),
+            ([(headerRows[0][16]): tmpRow.getCell('incomeShortPosition').column.name]),
+            ([(headerRows[0][17]): tmpRow.getCell('percIncome').column.name]),
+            ([(headerRows[0][18]): tmpRow.getCell('totalPercIncome').column.name])
     ]
     (1..18).each {
         headerMapping.add(([(headerRows[1][it]): it.toString()]))

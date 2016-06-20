@@ -814,7 +814,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 19
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -937,25 +937,25 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNumber').column.name]),
             // вторая ячейка скрытая
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'date')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'opTypeCode')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'invoiceNumDate')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'invoiceCorrNumDate')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'corrInvoiceNumDate')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'corrInvCorrNumDate')]),
-            ([(headerRows[0][8]): getColumnName(tmpRow, 'buyerName')]),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'buyerInnKpp')]),
+            ([(headerRows[0][2]): tmpRow.getCell('date').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('opTypeCode').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('invoiceNumDate').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('invoiceCorrNumDate').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('corrInvoiceNumDate').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('corrInvCorrNumDate').column.name]),
+            ([(headerRows[0][8]): tmpRow.getCell('buyerName').column.name]),
+            ([(headerRows[0][9]): tmpRow.getCell('buyerInnKpp').column.name]),
 
             ([(headerRows[0][10]): 'Сведения о посреднической деятельности, указываемые комиссионером (агентом), застройщиком или техническим заказчиком']),
             ([(headerRows[1][10]): 'наименование продавца (из графы 8 части 2)/ субкомиссионера (субагента)']),
             ([(headerRows[1][11]): 'ИНН/КПП продавца (из графы 9 части 2)/ субкомиссионера (субагента)']),
             ([(headerRows[1][12]): 'номер и дата счета-фактуры, полученного от продавца (из графы 4 части 2)/ код вида сделки']),
 
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'currNameCode')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'vatSum')]),
+            ([(headerRows[0][13]): tmpRow.getCell('currNameCode').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('cost').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('vatSum').column.name]),
 
             ([(headerRows[0][16]): 'Разница стоимости с учетом НДС по корректировочному счету-фактуре']),
             ([(headerRows[1][16]): 'уменьшение']),

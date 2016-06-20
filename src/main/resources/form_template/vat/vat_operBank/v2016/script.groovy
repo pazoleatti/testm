@@ -478,7 +478,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 8
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'code')
+    String TABLE_START_VALUE = tmpRow.getCell('code').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -589,12 +589,12 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
 
     // для проверки шапки
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'code')]),
-            ([(headerRows[0][1]): getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'totalVAT')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'month1')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'month2')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'month3')]),
+            ([(headerRows[0][0]): tmpRow.getCell('code').column.name]),
+            ([(headerRows[0][1]): tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('totalVAT').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('month1').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('month2').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('month3').column.name]),
             ([(headerRows[1][0]): '1']),
             ([(headerRows[1][1]): '2']),
             ([(headerRows[1][3]): '3']),

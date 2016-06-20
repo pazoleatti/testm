@@ -974,7 +974,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 10
     int HEADER_ROW_COUNT = 4
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -1125,10 +1125,10 @@ void importData() {
 void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNum').column.name]),
             ([(headerRows[0][2]): 'Данные бухгалтерского учёта']),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'rateNds')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'sum')]),
+            ([(headerRows[0][9]): tmpRow.getCell('rateNds').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('sum').column.name]),
 
             ([(headerRows[1][2]): 'Величина корректировки налоговой базы']),
             ([(headerRows[1][6]): 'Величина корректировки НДС']),

@@ -414,7 +414,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 13
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -538,19 +538,19 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'code')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'numberFirstRecord')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'opy')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'operationDate')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'name')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('code').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('numberFirstRecord').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('opy').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('operationDate').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('name').column.name]),
             ([(headerRows[0][7]): 'Первичный документ']),
-            ([(headerRows[1][7]): getColumnName(tmpRow, 'documentNumber')]),
-            ([(headerRows[1][8]): getColumnName(tmpRow, 'date')]),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'periodCounts')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'advancePayment')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'outcomeInNalog')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'outcomeInBuh')]),
+            ([(headerRows[1][7]): tmpRow.getCell('documentNumber').column.name]),
+            ([(headerRows[1][8]): tmpRow.getCell('date').column.name]),
+            ([(headerRows[0][9]): tmpRow.getCell('periodCounts').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('advancePayment').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('outcomeInNalog').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('outcomeInBuh').column.name]),
             ([(headerRows[2][0]): '1'])
     ]
     (2..12).each { index ->

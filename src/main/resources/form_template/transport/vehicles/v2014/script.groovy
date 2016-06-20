@@ -1215,7 +1215,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 25
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -1324,32 +1324,32 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
    def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'codeOKATO')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'regionName')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'tsTypeCode')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'tsType')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'model')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'ecoClass')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'identNumber')]),
-            ([(headerRows[0][9]) : getColumnName(tmpRow, 'regNumber')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'regDate')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'regDateEnd')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'taxBase')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'baseUnit')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'year')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'pastYear')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('codeOKATO').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('regionName').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('tsTypeCode').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('tsType').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('model').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('ecoClass').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('identNumber').column.name]),
+            ([(headerRows[0][9]) : tmpRow.getCell('regNumber').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('regDate').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('regDateEnd').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('taxBase').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('baseUnit').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('year').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('pastYear').column.name]),
             ([(headerRows[0][16]): 'Сведения об угоне']),
             ([(headerRows[1][16]): 'Дата начала розыска ТС']),
             ([(headerRows[1][17]): 'Дата возврата ТС']),
-            ([(headerRows[0][18]): getColumnName(tmpRow, 'share')]),
-            ([(headerRows[0][19]): getColumnName(tmpRow, 'costOnPeriodBegin')]),
-            ([(headerRows[0][20]): getColumnName(tmpRow, 'costOnPeriodEnd')]),
-            ([(headerRows[0][21]): getColumnName(tmpRow, 'benefitStartDate')]),
-            ([(headerRows[0][22]): getColumnName(tmpRow, 'benefitEndDate')]),
-            ([(headerRows[0][23]): getColumnName(tmpRow, 'taxBenefitCode')]),
-            ([(headerRows[0][24]): getColumnName(tmpRow, 'base')]),
-            ([(headerRows[0][25]): getColumnName(tmpRow, 'version')]),
+            ([(headerRows[0][18]): tmpRow.getCell('share').column.name]),
+            ([(headerRows[0][19]): tmpRow.getCell('costOnPeriodBegin').column.name]),
+            ([(headerRows[0][20]): tmpRow.getCell('costOnPeriodEnd').column.name]),
+            ([(headerRows[0][21]): tmpRow.getCell('benefitStartDate').column.name]),
+            ([(headerRows[0][22]): tmpRow.getCell('benefitEndDate').column.name]),
+            ([(headerRows[0][23]): tmpRow.getCell('taxBenefitCode').column.name]),
+            ([(headerRows[0][24]): tmpRow.getCell('base').column.name]),
+            ([(headerRows[0][25]): tmpRow.getCell('version').column.name]),
             ([(headerRows[2][0]) : '1'])
     ]
     (2..25).each { index ->

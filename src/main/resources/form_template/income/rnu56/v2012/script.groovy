@@ -609,7 +609,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 16
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_START_VALUE = tmpRow.getCell('number').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -695,17 +695,17 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'bill')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'buyDate')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'currency')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'nominal')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'price')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'maturity')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'termDealBill')]),
-            ([(headerRows[0][9]) : getColumnName(tmpRow, 'percIncome')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'implementationDate')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'sum')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('number').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('bill').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('buyDate').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('currency').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('nominal').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('price').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('maturity').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('termDealBill').column.name]),
+            ([(headerRows[0][9]) : tmpRow.getCell('percIncome').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('implementationDate').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('sum').column.name]),
             ([(headerRows[0][12]): 'Фактически поступившая сумма дисконта']),
             ([(headerRows[0][14]): 'Сумма начисленного процентного дохода за отчётный период']),
             ([(headerRows[1][12]): 'в валюте']),

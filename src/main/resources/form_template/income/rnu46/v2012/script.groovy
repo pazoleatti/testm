@@ -764,7 +764,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 19
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -832,27 +832,27 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][1]) : getColumnName(tmpRow, 'invNumber')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'amortGroup')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'usefulLife')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'monthsUsed')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'usefulLifeWithUsed')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'specCoef')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][1]) : tmpRow.getCell('invNumber').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('cost').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('amortGroup').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('usefulLife').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('monthsUsed').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('usefulLifeWithUsed').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('specCoef').column.name]),
             ([(headerRows[0][9]) : '10% (30%) от первоначальной стоимости, включаемые в расходы']),
             ([(headerRows[1][9]) : 'За месяц']),
             ([(headerRows[1][10]): 'с начала налогового периода']),
             ([(headerRows[1][11]): 'с даты ввода в эксплуатацию']),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'amortNorm')]),
+            ([(headerRows[0][12]): tmpRow.getCell('amortNorm').column.name]),
             ([(headerRows[0][13]): 'Сумма начисленной амортизации']),
             ([(headerRows[1][13]): 'за месяц']),
             ([(headerRows[1][14]): 'с начала налогового периода']),
             ([(headerRows[1][15]): 'с даты ввода в эксплуатацию']),
-            ([(headerRows[0][16]): getColumnName(tmpRow, 'exploitationStart')]),
-            ([(headerRows[0][17]): getColumnName(tmpRow, 'usefullLifeEnd')]),
-            ([(headerRows[0][18]): getColumnName(tmpRow, 'rentEnd')])
+            ([(headerRows[0][16]): tmpRow.getCell('exploitationStart').column.name]),
+            ([(headerRows[0][17]): tmpRow.getCell('usefullLifeEnd').column.name]),
+            ([(headerRows[0][18]): tmpRow.getCell('rentEnd').column.name])
     ]
     (1..19).each {
         headerMapping.add(([(headerRows[2][it - 1]): it.toString()]))

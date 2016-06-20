@@ -195,7 +195,7 @@ boolean isBank() {
 void importData() {
     def tmpRow = formData.createDataRow()
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -258,11 +258,11 @@ void checkHeaderXls(def headerRows, def tmpRow) {
     checkHeaderSize(headerRows, 6, 3)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),//'№ п/п']),
-            ([(headerRows[0][1]): getColumnName(tmpRow, 'name')]),//'Наименование сделки']),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNum').column.name]),//'№ п/п']),
+            ([(headerRows[0][1]): tmpRow.getCell('name').column.name]),//'Наименование сделки']),
             ([(headerRows[0][2]): ('Сумма фактического дохода/расхода по нерыночным сделкам, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.') + ' (налоговый учет)')]),//'Сумма фактического дохода/расхода по нерыночным сделкам, тыс. руб. (налоговый учет)']),
             ([(headerRows[0][3]): ('Сумма доначислений до рыночного уровня, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),//'Сумма доначислений до рыночного уровня, тыс. руб.']),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'level')]),//'Уровень доначислений/ не учитываемых расходов (в % от факта)']),
+            ([(headerRows[0][4]): tmpRow.getCell('level').column.name]),//'Уровень доначислений/ не учитываемых расходов (в % от факта)']),
             ([(headerRows[0][5]): ('Налоговое бремя, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),//'Налоговое бремя, тыс. руб.']),
             ([(headerRows[1][2]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов']),
             ([(headerRows[1][3]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов']),

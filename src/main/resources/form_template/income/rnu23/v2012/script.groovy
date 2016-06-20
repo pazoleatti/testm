@@ -666,7 +666,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 21
     int HEADER_ROW_COUNT = 4
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_START_VALUE = tmpRow.getCell('number').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -750,14 +750,14 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'contract')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'contractDate')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'amountOfTheGuarantee')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'dateOfTransaction')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'rateOfTheBankOfRussia')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'interestRate')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'baseForCalculation')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('number').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('contract').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('contractDate').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('amountOfTheGuarantee').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('dateOfTransaction').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('rateOfTheBankOfRussia').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('interestRate').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('baseForCalculation').column.name]),
             ([(headerRows[0][9]) : 'Расчётный период']),
             ([(headerRows[0][13]): 'Сумма в налоговом учёте']),
             ([(headerRows[0][15]): 'Сумма в бухгалтерском учёте']),

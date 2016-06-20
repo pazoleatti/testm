@@ -415,21 +415,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
 
     def headerMapping = [
             ([(headerRows[0][8]): 'Основание для совершения операции']),
-            ([(headerRows[1][2]): getColumnName(tmpRow, 'name')]),
-            ([(headerRows[1][3]): getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[1][4]): getColumnName(tmpRow, 'countryName')]),
-            ([(headerRows[1][5]): getColumnName(tmpRow, 'transDoneDate')]),
-            ([(headerRows[1][6]): getColumnName(tmpRow, 'course')]),
-            ([(headerRows[1][7]): getColumnName(tmpRow, 'incomeCode')]),
+            ([(headerRows[1][2]): tmpRow.getCell('name').column.name]),
+            ([(headerRows[1][3]): tmpRow.getCell('iksr').column.name]),
+            ([(headerRows[1][4]): tmpRow.getCell('countryName').column.name]),
+            ([(headerRows[1][5]): tmpRow.getCell('transDoneDate').column.name]),
+            ([(headerRows[1][6]): tmpRow.getCell('course').column.name]),
+            ([(headerRows[1][7]): tmpRow.getCell('incomeCode').column.name]),
             ([(headerRows[1][8]): 'Номер']),
             ([(headerRows[1][9]): 'Дата']),
-            ([(headerRows[1][10]): getColumnName(tmpRow, 'count')]),
-            ([(headerRows[1][11]): getColumnName(tmpRow, 'dealPrice')]),
-            ([(headerRows[1][12]): getColumnName(tmpRow, 'taxPrice')]),
-            ([(headerRows[1][13]): getColumnName(tmpRow, 'sum1')]),
-            ([(headerRows[1][14]): getColumnName(tmpRow, 'incomeRate')]),
-            ([(headerRows[1][15]): getColumnName(tmpRow, 'sum2')]),
-            ([(headerRows[1][16]): getColumnName(tmpRow, 'sum3')])
+            ([(headerRows[1][10]): tmpRow.getCell('count').column.name]),
+            ([(headerRows[1][11]): tmpRow.getCell('dealPrice').column.name]),
+            ([(headerRows[1][12]): tmpRow.getCell('taxPrice').column.name]),
+            ([(headerRows[1][13]): tmpRow.getCell('sum1').column.name]),
+            ([(headerRows[1][14]): tmpRow.getCell('incomeRate').column.name]),
+            ([(headerRows[1][15]): tmpRow.getCell('sum2').column.name]),
+            ([(headerRows[1][16]): tmpRow.getCell('sum3').column.name])
     ]
     (2..16).each {
         headerMapping.add([(headerRows[2][it]): it.toString()])

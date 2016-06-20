@@ -195,7 +195,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 5
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -262,13 +262,13 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('rowNum').column.name]),
             ([(headerRows[0][1]) : 'Информация о лице']),
             ([(headerRows[0][3]) : 'Информация о сделке']),
-            ([(headerRows[1][1]) : getColumnName(tmpRow, 'ikksr')]),
-            ([(headerRows[1][2]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[1][3]) : getColumnName(tmpRow, 'transactionName')]),
-            ([(headerRows[1][4]) : getColumnName(tmpRow, 'sum')])
+            ([(headerRows[1][1]) : tmpRow.getCell('ikksr').column.name]),
+            ([(headerRows[1][2]) : tmpRow.getCell('name').column.name]),
+            ([(headerRows[1][3]) : tmpRow.getCell('transactionName').column.name]),
+            ([(headerRows[1][4]) : tmpRow.getCell('sum').column.name])
     ]
     (1..5).each {
         headerMapping.add(([(headerRows[2][it - 1]): it.toString()]))

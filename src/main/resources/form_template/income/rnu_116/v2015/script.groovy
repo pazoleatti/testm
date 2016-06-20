@@ -572,28 +572,28 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'dealNum')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'dealType')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'dealDate')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'dealDoneDate')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'countryName')]),
-            ([(headerRows[0][8]): getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'dealFocus')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'reqCurCode')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'reqVolume')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'guarCurCode')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'guarVolume')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'price')]),
+            ([(headerRows[0][2]): tmpRow.getCell('dealNum').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('dealType').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('dealDate').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('dealDoneDate').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('iksr').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('countryName').column.name]),
+            ([(headerRows[0][8]): tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][9]): tmpRow.getCell('dealFocus').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('reqCurCode').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('reqVolume').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('guarCurCode').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('guarVolume').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('price').column.name]),
             ([(headerRows[0][15]): 'Курс Банка России на дату исполнения (досрочного исполнения) сделки, руб.']),
             ([(headerRows[0][16]): '']),
             ([(headerRows[0][17]): 'Требования (обязательства) по сделке, руб.']),
             ([(headerRows[0][18]): '']),
             ([(headerRows[0][19]): 'Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб.']),
             ([(headerRows[0][20]): '']),
-            ([(headerRows[0][21]): getColumnName(tmpRow, 'marketPrice')]),
-            ([(headerRows[0][22]): getColumnName(tmpRow, 'incomeDelta')]),
-            ([(headerRows[0][23]): getColumnName(tmpRow, 'outcomeDelta')])
+            ([(headerRows[0][21]): tmpRow.getCell('marketPrice').column.name]),
+            ([(headerRows[0][22]): tmpRow.getCell('incomeDelta').column.name]),
+            ([(headerRows[0][23]): tmpRow.getCell('outcomeDelta').column.name])
     ]
     (1..23).each {
         headerMapping.add([(headerRows[2][it]): it.toString()])

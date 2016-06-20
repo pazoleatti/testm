@@ -619,7 +619,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 16
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -730,17 +730,17 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'contragent')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'inn')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('contragent').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('inn').column.name]),
             ([(headerRows[0][4]) : 'Договор цессии']),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'amount')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'amountForReserve')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'repaymentDate')]),
-            ([(headerRows[0][9]) : getColumnName(tmpRow, 'dateOfAssignment')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'income')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'result')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'part2Date')]),
+            ([(headerRows[0][6]) : tmpRow.getCell('amount').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('amountForReserve').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('repaymentDate').column.name]),
+            ([(headerRows[0][9]) : tmpRow.getCell('dateOfAssignment').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('income').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('result').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('part2Date').column.name]),
             ([(headerRows[0][13]): 'Убыток, относящийся к расходам']),
             ([(headerRows[1][4]) : 'Номер']),
             ([(headerRows[1][5]) : 'Дата']),

@@ -953,7 +953,6 @@ public final class ScriptUtils {
      * Заголовок колонки по алиасу
      */
     public static String getColumnName(DataRow<Cell> row, String alias) {
-
         if (row == null || alias == null) {
             return "";
         }
@@ -961,10 +960,11 @@ public final class ScriptUtils {
         if (cell == null) {
             return "";
         }
-        // убрал замену одного процента на два, так как после ввода rowError стало неактуально
-        // logger.error("%s", msg) корректно обрабатывает процента
-        // напрямую вызов logger.error("...%...") происходить не должен
-        return cell.getColumn().getName();
+        String name = cell.getColumn().getShortName();
+        if (name == null || name.isEmpty()) {
+            name = cell.getColumn().getName();
+        }
+        return name;
     }
 
     /**

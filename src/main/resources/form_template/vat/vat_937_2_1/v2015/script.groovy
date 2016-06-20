@@ -520,7 +520,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 20
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -602,21 +602,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][1]): getColumnName(tmpRow, 'opTypeCode')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'invoiceNumDate')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'invoiceCorrNumDate')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'corrInvoiceNumDate')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'corrInvCorrNumDate')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'buyerName')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'buyerInnKpp')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][1]): tmpRow.getCell('opTypeCode').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('invoiceNumDate').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('invoiceCorrNumDate').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('corrInvoiceNumDate').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('corrInvCorrNumDate').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('buyerName').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('buyerInnKpp').column.name]),
 
             ([(headerRows[0][8]): 'Сведения о посреднике (комиссионере, агенте)']),
             ([(headerRows[1][8]): 'наименование посредника']),
             ([(headerRows[1][9]): 'ИНН/КПП посредника']),
 
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'paymentDocNumDate')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'currNameCode')]),
+            ([(headerRows[0][10]): tmpRow.getCell('paymentDocNumDate').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('currNameCode').column.name]),
 
             ([(headerRows[0][12]): 'Стоимость продаж по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в валюте счета-фактуры']),
             ([(headerRows[1][12]): 'в валюте счета-фактуры']),
@@ -631,7 +631,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][17]): '18 процентов']),
             ([(headerRows[1][18]): '10 процентов']),
 
-            ([(headerRows[0][19]): getColumnName(tmpRow, 'bonifSalesSum')]),
+            ([(headerRows[0][19]): tmpRow.getCell('bonifSalesSum').column.name]),
             ([(headerRows[2][12]): '13а']),
             ([(headerRows[2][13]): '13б'])
     ]

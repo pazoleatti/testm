@@ -872,7 +872,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 24
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_START_VALUE = tmpRow.getCell('number').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 

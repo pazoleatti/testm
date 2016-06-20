@@ -524,7 +524,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 15
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_START_VALUE = tmpRow.getCell('number').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -608,20 +608,20 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'bill')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'purchaseDate')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'purchasePrice')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'purchaseOutcome')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'implementationDate')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'implementationPrice')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'implementationOutcome')]),
-            ([(headerRows[0][9]) : getColumnName(tmpRow, 'price')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'percent')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'implementationpPriceTax')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'allIncome')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'implementationPriceUp')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'income')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('number').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('bill').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('purchaseDate').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('purchasePrice').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('purchaseOutcome').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('implementationDate').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('implementationPrice').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('implementationOutcome').column.name]),
+            ([(headerRows[0][9]) : tmpRow.getCell('price').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('percent').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('implementationpPriceTax').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('allIncome').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('implementationPriceUp').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('income').column.name]),
             ([(headerRows[1][0]): '1'])
     ]
     (2..14).each {

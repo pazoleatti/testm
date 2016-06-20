@@ -292,7 +292,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 10
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -422,13 +422,13 @@ void importData() {
 void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'date')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'nameOf')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNum').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('iksr').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('date').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('nameOf').column.name]),
             ([(headerRows[0][6]): 'Данные налогового учета о доходе, доначисленном до рыночного уровня']),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'ndsSum')]),
+            ([(headerRows[0][9]): tmpRow.getCell('ndsSum').column.name]),
             ([(headerRows[1][6]): 'РНУ']),
             ([(headerRows[1][7]): 'Номер записи в РНУ']),
             ([(headerRows[1][8]): 'Сумма']),

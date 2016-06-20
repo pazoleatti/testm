@@ -619,7 +619,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 19
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -703,21 +703,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'billNumber')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'creationDate')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'nominal')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'sellingPrice')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'currencyCode')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('billNumber').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('creationDate').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('nominal').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('sellingPrice').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('currencyCode').column.name]),
             ([(headerRows[0][7]): 'Курс Банка России']),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'paymentTermStart')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'paymentTermEnd')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'interestRate')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'operationDate')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'rateWithDiscCoef')]),
+            ([(headerRows[0][9]): tmpRow.getCell('paymentTermStart').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('paymentTermEnd').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('interestRate').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('operationDate').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('rateWithDiscCoef').column.name]),
             ([(headerRows[0][14]): 'Сумма дисконта начисленного на начало отчётного периода']),
             ([(headerRows[0][16]): 'Сумма дисконта начисленного на конец отчётного периода']),
-            ([(headerRows[0][18]): getColumnName(tmpRow, 'sum')]),
+            ([(headerRows[0][18]): tmpRow.getCell('sum').column.name]),
             ([(headerRows[1][7]): 'на дату составления векселя']),
             ([(headerRows[1][8]): 'на дату совершения операции']),
             ([(headerRows[1][14]): 'в валюте']),

@@ -106,7 +106,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 8
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -178,14 +178,14 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
-            ([(headerRows[0][1]): getColumnName(tmpRow, 'taxName')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'dynamics')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'factors')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'areas')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'offers')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'offersCA')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'other')])
+            ([(headerRows[0][0]): tmpRow.getCell('rowNum').column.name]),
+            ([(headerRows[0][1]): tmpRow.getCell('taxName').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('dynamics').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('factors').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('areas').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('offers').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('offersCA').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('other').column.name])
     ]
     (0..7).each { index ->
         headerMapping.add(([(headerRows[1][index]): (index + 1).toString()]))

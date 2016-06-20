@@ -998,7 +998,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 39
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 0
 
@@ -1123,45 +1123,45 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
 
     def headerMapping = [
             // название первого столбца хранится в нулевой скрытой графе
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'taxAuthority')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'kpp')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'okato')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'tsTypeCode')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'tsType')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'model')]),
-            ([(headerRows[0][8]): getColumnName(tmpRow, 'ecoClass')]),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'vi')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'regNumber')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'regDate')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'regDateEnd')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'taxBase')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'taxBaseOkeiUnit')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'createYear')]),
-            ([(headerRows[0][16]): getColumnName(tmpRow, 'years')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('taxAuthority').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('kpp').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('okato').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('tsTypeCode').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('tsType').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('model').column.name]),
+            ([(headerRows[0][8]): tmpRow.getCell('ecoClass').column.name]),
+            ([(headerRows[0][9]): tmpRow.getCell('vi').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('regNumber').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('regDate').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('regDateEnd').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('taxBase').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('taxBaseOkeiUnit').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('createYear').column.name]),
+            ([(headerRows[0][16]): tmpRow.getCell('years').column.name]),
             ([(headerRows[0][17]): 'Сведения об угоне']),
             ([(headerRows[1][17]): 'Дата начала розыска ТС']),
             ([(headerRows[1][18]): 'Дата возврата ТС']),
-            ([(headerRows[0][19]): getColumnName(tmpRow, 'periodStartCost')]),
-            ([(headerRows[0][20]): getColumnName(tmpRow, 'periodEndCost')]),
-            ([(headerRows[0][21]): getColumnName(tmpRow, 'ownMonths')]),
-            ([(headerRows[0][22]): getColumnName(tmpRow, 'partRight')]),
-            ([(headerRows[0][23]): getColumnName(tmpRow, 'coef362')]),
-            ([(headerRows[0][24]): getColumnName(tmpRow, 'taxRate')]),
-            ([(headerRows[0][25]): getColumnName(tmpRow, 'calculatedTaxSum')]),
-            ([(headerRows[0][26]): getColumnName(tmpRow, 'benefitMonths')]),
-            ([(headerRows[0][27]): getColumnName(tmpRow, 'benefitStartDate')]),
-            ([(headerRows[0][28]): getColumnName(tmpRow, 'benefitEndDate')]),
-            ([(headerRows[0][29]): getColumnName(tmpRow, 'coefKl')]),
-            ([(headerRows[0][30]): getColumnName(tmpRow, 'taxBenefitCode')]),
-            ([(headerRows[0][31]): getColumnName(tmpRow, 'benefitSum')]),
-            ([(headerRows[0][32]): getColumnName(tmpRow, 'taxBenefitCodeDecrease')]),
-            ([(headerRows[0][33]): getColumnName(tmpRow, 'benefitSumDecrease')]),
-            ([(headerRows[0][34]): getColumnName(tmpRow, 'benefitCodeReduction')]),
-            ([(headerRows[0][35]): getColumnName(tmpRow, 'benefitSumReduction')]),
-            ([(headerRows[0][36]): getColumnName(tmpRow, 'koefKp')]),
-            ([(headerRows[0][37]): getColumnName(tmpRow, 'taxSumToPay')]),
-            ([(headerRows[0][38]): getColumnName(tmpRow, 'benefitBase')])
+            ([(headerRows[0][19]): tmpRow.getCell('periodStartCost').column.name]),
+            ([(headerRows[0][20]): tmpRow.getCell('periodEndCost').column.name]),
+            ([(headerRows[0][21]): tmpRow.getCell('ownMonths').column.name]),
+            ([(headerRows[0][22]): tmpRow.getCell('partRight').column.name]),
+            ([(headerRows[0][23]): tmpRow.getCell('coef362').column.name]),
+            ([(headerRows[0][24]): tmpRow.getCell('taxRate').column.name]),
+            ([(headerRows[0][25]): tmpRow.getCell('calculatedTaxSum').column.name]),
+            ([(headerRows[0][26]): tmpRow.getCell('benefitMonths').column.name]),
+            ([(headerRows[0][27]): tmpRow.getCell('benefitStartDate').column.name]),
+            ([(headerRows[0][28]): tmpRow.getCell('benefitEndDate').column.name]),
+            ([(headerRows[0][29]): tmpRow.getCell('coefKl').column.name]),
+            ([(headerRows[0][30]): tmpRow.getCell('taxBenefitCode').column.name]),
+            ([(headerRows[0][31]): tmpRow.getCell('benefitSum').column.name]),
+            ([(headerRows[0][32]): tmpRow.getCell('taxBenefitCodeDecrease').column.name]),
+            ([(headerRows[0][33]): tmpRow.getCell('benefitSumDecrease').column.name]),
+            ([(headerRows[0][34]): tmpRow.getCell('benefitCodeReduction').column.name]),
+            ([(headerRows[0][35]): tmpRow.getCell('benefitSumReduction').column.name]),
+            ([(headerRows[0][36]): tmpRow.getCell('koefKp').column.name]),
+            ([(headerRows[0][37]): tmpRow.getCell('taxSumToPay').column.name]),
+            ([(headerRows[0][38]): tmpRow.getCell('benefitBase').column.name])
     ]
     (1..38).each { index ->
         headerMapping.add(([(headerRows[2][index]): index.toString()]))

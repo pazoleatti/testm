@@ -482,21 +482,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'dealNum')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'dealDate')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'costReserve')]),
-            ([(headerRows[0][8]): getColumnName(tmpRow, 'repaymentDate')]),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'concessionsDate')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'income')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'finResult')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'code')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'marketPrice')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'finResultTax')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'incomeCorrection')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('iksr').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('dealNum').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('dealDate').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('cost').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('costReserve').column.name]),
+            ([(headerRows[0][8]): tmpRow.getCell('repaymentDate').column.name]),
+            ([(headerRows[0][9]): tmpRow.getCell('concessionsDate').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('income').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('finResult').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('code').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('marketPrice').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('finResultTax').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('incomeCorrection').column.name]),
             ([(headerRows[1][0]): '1'])
     ]
     (2..15).each {

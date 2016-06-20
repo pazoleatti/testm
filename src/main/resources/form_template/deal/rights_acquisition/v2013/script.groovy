@@ -265,17 +265,17 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     def headerMapping = [
             ([(headerRows[0][0]) : 'Общая информация о контрагенте - юридическом лице']),
             ([(headerRows[0][6]) : 'Сведения о сделке']),
-            ([(headerRows[1][0]) : getColumnName(tmpRow, 'rowNum')]),
-            ([(headerRows[1][1]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[1][2]) : getColumnName(tmpRow, 'innKio')]),
-            ([(headerRows[1][3]) : getColumnName(tmpRow, 'country')]),
-            ([(headerRows[1][4]) : getColumnName(tmpRow, 'contractNum')]),
-            ([(headerRows[1][5]) : getColumnName(tmpRow, 'contractDate')]),
-            ([(headerRows[1][6]) : getColumnName(tmpRow, 'okeiCode')]),
-            ([(headerRows[1][7]) : getColumnName(tmpRow, 'count')]),
-            ([(headerRows[1][8]) : getColumnName(tmpRow, 'price')]),
-            ([(headerRows[1][9]) : getColumnName(tmpRow, 'totalCost')]),
-            ([(headerRows[1][10]): getColumnName(tmpRow, 'transactionDate')])
+            ([(headerRows[1][0]) : tmpRow.getCell('rowNum').column.name]),
+            ([(headerRows[1][1]) : tmpRow.getCell('name').column.name]),
+            ([(headerRows[1][2]) : tmpRow.getCell('innKio').column.name]),
+            ([(headerRows[1][3]) : tmpRow.getCell('country').column.name]),
+            ([(headerRows[1][4]) : tmpRow.getCell('contractNum').column.name]),
+            ([(headerRows[1][5]) : tmpRow.getCell('contractDate').column.name]),
+            ([(headerRows[1][6]) : tmpRow.getCell('okeiCode').column.name]),
+            ([(headerRows[1][7]) : tmpRow.getCell('count').column.name]),
+            ([(headerRows[1][8]) : tmpRow.getCell('price').column.name]),
+            ([(headerRows[1][9]) : tmpRow.getCell('totalCost').column.name]),
+            ([(headerRows[1][10]): tmpRow.getCell('transactionDate').column.name])
     ]
     (0..10).each {
         headerMapping.add(([(headerRows[2][it]): 'гр. ' + (it + 1).toString()]))

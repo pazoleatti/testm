@@ -262,7 +262,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 25
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы

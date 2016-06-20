@@ -370,14 +370,14 @@ void importData() {
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 1)
 
     def headerMapping = [
-            (xml.row[0].cell[0]): getColumnName(tmpRow, 'number'),
-            (xml.row[0].cell[2]): getColumnName(tmpRow, 'regionBank'),
-            (xml.row[0].cell[3]): getColumnName(tmpRow, 'regionBankDivision'),
-            (xml.row[0].cell[4]): getColumnName(tmpRow, 'divisionName'),
-            (xml.row[0].cell[5]): getColumnName(tmpRow, 'kpp'),
-            (xml.row[0].cell[6]): getColumnName(tmpRow, 'avepropertyPricerageCost'),
-            (xml.row[0].cell[7]): getColumnName(tmpRow, 'workersCount'),
-            (xml.row[0].cell[8]): getColumnName(tmpRow, 'subjectTaxCredit'),
+            (xml.row[0].cell[0]): tmpRow.getCell('number').column.name,
+            (xml.row[0].cell[2]): tmpRow.getCell('regionBank').column.name,
+            (xml.row[0].cell[3]): tmpRow.getCell('regionBankDivision').column.name,
+            (xml.row[0].cell[4]): tmpRow.getCell('divisionName').column.name,
+            (xml.row[0].cell[5]): tmpRow.getCell('kpp').column.name,
+            (xml.row[0].cell[6]): tmpRow.getCell('avepropertyPricerageCost').column.name,
+            (xml.row[0].cell[7]): tmpRow.getCell('workersCount').column.name,
+            (xml.row[0].cell[8]): tmpRow.getCell('subjectTaxCredit').column.name,
             (xml.row[0].cell[9]): 'Льготы по налогу в бюджет субъекта (руб.)',
             (xml.row[1].cell[9]): 'Уменьшение суммы налога (руб.)',
             (xml.row[1].cell[10]): 'Ставка налога (%)',

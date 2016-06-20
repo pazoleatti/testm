@@ -505,7 +505,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 6
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_START_VALUE = tmpRow.getCell('number').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -580,8 +580,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'number')]),
-            ([(headerRows[0][1]): getColumnName(tmpRow, 'amortGroup')]),
+            ([(headerRows[0][0]): tmpRow.getCell('number').column.name]),
+            ([(headerRows[0][1]): tmpRow.getCell('amortGroup').column.name]),
             ([(headerRows[0][2]): 'Сумма расходов в виде капитальных вложений, предусмотренных п. 9 ст. 258 НК РФ']),
             ([(headerRows[1][2]): 'За отчётный месяц']),
             ([(headerRows[1][3]): 'С начала налогового периода']),

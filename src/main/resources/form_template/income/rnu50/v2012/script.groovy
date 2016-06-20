@@ -381,7 +381,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 6
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -466,9 +466,9 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'rnu49rowNumber')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'invNumber')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('rnu49rowNumber').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('invNumber').column.name]),
             ([(headerRows[0][4]): 'Убыток, приходящийся на отчётный период']),
             ([(headerRows[1][4]): 'от реализации в отчётном налоговом периоде']),
             ([(headerRows[1][5]): 'от реализации в предыдущих налоговых периодах']),

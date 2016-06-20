@@ -493,7 +493,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 8
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'series')
+    String TABLE_START_VALUE = tmpRow.getCell('series').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 0
 
@@ -642,14 +642,14 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'series')]),
-            ([(headerRows[0][1]): getColumnName(tmpRow, 'amount')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'nominal')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'shortPositionDate')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'balance2')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'averageWeightedPrice')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'termBondsIssued')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'percIncome')])
+            ([(headerRows[0][0]): tmpRow.getCell('series').column.name]),
+            ([(headerRows[0][1]): tmpRow.getCell('amount').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('nominal').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('shortPositionDate').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('balance2').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('averageWeightedPrice').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('termBondsIssued').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('percIncome').column.name])
     ]
     (1..8).each {
         headerMapping.add(([(headerRows[1][it - 1]): it.toString()]))

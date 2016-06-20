@@ -443,7 +443,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 10
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -526,15 +526,15 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'operDate')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNum').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('operDate').column.name]),
 
             ([(headerRows[0][3]): 'Арендодатель']),
             ([(headerRows[1][3]): 'наименование']),
             ([(headerRows[1][4]): 'ИНН']),
 
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'balanceNumber')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'sum')]),
+            ([(headerRows[0][5]): tmpRow.getCell('balanceNumber').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('sum').column.name]),
 
             ([(headerRows[0][7]): 'НДС']),
             ([(headerRows[1][7]): 'номер мемориального ордера']),

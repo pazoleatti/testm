@@ -889,7 +889,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 70
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'innRF')
+    String TABLE_START_VALUE = tmpRow.getCell('innRF').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы

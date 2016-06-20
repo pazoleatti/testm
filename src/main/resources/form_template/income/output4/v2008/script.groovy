@@ -56,7 +56,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 3
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -130,9 +130,9 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][1]) : getColumnName(tmpRow, 'taxName'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'taxSum'),
+            (headerRows[0][0]) : tmpRow.getCell('rowNumber').column.name,
+            (headerRows[0][1]) : tmpRow.getCell('taxName').column.name,
+            (headerRows[0][2]) : tmpRow.getCell('taxSum').column.name,
             (headerRows[1][0]) : '1',
             (headerRows[1][1]) : '2',
             (headerRows[1][2]) : '3'

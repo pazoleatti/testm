@@ -742,7 +742,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 15
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_START_VALUE = tmpRow.getCell('number').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -875,8 +875,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'number')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'numberAccount')]),
+            ([(headerRows[0][0]): tmpRow.getCell('number').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('numberAccount').column.name]),
             ([(headerRows[0][3]): 'Задолженность от 45 до 90 дней']),
             ([(headerRows[1][3]): 'сумма долга']),
             ([(headerRows[1][4]): 'норматив отчислений 50%']),
@@ -885,7 +885,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][6]): 'сумма долга']),
             ([(headerRows[1][7]): 'норматив отчислений 100%']),
             ([(headerRows[1][8]): 'расчётный резерв']),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'totalReserve')]),
+            ([(headerRows[0][9]): tmpRow.getCell('totalReserve').column.name]),
             ([(headerRows[0][10]): 'Резерв']),
             ([(headerRows[1][10]): 'на предыдущую отчётную дату']),
             ([(headerRows[1][11]): 'на отчетную дату']),

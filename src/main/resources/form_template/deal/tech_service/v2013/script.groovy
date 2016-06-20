@@ -318,22 +318,22 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     def headerMapping = [
             (headerRows[0][0]) : 'Общая информация',
             (headerRows[0][4]) : 'Сведения о сделке',
-            (headerRows[1][0]) : getColumnName(tmpRow, 'rowNum'),
-            (headerRows[1][1]) : getColumnName(tmpRow, 'jurName'),
-            (headerRows[1][2]) : getColumnName(tmpRow, 'innKio'),
-            (headerRows[1][3]) : getColumnName(tmpRow, 'countryCode'),
-            (headerRows[1][4]) : getColumnName(tmpRow, 'bankSum'),
-            (headerRows[1][5]) : getColumnName(tmpRow, 'contractNum'),
-            (headerRows[1][6]) : getColumnName(tmpRow, 'contractDate'),
+            (headerRows[1][0]) : tmpRow.getCell('rowNum').column.name,
+            (headerRows[1][1]) : tmpRow.getCell('jurName').column.name,
+            (headerRows[1][2]) : tmpRow.getCell('innKio').column.name,
+            (headerRows[1][3]) : tmpRow.getCell('countryCode').column.name,
+            (headerRows[1][4]) : tmpRow.getCell('bankSum').column.name,
+            (headerRows[1][5]) : tmpRow.getCell('contractNum').column.name,
+            (headerRows[1][6]) : tmpRow.getCell('contractDate').column.name,
             (headerRows[1][7]) : 'Адрес местонахождения объекта недвижимости',
-            (headerRows[1][11]): getColumnName(tmpRow, 'count'),
-            (headerRows[1][12]): getColumnName(tmpRow, 'price'),
-            (headerRows[1][13]): getColumnName(tmpRow, 'cost'),
-            (headerRows[1][14]): getColumnName(tmpRow, 'transactionDate'),
-            (headerRows[2][7]) : getColumnName(tmpRow, 'country'),
-            (headerRows[2][8]) : getColumnName(tmpRow, 'region'),
-            (headerRows[2][9]) : getColumnName(tmpRow, 'city'),
-            (headerRows[2][10]): getColumnName(tmpRow, 'settlement')
+            (headerRows[1][11]): tmpRow.getCell('count').column.name,
+            (headerRows[1][12]): tmpRow.getCell('price').column.name,
+            (headerRows[1][13]): tmpRow.getCell('cost').column.name,
+            (headerRows[1][14]): tmpRow.getCell('transactionDate').column.name,
+            (headerRows[2][7]) : tmpRow.getCell('country').column.name,
+            (headerRows[2][8]) : tmpRow.getCell('region').column.name,
+            (headerRows[2][9]) : tmpRow.getCell('city').column.name,
+            (headerRows[2][10]): tmpRow.getCell('settlement').column.name
     ]
 
     (0..14).each{

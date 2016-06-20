@@ -549,7 +549,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 12
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_START_VALUE = tmpRow.getCell('number').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 0
 
@@ -661,17 +661,17 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'issuer')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'registrationNumber')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'buyDate')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'bondsCount')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'upCost')]),
-            ([(headerRows[0][9]) : getColumnName(tmpRow, 'circulationTerm')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'percent')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'currencyCode')])
+            ([(headerRows[0][0]) : tmpRow.getCell('number').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('issuer').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('registrationNumber').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('buyDate').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('cost').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('bondsCount').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('upCost').column.name]),
+            ([(headerRows[0][9]) : tmpRow.getCell('circulationTerm').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('percent').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('currencyCode').column.name])
     ]
     (1..11).each {
         headerMapping.add(([(headerRows[1][it]): it.toString()]))

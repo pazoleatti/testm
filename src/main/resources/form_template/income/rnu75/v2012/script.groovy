@@ -264,7 +264,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 8
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_START_VALUE = tmpRow.getCell('number').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -349,12 +349,12 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'number')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'date')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'depo')]),
+            ([(headerRows[0][0]): tmpRow.getCell('number').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('date').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('depo').column.name]),
             ([(headerRows[0][4]): 'Основание для совершения операции']),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'taxSum')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'factSum')]),
+            ([(headerRows[0][6]): tmpRow.getCell('taxSum').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('factSum').column.name]),
             ([(headerRows[1][4]): 'номер']),
             ([(headerRows[1][5]): 'дата']),
             ([(headerRows[2][0]): '1'])

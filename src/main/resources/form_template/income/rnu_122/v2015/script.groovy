@@ -414,26 +414,26 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'countryName')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'code')]),
+            ([(headerRows[0][2]): tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('iksr').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('countryName').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('code').column.name]),
             ([(headerRows[0][6]): 'Первичный документ']),
             ([(headerRows[0][7]): '']),
-            ([(headerRows[0][8]): getColumnName(tmpRow, 'sum1')]),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'course')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'transDoneDate')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'course2')]),
+            ([(headerRows[0][8]): tmpRow.getCell('sum1').column.name]),
+            ([(headerRows[0][9]): tmpRow.getCell('course').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('transDoneDate').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('course2').column.name]),
             ([(headerRows[0][12]): 'Расчетный период (согласно условиям сделки)']),
             ([(headerRows[0][13]): '']),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'base')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'dealPay')]),
+            ([(headerRows[0][14]): tmpRow.getCell('base').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('dealPay').column.name]),
             ([(headerRows[0][16]): 'Сумма фактического дохода / расхода, руб.']),
             ([(headerRows[0][17]): '']),
-            ([(headerRows[0][18]): getColumnName(tmpRow, 'tradePay')]),
+            ([(headerRows[0][18]): tmpRow.getCell('tradePay').column.name]),
             ([(headerRows[0][19]): 'Рыночная сумма дохода (расхода), выраженная в:']),
             ([(headerRows[0][20]): '']),
-            ([(headerRows[0][21]): getColumnName(tmpRow, 'sum6')])
+            ([(headerRows[0][21]): tmpRow.getCell('sum6').column.name])
     ]
     (2..21).each {
         headerMapping.add([(headerRows[2][it]): it.toString()])

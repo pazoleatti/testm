@@ -790,7 +790,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 17
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -913,23 +913,23 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'issuer')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'shareType')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'tradeNumber')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'currency')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'lotSizePrev')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'lotSizeCurrent')]),
-            ([(headerRows[0][8]): getColumnName(tmpRow, 'reserveCalcValuePrev')]),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'signSecurity')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'marketQuotation')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'rubCourse')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'marketQuotationInRub')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'costOnMarketQuotation')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'reserveCalcValue')]),
-            ([(headerRows[0][16]): getColumnName(tmpRow, 'reserveCreation')]),
-            ([(headerRows[0][17]): getColumnName(tmpRow, 'reserveRecovery')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('issuer').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('shareType').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('tradeNumber').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('currency').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('lotSizePrev').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('lotSizeCurrent').column.name]),
+            ([(headerRows[0][8]): tmpRow.getCell('reserveCalcValuePrev').column.name]),
+            ([(headerRows[0][9]): tmpRow.getCell('cost').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('signSecurity').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('marketQuotation').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('rubCourse').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('marketQuotationInRub').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('costOnMarketQuotation').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('reserveCalcValue').column.name]),
+            ([(headerRows[0][16]): tmpRow.getCell('reserveCreation').column.name]),
+            ([(headerRows[0][17]): tmpRow.getCell('reserveRecovery').column.name]),
             ([(headerRows[1][0]): '1'])
     ]
     (2..17).each { index ->

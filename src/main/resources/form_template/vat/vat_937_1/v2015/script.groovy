@@ -566,7 +566,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 16
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 2
 
@@ -647,21 +647,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
 
     // для проверки шапки
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
-            ([(headerRows[0][1]): getColumnName(tmpRow, 'typeCode')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'invoice')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'invoiceCorrecting')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'invoiceCorrection')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'invoiceCorrectingCorrection')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'documentPay')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'dateRegistration')]),
-            ([(headerRows[0][8]): getColumnName(tmpRow, 'salesman')]),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'salesmanInnKpp')]),
+            ([(headerRows[0][0]): tmpRow.getCell('rowNum').column.name]),
+            ([(headerRows[0][1]): tmpRow.getCell('typeCode').column.name]),
+            ([(headerRows[0][2]): tmpRow.getCell('invoice').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('invoiceCorrecting').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('invoiceCorrection').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('invoiceCorrectingCorrection').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('documentPay').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('dateRegistration').column.name]),
+            ([(headerRows[0][8]): tmpRow.getCell('salesman').column.name]),
+            ([(headerRows[0][9]): tmpRow.getCell('salesmanInnKpp').column.name]),
             ([(headerRows[0][10]): 'Сведения о посреднике (комиссионере, агенте)']),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'declarationNum')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'currency')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'nds')]),
+            ([(headerRows[0][12]): tmpRow.getCell('declarationNum').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('currency').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('cost').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('nds').column.name]),
 
             ([(headerRows[1][10]): 'Наименование посредника']),
             ([(headerRows[1][11]): 'ИНН/КПП посредника']),

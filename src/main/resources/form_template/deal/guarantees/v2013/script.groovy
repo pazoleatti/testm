@@ -310,18 +310,18 @@ void importData() {
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 11, 3)
 
     def headerMapping = [
-            (xml.row[1].cell[0]): getColumnName(tmpRow, 'rowNumber'),
-            (xml.row[1].cell[2]): getColumnName(tmpRow, 'fullName'),
-            (xml.row[1].cell[3]): getColumnName(tmpRow, 'inn'),
-            (xml.row[1].cell[4]): getColumnName(tmpRow, 'countryName'),
-            (xml.row[1].cell[5]): getColumnName(tmpRow, 'docNumber'),
-            (xml.row[1].cell[6]): getColumnName(tmpRow, 'docDate'),
-            (xml.row[1].cell[7]): getColumnName(tmpRow, 'dealNumber'),
-            (xml.row[1].cell[8]): getColumnName(tmpRow, 'dealDate'),
-            (xml.row[1].cell[9]): getColumnName(tmpRow, 'sum'),
-            (xml.row[1].cell[10]): getColumnName(tmpRow, 'price'),
-            (xml.row[1].cell[11]): getColumnName(tmpRow, 'total'),
-            (xml.row[1].cell[13]): getColumnName(tmpRow, 'dealDoneDate'),
+            (xml.row[1].cell[0]): tmpRow.getCell('rowNumber').column.name,
+            (xml.row[1].cell[2]): tmpRow.getCell('fullName').column.name,
+            (xml.row[1].cell[3]): tmpRow.getCell('inn').column.name,
+            (xml.row[1].cell[4]): tmpRow.getCell('countryName').column.name,
+            (xml.row[1].cell[5]): tmpRow.getCell('docNumber').column.name,
+            (xml.row[1].cell[6]): tmpRow.getCell('docDate').column.name,
+            (xml.row[1].cell[7]): tmpRow.getCell('dealNumber').column.name,
+            (xml.row[1].cell[8]): tmpRow.getCell('dealDate').column.name,
+            (xml.row[1].cell[9]): tmpRow.getCell('sum').column.name,
+            (xml.row[1].cell[10]): tmpRow.getCell('price').column.name,
+            (xml.row[1].cell[11]): tmpRow.getCell('total').column.name,
+            (xml.row[1].cell[13]): tmpRow.getCell('dealDoneDate').column.name,
             (xml.row[2].cell[0]): 'гр. 1',
             (xml.row[2].cell[13]): 'гр. 12'
     ]

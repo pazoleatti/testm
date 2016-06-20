@@ -567,7 +567,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 16
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -695,20 +695,20 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'inn')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('inn').column.name]),
             ([(headerRows[0][4]) : 'Договор цессии']),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'repaymentDate')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'concessionsDate')]),
-            ([(headerRows[0][9]) : getColumnName(tmpRow, 'income')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'financialResult1')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'currencyDebtObligation')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'rateBR')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'interestRate')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'perc')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'loss')]),
+            ([(headerRows[0][6]) : tmpRow.getCell('cost').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('repaymentDate').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('concessionsDate').column.name]),
+            ([(headerRows[0][9]) : tmpRow.getCell('income').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('financialResult1').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('currencyDebtObligation').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('rateBR').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('interestRate').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('perc').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('loss').column.name]),
             ([(headerRows[1][4]) : 'Номер']),
             ([(headerRows[1][5]) : 'Дата']),
             ([(headerRows[2][0]) : '1'])

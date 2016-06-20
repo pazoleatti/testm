@@ -383,22 +383,22 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'countryName')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'code')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'docNumber')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'docDate')]),
-            ([(headerRows[0][8]): getColumnName(tmpRow, 'residual')]),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'currencyCode')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'courseCB')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'period')]),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'base')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'rate1')]),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'rate2')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'deviation')]),
-            ([(headerRows[0][16]): getColumnName(tmpRow, 'sum1')]),
-            ([(headerRows[0][17]): getColumnName(tmpRow, 'sum2')])]
+            ([(headerRows[0][2]): tmpRow.getCell('name').column.name]),
+            ([(headerRows[0][3]): tmpRow.getCell('iksr').column.name]),
+            ([(headerRows[0][4]): tmpRow.getCell('countryName').column.name]),
+            ([(headerRows[0][5]): tmpRow.getCell('code').column.name]),
+            ([(headerRows[0][6]): tmpRow.getCell('docNumber').column.name]),
+            ([(headerRows[0][7]): tmpRow.getCell('docDate').column.name]),
+            ([(headerRows[0][8]): tmpRow.getCell('residual').column.name]),
+            ([(headerRows[0][9]): tmpRow.getCell('currencyCode').column.name]),
+            ([(headerRows[0][10]): tmpRow.getCell('courseCB').column.name]),
+            ([(headerRows[0][11]): tmpRow.getCell('period').column.name]),
+            ([(headerRows[0][12]): tmpRow.getCell('base').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('rate1').column.name]),
+            ([(headerRows[0][14]): tmpRow.getCell('rate2').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('deviation').column.name]),
+            ([(headerRows[0][16]): tmpRow.getCell('sum1').column.name]),
+            ([(headerRows[0][17]): tmpRow.getCell('sum2').column.name])]
 
     (1..17).each {
         headerMapping.add([(headerRows[1][it]): it.toString()])

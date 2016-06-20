@@ -487,7 +487,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 15
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -593,18 +593,18 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNum')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'subject')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'taxAuthority')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'kpp')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'oktmo')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'address')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'sign')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('rowNum').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('subject').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('taxAuthority').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('kpp').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('oktmo').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('address').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('sign').column.name]),
             ([(headerRows[0][8]) : 'Кадастровый номер']),
             ([(headerRows[0][10]): 'Кадастровая стоимость']),
             ([(headerRows[0][12]): 'Право собственности']),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'taxBenefitCode')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'benefitBasis')]),
+            ([(headerRows[0][14]): tmpRow.getCell('taxBenefitCode').column.name]),
+            ([(headerRows[0][15]): tmpRow.getCell('benefitBasis').column.name]),
             ([(headerRows[1][8]) : 'Здание']),
             ([(headerRows[1][9]) : 'Помещение']),
             ([(headerRows[1][10]): 'на 1 января']),

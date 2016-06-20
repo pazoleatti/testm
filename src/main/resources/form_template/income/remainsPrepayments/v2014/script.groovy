@@ -55,7 +55,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 2
     int HEADER_ROW_COUNT = 1
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'sum1')
+    String TABLE_START_VALUE = tmpRow.getCell('sum1').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -130,8 +130,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): getColumnName(tmpRow, 'sum1')]),
-            ([(headerRows[0][1]): getColumnName(tmpRow, 'sum2')])
+            ([(headerRows[0][0]): tmpRow.getCell('sum1').column.name]),
+            ([(headerRows[0][1]): tmpRow.getCell('sum2').column.name])
     ]
     checkHeaderEquals(headerMapping, logger)
 }

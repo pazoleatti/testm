@@ -1522,7 +1522,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 19
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'subject')
+    String TABLE_START_VALUE = tmpRow.getCell('subject').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -1607,28 +1607,28 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
 
     // для проверки шапки
     def headerMapping = [
-            ([(headerRows[0][0])  : getColumnName(tmpRow, 'subject')]),
-            ([(headerRows[0][1])  : getColumnName(tmpRow, 'taxAuthority')]),
-            ([(headerRows[0][2])  : getColumnName(tmpRow, 'kpp')]),
-            ([(headerRows[0][3])  : getColumnName(tmpRow, 'oktmo')]),
+            ([(headerRows[0][0])  : tmpRow.getCell('subject').column.name]),
+            ([(headerRows[0][1])  : tmpRow.getCell('taxAuthority').column.name]),
+            ([(headerRows[0][2])  : tmpRow.getCell('kpp').column.name]),
+            ([(headerRows[0][3])  : tmpRow.getCell('oktmo').column.name]),
             ([(headerRows[0][4])  : '']),
             ([(headerRows[1][4])  : '']),
             ([(headerRows[2][4])  : '']),
             ([(headerRows[0][5])  : 'Остаточная стоимость основных средств']),
-            ([(headerRows[1][5])  : getColumnName(tmpRow, 'cost1')]),
-            ([(headerRows[0][6])  : getColumnName(tmpRow, 'cost2')]),
-            ([(headerRows[0][7])  : getColumnName(tmpRow, 'cost3')]),
-            ([(headerRows[0][8])  : getColumnName(tmpRow, 'cost4')]),
-            ([(headerRows[0][9])  : getColumnName(tmpRow, 'cost5')]),
-            ([(headerRows[0][10]) : getColumnName(tmpRow, 'cost6')]),
-            ([(headerRows[0][11]) : getColumnName(tmpRow, 'cost7')]),
-            ([(headerRows[0][12]) : getColumnName(tmpRow, 'cost8')]),
-            ([(headerRows[0][13]) : getColumnName(tmpRow, 'cost9')]),
-            ([(headerRows[0][14]) : getColumnName(tmpRow, 'cost10')]),
-            ([(headerRows[0][15]) : getColumnName(tmpRow, 'cost11')]),
-            ([(headerRows[0][16]) : getColumnName(tmpRow, 'cost12')]),
-            ([(headerRows[0][17]) : getColumnName(tmpRow, 'cost13')]),
-            ([(headerRows[0][18]) : getColumnName(tmpRow, 'cost31_12')]),
+            ([(headerRows[1][5])  : tmpRow.getCell('cost1').column.name]),
+            ([(headerRows[0][6])  : tmpRow.getCell('cost2').column.name]),
+            ([(headerRows[0][7])  : tmpRow.getCell('cost3').column.name]),
+            ([(headerRows[0][8])  : tmpRow.getCell('cost4').column.name]),
+            ([(headerRows[0][9])  : tmpRow.getCell('cost5').column.name]),
+            ([(headerRows[0][10]) : tmpRow.getCell('cost6').column.name]),
+            ([(headerRows[0][11]) : tmpRow.getCell('cost7').column.name]),
+            ([(headerRows[0][12]) : tmpRow.getCell('cost8').column.name]),
+            ([(headerRows[0][13]) : tmpRow.getCell('cost9').column.name]),
+            ([(headerRows[0][14]) : tmpRow.getCell('cost10').column.name]),
+            ([(headerRows[0][15]) : tmpRow.getCell('cost11').column.name]),
+            ([(headerRows[0][16]) : tmpRow.getCell('cost12').column.name]),
+            ([(headerRows[0][17]) : tmpRow.getCell('cost13').column.name]),
+            ([(headerRows[0][18]) : tmpRow.getCell('cost31_12').column.name]),
             ([(headerRows[2][0]) : '1']),
             ([(headerRows[2][1]) : '2']),
             ([(headerRows[2][2]) : '3']),

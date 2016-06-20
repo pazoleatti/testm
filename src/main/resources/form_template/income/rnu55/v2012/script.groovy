@@ -543,7 +543,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 12
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_START_VALUE = tmpRow.getCell('number').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -629,13 +629,13 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'bill')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'buyDate')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'currency')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'nominal')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'percent')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'implementationDate')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('number').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('bill').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('buyDate').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('currency').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('nominal').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('percent').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('implementationDate').column.name]),
             ([(headerRows[0][8]) : 'Фактически поступившая сумма процентов']),
             ([(headerRows[0][10]): 'Сумма начисленного процентного дохода за отчётный период']),
             ([(headerRows[1][8]) : 'в валюте']),

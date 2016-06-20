@@ -658,7 +658,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 19
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -761,25 +761,25 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNum')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'subject')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'taxAuthority')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'kpp')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'oktmo')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'priceAverage')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'taxBenefitCode')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'benefitBasis')]),
-            ([(headerRows[0][9]) : getColumnName(tmpRow, 'priceAverageTaxFree')]),
-            ([(headerRows[0][10]) : getColumnName(tmpRow, 'taxBase')]),
-            ([(headerRows[0][11]) : getColumnName(tmpRow, 'taxBenefitCodeReduction')]),
-            ([(headerRows[0][12]) : getColumnName(tmpRow, 'benefitReductionBasis')]),
-            ([(headerRows[0][13]) : getColumnName(tmpRow, 'taxRate')]),
-            ([(headerRows[0][14]) : getColumnName(tmpRow, 'taxSum')]),
-            ([(headerRows[0][15]) : getColumnName(tmpRow, 'sumPayment')]),
-            ([(headerRows[0][16]) : getColumnName(tmpRow, 'taxBenefitCodeDecrease')]),
-            ([(headerRows[0][17]) : getColumnName(tmpRow, 'benefitDecreaseBasis')]),
-            ([(headerRows[0][18]) : getColumnName(tmpRow, 'sumDecrease')]),
-            ([(headerRows[0][19]) : getColumnName(tmpRow, 'residualValue')])]
+            ([(headerRows[0][0]) : tmpRow.getCell('rowNum').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('subject').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('taxAuthority').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('kpp').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('oktmo').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('priceAverage').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('taxBenefitCode').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('benefitBasis').column.name]),
+            ([(headerRows[0][9]) : tmpRow.getCell('priceAverageTaxFree').column.name]),
+            ([(headerRows[0][10]) : tmpRow.getCell('taxBase').column.name]),
+            ([(headerRows[0][11]) : tmpRow.getCell('taxBenefitCodeReduction').column.name]),
+            ([(headerRows[0][12]) : tmpRow.getCell('benefitReductionBasis').column.name]),
+            ([(headerRows[0][13]) : tmpRow.getCell('taxRate').column.name]),
+            ([(headerRows[0][14]) : tmpRow.getCell('taxSum').column.name]),
+            ([(headerRows[0][15]) : tmpRow.getCell('sumPayment').column.name]),
+            ([(headerRows[0][16]) : tmpRow.getCell('taxBenefitCodeDecrease').column.name]),
+            ([(headerRows[0][17]) : tmpRow.getCell('benefitDecreaseBasis').column.name]),
+            ([(headerRows[0][18]) : tmpRow.getCell('sumDecrease').column.name]),
+            ([(headerRows[0][19]) : tmpRow.getCell('residualValue').column.name])]
     (2..19).each {
         headerMapping.add(([(headerRows[1][it]): it.toString()]))
     }

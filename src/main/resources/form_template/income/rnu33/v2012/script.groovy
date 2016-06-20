@@ -721,7 +721,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 28
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_START_VALUE = tmpRow.getCell('rowNumber').column.name
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
@@ -825,37 +825,37 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2]) : getColumnName(tmpRow, 'code')]),
-            ([(headerRows[0][3]) : getColumnName(tmpRow, 'valuablePaper')]),
-            ([(headerRows[0][4]) : getColumnName(tmpRow, 'issue')]),
-            ([(headerRows[0][5]) : getColumnName(tmpRow, 'purchaseDate')]),
-            ([(headerRows[0][6]) : getColumnName(tmpRow, 'implementationDate')]),
-            ([(headerRows[0][7]) : getColumnName(tmpRow, 'bondsCount')]),
-            ([(headerRows[0][8]) : getColumnName(tmpRow, 'purchaseCost')]),
-            ([(headerRows[0][9]) : getColumnName(tmpRow, 'costs')]),
+            ([(headerRows[0][0]) : tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[0][2]) : tmpRow.getCell('code').column.name]),
+            ([(headerRows[0][3]) : tmpRow.getCell('valuablePaper').column.name]),
+            ([(headerRows[0][4]) : tmpRow.getCell('issue').column.name]),
+            ([(headerRows[0][5]) : tmpRow.getCell('purchaseDate').column.name]),
+            ([(headerRows[0][6]) : tmpRow.getCell('implementationDate').column.name]),
+            ([(headerRows[0][7]) : tmpRow.getCell('bondsCount').column.name]),
+            ([(headerRows[0][8]) : tmpRow.getCell('purchaseCost').column.name]),
+            ([(headerRows[0][9]) : tmpRow.getCell('costs').column.name]),
             ([(headerRows[0][10]): 'Рыночная цена на дату приобретения']),
             ([(headerRows[1][10]): '% к номиналу']),
             ([(headerRows[1][11]): 'руб.коп.']),
-            ([(headerRows[0][12]): getColumnName(tmpRow, 'taxPrice')]),
-            ([(headerRows[0][13]): getColumnName(tmpRow, 'redemptionVal')]),
+            ([(headerRows[0][12]): tmpRow.getCell('taxPrice').column.name]),
+            ([(headerRows[0][13]): tmpRow.getCell('redemptionVal').column.name]),
             ([(headerRows[0][14]): 'Цена реализации']),
             ([(headerRows[1][14]): '% к номиналу']),
             ([(headerRows[1][15]): 'руб.коп.']),
             ([(headerRows[0][16]): 'Рыночная цена']),
             ([(headerRows[1][16]): '% к номиналу']),
             ([(headerRows[1][17]): 'руб.коп.']),
-            ([(headerRows[0][18]): getColumnName(tmpRow, 'exercisePriceRetirement')]),
-            ([(headerRows[0][19]): getColumnName(tmpRow, 'costsRetirement')]),
-            ([(headerRows[0][20]): getColumnName(tmpRow, 'allCost')]),
+            ([(headerRows[0][18]): tmpRow.getCell('exercisePriceRetirement').column.name]),
+            ([(headerRows[0][19]): tmpRow.getCell('costsRetirement').column.name]),
+            ([(headerRows[0][20]): tmpRow.getCell('allCost').column.name]),
             ([(headerRows[0][21]): 'Показатели для расчёта поцентного дохода за время владения сквитованными облигациями']),
             ([(headerRows[1][21]): 'Номинал одной бумаги, руб.коп.']),
             ([(headerRows[1][22]): 'Средневзвешенная цена одной бумаги на дату размещения, руб.коп.']),
             ([(headerRows[1][23]): 'Срок обращения согласно условиям выпуска, дней']),
             ([(headerRows[1][24]): 'Срок владения сквитованными облигациями, дней']),
-            ([(headerRows[0][25]): getColumnName(tmpRow, 'interestEarned')]),
-            ([(headerRows[0][26]): getColumnName(tmpRow, 'profitLoss')]),
-            ([(headerRows[0][27]): getColumnName(tmpRow, 'excessOfTheSellingPrice')]),
+            ([(headerRows[0][25]): tmpRow.getCell('interestEarned').column.name]),
+            ([(headerRows[0][26]): tmpRow.getCell('profitLoss').column.name]),
+            ([(headerRows[0][27]): tmpRow.getCell('excessOfTheSellingPrice').column.name]),
             ([(headerRows[2][0]) : '1'])
     ]
     (2..27).each {

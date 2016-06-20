@@ -291,18 +291,18 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     def headerMapping = [
             ([(headerRows[0][0]) : 'Общая информация о контрагенте - юридическом лице']),
             ([(headerRows[0][4]) : 'Сведения о сделке']),
-            ([(headerRows[1][0]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[1][1]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[1][2]) : getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[1][3]) : getColumnName(tmpRow, 'countryCode')]),
-            ([(headerRows[1][4]) : getColumnName(tmpRow, 'docNumber')]),
-            ([(headerRows[1][5]) : getColumnName(tmpRow, 'docDate')]),
-            ([(headerRows[1][6]) : getColumnName(tmpRow, 'okeiCode')]),
-            ([(headerRows[1][7]) : getColumnName(tmpRow, 'count')]),
-            ([(headerRows[1][8]) : getColumnName(tmpRow, 'finResult')]),
-            ([(headerRows[1][9]) : getColumnName(tmpRow, 'price')]),
-            ([(headerRows[1][10]): getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[1][11]): getColumnName(tmpRow, 'dealDoneDate')])
+            ([(headerRows[1][0]) : tmpRow.getCell('rowNumber').column.name]),
+            ([(headerRows[1][1]) : tmpRow.getCell('name').column.name]),
+            ([(headerRows[1][2]) : tmpRow.getCell('iksr').column.name]),
+            ([(headerRows[1][3]) : tmpRow.getCell('countryCode').column.name]),
+            ([(headerRows[1][4]) : tmpRow.getCell('docNumber').column.name]),
+            ([(headerRows[1][5]) : tmpRow.getCell('docDate').column.name]),
+            ([(headerRows[1][6]) : tmpRow.getCell('okeiCode').column.name]),
+            ([(headerRows[1][7]) : tmpRow.getCell('count').column.name]),
+            ([(headerRows[1][8]) : tmpRow.getCell('finResult').column.name]),
+            ([(headerRows[1][9]) : tmpRow.getCell('price').column.name]),
+            ([(headerRows[1][10]): tmpRow.getCell('cost').column.name]),
+            ([(headerRows[1][11]): tmpRow.getCell('dealDoneDate').column.name])
     ]
     (1..12).each{
         headerMapping.add(([(headerRows[2][it - 1]): 'гр. ' + it]))
