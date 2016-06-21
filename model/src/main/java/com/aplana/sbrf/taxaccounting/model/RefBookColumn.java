@@ -25,6 +25,9 @@ public class RefBookColumn extends FilterColumn {
 
     private boolean isHierarchical = false;
 
+    /** Версионируемый (0 - не версионируемый, 1 - версионируемый) */
+    private boolean versioned;
+
     private RefBookAttribute refBookAttribute;
 
     transient private ColumnFormatter formatter;
@@ -55,6 +58,14 @@ public class RefBookColumn extends FilterColumn {
 
     public void setHierarchical(boolean isHierarchical) {
         this.isHierarchical = isHierarchical;
+    }
+
+    public boolean isVersioned() {
+        return versioned;
+    }
+
+    public void setVersioned(boolean versioned) {
+        this.versioned = versioned;
     }
 
     public long getNameAttributeId() {

@@ -126,6 +126,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         departmentColumn.setAlias("departmentColumn");
         departmentColumn.setName("Наименование ТБ");
         departmentColumn.setWidth(1);
+        departmentColumn.setVersioned(false);
 
         uploadPathColumn.setAlias("uploadPathColumn");
         uploadPathColumn.setName("Путь к каталогу загрузки");

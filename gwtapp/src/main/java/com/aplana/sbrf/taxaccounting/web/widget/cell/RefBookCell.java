@@ -71,6 +71,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
         attrId = column.isHierarchical() ? column.getNameAttributeId() : column.getRefBookAttributeId();
 
         refBookPiker.setVisible(false);
+        refBookPiker.setVersionEnabled(column.isVersioned());
 	}
 
 	@Override
