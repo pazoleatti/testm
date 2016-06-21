@@ -147,7 +147,9 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
         when(departmentService.getDepartment(DEPARTMENT_TB2_ID)).thenReturn(departmentTB2);
         ReflectionTestUtils.setField(service, "departmentService", departmentService);
 
-        ReportPeriod reportPeriod = mockReportPeriod(REPORT_PERIOD_ID);
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setTaxType(TaxType.INCOME);
+        ReportPeriod reportPeriod = mockReportPeriod(REPORT_PERIOD_ID, taxPeriod);
 
         DeclarationTemplate declarationTemplate1 = mockDeclarationTemplate(DECLARATION_TEMPLATE_1_ID, DECLARATION_TYPE_1_ID);
         DeclarationTemplate declarationTemplate2 = mockDeclarationTemplate(DECLARATION_TEMPLATE_2_ID, DECLARATION_TYPE_2_ID);
