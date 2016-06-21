@@ -383,7 +383,7 @@ void importFromXML() {
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        def uniqueRecordIds = dataProvider.getUniqueRecordIds(dateFrom, null)
+        def uniqueRecordIds = dataProvider.getUniqueRecordIds(dateFrom - 1, null)
         if (!uniqueRecordIds.isEmpty()) {
             def recordDataMap = dataProvider.getRecordData(uniqueRecordIds)
             def closeRecordsData = recordDataMap.findAll { def uniqueRecordId, map ->
