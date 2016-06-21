@@ -760,7 +760,8 @@ void addTransportData(def xml) {
                 if (record89 != null) {
                     value1 = record89?.record_id?.value?.toString()
                     value2 = record84?.TYPE?.value?.toString()
-                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, false)
+                    value3 = new BigDecimal(value2)?.setScale(1)?.toString()
+                    formDataService.checkReferenceValue(value1, [value2, value3], getColumnName(newRow, 'securityKind'), record100.NAME.value, rnuIndexRow, indexCell + colOffset, logger, false)
                 }
 
                 // графа 8 - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
@@ -1228,7 +1229,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
             if (record89 != null) {
                 value1 = record89?.record_id?.value?.toString()
                 value2 = record84?.TYPE?.value?.toString()
-                formDataService.checkReferenceValue(84, value1, value2, fileRowIndex, colIndex + colOffset, logger, false)
+                value3 = new BigDecimal(value2)?.setScale(1)?.toString()
+                formDataService.checkReferenceValue(value1, [value2, value3], getColumnName(newRow, 'securityKind'), record100.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
             }
 
             // графа 8 - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»

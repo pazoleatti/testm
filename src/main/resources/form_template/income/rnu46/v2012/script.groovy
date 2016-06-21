@@ -697,7 +697,9 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     colIndex = 6
     if (record71 != null) {
         // графа 6 - зависит от графы 5 - атрибут 645 - TERM - "Срок полезного использования (месяцев)", справочник 71 "Амортизационные группы"
-        formDataService.checkReferenceValue(71, pure(rowCells[colIndex]), record71?.TERM?.value?.toString(), fileRowIndex, colIndex + colOffset, logger, false)
+        def expectedValue = record71?.TERM?.value?.toString()
+        def expValueNumeric = new BigDecimal(expectedValue)?.setScale(1)?.toString()
+        formDataService.checkReferenceValue(pure(rowCells[colIndex]), [expectedValue, expValueNumeric], getColumnName(newRow, 'usefulLife'), record71.GROUP.value, fileRowIndex, colIndex + colOffset, logger, false)
     }
     // графа 7..16
     ['monthsUsed', 'usefulLifeWithUsed', 'specCoef', 'cost10perMonth', 'cost10perTaxPeriod',
@@ -910,7 +912,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     if (record71 != null) {
         // графа 6 - зависит от графы 5 - атрибут 645 - TERM - "Срок полезного использования (месяцев)", справочник 71 "Амортизационные группы"
-        formDataService.checkReferenceValue(71, values[colIndex], record71?.TERM?.value?.toString(), fileRowIndex, colIndex + colOffset, logger, false)
+        def expectedValue = record71?.TERM?.value?.toString()
+        def expValueNumeric = new BigDecimal(expectedValue)?.setScale(1)?.toString()
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue, expValueNumeric], getColumnName(newRow, 'usefulLife'), record71.GROUP.value, fileRowIndex, colIndex + colOffset, logger, false)
     }
 
     // графа 7..16

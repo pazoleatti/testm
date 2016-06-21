@@ -41,7 +41,7 @@
             </g:cell>
             <g:cell horizontalAlignment="ALIGN_RIGHT">
                 <g:FlowPanel addStyleNames="{style.footerPanel}">
-                    <g:Button addStyleNames="{style.footerButton}" text="Продолжить" ui:field="okButton"/>
+                    <g:Button addStyleNames="{style.footerButton}" text="Загрузить" ui:field="okButton"/>
                     <g:Button addStyleNames="{style.footerButton}" text="Закрыть" ui:field="cancelButton"/>
                 </g:FlowPanel>
             </g:cell>
