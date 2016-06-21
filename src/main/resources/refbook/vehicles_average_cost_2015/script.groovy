@@ -28,7 +28,7 @@ switch (formDataEvent) {
         if (fileName == null || fileName.isEmpty()) {
             logger.error("Не выбран файл");
         } else if (!fileName.endsWith(".xml")) {
-            logger.error("Файл должен иметь расширение \"xml\"!" + fileName)
+            logger.error("Файл должен иметь расширение \"xml\"!")
         }
         break
     case FormDataEvent.IMPORT:
