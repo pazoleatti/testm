@@ -1,11 +1,13 @@
 package form_template.income.advanceDistribution_2.v2016
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import groovy.transform.Field
 
 /**
@@ -134,12 +136,10 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 
 // Атрибуты для итогов
 @Field
-def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit',
-                    'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
-                    'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
-                    'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
-                    'everyMonthForThirdKvartalNextPeriod',
-                    'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
+def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'baseTaxOfRub', 'taxSum', 'taxSumOutside',
+        'taxSumToPay', 'taxSumToReduction', 'everyMontherPayment1', 'everyMontherPayment2', 'everyMontherPayment3',
+        'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
+        'everyMonthForThirdKvartalNextPeriod', 'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
 
 @Field
 def totalColumnsPeriod4 = totalColumns - ['everyMontherPayment1', 'everyMontherPayment2', 'everyMontherPayment3', 'everyMontherPaymentAfterPeriod']
@@ -248,7 +248,7 @@ void calc() {
         sumNal = getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_TAX')
     }
 
-    def prevDataRows = getPrevDataRows()
+    def prevDataRows = getPrevDataRows(true)
 
     // расчет графы 2..4, 8..17, 23, 24
     for (row in dataRows) {
@@ -341,8 +341,6 @@ void reCalcTotalRow(def dataRows, def totalRow) {
         }
         totalRow.everyMonthForKvartalNextPeriod += row.everyMonthForKvartalNextPeriod ?: 0
     }
-    // графа 18, 19, 20 расчитываются после графы 21
-    calc18_19_20(totalRow, getReportPeriod())
 }
 
 void calcTotalRow(def dataRows, def totalRow) {
@@ -704,7 +702,7 @@ void logicalCheckAfterCalc() {
         sumNal = getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_TAX')
     }
 
-    def prevDataRows = getPrevDataRows()
+    def prevDataRows = getPrevDataRows(false)
 
     def caTotalRow
     def totalRow
@@ -1728,10 +1726,50 @@ def roundValue(BigDecimal value, def precision) {
     value.setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
+@Field
+def prevDataRows = null
+
 /** Получить строки за предыдущий отчетный период. */
-def getPrevDataRows() {
-    def prevFormData = formDataService.getFormDataPrev(formData)
-    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allSaved : null)
+def getPrevDataRows(def isCalc = true) {
+    def reportPeriod = getReportPeriod()
+    if (reportPeriod.order == 1 || reportPeriod.order == 4) {
+        return null
+    }
+    if (prevDataRows) {
+        return prevDataRows
+    }
+
+    // Условия выполнения расчетов: 6. Проверка наличия формы предыдущего периода
+    def is2Quartal2016 = (reportPeriod?.taxPeriod?.year == 2016 && reportPeriod.order == 2)
+    def formTypeId = (is2Quartal2016 ? 500 : 507)
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    def formDataKind = FormDataKind.SUMMARY
+
+    def prevFormData = null
+    if (prevReportPeriod) {
+        def order = null
+        prevFormData = formDataService.getLast(formTypeId, formDataKind, formData.departmentId, prevReportPeriod?.id, order, formData.comparativePeriodId, formData.accruing)
+    }
+    if (prevFormData && prevFormData.state == WorkflowState.ACCEPTED) {
+        prevDataRows == formDataService.getDataRowHelper(prevFormData)?.allSaved
+    } else if (!isCalc) {
+        // предыдущая форма не найдена или не принята
+        def formName = formDataService.getFormTemplate(formTypeId, prevReportPeriod?.id)?.name
+        def departmentName = formDataDepartment.name
+        def periodName = prevReportPeriod?.taxPeriod?.year + ', ' + prevReportPeriod?.name
+        def subMsg = ""
+        def prevDepartmentReportPeriodId = prevFormData?.departmentReportPeriodId
+        if (prevDepartmentReportPeriodId == null) {
+            prevDepartmentReportPeriodId = getPrevDepartmentReportPeriod(prevReportPeriod.id)?.id
+        }
+        def correctionDate = getDepartmentReportPeriod(prevDepartmentReportPeriodId)?.correctionDate?.format('dd.MM.yyyy')
+        if (correctionDate) {
+            subMsg = String.format(", Дата сдачи корректировки: «%s»", correctionDate.format('dd.MM.yyyy'))
+        }
+        logger.error("В Системе не найдена форма: Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s»%s!",
+                formDataKind.title, formName, departmentName, periodName, subMsg)
+    }
+    return prevDataRows
 }
 
 // Сортировка групп и строк
@@ -1834,4 +1872,33 @@ void afterLoad() {
         // для справочников начало от 01.01.year (для прибыли start_date)
         specialPeriod.calendarStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
+}
+
+@Field
+def departmentReportPeriodMap = [:]
+
+DepartmentReportPeriod getDepartmentReportPeriod(def id) {
+    if (departmentReportPeriodMap[id] == null) {
+        departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)
+    }
+    return departmentReportPeriodMap[id]
+}
+
+@Field
+def prevDepartmentReportPeriodMap = [:]
+
+/** Получить последний подразделение-период. */
+DepartmentReportPeriod getPrevDepartmentReportPeriod(def reportPeriodId) {
+    if (prevDepartmentReportPeriodMap[reportPeriodId]) {
+        return prevDepartmentReportPeriodMap[reportPeriodId]
+    }
+    DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter()
+    filter.setDepartmentIdList([formData.departmentId])
+    filter.setReportPeriodIdList([reportPeriodId])
+    List<DepartmentReportPeriod> departmentReportPeriods = departmentReportPeriodService.getListByFilter(filter)
+    // найти предыдущие корректирующие периоды
+    if (!departmentReportPeriods.isEmpty()) {
+        prevDepartmentReportPeriodMap[reportPeriodId] = departmentReportPeriods[departmentReportPeriods.size() - 1]
+    }
+    return prevDepartmentReportPeriodMap[reportPeriodId]
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>Расчет распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации</name>
+    <name>Расчет распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации (с периода полугодие 2016)</name>
     <fullName>Расчет распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>number</alias>
