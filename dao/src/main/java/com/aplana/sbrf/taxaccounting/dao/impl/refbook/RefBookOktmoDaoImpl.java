@@ -186,9 +186,8 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
 			ps.appendQuery(",");
             ps.appendQuery(" row_number()");
             // Надо делать сортировку
-            ps.appendQuery(" over (order by '");
+            ps.appendQuery(" over (order by ");
             ps.appendQuery(sortAttribute.getAlias());
-            ps.appendQuery("'");
             ps.appendQuery(isSortAscending ? " ASC":" DESC");
             ps.appendQuery(")");
             ps.appendQuery(" as row_number_over\n");
@@ -315,9 +314,8 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             ps.appendQuery(",");
             ps.appendQuery(" row_number()");
             // Надо делать сортировку
-            ps.appendQuery(" over (order by '");
+            ps.appendQuery(" over (order by ");
             ps.appendQuery(sortAttribute.getAlias());
-            ps.appendQuery("'");
             ps.appendQuery(isSortAscending ? " ASC" : " DESC");
             ps.appendQuery(")");
             ps.appendQuery(" as row_number_over\n");

@@ -91,8 +91,13 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
             refBookPage.setTotalCount(action.getIdsTofind().size());
         } else {
             RefBookAttribute sort = null;
+
             try {
-                sort = refBook.getAttribute("NAME");
+                if (action.getRefBookAttrId() != 0) {
+                    sort = refBook.getAttribute(action.getRefBookAttrId());
+                } else {
+                    sort = refBook.getAttribute("NAME");
+                }
             } catch (IllegalArgumentException ignored) {
             }
 
