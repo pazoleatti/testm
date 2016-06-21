@@ -125,7 +125,7 @@ BEGIN
 	
 	UPDATE department SET name = translate(name, '«»', '""') where name <> translate(name, '«»', '""');
 	dbms_output.put_line('department (name): '||sql%rowcount||' row(s) updated');	
-	UPDATE department SET shortname = translate(shortname, '«»', '""') where name <> translate(shortname, '«»', '""');
+	UPDATE department SET shortname = translate(shortname, '«»', '""') where shortname <> translate(shortname, '«»', '""');
 	dbms_output.put_line('department (shortname): '||sql%rowcount||' row(s) updated');
 END;
 /
