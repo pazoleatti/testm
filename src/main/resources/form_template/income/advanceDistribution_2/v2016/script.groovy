@@ -248,7 +248,7 @@ void calc() {
         sumNal = getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_TAX')
     }
 
-    def prevDataRows = getPrevDataRows(true)
+    def prevDataRows = getPrevDataRows()
 
     // расчет графы 2..4, 8..17, 23, 24
     for (row in dataRows) {
@@ -672,6 +672,9 @@ void logicalCheckBeforeCalc() {
             }
         }
     }
+
+    // 6. Проверка наличия формы предыдущего периода
+    getPrevDataRows(formDataEvent == FormDataEvent.CALCULATE)
 }
 
 void logicalCheckAfterCalc() {
@@ -702,7 +705,7 @@ void logicalCheckAfterCalc() {
         sumNal = getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_TAX')
     }
 
-    def prevDataRows = getPrevDataRows(false)
+    def prevDataRows = getPrevDataRows()
 
     def caTotalRow
     def totalRow
@@ -1730,7 +1733,7 @@ def roundValue(BigDecimal value, def precision) {
 def prevDataRows = null
 
 /** Получить строки за предыдущий отчетный период. */
-def getPrevDataRows(def isCalc = true) {
+def getPrevDataRows(def showMsg = false) {
     def reportPeriod = getReportPeriod()
     if (reportPeriod.order == 1 || reportPeriod.order == 4) {
         return null
@@ -1739,7 +1742,6 @@ def getPrevDataRows(def isCalc = true) {
         return prevDataRows
     }
 
-    // Условия выполнения расчетов: 6. Проверка наличия формы предыдущего периода
     def is2Quartal2016 = (reportPeriod?.taxPeriod?.year == 2016 && reportPeriod.order == 2)
     def formTypeId = (is2Quartal2016 ? 500 : 507)
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
@@ -1751,8 +1753,9 @@ def getPrevDataRows(def isCalc = true) {
         prevFormData = formDataService.getLast(formTypeId, formDataKind, formData.departmentId, prevReportPeriod?.id, order, formData.comparativePeriodId, formData.accruing)
     }
     if (prevFormData && prevFormData.state == WorkflowState.ACCEPTED) {
-        prevDataRows == formDataService.getDataRowHelper(prevFormData)?.allSaved
-    } else if (!isCalc) {
+        prevDataRows = formDataService.getDataRowHelper(prevFormData)?.allSaved
+    } else if (showMsg) {
+        // Условия выполнения расчетов: 6. Проверка наличия формы предыдущего периода
         // предыдущая форма не найдена или не принята
         def formName = formDataService.getFormTemplate(formTypeId, prevReportPeriod?.id)?.name
         def departmentName = formDataDepartment.name
