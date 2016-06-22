@@ -63,6 +63,10 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
                     refBookDataProvider.deleteAllRecords(logger, action.getRecordsId());
                 } catch (ServiceLoggerException e) {
                     result.setException(true);
+                    logger.error(e.getMessage());
+                    if (e.getUuid() != null) {
+                        logger.getEntries().addAll(logEntryService.getAll(e.getUuid()));
+                    }
                 }
             }
             result.setUuid(logEntryService.save(logger.getEntries()));
