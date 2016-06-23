@@ -430,7 +430,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
         addValueChangeHandler(new ValueChangeHandler<H>() {
             @Override
             public void onValueChange(ValueChangeEvent<H> event) {
-                if (selectChild && multiSelection) {
+                if (selectChild && multiSelection && getSelectedItem() != null) {
                     // обновить значения у всех дочерних элементов
                     CheckBox widget = (CheckBox) getSelectedItem().getWidget();
                     T item = treeItemsHash.get(widget);
