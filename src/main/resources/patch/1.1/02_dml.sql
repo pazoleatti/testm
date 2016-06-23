@@ -43,7 +43,7 @@ EXCEPTION
 		dbms_output.put_line(l_task_name||'[ERROR]: tax_type ''M'' already exists ('||sqlerrm||')');
 		ROLLBACK;
 	when OTHERS then
-		dbms_output.put_line(l_task_name||'[ERROR]: '||sqlerrm);
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
         ROLLBACK;
 end;
 /
