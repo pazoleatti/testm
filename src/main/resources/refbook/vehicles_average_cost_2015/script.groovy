@@ -567,7 +567,7 @@ def uniqueAliases = ["BREND", "MODEL", "ENGINE_VOLUME", "ENGINE_TYPE", "YOM_RANG
 def allAliases = ["AVG_COST", "BREND", "MODEL", "ENGINE_VOLUME", "ENGINE_TYPE", "YOM_RANGE"]
 
 String getFuzzyFilter(def recordsMap) {
-    return uniqueAliases.collect { alias -> String.format("LOWER(%s)=LOWER('%s')", alias, recordsMap[alias].value) }.join(" AND ")
+    return uniqueAliases.collect { alias -> String.format("LOWER(%s)=LOWER('%s')", alias, recordsMap[alias].value?.replace('\'', '\\\'')) }.join(" AND ")
 }
 
 /**
