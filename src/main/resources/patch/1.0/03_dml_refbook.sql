@@ -3,6 +3,10 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 UPDATE ref_book_attribute SET name = 'Код налогового органа (кон.)' WHERE id = 185;	
 
 -----------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16085: Отображение дат в справочнике ценных бумаг
+update ref_book_attribute set format = 1 where id in (816, 817);
+
+-----------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15302: 0.8.4 Классификаторы доходов/расходов: Изменить название поля "Символ ОПУ" на "Символ ОФР"
 UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Символ ОФР' WHERE REF_BOOK_ID IN (27, 28) AND ALIAS = 'OPU';
 
