@@ -5484,8 +5484,8 @@ dbms_output.put_line('OKTMO fix initial hierarchy: '||sql%rowcount||' rows merge
 					from t )
 			  select pt.id, o.id as parent_id
 			  from pt
-			  join ref_book_oktmo o on o.code = pt.parent_code and o.version = pt.version and pt.version = to_date('01.01.2012', 'DD.MM.YYYY')
-			  where o.id <> pt.parent_id  ) src
+			  join ref_book_oktmo o on o.code = pt.parent_code
+			  where o.id <> nvl(pt.parent_id, -1)  ) src
 			on (tgt.id = src.id)
 			when matched then
 				 update set tgt.parent_id = src.parent_id;
