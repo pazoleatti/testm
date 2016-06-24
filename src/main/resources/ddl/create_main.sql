@@ -25,6 +25,7 @@ comment on column ref_book_oktmo.status is 'Статус записи(0-обыч
 comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
 
 create sequence seq_ref_book_oktmo start with 300000 increment by 100;
+create sequence seq_ref_book_oktmo_record_id start with 1000000;
 --------------------------------------------------------------------------------------------------------------
 create table configuration (
   code varchar2(50) not null,

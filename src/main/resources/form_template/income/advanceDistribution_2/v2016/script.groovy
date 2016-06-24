@@ -147,6 +147,7 @@ def totalColumnsPeriod4 = totalColumns - ['everyMontherPayment1', 'everyMontherP
 // расчитываемые поля (графа 12..22)
 @Field
 def calcColumns = [ 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum', 'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
+        'everyMontherPayment1', 'everyMontherPayment2', 'everyMontherPayment3',
         'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
         'everyMonthForThirdKvartalNextPeriod', 'everyMonthForFourthKvartalNextPeriod']
 
@@ -293,11 +294,6 @@ void calc() {
         calcColumnFrom14To24(prevDataRows, row, row, sumNal, reportPeriod)
     }
 
-    // нужен отдельный расчет
-    for (row in dataRows) {
-        calc18_22(prevDataRows, dataRows, row, reportPeriod)
-    }
-
     def templateRows = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).getRows()
 
     // добавить строку ЦА (скорректрированный) (графа 1..22)
@@ -314,6 +310,16 @@ void calc() {
 
     // После расчета фикс. строки "ЦА(скоррект)" необходимо пересчитать для граф 12, 14, 15, 17, 18, 19, 20, 21, 22
     // фиксированную строку итогов: сумма всех строк, кроме строки "ЦА" и строки итогов
+    reCalcTotalRow(dataRows, totalRow)
+
+    // нужен отдельный расчет
+    for (row in dataRows) {
+        calc18_22(prevDataRows, dataRows, row, reportPeriod)
+    }
+
+    // пересчет итогов из за того что графа 18..22 расчитываются отдельно
+    calcTotalRow(dataRows, totalRow)
+    calcCaTotalRow(dataRows, prevDataRows, caTotalRow, totalRow, taxBase, sumNal)
     reCalcTotalRow(dataRows, totalRow)
 
     updateIndexes(dataRows)
@@ -532,6 +538,7 @@ def calc14(def row) {
     return temp
 }
 
+/** Расчет граф 18..22. Перед расчетом графы 21 надо расчитать итоговый строки. */
 def calc18_22(def prevDataRows, def dataRows, def row, def reportPeriod) {
     def tmp = null
     // графа 21
@@ -545,11 +552,16 @@ def calc18_22(def prevDataRows, def dataRows, def row, def reportPeriod) {
             break
         default:
             // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
-            def currentSum  =     dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-            def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+            def currentSum  =     dataRows?.find { it.getAlias() == 'total' }?.taxSum ?: 0
+            def previousSum = prevDataRows?.find { it.getAlias() == 'total' }?.taxSum ?: 0
             // остальные
             if (currentSum) {
-                tmp = (currentSum - previousSum) * row.taxSum / currentSum
+                currentSum = new BigDecimal(currentSum.toString())
+                previousSum = new BigDecimal(previousSum.toString())
+                def taxSum = new BigDecimal(row.taxSum.toString())
+                int precision = 20 // точность при делении
+                tmp = currentSum.subtract(previousSum).multiply(taxSum.divide(currentSum, precision, BigDecimal.ROUND_HALF_UP))
+                tmp = roundValue(tmp, 0)
             }
     }
     row.everyMontherPaymentAfterPeriod = tmp
@@ -707,16 +719,24 @@ void logicalCheckAfterCalc() {
 
     def prevDataRows = getPrevDataRows()
 
-    def caTotalRow
-    def totalRow
+    def caTotalRow = dataRows?.find { it.getAlias() == "ca" }
+    def totalRow   = dataRows?.find { it.getAlias() == "total" }
+    def caTotalRowTemp
+    def totalRowTemp
+
+    // расчет итогов
+    if (caTotalRow != null && totalRow != null) {
+        def templateRows = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).getRows()
+        caTotalRowTemp = getDataRow(templateRows, 'ca')
+        totalRowTemp = getDataRow(templateRows, 'total')
+
+        calcTotalRow(dataRows, totalRowTemp)
+        calcCaTotalRow(dataRows, prevDataRows, caTotalRowTemp, totalRowTemp, taxBase, sumNal)
+        reCalcTotalRow(dataRows, totalRowTemp)
+    }
+
     for (def row : dataRows) {
         if (isFixedRow(row)) {
-            if ("ca".equals(row.getAlias())){
-                caTotalRow = row
-            }
-            if ("total".equals(row.getAlias())){
-                totalRow = row
-            }
             continue
         }
         def index = row.getIndex()
@@ -771,17 +791,11 @@ void logicalCheckAfterCalc() {
             logger.warn(WRONG_CALC, row.getIndex(), tmpNames)
         }
     }
+
+    // 4. Проверка итоговых значений по строке итога «Сбербанк России» и «Центральный аппарат (скорректированный)»
     if (caTotalRow == null || totalRow == null) { // строк нет, в расчеты не зашел, проверять нечего
         return
     }
-
-    def templateRows = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).getRows()
-    def caTotalRowTemp = getDataRow(templateRows, 'ca')
-    def totalRowTemp = getDataRow(templateRows, 'total')
-
-    calcTotalRow(dataRows, totalRowTemp)
-    calcCaTotalRow(dataRows, prevDataRows, caTotalRowTemp, totalRowTemp, taxBase, sumNal)
-    reCalcTotalRow(dataRows, totalRowTemp)
 
     def errorColumns = (allColumns - 'number').findAll { alias ->
         caTotalRowTemp[alias] != caTotalRow[alias]
