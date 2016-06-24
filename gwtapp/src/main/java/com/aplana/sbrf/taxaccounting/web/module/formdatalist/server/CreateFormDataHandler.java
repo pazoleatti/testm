@@ -118,7 +118,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                         departmentReportPeriod.getDepartmentId(), formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
                 if (declarationDestinations.isEmpty() && formDestinations.isEmpty()){
                     if (formType.getTaxType() == TaxType.ETR || formType.getTaxType() == TaxType.DEAL || formType.getTaxType() == TaxType.MARKET) {
-                        logger.warn(String.format(NOT_EXIST_DESTINATIONS_ETR, (formType.getTaxType() == TaxType.ETR ? "других форм" : "других форм и уведомления")));
+                        logger.warn(String.format(NOT_EXIST_DESTINATIONS_ETR, (formType.getTaxType() == TaxType.DEAL ? "других форм и уведомления" : "других форм")));
                     } else {
                         logger.warn(NOT_EXIST_DESTINATIONS_OTHER);
                     }
