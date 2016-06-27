@@ -293,6 +293,200 @@ end;
 /
 COMMIT;
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-15925: 1.1 РнРнтб. Реализовать справочник "Организационно-правовые формы"
+declare l_task_name varchar2(128) := 'DML Block #5 (SBRFACCTAX-15925 - Organizational legal forms))';
+begin
+	
+	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (605,'Организационно-правовые формы',1,0,0,null);
+	
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6051, 605, 'Код ОПФ', 'CODE',2,1,null,null,1,0,5,1,1,null,null,0,3);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6052, 605, 'Наименование', 'NAME',1,2,null,null,1,null,20,1,0,null,null,0,128);
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 39);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'ЮРИДИЧЕСКИЕ ЛИЦА, ЯВЛЯЮЩИЕСЯ КОММЕРЧЕСКИМИ ОРГАНИЗАЦИЯМИ');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 40);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Унитарные предприятия');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 41);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Унитарные предприятия, основанные на праве оперативного управления');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 4, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 42);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Унитарные предприятия, основанные на праве хозяйственного ведения');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 5, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 47);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Открытые акционерные общества');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 6, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 48);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Хозяйственные товарищества и общества');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 7, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 51);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Полные товарищества');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 8, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 52);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Производственные кооперативы');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 9, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 53);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Крестьянские (фермерские) хозяйства (сохраняют статус юридического лица на период до 1 января 2013 года)');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 10, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 60);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Акционерные общества');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 11, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 61);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Хозяйственные партнерства');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 12, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 64);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Товарищества на вере');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 13, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 65);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Общества с ограниченной ответственностью');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 14, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 66);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Общества с дополнительной ответственностью');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 15, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 67);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Закрытые акционерные общества');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 16, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 70);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'ЮРИДИЧЕСКИЕ ЛИЦА, ЯВЛЯЮЩИЕСЯ НЕКОММЕРЧЕСКИМИ ОРГАНИЗАЦИЯМИ');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 17, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 71);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Частные учреждения');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 18, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 72);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Бюджетные учреждения');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 19, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 73);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Автономные учреждения');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 20, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 74);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Казенные учреждения');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 21, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 76);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Садоводческие, огороднические или дачные некоммерческие товарищества');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 22, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 77);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Объединение крестьянских (фермерских) хозяйств');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 23, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 78);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Органы общественной самодеятельности');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 24, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 80);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Территориальные общественные самоуправления');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 25, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 81);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Учреждения');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 26, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 82);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Государственные корпорации');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 27, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 83);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Общественные и религиозные организации (объединения)');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 28, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 84);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Общественные движения');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 29, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 85);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Потребительские кооперативы');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 30, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 86);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Государственные компании');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 31, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 87);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Простые товарищества');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 32, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 88);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Фонды');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 33, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 89);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Прочие некоммерческие организации');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 34, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 90);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Представительства и филиалы');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 35, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 91);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Индивидуальные предприниматели');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 36, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 92);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Паевые инвестиционные фонды');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 37, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 93);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Объединения юридических лиц (ассоциации и союзы)');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 38, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 94);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Товарищества собственников жилья');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 39, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 95);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Крестьянские (фермерские) хозяйства');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 40, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 96);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Некоммерческие партнерства');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 41, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 97);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Автономные некоммерческие организации');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 42, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 98);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'Иные неюридические лица');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 43, 605, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6051, 99);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6052, 'ОРГАНИЗАЦИИ БЕЗ ПРАВ ЮРИДИЧЕСКОГО ЛИЦА');
+
+	
+	dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book or its attributes already exist ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
 ---------------------------------------------------------------------------
 COMMIT;
 EXIT;
