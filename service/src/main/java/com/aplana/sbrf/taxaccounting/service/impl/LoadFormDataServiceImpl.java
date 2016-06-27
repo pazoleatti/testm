@@ -274,9 +274,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Указан несуществующий код налоговой формы
                 FormType formType = formTypeService.getByCode(formCode);
                 if (formType == null) {
-                    log(userInfo, LogData.L6, logger, lockId, formCode);
+                    log(userInfo, LogData.L6, logger, lockId, formCode, fileName);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), lockId, formCode))), logger, lockId);
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), lockId, formCode, fileName))), logger, lockId);
                     fail++;
                     continue;
                 }
@@ -295,9 +295,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                             reportPeriodName = " (" + reportPeriodName + ")";
                         }
                     }
-                    log(userInfo, LogData.L7, logger, lockId, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year);
+                    log(userInfo, LogData.L7, logger, lockId, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year, fileName);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), lockId, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year))), logger, lockId);
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), lockId, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year, fileName))), logger, lockId);
                     fail++;
                     continue;
                 }
@@ -341,9 +341,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Указан несуществующий код подразделения
                 if (formDepartment == null) {
                     RefBook refBook = refBookDao.get(REF_BOOK_DEPARTMENT);
-                    log(userInfo, LogData.L5, logger, lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode);
+                    log(userInfo, LogData.L5, logger, lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode, fileName);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode))), logger, lockId);
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode, fileName))), logger, lockId);
                     fail++;
                     continue;
                 }
@@ -355,10 +355,10 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 boolean existedAdditionalAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL);
                 // если нет назначения на первичную и выходную, то ошибка
                 if (!existedPrimaryAssigning && !existedAdditionalAssigning) {
-                    log(userInfo, LogData.L14, logger, lockId, formDepartment.getName(), formType.getName());
+                    log(userInfo, LogData.L14, logger, lockId, formDepartment.getName(), formType.getName(), fileName);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
                             Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L14.getText(),
-                                    lockId, formDepartment.getName(), formType.getName()))), logger, lockId);
+                                    lockId, formDepartment.getName(), formType.getName(), fileName))), logger, lockId);
                     fail++;
                     continue;
                 } else if (!existedPrimaryAssigning) {
@@ -403,8 +403,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 if (formData != null && formData.getState() != WorkflowState.CREATED) {
                     // Сообщение об ошибке в общий лог и в файл со списком ошибок
                     Logger localLogger = new Logger();
-                    localLogger.error(String.format(LogData.L17.getText(), lockId, formType.getName(), formDepartment.getName()));
-                    log(userInfo, LogData.L17, logger, lockId, formType.getName(), formDepartment.getName());
+                    localLogger.error(String.format(LogData.L17.getText(), lockId, formType.getName(), formDepartment.getName(), fileName));
+                    log(userInfo, LogData.L17, logger, lockId, formType.getName(), formDepartment.getName(), fileName);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
                             localLogger.getEntries(), logger, lockId);
                     fail++;
