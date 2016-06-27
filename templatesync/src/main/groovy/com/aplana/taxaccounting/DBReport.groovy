@@ -525,7 +525,13 @@ class DBReport {
         stylesMap.keySet().asList().each { form_template_id ->
             styleByAliasMap[form_template_id] = [:]
             stylesMap[form_template_id].each {
-                styleByAliasMap[form_template_id][it.alias] = new FormStyle(it.alias, it.font_color, it.back_color, it.italic, it.bold)
+                FormStyle style = new FormStyle()
+                style.alias = it.alias
+                style.backColor = it.back_color
+                style.fontColor = it.font_color
+                style.bold = it.bold
+                style.italic = it.italic
+                styleByAliasMap[form_template_id][it.alias] = style
             }
         }
         def map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'COMPARATIVE'")
