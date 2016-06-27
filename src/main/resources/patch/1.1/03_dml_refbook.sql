@@ -273,6 +273,26 @@ end;
 /
 COMMIT;
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-15923: 1.1 РнРнтб. Реализовать справочник "Кредитные рейтинги и классы кредитоспособности"
+declare l_task_name varchar2(128) := 'DML Block #4 (SBRFACCTAX-15923 - Credit ratings and credit quality classes))';
+begin
+	
+	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (604,'Кредитные рейтинги и классы кредитоспособности',1,0,1,null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6041, 604, 'Наименование', 'NAME',1,1,null,null,1,null,10,1,0,null,null,0,20);
+	
+	dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book or its attributes already exist ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+---------------------------------------------------------------------------
 ---------------------------------------------------------------------------
 COMMIT;
 EXIT;
