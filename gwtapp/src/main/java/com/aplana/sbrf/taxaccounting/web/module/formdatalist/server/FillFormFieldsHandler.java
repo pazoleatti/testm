@@ -79,6 +79,8 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                     }
                 }
                 if (result.getDefaultReportPeriod() == null) {
+                    result.setDepartments(new ArrayList<Department>());
+                    result.setDepartmentIds(new HashSet<Integer>());
                     break;
                 }
                 action.setFieldId(result.getDefaultReportPeriod().getId());
