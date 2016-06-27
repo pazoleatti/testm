@@ -652,12 +652,20 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
+    // графа 2
+    def colIndex = 2
+    newRow.regionBank = getRecordIdImport(30, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+
     // графа 3
-    def colIndex = 3
+    colIndex++
     newRow.regionBankDivision = getRecordIdImport(30, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
 
+    // графа 4
+    colIndex++
+    newRow.divisionName = values[colIndex]
+
     // графа 5
-    colIndex = 5
+    colIndex++
     newRow.kpp = values[colIndex]
 
     // графа 6..10
