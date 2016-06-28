@@ -21,21 +21,21 @@ import java.util.*;
  * Провайдер для справочника "Коды валют и драгоценных металлов"
  * @author lhaziev
  */
-@Service("RefBookCurrencyMetals")
+@Service("RefBookCreditRatingsClasses")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
-public class RefBookCurrencyMetals implements RefBookDataProvider {
+public class RefBookCreditRatingsClasses implements RefBookDataProvider {
 
-    public static final Long REF_BOOK_ID = 542L;
-    private static final Long REF_BOOK_CURRENCY_ID = 15L;
-    private static final Long REF_BOOK_METALS_ID = 17L;
+    public static final Long REF_BOOK_ID = 604L;
+    private static final Long REF_BOOK_CREDIT_RATINGS_ID = 603L;
+    private static final Long REF_BOOK_CREDIT_CLASSES_ID = 601L;
 
     @Autowired
     private RefBookFactory refBookFactory;
 
     enum RefBookType {
-        CURRENCY(0),
-        METALS(1);
+        CREDIT_RATINGS(0),
+        CREDIT_CLASSES(1);
 
         private long deviation;
 
@@ -47,27 +47,26 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
             this.deviation = deviation;
         }
     }
-    private RefBookDataProvider refBookDataProviderCurrency;
-    private RefBookDataProvider refBookDataProviderMetals;
+    private RefBookDataProvider refBookDataProviderCreditRatings;
+    private RefBookDataProvider refBookDataProviderCreditClasses;
     private RefBook refBook;
-    private RefBook refBookCurrency;
-    private RefBook refBookMetals;
+    private RefBook refBookCreditRatings;
+    private RefBook refBookCreditClasses;
 
     void init() {
-        if (refBookDataProviderCurrency == null)
-            refBookDataProviderCurrency = refBookFactory.getDataProvider(REF_BOOK_CURRENCY_ID);
-        if (refBookDataProviderMetals == null)
-            refBookDataProviderMetals = refBookFactory.getDataProvider(REF_BOOK_METALS_ID);
+        if (refBookDataProviderCreditRatings == null)
+            refBookDataProviderCreditRatings = refBookFactory.getDataProvider(REF_BOOK_CREDIT_RATINGS_ID);
+        if (refBookDataProviderCreditClasses == null)
+            refBookDataProviderCreditClasses = refBookFactory.getDataProvider(REF_BOOK_CREDIT_CLASSES_ID);
         refBook = refBookFactory.get(REF_BOOK_ID);
-        refBookCurrency = refBookFactory.get(REF_BOOK_CURRENCY_ID);
-        refBookMetals = refBookFactory.get(REF_BOOK_METALS_ID);
+        refBookCreditRatings = refBookFactory.get(REF_BOOK_CREDIT_RATINGS_ID);
+        refBookCreditClasses = refBookFactory.get(REF_BOOK_CREDIT_CLASSES_ID);
     }
 
-    private Map<String, RefBookValue> convertCurrency(Map<String, RefBookValue> record) {
+    private Map<String, RefBookValue> convertCreditRatings(Map<String, RefBookValue> record) {
         Map<String, RefBookValue> newRecord = new HashMap<String, RefBookValue>();
-        newRecord.put("NAME", record.get("NAME"));
-        newRecord.put("CODE", record.get("CODE"));
-        newRecord.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue() * 10L + RefBookType.CURRENCY.getDeviation()));
+        newRecord.put("NAME", record.get("CREDIT_RATING"));
+        newRecord.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue() * 10L + RefBookType.CREDIT_RATINGS.getDeviation()));
         if (record.containsKey(RefBook.RECORD_VERSION_FROM_ALIAS))
             newRecord.put(RefBook.RECORD_VERSION_FROM_ALIAS, record.get(RefBook.RECORD_VERSION_FROM_ALIAS));
         if (record.containsKey(RefBook.RECORD_VERSION_TO_ALIAS))
@@ -75,11 +74,10 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
         return newRecord;
     }
 
-    private Map<String, RefBookValue> convertMetals(Map<String, RefBookValue> record) {
+    private Map<String, RefBookValue> convertCreditClasses(Map<String, RefBookValue> record) {
         Map<String, RefBookValue> newRecord = new HashMap<String, RefBookValue>();
-        newRecord.put("NAME", record.get("NAME"));
-        newRecord.put("CODE", record.get("INNER_CODE"));
-        newRecord.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue() * 10L + RefBookType.METALS.getDeviation()));
+        newRecord.put("NAME", record.get("CREDIT_QUALITY_CLASS"));
+        newRecord.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue() * 10L + RefBookType.CREDIT_CLASSES.getDeviation()));
         if (record.containsKey(RefBook.RECORD_VERSION_FROM_ALIAS))
             newRecord.put(RefBook.RECORD_VERSION_FROM_ALIAS, record.get(RefBook.RECORD_VERSION_FROM_ALIAS));
         if (record.containsKey(RefBook.RECORD_VERSION_TO_ALIAS))
@@ -90,19 +88,19 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
     private RefBookAttribute getAttribute(RefBookAttribute sortAttribute, RefBookType refBookType) {
         if (sortAttribute==null)
             return null;
-        if (RefBookType.CURRENCY.equals(refBookType))
-            return refBookCurrency.getAttribute(sortAttribute.getAlias());
+        if (RefBookType.CREDIT_RATINGS.equals(refBookType))
+            return refBookCreditRatings.getAttribute("CREDIT_RATING");
         else
-            return refBookMetals.getAttribute(sortAttribute.getAlias().equals("CODE")?"INNER_CODE":sortAttribute.getAlias());
+            return refBookCreditClasses.getAttribute("CREDIT_QUALITY_CLASS");
     }
 
     private String getFilter(String filter, RefBookType refBookType) {
         if (filter == null || filter.isEmpty())
             return filter;
-        if (RefBookType.CURRENCY.equals(refBookType))
-            return filter;
+        if (RefBookType.CREDIT_RATINGS.equals(refBookType))
+            return filter.replaceAll("NAME", "CREDIT_RATING");
         else
-            return filter.replaceAll("CODE", "INNER_CODE");
+            return filter.replaceAll("NAME", "CREDIT_QUALITY_CLASS");
     }
 
     @Override
@@ -115,13 +113,13 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
             newPagingParams.setStartIndex(1);
             newPagingParams.setCount(pagingParams.getCount() + pagingParams.getStartIndex() - 1);
         }
-        PagingResult<Map<String, RefBookValue>> currencyPage = refBookDataProviderCurrency.getRecords(version, newPagingParams, getFilter(filter, RefBookType.CURRENCY), getAttribute(sortAttribute, RefBookType.CURRENCY), isSortAscending);
+        PagingResult<Map<String, RefBookValue>> currencyPage = refBookDataProviderCreditRatings.getRecords(version, newPagingParams, getFilter(filter, RefBookType.CREDIT_RATINGS), getAttribute(sortAttribute, RefBookType.CREDIT_RATINGS), isSortAscending);
         for(Map<String, RefBookValue> record: currencyPage) {
-            result.add(convertCurrency(record));
+            result.add(convertCreditRatings(record));
         }
-        PagingResult<Map<String, RefBookValue>> metalsPage = refBookDataProviderMetals.getRecords(version, newPagingParams, getFilter(filter, RefBookType.METALS), getAttribute(sortAttribute, RefBookType.METALS), isSortAscending);
+        PagingResult<Map<String, RefBookValue>> metalsPage = refBookDataProviderCreditClasses.getRecords(version, newPagingParams, getFilter(filter, RefBookType.CREDIT_CLASSES), getAttribute(sortAttribute, RefBookType.CREDIT_CLASSES), isSortAscending);
         for(Map<String, RefBookValue> record: metalsPage) {
-            result.add(convertMetals(record));
+            result.add(convertCreditClasses(record));
         }
         if (sortAttribute != null) {
             Collections.sort(result, new Comparator<Map<String, RefBookValue>>() {
@@ -165,11 +163,11 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
     public List<Long> getUniqueRecordIds(Date version, String filter) {
         init();
         List<Long> result = new ArrayList<Long>();
-        for(Long id: refBookDataProviderCurrency.getUniqueRecordIds(version, filter)) {
-            result.add(id*10L + RefBookType.CURRENCY.getDeviation());
+        for(Long id: refBookDataProviderCreditRatings.getUniqueRecordIds(version, filter)) {
+            result.add(id * 10L + RefBookType.CREDIT_RATINGS.getDeviation());
         }
-        for(Long id: refBookDataProviderMetals.getUniqueRecordIds(version, filter)) {
-            result.add(id*10L + RefBookType.METALS.getDeviation());
+        for(Long id: refBookDataProviderCreditClasses.getUniqueRecordIds(version, filter)) {
+            result.add(id * 10L + RefBookType.CREDIT_CLASSES.getDeviation());
         }
         return result;
     }
@@ -177,8 +175,8 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
     @Override
     public int getRecordsCount(Date version, String filter) {
         init();
-        return refBookDataProviderCurrency.getRecordsCount(version, getFilter(filter, RefBookType.CURRENCY)) +
-                    refBookDataProviderMetals.getRecordsCount(version, getFilter(filter, RefBookType.METALS));
+        return refBookDataProviderCreditRatings.getRecordsCount(version, getFilter(filter, RefBookType.CREDIT_RATINGS)) +
+                    refBookDataProviderCreditClasses.getRecordsCount(version, getFilter(filter, RefBookType.CREDIT_CLASSES));
     }
 
     @Override
@@ -216,20 +214,20 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
         init();
         Long recordIdReal = recordId/10;
         long type = recordId % 10;
-        if (RefBookType.CURRENCY.getDeviation() == type)
-            return convertCurrency(refBookDataProviderCurrency.getRecordData(recordIdReal));
-        return convertMetals(refBookDataProviderMetals.getRecordData(recordIdReal));
+        if (RefBookType.CREDIT_RATINGS.getDeviation() == type)
+            return convertCreditRatings(refBookDataProviderCreditRatings.getRecordData(recordIdReal));
+        return convertCreditClasses(refBookDataProviderCreditClasses.getRecordData(recordIdReal));
     }
 
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
         init();
         Map<Long, Map<String, RefBookValue>> result = new HashMap<Long, Map<String, RefBookValue>>();
-        for(Map.Entry<Long, Map<String, RefBookValue>> entry: refBookDataProviderCurrency.getRecordData(recordIds).entrySet()) {
-            result.put(entry.getKey()*10L + RefBookType.CURRENCY.getDeviation(), convertCurrency(entry.getValue()));
+        for(Map.Entry<Long, Map<String, RefBookValue>> entry: refBookDataProviderCreditRatings.getRecordData(recordIds).entrySet()) {
+            result.put(entry.getKey()*10L + RefBookType.CREDIT_RATINGS.getDeviation(), convertCreditRatings(entry.getValue()));
         }
-        for(Map.Entry<Long, Map<String, RefBookValue>> entry: refBookDataProviderMetals.getRecordData(recordIds).entrySet()) {
-            result.put(entry.getKey()*10L + RefBookType.METALS.getDeviation(), convertMetals(entry.getValue()));
+        for(Map.Entry<Long, Map<String, RefBookValue>> entry: refBookDataProviderCreditClasses.getRecordData(recordIds).entrySet()) {
+            result.put(entry.getKey()*10L + RefBookType.CREDIT_CLASSES.getDeviation(), convertCreditClasses(entry.getValue()));
         }
         return result;
     }
@@ -238,8 +236,8 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
     public List<Date> getVersions(Date startDate, Date endDate) {
         init();
         List<Date> result = new ArrayList<Date>();
-        result.addAll(refBookDataProviderCurrency.getVersions(startDate, endDate));
-        result.addAll(refBookDataProviderMetals.getVersions(startDate, endDate));
+        result.addAll(refBookDataProviderCreditRatings.getVersions(startDate, endDate));
+        result.addAll(refBookDataProviderCreditClasses.getVersions(startDate, endDate));
 		return result;
     }
 
@@ -254,17 +252,17 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
         Long recordIdReal = recordId/10;
         long type = recordId % 10;
-        if (RefBookType.CURRENCY.getDeviation() == type) {
-            PagingResult<Map<String, RefBookValue>> currencyPage = refBookDataProviderCurrency.getRecordVersionsByRecordId(recordIdReal, pagingParams, getFilter(filter, RefBookType.CURRENCY), getAttribute(sortAttribute, RefBookType.CURRENCY));
+        if (RefBookType.CREDIT_RATINGS.getDeviation() == type) {
+            PagingResult<Map<String, RefBookValue>> currencyPage = refBookDataProviderCreditRatings.getRecordVersionsByRecordId(recordIdReal, pagingParams, getFilter(filter, RefBookType.CREDIT_RATINGS), getAttribute(sortAttribute, RefBookType.CREDIT_RATINGS));
             for(Map<String, RefBookValue> record: currencyPage) {
-                result.add(convertCurrency(record));
+                result.add(convertCreditRatings(record));
             }
             result.setTotalCount(currencyPage.getTotalCount());
             return result;
         }
-        PagingResult<Map<String, RefBookValue>> metalsPage = refBookDataProviderMetals.getRecordVersionsByRecordId(recordIdReal, pagingParams, getFilter(filter, RefBookType.METALS), getAttribute(sortAttribute, RefBookType.METALS));
+        PagingResult<Map<String, RefBookValue>> metalsPage = refBookDataProviderCreditClasses.getRecordVersionsByRecordId(recordIdReal, pagingParams, getFilter(filter, RefBookType.CREDIT_CLASSES), getAttribute(sortAttribute, RefBookType.CREDIT_CLASSES));
         for(Map<String, RefBookValue> record: metalsPage) {
-            result.add(convertMetals(record));
+            result.add(convertCreditClasses(record));
         }
         result.setTotalCount(metalsPage.getTotalCount());
         return result;
@@ -301,13 +299,13 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
         RefBookRecordVersion result;
         Long recordIdReal = uniqueRecordId/10;
         long type = uniqueRecordId % 10;
-        if (RefBookType.CURRENCY.getDeviation() == type) {
-            result = refBookDataProviderCurrency.getRecordVersionInfo(recordIdReal);
-            result.setRecordId(result.getRecordId()*10L + RefBookType.CURRENCY.getDeviation());
+        if (RefBookType.CREDIT_RATINGS.getDeviation() == type) {
+            result = refBookDataProviderCreditRatings.getRecordVersionInfo(recordIdReal);
+            result.setRecordId(result.getRecordId()*10L + RefBookType.CREDIT_RATINGS.getDeviation());
             return result;
         }
-        result = refBookDataProviderMetals.getRecordVersionInfo(recordIdReal);
-        result.setRecordId(result.getRecordId()*10L + RefBookType.METALS.getDeviation());
+        result = refBookDataProviderCreditClasses.getRecordVersionInfo(recordIdReal);
+        result.setRecordId(result.getRecordId() * 10L + RefBookType.CREDIT_CLASSES.getDeviation());
         return result;
     }
 
@@ -321,9 +319,9 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
         init();
         Long recordIdReal = refBookRecordId/10;
         long type = refBookRecordId % 10;
-        if (RefBookType.CURRENCY.getDeviation() == type)
-            return refBookDataProviderCurrency.getRecordVersionsCount(recordIdReal);
-        return refBookDataProviderMetals.getRecordVersionsCount(recordIdReal);
+        if (RefBookType.CREDIT_RATINGS.getDeviation() == type)
+            return refBookDataProviderCreditRatings.getRecordVersionsCount(recordIdReal);
+        return refBookDataProviderCreditClasses.getRecordVersionsCount(recordIdReal);
     }
 
     @Override
@@ -396,9 +394,9 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
         init();
         Long recordIdReal = uniqueRecordId/10;
         long type = uniqueRecordId % 10;
-        if (RefBookType.CURRENCY.getDeviation() == type)
-            return refBookDataProviderCurrency.getRecordId(recordIdReal)*10L + RefBookType.CURRENCY.getDeviation();
-        return refBookDataProviderMetals.getRecordId(recordIdReal)*10L + RefBookType.METALS.getDeviation();
+        if (RefBookType.CREDIT_RATINGS.getDeviation() == type)
+            return refBookDataProviderCreditRatings.getRecordId(recordIdReal)*10L + RefBookType.CREDIT_RATINGS.getDeviation();
+        return refBookDataProviderCreditClasses.getRecordId(recordIdReal)*10L + RefBookType.CREDIT_CLASSES.getDeviation();
     }
 
     @Override
@@ -413,7 +411,7 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
         for (Long fakeRecordId : recordIds) {
             realRecordIds.add(fakeRecordId/10);
         }
-        return refBookDataProviderCurrency.getInactiveRecordsInPeriod(realRecordIds, periodFrom, periodTo);
+        return refBookDataProviderCreditRatings.getInactiveRecordsInPeriod(realRecordIds, periodFrom, periodTo);
     }
 
 	@Override
@@ -424,17 +422,17 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
         for(Long recordId: recordIds) {
             Long recordIdReal = recordId/10;
             long type = recordId % 10;
-            if (RefBookType.CURRENCY.getDeviation() == type)
+            if (RefBookType.CREDIT_RATINGS.getDeviation() == type)
                 currencyRecordIds.add(recordIdReal);
             else
                 metalsRecordIds.add(recordIdReal);
         }
         Map<Long, RefBookValue> result = new HashMap<Long, RefBookValue>();
-        for (Map.Entry<Long, RefBookValue> entry: refBookDataProviderCurrency.dereferenceValues(getAttribute(refBook.getAttribute(attributeId), RefBookType.CURRENCY).getId(), currencyRecordIds).entrySet()){
-            result.put(entry.getKey()*10L + RefBookType.CURRENCY.getDeviation(), entry.getValue());
+        for (Map.Entry<Long, RefBookValue> entry: refBookDataProviderCreditRatings.dereferenceValues(getAttribute(refBook.getAttribute(attributeId), RefBookType.CREDIT_RATINGS).getId(), currencyRecordIds).entrySet()){
+            result.put(entry.getKey()*10L + RefBookType.CREDIT_RATINGS.getDeviation(), entry.getValue());
         }
-        for (Map.Entry<Long, RefBookValue> entry: refBookDataProviderMetals.dereferenceValues(getAttribute(refBook.getAttribute(attributeId), RefBookType.METALS).getId(), metalsRecordIds).entrySet()){
-            result.put(entry.getKey()*10L + RefBookType.METALS.getDeviation(), entry.getValue());
+        for (Map.Entry<Long, RefBookValue> entry: refBookDataProviderCreditClasses.dereferenceValues(getAttribute(refBook.getAttribute(attributeId), RefBookType.CREDIT_CLASSES).getId(), metalsRecordIds).entrySet()){
+            result.put(entry.getKey()*10L + RefBookType.CREDIT_CLASSES.getDeviation(), entry.getValue());
         }
         return result;
 	}
