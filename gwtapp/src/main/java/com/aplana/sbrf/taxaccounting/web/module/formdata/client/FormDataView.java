@@ -915,7 +915,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     public void setReportTypes(List<FormDataReportType> reportTypes) {
         printAnchor.clear();
         for(final FormDataReportType reportType: reportTypes) {
-            LinkButton linkButton = new LinkButton("Сформировать \"" + reportType + "\"");
+            LinkButton linkButton = new LinkButton("Сформировать \"" + reportType.getReportName() + "\"");
             linkButton.setHeight("20px");
             linkButton.setDisableImage(true);
             linkButton.addClickHandler(new ClickHandler() {
