@@ -40,7 +40,7 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
 
     private static String[] headers = new String[]{"Дата-время", "Событие", "Текст события", "Период", "Подразделение",
             "Тип формы", "Тип налоговой формы", "Вид налоговой формы/декларации",
-            "Пользователь", "Роль пользователя", "IP пользователя"};
+            "Пользователь", "Роль пользователя", "IP пользователя", "Сервер"};
 
     private List<LogSearchResultItem> items;
 
@@ -120,6 +120,7 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
         entries.add(item.getUser());
         entries.add(item.getRoles());
         entries.add(item.getIp());
+        entries.add(item.getServer());
 
         return entries.toArray(new String[entries.size()]);
     }

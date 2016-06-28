@@ -30,7 +30,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
     private static String[] headers = new String[]{"Дата-время", "Событие", "Текст события", "Период", "Подразделение",
             "Тип формы", "Тип налоговой формы", "Вид налоговой формы/декларации",
-            "Пользователь", "Роль пользователя", "IP пользователя"};
+            "Пользователь", "Роль пользователя", "IP пользователя", "Сервер"};
 
     public LogSystemXlsxReportBuilder(List<LogSearchResultItem> items) {
         super("audit",".xlsx");
@@ -183,6 +183,11 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(item.getIp());
+            cellNumber++;
+
+            cell = row.createCell(cellNumber);
+            cell.setCellStyle(cs);
+            cell.setCellValue(item.getServer());
             cellNumber++;
 
             cellNumber = 0;
