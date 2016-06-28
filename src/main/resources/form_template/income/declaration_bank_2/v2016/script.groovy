@@ -1013,7 +1013,7 @@ void generateXML(def xml, boolean showApp2) {
                         // КвИсчислАв : '00',
                         НалПУМес(ОКТМО : oktmo) {
                             def list02Row300 = avPlatMesFB
-                            def avPlat1 = (long) list02Row300 / 3
+                            def avPlat1 = roundValue(list02Row300 / 3, 0)
                             def avPlat2 = avPlat1
                             def avPlat3 = getLong(list02Row300 - avPlat1 - avPlat2)
                             // 0..1
