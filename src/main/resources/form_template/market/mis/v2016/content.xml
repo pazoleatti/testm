@@ -90,7 +90,7 @@
         <name>Ставка фондирования, % годовых</name>
         <order>9</order>
         <width>10</width>
-        <maxLength>10</maxLength>
+        <maxLength>8</maxLength>
         <precision>6</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -99,7 +99,7 @@
         <name>Ставка ETC, % годовых</name>
         <order>10</order>
         <width>10</width>
-        <maxLength>10</maxLength>
+        <maxLength>8</maxLength>
         <precision>6</precision>
     </columns>
     <styles>
