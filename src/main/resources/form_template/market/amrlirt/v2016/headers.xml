@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="crmId" colSpan="1" rowSpan="1" value="CRM ID"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименование организации"/>
+        <cell alias="inn" colSpan="1" rowSpan="1" value="ИНН"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="Код ТБ"/>
+        <cell alias="lgd" colSpan="1" rowSpan="1" value="LGD ценообразования"/>
+    </row>
+    <row alias="">
+        <cell alias="crmId" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="inn" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="lgd" colSpan="1" rowSpan="1" value="5"/>
+    </row>
+</rows>
