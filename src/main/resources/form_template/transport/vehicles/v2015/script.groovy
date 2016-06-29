@@ -373,14 +373,21 @@ def logicCheck() {
         }
 
         if (row.share != null) {
+            def parts = row.share.split('/')
             def columnName = getColumnTitle(row, 'share')
-            if (!(row.share ==~ /\d{1,10}\/\d{1,10}/)) {
-                loggerError(row, errorMsg + "Графа «$columnName» должна быть заполнена согласно формату «(от 1 до 10 знаков)/(от 1 до 10 знаков)»!")
-            } else {
-                def partArray = row.share.split('/')
-                if (partArray[1] ==~ /0{1,10}/) {
-                    logger.error(errorMsg + "Деление на ноль в графе «$columnName»!")
-                }
+
+            // 21. Проверка доли налогоплательщика в праве на ТС (графа 18) на корректность формата введенных данных
+            def isOnlyDigits = row.share ==~ /\d{1,10}\/\d{1,10}/
+            def hasFirstZero = parts.find { it ==~ /0+\d/ }
+            // если числитель больше знаменателя
+            def devisorGreaterDenominator = (parts.size() == 2 && (parts[0].size() > parts[1].size() || (parts[0].size() == parts[1].size() && parts[0] > parts[1])))
+            if (!isOnlyDigits || hasFirstZero || devisorGreaterDenominator) {
+                loggerError(row, errorMsg + "Графа «$columnName» должна быть заполнена согласно формату: «(от 1 до 10 числовых знаков)/(от 1 до 10 числовых знаков)», числитель должен быть меньше либо равен знаменателю!")
+            }
+
+            // 22. Проверка значения знаменателя доли налогоплательщика в праве на ТС (графа 18)
+            if (parts.size() == 2 && parts[1] ==~ /0{1,10}/) {
+                logger.error(errorMsg + "Деление на ноль в графе «$columnName»!")
             }
         }
 
