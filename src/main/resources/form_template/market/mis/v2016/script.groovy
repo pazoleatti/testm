@@ -2,11 +2,16 @@ package form_template.market.mis.v2016
 
 import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormTemplate
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn
 import com.aplana.sbrf.taxaccounting.model.ReferenceColumn
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
+
+import java.math.RoundingMode
 
 /**
  * Данные MIS
@@ -35,6 +40,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         calc()
+        logicCheck()
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
@@ -182,7 +188,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 10
     int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
+    String TABLE_START_VALUE = tmpRow.getCell('innKio').column.name
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -242,14 +248,14 @@ void importData() {
  * @param colCount количество колонок в таблице
  * @param rowCount количество строк в таблице
  */
-void checkHeaderXls(def headerRows, def colCount, rowCount) {
+void checkHeaderXls(def headerRows, def colCount, def rowCount) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headers = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).headers
     def headerMapping =[[:]]
     def index = 0
     allColumns.each { alias ->
-        headerMapping.add(([(headerRows[0][index]): headers[1][alias]]))
+        headerMapping.add(([(headerRows[0][index]): headers[0][alias]]))
         headerMapping.add(([(headerRows[1][index]): (index + 1).toString()]))
         index++
     }
@@ -286,15 +292,21 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
                 newRow[formColumn.alias] = values[colIndex]
                 break
             case ColumnType.REFBOOK:
-                def refBookId = ((RefBookColumn)formColumn).refBookAttribute.refBookId
-                def refBookAttrAlias = ((RefBookColumn)formColumn).refBookAttribute.alias
-                def recordId = getRecordIdImport(refBookId, refBookAttrAlias, values[colIndex], fileRowIndex, colIndex + colOffset, false)
+                def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
+                def refBookId = refBookFactory.getByAttribute(refBookAttribute.id).id
+                def refBookAttrAlias = refBookAttribute.alias
+                def value = values[colIndex]
+                if (RefBookAttributeType.NUMBER.equals(refBookAttribute.attributeType)) {
+                    value = new BigDecimal(value).setScale(refBookAttribute.precision, RoundingMode.HALF_UP).toString()
+                }
+                def recordId = getRecordIdImport(refBookId, refBookAttrAlias, value, fileRowIndex, colIndex + colOffset, false)
                 newRow[formColumn.alias] = recordId
                 recordMap[formColumn.alias] = getRefBookValue(refBookId, recordId)
                 break
             case ColumnType.REFERENCE:
-                def refBookId = ((RefBookColumn)formColumn).refBookAttribute.refBookId
-                def refBookAttrAlias = ((RefBookColumn)formColumn).refBookAttribute.alias
+                def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
+                def refBookId = refBookFactory.getByAttribute(refBookAttribute.id).id
+                def refBookAttrAlias = refBookAttribute.alias
                 def parentAlias = ((ReferenceColumn) formColumn).parentAlias
                 def map = recordMap[parentAlias]
                 if (map != null) {
