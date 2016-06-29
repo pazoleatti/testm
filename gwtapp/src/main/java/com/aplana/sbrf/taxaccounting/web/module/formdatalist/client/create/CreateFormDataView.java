@@ -290,7 +290,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
             return;
         }
         if (dataKinds.isEmpty()) {
-            formDataKind.setFilter("");
+            formDataKind.setFilter("2 = 1");
             return;
         }
         List<String> list = new ArrayList<String>(dataKinds.size());

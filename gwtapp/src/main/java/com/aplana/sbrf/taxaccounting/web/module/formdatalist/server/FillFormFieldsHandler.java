@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsAction;
@@ -50,6 +47,9 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
 
     @Autowired
     DepartmentReportPeriodService departmentReportPeriodService;
+
+    @Autowired
+    SourceService sourceService;
 
     @Override
     public FillFormFieldsResult execute(FillFormFieldsAction action, ExecutionContext executionContext) throws ActionException {
@@ -101,7 +101,13 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                 break;
             case THIRD:
                 List<FormDataKind> kinds = new ArrayList<FormDataKind>();
-                kinds.addAll(dataAccessService.getAvailableFormDataKind(userInfo, asList(action.getTaxType())));
+                List<FormTypeKind> formAssigned = sourceService.getFormAssigned(action.getDepartmentId(), action.getTaxType().getCode());
+                List<FormDataKind> formDataKindList = dataAccessService.getAvailableFormDataKind(userInfo, asList(action.getTaxType()));
+                for (FormTypeKind formTypeKind: formAssigned) {
+                    if (!kinds.contains(formTypeKind.getKind()) && formDataKindList.contains(formTypeKind.getKind())) {
+                        kinds.add(formTypeKind.getKind());
+                    }
+                }
                 result.setDataKinds(kinds);
                 result.setCorrectionDate(departmentReportPeriodService.getLast(action.getDepartmentId().intValue(), action.getReportPeriodId()).getCorrectionDate());
                 break;
