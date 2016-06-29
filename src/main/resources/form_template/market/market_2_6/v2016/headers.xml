@@ -6,7 +6,7 @@
     <cell alias="depNumber" colSpan="1" rowSpan="2" value="Номер отделения, выдавшего кредит / кредитующее подразделение ЦА, к компетенции которого относится договор"/>
     <cell alias="okved" colSpan="1" rowSpan="2" value="Код отрасли по ОКВЭД"/>
     <cell alias="opf" colSpan="1" rowSpan="2" value="Организационно-правовая форма"/>
-    <cell alias="debtor" colSpan="1" rowSpan="2" value="Наименование заемщика"/>
+    <cell alias="debtorName" colSpan="1" rowSpan="2" value="Наименование заемщика"/>
     <cell alias="inn" colSpan="1" rowSpan="2" value="ИНН заемщика"/>
     <cell alias="sign" colSpan="1" rowSpan="2" value="Признак СМП"/>
     <cell alias="direction" colSpan="1" rowSpan="2" value="Направление бизнес плана, к которому относится кредит"/>
@@ -49,7 +49,7 @@
     <cell alias="depNumber" colSpan="1" rowSpan="1" value="Номер отделения, выдавшего кредит / кредитующее подразделение ЦА, к компетенции которого относится договор"/>
     <cell alias="okved" colSpan="1" rowSpan="1" value="Код отрасли по ОКВЭД"/>
     <cell alias="opf" colSpan="1" rowSpan="1" value="Организационно-правовая форма"/>
-    <cell alias="debtor" colSpan="1" rowSpan="1" value="Наименование заемщика"/>
+    <cell alias="debtorName" colSpan="1" rowSpan="1" value="Наименование заемщика"/>
     <cell alias="inn" colSpan="1" rowSpan="1" value="ИНН заемщика"/>
     <cell alias="sign" colSpan="1" rowSpan="1" value="Признак СМП"/>
     <cell alias="direction" colSpan="1" rowSpan="1" value="Направление бизнес плана, к которому относится кредит"/>
@@ -92,7 +92,7 @@
     <cell alias="depNumber" colSpan="1" rowSpan="1" value="4"/>
     <cell alias="okved" colSpan="1" rowSpan="1" value="5"/>
     <cell alias="opf" colSpan="1" rowSpan="1" value="6"/>
-    <cell alias="debtor" colSpan="1" rowSpan="1" value="7"/>
+    <cell alias="debtorName" colSpan="1" rowSpan="1" value="7"/>
     <cell alias="inn" colSpan="1" rowSpan="1" value="8"/>
     <cell alias="sign" colSpan="1" rowSpan="1" value="9"/>
     <cell alias="direction" colSpan="1" rowSpan="1" value="10"/>

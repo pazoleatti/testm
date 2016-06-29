@@ -41,6 +41,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
@@ -179,7 +180,7 @@ void calc() {
     for (row in dataRows) {
         def records = getRecords(row.innKio)
         if (records.size() == 1) {
-            row.debtor = records.get(0).NAME.value
+            row.debtorName = records.get(0).NAME.value
         }
     }
 }
@@ -277,7 +278,6 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     def required = true
 
     def colIndex = 0
-    def recordMap = [:]
     for (formColumn in formData.formColumns) {
         switch (formColumn.columnType) {
             case ColumnType.AUTO:
@@ -301,26 +301,12 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
                 }
                 def recordId = getRecordIdImport(refBookId, refBookAttrAlias, value, fileRowIndex, colIndex + colOffset, false)
                 newRow[formColumn.alias] = recordId
-                recordMap[formColumn.alias] = getRefBookValue(refBookId, recordId)
-                break
-            case ColumnType.REFERENCE:
-                def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
-                def refBookId = refBookFactory.getByAttribute(refBookAttribute.id).id
-                def refBookAttrAlias = refBookAttribute.alias
-                def parentAlias = ((ReferenceColumn) formColumn).parentAlias
-                def map = recordMap[parentAlias]
-                if (map != null) {
-                    def expectedValue = map[refBookAttrAlias].value
-                    formDataService.checkReferenceValue(refBookId, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
-                }
                 break
         }
         colIndex++
     }
     // Заполнение общей информации о заемщике при загрузке из Excel
     fillDebtorInfo(newRow)
-    recordMap.clear()
-    recordMap = null
     return newRow
 }
 
@@ -343,12 +329,7 @@ Map<Long, Map<String, RefBookValue>> getRecords520() {
     if (records520 == null) {
         def date = getReportPeriodEndDate()
         def provider = formDataService.getRefBookProvider(refBookFactory, 520, providerCache)
-        // найдем все версии больше даты актуальности
-        def versions = provider.getVersions(date + 1, null)
-        // найдем минимальную дату среди этих версий
-        def minVersion = versions.min()
-
-        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(minVersion, null)
+        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
         records520 = provider.getRecordData(uniqueRecordIds)
     }
     return records520
@@ -375,7 +356,7 @@ void fillDebtorInfo(def newRow) {
     String fileDebtorName = newRow.debtorName
     newRow.debtorName = debtorRecords[0].NAME?.stringValue ?: ""
     if (! newRow.debtorName.equalsIgnoreCase(fileDebtorName)) {
-        def refBook = refBookFactory.get(520)
+        def refBook = refBookFactory.get(520L)
         def refBookAttrName = refBook.getAttribute('INN').name + '/' + refBook.getAttribute('KIO').name
         if (fileDebtorName) {
             rowWarning(logger, newRow, "На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +

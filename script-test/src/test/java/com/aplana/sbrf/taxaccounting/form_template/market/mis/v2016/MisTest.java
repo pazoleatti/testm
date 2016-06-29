@@ -138,7 +138,6 @@ public class MisTest extends ScriptTestBase {
         int expected = 1; // в файле 1 строка
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        printLog();
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();

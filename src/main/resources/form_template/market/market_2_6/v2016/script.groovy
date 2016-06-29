@@ -4,7 +4,12 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn
 import com.aplana.sbrf.taxaccounting.model.ReferenceColumn
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
+
+import java.math.RoundingMode
+
 /**
  * 2.6 (Ежемесячный) Отчет о состоянии кредитного портфеля
  * formTemplateId = 900
@@ -17,7 +22,7 @@ import groovy.transform.Field
  * графа 4  - depNumber          - Номер отделения, выдавшего кредит / кредитующее подразделение ЦА, к компетенции которого относится договор
  * графа 5  - okved              - Код отрасли по ОКВЭД
  * графа 6  - opf                - Организационно-правовая форма
- * графа 7  - debtor             - Наименование заемщика
+ * графа 7  - debtorName         - Наименование заемщика
  * графа 8  - inn                - ИНН заемщика
  * графа 9  - sign               - Признак СМП
  * графа 10 - direction          - Направление бизнес плана, к которому относится кредит
@@ -63,6 +68,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         calc()
+        logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
@@ -81,13 +88,13 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        importData() // TODO доработать
+        importData()
         formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
 @Field
-def allColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtor', 'inn', 'sign', 'direction',
+def allColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtorName', 'inn', 'sign', 'direction',
                   'law', 'creditType', 'docNum', 'docDate', 'creditDate', 'closeDate', 'extendNum', 'creditMode',
                   'currencySum', 'sumDoc', 'sumGiven', 'rate', 'payFrequency', 'currencyCredit', 'debtSum', 'inTimeDebtSum',
                   'overdueDebtSum', 'percentDebtSum', 'deptDate', 'percentDate', 'percentPeriod', 'provision', 'provisionComment',
@@ -95,7 +102,7 @@ def allColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf',
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtor', 'inn', 'sign', 'direction',
+def editableColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtorName', 'inn', 'sign', 'direction',
                        'law', 'creditType', 'docNum', 'docDate', 'creditDate', 'closeDate', 'extendNum', 'creditMode',
                        'currencySum', 'sumDoc', 'sumGiven', 'rate', 'payFrequency', 'currencyCredit', 'debtSum', 'inTimeDebtSum',
                        'overdueDebtSum', 'percentDebtSum', 'deptDate', 'percentDate', 'percentPeriod', 'provision', 'provisionComment',
@@ -107,7 +114,7 @@ def autoFillColumns = []
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtor', 'inn', 'sign', 'direction',
+def nonEmptyColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtorName', 'inn', 'sign', 'direction',
                        'law', 'creditType', 'docNum', 'docDate', 'closeDate', 'extendNum', 'creditMode',
                        'currencySum', 'sumDoc', 'sumGiven', 'rate', 'payFrequency', 'currencyCredit', 'debtSum', 'inTimeDebtSum',
                        'overdueDebtSum', 'percentDebtSum', 'provision', 'loanSign', 'loanQuality', 'finPosition', 'debtService', 'creditRisk', 'reservePercent', 'reserveSum']
@@ -193,7 +200,7 @@ void logicCheck() {
                     row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'creditDate'))
         }
         // 8. Проверка валюты
-        if (row.currencySum != null && !("RUB".equals(getRefBookValue(15, row.currencySum).CODE_2.value))) {
+        if (row.currencySum != null && ("RUB".equals(getRefBookValue(15, row.currencySum).CODE_2.value))) {
             logger.error("Строка %s: Для российского рубля должно быть проставлено буквенное значение RUR!", row.getIndex())
         }
     }
@@ -231,20 +238,26 @@ def getRecords(def inn) {
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (row in dataRows) {
-        //Если значение графы 8 не равно значениям “9999999999”, “9999999998”, тогда:
-        //1.	Найти в справочнике «Участники ТЦО» запись, для которой выполнено одно из условий:
-        //        -	Значение поля «ИНН (заполняется для резидентов, некредитных организаций)» = значение графы 8;
-        //-	Значение поля «КИО (заполняется для нерезидентов)» = значение графы 8.
-        //2.	Если запись найдена, тогда:
-        //Графа 7 = значение поля «Полное наименование юридического лица с указанием ОПФ».
-        //3.	Если запись не найдена, тогда графа 7 не рассчитывается (если до выполнения расчета в графе 7 было указано значение, то это значение должно сохраниться)
-        if (!['9999999999', '9999999998'].contains(row.inn)) {
-            def records = getRecords(row.inn?.trim()?.toLowerCase())
-            if (records.size() == 1) {
-                row.debtor = records.get(0).NAME.value
-            }
-        }
+        calc7(row)
+    }
+}
 
+@Field
+def exclusiveInns = ['9999999999', '9999999998']
+
+void calc7(def row) {
+    //Если значение графы 8 не равно значениям “9999999999”, “9999999998”, тогда:
+    //1.	Найти в справочнике «Участники ТЦО» запись, для которой выполнено одно из условий:
+    //        -	Значение поля «ИНН (заполняется для резидентов, некредитных организаций)» = значение графы 8;
+    //-	Значение поля «КИО (заполняется для нерезидентов)» = значение графы 8.
+    //2.	Если запись найдена, тогда:
+    //Графа 7 = значение поля «Полное наименование юридического лица с указанием ОПФ».
+    //3.	Если запись не найдена, тогда графа 7 не рассчитывается (если до выполнения расчета в графе 7 было указано значение, то это значение должно сохраниться)
+    if (!exclusiveInns.contains(row.inn)) {
+        def records = getRecords(row.inn?.trim()?.toLowerCase())
+        if (records != null && records.size() == 1) {
+            row.debtorName = records.get(0).NAME.value
+        }
     }
 }
 
@@ -344,7 +357,6 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     def required = true
 
     def colIndex = 0
-    def recordMap = [:]
     for (formColumn in formData.formColumns) {
         switch (formColumn.columnType) {
             case ColumnType.AUTO:
@@ -359,27 +371,21 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
                 newRow[formColumn.alias] = values[colIndex]
                 break
             case ColumnType.REFBOOK:
-                def refBookId = ((RefBookColumn)formColumn).refBookAttribute.refBookId
-                def refBookAttrAlias = ((RefBookColumn)formColumn).refBookAttribute.alias
-                def recordId = getRecordIdImport(refBookId, refBookAttrAlias, values[colIndex], fileRowIndex, colIndex + colOffset, false)
-                newRow[formColumn.alias] = recordId
-                recordMap[formColumn.alias] = getRefBookValue(refBookId, recordId)
-                break
-            case ColumnType.REFERENCE:
-                def refBookId = ((RefBookColumn)formColumn).refBookAttribute.refBookId
-                def refBookAttrAlias = ((RefBookColumn)formColumn).refBookAttribute.alias
-                def parentAlias = ((ReferenceColumn) formColumn).parentAlias
-                def map = recordMap[parentAlias]
-                if (map != null) {
-                    def expectedValue = map[refBookAttrAlias].value
-                    formDataService.checkReferenceValue(refBookId, values[colIndex], expectedValue, fileRowIndex, colIndex + colOffset, logger, false)
+                def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
+                def refBookId = refBookFactory.getByAttribute(refBookAttribute.id).id
+                def refBookAttrAlias = refBookAttribute.alias
+                def value = values[colIndex]
+                if (RefBookAttributeType.NUMBER.equals(refBookAttribute.attributeType)) {
+                    value = new BigDecimal(value).setScale(refBookAttribute.precision, RoundingMode.HALF_UP).toString()
                 }
+                def recordId = getRecordIdImport(refBookId, refBookAttrAlias, value, fileRowIndex, colIndex + colOffset, false)
+                newRow[formColumn.alias] = recordId
                 break
         }
         colIndex++
     }
-    recordMap.clear()
-    recordMap = null
+    // Заполнение общей информации о заемщике при загрузке из Excel
+    fillDebtorInfo(newRow)
     return newRow
 }
 
@@ -395,3 +401,52 @@ def getNewRow() {
     return newRow
 }
 
+@Field
+Map<Long, Map<String, RefBookValue>> records520
+
+Map<Long, Map<String, RefBookValue>> getRecords520() {
+    if (records520 == null) {
+        def date = getReportPeriodEndDate()
+        def provider = formDataService.getRefBookProvider(refBookFactory, 520, providerCache)
+        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
+        records520 = provider.getRecordData(uniqueRecordIds)
+    }
+    return records520
+}
+
+void fillDebtorInfo(def newRow) {
+    // Найти множество записей справочника «Участники ТЦО», периоды актуальности которых содержат определенную выше дату актуальности
+    Map<Long, Map<String, RefBookValue>> records = getRecords520()
+    String debtorNumber = newRow.inn
+    if (debtorNumber == null || debtorNumber.isEmpty() || exclusiveInns.contains(debtorNumber)) {
+        return
+    }
+    def debtorRecords = records.findAll { def uniqueRecordId, refBookValueMap ->
+        debtorNumber.equalsIgnoreCase(refBookValueMap.INN.stringValue) || debtorNumber.equalsIgnoreCase(refBookValueMap.KIO.stringValue)
+    }
+    if (debtorRecords.size() > 1) {
+        logger.warn("Найдено больше одной записи соотвествующей данным ИНН/КИО = " + debtorNumber)
+        return
+    }
+    if (debtorRecords.size() == 0) {
+        return
+    }
+    // else
+    String fileDebtorName = newRow.debtorName
+    newRow.debtorName = debtorRecords[0].NAME?.stringValue ?: ""
+    if (! newRow.debtorName.equalsIgnoreCase(fileDebtorName)) {
+        def refBook = refBookFactory.get(520)
+        def refBookAttrName = refBook.getAttribute('INN').name + '/' + refBook.getAttribute('KIO').name
+        if (fileDebtorName) {
+            rowWarning(logger, newRow, "На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
+                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
+                    "В файле указано другое наименование заемщика - «%s»!",
+                    newRow.debtorName, refBookAttrName, newRow.innKio, fileDebtorName)
+        } else {
+            rowWarning(logger, newRow, "На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
+                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
+                    "Наименование заемщика в файле не заполнено!",
+                    newRow.debtorName, refBookAttrName, newRow.innKio)
+        }
+    }
+}

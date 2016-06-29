@@ -58,13 +58,13 @@
         <order>6</order>
         <width>6</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>53</nameAttributeId>
-        <refBookAttributeId>50</refBookAttributeId>
+        <nameAttributeId>6052</nameAttributeId>
+        <refBookAttributeId>6051</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
         <versioned>true</versioned>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>debtor</alias>
+        <alias>debtorName</alias>
         <checking>false</checking>
         <name>Наименование заемщика</name>
         <order>7</order>
@@ -350,8 +350,8 @@
         <order>38</order>
         <width>6</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>66</nameAttributeId>
-        <refBookAttributeId>65</refBookAttributeId>
+        <nameAttributeId>6041</nameAttributeId>
+        <refBookAttributeId>6041</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
         <versioned>true</versioned>
     </columns>
