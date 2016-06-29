@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="2" value="№ п/п"/>
+        <cell alias="name" colSpan="6" rowSpan="1" value="Заёмщик"/>
+        <cell alias="docDate" colSpan="8" rowSpan="1" value="Кредитный договор"/>
+    </row>
+    <row alias="">
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименование заёмщика"/>
+        <cell alias="opf" colSpan="1" rowSpan="1" value="ОПФ"/>
+        <cell alias="country" colSpan="1" rowSpan="1" value="Страна регистрации (местоположения заемщика)"/>
+        <cell alias="innKio" colSpan="1" rowSpan="1" value="ИНН / КИО заёмщика"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1" value="Кредитный рейтинг / класс кредитоспособности"/>
+        <cell alias="docNum" colSpan="1" rowSpan="1" value="Номер кредитного договора"/>
+        <cell alias="docDate" colSpan="1" rowSpan="1" value="Дата кредитного договора (дд.мм.гг.)"/>
+        <cell alias="docDate2" colSpan="1" rowSpan="1" value="Дата выдачи (дд.мм.гг.)"/>
+        <cell alias="docDate3" colSpan="1" rowSpan="1" value="Дата планируемого погашения с учетом последней пролонгации (дд.мм.гг.)"/>
+        <cell alias="partRepayment" colSpan="1" rowSpan="1" value="Частичное погашение основного долга (Да / Нет)"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" value="Срок кредита, лет"/>
+        <cell alias="currencyCode" colSpan="1" rowSpan="1" value="Валюта суммы кредита"/>
+        <cell alias="creditSum" colSpan="1" rowSpan="1" value="Сумма кредита (по договору), ед. валюты"/>
+        <cell alias="creditRate" colSpan="1" rowSpan="1" value="Процентная ставка, % годовых"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="2.1"/>
+        <cell alias="opf" colSpan="1" rowSpan="1" value="2.2"/>
+        <cell alias="country" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="innKio" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="docNum" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="docDate" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="docDate2" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="docDate3" colSpan="1" rowSpan="1" value="9)"/>
+        <cell alias="partRepayment" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="currencyCode" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="creditSum" colSpan="1" rowSpan="1" value="13"/>
+        <cell alias="creditRate" colSpan="1" rowSpan="1" value="14"/>
+    </row>
+</rows>
