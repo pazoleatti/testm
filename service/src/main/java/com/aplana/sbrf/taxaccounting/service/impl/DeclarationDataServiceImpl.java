@@ -176,8 +176,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod,
                 FormDataEvent.CREATE, logger);
         if (logger.containsLevel(LogLevel.ERROR)) {
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
             throw new ServiceLoggerException(
-                    "Декларация не создана",
+                    (declarationTemplate.getType().getTaxType().equals(TaxType.DEAL) ? "Уведомление не создано" : "Декларация не создана"),
                     logEntryService.save(logger.getEntries()));
         }
 

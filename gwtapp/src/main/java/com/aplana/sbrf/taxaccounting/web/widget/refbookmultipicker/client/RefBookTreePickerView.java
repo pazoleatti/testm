@@ -502,6 +502,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public void cleanValues() {
         tree.clear();
+        getUiHandlers().cleanPS();
     }
 
     public void widgetFireChangeEvent(Set<Long> value) {

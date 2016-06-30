@@ -159,6 +159,11 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
 // Получение Id записи из справочника 27 с использованием кэширования
 def getRecordId(String knu, String accountNo, Date date) {
     def ref_id = 27

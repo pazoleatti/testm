@@ -93,7 +93,7 @@ public class DataRowServiceImpl implements DataRowService {
             else
                 existCommonColumn = true;
         }
-        long index = 1;
+        Long index = 0L;
         if (existRefBookColumn) {
             List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);
             refBookHelper.dataRowsDereference(new Logger(), rows, formData.getFormColumns());
@@ -105,13 +105,13 @@ public class DataRowServiceImpl implements DataRowService {
                         Cell valueCell = row.getCell(column.getAlias());
                         if (valueCell != null && valueCell.getRefBookDereference() != null && (isCaseSensitive && valueCell.getRefBookDereference().indexOf(searchKey) >= 0
                                 || !isCaseSensitive && valueCell.getRefBookDereference().toUpperCase().indexOf(searchKey) >= 0)) {
-                            FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
-                            formDataSearchResult.setColumnIndex((long) column.getOrder());
-                            formDataSearchResult.setRowIndex(row.getIndex().longValue());
-                            formDataSearchResult.setStringFound(valueCell.getRefBookDereference());
-                            resultsList.add(formDataSearchResult);
-                            if ((++index) > range.getCount())
-                                break;
+                            if ((index++) < range.getCount()) {
+                                FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
+                                formDataSearchResult.setColumnIndex((long) column.getOrder());
+                                formDataSearchResult.setRowIndex(row.getIndex().longValue());
+                                formDataSearchResult.setStringFound(valueCell.getRefBookDereference());
+                                resultsList.add(formDataSearchResult);
+                            }
                         }
                     } else if (ColumnType.DATE.equals(column.getColumnType())) {
                         Cell valueCell = row.getCell(column.getAlias());
@@ -126,13 +126,13 @@ public class DataRowServiceImpl implements DataRowService {
                             String valueStr = df.format(valueCell.getDateValue());
                             if (isCaseSensitive && valueStr.indexOf(searchKey) >= 0
                                     || !isCaseSensitive && valueStr.toUpperCase().indexOf(searchKey) >= 0) {
-                                FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
-                                formDataSearchResult.setColumnIndex((long) column.getOrder());
-                                formDataSearchResult.setRowIndex(row.getIndex().longValue());
-                                formDataSearchResult.setStringFound(valueStr);
-                                resultsList.add(formDataSearchResult);
-                                if ((++index) > range.getCount())
-                                    break;
+                                if ((index++) < range.getCount()) {
+                                    FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
+                                    formDataSearchResult.setColumnIndex((long) column.getOrder());
+                                    formDataSearchResult.setRowIndex(row.getIndex().longValue());
+                                    formDataSearchResult.setStringFound(valueStr);
+                                    resultsList.add(formDataSearchResult);
+                                }
                             }
                         }
                     }
@@ -141,15 +141,15 @@ public class DataRowServiceImpl implements DataRowService {
         }
         PagingResult<FormDataSearchResult> daoResults;
         if (existCommonColumn) {
-            daoResults = dataRowDao.searchByKey(formDataId, range, key, isCaseSensitive, manual);
+            daoResults = dataRowDao.searchByKey(formDataId, formData.getFormTemplateId(), range, key, isCaseSensitive, manual);
         } else {
             // если нет *обычных*(числовых, строковых, автонумеруемых) граф, то нет смысла проводить поиск
             daoResults = new PagingResult<FormDataSearchResult>();
         }
-        results.setTotalCount(daoResults.getTotalCount() + resultsList.size());
+        results.setTotalCount(daoResults.getTotalCount() + index.intValue());
         resultsList.addAll(daoResults);
         Collections.sort(resultsList);
-        index = 1;
+        index = 1L;
         for(FormDataSearchResult searchResult: resultsList) {
             searchResult.setIndex(index++);
         }

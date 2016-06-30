@@ -315,26 +315,30 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				hideCheckedColumnsCheckbox = false;
 			}
 
-			if (showCheckedColumns.getValue() || !col.isChecking()) {
-				com.google.gwt.user.cellview.client.Column<DataRow<Cell>, ?> tableCol = factory
-						.createTableColumn(col, formDataTable);
-				formDataTable.addColumn(tableCol, col.getName());
-				((DataRowColumn<?>)tableCol).addCellModifiedEventHandler(new CellModifiedEventHandler() {
-					@Override
-					public void onCellModified(CellModifiedEvent event, boolean withReference) {
-                        if (getUiHandlers() != null) {
-                            getUiHandlers().onCellModified(event.getDataRow());
-                            // Зависимые ячейки - обновление всей строки
-                            if (withReference) {
-                                formDataTable.redrawRow(event.getDataRow().getIndex() - 1);
-                            }
-						}
-					}
-				});
-				if (col.getWidth() >= 0) {
-					formDataTable.setColumnWidth(tableCol, col.getWidth(), Style.Unit.EM);
-				}
-			}
+            com.google.gwt.user.cellview.client.Column<DataRow<Cell>, ?> tableCol = factory
+                    .createTableColumn(col, formDataTable);
+            if (showCheckedColumns.getValue() || !col.isChecking()) {
+                formDataTable.addColumn(tableCol, col.getName());
+            } else {
+                formDataTable.addColumn(tableCol);
+            }
+            ((DataRowColumn<?>)tableCol).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+                @Override
+                public void onCellModified(CellModifiedEvent event, boolean withReference) {
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().onCellModified(event.getDataRow());
+                        // Зависимые ячейки - обновление всей строки
+                        if (withReference) {
+                            formDataTable.redrawRow(event.getDataRow().getIndex() - 1);
+                        }
+                    }
+                }
+            });
+            if (!showCheckedColumns.getValue() && col.isChecking()) {
+                formDataTable.setColumnWidth(tableCol, "0px");
+            } else if (col.getWidth() >= 0) {
+                formDataTable.setColumnWidth(tableCol, col.getWidth(), Style.Unit.EM);
+            }
 		}
 		showCheckedColumns.setVisible(!hideCheckedColumnsCheckbox);
 		//TODO КОСТЫЛИ! По возможности убрать.

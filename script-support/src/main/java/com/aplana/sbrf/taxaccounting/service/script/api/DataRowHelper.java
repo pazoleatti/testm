@@ -149,7 +149,7 @@ public interface DataRowHelper {
     void clear();
 
     /**
-     * Сохранить отсортированные строки без учета остальных изменении. Обновятся только значения атрибута FORM_DATA_ROW.ORD
+     * Сохранить отсортированные строки без учета остальных изменении. Обновятся только значения атрибута FORM_DATA_NNN.ORD
      */
     @SuppressWarnings("unused")
     void saveSort();

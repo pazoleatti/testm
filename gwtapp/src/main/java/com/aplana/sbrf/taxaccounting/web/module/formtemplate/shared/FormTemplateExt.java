@@ -13,7 +13,6 @@ import java.util.List;
 public class FormTemplateExt implements Serializable {
     private FormTemplate formTemplate;
     private Date actualEndVersionDate;
-    private List<FormStyle> styles;
 
     public FormTemplate getFormTemplate() {
         return formTemplate;
@@ -29,13 +28,5 @@ public class FormTemplateExt implements Serializable {
 
     public void setActualEndVersionDate(Date actualEndVersionDate) {
         this.actualEndVersionDate = actualEndVersionDate;
-    }
-
-    public List<FormStyle> getStyles() {
-        return styles;
-    }
-
-    public void setStyles(List<FormStyle> styles) {
-        this.styles = styles;
     }
 }

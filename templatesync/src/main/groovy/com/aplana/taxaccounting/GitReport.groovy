@@ -451,8 +451,8 @@ class GitReport {
                                     def dbRows = versions[version]?.data_rows
                                     def gitRows = XMLUnit.buildControlDocument(rowsFile?.text?.replaceAll('stringValue=""', ''))
                                     if (dbRows != null && gitRows != null) {
-                                        updateStyleAliases(dbRows, stylesDb)
-                                        updateStyleAliases(gitRows, stylesDb + mapStylesXml)
+                                        // updateStyleAliases(dbRows, stylesDb)
+                                        // updateStyleAliases(gitRows, stylesDb + mapStylesXml)
                                         Diff diff = XMLUnit.compareXML(dbRows, gitRows)
                                         def rowsEqual = diff.similar()
                                         if (rowsEqual) {
@@ -1229,6 +1229,7 @@ order by ds.declaration_template_id, ds.ord
         return refbooks
     }
 
+    @Deprecated
     def public static void updateStyleAliases(Document document, def styleMap) {
         if (document == null || styleMap == null) {
             return

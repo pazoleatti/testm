@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionSegment;
@@ -163,11 +162,34 @@ public interface FormTemplateDao {
 
 	/**
 	 * Проверяет, есть ли в списке строковых значений, строка с длиной больше maxLength
-	 * @param formTemplateId идентификатор версии макета НФ
-	 * @param column проверяемая графа
+	 * @param formTemplateId по данному макету осуществляется поиск
+	 * @param columnId среди данных этого столбца
+	 * @param maxLength с данным значением сравниваем длину строк
 	 * @return true - есть длинные строки, false - нет
 	 */
-	boolean checkExistLargeString(Long formTemplateId, Column column);
+	boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength);
+
+    /**
+     * Метод для создания таблиц НФ в новой структуре.
+     * НЕ ИСПОЛЬЗОВАТЬ нигде больше.
+     * http://jira.aplana.com/browse/SBRFACCTAX-11384
+     * @param ftId идентификатор макета НФ
+     */
+    void createFDTable(int ftId);
+
+    /**
+     * Метод для удаления таблиц НФ в новой структуре.
+     * НЕ ИСПОЛЬЗОВАТЬ нигде больше.
+     * @param ftId идентификатор версии макета НФ
+     */
+    void dropFDTable(int ftId);
+
+    /**
+     * Метод для удаления таблиц НФ в новой структуре.
+     * НЕ ИСПОЛЬЗОВАТЬ нигде больше.
+     * @param ftId идентификатор id версий макета {@link com.aplana.sbrf.taxaccounting.model.FormType}
+     */
+    void dropFTTable(List<Integer> ftId);
 
     boolean isFDTableExist(int ftId);
 

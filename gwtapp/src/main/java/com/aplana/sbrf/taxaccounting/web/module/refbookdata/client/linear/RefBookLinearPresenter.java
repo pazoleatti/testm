@@ -98,6 +98,10 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                     Dialog.errorMessage("Удаление записи справочника", "Обнаружены фатальные ошибки!");
                                 }
                                 editFormPresenter.setIsFormModified(false);
+                                recordId = null;
+                                editFormPresenter.setRecordId(null);
+                                editFormPresenter.setCurrentUniqueRecordId(null);
+
                                 /*editPresenter.setMode(mode);*/
                                 ShowItemEvent.fire(RefBookLinearPresenter.this, null, recordId);
                                 getView().updateTable();

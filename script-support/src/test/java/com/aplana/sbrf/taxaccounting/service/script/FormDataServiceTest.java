@@ -12,8 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.StyleService;
-import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +40,8 @@ import static org.mockito.Mockito.when;
 @DirtiesContext
 public class FormDataServiceTest {
 
-    private FormDataService formDataService;
+    @Autowired
+    FormDataService formDataService;
 
     private Map<Long, Map<String, Long>> recordCache;
     private Map<Long, RefBookDataProvider> providerCache;
@@ -58,8 +57,6 @@ public class FormDataServiceTest {
 
     @Before
     public void init() {
-		formDataService = new FormDataServiceImpl();
-
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
 
         RefBookDataProvider refBookDataProvider = mock(RefBookDataProvider.class);
@@ -100,9 +97,6 @@ public class FormDataServiceTest {
 
         SourceService sourceService = mock(SourceService.class);
         ReflectionTestUtils.setField(formDataService, "sourceService", sourceService);
-
-		StyleService styleService = mock(StyleService.class);
-		ReflectionTestUtils.setField(formDataService, "styleService", styleService);
     }
 
     @Test
@@ -335,6 +329,10 @@ public class FormDataServiceTest {
         formData1.setId(1L);
         FormData formData2 = new FormData();
         formData2.setId(2L);
+        formDataService.getDataRowHelper(formData1);
+        formDataService.getDataRowHelper(formData2);
+        formDataService.getDataRowHelper(formData1);
+        formDataService.getDataRowHelper(formData2);
     }
 
     @Test(expected = ServiceException.class)

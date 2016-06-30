@@ -99,7 +99,10 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 
                 DeclarationData declarationData = declarationDataService.find(declarationTypeId, departmentReportPeriod.getId(), command.getTaxOrganKpp(), command.getTaxOrganCode());
                 if (declarationData != null) {
-                    logger.error("Декларация с заданными параметрами уже существует");
+                    String msg = (declarationType.getTaxType().equals(TaxType.DEAL) ?
+                            "Уведомление с заданными параметрами уже существует" :
+                            "Декларация с заданными параметрами уже существует");
+                    logger.error(msg);
                     result.setDeclarationId(null);
                     lockDataService.unlock(key, userInfo.getUser().getId());
                     return result;

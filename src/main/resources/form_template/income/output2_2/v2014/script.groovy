@@ -43,6 +43,9 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
+    case FormDataEvent.AFTER_CREATE:
+        addTotalRow()
+        break
     case FormDataEvent.AFTER_LOAD:
         afterLoad()
         break
@@ -58,7 +61,9 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
-        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -633,4 +638,23 @@ def checkOverflow(BigDecimal value, def row, def alias, int size) {
         return null
     }
     return value
+}
+
+void addTotalRow() {
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def isAfterFirstQuarter2016 = (reportPeriod?.taxPeriod?.year > 2016 ||
+            reportPeriod?.taxPeriod?.year > 2016 && reportPeriod?.order > 1)
+    if (!isAfterFirstQuarter2016) {
+        return
+    }
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    def totalRow = dataRows.find { it.getAlias() == 'total' }
+    if (totalRow) {
+        return
+    }
+
+    // итоговая строка
+    totalRow = getTotalRow()
+    dataRows.add(totalRow)
+    formDataService.saveCachedDataRows(formData, logger)
 }

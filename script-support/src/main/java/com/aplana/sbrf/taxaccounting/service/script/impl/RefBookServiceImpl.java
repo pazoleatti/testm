@@ -1,14 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormLink;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
@@ -31,6 +31,9 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Autowired
     private RefBookFactory factory;
+
+    @Autowired
+    private RefBookDao refBookDao;
 
     @Autowired
     private RefBookHelper refBookHelper;
@@ -86,6 +89,71 @@ public class RefBookServiceImpl implements RefBookService {
     @Override
     public List<Pair<String, String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         return refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(recordId, attributes, records);
+    }
+
+    @Override
+    public RefBookRecordVersion getNextVersion(Long refBookId, Long recordId, Date versionFrom) {
+        return refBookDao.getNextVersion(refBookId, recordId, versionFrom);
+    }
+
+    @Override
+    public List<CheckCrossVersionsResult> checkCrossVersions(Long refBookId, Long recordId, Date versionFrom, Date versionTo, Long excludedRecordId) {
+        return refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, excludedRecordId);
+    }
+
+    @Override
+    public void updateVersionRelevancePeriod(String tableName, Long uniqueRecordId, Date version) {
+        refBookDao.updateVersionRelevancePeriod(tableName, uniqueRecordId, version);
+    }
+
+    @Override
+    public void deleteRecordVersions(String tableName, List<Long> uniqueRecordIds) {
+        refBookDao.deleteRecordVersions(tableName, uniqueRecordIds);
+    }
+
+    @Override
+    public List<FormLink> isVersionUsedInForms(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod) {
+        return refBookDao.isVersionUsedInForms(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
+    }
+
+    @Override
+    public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, List<Long> excludeUseCheck) {
+        return refBookDao.isVersionUsedInRefBooks(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod, excludeUseCheck);
+    }
+
+    @Override
+    public List<String> isVersionUsedInDepartmentConfigs(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, List<Long> excludeUseCheck) {
+        return refBookDao.isVersionUsedInDepartmentConfigs(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod, excludeUseCheck);
+    }
+
+    @Override
+    public RefBookRecordVersion getPreviousVersion(Long refBookId, Long recordId, Date versionFrom) {
+        return refBookDao.getPreviousVersion(refBookId, recordId, versionFrom);
+    }
+
+    @Override
+    public Long findRecord(Long refBookId, Long recordId, Date version) {
+        return refBookDao.findRecord(refBookId, recordId, version);
+    }
+
+    @Override
+    public List<Long> getRelatedVersions(List<Long> uniqueRecordIds) {
+        return refBookDao.getRelatedVersions(uniqueRecordIds);
+    }
+
+    @Override
+    public boolean isVersionsExist(Long refBookId, List<Long> recordIds, Date version) {
+        return refBookDao.isVersionsExist(refBookId, recordIds, version);
+    }
+
+    @Override
+    public void createFakeRecordVersion(Long refBookId, Long recordId, Date version) {
+        refBookDao.createFakeRecordVersion(refBookId, recordId, version);
+    }
+
+    @Override
+    public void updateRecordVersion(Long refBookId, Long uniqueRecordId, Map<String, RefBookValue> records) {
+        refBookDao.updateRecordVersion(refBookId, uniqueRecordId, records);
     }
 
     private RefBookValue getValue(Long refBookId, Long recordId, String alias) {

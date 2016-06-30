@@ -129,7 +129,7 @@ public class FormTemplateDaoTest {
 	public void testSaveDataRows() {
 		FormTemplate formTemplate = formTemplateDao.get(1);
 		
-		DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate));
+		DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate.getColumns(), formTemplate.getStyles()));
 		formTemplate.getRows().add(rows);
 		
 		DataRow<HeaderCell> headers1 = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));
@@ -346,15 +346,9 @@ public class FormTemplateDaoTest {
 
 	@Test
 	public void checkExistLargeStringTest() {
-		StringColumn column = new StringColumn();
-		column.setDataOrder(0);
-		column.setMaxLength(3);
-		Assert.assertTrue(formTemplateDao.checkExistLargeString(1L, column));
-		column.setMaxLength(5);
-		Assert.assertTrue(formTemplateDao.checkExistLargeString(1L, column));
-		column.setMaxLength(6);
-		Assert.assertFalse(formTemplateDao.checkExistLargeString(1L, column));
-		column.setMaxLength(7);
-		Assert.assertFalse(formTemplateDao.checkExistLargeString(1L, column));
+		Assert.assertTrue(formTemplateDao.checkExistLargeString(1, 1, 3));
+		Assert.assertTrue(formTemplateDao.checkExistLargeString(1, 1, 5));
+		Assert.assertFalse(formTemplateDao.checkExistLargeString(1, 1, 6));
+		Assert.assertFalse(formTemplateDao.checkExistLargeString(1, 1, 7));
 	}
 }

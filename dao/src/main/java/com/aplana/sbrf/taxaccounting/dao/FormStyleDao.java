@@ -21,6 +21,13 @@ public interface FormStyleDao {
 	List<FormStyle> getFormStyles(int formId);
 
 	/**
+	 * Получить мапку, где ключ - id стиля, значение - стиль
+	 * @param formTemplateId идентификатор формы
+	 * @return мапка
+	 */
+	Map<Integer, FormStyle> getIdToFormStyleMap(int formTemplateId);
+
+	/**
 	 * Получить мапку, где ключ - alias стиля, значение - стиль
 	 * @param formTemplateId идентификатор формы
 	 * @return мапка
@@ -31,5 +38,5 @@ public interface FormStyleDao {
 	 * Сохранить список стилей формы
 	 * @param formTemplate форма
 	 */
-	void saveFormStyles(FormTemplate formTemplate);
+	Collection<Integer> saveFormStyles(FormTemplate formTemplate);
 }

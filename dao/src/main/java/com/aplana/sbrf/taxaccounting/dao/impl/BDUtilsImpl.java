@@ -14,7 +14,7 @@ import java.util.List;
 class BDUtilsImpl extends AbstractDao implements BDUtils {
     @Override
     public List<Long> getNextDataRowIds(Long count) {
-        return getNextIds(Sequence.FORM_DATA_ROW, count);
+        return getNextIds(Sequence.FORM_DATA_NNN, count);
     }
 
     @Override

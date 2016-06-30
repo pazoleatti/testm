@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.StyleService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTemplateExt;
@@ -43,9 +42,6 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
     private RefBookFactory refBookFactory;
 
     @Autowired
-    private StyleService styleService;
-
-    @Autowired
     private LogEntryService logEntryService;
 
     @Autowired
@@ -65,7 +61,6 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
         FormTemplateExt formTemplateExt = new FormTemplateExt();
 		FormTemplate formTemplate = formTemplateService.get(action.getId(), logger);
         formTemplateExt.setActualEndVersionDate(formTemplateService.getFTEndDate(formTemplate.getId()));
-        formTemplateExt.setStyles(styleService.getAll());
         formTemplate.setScript(formTemplate.getScript());
         formTemplateExt.setFormTemplate(formTemplate);
         result.setForm(formTemplateExt);

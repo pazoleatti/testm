@@ -3,6 +3,10 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 UPDATE ref_book_attribute SET name = 'Код налогового органа (кон.)' WHERE id = 185;	
 
 -----------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16085: Отображение дат в справочнике ценных бумаг
+update ref_book_attribute set format = 1 where id in (816, 817);
+
+-----------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15302: 0.8.4 Классификаторы доходов/расходов: Изменить название поля "Символ ОПУ" на "Символ ОФР"
 UPDATE REF_BOOK_ATTRIBUTE SET NAME = 'Символ ОФР' WHERE REF_BOOK_ID IN (27, 28) AND ALIAS = 'OPU';
 
@@ -155,6 +159,9 @@ update ref_book set name = 'Средняя стоимость транспорт
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) 
 VALUES (2188, 218, 'Количество лет, прошедших с года выпуска', 'YOM_RANGE', 1, 7, null, null, 1, null, 10, 1, 0, null, null, 0, 120);
 
+-- -- https://jira.aplana.com/browse/SBRFACCTAX-15963: 1.0 Справочник "Средняя стоимость транспортных средств (с 2015)". Изменить уникальность полей
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 2188;
+
 begin
 	merge into ref_book_value tgt
 using (
@@ -182,6 +189,33 @@ end;
 /
 delete from ref_book_value where attribute_id in (2186, 2187);	 
 delete from ref_book_attribute where id in (2186, 2187);
+
+--https://jira.aplana.com/browse/SBRFACCTAX-16002: В справочнике "Средняя стоимость транспортных средств (с 2015)" по части строк 2015 г. заполнить поле "Модель (версия)"
+begin
+
+merge into ref_book_value tgt
+using (
+  with t as (
+  select v.record_id, v.attribute_id, v.string_value, r.version
+  from ref_book_value v
+  join ref_book_record r on v.record_id = r.id and r.status = 0 and r.ref_book_id = 218
+  where attribute_id in (2182, 2183, 2184, 2185, 2188)), pt as (
+  select * from t
+  pivot (max(string_value) for attribute_id in (2182 BREND, 2183 MODEL, 2184 ENGINE_VOLUME, 2185 ENGINE_TYPE, 2188 YOM_RANGE)))
+  select pt.record_id, 2183 as attribute_id, case when brend='Mercedes- Benz' and engine_volume = '2987' and engine_type = 'дизель' and yom_range = 'не более 2 лет' then 'S 350 BlueTec 4MATIC длинная база'
+                    when brend='Mercedes- Benz' and engine_volume = '5461' and engine_type = 'бензин' and yom_range = 'не более 2 лет' then 'CLS 63 AMG 4MATIC (Shooting Brake)' end new_model
+  from pt 
+  where model is null) src
+on (tgt.record_id=src.record_id and tgt.attribute_id = src.attribute_id)
+when matched then
+     update set tgt.string_value = src.new_model
+when not matched then
+     insert (tgt.record_id, tgt.attribute_id, tgt.string_value) values (src.record_id, src.attribute_id, src.new_model);       
+
+dbms_output.put_line('REFBOOK (Transport, SBRFACCTAX-16002): '||sql%rowcount||' row(s) merged');
+     
+end;
+/
 -----------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15863: 1.0 ТН. Сделать поле "Код ТС" справочным в справочнике
 

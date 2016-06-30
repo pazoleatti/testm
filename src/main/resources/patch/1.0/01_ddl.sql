@@ -1,3 +1,9 @@
+set serveroutput on size 1000000;
+
+--https://jira.aplana.com/browse/SBRFACCTAX-15158: добавить в FORM_COLUMN строковое поле SHORT_NAME
+alter table form_column add short_name varchar2(1000);
+comment on column form_column.short_name is 'Краткое наименование';
+----------------------------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15795: Поиск по ОКТМО
 create index I_REF_BOOK_OKTMO_PARENT_ID on REF_BOOK_OKTMO (PARENT_ID);
 ----------------------------------------------------------------------------------------------------------------
@@ -13,13 +19,19 @@ alter table template_changes add constraint template_changes_chk_event check (ev
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14423: Реализовать справочник "История изменения категории ВЗЛ"
 
-insert into ref_book (id, name, visible, type, read_only, region_attribute_id, is_versioned) values (521, 'История изменения категории ВЗЛ', 0, 0, 0, null, 0);
-                                                                                                
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5230, 521, 'ВЗЛ',            'JUR_PERSON',    4,  1,  520,  5201,  1,  null,  10,  1,  0,  null,  null,  0,  null);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5231, 521, 'Категория ВЗЛ',        'CATEGORY',      4,  2,  506,  5061,  1,  null,  10,  1,  0,  null,  null,  0,  null);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5232, 521, 'Код формы',           'FORM_DATA_ID',   2,   3,   null,   null,   1,   0,     10, 1,   0,   null,   null,   0,   18);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5233, 521, 'Дата изменения',        'CHANGE_DATE',    3,  4,  null,  null,  1,  null,  10,  1,  0,  null,  1,    0,  null);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5234, 521, 'Код состояния',         'STATE',       2,   5,   null,   null,   1,   0,     10, 1,   0,   null,   null,   0,   9);
+begin
+	insert into ref_book (id, name, visible, type, read_only, region_attribute_id, is_versioned) values (521, 'История изменения категории ВЗЛ', 0, 0, 0, null, 0);
+																									
+	insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5230, 521, 'ВЗЛ',            'JUR_PERSON',    4,  1,  520,  5201,  1,  null,  10,  1,  0,  null,  null,  0,  null);
+	insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5231, 521, 'Категория ВЗЛ',        'CATEGORY',      4,  2,  506,  5061,  1,  null,  10,  1,  0,  null,  null,  0,  null);
+	insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5232, 521, 'Код формы',           'FORM_DATA_ID',   2,   3,   null,   null,   1,   0,     10, 1,   0,   null,   null,   0,   18);
+	insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5233, 521, 'Дата изменения',        'CHANGE_DATE',    3,  4,  null,  null,  1,  null,  10,  1,  0,  null,  1,    0,  null);
+	insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5234, 521, 'Код состояния',         'STATE',       2,   5,   null,   null,   1,   0,     10, 1,   0,   null,   null,   0,   9);
+exception
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line('Exception: ref_book with id=521 already exists.');
+end;
+/
 
 --http://jira.aplana.com/browse/SBRFACCTAX-14644: Создать отдельную таблицу для справочника "История ВЗЛ"
 create table ref_book_vzl_history

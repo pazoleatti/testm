@@ -334,26 +334,25 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
 
         ps.appendQuery(" FROM ");
         ps.appendQuery("(select distinct ");
-        ps.appendQuery("CONNECT_BY_ROOT frb.id as \"RECORD_ID\"");
+        ps.appendQuery("frb.id as \"RECORD_ID\"");
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
-            ps.appendQuery(", ");
-            ps.appendQuery("CONNECT_BY_ROOT frb.");
+            ps.appendQuery(", frb.");
             ps.appendQuery(attribute.getAlias());
             ps.appendQuery(" as \"");
             ps.appendQuery(attribute.getAlias());
             ps.appendQuery("\"");
         }
         if (version == null) {
-            ps.appendQuery(", CONNECT_BY_ROOT frb.version AS \"record_version_from\"");
+            ps.appendQuery(", frb.version AS \"record_version_from\"");
         }
 
         ps.appendQuery(" FROM ");
         ps.appendQuery(tableName);
         ps.appendQuery(" frb ");
 
-        ps.appendQuery("WHERE frb.id IN (SELECT id FROM t) \n");
-        ps.appendQuery(" CONNECT BY PRIOR ID = PARENT_ID ) rbo \n");
+        ps.appendQuery("START WITH frb.id IN (SELECT id FROM t) \n");
+        ps.appendQuery(" CONNECT BY PRIOR PARENT_ID = ID ) rbo \n");
         ps.appendQuery("WHERE ");
         ps.appendQuery(uniqueRecordId == null ? "PARENT_ID is null" : "PARENT_ID = " + uniqueRecordId);
 

@@ -163,7 +163,7 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
 
     def tmpValues = [:]
     colIndex++
-    tmpValues.rowNumber = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    tmpValues.rowNumber = round(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true), 0)
     colIndex++
     tmpValues.taxName = values[colIndex]
 

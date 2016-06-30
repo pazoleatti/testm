@@ -117,6 +117,14 @@ public interface DataRowDao {
 	void removeAllManualRows(FormData formData);
 
 	/**
+	 * Удаляет строки в диапазоне индексов.
+	 *
+	 * @param formData экземпляр НФ для которой выполняется удаление строк
+	 * @param range диапазон удаляемых строк, индекс начинается с 1
+	 */
+	void removeRows(FormData formData, DataRowRange range);
+
+	/**
 	 * Удаляет указанные строки
 	 *
 	 * @param formData
@@ -141,7 +149,7 @@ public interface DataRowDao {
 	/**
 	 * Заменяет существующие строки в БД на те, которые указаны в аргументе rows. Старые данные удаляются.
 	 * Поля DataRow.index и DataRow.id не принимаются во внимание. Порядок следования выставляется согласно
-	 * последовательности строк в rows. Id выставляется новый из последовательности "seq_form_data_row"
+	 * последовательности строк в rows. Id выставляется новый из последовательности "seq_form_data_nnn"
 	 * 
 	 * @param formData
 	 * @param rows
@@ -152,7 +160,7 @@ public interface DataRowDao {
     /**
      * Заменяет существующие строки в БД во временном(резервном) срезе на те, которые указаны в аргументе rows. Старые данные удаляются.
      * Поля DataRow.index и DataRow.id не принимаются во внимание. Порядок следования выставляется согласно
-     * последовательности строк в rows. Id выставляется новый из последовательности "seq_form_data_row"
+     * последовательности строк в rows. Id выставляется новый из последовательности "seq_form_data_nnn"
      *
      * @param formData
      * @param rows
@@ -163,17 +171,18 @@ public interface DataRowDao {
      * Полнотекстовый поиск по данным налоговой формы
      *
      * @param formDataId идентификатор НФ
+     * @param formTemplateId идентификатор шаблона НФ
      * @param range информация о выборке данных, с какой строки и сколько строк выбрать
      * @param key ключ для поиска
      * @param isCaseSensitive чувствительность к регистру
      * @param manual ручной ввод
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
-    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual);
+    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual);
 
 	/**
 	 * Обновляет существующие строки НФ
 	 */
-	void updateRows(FormData formData, List<DataRow<Cell>> rows);
+	void updateRows(FormData formData, Collection<DataRow<Cell>> rows);
 
 }

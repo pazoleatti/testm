@@ -1,62 +1,58 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+
 public class FormTemplateTest {
 
-	private FormTemplate createFormTemplate() {
+	private FormTemplate createFormTemplateWithStyles() {
 		FormTemplate ft = new FormTemplate();
 
-		ft.getStyles().add(new FormStyle("alias1", Color.DARK_GREEN, Color.WHITE, false, false));
-		ft.getStyles().add(new FormStyle("alias2", Color.RED, Color.LIGHT_BLUE, false, false));
-		ft.getStyles().add(new FormStyle("alias3", Color.BLUE, Color.LIGHT_CORAL, false, false));
+		FormStyle s = new FormStyle();
+		s.setAlias("alias1");
+		s.setId(1);
+		ft.getStyles().add(s);
 
-		Column column = new StringColumn();
-		column.setId(2);
-		column.setAlias("col1");
-		ft.getColumns().add(column);
-		column = new StringColumn();
-		column.setId(6);
-		column.setAlias("col2");
-		ft.getColumns().add(column);
+		s = new FormStyle();
+		s.setAlias("alias2");
+		s.setId(2);
+		ft.getStyles().add(s);
+
+		s = new FormStyle();
+		s.setAlias("alias3");
+		s.setId(3);
+		ft.getStyles().add(s);
 
 		return ft;
 	}
 	
 	@Test
-	public void getColumnTest() {
-		FormTemplate ft = createFormTemplate();
-		assertEquals("col1", ft.getColumn("col1").getAlias());
-		assertEquals("col2", ft.getColumn("col2").getAlias());
-		assertEquals("col2", ft.getColumn(6).getAlias());
-		assertEquals("col1", ft.getColumn(2).getAlias());
+	public void testGetStyle() {
+		FormTemplate ft = createFormTemplateWithStyles();
+
+		FormStyle s = ft.getStyle("alias3");
+		assertEquals(new Integer(3), s.getId());
+
+		s = ft.getStyle("alias2");
+		assertEquals(new Integer(2), s.getId());
+
+		s = ft.getStyle("alias1");
+		assertEquals(new Integer(1), s.getId());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void getColumnTest2() {
-		FormTemplate ft = createFormTemplate();
-		Integer i = null;
-		ft.getColumn(i);
+	@Test(expected=IllegalArgumentException.class)
+	public void testGetStyleNullAlias() {
+		FormTemplate ft = createFormTemplateWithStyles();
+		ft.getStyle(null);
+
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void getColumnTest3() {
-		FormTemplate ft = createFormTemplate();
-		ft.getColumn(1000);
-	}
+	@Test(expected=IllegalArgumentException.class)
+	public void testGetStyleWrongAlias() {
+		FormTemplate ft = createFormTemplateWithStyles();
+		ft.getStyle("nonExistantAlias");
 
-	@Test(expected = IllegalArgumentException.class)
-	public void getColumnTest4() {
-		FormTemplate ft = createFormTemplate();
-		String s = null;
-		ft.getColumn(s);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void getColumnTest5() {
-		FormTemplate ft = createFormTemplate();
-		ft.getColumn("something");
 	}
 }
