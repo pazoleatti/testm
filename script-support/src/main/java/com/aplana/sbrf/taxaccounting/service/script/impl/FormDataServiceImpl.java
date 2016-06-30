@@ -744,4 +744,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     public List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
         return sourceService.getDestinationsInfo(sourceFormData, light, excludeIfNotExist, stateRestriction, userInfo, logger);
     }
+
+    @Override
+    public FormData get(long formDataId, Boolean manual) {
+        return dao.get(formDataId, manual);
+    }
 }
