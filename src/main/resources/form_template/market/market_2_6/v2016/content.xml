@@ -295,7 +295,7 @@
         <name>Обеспечение</name>
         <order>32</order>
         <width>20</width>
-        <maxLength>32</maxLength>
+        <maxLength>100</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
