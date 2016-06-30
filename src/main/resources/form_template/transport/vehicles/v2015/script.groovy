@@ -378,7 +378,7 @@ def logicCheck() {
 
             // 21. Проверка доли налогоплательщика в праве на ТС (графа 18) на корректность формата введенных данных
             def isOnlyDigits = row.share ==~ /\d{1,10}\/\d{1,10}/
-            def hasFirstZero = parts.find { it ==~ /0+\d/ }
+            def hasFirstZero = parts.find { it ==~ /0+\d*/ }
             // если числитель больше знаменателя
             def devisorGreaterDenominator = (parts.size() == 2 && (parts[0].size() > parts[1].size() || (parts[0].size() == parts[1].size() && parts[0] > parts[1])))
             if (!isOnlyDigits || hasFirstZero || devisorGreaterDenominator) {
