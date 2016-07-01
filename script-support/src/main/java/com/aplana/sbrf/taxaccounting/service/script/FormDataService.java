@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * DAO для работы с данными по налоговым формам для скриптов 
+ * Сервис для работы с данными по налоговым формам для скриптов
  * @author auldanov
  */
 @ScriptExposed
@@ -326,4 +326,13 @@ public interface FormDataService {
      */
     List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
                                        TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Получить данные по налоговой формы
+     *
+     * @param formDataId идентификатор заполненной налоговой формы
+     * @param manual признак версии ручного ввода (возможно значение null)
+     * @return данные по налоговой форме
+     */
+    FormData get(long formDataId, Boolean manual);
 }

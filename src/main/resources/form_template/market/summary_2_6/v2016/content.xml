@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>false</fixedRows>
-    <monthly>true</monthly>
+    <fixedRows>true</fixedRows>
+    <monthly>false</monthly>
     <comparative>false</comparative>
     <accruing>false</accruing>
     <updating>false</updating>
-    <name>2.6 (Ежемесячный) Отчет о состоянии кредитного портфеля</name>
-    <fullName>2.6 (Ежемесячный) Отчет о состоянии кредитного портфеля Сбербанка России (по кредитам, предоставленным юридическим лицам) по ЦА и ОСБ г. Москвы</fullName>
+    <name>2.6 (Сводный) Отчет о состоянии кредитного портфеля</name>
+    <fullName>2.6 (Сводный) Отчет о состоянии кредитного портфеля Сбербанка России (по кредитам, предоставленным юридическим лицам) по ЦА и ОСБ г. Москвы</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>

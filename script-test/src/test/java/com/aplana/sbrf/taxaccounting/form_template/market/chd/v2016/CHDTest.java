@@ -144,7 +144,7 @@ public class CHDTest extends ScriptTestBase {
         row.getCell("docDate3").setValue(sdf.parse("04.01.2014"), null);
         dataRows.add(row);
 
-        testHelper.execute(FormDataEvent.CHECK);
+        testHelper.execute(FormDataEvent.CALCULATE);
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
@@ -154,7 +154,7 @@ public class CHDTest extends ScriptTestBase {
 
         // для успешного прохождения всех ЛП:
         dataRows.remove(1);
-        testHelper.execute(FormDataEvent.CHECK);
+        testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
     }
 

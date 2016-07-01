@@ -30,7 +30,7 @@
         <cell alias="docNum" colSpan="1" rowSpan="1" value="6"/>
         <cell alias="docDate" colSpan="1" rowSpan="1" value="7"/>
         <cell alias="docDate2" colSpan="1" rowSpan="1" value="8"/>
-        <cell alias="docDate3" colSpan="1" rowSpan="1" value="9)"/>
+        <cell alias="docDate3" colSpan="1" rowSpan="1" value="9"/>
         <cell alias="partRepayment" colSpan="1" rowSpan="1" value="10"/>
         <cell alias="creditPeriod" colSpan="1" rowSpan="1" value="11"/>
         <cell alias="currencyCode" colSpan="1" rowSpan="1" value="12"/>

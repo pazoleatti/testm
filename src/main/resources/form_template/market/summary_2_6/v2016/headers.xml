@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+  <row alias="">
+    <cell alias="rowNum" colSpan="1" rowSpan="2" value="№ п/п"/>
+    <cell alias="codeBank" colSpan="1" rowSpan="2" value="Код банка"/>
+    <cell alias="nameBank" colSpan="1" rowSpan="2" value="Наименование банка"/>
+    <cell alias="depNumber" colSpan="1" rowSpan="2" value="Номер отделения, выдавшего кредит / кредитующее подразделение ЦА, к компетенции которого относится договор"/>
+    <cell alias="okved" colSpan="1" rowSpan="2" value="Код отрасли по ОКВЭД"/>
+    <cell alias="opf" colSpan="1" rowSpan="2" value="Организационно-правовая форма"/>
+    <cell alias="debtorName" colSpan="1" rowSpan="2" value="Наименование заемщика"/>
+    <cell alias="inn" colSpan="1" rowSpan="2" value="ИНН заемщика"/>
+    <cell alias="sign" colSpan="1" rowSpan="2" value="Признак СМП"/>
+    <cell alias="direction" colSpan="1" rowSpan="2" value="Направление бизнес плана, к которому относится кредит"/>
+    <cell alias="law" colSpan="1" rowSpan="2" value="Номер Регламента, в рамках которого предоставлен кредит"/>
+    <cell alias="creditType" colSpan="1" rowSpan="2" value="Тип кредита"/>
+    <cell alias="docNum" colSpan="1" rowSpan="2" value="№ кредитного договора"/>
+    <cell alias="docDate" colSpan="1" rowSpan="2" value="Дата кредитного договора"/>
+    <cell alias="creditDate" colSpan="1" rowSpan="2" value="Дата выдачи кредита"/>
+    <cell alias="closeDate" colSpan="1" rowSpan="2" value="Дата погашения с учетом последней пролонгации"/>
+    <cell alias="extendNum" colSpan="1" rowSpan="2" value="Количество пролонгаций"/>
+    <cell alias="creditMode" colSpan="1" rowSpan="2" value="Режим кредитования"/>
+    <cell alias="currencySum" colSpan="1" rowSpan="2" value="Валюта суммы кредита (лимита кредитной линии)"/>
+    <cell alias="sumDoc" colSpan="1" rowSpan="2" value="Сумма кредита (по договору), лимит кредитной линии, тыс. ед. валюты"/>
+    <cell alias="sumGiven" colSpan="1" rowSpan="2" value="Сумма выданного кредита, тыс. ед. валюты"/>
+    <cell alias="rate" colSpan="1" rowSpan="2" value="Действующая процентная ставка"/>
+    <cell alias="payFrequency" colSpan="1" rowSpan="2" value="Периодичность уплаты процентов"/>
+    <cell alias="currencyCredit" colSpan="1" rowSpan="2" value="Валюта выдачи кредита"/>
+    <cell alias="debtSum" colSpan="4" rowSpan="1" value="Остаток задолженности на отчетную дату (тыс. руб.)"/>
+    <cell alias="inTimeDebtSum" colSpan="1" rowSpan="1" value="Остаток задолженности на отчетную дату (тыс. руб.)"/>
+    <cell alias="overdueDebtSum" colSpan="1" rowSpan="1" value="Остаток задолженности на отчетную дату (тыс. руб.)"/>
+    <cell alias="percentDebtSum" colSpan="1" rowSpan="1" value="Остаток задолженности на отчетную дату (тыс. руб.)"/>
+    <cell alias="deptDate" colSpan="1" rowSpan="2" value="Дата вынесения на просрочку основного долга"/>
+    <cell alias="percentDate" colSpan="1" rowSpan="2" value="Дата вынесения на просрочку процентов"/>
+    <cell alias="percentPeriod" colSpan="1" rowSpan="2" value="Срок нахождения на счетах просроченных требований и/или процентов, дней"/>
+    <cell alias="provision" colSpan="1" rowSpan="2" value="Обеспечение"/>
+    <cell alias="provisionComment" colSpan="1" rowSpan="2" value="Примечание к обеспечению"/>
+    <cell alias="loanSign" colSpan="1" rowSpan="2" value="Признак реструктурированной ссуды"/>
+    <cell alias="loanQuality" colSpan="1" rowSpan="2" value="Категория качества ссуды"/>
+    <cell alias="finPosition" colSpan="1" rowSpan="2" value="Финансовое положение"/>
+    <cell alias="debtService" colSpan="1" rowSpan="2" value="Обслуживание долга"/>
+    <cell alias="creditRisk" colSpan="1" rowSpan="2" value="Категория кредитного риска / класс кредитоспособности"/>
+    <cell alias="portfolio" colSpan="1" rowSpan="2" value="Портфель однородных требований"/>
+    <cell alias="reservePercent" colSpan="1" rowSpan="2" value="Величина отчислений в резерв, %"/>
+    <cell alias="reserveSum" colSpan="1" rowSpan="2" value="Сформированный резерв в тыс. руб."/>
+  </row>
+  <row alias="">
+    <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+    <cell alias="codeBank" colSpan="1" rowSpan="1" value="Код банка"/>
+    <cell alias="nameBank" colSpan="1" rowSpan="1" value="Наименование банка"/>
+    <cell alias="depNumber" colSpan="1" rowSpan="1" value="Номер отделения, выдавшего кредит / кредитующее подразделение ЦА, к компетенции которого относится договор"/>
+    <cell alias="okved" colSpan="1" rowSpan="1" value="Код отрасли по ОКВЭД"/>
+    <cell alias="opf" colSpan="1" rowSpan="1" value="Организационно-правовая форма"/>
+    <cell alias="debtorName" colSpan="1" rowSpan="1" value="Наименование заемщика"/>
+    <cell alias="inn" colSpan="1" rowSpan="1" value="ИНН заемщика"/>
+    <cell alias="sign" colSpan="1" rowSpan="1" value="Признак СМП"/>
+    <cell alias="direction" colSpan="1" rowSpan="1" value="Направление бизнес плана, к которому относится кредит"/>
+    <cell alias="law" colSpan="1" rowSpan="1" value="Номер Регламента, в рамках которого предоставлен кредит"/>
+    <cell alias="creditType" colSpan="1" rowSpan="1" value="Тип кредита"/>
+    <cell alias="docNum" colSpan="1" rowSpan="1" value="№ кредитного договора"/>
+    <cell alias="docDate" colSpan="1" rowSpan="1" value="Дата кредитного договора"/>
+    <cell alias="creditDate" colSpan="1" rowSpan="1" value="Дата выдачи кредита"/>
+    <cell alias="closeDate" colSpan="1" rowSpan="1" value="Дата погашения с учетом последней пролонгации"/>
+    <cell alias="extendNum" colSpan="1" rowSpan="1" value="Количество пролонгаций"/>
+    <cell alias="creditMode" colSpan="1" rowSpan="1" value="Режим кредитования"/>
+    <cell alias="currencySum" colSpan="1" rowSpan="1" value="Валюта суммы кредита (лимита кредитной линии)"/>
+    <cell alias="sumDoc" colSpan="1" rowSpan="1" value="Сумма кредита (по договору), лимит кредитной линии, тыс. ед. валюты"/>
+    <cell alias="sumGiven" colSpan="1" rowSpan="1" value="Сумма выданного кредита, тыс. ед. валюты"/>
+    <cell alias="rate" colSpan="1" rowSpan="1" value="Действующая процентная ставка"/>
+    <cell alias="payFrequency" colSpan="1" rowSpan="1" value="Периодичность уплаты процентов"/>
+    <cell alias="currencyCredit" colSpan="1" rowSpan="1" value="Валюта выдачи кредита"/>
+    <cell alias="debtSum" colSpan="1" rowSpan="1" value="ссудная задолженность, всего"/>
+    <cell alias="inTimeDebtSum" colSpan="1" rowSpan="1" value="в т.ч. срочная"/>
+    <cell alias="overdueDebtSum" colSpan="1" rowSpan="1" value="в т.ч. просроченная"/>
+    <cell alias="percentDebtSum" colSpan="1" rowSpan="1" value="задолженность по просроченным %"/>
+    <cell alias="deptDate" colSpan="1" rowSpan="1" value="Дата вынесения на просрочку основного долга"/>
+    <cell alias="percentDate" colSpan="1" rowSpan="1" value="Дата вынесения на просрочку процентов"/>
+    <cell alias="percentPeriod" colSpan="1" rowSpan="1" value="Срок нахождения на счетах просроченных требований и/или процентов, дней"/>
+    <cell alias="provision" colSpan="1" rowSpan="1" value="Обеспечение"/>
+    <cell alias="provisionComment" colSpan="1" rowSpan="1" value="Примечание к обеспечению"/>
+    <cell alias="loanSign" colSpan="1" rowSpan="1" value="Признак реструктурированной ссуды"/>
+    <cell alias="loanQuality" colSpan="1" rowSpan="1" value="Категория качества ссуды"/>
+    <cell alias="finPosition" colSpan="1" rowSpan="1" value="Финансовое положение"/>
+    <cell alias="debtService" colSpan="1" rowSpan="1" value="Обслуживание долга"/>
+    <cell alias="creditRisk" colSpan="1" rowSpan="1" value="Категория кредитного риска / класс кредитоспособности"/>
+    <cell alias="portfolio" colSpan="1" rowSpan="1" value="Портфель однородных требований"/>
+    <cell alias="reservePercent" colSpan="1" rowSpan="1" value="Величина отчислений в резерв, %"/>
+    <cell alias="reserveSum" colSpan="1" rowSpan="1" value="Сформированный резерв в тыс. руб."/>
+  </row>
+  <row alias="">
+    <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
+    <cell alias="codeBank" colSpan="1" rowSpan="1" value="2"/>
+    <cell alias="nameBank" colSpan="1" rowSpan="1" value="3"/>
+    <cell alias="depNumber" colSpan="1" rowSpan="1" value="4"/>
+    <cell alias="okved" colSpan="1" rowSpan="1" value="5"/>
+    <cell alias="opf" colSpan="1" rowSpan="1" value="6"/>
+    <cell alias="debtorName" colSpan="1" rowSpan="1" value="7"/>
+    <cell alias="inn" colSpan="1" rowSpan="1" value="8"/>
+    <cell alias="sign" colSpan="1" rowSpan="1" value="9"/>
+    <cell alias="direction" colSpan="1" rowSpan="1" value="10"/>
+    <cell alias="law" colSpan="1" rowSpan="1" value="11"/>
+    <cell alias="creditType" colSpan="1" rowSpan="1" value="12"/>
+    <cell alias="docNum" colSpan="1" rowSpan="1" value="13"/>
+    <cell alias="docDate" colSpan="1" rowSpan="1" value="14"/>
+    <cell alias="creditDate" colSpan="1" rowSpan="1" value="15"/>
+    <cell alias="closeDate" colSpan="1" rowSpan="1" value="16"/>
+    <cell alias="extendNum" colSpan="1" rowSpan="1" value="17"/>
+    <cell alias="creditMode" colSpan="1" rowSpan="1" value="18"/>
+    <cell alias="currencySum" colSpan="1" rowSpan="1" value="19"/>
+    <cell alias="sumDoc" colSpan="1" rowSpan="1" value="20"/>
+    <cell alias="sumGiven" colSpan="1" rowSpan="1" value="21"/>
+    <cell alias="rate" colSpan="1" rowSpan="1" value="22"/>
+    <cell alias="payFrequency" colSpan="1" rowSpan="1" value="23"/>
+    <cell alias="currencyCredit" colSpan="1" rowSpan="1" value="24"/>
+    <cell alias="debtSum" colSpan="1" rowSpan="1" value="25"/>
+    <cell alias="inTimeDebtSum" colSpan="1" rowSpan="1" value="26"/>
+    <cell alias="overdueDebtSum" colSpan="1" rowSpan="1" value="27"/>
+    <cell alias="percentDebtSum" colSpan="1" rowSpan="1" value="28"/>
+    <cell alias="deptDate" colSpan="1" rowSpan="1" value="29"/>
+    <cell alias="percentDate" colSpan="1" rowSpan="1" value="30"/>
+    <cell alias="percentPeriod" colSpan="1" rowSpan="1" value="31"/>
+    <cell alias="provision" colSpan="1" rowSpan="1" value="32"/>
+    <cell alias="provisionComment" colSpan="1" rowSpan="1" value="33"/>
+    <cell alias="loanSign" colSpan="1" rowSpan="1" value="34"/>
+    <cell alias="loanQuality" colSpan="1" rowSpan="1" value="35"/>
+    <cell alias="finPosition" colSpan="1" rowSpan="1" value="36"/>
+    <cell alias="debtService" colSpan="1" rowSpan="1" value="37"/>
+    <cell alias="creditRisk" colSpan="1" rowSpan="1" value="38"/>
+    <cell alias="portfolio" colSpan="1" rowSpan="1" value="39"/>
+    <cell alias="reservePercent" colSpan="1" rowSpan="1" value="40"/>
+    <cell alias="reserveSum" colSpan="1" rowSpan="1" value="41"/>
+  </row>
+</rows>
