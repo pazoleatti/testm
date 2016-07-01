@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+  <row alias="">
+    <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+    <cell alias="depName" colSpan="1" rowSpan="1" value="Наименование подразделения"/>
+    <cell alias="inn" colSpan="1" rowSpan="1" value="ИНН заемщика"/>
+    <cell alias="debtorName" colSpan="1" rowSpan="1" value="Наименование заемщика"/>
+    <cell alias="docNum" colSpan="1" rowSpan="1" value="№ кредитного договора"/>
+    <cell alias="docDate" colSpan="1" rowSpan="1" value="Дата кредитного договора"/>
+    <cell alias="creditDate" colSpan="1" rowSpan="1" value="Дата выдачи кредита"/>
+    <cell alias="productId" colSpan="1" rowSpan="1" value="ID продукта CRM"/>
+    <cell alias="clientId" colSpan="1" rowSpan="1" value="ID клиента CRM"/>
+  </row>
+  <row alias="">
+    <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
+    <cell alias="depName" colSpan="1" rowSpan="1" value="2"/>
+    <cell alias="inn" colSpan="1" rowSpan="1" value="3"/>
+    <cell alias="debtorName" colSpan="1" rowSpan="1" value="4"/>
+    <cell alias="docNum" colSpan="1" rowSpan="1" value="5"/>
+    <cell alias="docDate" colSpan="1" rowSpan="1" value="6"/>
+    <cell alias="creditDate" colSpan="1" rowSpan="1" value="7"/>
+    <cell alias="productId" colSpan="1" rowSpan="1" value="9"/>
+    <cell alias="clientId" colSpan="1" rowSpan="1" value="10"/>
+  </row>
+</rows>
