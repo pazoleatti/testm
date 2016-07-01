@@ -38,6 +38,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         calc()
+        logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
@@ -58,6 +60,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
         break
 }
 
@@ -151,13 +156,13 @@ void logicCheck() {
 
         // 6. Проверка даты погашения кредита
         if (row.docDate != null && row.docDate3 != null && row.docDate3 < row.docDate) {
-            logger.warn("Строка %s: Значение графы «%s» должно быть больше либо равно значения графы «%s»!",
+            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значения графы «%s»!",
                     row.getIndex(), getColumnName(row, 'docDate3'), getColumnName(row, 'docDate'))
         }
 
         // 7. Проверка даты погашения кредита 2
         if (row.docDate2 != null && row.docDate3 != null && row.docDate3 < row.docDate2) {
-            logger.warn("Строка %s: Значение графы «%s» должно быть больше либо равно значения графы «%s»!",
+            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значения графы «%s»!",
                     row.getIndex(), getColumnName(row, 'docDate3'), getColumnName(row, 'docDate2'))
         }
     }
@@ -197,7 +202,7 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (row in dataRows) {
         def records = getRecords(row.innKio)
-        if (records.size() == 1) {
+        if (records != null && records.size() == 1) {
             row.name = records.get(0).RECORD_ID.value
             row.country = records.get(0).COUNTRY_CODE.value
         }
@@ -410,5 +415,17 @@ void fillDebtorInfo(def newRow) {
                     "Наименование заемщика в файле не заполнено!",
                     newRow.debtorName, refBookAttrName, newRow.innKio)
         }
+    }
+}
+
+// Сортировка групп и строк
+void sortFormDataRows(def saveInDB = true) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, null, null)
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
     }
 }
