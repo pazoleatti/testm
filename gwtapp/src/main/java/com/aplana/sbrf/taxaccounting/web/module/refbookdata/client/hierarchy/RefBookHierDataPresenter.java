@@ -2,11 +2,15 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.AbstractEditPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.DepartmentEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.HierEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
@@ -43,7 +47,10 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     private RecordChanges recordChanges;
     private Date relevanceDate;
 
-    private final EditFormPresenter editFormPresenter;
+    private AbstractEditPresenter commonEditPresenter;
+    private HierEditPresenter hierEditFormPresenter;
+    private DepartmentEditPresenter departmentEditPresenter;
+
     private final DispatchAsync dispatcher;
 
     @ProxyEvent
@@ -126,11 +133,13 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     }
 
     @Inject
-    public RefBookHierDataPresenter(final EventBus eventBus, EditFormPresenter editFormPresenter, final MyView view,
+    public RefBookHierDataPresenter(final EventBus eventBus, final HierEditPresenter hierEditFormPresenter,
+                                    final DepartmentEditPresenter departmentEditPresenter, final MyView view,
                                     DispatchAsync dispatcher) {
         super(eventBus, view);
-        this.editFormPresenter = editFormPresenter;
         this.dispatcher = dispatcher;
+        this.departmentEditPresenter = departmentEditPresenter;
+        this.hierEditFormPresenter = hierEditFormPresenter;
         getView().setUiHandlers(this);
     }
 
@@ -153,6 +162,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         super.onReveal();
         CheckRefBookAction checkAction = new CheckRefBookAction();
         checkAction.setRefBookId(refBookId);
+        commonEditPresenter = Department.REF_BOOK_ID.equals(refBookId) ? departmentEditPresenter : hierEditFormPresenter;
         dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
                 new AbstractCallback<CheckRefBookResult>() {
                     @Override
@@ -212,7 +222,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                                 Dialog.errorMessage("Удаление записи справочника",
                                         "Обнаружены фатальные ошибки!");
                             } else {
-                                editFormPresenter.setIsFormModified(false);
+                                commonEditPresenter.setIsFormModified(false);
                                 getView().deleteItem(selected);
                                 getView().setSelection(parentRefBookItem);
                                 if (parentRefBookItem == null)
@@ -251,7 +261,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                                         ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);
                                         /*editPresenter.clean();
                                         editPresenter.setNeedToReload();*/
-                                        editFormPresenter.setIsFormModified(false);
+                                        commonEditPresenter.setIsFormModified(false);
                                         getView().deleteItem(selected);
                                         getView().setSelection(parentRefBookItem);
                                     }
@@ -264,7 +274,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                             }
                         });
                     } else {
-                        editFormPresenter.setIsFormModified(false);
+                        commonEditPresenter.setIsFormModified(false);
                         LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
                         //editPresenter.show(null);
                         ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);
