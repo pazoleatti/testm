@@ -1,62 +1,27 @@
-package form_template.market.market_2_6.v2016
+package form_template.market.market_7_129.v2016
 import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn
-import com.aplana.sbrf.taxaccounting.model.ReferenceColumn
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 
 import java.math.RoundingMode
 
 /**
- * 2.6 (Ежемесячный) Отчет о состоянии кредитного портфеля
- * formTemplateId = 900
+ * 7.129 (Ежемесячный) Кредитные договоры в CRM
+ * formTemplateId = 905
  *
  * @author Bulat Kinzyabulatov
  *
  * графа 1  - rowNum             - № п/п
- * графа 2  - codeBank           - Код банка
- * графа 3  - nameBank           - Наименование банка
- * графа 4  - depNumber          - Номер отделения, выдавшего кредит / кредитующее подразделение ЦА, к компетенции которого относится договор
- * графа 5  - okved              - Код отрасли по ОКВЭД
- * графа 6  - opf                - Организационно-правовая форма
- * графа 7  - debtorName         - Наименование заемщика
- * графа 8  - inn                - ИНН заемщика
- * графа 9  - sign               - Признак СМП
- * графа 10 - direction          - Направление бизнес плана, к которому относится кредит
- * графа 11 - law                - Номер Регламента, в рамках которого предоставлен кредит
- * графа 12 - creditType         - Тип кредита
- * графа 13 - docNum             - № кредитного договора
- * графа 14 - docDate            - Дата кредитного договора
- * графа 15 - creditDate         - Дата выдачи кредита
- * графа 16 - closeDate          - Дата погашения с учетом последней пролонгации
- * графа 17 - extendNum          - Количество пролонгаций
- * графа 18 - creditMode         - Режим кредитования
- * графа 19 - currencySum        - Валюта суммы кредита (лимита кредитной линии)
- * графа 20 - sumDoc             - Сумма кредита (по договору), лимит кредитной линии, тыс. ед. валюты
- * графа 21 - sumGiven           - Сумма выданного кредита, тыс. ед. валюты
- * графа 22 - rate               - Действующая процентная ставка
- * графа 23 - payFrequency       - Периодичность уплаты процентов
- * графа 24 - currencyCredit     - Валюта выдачи кредита
- * графа 25 - debtSum            - Остаток задолженности на отчетную дату (тыс. руб.). Ссудная задолженность, всего
- * графа 26 - inTimeDebtSum      - Остаток задолженности на отчетную дату (тыс. руб.). В т.ч. срочная
- * графа 27 - overdueDebtSum     - Остаток задолженности на отчетную дату (тыс. руб.). В т.ч. просроченная
- * графа 28 - percentDebtSum     - Остаток задолженности на отчетную дату (тыс. руб.). Задолженность по просроченным %
- * графа 29 - deptDate           - Дата вынесения на просрочку основного долга
- * графа 30 - percentDate        - Дата вынесения на просрочку процентов
- * графа 31 - percentPeriod      - Срок нахождения на счетах просроченных требований и/или процентов, дней
- * графа 32 - provision          - Обеспечение
- * графа 33 - provisionComment   - Примечание к обеспечению
- * графа 34 - loanSign           - Признак реструктурированной ссуды
- * графа 35 - loanQuality        - Категория качества ссуды
- * графа 36 - finPosition        - Финансовое положение
- * графа 37 - debtService        - Обслуживание долга
- * графа 38 - creditRisk         - Категория кредитного риска / класс кредитоспособности
- * графа 39 - portfolio          - Портфель однородных требований
- * графа 40 - reservePercent     - Величина отчислений в резерв, %
- * графа 41 - reserveSum         - Сформированный резерв в тыс. руб.
+ * графа 2  - depName            - Наименование подразделения
+ * графа 3  - inn                - ИНН заемщика
+ * графа 4  - debtorName         - Наименование заемщика
+ * графа 5  - docNum             - № кредитного договора
+ * графа 6  - docDate            - Дата кредитного договора
+ * графа 7  - creditDate         - Дата выдачи кредита
+ * графа 8  - productId          - ID продукта CRM
+ * графа 9  - clientId           - ID клиента CRM
  */
 
 switch (formDataEvent) {
@@ -97,19 +62,11 @@ switch (formDataEvent) {
 }
 
 @Field
-def allColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtorName', 'inn', 'sign', 'direction',
-                  'law', 'creditType', 'docNum', 'docDate', 'creditDate', 'closeDate', 'extendNum', 'creditMode',
-                  'currencySum', 'sumDoc', 'sumGiven', 'rate', 'payFrequency', 'currencyCredit', 'debtSum', 'inTimeDebtSum',
-                  'overdueDebtSum', 'percentDebtSum', 'deptDate', 'percentDate', 'percentPeriod', 'provision', 'provisionComment',
-                  'loanSign', 'loanQuality', 'finPosition', 'debtService', 'creditRisk', 'portfolio', 'reservePercent', 'reserveSum']
+def allColumns = ['rowNum', 'depName', 'inn', 'debtorName', 'docNum', 'docDate', 'creditDate', 'productId', 'clientId']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtorName', 'inn', 'sign', 'direction',
-                       'law', 'creditType', 'docNum', 'docDate', 'creditDate', 'closeDate', 'extendNum', 'creditMode',
-                       'currencySum', 'sumDoc', 'sumGiven', 'rate', 'payFrequency', 'currencyCredit', 'debtSum', 'inTimeDebtSum',
-                       'overdueDebtSum', 'percentDebtSum', 'deptDate', 'percentDate', 'percentPeriod', 'provision', 'provisionComment',
-                       'loanSign', 'loanQuality', 'finPosition', 'debtService', 'creditRisk', 'portfolio', 'reservePercent', 'reserveSum']
+def editableColumns = ['depName', 'inn', 'debtorName', 'docNum', 'docDate', 'creditDate', 'productId', 'clientId']
 
 // Автозаполняемые атрибуты
 @Field
@@ -117,10 +74,7 @@ def autoFillColumns = []
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtorName', 'inn', 'sign', 'direction',
-                       'law', 'creditType', 'docNum', 'docDate', 'closeDate', 'extendNum', 'creditMode',
-                       'currencySum', 'sumDoc', 'sumGiven', 'rate', 'payFrequency', 'currencyCredit', 'debtSum', 'inTimeDebtSum',
-                       'overdueDebtSum', 'percentDebtSum', 'provision', 'loanSign', 'loanQuality', 'finPosition', 'debtService', 'creditRisk', 'reservePercent', 'reserveSum']
+def nonEmptyColumns = ['depName', 'inn', 'debtorName', 'docNum', 'docDate']
 
 @Field
 def startDate = null
@@ -159,55 +113,27 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
-@Field
-def nonNegativeColumns = ['extendNum', 'sumDoc', 'sumGiven', 'rate', 'debtSum', 'inTimeDebtSum',
-                  'overdueDebtSum', 'percentDebtSum', 'percentPeriod', 'reservePercent', 'reserveSum']
-
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    // групируем по графам 8, 13, 14
+    // групируем по графам 3, 5, 6
     def rowsMap = [:]
     for (row in dataRows) {
         // 1. Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
-        // 2. 17, 20, 21, 22,  25, 26, 27, 28, 31, 40, 41 неотрицательность графы
-        nonNegativeColumns.each { alias ->
-            if (row[alias] != null && row[alias] < 0) {
-                logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно 0!", row.getIndex(), getColumnName(row, alias))
-            }
-        }
-        // 3. Положительность графы
-        if (row.payFrequency != null && row.payFrequency <= 0) {
-            logger.error("Строка %s: Значение графы «%s» должно быть больше 0!", row.getIndex(), getColumnName(row, 'payFrequency'))
-        }
-        // 4. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
+        // 2. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
         // группируем
         def key = getKey(row)
         if (rowsMap[key] == null) {
             rowsMap[key] = []
         }
         rowsMap[key].add(row)
-        // 5. Проверка даты выдачи кредита
+        // 3. Проверка даты выдачи кредита
         if (row.docDate != null && row.creditDate != null && (row.creditDate < row.docDate)) {
             logger.warn("Строка %s: Значение графа «%s» должно быть больше либо равно значения графы «%s»!",
                 row.getIndex(), getColumnName(row, 'creditDate'), getColumnName(row, 'docDate'))
         }
-        // 6. Проверка даты погашения кредита
-        if (row.docDate != null && row.closeDate != null && (row.closeDate < row.docDate)) {
-            logger.error("Строка %s: Значение графа «%s» должно быть больше либо равно значения графы «%s»!",
-                    row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'docDate'))
-        }
-        // 7. Проверка даты погашения кредита 2
-        if (row.creditDate != null && row.closeDate != null && (row.closeDate < row.creditDate)) {
-            logger.error("Строка %s: Значение графа «%s» должно быть больше либо равно значения графы «%s»!",
-                    row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'creditDate'))
-        }
-        // 8. Проверка валюты
-        if (row.currencySum != null && ("RUB".equals(getRefBookValue(15, row.currencySum).CODE_2.value))) {
-            logger.error("Строка %s: Для российского рубля должно быть проставлено буквенное значение RUR!", row.getIndex())
-        }
     }
-    // 4. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
+    // 2. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
     rowsMap.each { def key, rows ->
         def size = rows.size()
         // пропускаем первую строку
@@ -249,13 +175,13 @@ void calc() {
 def exclusiveInns = ['9999999999', '9999999998']
 
 void calc7(def row) {
-    //Если значение графы 8 не равно значениям “9999999999”, “9999999998”, тогда:
+    //Если значение графы 3 не равно значениям “9999999999”, “9999999998”, тогда:
     //1.	Найти в справочнике «Участники ТЦО» запись, для которой выполнено одно из условий:
-    //        -	Значение поля «ИНН (заполняется для резидентов, некредитных организаций)» = значение графы 8;
-    //-	Значение поля «КИО (заполняется для нерезидентов)» = значение графы 8.
+    //        -	Значение поля «ИНН (заполняется для резидентов, некредитных организаций)» = значение графы 3;
+    //-	Значение поля «КИО (заполняется для нерезидентов)» = значение графы 3.
     //2.	Если запись найдена, тогда:
-    //Графа 7 = значение поля «Полное наименование юридического лица с указанием ОПФ».
-    //3.	Если запись не найдена, тогда графа 7 не рассчитывается (если до выполнения расчета в графе 7 было указано значение, то это значение должно сохраниться)
+    //Графа 4 = значение поля «Полное наименование юридического лица с указанием ОПФ».
+    //3.	Если запись не найдена, тогда графа 4 не рассчитывается (если до выполнения расчета в графе 4 было указано значение, то это значение должно сохраниться)
     if (!exclusiveInns.contains(row.inn)) {
         def records = getRecords(row.inn?.trim()?.toLowerCase())
         if (records != null && records.size() == 1) {
@@ -266,8 +192,8 @@ void calc7(def row) {
 
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 41
-    int HEADER_ROW_COUNT = 3
+    int COLUMN_COUNT = 9
+    int HEADER_ROW_COUNT = 2
     String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
 
@@ -335,11 +261,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
     def headerMapping =[[:]]
     def index = 0
     allColumns.each { alias ->
-        if (!['inTimeDebtSum', 'overdueDebtSum', 'percentDebtSum'].contains(alias)) {
-            headerMapping.add(([(headerRows[0][index]): headers[0][alias]]))
-        }
-        headerMapping.add(([(headerRows[1][index]): headers[1][alias]]))
-        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
+        headerMapping.add(([(headerRows[0][index]): headers[0][alias]]))
+        headerMapping.add(([(headerRows[1][index]): (index + 1).toString()]))
         index++
     }
     checkHeaderEquals(headerMapping, logger)
@@ -372,17 +295,6 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
                 break
             case ColumnType.STRING:
                 newRow[formColumn.alias] = values[colIndex]
-                break
-            case ColumnType.REFBOOK:
-                def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
-                def refBookId = refBookFactory.getByAttribute(refBookAttribute.id).id
-                def refBookAttrAlias = refBookAttribute.alias
-                def value = values[colIndex]
-                if (RefBookAttributeType.NUMBER.equals(refBookAttribute.attributeType)) {
-                    value = new BigDecimal(value).setScale(refBookAttribute.precision, RoundingMode.HALF_UP).toString()
-                }
-                def recordId = getRecordIdImport(refBookId, refBookAttrAlias, value, fileRowIndex, colIndex + colOffset, false)
-                newRow[formColumn.alias] = recordId
                 break
         }
         colIndex++
