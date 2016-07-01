@@ -114,15 +114,12 @@ void checkDepartmentParams(LogLevel logLevel) {
 
 // Провека декларации банка.
 def checkDeclarationBank(boolean onlyCheck = true) {
-    /** Отчётный период. */
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-
     /** вид декларации 11 - декларация банка */
     def declarationTypeId = 11
 
     /** Идентификатор подразделения Банка. */
     def departmentBankId = 1
-    def bankDeclarationData = declarationService.getLast(declarationTypeId, departmentBankId, reportPeriod.id)
+    def bankDeclarationData = declarationService.getLast(declarationTypeId, departmentBankId, declarationData.reportPeriodId)
     if (bankDeclarationData == null || !bankDeclarationData.accepted) {
         logger.error('Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
         return null
@@ -307,8 +304,6 @@ void generateXML(XMLStreamReader readerBank, def xml) {
     def kbk2 = '18210101012021000110'
     def typeNP = '1'
 
-    def reportPeriodId = declarationData.reportPeriodId
-
     // Параметры подразделения
     def incomeParams = getDepartmentParam()
     def incomeParamsTable = getDepartmentParamTable(incomeParams.record_id.value)
@@ -336,7 +331,7 @@ void generateXML(XMLStreamReader readerBank, def xml) {
     def approveOrgName = incomeParamsTable?.APPROVE_ORG_NAME?.value
 
     // Отчётный период.
-    def reportPeriod = reportPeriodService.get(reportPeriodId)
+    def reportPeriod = getReportPeriod()
 
     // Налоговый период.
     def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.getTaxPeriod().getId()) : null)
@@ -435,7 +430,7 @@ void generateXML(XMLStreamReader readerBank, def xml) {
     def formDataCollection = getAcceptedFormDataSources()
 
     /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
-    def dataRowsAdvance = getDataRows(formDataCollection, 500)
+    def dataRowsAdvance = getDataRows(formDataCollection, getAdvanceTypeId())
 
     // Расчет значений для текущей декларации.
 
@@ -769,11 +764,21 @@ def getDepartmentParamTable(def departmentParamId) {
 }
 
 @Field
+def reportPeriod = null
+
+def getReportPeriod() {
+    if (reportPeriod == null) {
+        reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    }
+    return reportPeriod
+}
+
+@Field
 def declarationReportPeriod
 
 boolean useTaxOrganCodeProm() {
     if (declarationReportPeriod == null) {
-        declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        declarationReportPeriod = getReportPeriod()
     }
     def year = declarationReportPeriod?.taxPeriod?.year
     return (year > 2015 || (year == 2015 && declarationReportPeriod?.order > 2))
@@ -798,7 +803,7 @@ def generateXmlFileId(String taxOrganCodeProm, String taxOrganCode) {
 
 void calcTaskComplexity() {
     def formDataCollection = getAcceptedFormDataSources()
-    taskComplexityHolder.setValue(getCellCount(formDataCollection, [500])) // декларацию не считаю
+    taskComplexityHolder.setValue(getCellCount(formDataCollection, [getAdvanceTypeId()])) // декларацию не считаю
 }
 
 def getCellCount(def formDataCollection, def formTypeIdList) {
@@ -847,4 +852,11 @@ def getAcceptedFormDataSources() {
         acceptedFormDataSources = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
     }
     return acceptedFormDataSources
+}
+
+/** Получить form_type_id "авансовых платежей". До 1 кв 2016 (включительно) используется макет 500, после - 507. */
+def getAdvanceTypeId() {
+    def reportPeriod = getReportPeriod()
+    def isAfterFirstQuarter2016 = (reportPeriod?.taxPeriod?.year > 2016 || reportPeriod?.order > 1)
+    return (isAfterFirstQuarter2016 ? 507 : 500)
 }

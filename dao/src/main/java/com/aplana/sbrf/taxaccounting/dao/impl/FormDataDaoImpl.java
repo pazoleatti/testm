@@ -166,20 +166,22 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         }
     }
 
-	@Override
-	@Transactional(readOnly = false)
-	public void delete(long formDataId) {
-		Map<String, Long> params = new HashMap<String, Long>();
-		params.put("id", formDataId);
-		getNamedParameterJdbcTemplate().update("DELETE FROM form_data WHERE id = :id", params);
-		getNamedParameterJdbcTemplate().update("DELETE FROM form_data_row WHERE form_data_id = :id", params);
-	}
+    private static final String DELETE_FROM_FD_NNN = "delete from form_data_%s where form_data_id=?";
+
+    @Override
+    @Transactional(readOnly = false)
+    public void delete(int ftId, long fdId) {
+        Object[] params = {fdId};
+        int[] types = {Types.NUMERIC};
+        getJdbcTemplate().update("delete from form_data where id = ?", params, types);
+        getJdbcTemplate().update(String.format(DELETE_FROM_FD_NNN, ftId), fdId);
+    }
 
     @Override
     public List<Long> findFormDataByFormTemplate(int formTemplateId) {
         try {
             return getJdbcTemplate().queryForList(
-                    "SELECT fd.id FROM form_data fd WHERE fd.form_template_id = ?",
+                    "select fd.id from form_data fd where fd.form_template_id = ?",
                     new Object[]{formTemplateId},
                     new int[]{Types.NUMERIC},
                     Long.class

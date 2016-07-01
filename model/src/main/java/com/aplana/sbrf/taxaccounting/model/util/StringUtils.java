@@ -12,7 +12,7 @@ public final class StringUtils {
      */
     public static String cleanString(String uncleanString) {
         if (uncleanString != null) {
-            return uncleanString.replaceAll("\n"," ").trim().replaceAll("\\s{2,}", " ").replaceAll("['`«»„“‘’”]", "\"");
+            return uncleanString.replaceAll("\n"," ").trim().replaceAll("\\s{2,}", " ").replaceAll("[«»„“”]", "\"").replaceAll("[`‘’]", "\'");
         } else {
             return null;
         }

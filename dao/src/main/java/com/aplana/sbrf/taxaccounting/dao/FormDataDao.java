@@ -58,9 +58,10 @@ public interface FormDataDao {
 	/**
 	 * Удалить запись о данных по налоговой форме
 	 *
-     * @param formDataId идентификатор НФ
+     * @param ftId идентификатор версии макета
+     * @param fdId идентификатор НФ
      */
-	void delete(long formDataId);
+	void delete(int ftId, long fdId);
 
     /**
      * Список Id экземпляров НФ по Id шаблона

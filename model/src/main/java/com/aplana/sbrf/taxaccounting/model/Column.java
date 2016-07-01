@@ -16,12 +16,6 @@ import java.io.Serializable;
  * @author dsultanbekov
  */
 public abstract class Column implements Ordered, Serializable {
-
-	/** Нижняя граница на индекс столбца в таблице данных. Включительно */
-	public static final int MIN_DATA_ORDER = 0;
-	/** Верхняя граница на индекс столбца в таблице данных. Включительно */
-	public static final int MAX_DATA_ORDER = 99;
-
 	public interface ValidationStrategy {
 		boolean matches(String valueToCheck);
 	}
@@ -36,10 +30,7 @@ public abstract class Column implements Ordered, Serializable {
 	private int width;
 	private boolean checking;
 	private int order;
-	/** Номер столбца в таблице с данными. Принимает значения от MIN_DATA_ORDER до MAX_DATA_ORDER.
-	 * Также может иметь значение NULL для новых столбцов*/
 
-    private Integer dataOrder;
     transient private ColumnFormatter formatter = new ColumnFormatter();
 	/**
 	 * Идентификатор столбца в БД
@@ -180,22 +171,7 @@ public abstract class Column implements Ordered, Serializable {
 		return columnType;
 	}
 
-	/**
-	 * Порядковый номер столбца в таблице FORM_DATA_ROW
-	 * @return
-	 */
-    @XmlTransient
-	public Integer getDataOrder() {
-		return dataOrder;
-	}
-
-	public void setDataOrder(Integer dataOrder) {
-		if (dataOrder == null) {
-			throw new IllegalArgumentException("Field \"dataOrder\" must not be null");
-		}
-		if (dataOrder < MIN_DATA_ORDER || dataOrder > MAX_DATA_ORDER) {
-			throw new IllegalArgumentException("Value of field \"dataOrder\" must be in interval [" + MIN_DATA_ORDER + ";" + MAX_DATA_ORDER + "]");
-		}
-		this.dataOrder = dataOrder;
+	public void setColumnType(ColumnType columnType) {
+		this.columnType = columnType;
 	}
 }

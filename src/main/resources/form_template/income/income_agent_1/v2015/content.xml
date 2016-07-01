@@ -40,8 +40,8 @@
         <name>Дивиденды полученные ПАО Сбербанк. Всего</name>
         <order>4</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rateZero</alias>
@@ -50,8 +50,8 @@
         <name>Дивиденды полученные ПАО Сбербанк. По ставке 0%</name>
         <order>5</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>distributionSum</alias>
@@ -60,8 +60,8 @@
         <name>Сумма дивидендов Эмитента, распределяемая в пользу всех получателей, уменьшенная на сумму дивидендов, полученных самим Эмитентом</name>
         <order>6</order>
         <width>15</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>decisionNumber</alias>
@@ -118,8 +118,8 @@
         <name>Дивиденды выплаченные. Сумма дивидендов. Всего</name>
         <order>12</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>addresseeName</alias>
@@ -231,8 +231,8 @@
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Дивиденды начисленные</name>
         <order>23</order>
         <width>6</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
@@ -241,8 +241,8 @@
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Платёжное поручение. Сумма</name>
         <order>24</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>date</alias>
@@ -270,8 +270,8 @@
         <name>Дивиденды выплаченные. Сумма удержанного налога. Выплачиваемая через ПАО Сбербанк. Платёжное поручение. Сумма</name>
         <order>27</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>withheldDate</alias>

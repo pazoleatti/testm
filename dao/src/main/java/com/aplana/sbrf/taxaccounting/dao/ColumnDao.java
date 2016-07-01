@@ -24,7 +24,7 @@ public interface ColumnDao {
 	 * Сохранить список столбцов формы
 	 * @param form форма
 	 */
-    void updateFormColumns(FormTemplate form);
+    Map<ColumnKeyEnum, Collection<Long>> updateFormColumns(FormTemplate form);
     /**
      * Получить список атрибутов второго уровня для атрибута который используется в колонках.
      * @param attributes атрибуты
@@ -32,4 +32,6 @@ public interface ColumnDao {
 	 * В списке не для всех атрибутов могут присутствовать списки атрибутов второго уровня
      */
 	Map<Long, List<Long>> getAttributeId2(List<RefBookAttribute> attributes);
+
+    int getColumnIdByAlias(int formTemplateId, String columnAlias);
 }

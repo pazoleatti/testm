@@ -66,9 +66,11 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
 
 		// Нельзя работать с декларациями в отчетном периоде вида "ввод остатков"
-		if (departmentReportPeriod.isBalance()) {
-            error("Декларация не может быть создана в периоде ввода остатков!", logger);
-		}
+        if (departmentReportPeriod.isBalance()) {
+            String msg = departmentReportPeriod.getReportPeriod().getTaxPeriod().getTaxType() == TaxType.DEAL ?
+                    "Уведомление не может быть создано" : "Декларация не может быть создана";
+            error(msg + " в периоде ввода остатков!", logger);
+        }
 
         // Выборка для доступа к экземплярам деклараций
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380670

@@ -58,7 +58,7 @@
         <name>Первичный документ. Номер</name>
         <order>6</order>
         <width>10</width>
-        <maxLength>15</maxLength>
+        <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
@@ -85,7 +85,7 @@
         <name>Курс Банка России</name>
         <order>9</order>
         <width>10</width>
-        <maxLength>23</maxLength>
+        <maxLength>19</maxLength>
         <precision>4</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">

@@ -290,4 +290,11 @@
         <fontColor>DARK_GREEN</fontColor>
         <italic>false</italic>
     </styles>
+    <styles>
+        <alias>Заголовок</alias>
+        <backColor>DARK_GREY</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
 </formTemplateContent>

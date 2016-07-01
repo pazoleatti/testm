@@ -43,7 +43,11 @@ public class GetDeclarationLogsBusinessHandler extends
 		for (LogBusiness log : logs) {
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             LogBusinessClient business = new LogBusinessClient(log);
-            business.setUserName(userService.getUser(log.getUserLogin()).getName());
+            if (userService.existsUser(log.getUserLogin())) {
+                business.setUserName(userService.getUser(log.getUserLogin()).getName());
+            } else {
+                business.setUserName(log.getUserLogin());
+            }
             business.setDepartmentName(log.getDepartmentName());
             logBusinessClients.add(business);
 		}

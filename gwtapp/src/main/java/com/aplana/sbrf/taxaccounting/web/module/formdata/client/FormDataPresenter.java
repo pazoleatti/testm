@@ -140,12 +140,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             Cell cell = row.getCell(alias);
                                             if (!(ColumnType.REFERENCE.equals(cell.getColumn().getColumnType()))) {
                                                 cell.setEditable(true);
-                                                if (FormStyle.DEFAULT_STYLE.equals(cell.getStyle())) {
-													cell.setClientStyle(FormStyle.MANUAL_EDITABLE_STYLE);
+                                                if (cell.getStyle() == null) {
+                                                    cell.setClientStyle("manual_editable_cell", Color.BLACK, Color.LIGHT_BLUE);
                                                 }
                                             }  else {
-                                                if (FormStyle.DEFAULT_STYLE.equals(cell.getStyle())) {
-													cell.setClientStyle(FormStyle.MANUAL_READ_ONLY_STYLE);
+                                                if (cell.getStyle() == null) {
+                                                    cell.setClientStyle("manual_non_editable_cell", Color.BLACK, Color.WHITE);
                                                 }
                                             }
                                         }

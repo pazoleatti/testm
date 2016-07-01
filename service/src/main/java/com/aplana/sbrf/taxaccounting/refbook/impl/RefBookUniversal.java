@@ -315,7 +315,8 @@ public class RefBookUniversal implements RefBookDataProvider {
     /**
      * Проверка корректности
      */
-    private void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+    // TODO использую в скрипте
+    void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         //Проверка обязательности заполнения записей справочника
         List<String> errors = RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
         if (!errors.isEmpty()){
@@ -521,7 +522,8 @@ public class RefBookUniversal implements RefBookDataProvider {
         throw new ServiceException("Не найдена запись с заданным родительским элементом");
     }
 
-    private List<Long> createVersions(RefBook refBook, Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, List<Long> excludedVersionEndRecords, Logger logger) {
+    // TODO использую в скрипте
+    List<Long> createVersions(RefBook refBook, Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, List<Long> excludedVersionEndRecords, Logger logger) {
         //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
         List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);
         if (refBook.isVersioned()) {
@@ -911,7 +913,8 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
     }
 
-    private boolean checkValuesChanged(Long uniqueRecordId, Map<String,RefBookValue> records) {
+    // TODO использую в скрипте
+    boolean checkValuesChanged(Long uniqueRecordId, Map<String,RefBookValue> records) {
         Map<String,RefBookValue> oldValues = refBookDao.getRecordData(refBookId, uniqueRecordId);
         for (Map.Entry<String, RefBookValue> newValue : records.entrySet()) {
             RefBookValue oldValue = oldValues.get(newValue.getKey());

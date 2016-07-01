@@ -126,6 +126,7 @@ public class PickerState{
             return false;
         if (!setIds.equals(that.setIds)) return false;
         if (!versionDate.equals(that.versionDate)) return false;
+        if (exactSearch != that.exactSearch) return false;
 
         return true;
     }
@@ -154,6 +155,7 @@ public class PickerState{
         result = 31 * result + (filter != null ? filter.hashCode() : 0);
         result = 31 * result + (searchPattern != null ? searchPattern.hashCode() : 0);
         result = 31 * result + setIds.hashCode();
+        result = 31 * result + (exactSearch ? 1 : 0);
         return result;
     }
 
@@ -166,6 +168,7 @@ public class PickerState{
                 ", versionDate=" + versionDate +
                 ", multiSelect=" + multiSelect +
                 ", setIds=" + setIds +
+                ", exactSearch=" + exactSearch +
                 '}';
     }
 

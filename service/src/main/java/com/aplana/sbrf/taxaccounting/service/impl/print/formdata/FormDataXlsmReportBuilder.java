@@ -283,7 +283,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                             }
                             //Переносим стиль с удаленного ячейке в столбце на ячейку в следующем столбце
                             com.aplana.sbrf.taxaccounting.model.Cell nextCell = dataRow.getCell(nextColumn.getAlias());
-                            nextCell.setStyle(cell.getStyle());
+                            nextCell.setStyleAlias(cell.getStyleAlias());
                             //Переносим объединение ячеек
                             if (cell.getColSpan() > 1) {
                                 //Уменьшаем объединение столбцов на 1, т.к скрытый столбец будет удален

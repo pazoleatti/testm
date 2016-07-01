@@ -395,7 +395,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         return versioned;
     }
 
-    void setCurrentUniqueRecordId(Long currentUniqueRecordId) {
+    public void setCurrentUniqueRecordId(Long currentUniqueRecordId) {
         this.currentUniqueRecordId = currentUniqueRecordId;
     }
 

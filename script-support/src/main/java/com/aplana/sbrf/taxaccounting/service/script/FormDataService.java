@@ -19,6 +19,9 @@ import java.util.Map;
 @ScriptExposed
 public interface FormDataService {
 
+    String EDITABLE_CELL_STYLE = "Редактируемая";
+    String AUTO_FILL_CELL_STYLE = "Автозаполняемая";
+
     /**
      * Поиск ежемесячной налоговой формы
      * @deprecated Неактуально с появлением корректирующих периодов

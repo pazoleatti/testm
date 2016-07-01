@@ -50,29 +50,18 @@ public class GetManualMenuHandler extends AbstractActionHandler<GetManualMenuAct
 
             MenuItem manualMenu = new MenuItem("");
 
-            MenuItem menuItem = new MenuItem("Учет налогов");
-
             if (currentUser.hasRole(TARole.ROLE_ADMIN)
                     || currentUser.hasRole(TARole.ROLE_OPER)
                     || currentUser.hasRole(TARole.ROLE_CONTROL)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                menuItem.getSubMenu().add(new MenuItem("Руководство для бизнес-пользователей", "resources/help_un.pdf"));
-                manualMenu.getSubMenu().add(new MenuItem("Учет КС", "resources/help_uks.pdf", "Учет КС"));
+                manualMenu.getSubMenu().add(new MenuItem("Руководство для бизнес-пользователей", "resources/help_un.pdf"));
             }
 
             if (currentUser.hasRole(TARole.ROLE_CONF)) {
-                menuItem.getSubMenu().add(new MenuItem("Руководство для Настройщика макетов", "resources/help_conf.pdf"));
+                manualMenu.getSubMenu().add(new MenuItem("Руководство для Настройщика макетов", "resources/help_conf.pdf"));
             }
 
-            if (currentUser.hasRole(TARole.ROLE_ADMIN)
-                    || currentUser.hasRole(TARole.ROLE_OPER)
-                    || currentUser.hasRole(TARole.ROLE_CONTROL)
-                    || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                    || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                manualMenu.getSubMenu().add(new MenuItem("ЭНС", "resources/help_ens.pdf", "ЭНС"));
-            }
-            manualMenu.getSubMenu().add(menuItem);
             menuItems.add(manualMenu);
         }
 

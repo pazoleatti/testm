@@ -63,7 +63,7 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
 
     void getValuesCount(String text, Date versionDate, boolean exactSearch, CheckValuesCountHandler checkValuesCountHandler);
 
-    void updatePS(Date date, String searchPattern);
+    void cleanPS();
 
     void cancelRequest();
 }

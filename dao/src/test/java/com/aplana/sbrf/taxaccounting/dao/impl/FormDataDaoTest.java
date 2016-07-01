@@ -50,8 +50,8 @@ public class FormDataDaoTest {
     @Autowired
     ReportPeriodDao reportPeriodDao;
 
-	@Autowired
-	NamedParameterJdbcTemplate jdbc;
+    @Autowired
+    NamedParameterJdbcTemplate jdbc;
 
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -131,12 +131,12 @@ public class FormDataDaoTest {
 
     @Test
     public void deleteTest() {
-        formDataDao.delete(1);
+        formDataDao.delete(1, 1);
     }
 
     @Test(expected = DaoException.class)
     public void deleteFailTest() {
-        formDataDao.delete(1);
+        formDataDao.delete(1, 1);
         formDataDao.get(1, false);
     }
 
@@ -168,7 +168,7 @@ public class FormDataDaoTest {
 
     @Test
     public void getFormDataIdsTest() {
-        List<Long> list1 = Arrays.asList(1L, 11L, 12L, 13L, 1000L, 329L, 3291L, 3292L, 330L, 331L, 3293L);
+        List<Long> list1 = Arrays.asList(1L, 11L, 12L, 13L, 1000L, 329L, 3291L, 3292L, 330L);
         List<Long> list2 = Arrays.asList(14L, 15L, 16L, 17L, 18L, 19L, 20L, 402L);
         assertEquals(list1, formDataDao.getFormDataIds(1, FormDataKind.SUMMARY, 1));
         assertEquals(list2, formDataDao.getFormDataIds(2, FormDataKind.PRIMARY, 1));
@@ -179,7 +179,7 @@ public class FormDataDaoTest {
         List<Integer> list = Arrays.asList(1, 11, 12, 13, 1000);
         List<Long> formDataIdList = formDataDao.getFormDataIds(Arrays.asList(TaxType.values()), list);
         assertArrayEquals(new Long[]{1L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L, 20L, 301L, 302L, 303L,
-                304L, 305L, 306L, 307L, 308L,  329L, 330L, 331L, 402L, 1000L, 3291L, 3292L, 3293L}, formDataIdList.toArray());
+                304L, 305L, 306L, 307L, 308L,  329L, 330L, 402L, 1000L, 3291L, 3292L}, formDataIdList.toArray());
     }
 
     @Test
@@ -450,25 +450,25 @@ public class FormDataDaoTest {
                 SIMPLE_DATE_FORMAT.parse("01.01.2012"), SIMPLE_DATE_FORMAT.parse("31.12.2012")).size());
     }
 
-	@Test
-	public void updatePreviousRowNumber() {
-		FormData formData = formDataDao.get(1, false);
-		formDataDao.updatePreviousRowNumber(formData, 7);
+    @Test
+    public void updatePreviousRowNumber() {
+        FormData formData = formDataDao.get(1, false);
+        formDataDao.updatePreviousRowNumber(formData, 7);
 
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("form_data_id", formData.getId());
-		assertEquals(Integer.valueOf(7), jdbc.queryForObject("SELECT number_previous_row FROM form_data WHERE id = :form_data_id", params, Integer.class));
-	}
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("form_data_id", formData.getId());
+        assertEquals(Integer.valueOf(7), jdbc.queryForObject("SELECT number_previous_row FROM form_data WHERE id = :form_data_id", params, Integer.class));
+    }
 
-	@Test
-	public void updateCurrentRowNumber() {
-		FormData formData = formDataDao.get(329, false);
-		formDataDao.updateCurrentRowNumber(formData);
+    @Test
+    public void updateCurrentRowNumber() {
+        FormData formData = formDataDao.get(329, false);
+        formDataDao.updateCurrentRowNumber(formData);
 
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("form_data_id", formData.getId());
-		assertEquals(Integer.valueOf(1), jdbc.queryForObject("SELECT number_current_row FROM form_data WHERE id = :form_data_id", params, Integer.class));
-	}
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("form_data_id", formData.getId());
+        assertEquals(Integer.valueOf(1), jdbc.queryForObject("SELECT number_current_row FROM form_data WHERE id = :form_data_id", params, Integer.class));
+    }
 
     @Test
     public void testSorted() {
