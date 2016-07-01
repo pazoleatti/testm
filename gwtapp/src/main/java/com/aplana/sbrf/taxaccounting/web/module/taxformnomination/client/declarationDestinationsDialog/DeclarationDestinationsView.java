@@ -104,7 +104,7 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
 
 	@Override
 	public List<Integer> getSelectedDeclarationTypes() {
-		if (declarationTypeId.getValue() == null) {
+		if (declarationTypeId.getValue() == null || declarationTypeId.getValue().isEmpty()) {
 			return Collections.EMPTY_LIST;
 		} else {
 			return Arrays.asList(declarationTypeId.getValue().get(0).intValue());
