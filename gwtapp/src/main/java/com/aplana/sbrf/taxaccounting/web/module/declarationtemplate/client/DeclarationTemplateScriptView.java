@@ -1,13 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -29,6 +28,13 @@ public class DeclarationTemplateScriptView extends ViewWithUiHandlers<Declaratio
 		initWidget(binder.createAndBindUi(this));
         init();
 	}
+
+    @UiHandler("createScript")
+    void onDecNameChanged(ChangeEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onInfoChanged();
+        }
+    }
 
 	private void init() {
     }

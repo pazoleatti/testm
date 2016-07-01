@@ -111,6 +111,7 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
     void onDownloadClick(ClickEvent event) {
         if (getUiHandlers() != null) {
             getUiHandlers().downloadFile();
+            onSubreportChanged();
         }
     }
 
@@ -119,11 +120,13 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
         subreports.get(subreportListBox.getSelectedIndex()).setBlobDataId(null);
         downloadFile.setEnabled(false);
         deleteFile.setEnabled(false);
+        onSubreportChanged();
     }
 
     @UiHandler("nameBox")
     public void onNameTextBoxKeyPressed(KeyUpEvent event){
         changeNameColumn();
+        onSubreportChanged();
     }
     @UiHandler("nameBox")
     public void onNameTextBoxClicked(ClickEvent event){
@@ -140,6 +143,7 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
     @UiHandler("aliasBox")
     public void onAliasTextBoxKeyPressed(KeyUpEvent event){
         changeAliasColumn();
+        onSubreportChanged();
     }
     @UiHandler("aliasBox")
     public void onAliasTextBoxClicked(ClickEvent event){
@@ -215,6 +219,12 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
         }
     }
 
+    void onSubreportChanged(){
+        if (getUiHandlers() != null) {
+            getUiHandlers().onSubreportChanged();
+        }
+    }
+
     @UiHandler("upColumn")
     public void onUpColumn(ClickEvent event){
         int ind = subreportListBox.getSelectedIndex();
@@ -230,6 +240,7 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
                 subreports.set(ind, exchange);
                 setColumnList();
                 subreportListBox.setSelectedIndex(ind - 1);
+                onSubreportChanged();
             }
         }
     }
@@ -249,6 +260,7 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
                 subreports.set(ind, exchange);
                 setColumnList();
                 subreportListBox.setSelectedIndex(ind + 1);
+                onSubreportChanged();
             }
         }
     }
@@ -262,6 +274,7 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
         newSubreport.setAlias("псевдоним");
         getUiHandlers().addSubreport(newSubreport);
         setupColumns(subreports.size() - 1);
+        onSubreportChanged();
     }
 
     @UiHandler("removeColumn")
@@ -281,6 +294,7 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
         } else {
             setupColumns(0);
         }
+        onSubreportChanged();
     }
 
 

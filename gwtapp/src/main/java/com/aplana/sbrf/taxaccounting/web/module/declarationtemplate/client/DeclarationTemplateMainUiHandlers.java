@@ -14,4 +14,5 @@ public interface DeclarationTemplateMainUiHandlers extends UiHandlers {
     int getDeclarationId();
     void onHistoryClicked();
     void downloadDect();
+    void setOnLeaveConfirmation(String msg);
 }

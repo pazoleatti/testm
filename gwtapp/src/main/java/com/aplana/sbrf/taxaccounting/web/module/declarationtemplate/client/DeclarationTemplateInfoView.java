@@ -12,7 +12,9 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.editor.client.Editor;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -136,6 +138,27 @@ public class DeclarationTemplateInfoView extends ViewWithUiHandlers<DeclarationT
     private void setEnabled(boolean isEnable){
         uploadJrxmlFile.setEnabled(isEnable);
         uploadXsdFile.setEnabled(isEnable);
+    }
+
+    @UiHandler("decName")
+    void onDecNameChanged(ChangeEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onInfoChanged();
+        }
+    }
+
+    @UiHandler("versionDateBegin")
+    void onDateBeginChanged(ValueChangeEvent<Date> event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onInfoChanged();
+        }
+    }
+
+    @UiHandler("versionDateEnd")
+    void onDateEndChanged(ValueChangeEvent<Date> event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onInfoChanged();
+        }
     }
 
     @UiHandler("downloadJrxmlButton")

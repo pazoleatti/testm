@@ -162,6 +162,7 @@ public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationT
 
     @UiHandler("saveButton")
 	public void onSave(ClickEvent event){
+        getUiHandlers().setOnLeaveConfirmation(null);
         getUiHandlers().save();
 	}
 
@@ -177,6 +178,8 @@ public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationT
 	public void onCancel(ClickEvent event){
         if (getUiHandlers() == null)
             return;
+
+        getUiHandlers().setOnLeaveConfirmation(null);
         Dialog.confirmMessage(getUiHandlers().getDeclarationId() != 0 ? "Редактирование версии макета" : "Создание версии макета", "Сохранить изменения?",
                 new DialogHandler() {
                     @Override

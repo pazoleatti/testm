@@ -18,6 +18,7 @@ public class TaPlaceManagerImpl extends PlaceManagerImpl implements TaPlaceManag
 	private final PlaceRequest defaultPlaceRequest;
 	
 	private boolean quietlyChange = false;
+	private String onLeaveQuestion;
 
 	@Inject
 	public TaPlaceManagerImpl(final EventBus eventBus,
@@ -31,8 +32,13 @@ public class TaPlaceManagerImpl extends PlaceManagerImpl implements TaPlaceManag
 	public void revealDefaultPlace() {
 		revealPlace(defaultPlaceRequest);
 	}
-	
-	
+
+	@Override
+	public void setOnLeaveConfirmation(String question) {
+		super.setOnLeaveConfirmation(question);
+		this.onLeaveQuestion = question;
+	}
+
 	@Override
 	public void revealErrorPlace(String invalidHistoryToken) {
         Dialog.errorMessage("Ошибка 404. Введен некорректный адрес. Вы будете перенаправлены на главную страницу", new DialogHandler() {
@@ -42,23 +48,45 @@ public class TaPlaceManagerImpl extends PlaceManagerImpl implements TaPlaceManag
             }
         });
 	}
-	
-	
+
+
 	@Override
     public void navigateBackQuietly() {
 		quietlyChange = true;
 		History.back();
 	}
-	
 
-	@Override
-	public void onValueChange(ValueChangeEvent<String> event) {
-		if (quietlyChange){
-			quietlyChange = false;
-			return;
-		}
-		super.onValueChange(event);
-	}
+    /**
+     * Проверка нужно ли вызывать диалог onLeaveConfirmation
+     */
+    public interface CheckOnLeaveConfirmationNeededHandler {
+        boolean isNeeded(ValueChangeEvent<String> event);
+    }
+
+    private CheckOnLeaveConfirmationNeededHandler checkOnLeaveConfirmationNeededHandler;
+
+    public CheckOnLeaveConfirmationNeededHandler getCheckOnLeaveConfirmationNeededHandler() {
+        return checkOnLeaveConfirmationNeededHandler;
+    }
+
+    public void setCheckOnLeaveConfirmationNeededHandler(CheckOnLeaveConfirmationNeededHandler checkOnLeaveConfirmationNeededHandler) {
+        this.checkOnLeaveConfirmationNeededHandler = checkOnLeaveConfirmationNeededHandler;
+    }
+
+    @Override
+    public void onValueChange(ValueChangeEvent<String> event) {
+        if (quietlyChange) {
+            quietlyChange = false;
+            return;
+        }
+        if (checkOnLeaveConfirmationNeededHandler != null && !checkOnLeaveConfirmationNeededHandler.isNeeded(event)) {
+            super.setOnLeaveConfirmation(null);
+        }
+
+        super.onValueChange(event);
+
+        super.setOnLeaveConfirmation(onLeaveQuestion);
+    }
 	
 	
 }
