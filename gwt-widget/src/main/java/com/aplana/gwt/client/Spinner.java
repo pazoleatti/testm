@@ -132,7 +132,7 @@ public class Spinner extends DoubleStateComposite
 					setValue(null, true);
 				} else {
 					// Если введено не число, а какая-то ерунда.
-					textBox.setValue(String.valueOf(value));
+					textBox.setValue(value == null ? "" : String.valueOf(value));
 				}
 			}
 		});
