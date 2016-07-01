@@ -7,4 +7,5 @@ public interface DeclarationTemplateInfoUiHandlers extends UiHandlers {
     void onCheckBeforeDeleteJrxml();
     void downloadJrxml();
     void downloadXsd();
+    void onInfoChanged();
 }

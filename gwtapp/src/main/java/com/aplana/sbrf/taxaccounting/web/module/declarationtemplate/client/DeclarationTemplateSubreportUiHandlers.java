@@ -12,4 +12,5 @@ public interface DeclarationTemplateSubreportUiHandlers extends UiHandlers {
     void onStartLoad(StartLoadFileEvent event);
     void onEndLoad(EndLoadFileEvent event);
     void downloadFile();
+    void onSubreportChanged();
 }

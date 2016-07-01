@@ -348,7 +348,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 
     @Override
     public void updateLabel(TaxType taxType) {
-        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR)) {
+        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR) && !taxType.equals(TaxType.MARKET)) {
             formDataKindLabel.setText(FORM_DATA_KIND_TITLE);
             formTypeLabel.setText(FORM_DATA_TYPE_TITLE);
             modalWindowTitle.setTitle(MODAL_WINDOW_TITLE);

@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.entry.client.TaPlaceManagerImpl;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DeclarationTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.UpdateTemplateEvent;
@@ -26,6 +27,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -35,6 +37,7 @@ import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.Date;
+import com.google.gwt.regexp.shared.RegExp;
 
 public class DeclarationTemplateMainPresenter extends TabContainerPresenter<DeclarationTemplateMainPresenter.MyView, DeclarationTemplateMainPresenter.MyProxy>
 		implements DeclarationTemplateMainUiHandlers, CreateNewDTVersionEvent.MyHandler, DTCreateNewTypeEvent.MyHandler {
@@ -152,6 +155,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
 
 	@Override
 	public void reset() {
+        setOnLeaveConfirmation(null);
 		setDeclarationTemplate();
 	}
 
@@ -161,6 +165,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
         unlockForm(declarationTemplate.getId() != null ? declarationTemplate.getId() : 0);
 		if (closeDeclarationTemplateHandlerRegistration != null)
             closeDeclarationTemplateHandlerRegistration.removeHandler();
+        setOnLeaveConfirmation(null);
 	}
 
 	/**
@@ -425,5 +430,34 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
 
     public DeclarationTemplateExt getDeclarationTemplateExt() {
         return declarationTemplateExt;
+    }
+
+    private Integer extractDeclarationTemplateId(String historyToken) {
+        RegExp regExp = RegExp.compile("^!(\\w*);" + DeclarationTemplateTokens.declarationTemplateId + "=(\\d+)");
+        MatchResult matcher = regExp.exec(historyToken);
+        if (matcher != null && matcher.getGroupCount() > 1) {
+            return Integer.parseInt(matcher.getGroup(2));
+        }
+        return null;
+    }
+
+    public void setOnLeaveConfirmation(String msg) {
+        placeManager.setOnLeaveConfirmation(msg);
+        TaPlaceManagerImpl taPlaceManager = (TaPlaceManagerImpl) placeManager;
+        if (msg == null) {
+            taPlaceManager.setCheckOnLeaveConfirmationNeededHandler(null);
+            return;
+        }
+        if (taPlaceManager.getCheckOnLeaveConfirmationNeededHandler() == null) {
+            taPlaceManager.setCheckOnLeaveConfirmationNeededHandler(new TaPlaceManagerImpl.CheckOnLeaveConfirmationNeededHandler() {
+                @Override
+                public boolean isNeeded(ValueChangeEvent<String> event) {
+                    return !(event.getValue().contains(DeclarationTemplateTokens.declarationTemplateInfo) ||
+                            event.getValue().contains(DeclarationTemplateTokens.declarationTemplateScript) ||
+                            event.getValue().contains(DeclarationTemplateTokens.declarationTemplateSubreports)) &&
+                            declarationTemplate.getId() != null && !declarationTemplate.getId().equals(extractDeclarationTemplateId(event.getValue()));
+                }
+            });
+        }
     }
 }

@@ -23,6 +23,7 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.*;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
 import java.util.Date;
@@ -133,7 +134,8 @@ public class DeclarationTemplateInfoPresenter
 	@Inject
 	public DeclarationTemplateInfoPresenter(final EventBus eventBus,
                                             final MyView view, final MyProxy proxy, DispatchAsync dispatcher,
-                                            DeclarationTemplateMainPresenter declarationTemplateMainPresenter) {
+                                            DeclarationTemplateMainPresenter declarationTemplateMainPresenter,
+                                            PlaceManager placeManager) {
 		super(eventBus, view, proxy, DeclarationTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
         this.dispatcher = dispatcher;
@@ -191,5 +193,12 @@ public class DeclarationTemplateInfoPresenter
         templateExt.getDeclarationTemplate().setName(getView().getName());
         templateExt.getDeclarationTemplate().setVersion(getView().getStartDate());
         templateExt.setEndDate(getView().getEndDate());
+    }
+
+    private HandlerRegistration closeDTHandlerRegistration;
+
+    @Override
+    public void onInfoChanged(){
+        declarationTemplateMainPresenter.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
     }
 }

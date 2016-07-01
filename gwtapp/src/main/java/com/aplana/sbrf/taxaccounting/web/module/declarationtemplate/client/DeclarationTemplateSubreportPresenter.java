@@ -103,5 +103,13 @@ public class DeclarationTemplateSubreportPresenter
         // Разблокируем форму и выводим логи
         LockInteractionEvent.fire(this, false);
         LogAddEvent.fire(this, event.getUuid());
+        if (!event.isHasError()){
+            onSubreportChanged();
+        }
+    }
+
+    @Override
+    public void onSubreportChanged(){
+        declarationTemplateMainPresenter.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
     }
 }
