@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>true</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>2.6 (Сводный) Отчет о состоянии кредитного портфеля</name>
+    <fullName>2.6 (Сводный) Отчет о состоянии кредитного портфеля Сбербанка России (по кредитам, предоставленным юридическим лицам) по ЦА и ОСБ г. Москвы</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <name>№ п/п</name>
+        <order>1</order>
+        <width>5</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>codeBank</alias>
+        <checking>false</checking>
+        <name>Код банка</name>
+        <order>2</order>
+        <width>20</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>nameBank</alias>
+        <checking>false</checking>
+        <name>Наименование банка</name>
+        <order>3</order>
+        <width>20</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>depNumber</alias>
+        <checking>false</checking>
+        <name>Номер отделения, выдавшего кредит / кредитующее подразделение ЦА, к компетенции которого относится договор</name>
+        <order>4</order>
+        <width>20</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>okved</alias>
+        <checking>false</checking>
+        <name>Код отрасли по ОКВЭД</name>
+        <order>5</order>
+        <width>20</width>
+        <maxLength>16</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>opf</alias>
+        <checking>false</checking>
+        <name>Организационно-правовая форма</name>
+        <order>6</order>
+        <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>6052</nameAttributeId>
+        <refBookAttributeId>6051</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+        <versioned>true</versioned>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>debtorName</alias>
+        <checking>false</checking>
+        <name>Наименование заемщика</name>
+        <order>7</order>
+        <width>20</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>inn</alias>
+        <checking>false</checking>
+        <name>ИНН заемщика</name>
+        <order>8</order>
+        <width>20</width>
+        <maxLength>12</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sign</alias>
+        <checking>false</checking>
+        <name>Признак СМП</name>
+        <order>9</order>
+        <width>10</width>
+        <maxLength>2</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>direction</alias>
+        <checking>false</checking>
+        <name>Направление бизнес плана, к которому относится кредит</name>
+        <order>10</order>
+        <width>20</width>
+        <maxLength>3</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>law</alias>
+        <checking>false</checking>
+        <name>Номер Регламента, в рамках которого предоставлен кредит</name>
+        <order>11</order>
+        <width>20</width>
+        <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>creditType</alias>
+        <checking>false</checking>
+        <name>Тип кредита</name>
+        <order>12</order>
+        <width>20</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>docNum</alias>
+        <checking>false</checking>
+        <name>№ кредитного договора</name>
+        <order>13</order>
+        <width>20</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>docDate</alias>
+        <checking>false</checking>
+        <name>Дата кредитного договора</name>
+        <order>14</order>
+        <width>5</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>creditDate</alias>
+        <checking>false</checking>
+        <name>Дата выдачи кредита</name>
+        <order>15</order>
+        <width>5</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>closeDate</alias>
+        <checking>false</checking>
+        <name>Дата погашения с учетом последней пролонгации</name>
+        <order>16</order>
+        <width>5</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>extendNum</alias>
+        <checking>false</checking>
+        <name>Количество пролонгаций</name>
+        <order>17</order>
+        <width>10</width>
+        <maxLength>2</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>creditMode</alias>
+        <checking>false</checking>
+        <name>Режим кредитования</name>
+        <order>18</order>
+        <width>20</width>
+        <maxLength>16</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>currencySum</alias>
+        <checking>false</checking>
+        <name>Валюта суммы кредита (лимита кредитной линии)</name>
+        <order>19</order>
+        <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>66</nameAttributeId>
+        <refBookAttributeId>65</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+        <versioned>true</versioned>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sumDoc</alias>
+        <checking>false</checking>
+        <name>Сумма кредита (по договору), лимит кредитной линии, тыс. ед. валюты</name>
+        <order>20</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sumGiven</alias>
+        <checking>false</checking>
+        <name>Сумма выданного кредита, тыс. ед. валюты</name>
+        <order>21</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>rate</alias>
+        <checking>false</checking>
+        <name>Действующая процентная ставка</name>
+        <order>22</order>
+        <width>10</width>
+        <maxLength>6</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>payFrequency</alias>
+        <checking>false</checking>
+        <name>Периодичность уплаты процентов</name>
+        <order>23</order>
+        <width>10</width>
+        <maxLength>4</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>currencyCredit</alias>
+        <checking>false</checking>
+        <name>Валюта выдачи кредита</name>
+        <order>24</order>
+        <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>66</nameAttributeId>
+        <refBookAttributeId>65</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+        <versioned>true</versioned>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>debtSum</alias>
+        <checking>false</checking>
+        <name>Остаток задолженности на отчетную дату (тыс. руб.). Ссудная задолженность, всего</name>
+        <order>25</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>inTimeDebtSum</alias>
+        <checking>false</checking>
+        <name>Остаток задолженности на отчетную дату (тыс. руб.). В т.ч. срочная</name>
+        <order>26</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>overdueDebtSum</alias>
+        <checking>false</checking>
+        <name>Остаток задолженности на отчетную дату (тыс. руб.). В т.ч. просроченная</name>
+        <order>27</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>percentDebtSum</alias>
+        <checking>false</checking>
+        <name>Остаток задолженности на отчетную дату (тыс. руб.). Задолженность по просроченным %</name>
+        <order>28</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>deptDate</alias>
+        <checking>false</checking>
+        <name>Дата вынесения на просрочку основного долга</name>
+        <order>29</order>
+        <width>5</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>percentDate</alias>
+        <checking>false</checking>
+        <name>Дата вынесения на просрочку процентов</name>
+        <order>30</order>
+        <width>5</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>percentPeriod</alias>
+        <checking>false</checking>
+        <name>Срок нахождения на счетах просроченных требований и/или процентов, дней</name>
+        <order>31</order>
+        <width>10</width>
+        <maxLength>5</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>provision</alias>
+        <checking>false</checking>
+        <name>Обеспечение</name>
+        <order>32</order>
+        <width>20</width>
+        <maxLength>100</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>provisionComment</alias>
+        <checking>false</checking>
+        <name>Примечание к обеспечению</name>
+        <order>33</order>
+        <width>20</width>
+        <maxLength>512</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>loanSign</alias>
+        <checking>false</checking>
+        <name>Признак реструктурированной ссуды</name>
+        <order>34</order>
+        <width>10</width>
+        <maxLength>2</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>loanQuality</alias>
+        <checking>false</checking>
+        <name>Категория качества ссуды</name>
+        <order>35</order>
+        <width>10</width>
+        <maxLength>2</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>finPosition</alias>
+        <checking>false</checking>
+        <name>Финансовое положение</name>
+        <order>36</order>
+        <width>10</width>
+        <maxLength>2</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>debtService</alias>
+        <checking>false</checking>
+        <name>Обслуживание долга</name>
+        <order>37</order>
+        <width>10</width>
+        <maxLength>2</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>creditRisk</alias>
+        <checking>false</checking>
+        <name>Категория кредитного риска / класс кредитоспособности</name>
+        <order>38</order>
+        <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>6041</nameAttributeId>
+        <refBookAttributeId>6041</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+        <versioned>true</versioned>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>portfolio</alias>
+        <checking>false</checking>
+        <name>Портфель однородных требований</name>
+        <order>39</order>
+        <width>20</width>
+        <maxLength>32</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>reservePercent</alias>
+        <checking>false</checking>
+        <name>Величина отчислений в резерв, %</name>
+        <order>40</order>
+        <width>10</width>
+        <maxLength>5</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>reserveSum</alias>
+        <checking>false</checking>
+        <name>Сформированный резерв в тыс. руб.</name>
+        <order>41</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>
