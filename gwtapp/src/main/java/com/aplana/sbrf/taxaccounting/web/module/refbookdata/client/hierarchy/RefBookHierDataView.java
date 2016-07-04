@@ -51,6 +51,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     @Override
     public void load(){
         refbookDataTree.load(pickerState, false);
+        pickerState.setNeedReload(false);
     }
 
     @Override
@@ -117,6 +118,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     @Override
     public void updateItem(Long id, Long newParentId, String newName){
         refbookDataTree.updateRecord(id, newParentId, newName);
+        pickerState.setNeedReload(true);
     }
 
     @Override
@@ -140,7 +142,6 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     public void searchButtonClicked(Date relevanceDate) {
         if (getUiHandlers() != null) {
             if (pickerState.getSearchPattern()!= null && !pickerState.getSearchPattern().isEmpty()){
-                pickerState.setNeedReload(false);
                 refbookDataTree.checkCount(pickerState.getSearchPattern().trim(), relevanceDate, pickerState.isExactSearch(), new CheckValuesCountHandler() {
                     @Override
                     public void onGetValuesCount(Integer count) {
