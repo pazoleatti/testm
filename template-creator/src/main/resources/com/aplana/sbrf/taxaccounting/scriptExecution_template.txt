@@ -23,7 +23,7 @@ boolean addDataHeaders = %24%
 boolean addScript = %25%
 
 try {
-    // id типа формы, имя типа формы, вид налога(I, T, V, D, P, E), включать в ИФРС(флаг), имя ИФРС
+    // id типа формы, имя типа формы, вид налога(I, T, V, D, P, E, M), включать в ИФРС(флаг), имя ИФРС
     FormType formType = new FormType()
     formType.setId(%1%)
     formType.setName('%2%')
@@ -73,7 +73,7 @@ try {
     if (addColumns) {
         %13%
         formTemplate.getColumns().addAll(formColumns)
-        columnDaoImpl.calculateNewDataOrder(formColumns, [])
+        //columnDaoImpl.calculateNewDataOrder(formColumns, [])
         columnDaoImpl.createFormColumns(formColumns, formTemplate)
 
 	  	referenceColumnMap.each { alias, parentAlias ->
