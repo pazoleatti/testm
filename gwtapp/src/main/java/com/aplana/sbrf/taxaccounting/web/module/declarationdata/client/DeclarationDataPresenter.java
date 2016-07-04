@@ -108,6 +108,10 @@ public class DeclarationDataPresenter
         void setSubreports(List<DeclarationSubreport> subreports);
 
         void updatePrintSubreportButtonName(DeclarationSubreport subreport, boolean exist);
+
+        void setVisiblePDF(boolean isVisiblePDF);
+
+        boolean isVisiblePDF();
     }
 
 	private final DispatchAsync dispatcher;
@@ -173,6 +177,7 @@ public class DeclarationDataPresenter
 								getView().setReportPeriod(periodStr);
 								getView().setDocDate(result.getDocDate());
                                 getView().setDepartment(result.getDepartment());
+                                getView().setVisiblePDF(result.isVisiblePDF());
                                 subreports = result.getSubreports();
                                 getView().setSubreports(result.getSubreports());
                                 if(taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT)){
@@ -238,8 +243,13 @@ public class DeclarationDataPresenter
                             if (DeclarationDataReportType.XML_DEC.equals(type)) {
                                 getView().showNoPdf("Область предварительного просмотра");
                             } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
-                                getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
-                                        " Форма предварительного просмотра не сформирована");
+                                if (getView().isVisiblePDF()) {
+                                    getView().showNoPdf((!TaxType.DEAL.equals(taxType) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D) +
+                                            " Форма предварительного просмотра не сформирована");
+                                } else {
+                                    getView().showNoPdf((!TaxType.DEAL.equals(taxType) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D) +
+                                            "  Форма предварительного просмотра недоступна");
+                                }
                             }
                             getView().updatePrintReportButtonName(type, false);
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.LIMIT)) {

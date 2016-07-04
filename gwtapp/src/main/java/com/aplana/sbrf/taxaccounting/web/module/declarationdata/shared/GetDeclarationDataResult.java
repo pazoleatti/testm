@@ -19,6 +19,7 @@ public class GetDeclarationDataResult implements Result {
     private String kpp;
 	private String uuid;
     private List<DeclarationSubreport> subreports;
+    private boolean isVisiblePDF;
 
 	private boolean accepted;
 	private boolean canAccept;
@@ -142,5 +143,13 @@ public class GetDeclarationDataResult implements Result {
 
     public void setSubreports(List<DeclarationSubreport> subreports) {
         this.subreports = subreports;
+    }
+
+    public boolean isVisiblePDF() {
+        return isVisiblePDF;
+    }
+
+    public void setVisiblePDF(boolean isVisiblePDF) {
+        this.isVisiblePDF = isVisiblePDF;
     }
 }

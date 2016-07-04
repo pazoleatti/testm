@@ -1288,4 +1288,25 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 throw new ServiceException("Неверный тип отчета(%s)", ddReportType.getReportType().getName());
         }
     }
+
+    @Override
+    public boolean isVisiblePDF(DeclarationData declarationData, TAUserInfo userInfo) {
+        Map<String, Object> exchangeParams = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<String, Object>();
+        exchangeParams.put("params", params);
+        Logger logger = new Logger();
+        if (declarationDataScriptingService.executeScript(userInfo,
+                declarationData, FormDataEvent.CHECK_VISIBILITY_PDF, logger, exchangeParams)) {
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                return false;
+            }
+            if (params.containsKey("isVisiblePDF") && params.get("isVisiblePDF") instanceof Boolean) {
+                return (Boolean)(params.get("isVisiblePDF"));
+            } else {
+                return true;
+            }
+        } else {
+            return true;
+        }
+    }
 }
