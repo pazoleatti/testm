@@ -120,6 +120,12 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
+    public FormTemplate getFormTemplate(int formTemplateId) {
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+        return formTemplate.clone();
+    }
+
+    @Override
     public DataRowHelper getDataRowHelper(FormData formData) {
         if (formData.getId() == null) {
             throw new ServiceException(FIND_ERROR);

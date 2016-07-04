@@ -61,6 +61,14 @@ public interface FormDataService {
     FormTemplate getFormTemplate(int formTypeId, int reportPeriodId);
 
     /**
+     * Получить шаблон нф.
+     * НФ созданная в последнем отчетном периоде подразделения.
+     *
+     * @param formTemplateId идентификатор шаблона формы
+     */
+    FormTemplate getFormTemplate(int formTemplateId);
+
+    /**
      * Посредник для работы со строками налоговой формы во временном и постоянном срезах
      */
 	DataRowHelper getDataRowHelper(FormData formData);
