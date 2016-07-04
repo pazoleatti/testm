@@ -281,4 +281,12 @@ public interface DeclarationDataService {
      * @param data
      */
     void exportXLSX(JasperPrint jasperPrint, OutputStream data);
+
+    /**
+     * Получение возможности отображения формы предварительного просмотра
+     * @param declarationData
+     * @param userInfo
+     * @return
+     */
+    boolean isVisiblePDF(DeclarationData declarationData, TAUserInfo userInfo);
 }

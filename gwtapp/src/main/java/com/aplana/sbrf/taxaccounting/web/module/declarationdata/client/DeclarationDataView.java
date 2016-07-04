@@ -98,6 +98,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     private LinkButton printToXml, printToExcel;
 
     private Timer timerExcel, timerXML, timerPDF, timerAccept, timerSpecific;
+    private boolean isVisiblePDF;
 
 	@Inject
 	@UiConstructor
@@ -345,7 +346,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     @UiHandler("viewPdf")
     public void onViewPdfButton(ClickEvent event){
-        getUiHandlers().viewReport(false, DeclarationDataReportType.PDF_DEC);
+        if (isVisiblePDF)
+            getUiHandlers().viewReport(false, DeclarationDataReportType.PDF_DEC);
         //getUiHandlers().viewPdf(false);
     }
 /*
@@ -402,7 +404,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 viewPdf.setVisible(false);
                 timerPDF.cancel();
             } else {
-                viewPdf.setVisible(true);
+                viewPdf.setVisible(isVisiblePDF);
             }
         } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
             if (isLoad) {
@@ -423,8 +425,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             timerXML.scheduleRepeating(10000);
             timerXML.run();
         } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
-            timerPDF.scheduleRepeating(10000);
-            timerPDF.run();
+            if (isVisiblePDF) {
+                timerPDF.scheduleRepeating(10000);
+                timerPDF.run();
+            }
         } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
             timerAccept.scheduleRepeating(10000);
             timerAccept.run();
@@ -482,5 +486,16 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 linkButton.setText("Сформировать \"" + subreport.getName() + "\"");
             }
         }
+    }
+
+    @Override
+    public void setVisiblePDF(boolean isVisiblePDF) {
+        this.isVisiblePDF = isVisiblePDF;
+        viewPdf.setVisible(isVisiblePDF);
+    }
+
+    @Override
+    public boolean isVisiblePDF() {
+        return isVisiblePDF;
     }
 }

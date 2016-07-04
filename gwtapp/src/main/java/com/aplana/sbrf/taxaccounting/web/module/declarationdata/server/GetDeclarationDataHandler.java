@@ -87,6 +87,7 @@ public class GetDeclarationDataHandler
         result.setTaxOrganCode(declaration.getTaxOrganCode());
         result.setKpp(declaration.getKpp());
 
+        result.setVisiblePDF(declarationDataService.isVisiblePDF(declaration, userInfo));
         //Проверка статуса макета декларации при открытиии экземпляра декларации.
         if (declarationTemplate.getStatus() == VersionedObjectStatus.DRAFT) {
             Logger logger = new Logger();
