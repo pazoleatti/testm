@@ -270,7 +270,15 @@ void consolidation() {
             rowsMap[key]= row
         }
     }
-    def dataRows = rowsMap.values() as List<DataRow>
+    List<DataRow> dataRows = []
+    // убрать редактируемость
+    rowsMap.values().each { row ->
+        def newRow = formData.createDataRow()
+        row.each { alias, value ->
+            newRow[alias] = value
+        }
+        dataRows.add(newRow)
+    }
     sortRows(refBookService, logger, dataRows, null, null, null)
     updateIndexes(dataRows)
     def dataRowHelper = formDataService.getDataRowHelper(formData)
