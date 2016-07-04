@@ -325,7 +325,10 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "-- Для сортировки\n" +
                     "dp.NAME  AS performer, \n" +
                     "p.FULL_NAME AS performer_full_name \n" +
-                    "FROM (\n"+
+                    "FROM (" +
+                    "SELECT dftOrd.*,\n" +
+                    "    rownum AS row_number_over\n" +
+                    "  FROM(\n"+
                     "SELECT dft.ID as id,\n" +
                     "  dft.KIND,\n" +
                     "  ft.NAME,\n" +
@@ -347,14 +350,13 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "  dft.KIND AS form_kind,\n" +
                     "  d.NAME   AS department,\n" +
                     "  d.FULL_NAME AS department_full_name \n" +
-                    // пейджинг
-                    "%s\n" +
                     "FROM department_form_type dft\n" +
                     "JOIN form_type ft ON ft.ID = dft.FORM_TYPE_ID\n" +
                     "JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id is null CONNECT BY PRIOR id = parent_id) d ON d.ID = dft.DEPARTMENT_ID\n" +
                     "WHERE ft.tax_type = :taxType\n" +
                     "%s\n" +
                     "%s\n" +
+                    ") dftOrd \n" +
                     ") dft \n" +
                     "left join department_form_type_performer dftp on 0=:withoutPerformers and dftp.DEPARTMENT_FORM_TYPE_ID = dft.id \n" +
                     "LEFT OUTER JOIN department dp ON dp.ID = dftp.PERFORMER_DEP_ID\n" +
@@ -394,7 +396,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             parameters.addValue("params", departmentIds);
         }
 
-        String query =String.format(QUERY, paging ? ", \n rownum as row_number_over \n":"", departmentClause, order.toString());
+        String query = String.format(QUERY, departmentClause, order.toString());
 
         // Limit
         if (paging){
