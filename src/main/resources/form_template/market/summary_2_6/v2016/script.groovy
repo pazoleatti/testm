@@ -151,44 +151,15 @@ void logicCheck() {
     for (row in dataRows) {
         // 1. Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
-        // 2. 17, 20, 21, 22,  25, 26, 27, 28, 31, 40, 41 неотрицательность графы
-        nonNegativeColumns.each { alias ->
-            if (row[alias] != null && row[alias] < 0) {
-                logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно 0!", row.getIndex(), getColumnName(row, alias))
-            }
-        }
-        // 3. Положительность графы
-        if (row.payFrequency != null && row.payFrequency <= 0) {
-            logger.error("Строка %s: Значение графы «%s» должно быть больше 0!", row.getIndex(), getColumnName(row, 'payFrequency'))
-        }
-        // 4. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
+        // 2. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
         // группируем
         def key = getKey(row)
         if (rowsMap[key] == null) {
             rowsMap[key] = []
         }
         rowsMap[key].add(row)
-        // 5. Проверка даты выдачи кредита
-        if (row.docDate != null && row.creditDate != null && (row.creditDate < row.docDate)) {
-            logger.warn("Строка %s: Значение графа «%s» должно быть больше либо равно значения графы «%s»!",
-                row.getIndex(), getColumnName(row, 'creditDate'), getColumnName(row, 'docDate'))
-        }
-        // 6. Проверка даты погашения кредита
-        if (row.docDate != null && row.closeDate != null && (row.closeDate < row.docDate)) {
-            logger.error("Строка %s: Значение графа «%s» должно быть больше либо равно значения графы «%s»!",
-                    row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'docDate'))
-        }
-        // 7. Проверка даты погашения кредита 2
-        if (row.creditDate != null && row.closeDate != null && (row.closeDate < row.creditDate)) {
-            logger.error("Строка %s: Значение графа «%s» должно быть больше либо равно значения графы «%s»!",
-                    row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'creditDate'))
-        }
-        // 8. Проверка валюты
-        if (row.currencySum != null && ("RUB".equals(getRefBookValue(15, row.currencySum).CODE_2.value))) {
-            logger.error("Строка %s: Для российского рубля должно быть проставлено буквенное значение RUR!", row.getIndex())
-        }
     }
-    // 4. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
+    // 2. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
     rowsMap.each { def key, rows ->
         def size = rows.size()
         // пропускаем первую строку
@@ -271,7 +242,6 @@ void consolidation() {
         }
     }
     List<DataRow> dataRows = []
-    // убрать редактируемость
     rowsMap.values().each { row ->
         def newRow = formData.createDataRow()
         row.each { alias, value ->

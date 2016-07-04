@@ -956,7 +956,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     def headerMapping =[[:]]
     def index = 0
     allColumns.each { alias ->
-        headerMapping.add(([(headerRows[0][index]): getColumnName(tmpRow, alias)]))
+        headerMapping.add(([(headerRows[0][index]): tmpRow.getCell(alias).column.name]))
         headerMapping.add(([(headerRows[1][index]): (index + 1).toString()]))
         index++
     }

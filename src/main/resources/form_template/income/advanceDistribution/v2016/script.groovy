@@ -981,7 +981,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
         if (alias == 'fix') {
             continue
         }
-        headerMapping.add(([(headerRows[0][index ? (index + 1) : 0]): getColumnName(tmpRow, alias)]))
+        headerMapping.add(([(headerRows[0][index ? (index + 1) : 0]): tmpRow.getCell(alias).column.name]))
         headerMapping.add(([(headerRows[1][index == 0 ? 0 : (index + 1)]): (index + 1).toString()]))
         index++
     }
