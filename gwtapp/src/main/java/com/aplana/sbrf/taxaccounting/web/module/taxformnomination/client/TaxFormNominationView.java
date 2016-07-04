@@ -326,6 +326,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	private void initView(boolean isForm) {
 		boolean isTaxTypeDeal = taxType.equals(TaxType.DEAL);
         boolean isTaxTypeETR = taxType.equals(TaxType.ETR);
+		boolean isTaxTypeMarket = taxType.equals(TaxType.MARKET);
 		receiverSourcesKindTitle.setTitle(isTaxTypeDeal || isTaxTypeETR ? "Тип формы" : "Тип налоговой формы");
 		receiverSourcesTypeTitle.setTitle(isTaxTypeDeal || isTaxTypeETR ? "Вид формы" : "Вид налоговой формы");
             declarationTypeHeader.setTitle(isTaxTypeDeal ? "Вид уведомления" : "Вид декларации");
@@ -333,14 +334,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		decGrid.redrawHeaders();
 
 		// леваяя ссылка
-        if (isTaxTypeETR) {
+        if (isTaxTypeETR || isTaxTypeMarket) {
             switchMode.setVisible(false);
         } else {
             switchMode.setVisible(true);
             switchMode.setText(getHeader(isForm, isTaxTypeDeal));
         }
 		// средний лейбл
-		formHeader.setText(getHeader(!isForm, isTaxTypeDeal || isTaxTypeETR));
+		formHeader.setText(getHeader(!isForm, isTaxTypeDeal || isTaxTypeETR || isTaxTypeMarket));
 
 		if (isForm) {
 			this.isForm = true;
