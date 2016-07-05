@@ -153,6 +153,9 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     }
 
     void  showRecord(final Long refBookRecordId, final Boolean isCancel){
+        if (refBookRecordId == null) {
+            return;
+        }
         //Для случая когда мы нажимаем на кнопку отмены перехода на другую запись
         if (previousURId != null && previousURId.equals(refBookRecordId) && isCancel){
             return;
