@@ -167,7 +167,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         if (onlyId) {
             ps.appendQuery("SELECT record_id FROM ");
         } else {
-            ps.appendQuery("SELECT * FROM ");
+            ps.appendQuery("SELECT res.*, rownum row_number_over FROM ");
         }
 
         ps.appendQuery("(select frb.id as ");
@@ -182,19 +182,19 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
         }
 
-        if (isSupportOver() && sortAttribute != null) {
+        /*if (isSupportOver() && sortAttribute != null) {
 			ps.appendQuery(",");
             ps.appendQuery(" row_number()");
             // Надо делать сортировку
             ps.appendQuery(" over (order by ");
-            ps.appendQuery(sortAttribute.getAlias());
+            ps.appendQuery("frb." + sortAttribute.getAlias());
             ps.appendQuery(isSortAscending ? " ASC":" DESC");
             ps.appendQuery(")");
             ps.appendQuery(" as row_number_over\n");
         } else {
             // База тестовая и не поддерживает row_number() значит сортировка работать не будет
             ps.appendQuery(", rownum row_number_over\n");
-        }
+        }*/
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", frb.");
@@ -239,14 +239,21 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         }
         ps.appendQuery("(frb.version = t.version and frb.record_id = t.record_id)");
 
+        if (sortAttribute != null) {
+            ps.appendQuery(" order by ");
+            ps.appendQuery("frb." + sortAttribute.getAlias());
+            ps.appendQuery(isSortAscending ? " ASC":" DESC");
+        } else {
+            ps.appendQuery(" order by frb.CODE");
+        }
         if (version == null) {
-            ps.appendQuery(" order by t.version\n");
+            ps.appendQuery(" , t.version\n");
         }
 
-        ps.appendQuery(")");
+        ps.appendQuery(") res ");
 
         if (pagingParams != null) {
-            ps.appendQuery(" where row_number_over BETWEEN ? AND ?");
+            ps.appendQuery(" where rownum BETWEEN ? AND ?");
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
         }
