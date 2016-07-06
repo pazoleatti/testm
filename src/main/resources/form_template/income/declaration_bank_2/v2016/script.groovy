@@ -3,6 +3,7 @@ package form_template.income.declaration_bank_2.v2016
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
@@ -1667,9 +1668,8 @@ def getDataRowsApp2(def groupsApp2) {
     def formDataCollection = getAcceptedFormDataSources()
 
     if (formDataCollection.records.find { [415, 418].contains(it.getFormType().getId()) } == null ) {
-        logger.error("Формирование отчета невозможно, т.к. отсутствует форма-источник «%s»/«%s» в статусе «Принята»!",
+        throw new ScriptServiceException("Формирование отчета невозможно, т.к. отсутствует форма-источник «%s»/«%s» в статусе «Принята»!",
                 formTypeService.get(415)?.name, formTypeService.get(418)?.name)
-        return null
     }
 
     // Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
@@ -1697,7 +1697,7 @@ def getDataRowsApp2(def groupsApp2) {
             groupRows(dataRowsApp2, groupsApp2)
         }
     } else {
-        logger.error("Формирование отчета невозможно, т.к. нет данных в форме-источнике «%s»!", formTypeService.get(isCFOApp2 ? 418 : 415)?.name)
+        throw new ScriptServiceException("Формирование отчета невозможно, т.к. нет данных в форме-источнике «%s»!", formTypeService.get(isCFOApp2 ? 418 : 415)?.name)
     }
     return dataRowsApp2
 }
