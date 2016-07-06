@@ -729,7 +729,7 @@ void importTransportData() {
     }
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
     def newRows = []
 
@@ -844,7 +844,7 @@ void importData() {
     def sectionIndex = null
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
     def firstRow = getDataRow(templateRows, 'part_1')
     def lastRow = getDataRow(templateRows, 'part_2')

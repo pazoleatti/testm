@@ -438,7 +438,7 @@ void importData() {
     }
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
 
     // итоговая строка
@@ -465,7 +465,7 @@ void importData() {
 void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def headers = formTemplate.getHeaders()
     def headerMapping = []
     [

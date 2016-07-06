@@ -49,7 +49,7 @@ public class RemainsPrepaymentsTest extends ScriptTestBase {
     @Before
     public void mockFormDataService() {
         // макет
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @Test

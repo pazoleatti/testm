@@ -208,7 +208,7 @@ void importTransportData() {
 void addTransportData(def xml) {
     def int rnuIndexRow = 3
     def int colOffset = 1
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
     def row = getDataRow(templateRows, 'total')
     row.keySet().each { row.getCell(it).setCheckMode(true) }
@@ -296,7 +296,7 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
 
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def dataRows = formTemplate.rows
 
     // формирвание строк нф

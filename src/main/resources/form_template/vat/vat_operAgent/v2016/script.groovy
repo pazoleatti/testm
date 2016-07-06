@@ -385,7 +385,7 @@ void importData() {
     def totalRow = getDataRow(dataRows, totalRowAlias)
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
 
     // формирвание строк нф

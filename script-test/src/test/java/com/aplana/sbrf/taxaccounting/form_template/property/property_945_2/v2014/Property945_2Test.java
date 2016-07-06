@@ -121,7 +121,7 @@ public class Property945_2Test extends ScriptTestBase {
                     }
                 });
 
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
 

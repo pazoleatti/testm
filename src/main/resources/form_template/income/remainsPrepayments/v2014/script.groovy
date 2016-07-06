@@ -82,7 +82,7 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
 
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def dataRows = formTemplate.rows
 
     // формирвание строк нф

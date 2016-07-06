@@ -216,7 +216,7 @@ def calc9(def row) {
 }
 
 void consolidation() {
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def dataRows = formTemplate.rows
     updateIndexes(dataRows)
 
@@ -312,7 +312,7 @@ void importData() {
     headerValues = null
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
     updateIndexes(templateRows)
 

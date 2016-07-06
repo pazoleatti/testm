@@ -121,7 +121,7 @@ void logicCheck() {
     }
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def tempRows = formTemplate.rows
     updateIndexes(tempRows)
     // 2. Проверка графы 3 при расчете графы 5
@@ -293,7 +293,7 @@ void importData() {
     }
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
 
     // итоговая строка

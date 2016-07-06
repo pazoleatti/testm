@@ -61,7 +61,7 @@ public class Etr4_22Test extends ScriptTestBase {
     @Before
     public void mockServices() {
         // макет нф
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
         // имя справочника
         RefBook rb = new RefBook();
         rb.setName("Проблемные зоны (test refBook)");

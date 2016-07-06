@@ -191,7 +191,7 @@ void logicCheck() {
         checkNonEmptyColumns(dataRows[i], dataRows[i].getIndex(), nonEmptyColumns, logger, true)
     }
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def tempRows = formTemplate.rows
     updateIndexes(tempRows)
     calcValues(tempRows, dataRows, false)
@@ -393,7 +393,7 @@ void importData() {
 
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
 
     // формирование строк нф

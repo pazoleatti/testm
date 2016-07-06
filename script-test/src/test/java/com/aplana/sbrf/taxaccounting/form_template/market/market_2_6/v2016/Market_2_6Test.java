@@ -138,7 +138,7 @@ public class Market_2_6Test extends ScriptTestBase {
             setAlias("NAME");
             setName("Наименование");
         }});
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(formTemplate);
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(formTemplate);
         when(testHelper.getRefBookFactory().getByAttribute(eq(6051L))).thenReturn(new RefBook() {{
             setId(605L);
         }});
@@ -148,7 +148,7 @@ public class Market_2_6Test extends ScriptTestBase {
         when(testHelper.getRefBookFactory().getByAttribute(eq(65L))).thenReturn(new RefBook() {{
             setId(15L);
         }});
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
         int expected = 1; // в файле 0 строк
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);

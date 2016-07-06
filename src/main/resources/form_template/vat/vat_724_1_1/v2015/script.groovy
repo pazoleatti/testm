@@ -501,7 +501,7 @@ void calc() {
 
     // добавим строки макета
     dataRows.clear()
-    dataRows.addAll(formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).rows)
+    dataRows.addAll(formDataService.getFormTemplate(formData.formTemplateId).rows)
     updateIndexes(dataRows)
 
     // Сортировка и добавление нефиксированных строк
@@ -849,7 +849,7 @@ void checkDeclarationAccepted() {
 
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).rows
+    def dataRows = formDataService.getFormTemplate(formData.formTemplateId).rows
     updateIndexes(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
@@ -999,7 +999,7 @@ void importData() {
     paramsMap = null
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
     def valuesTotal = [ getDataRow(templateRows, 'head_1')?.fix,
                         getDataRow(templateRows, 'head_2')?.fix,
@@ -1244,7 +1244,7 @@ void compareSpecificTotalValues(def dataRows, def sectionMap) {
     def logLevel = isImport ? LogLevel.WARNING : LogLevel.ERROR
     // считаем итоги
     def calcRows = []
-    calcRows.addAll(formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).rows)
+    calcRows.addAll(formDataService.getFormTemplate(formData.formTemplateId).rows)
     updateIndexes(calcRows)
     sectionMap.each { key, tempRows ->
         calcRows.addAll(getDataRow(calcRows, 'head_' + key).getIndex(), tempRows.findAll { it.getAlias() == null || it.getAlias().startsWith('total_') })

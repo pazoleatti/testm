@@ -724,7 +724,7 @@ void importData() {
     }
 
     // итоговая строка из макета//
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
     def totalRow = getDataRow(templateRows, 'total')
 

@@ -69,7 +69,7 @@ public class Vat_937_3Test extends ScriptTestBase {
 
         when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenReturn(departmentReportPeriod);
         when(testHelper.getDepartmentService().get(anyInt())).thenReturn(department);
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @After

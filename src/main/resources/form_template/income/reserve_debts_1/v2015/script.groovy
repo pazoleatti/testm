@@ -350,7 +350,7 @@ void importTransportData() {
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
     def totalTF = null		// итоговая строка со значениями из тф для добавления
 
@@ -554,7 +554,7 @@ void importData() {
     def totalRowFromFileMap = [:]
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
     def aRow = getDataRow(templateRows, 'A')
     def bRow = getDataRow(templateRows, 'B')

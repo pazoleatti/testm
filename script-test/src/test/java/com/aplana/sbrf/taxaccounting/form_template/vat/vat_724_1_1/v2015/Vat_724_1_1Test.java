@@ -61,7 +61,7 @@ public class Vat_724_1_1Test extends ScriptTestBase {
         department.setId(UNP_ID);
         department.setName("Управление налогового планирования");
         when(testHelper.getDepartmentService().get(UNP_ID)).thenReturn(department);
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
         when(testHelper.getFormDataService().getRefBookRecord(anyLong(), anyMap(), anyMap(), anyMap(), anyString(),
                 anyString(), any(Date.class), anyInt(), anyString(), any(Logger.class), anyBoolean())).thenAnswer(
                 new Answer<Map<String, RefBookValue>>() {

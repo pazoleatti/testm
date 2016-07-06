@@ -276,7 +276,7 @@ void importData() {
 void checkHeaderXls(def headerRows, def colCount, rowCount) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
-    def headers = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).headers
+    def headers = formDataService.getFormTemplate(formData.formTemplateId).headers
     def headerMapping =[[:]]
     def index = 0
     headerMapping.add([(headerRows[0][0]): '№ п/п'])

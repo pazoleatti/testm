@@ -60,7 +60,7 @@ public class Vat_724_1Test extends ScriptTestBase {
 
         when(testHelper.getDepartmentService().get(anyInt())).thenReturn(department);
 
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @After

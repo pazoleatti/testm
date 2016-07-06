@@ -197,7 +197,7 @@ public class CHDTest extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
         int expected = 2; // в файле 2 строки
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);

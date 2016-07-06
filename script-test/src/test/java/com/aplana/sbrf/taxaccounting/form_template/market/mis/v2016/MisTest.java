@@ -128,7 +128,7 @@ public class MisTest extends ScriptTestBase {
             setAlias("CODE");
             setName("Код");
         }});
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(formTemplate);
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(formTemplate);
         when(testHelper.getRefBookFactory().getByAttribute(eq(646L))).thenReturn(new RefBook() {{
             setId(72L);
         }});

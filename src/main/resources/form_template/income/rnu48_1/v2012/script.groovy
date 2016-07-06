@@ -289,7 +289,7 @@ void importData() {
     }
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def totalRow = getDataRow(formTemplate.rows, 'total')
     rows.add(totalRow)
     updateIndexes(rows)

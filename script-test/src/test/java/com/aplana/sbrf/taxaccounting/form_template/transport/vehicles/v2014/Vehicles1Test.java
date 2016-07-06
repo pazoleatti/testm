@@ -86,7 +86,7 @@ public class Vehicles1Test extends ScriptTestBase {
                     }
                 });
 
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
 
         // провайдер
         when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), anyLong(),
@@ -189,7 +189,7 @@ public class Vehicles1Test extends ScriptTestBase {
 
     @Test
     public void importTransportFileTest() {
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         int expected = 4; // 3 строки фиксированны (заголовки разделов) + 1 строка из тф

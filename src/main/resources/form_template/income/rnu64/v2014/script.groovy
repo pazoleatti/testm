@@ -311,7 +311,7 @@ void importTransportData() {
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
     def totalQuarterRow = getDataRow(templateRows, 'totalQuarter')
     def totalRow = getDataRow(templateRows, 'total')
@@ -525,7 +525,7 @@ void importData() {
     }
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
 
     def totalQuarterRow = getDataRow(templateRows, 'totalQuarter')

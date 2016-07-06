@@ -112,7 +112,7 @@ public class Market_7_129Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
         int expected = 1; // в файле 1 строк
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);

@@ -433,7 +433,7 @@ void importTransportData() {
     }
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
 
     def rows = []
@@ -543,7 +543,7 @@ void importData() {
     paramsMap = null
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
     def valuesTotal = [ getDataRow(templateRows, 'head1')?.fix, getDataRow(templateRows, 'head2')?.fix ]
 

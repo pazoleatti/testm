@@ -294,7 +294,7 @@ void calc() {
         calcColumnFrom14To24(prevDataRows, row, row, sumNal, reportPeriod)
     }
 
-    def templateRows = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).getRows()
+    def templateRows = formDataService.getFormTemplate(formData.formTemplateId).getRows()
 
     // добавить строку ЦА (скорректрированный) (графа 1..22)
     def caTotalRow = getDataRow(templateRows, 'ca')
@@ -726,7 +726,7 @@ void logicalCheckAfterCalc() {
 
     // расчет итогов
     if (caTotalRow != null && totalRow != null) {
-        def templateRows = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).getRows()
+        def templateRows = formDataService.getFormTemplate(formData.formTemplateId).getRows()
         caTotalRowTemp = getDataRow(templateRows, 'ca')
         totalRowTemp = getDataRow(templateRows, 'total')
 

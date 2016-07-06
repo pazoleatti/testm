@@ -60,7 +60,7 @@ public class Vat_724_10Test extends ScriptTestBase {
 
     @Before
     public void mockFormDataService() {
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenAnswer(new Answer<Object>() {
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 return testHelper.getFormTemplate();

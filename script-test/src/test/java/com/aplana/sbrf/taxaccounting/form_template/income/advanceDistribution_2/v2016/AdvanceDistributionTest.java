@@ -59,7 +59,7 @@ public class AdvanceDistributionTest extends ScriptTestBase {
     @Before
     public void mockFormDataService() {
         // макет нф
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
 
         // для поиска подразделений
         when(testHelper.getFormDataService().getRefBookRecord(anyLong(), anyMap(), anyMap(), anyMap(), anyString(),

@@ -785,7 +785,7 @@ void importData() {
     }
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def formTemplateRows = formTemplate.rows
     def totalMonthRow = getDataRow(formTemplateRows, 'month')
     def totalRow = getDataRow(formTemplateRows, 'total')

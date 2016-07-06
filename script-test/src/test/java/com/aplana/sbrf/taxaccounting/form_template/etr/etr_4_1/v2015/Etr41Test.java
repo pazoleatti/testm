@@ -52,7 +52,7 @@ public class Etr41Test extends ScriptTestBase {
     @Before
     public void mockServices() {
         // макет нф
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
 
         // подразделение-период
         when(testHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(

@@ -58,7 +58,7 @@ public class Vat_724_2_1Test extends ScriptTestBase {
 
     @Before
     public void mockFormDataService() {
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @After

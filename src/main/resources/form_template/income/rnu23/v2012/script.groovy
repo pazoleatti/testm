@@ -723,7 +723,7 @@ void importData() {
     }
 
     // итоговая строка
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
     def totalRow = getDataRow(templateRows, 'total')
     rows.add(totalRow)

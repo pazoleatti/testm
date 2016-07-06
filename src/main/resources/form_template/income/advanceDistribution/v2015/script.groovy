@@ -295,7 +295,7 @@ void calc() {
         calc18_19(prevDataRows, dataRows, row, reportPeriod)
     }
 
-    def templateRows = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).getRows()
+    def templateRows = formDataService.getFormTemplate(formData.formTemplateId).getRows()
 
     // добавить строку ЦА (скорректрированный) (графа 1..22)
     def caTotalRow = getDataRow(templateRows, 'ca')
@@ -766,7 +766,7 @@ void logicalCheckAfterCalc() {
         return
     }
 
-    def templateRows = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).getRows()
+    def templateRows = formDataService.getFormTemplate(formData.formTemplateId).getRows()
     def caTotalRowTemp = getDataRow(templateRows, 'ca')
     def totalRowTemp = getDataRow(templateRows, 'total')
 

@@ -234,7 +234,7 @@ void logicCheck() {
     }
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def tempRows = formTemplate.rows
     updateIndexes(tempRows)
     // подсчет временных тестовых данных
@@ -522,7 +522,7 @@ void importData() {
 
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
 
     // формирвание строк нф

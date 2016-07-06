@@ -54,7 +54,7 @@ public class AmountTaxTest extends ScriptTestBase {
 
     @Before
     public void mockServices() {
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
 
     }
 

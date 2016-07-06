@@ -874,7 +874,7 @@ void importTransportData() {
     }
 
     // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
     def templateRows = formTemplate.rows
 
     def sectionMap = ['50000' : 'A', '40200' : 'B', '40100' : 'C']
@@ -1289,7 +1289,7 @@ void importData() {
     }
     if (!logger.containsLevel(LogLevel.ERROR)) {
         // получить строки из шаблона
-        def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+        def formTemplate = formDataService.getFormTemplate(formData.formTemplateId)
         def templateRows = formTemplate.rows
         def dataRows = []
         dataRows.addAll(templateRows)

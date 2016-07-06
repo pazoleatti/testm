@@ -60,7 +60,7 @@ public class Etr4_9_SummaryTest extends ScriptTestBase {
     @Before
     public void mockServices() {
         // макет нф
-        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
 
         // подразделение-период
         final Map<Long, Map<String, RefBookValue>> records = testHelper.getRefBookAllRecords(30L);
