@@ -24,30 +24,20 @@ public class GetFieldNamesHandler extends AbstractActionHandler<GetFieldsNames, 
 	public GetFieldsNamesResult execute(GetFieldsNames getFieldsNames, ExecutionContext executionContext) throws ActionException {
 
 		Map<FormDataElementName, String> names = new HashMap<FormDataElementName, String>();
-		switch (getFieldsNames.getTaxType()) {
-			case DEAL:
-            case ETR:
-            case MARKET:
-				names.put(FormDataElementName.HEADER, "Список форм");
-				names.put(FormDataElementName.FORM_KIND, "Тип формы");
-				names.put(FormDataElementName.FORM_TYPE, "Вид формы");
-                names.put(FormDataElementName.FORM_KIND_REFBOOK, "Выбор типа формы");
-                names.put(FormDataElementName.FORM_TYPE_REFBOOK, "Выбор вида формы");
-				names.put(FormDataElementName.REPORT_PERIOD, "Период");
-				break;
-            case INCOME:
-			case PROPERTY:
-			case TRANSPORT:
-			case VAT:
-				names.put(FormDataElementName.HEADER,  "Список налоговых форм");
-				names.put(FormDataElementName.FORM_KIND, "Тип налоговой формы");
-				names.put(FormDataElementName.FORM_TYPE, "Вид налоговой формы");
-                names.put(FormDataElementName.FORM_KIND_REFBOOK, "Выбор типа налоговой формы");
-                names.put(FormDataElementName.FORM_TYPE_REFBOOK, "Выбор вида налоговой формы");
-				names.put(FormDataElementName.REPORT_PERIOD, "Период");
-				break;
-			default:
-				break;
+		if (getFieldsNames.getTaxType().isTax()) {
+			names.put(FormDataElementName.HEADER,  "Список налоговых форм");
+			names.put(FormDataElementName.FORM_KIND, "Тип налоговой формы");
+			names.put(FormDataElementName.FORM_TYPE, "Вид налоговой формы");
+			names.put(FormDataElementName.FORM_KIND_REFBOOK, "Выбор типа налоговой формы");
+			names.put(FormDataElementName.FORM_TYPE_REFBOOK, "Выбор вида налоговой формы");
+			names.put(FormDataElementName.REPORT_PERIOD, "Период");
+		} else {
+			names.put(FormDataElementName.HEADER, "Список форм");
+			names.put(FormDataElementName.FORM_KIND, "Тип формы");
+			names.put(FormDataElementName.FORM_TYPE, "Вид формы");
+			names.put(FormDataElementName.FORM_KIND_REFBOOK, "Выбор типа формы");
+			names.put(FormDataElementName.FORM_TYPE_REFBOOK, "Выбор вида формы");
+			names.put(FormDataElementName.REPORT_PERIOD, "Период");
 		}
 
 		GetFieldsNamesResult result = new GetFieldsNamesResult();

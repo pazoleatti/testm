@@ -510,8 +510,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	}
 
     private String speck(){
-        return formData.getFormType().getTaxType() == TaxType.ETR
-                ||
-                formData.getFormType().getTaxType() == TaxType.DEAL ? "формы" : "налоговой формы";
+        return formData.getFormType().getTaxType().isTax() ? "налоговой формы" : "формы";
     }
 }

@@ -386,7 +386,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @Override
     public void updateLabel() {
         TaxType taxType = getUiHandlers().getTaxType();
-        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR)) {
+        if (taxType.isTax()) {
             formDataKindLabel.setText(FORM_DATA_KIND_TITLE);
             formTypeIdLabel.setText(FORM_DATA_TYPE_TITLE);
             title.setText(FORM_DATA_TITLE);

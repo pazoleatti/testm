@@ -559,7 +559,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		reportPeriodLabel.setTitle(reportPeriod);
 		stateLabel.setText(state);
 		factory.setDateRange(startDate, endDate);
-        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR) && !taxType.equals(TaxType.MARKET)) {
+        if (taxType.isTax()) {
             formKindTitle.setText(FORM_DATA_KIND_TITLE);
         } else {
             formKindTitle.setText(FORM_DATA_KIND_TITLE_D);
@@ -721,14 +721,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 if (lockInfo.isEditMode()) {
                     text =
                             "Выбранная "
-                                    + (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форма" : "налоговая форма")
+                                    + (taxType.isTax() ? "налоговая форма" : "форма")
                                     + " в текущий момент редактируется " +
                                     (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\""))
                                     + " (с " + lockInfo.getLockDate() + ")";
                 } else {
                     text =
                             "Выбранная "
-                                    +  (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форма" : "налоговая форма")
+                                    +  (taxType.isTax() ? "налоговая форма" : "форма")
                                     + " в текущий момент заблокирована на изменение "
                                     + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\""))
                                     + " (с " + lockInfo.getLockDate() + ")";
@@ -736,7 +736,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             } else {
                 text =
                         "Выбранная "
-                                +   (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форма" : "налоговая форма")
+                                +   (taxType.isTax() ? "налоговая форма" : "форма")
                                 + " в текущий момент заблокирована на редактирование текущим пользователем (с " + lockInfo.getLockDate() + ")";
             }
 			lockInformation.setText(text);

@@ -1954,9 +1954,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     formLink.setFormTypeId(SqlUtils.getInteger(rs, "formTypeId"));
                     formLink.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
                     char taxType = rs.getString("tax_type").charAt(0);
+                    TaxType formTaxType = TaxType.fromCode(taxType);
                     formLink.setMsg(String.format(
                             FORM_LINK_MSG,
-                            (taxType == TaxType.ETR.getCode() || taxType == TaxType.DEAL.getCode()) ? " " : "налоговой ",
+                            (formTaxType != null && formTaxType.isTax()) ? "налоговой " : " ",
                             (refBookId == RefBook.TCO && formLink.getState() != WorkflowState.CREATED) ? " в статусе отличном от \"Создана\"" : "",
                             FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getTitle(),
                             rs.getString("formType"),

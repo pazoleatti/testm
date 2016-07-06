@@ -297,6 +297,7 @@ public class FormDataServiceTest extends Assert{
         Logger logger = new Logger();
 
         FormType formType = new FormType();
+        formType.setTaxType(TaxType.INCOME);
         formType.setId(1);
         formType.setName("Тестовый тип НФ");
 

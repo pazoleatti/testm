@@ -1635,7 +1635,7 @@ public class FormDataServiceImpl implements FormDataService {
                     stringBuilder.append(", ");
                 }
                 msg = "Сквозная нумерация обновлена в " +
-                        (taxType == TaxType.DEAL || taxType == TaxType.ETR || taxType == TaxType.MARKET ? "формах" : "налоговых формах") +
+                        (taxType.isTax() ? "налоговых формах" : "формах") +
                         " следующих периодов текущей сквозной нумерации: " +
                         stringBuilder.toString();
             }
