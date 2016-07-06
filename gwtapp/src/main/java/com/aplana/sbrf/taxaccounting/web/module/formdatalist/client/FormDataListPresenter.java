@@ -159,11 +159,10 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
 			if (event.isSuccess()){
 				FormDataFilter filter = filterPresenter.getFilterData();
 				getView().updateTitle(filter.getTaxType().getName());
-				// TODO Нужно переделать
-				if (TaxType.DEAL.equals(filter.getTaxType()) || TaxType.ETR.equals(filter.getTaxType())) {
-					getView().updateHeader("Список форм");
-				} else {
+				if (filter.getTaxType().isTax()) {
 					getView().updateHeader("Список налоговых форм");
+				} else {
+					getView().updateHeader("Список форм");
 				}
 				this.taxType = filter.getTaxType();
 				saveFilterState(filter.getTaxType(), filter);

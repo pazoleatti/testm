@@ -119,7 +119,7 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         int userId = (Integer)params.get(USER_ID.name());
         String alias = (String)params.get("alias");
 
@@ -141,8 +141,8 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
         }
-        return String.format("Произошла непредвиденная ошибка при формировании отчета \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
-                subreport.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
+        return String.format("Произошла %sошибка при формировании отчета \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
+                unexpected?"непредвиденная ":"", subreport.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
                 declarationTemplate.getType().getName(), str);
     }
 }

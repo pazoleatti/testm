@@ -96,8 +96,7 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
                 departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
-                String.format(SUCCESS, move.getFromState().getTitle(), move.getToState().getTitle(), formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL ?
-                        "форма" : "налоговая форма"),
+                String.format(SUCCESS, move.getFromState().getTitle(), move.getToState().getTitle(), formData.getFormType().getTaxType().isTax() ? "налоговая форма" : "форма"),
                 formData,
                 department.getName(),
                 false,
@@ -106,7 +105,7 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         int workflowMoveId = (Integer)params.get("workflowMoveId");
@@ -124,7 +123,7 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
                 departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
-                String.format(FAIL, move.getFromState().getTitle(), move.getToState().getTitle(),formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL ?
+                String.format(FAIL, move.getFromState().getTitle(), move.getToState().getTitle(),formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL || formData.getFormType().getTaxType() == TaxType.MARKET ?
                         "форму" : "налоговую форму"),
                 formData,
                 department.getName(),

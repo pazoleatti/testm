@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
+import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -21,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -238,6 +240,10 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             getScriptEngine().eval(script, bindings);
             return true;
         } catch (ScriptException e) {
+            int i = ExceptionUtils.indexOfThrowable(e, ScriptServiceException.class);
+            if (i != -1) {
+                throw (ScriptServiceException)ExceptionUtils.getThrowableList(e).get(i);
+            }
             logScriptException(e, logger);
             return false;
         } catch (Exception e) {

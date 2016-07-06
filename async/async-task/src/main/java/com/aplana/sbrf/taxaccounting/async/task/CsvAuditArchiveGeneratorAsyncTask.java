@@ -98,7 +98,7 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         LogSystemFilter filter = (LogSystemFilter) params.get(AuditService.AsyncNames.LOG_FILTER.name());
 
         return String.format(ERROR_MSG,

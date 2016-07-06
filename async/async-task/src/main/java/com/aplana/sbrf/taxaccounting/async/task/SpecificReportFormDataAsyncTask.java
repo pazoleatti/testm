@@ -121,7 +121,7 @@ public abstract class SpecificReportFormDataAsyncTask extends AbstractAsyncTask 
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
@@ -138,7 +138,7 @@ public abstract class SpecificReportFormDataAsyncTask extends AbstractAsyncTask 
         DepartmentReportPeriod rpCompare = formData.getComparativePeriodId() != null ?
                 departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
 
-        return MessageGenerator.getFDMsg(String.format("Произошла непредвиденная ошибка при формировании отчета \"%s\":", specificReportType),
+        return MessageGenerator.getFDMsg(String.format("Произошла %sошибка при формировании отчета \"%s\":", unexpected?"непредвиденная ":"", specificReportType),
                 formData,
                 department.getName(),
                 manual, reportPeriod, rpCompare, isShowChecked, saved);

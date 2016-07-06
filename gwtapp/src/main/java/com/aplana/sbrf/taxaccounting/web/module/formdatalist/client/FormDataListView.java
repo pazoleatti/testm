@@ -241,7 +241,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 
     @Override
     public void updateFormDataTable(TaxType taxType) {
-        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR) && !taxType.equals(TaxType.MARKET)) {
+        if (taxType.isTax()) {
             create.setText(FormDataListUtils.FORM_DATA_CREATE);
             create.setTitle(FormDataListUtils.FORM_DATA_CREATE_TITLE);
             formKindHeader.setTitle(FormDataListUtils.FORM_DATA_KIND_TITLE);

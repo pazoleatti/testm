@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -52,16 +53,22 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     protected class TaskStatus {
         private final String reportId;
         private final boolean success;
+        private final boolean unexpected;
         private final NotificationType notificationType;
 
-        public TaskStatus(boolean success, NotificationType notificationType, String reportId) {
+        public TaskStatus(boolean success, boolean unexpected, NotificationType notificationType, String reportId) {
             this.reportId = reportId;
             this.notificationType = notificationType;
             this.success = success;
+            this.unexpected = unexpected;
+        }
+
+        public TaskStatus(boolean success, NotificationType notificationType, String reportId) {
+            this(success, false, notificationType, reportId);
         }
 
         public TaskStatus(boolean success, String reportId) {
-            this(success, NotificationType.DEFAULT, reportId);
+            this(success, false, NotificationType.DEFAULT, reportId);
         }
 
         public NotificationType getNotificationType() {
@@ -74,6 +81,10 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
         public boolean isSuccess() {
             return success;
+        }
+
+        public boolean isUnexpected() {
+            return unexpected;
         }
     }
 
@@ -121,7 +132,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * Возвращает текст оповещения, которое будет создано для пользователей в случае некорректного завершения задачи
      * @return текст сообщения
      */
-    protected abstract String getErrorMsg(Map<String, Object> params);
+    protected abstract String getErrorMsg(Map<String, Object> params, boolean unexpected);
 
     protected BalancingVariants checkTask(ReportType reportType, Long value, String taskName, String msg) throws AsyncTaskException {
         AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId());
@@ -181,13 +192,19 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                     } else {
                                         lockService.updateState(lock, lockDate, LockData.State.SENDING_ERROR_MSGS.getText());
                                     }
-                                    String msg = getErrorMsg(params);
                                     if (e instanceof ServiceLoggerException && ((ServiceLoggerException) e).getUuid() != null) {
+                                        String msg = getErrorMsg(params, true);
                                         Logger logger1 = new Logger();
                                         logger1.error(msg);
                                         if (e.getMessage() != null && !e.getMessage().isEmpty()) logger1.error(e);
                                         sendNotifications(lock, msg, logEntryService.addFirst(logger1.getEntries(), ((ServiceLoggerException) e).getUuid()), NotificationType.DEFAULT, null);
+                                    } else if (e instanceof ScriptServiceException) {
+                                        String msg = getErrorMsg(params, false);
+                                        logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
+                                        if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
+                                        sendNotifications(lock, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
                                     } else {
+                                        String msg = getErrorMsg(params, true);
                                         logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
                                         if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
                                         sendNotifications(lock, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
@@ -216,7 +233,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 try {
                     LOG.info(String.format("Для задачи с ключом %s выполняется сохранение сообщений", lock));
                     lockService.updateState(lock, lockDate, LockData.State.SAVING_MSGS.getText());
-                    String msg = taskStatus.isSuccess()?getNotificationMsg(params):getErrorMsg(params);
+                    String msg = taskStatus.isSuccess()?getNotificationMsg(params):getErrorMsg(params, taskStatus.isUnexpected());
                     logger.getEntries().add(0, new LogEntry(taskStatus.isSuccess()?LogLevel.INFO:LogLevel.ERROR, msg));
                     String uuid = logEntryService.save(logger.getEntries());
                     LOG.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
