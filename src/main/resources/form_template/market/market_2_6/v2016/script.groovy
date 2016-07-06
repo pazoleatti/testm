@@ -2,7 +2,6 @@ package form_template.market.market_2_6.v2016
 import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn
-import com.aplana.sbrf.taxaccounting.model.ReferenceColumn
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -189,17 +188,17 @@ void logicCheck() {
         rowsMap[key].add(row)
         // 5. Проверка даты выдачи кредита
         if (row.docDate != null && row.creditDate != null && (row.creditDate < row.docDate)) {
-            logger.warn("Строка %s: Значение графа «%s» должно быть больше либо равно значения графы «%s»!",
+            logger.warn("Строка %s: Значение графа «%s» должно быть больше либо равно значению графы «%s»!",
                 row.getIndex(), getColumnName(row, 'creditDate'), getColumnName(row, 'docDate'))
         }
         // 6. Проверка даты погашения кредита
         if (row.docDate != null && row.closeDate != null && (row.closeDate < row.docDate)) {
-            logger.error("Строка %s: Значение графа «%s» должно быть больше либо равно значения графы «%s»!",
+            logger.error("Строка %s: Значение графа «%s» должно быть больше либо равно значению графы «%s»!",
                     row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'docDate'))
         }
         // 7. Проверка даты погашения кредита 2
         if (row.creditDate != null && row.closeDate != null && (row.closeDate < row.creditDate)) {
-            logger.error("Строка %s: Значение графа «%s» должно быть больше либо равно значения графы «%s»!",
+            logger.error("Строка %s: Значение графа «%s» должно быть больше либо равно значению графы «%s»!",
                     row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'creditDate'))
         }
         // 8. Проверка валюты
