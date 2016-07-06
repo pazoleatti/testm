@@ -46,7 +46,12 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     private AuditService auditService;
 
     @Override
-    public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
+    public <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
+        return edit(template, templateActualEndDate, logger, user, null);
+    }
+
+    @Override
+    public <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user, Boolean force) {
         FormTemplate formTemplate = (FormTemplate)template;
         formTemplateService.validateFormTemplate(formTemplate, logger);
         checkError(logger, SAVE_MESSAGE);
@@ -85,22 +90,31 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             checkError(logger, FORM_EXIST);
         }
 
-        if (formTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
-            versionOperatingService.isUsedVersion(formTemplate.getId(), formTemplate.getType().getId(),
+        if ((force == null || !force) && formTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
+            boolean isUsedVersion = versionOperatingService.isUsedVersion(formTemplate.getId(), formTemplate.getType().getId(),
                     formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
-            checkError(logger, SAVE_MESSAGE);
+            if (force == null)
+                checkError(logger, SAVE_MESSAGE);
+            else {
+                if (isUsedVersion) {
+                    return false;
+                }
+            }
         }
 
         formTemplateService.validateFormAutoNumerationColumn(formTemplate, logger, user);
         checkError(logger, SAVE_MESSAGE);
 
         //cleanData(oldFormTemplate, formTemplate);
-        int id = formTemplateService.save(formTemplate);
+        formTemplateService.save(formTemplate);
+        logger.info("Изменения сохранены");
 
+        int id = formTemplate.getId();
         auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, formTemplate.getVersion(),
                 formTemplateService.getFTEndDate(id), null, formTemplate.getName(), null, null);
         logging(id, FormDataEvent.TEMPLATE_MODIFIED, user.getUser());
-        return id;
+
+        return true;
     }
 
     /*

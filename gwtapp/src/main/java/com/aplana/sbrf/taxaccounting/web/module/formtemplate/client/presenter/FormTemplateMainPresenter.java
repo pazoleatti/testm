@@ -158,7 +158,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	@Override
 	public void save() {
 		FormTemplateFlushEvent.fire(this);
-		saveAfterFlush();
+		saveAfterFlush(false);
 	}
 
 	@ProxyEvent
@@ -273,7 +273,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 
-	private void saveAfterFlush() {
+	private void saveAfterFlush(boolean force) {
         if (formTemplate.getName().isEmpty() || formTemplate.getFullName().isEmpty()){
             Dialog.infoMessage("Не заполнено одно из обязательных полей. " +
                     "Проверьте поля \"Наименование формы\", \"Полное наименование формы\", \"Код формы\"");
@@ -350,13 +350,34 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
             UpdateFormAction action = new UpdateFormAction();
             action.setForm(formTemplate);
             action.setVersionEndDate(formTemplateExt.getActualEndVersionDate());
+            action.setForce(force);
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<UpdateFormResult>() {
                         @Override
                         public void onSuccess(UpdateFormResult result) {
                             LogCleanEvent.fire(FormTemplateMainPresenter.this);
-                            LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
-                            Dialog.infoMessage("Форма сохранена");
+                            if (result.isConfirmNeeded()) {
+                                Dialog.confirmMessage("Информация",
+                                        "Найдены экземпляры " +
+                                                (
+                                                        formTemplate.getType().getTaxType() == TaxType.DEAL
+                                                        ||
+                                                        formTemplate.getType().getTaxType() == TaxType.ETR
+                                                        ||
+                                                        formTemplate.getType().getTaxType() == TaxType.MARKET
+                                                        ? "форм" : "налоговых форм"
+                                                )
+                                                + ", использующие версию макета. Продожить сохранение?",
+                                        new DialogHandler() {
+                                            @Override
+                                            public void yes() {
+                                                saveAfterFlush(true);
+                                                super.yes();
+                                            }
+                                        });
+                            } else {
+                                LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
+                            }
                         }
                     }, this));
         }

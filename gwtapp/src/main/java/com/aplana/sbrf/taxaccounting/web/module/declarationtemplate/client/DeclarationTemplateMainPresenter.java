@@ -175,6 +175,10 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
 	@Override
 	public void save() {
         DeclarationTemplateFlushEvent.fire(DeclarationTemplateMainPresenter.this);
+        saveAfterFlush(false);
+	}
+
+    void saveAfterFlush(boolean force){
         if (declarationTemplateExt.getEndDate() != null &&
                 declarationTemplate.getVersion().compareTo(declarationTemplateExt.getEndDate()) >0 ){
             Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуализации.");
@@ -221,18 +225,29 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
         } else {
             UpdateDeclarationAction action = new UpdateDeclarationAction();
             action.setDeclarationTemplateExt(declarationTemplateExt);
+            action.setForce(force);
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<UpdateDeclarationResult>() {
                         @Override
                         public void onSuccess(UpdateDeclarationResult result) {
                             LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
-                            LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getLogUuid());
-                            Dialog.infoMessage("Декларация сохранена");
+                            if (result.isConfirmNeeded()) {
+                                Dialog.confirmMessage("Информация",
+                                        "Найдены экземпляры деклараций, использующие версию макета. Продожить сохранение?",
+                                        new DialogHandler() {
+                                            @Override
+                                            public void yes() {
+                                                saveAfterFlush(true);
+                                                super.yes();
+                                            }
+                                        });
+                            } else {
+                                LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getLogUuid());
+                            }
                         }
                     }, this));
         }
-
-	}
+    }
 
 	/**
 	 * Закрыть декларацию редактирования и вернуться на форму администрирования со списком версий шаблонов деклараций.

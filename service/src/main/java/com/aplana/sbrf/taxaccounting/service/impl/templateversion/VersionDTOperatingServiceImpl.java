@@ -56,8 +56,10 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     private Calendar calendar = Calendar.getInstance();
 
     @Override
-    public void isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
+    public boolean isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(templateId, versionActualDateStart);
+
+        boolean result = false;
         for (long declarationId : ddIds) {
             DeclarationData declarationData = declarationDataDao.get(declarationId);
             DepartmentReportPeriod drp = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
@@ -68,8 +70,9 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                     drp,
                     declarationData.getTaxOrganCode(),
                     declarationData.getKpp()));
+            result = true;
         }
-
+        return result;
     }
 
     @Override

@@ -11,6 +11,15 @@ import java.util.Date;
 public class UpdateFormAction extends UnsecuredActionImpl<UpdateFormResult> {
     private FormTemplate form;
     private Date versionEndDate;
+    private boolean force;
+
+    public boolean getForce() {
+        return force;
+    }
+
+    public void setForce(boolean force) {
+        this.force = force;
+    }
 
     public FormTemplate getForm() {
         return form;

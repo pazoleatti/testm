@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -52,14 +53,16 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
 		UpdateFormResult result = new UpdateFormResult();
 
         makeDates(action);
-        int formTemplateId =
-                mainOperatingService.edit(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo());
-
-        if (!logger.getEntries().isEmpty())
-            result.setUuid(logEntryService.save(logger.getEntries()));
-        result.setFormTemplateId(formTemplateId);
-        result.setFormTemplate(action.getForm());
-		return result;
+        if (mainOperatingService.edit(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo(), action.getForce())) {
+            int formTemplateId = action.getForm().getId();
+            result.setFormTemplateId(formTemplateId);
+            result.setFormTemplate(action.getForm());
+            if (!logger.getEntries().isEmpty())
+                result.setUuid(logEntryService.save(logger.getEntries()));
+        } else {
+            result.setConfirmNeeded(true);
+        }
+        return result;
     }
 
     @Override

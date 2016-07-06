@@ -10,6 +10,15 @@ public class UpdateFormResult implements Result {
     private int formTemplateId;
     private String uuid;
     private FormTemplate formTemplate;
+    private boolean isConfirmNeeded;
+
+    public boolean isConfirmNeeded() {
+        return isConfirmNeeded;
+    }
+
+    public void setConfirmNeeded(boolean isConfirmNeeded) {
+        this.isConfirmNeeded = isConfirmNeeded;
+    }
 
     public FormTemplate getFormTemplate() {
         return formTemplate;
