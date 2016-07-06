@@ -181,21 +181,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             ps.appendQuery("  t.versionEnd as ");
             ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
         }
-
-        /*if (isSupportOver() && sortAttribute != null) {
-			ps.appendQuery(",");
-            ps.appendQuery(" row_number()");
-            // Надо делать сортировку
-            ps.appendQuery(" over (order by ");
-            ps.appendQuery("frb." + sortAttribute.getAlias());
-            ps.appendQuery(isSortAscending ? " ASC":" DESC");
-            ps.appendQuery(")");
-            ps.appendQuery(" as row_number_over\n");
-        } else {
-            // База тестовая и не поддерживает row_number() значит сортировка работать не будет
-            ps.appendQuery(", rownum row_number_over\n");
-        }*/
-
+        
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", frb.");
             ps.appendQuery(attribute.getAlias());
