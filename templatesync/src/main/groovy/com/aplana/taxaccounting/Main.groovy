@@ -18,7 +18,7 @@ import groovy.sql.Sql
 class Main {
     // Параметры подключения к БД
     def static DB_URL = 'jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL'
-    def static DB_USER = 'TAX_1_0'
+    def static DB_USER = 'TAX_1_1'
     def static DB_PASSWORD = 'TAX'
     // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД
     def static checkOnlyFD = true // для налоговых форм
@@ -35,7 +35,8 @@ class Main {
                               'vat'      : 'НДС',
                               'transport': 'Транспортный налог',
                               'property' : 'Налог на имущество',
-                              'etr'      : 'Эффективная налоговая ставка']
+                              'etr'      : 'Эффективная налоговая ставка',
+                              'market'   : 'Рыночные интервалы ТЦО']
 
     // Названия файлов отчетов
     def static REPORT_GIT_NAME = 'report_git_db_compare.html'
@@ -356,6 +357,9 @@ class Main {
                     'mis'           : 901, // Данные MIS
                     'amrlirt'       : 902, // Данные АМРЛИРТ
                     'chd'           : 903, // Отчет о кредитах (ЦХД)
+                    'summary_2_6'   : 904, // 2.6 (Сводный) Отчет о состоянии кредитного портфеля
+                    'market_7_129'  : 905, // 7.129 (Ежемесячный) Кредитные договоры в CRM
+                    'summary_7_129' : 906, // 7.129 (Сводный) Кредитные договоры в CRM
             ]
     ]
 
