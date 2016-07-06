@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -47,16 +48,19 @@ public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclar
 
         Logger logger = new Logger();
         makeDates(action);
-        int dtId = mainOperatingService.edit(action.getDeclarationTemplateExt().getDeclarationTemplate(),
-                action.getDeclarationTemplateExt().getEndDate(), logger, securityService.currentUserInfo());
-        declarationTemplateService.checkLockedByAnotherUser(dtId, userInfo);
-        declarationTemplateService.lock(dtId, userInfo);
+        if (mainOperatingService.edit(action.getDeclarationTemplateExt().getDeclarationTemplate(),
+                action.getDeclarationTemplateExt().getEndDate(), logger, securityService.currentUserInfo(), action.getForce())){
+            int dtId = action.getDeclarationTemplateExt().getDeclarationTemplate().getId();
+            declarationTemplateService.checkLockedByAnotherUser(dtId, userInfo);
+            declarationTemplateService.lock(dtId, userInfo);
+            if (!logger.getEntries().isEmpty())
+                result.setLogUuid(logEntryService.save(logger.getEntries()));
+            result.setDeclarationTemplateId(dtId);
+        } else {
+            result.setConfirmNeeded(true);
+        }
 
-        if (!logger.getEntries().isEmpty())
-            result.setLogUuid(logEntryService.save(logger.getEntries()));
-        result.setDeclarationTemplateId(dtId);
-
-		return result;
+        return result;
     }
 
     @Override

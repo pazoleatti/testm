@@ -17,7 +17,8 @@ public interface MainOperatingService {
     String FORM_EXIST =
             "Версия макета не сохранена. Период актуальности версии не может быть изменен, пока существуют экземпляры форм в отчетных периодах, в течение которых версия макета более не должна действовать";
 
-    <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user);
+    <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user);
+    <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user, Boolean force);
     <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user);
     <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUserInfo user);
     void deleteTemplate(int typeId, Logger logger, TAUserInfo user);

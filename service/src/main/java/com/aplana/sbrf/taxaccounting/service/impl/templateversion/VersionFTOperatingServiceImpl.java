@@ -52,9 +52,10 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
     private Calendar calendar = Calendar.getInstance();
 
     @Override
-    public void isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
+    public boolean isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         List<Long> fdIds = formDataService.getFormDataListInActualPeriodByTemplate(templateId, versionActualDateStart);
 
+        boolean result = false;
         for (long formDataId : fdIds) {
             FormData formData = formDataDao.getWithoutRows(formDataId);
             DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
@@ -68,8 +69,9 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                     formData.isManual(),
                     drp,
                     drpCompare));
+            result = true;
         }
-
+        return result;
     }
 
     @Override

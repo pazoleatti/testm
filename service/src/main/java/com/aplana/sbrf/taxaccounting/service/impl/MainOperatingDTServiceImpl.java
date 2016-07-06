@@ -49,7 +49,12 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     private AuditService auditService;
 
     @Override
-    public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
+    public <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
+        return edit(template, templateActualEndDate, logger, user, null);
+    }
+
+    @Override
+    public <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user, Boolean force) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
         checkError(logger, SAVE_MESSAGE);
@@ -86,10 +91,15 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             checkError(logger, SAVE_MESSAGE);
         }
 
-        if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
-            versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
+        if ((force == null || !force) && declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
+            boolean isUsedVersion = versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
                     declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
-            checkError(logger, SAVE_MESSAGE);
+            if (force == null)
+                checkError(logger, SAVE_MESSAGE);
+            else {
+                if (isUsedVersion)
+                    return false;
+            }
         }
 
         List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(declarationTemplate.getId(), declarationTemplate.getVersion());
@@ -98,12 +108,16 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             declarationDataService.interruptTask(declarationId, user.getUser().getId(), ReportType.UPDATE_TEMPLATE_DEC, "Обновление макета");
         }
 
-        int id = declarationTemplateService.save(declarationTemplate);
+        declarationTemplateService.save(declarationTemplate);
+        logger.info("Изменения сохранены");
+
+        int id = declarationTemplate.getId();
 
         auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, declarationTemplate.getVersion(),
                 declarationTemplateService.getDTEndDate(id), declarationTemplate.getName(), null, null, null);
         logging(id, FormDataEvent.TEMPLATE_MODIFIED, user.getUser());
-        return id;
+
+        return true;
     }
 
     @Override
