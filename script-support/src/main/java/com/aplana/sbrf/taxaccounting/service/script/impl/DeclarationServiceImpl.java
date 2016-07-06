@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -67,6 +68,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private TAUserService taUserService;
     @Autowired
     private DeclarationTypeDao declarationTypeDao;
+    @Autowired
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Override
     public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
@@ -161,11 +164,14 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public boolean checkExistDeclarationsInPeriod(int declarationTypeId, int reportPeriodId) {
+    public boolean checkExistDeclarationsInPeriod(int declarationTypeId, int departmentReportPeriodId) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
         DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
         // фильтр
         declarationFilter.setDeclarationTypeId(declarationTypeId);
-        declarationFilter.setReportPeriodIds(Arrays.asList(reportPeriodId));
+        declarationFilter.setReportPeriodIds(Collections.singletonList(departmentReportPeriod.getReportPeriod().getId()));
+        declarationFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
+        declarationFilter.setCorrectionTag(departmentReportPeriod.getCorrectionDate() != null);
         declarationFilter.setTaxType(TaxType.INCOME);
 
         // пейджинг

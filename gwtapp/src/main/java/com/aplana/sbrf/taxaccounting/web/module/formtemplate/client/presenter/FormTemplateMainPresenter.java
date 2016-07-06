@@ -196,14 +196,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                 if (!result.isSetStatusSuccessfully()) { //
                     Dialog.confirmMessage("Информация",
                             "Найдены экземпляры " +
-                                    (
-                                            formTemplate.getType().getTaxType() == TaxType.DEAL
-                                                    ||
-                                            formTemplate.getType().getTaxType() == TaxType.ETR
-                                                    ||
-                                            formTemplate.getType().getTaxType() == TaxType.MARKET
-                                                    ? "форм" : "налоговых форм"
-                                    )
+                                    (formTemplate.getType().getTaxType().isTax() ? "налоговых форм" : "форм")
                                     + ", использующие версию макета. Изменить статус версии?",
                             new DialogHandler() {
                                 @Override
@@ -359,14 +352,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                             if (result.isConfirmNeeded()) {
                                 Dialog.confirmMessage("Информация",
                                         "Найдены экземпляры " +
-                                                (
-                                                        formTemplate.getType().getTaxType() == TaxType.DEAL
-                                                        ||
-                                                        formTemplate.getType().getTaxType() == TaxType.ETR
-                                                        ||
-                                                        formTemplate.getType().getTaxType() == TaxType.MARKET
-                                                        ? "форм" : "налоговых форм"
-                                                )
+                                                ( formTemplate.getType().getTaxType().isTax() ? "налоговых форм" : "форм" )
                                                 + ", использующие версию макета. Продожить сохранение?",
                                         new DialogHandler() {
                                             @Override

@@ -86,4 +86,8 @@ public enum TaxType {
             return "декларации";
         }
     }
+
+	public boolean isTax() {
+		return this != DEAL && this != ETR && this != MARKET;
+	}
 }

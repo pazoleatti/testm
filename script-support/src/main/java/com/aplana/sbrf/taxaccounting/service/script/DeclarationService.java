@@ -9,6 +9,7 @@ import net.sf.jasperreports.engine.util.JRSwapFile;
 import javax.xml.stream.XMLStreamReader;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
@@ -61,12 +62,11 @@ public interface DeclarationService {
 
     /**
      * Проверить существование декларации в отчетном периоде (без учета подразделения).
-     *
-     * @param declarationTypeId идентификатор типа декларации
-     * @param reportPeriodId идентификатор отчетного периода
+     *  @param declarationTypeId идентификатор типа декларации
+     * @param departmentReportPeriodId идентификатор периода
      */
     @SuppressWarnings("unused")
-    boolean checkExistDeclarationsInPeriod(int declarationTypeId, int reportPeriodId);
+    boolean checkExistDeclarationsInPeriod(int declarationTypeId, int departmentReportPeriodId);
 
     /**
      * Проверка декларации на уникальность с аналогичными параметрам

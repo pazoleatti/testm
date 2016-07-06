@@ -297,6 +297,6 @@ public class TaxFormNominationPresenter
     }
 
     private String  mesPart(){
-        return taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форм" : "налоговых форм";
+        return taxType.isTax() ? "налоговых форм" : "форм";
     }
 }

@@ -327,8 +327,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		boolean isTaxTypeDeal = taxType.equals(TaxType.DEAL);
         boolean isTaxTypeETR = taxType.equals(TaxType.ETR);
 		boolean isTaxTypeMarket = taxType.equals(TaxType.MARKET);
-		receiverSourcesKindTitle.setTitle(isTaxTypeDeal || isTaxTypeETR || isTaxTypeMarket ? "Тип формы" : "Тип налоговой формы");
-		receiverSourcesTypeTitle.setTitle(isTaxTypeDeal || isTaxTypeETR || isTaxTypeMarket ? "Вид формы" : "Вид налоговой формы");
+		receiverSourcesKindTitle.setTitle(taxType.isTax() ? "Тип налоговой формы" : "Тип формы");
+		receiverSourcesTypeTitle.setTitle(taxType.isTax() ? "Вид налоговой формы" : "Вид формы");
             declarationTypeHeader.setTitle(isTaxTypeDeal ? "Вид уведомления" : "Вид декларации");
 		formGrid.redrawHeaders();
 		decGrid.redrawHeaders();

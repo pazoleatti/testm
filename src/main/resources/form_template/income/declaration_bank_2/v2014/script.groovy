@@ -2035,7 +2035,7 @@ void сancelAccepted() {
     // вид декларации 19 - декларация ОП
     def declarationTypeId = 19
 
-    if (declarationService.checkExistDeclarationsInPeriod(declarationTypeId, declarationData.reportPeriodId)) {
+    if (declarationService.checkExistDeclarationsInPeriod(declarationTypeId, declarationData.departmentReportPeriodId)) {
         throw new Exception('Отменить принятие данной декларации Банка невозможно. Так как в текущем периоде создана декларация ОП по прибыли!')
     }
 }

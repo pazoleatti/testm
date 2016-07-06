@@ -110,12 +110,12 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
                             // показать сообщение
                             Dialog.warningMessage(
                                     "Предупреждение",
-                                    "Часть назначений " + (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форм" : "налоговых форм") +" подразделениям была выполнена ранее.");
+                                    "Часть назначений " + (taxType.isTax() ? "налоговых форм" : "форм") +" подразделениям была выполнена ранее.");
                         } else {
                             // Если в БД не было найдено ни одного сочетания, которое пытался создать пользователь (то есть ни разу не был выполнен сценарий 5А), Система выводит Диалог - сообщение:
                             Dialog.infoMessage(
                                     "Сообщение",
-                                    "Назначения " + (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форм" : "налоговых форм") + " подразделениям выполнены успешно.");
+                                    "Назначения " + (taxType.isTax() ? "налоговых форм" : "форм") + " подразделениям выполнены успешно.");
                         }
                         getView().hide();
                         UpdateTable.fire(FormDestinationsPresenter.this, getView().getDepartments());
