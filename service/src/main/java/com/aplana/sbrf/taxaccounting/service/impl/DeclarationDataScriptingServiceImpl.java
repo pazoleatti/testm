@@ -3,7 +3,9 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -11,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,7 +151,11 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		try {
             getScriptEngine().eval(script, bindings);
             return true;
-		} catch (ScriptException e) {
+        } catch (ScriptException e) {
+            int i = ExceptionUtils.indexOfThrowable(e, ScriptServiceException.class);
+            if (i != -1) {
+                throw (ScriptServiceException)ExceptionUtils.getThrowableList(e).get(i);
+            }
 			logScriptException(e, logger);
 			return false;
 		} catch (Exception e) {

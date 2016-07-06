@@ -51,7 +51,7 @@ public abstract class TestAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         return "Ошибка в тестовой задаче";
     }
 }

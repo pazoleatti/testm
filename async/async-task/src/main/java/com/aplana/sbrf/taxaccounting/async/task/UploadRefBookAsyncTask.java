@@ -98,7 +98,7 @@ public abstract class UploadRefBookAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         long refBookId = (Long)params.get("refBookId");
         return String.format("Не выполнена загрузка данных из файла в справочник \"%s\"", refBookFactory.get(refBookId).getName());
     }

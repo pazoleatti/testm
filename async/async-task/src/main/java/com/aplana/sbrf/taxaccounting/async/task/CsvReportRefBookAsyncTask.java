@@ -100,7 +100,7 @@ public abstract class CsvReportRefBookAsyncTask extends AbstractAsyncTask  {
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         long refBookId = (Long)params.get("refBookId");
         String searchPattern = (String)params.get("searchPattern");
         Date version = (Date)params.get("version");

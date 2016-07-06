@@ -98,13 +98,13 @@ public abstract class SpecificReportRefBookAsyncTask extends AbstractAsyncTask  
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         long refBookId = (Long)params.get("refBookId");
         String searchPattern = (String)params.get("searchPattern");
         Date version = (Date)params.get("version");
         String specificReportType = (String)params.get("specificReportType");
         RefBook refBook = refBookFactory.get(refBookId);
 
-        return String.format("Произошла непредвиденная ошибка при формировании отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.get().format(version), searchPattern);
+        return String.format("Произошла %sошибка при формировании отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", unexpected?"непредвиденная ":"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.get().format(version), searchPattern);
     }
 }

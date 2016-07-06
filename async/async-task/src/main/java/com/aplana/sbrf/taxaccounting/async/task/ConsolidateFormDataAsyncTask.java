@@ -128,7 +128,7 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         TAUserInfo userInfo = new TAUserInfo();

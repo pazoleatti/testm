@@ -109,7 +109,7 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         int userId = (Integer)params.get(USER_ID.name());
         long declarationDataId = (Long)params.get("declarationDataId");
         TAUserInfo userInfo = new TAUserInfo();

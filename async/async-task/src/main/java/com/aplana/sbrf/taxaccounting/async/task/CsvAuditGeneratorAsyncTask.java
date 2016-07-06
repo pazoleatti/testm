@@ -74,7 +74,7 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         return getMsg(params, true, false, null);
     }
 

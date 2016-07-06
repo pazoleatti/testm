@@ -22,7 +22,7 @@ public class TestAsyncTaskSpring extends TestAsyncTask {
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params) {
+    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
         return "Dev-мод ошибка";
     }
 }

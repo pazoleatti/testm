@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -11,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContextAware;
@@ -177,6 +179,10 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
         try {
             getScriptEngine().eval(script, bindings);
         } catch (ScriptException e) {
+            int i = ExceptionUtils.indexOfThrowable(e, ScriptServiceException.class);
+            if (i != -1) {
+                throw (ScriptServiceException)ExceptionUtils.getThrowableList(e).get(i);
+            }
             logScriptException(e, logger);
         } catch (Exception e) {
             //TODO: Добавить вывод номера строки в скрипте
