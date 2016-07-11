@@ -14,7 +14,7 @@ import java.util.List;
  * DAO для работы со строкам НФ.
  *
  * @author sgoryachkin
- * 
+ *
  */
 public interface DataRowDao {
 
@@ -55,6 +55,12 @@ public interface DataRowDao {
 	 *
 	 */
 	List<DataRow<Cell>> getRows(FormData formData, DataRowRange range);
+
+	/**
+	 * Метод возвращает строки сохраненного среза строк НФ со столбцами ссылочного типа или даты.
+	 *
+	 */
+	List<DataRow<Cell>> getRowsRefColumnsOnly(FormData formData, DataRowRange range);
 
 	/**
 	 * Метод возвращает количество строк НФ
@@ -150,7 +156,7 @@ public interface DataRowDao {
 	 * Заменяет существующие строки в БД на те, которые указаны в аргументе rows. Старые данные удаляются.
 	 * Поля DataRow.index и DataRow.id не принимаются во внимание. Порядок следования выставляется согласно
 	 * последовательности строк в rows. Id выставляется новый из последовательности "seq_form_data_nnn"
-	 * 
+	 *
 	 * @param formData
 	 * @param rows
 	 */

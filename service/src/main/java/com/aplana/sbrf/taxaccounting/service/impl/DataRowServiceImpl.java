@@ -21,14 +21,14 @@ import java.util.*;
 @Service
 @Transactional(readOnly = true)
 public class DataRowServiceImpl implements DataRowService {
-	
+
 	@Autowired
     private LockDataService lockDataService;
-	
+
 	@Autowired
 	private DataRowDao dataRowDao;
-	
-	@Autowired 
+
+	@Autowired
 	private FormDataDao formDataDao;
 
     @Autowired
@@ -95,7 +95,7 @@ public class DataRowServiceImpl implements DataRowService {
         }
         Long index = 0L;
         if (existRefBookColumn) {
-            List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);
+            List<DataRow<Cell>> rows = dataRowDao.getRowsRefColumnsOnly(formData, null);
             refBookHelper.dataRowsDereference(new Logger(), rows, formData.getFormColumns());
             String searchKey = key;
             if (!isCaseSensitive) searchKey = searchKey.toUpperCase();

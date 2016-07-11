@@ -22,8 +22,13 @@ import org.apache.commons.collections4.Predicate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
+import org.springframework.jdbc.core.namedparam.ParsedSql;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -62,30 +67,29 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		String query = sql.getFirst();
 		Map<String, Object> params = sql.getSecond();
 
-		// calculate count
-		String countQuery = "SELECT COUNT(*) FROM (" + query + ")";
-		int count = getNamedParameterJdbcTemplate().queryForObject(countQuery, params, Integer.class);
-
 		List<FormDataSearchResult> dataRows;
 
-		if (count != 0) {
-			String dataQuery = "SELECT idx, column_index, row_index, raw_value FROM (" + query + ") WHERE idx BETWEEN :from AND :to";
-			params.put("from", 1);
-			params.put("to", range.getCount());
+		String dataQuery = "SELECT idx, column_index, row_index, raw_value FROM (" + query + ") WHERE idx BETWEEN :from AND :to";
+		params.put("from", 0);
+		params.put("to", range.getCount());
 
-			dataRows = getNamedParameterJdbcTemplate().query(dataQuery, params, new RowMapper<FormDataSearchResult>() {
-				@Override
-				public FormDataSearchResult mapRow(ResultSet rs, int rowNum) throws SQLException {
-					FormDataSearchResult result = new FormDataSearchResult();
-					result.setIndex(SqlUtils.getLong(rs, "idx"));
-					result.setColumnIndex(SqlUtils.getLong(rs, "column_index"));
-					result.setRowIndex(SqlUtils.getLong(rs, "row_index"));
-					result.setStringFound(rs.getString("raw_value"));
-					return result;
-				}
-			});
-		} else {
-			dataRows = new ArrayList<FormDataSearchResult>();
+		dataRows = getNamedParameterJdbcTemplate().query(dataQuery, params, new RowMapper<FormDataSearchResult>() {
+			@Override
+			public FormDataSearchResult mapRow(ResultSet rs, int rowNum) throws SQLException {
+				FormDataSearchResult result = new FormDataSearchResult();
+				result.setIndex(SqlUtils.getLong(rs, "idx"));
+				result.setColumnIndex(SqlUtils.getLong(rs, "column_index"));
+				result.setRowIndex(SqlUtils.getLong(rs, "row_index"));
+				result.setStringFound(rs.getString("raw_value"));
+				return result;
+			}
+		});
+		int count = 0;
+		if (dataRows.size() > 0) {
+			try {
+				count = Integer.parseInt(dataRows.remove(0).getStringFound());
+			} catch (NumberFormatException ignored) {
+			}
 		}
 
 		return new PagingResult<FormDataSearchResult>(dataRows, count);
@@ -97,37 +101,45 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @return
 	 */
 	private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive, boolean manual) {
-        FormData formData = formDataDao.get(formDataId, manual);
-        StringBuilder stringBuilder = new StringBuilder("");
-        String strUnion = "union all \n";
-        boolean f = false;
-        for(Column column: formData.getFormColumns()) {
-            switch (column.getColumnType()) {
-                case NUMBER:
-                    if (f) stringBuilder.append(strUnion);
-                    stringBuilder.append("select ord as row_index, ").append(column.getId()).append(" as column_id, ltrim(to_char(to_number(c").append(column.getId()).append("),'99999999999999990");
-                    if (((NumericColumn)column).getPrecision()>0) {
-                        stringBuilder.append(".");
-                        for(int i=0; i<((NumericColumn)column).getPrecision(); i++)
-                            stringBuilder.append("0");
-                    }
-                    stringBuilder.append("')) as raw_value, ").append(column.getOrder()).append(" as column_index from t ");
-                    f = true;
-                    break;
-                case STRING:
-                    if (f) stringBuilder.append(strUnion);
-                    stringBuilder.append("select ord as row_index, ").append(column.getId()).append(" as column_id, c").append(column.getId()).append(" as raw_value, ")
-                            .append(column.getOrder()).append(" as column_index from t ");
-                    f = true;
-                    break;
-                case AUTO:
-                    if (f) stringBuilder.append(strUnion);
-                    stringBuilder.append("select ord as row_index, ").append(column.getId()).append(" as column_id, (case when (alias IS NULL OR alias LIKE '%{wan}%') then to_char((row_number() over(PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%{wan}%') THEN 1 ELSE 0 END ORDER BY ord)) + ").append(formData.getPreviousRowNumber()).append(") else null end) as raw_value, ")
-                            .append(column.getOrder()).append(" as column_index from t ");
-                    f = true;
-                    break;
-            }
-        }
+		FormData formData = formDataDao.get(formDataId, manual);
+		StringBuilder stringBuilder = new StringBuilder("");
+		StringBuilder listColumnIndex = new StringBuilder("");
+		boolean firstEntry = false;
+
+		stringBuilder.append("select ord as row_index ");
+
+		for(Column column: formData.getFormColumns()) {
+			String colIndex = "\"" + column.getOrder() + "\"";
+			switch (column.getColumnType()) {
+				case NUMBER:
+					if (firstEntry) listColumnIndex.append(",");
+					listColumnIndex.append(colIndex);
+					stringBuilder.append(", ltrim(to_char(to_number(c").append(column.getId()).append("),'99999999999999990");
+					if (((NumericColumn)column).getPrecision()>0) {
+						stringBuilder.append(".");
+						for(int i=0; i<((NumericColumn)column).getPrecision(); i++)
+							stringBuilder.append("0");
+					}
+					stringBuilder.append("')) as ").append(colIndex);
+					firstEntry = true;
+					break;
+				case STRING:
+					if (firstEntry) listColumnIndex.append(",");
+					listColumnIndex.append(colIndex);
+					stringBuilder.append(", c").append(column.getId()).append(" as ").append(colIndex);
+					firstEntry = true;
+					break;
+				case AUTO:
+					if (firstEntry) listColumnIndex.append(",");
+					listColumnIndex.append(colIndex);
+					stringBuilder.append(", (case when (alias IS NULL OR alias LIKE '%{wan}%') then to_char((row_number() over(PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%{wan}%') THEN 1 ELSE 0 END ORDER BY ord)) + ").append(formData.getPreviousRowNumber()).append(") else null end)")
+							.append(" as ").append(colIndex);
+					firstEntry = true;
+					break;
+			}
+		}
+		stringBuilder.append(" FROM form_data_" + formTemplateId + " fd ");
+		stringBuilder.append(" WHERE fd.form_data_id = :fdId and fd.temporary = :temporary and fd.manual = :manual ");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("fdId", formDataId);
@@ -136,19 +148,25 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("manual", manual);
 
 		String sql =
-				"SELECT row_number() OVER (ORDER BY a.row_index, a.column_index) AS idx, row_index, column_index, raw_value\n" +
-						"FROM (\n" +
-						"    WITH t AS (\n" +
-						"        SELECT * FROM form_data_" + formTemplateId + " fd WHERE fd.form_data_id = :fdId and fd.temporary = :temporary and fd.manual = :manual)\n" +
-                        stringBuilder.toString() +
-						"  ) a\n" +
-
+				"WITH t AS (" +
+						stringBuilder.toString() +
+						")," +
+						"res AS (" +
+						" SELECT row_number() over (ORDER BY row_index, column_index) AS idx,\n" +
+						"  COUNT(*) over() num_rows,\n" +
+						"  row_index,\n" +
+						"  column_index,\n" +
+						"  raw_value\n" +
+						" FROM t UNPIVOT INCLUDE NULLS (raw_value FOR column_index IN (" + listColumnIndex.toString() + "))" +
 						// check case sensitive
 						(
 								isCaseSensitive ?
 										"            WHERE raw_value like :key \n" :
 										"            WHERE LOWER(raw_value) like LOWER(:key) \n"
-						);
+						) + ")" +
+						"SELECT 0 as idx,0 as row_index,'0' as column_index,to_char(num_rows) as raw_value FROM res\n" +
+						"UNION\n" +
+						"SELECT idx,row_index,column_index,raw_value FROM res";
 
 		return new Pair<String, Map<String, Object>>(sql, params);
 	}
@@ -195,7 +213,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace(params);
 			LOG.trace(sql.toString());
-        }
+		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
 
@@ -251,9 +269,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-    public void insertRows(FormData formData, int index, List<DataRow<Cell>> rows) {
-        insertRows(formData, index, rows, DataRowType.SAVED);
-    }
+	public void insertRows(FormData formData, int index, List<DataRow<Cell>> rows) {
+		insertRows(formData, index, rows, DataRowType.SAVED);
+	}
 
 	private void insertRows(FormData formData, int index, List<DataRow<Cell>> rows, DataRowType dataRowType) {
 		int size = getRowCount(formData);
@@ -326,13 +344,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		insertRows(formData, 1, dataRows);
 	}
 
-    @Override
-    public void saveTempRows(final FormData formData, final List<DataRow<Cell>> dataRows) {
-        // полностью удаляем строки
-        removeCheckPoint(formData);
-        // вставляем новый набор данных
-        insertRows(formData, 1, dataRows, DataRowType.TEMP);
-    }
+	@Override
+	public void saveTempRows(final FormData formData, final List<DataRow<Cell>> dataRows) {
+		// полностью удаляем строки
+		removeCheckPoint(formData);
+		// вставляем новый набор данных
+		insertRows(formData, 1, dataRows, DataRowType.TEMP);
+	}
 
 	@Override
 	public void updateRows(FormData formData, Collection<DataRow<Cell>> rows) {
@@ -513,7 +531,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public List<DataRow<Cell>> getRows(FormData fd, DataRowRange range) {
-		return getRowsInternal(fd, range, DataRowType.SAVED);
+		return getRowsInternal(fd, range, DataRowType.SAVED, true);
+	}
+
+	@Override
+	public List<DataRow<Cell>> getRowsRefColumnsOnly(FormData fd, DataRowRange range) {
+		return getRowsInternal(fd, range, DataRowType.SAVED, false);
 	}
 
 	@Override
@@ -521,15 +544,15 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		return getSizeInternal(formData, DataRowType.SAVED);
 	}
 
-    @Override
-    public List<DataRow<Cell>> getTempRows(FormData fd, DataRowRange range) {
-        return getRowsInternal(fd, range, DataRowType.TEMP);
-    }
+	@Override
+	public List<DataRow<Cell>> getTempRows(FormData fd, DataRowRange range) {
+		return getRowsInternal(fd, range, DataRowType.TEMP, false);
+	}
 
-    @Override
-    public int getTempRowCount(FormData formData) {
-        return getSizeInternal(formData, DataRowType.TEMP);
-    }
+	@Override
+	public int getTempRowCount(FormData formData) {
+		return getSizeInternal(formData, DataRowType.TEMP);
+	}
 
 	@Override
 	public int getAutoNumerationRowCount(FormData formData) {
@@ -555,11 +578,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param range       параметры пейджинга, может быть null
 	 * @return список строк, != null
 	 */
-	private List<DataRow<Cell>> getRowsInternal(FormData formData, DataRowRange range, DataRowType dataRowType) {
-        if (dataRowType != DataRowType.SAVED && dataRowType != DataRowType.TEMP) {
-            throw new IllegalArgumentException("Wrong type of 'isTemporary' argument");
-        }
-        DataRowMapper dataRowMapper = new DataRowMapper(formData);
+	private List<DataRow<Cell>> getRowsInternal(FormData formData, DataRowRange range, DataRowType dataRowType, boolean isAllColumnsNeeded) {
+		if (dataRowType != DataRowType.SAVED && dataRowType != DataRowType.TEMP) {
+			throw new IllegalArgumentException("Wrong type of 'isTemporary' argument");
+		}
+		DataRowMapper dataRowMapper = new DataRowMapper(formData);
+		dataRowMapper.setAllColumnsNeeded(isAllColumnsNeeded);
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql(range, dataRowType);
 		if (!isSupportOver()) {
 			sql.setFirst(sql.getFirst().replaceAll("OVER \\(PARTITION BY.{0,}ORDER BY ord\\)", "OVER ()"));
@@ -568,6 +592,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			LOG.trace(sql.getSecond());
 			LOG.trace(sql.getFirst());
 		}
+		getJdbcTemplate().setFetchSize(200);
 		return getNamedParameterJdbcTemplate().query(sql.getFirst(), sql.getSecond(), dataRowMapper);
 	}
 

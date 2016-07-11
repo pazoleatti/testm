@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,12 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
     public final static String ALIASED_WITH_AUTO_NUMERATION_AFFIX = "{wan}";
 
     private FormData formData;
+
+    private boolean isAllColumnsNeeded = true;
+
+    public void setAllColumnsNeeded(boolean isAllColumnsNeeded) {
+        this.isAllColumnsNeeded = isAllColumnsNeeded;
+    }
 
     public DataRowMapper(FormData formData) {
         this.formData = formData;
@@ -59,7 +66,11 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
                     .append(" AND ord < :from)");
         }
         sql.append(" numeration");
-        getColumnNamesString(formData, sql);
+        if (isAllColumnsNeeded) {
+            getColumnNamesString(formData, sql);
+        }else {
+            getRefValueColumnNames(formData, sql);
+        }
         sql.append("\nFROM form_data_").append(formData.getFormTemplateId());
         sql.append("\nWHERE form_data_id = :formDataId AND temporary = :temporary AND manual = :manual");
         // пейджинг
@@ -89,6 +100,23 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
     }
 
     /**
+     * Добавляет в sql запрос список столбцов ссылочного типа или типа даты по всем графам по шаблону <b>", cXXX</b>
+     * @param formData НФ
+     * @param sql запрос, куда следует добавить перечень столбцов.
+     */
+    static void getRefValueColumnNames(FormData formData, StringBuilder sql) {
+        Map<Integer, String[]> columnNames = getColumnNames(formData);
+        for (Column column : formData.getFormColumns()){
+            if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType()) || ColumnType.DATE.equals(column.getColumnType())){
+                sql.append('\n');
+                for(String name : columnNames.get(column.getId())) {
+                    sql.append(", ").append(name);
+                }
+            }
+        }
+    }
+
+    /**
      * Формирует список названий столбцов таблицы как они хранятся в бд
      * @param formData
      * @return
@@ -107,9 +135,21 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
         return columnNames;
     }
 
+    public List<Column> getFormColumns() {
+        if (isAllColumnsNeeded){
+            return formData.getFormColumns();
+        }
+        List<Column> res = new ArrayList<Column>();
+        for (Column column : formData.getFormColumns())
+            if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType()) || ColumnType.DATE.equals(column.getColumnType())){
+                res.add(column);
+            }
+        return res;
+    }
+
     @Override
     public DataRow<Cell> mapRow(ResultSet rs, int rowNum) throws SQLException {
-        List<Cell> cells = FormDataUtils.createCells(formData.getFormColumns(), formData.getFormStyles());
+        List<Cell> cells = FormDataUtils.createCells(getFormColumns(), formData.getFormStyles());
         Integer previousRowNumber = formData.getPreviousRowNumber() != null ? formData.getPreviousRowNumber() : 0;
         String alias = rs.getString("alias");
         for (Cell cell : cells) {
@@ -126,16 +166,18 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
             } else {
                 cell.setValue(getCellValue(cell.getColumn(), rs, String.format("c%s", columnId)), rowNum, true);
             }
-            // Styles
-            BigDecimal styleId = rs.getBigDecimal(String.format("c%s_style_id", columnId));
-            cell.setStyleId(styleId != null ? styleId.intValueExact() : null);
-            // Editable
-            cell.setEditable(rs.getBoolean(String.format("c%s_editable", columnId)));
-            // Span Info
-            Integer colSpan = SqlUtils.getInteger(rs, String.format("c%s_colspan", columnId));
-            cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
-            Integer rowSpan = SqlUtils.getInteger(rs, String.format("c%s_rowspan", columnId));
-            cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
+            if (isAllColumnsNeeded) {
+                // Styles
+                BigDecimal styleId = rs.getBigDecimal(String.format("c%s_style_id", columnId));
+                cell.setStyleId(styleId != null ? styleId.intValueExact() : null);
+                // Editable
+                cell.setEditable(rs.getBoolean(String.format("c%s_editable", columnId)));
+                // Span Info
+                Integer colSpan = SqlUtils.getInteger(rs, String.format("c%s_colspan", columnId));
+                cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
+                Integer rowSpan = SqlUtils.getInteger(rs, String.format("c%s_rowspan", columnId));
+                cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
+            }
         }
         DataRow<Cell> dataRow = new DataRow<Cell>(alias, cells);
         dataRow.setId(SqlUtils.getLong(rs, "id"));
