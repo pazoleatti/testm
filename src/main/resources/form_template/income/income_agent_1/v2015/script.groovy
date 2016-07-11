@@ -5,7 +5,6 @@ import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -132,9 +131,6 @@ def nonEmptyColumns = ['emitentName', 'emitentInn', 'decisionNumber',
 // сортировка (графа 7, 8)
 @Field
 def sortColumns = ['decisionNumber', 'decisionDate']
-
-@Field
-def totalColumns = ['all', 'rateZero', 'distributionSum', 'allSum', 'dividends', 'sum', 'withheldSum']
 
 @Field
 def endDate = null
@@ -368,15 +364,47 @@ void importTransportData() {
         reader.close()
     }
 
-    // подсчет итогов
-    def totalRow = formData.createStoreMessagingDataRow()
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
-    calcTotalSum(dataRows, totalRow, totalColumns)
-
     showMessages(newRows, logger)
 
     // сравнение итогов
-    checkAndSetTFSum(totalRow, totalTF, totalColumns, totalTF?.getImportIndex(), logger, false)
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [
+                'all'             : 4,
+                'rateZero'        : 5,
+                'distributionSum' : 6,
+                'allSum'          : 12,
+                'dividends'       : 23,
+                'sum'             : 24,
+                'withheldSum'     : 27
+        ]
+
+        // итоговая строка для сверки сумм
+        def totalTmp = formData.createStoreMessagingDataRow()
+        def totalColumns = totalColumnsIndexMap.keySet().asList()
+        totalColumns.each { alias ->
+            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+        }
+
+        // подсчет итогов
+        def dataRows = formDataService.getDataRowHelper(formData).allCached
+        calcTotalSum(dataRows, totalTmp, totalColumns)
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumns) {
+            def v1 = totalTF[alias]
+            def v2 = totalTmp[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+    }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(newRows)
@@ -400,7 +428,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     newRow.setImportIndex(fileRowIndex)
 
     if (rowCells.length != columnCount + 2) {
-        rowError(logger, newRow, String.format(ROW_FILE_WRONG + "Ошибка при подсчете количества граф '${rowCells.length}' вместо '${columnCount + 2}'", fileRowIndex))
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG + "Ошибка при подсчете количества граф '${rowCells.length}' вместо '${columnCount + 2}", fileRowIndex))
         return newRow
     }
 
@@ -588,6 +616,10 @@ def getNewRow() {
     return newRow
 }
 
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
+}
+
 void importData() {
     int COLUMN_COUNT = 42
     int HEADER_ROW_COUNT = 9
@@ -652,8 +684,10 @@ void importData() {
  * @param rowCount количество строк в таблице
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount) {
-    checkHeaderSize(headerRows, colCount, rowCount)
-
+    if (headerRows.isEmpty() || headerRows.size() < rowCount) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
             // раздел 1
             ([(headerRows[0][0]): 'Раздел 1']),
