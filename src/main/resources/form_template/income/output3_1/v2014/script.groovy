@@ -389,6 +389,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
         throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+
     def headerMapping = [
             ([(headerRows[0][0]): getColumnName(tmpRow, 'paymentType')]),
             ([(headerRows[0][1]): getColumnName(tmpRow, 'okatoCode')]),

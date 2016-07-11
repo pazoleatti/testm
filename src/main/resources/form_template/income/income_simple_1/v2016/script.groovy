@@ -794,6 +794,7 @@ void checkHeaderXls(def headerRows) {
         throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), 8, 3)
+
     def headerMapping = [
             ([(headerRows[0][0]): 'КНУ']),
             ([(headerRows[0][1]): 'Группа дохода']),

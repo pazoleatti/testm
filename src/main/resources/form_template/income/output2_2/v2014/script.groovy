@@ -43,11 +43,11 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    /*case FormDataEvent.CALCULATE:
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break*/
+/*case FormDataEvent.CALCULATE:
+    calc()
+    logicCheck()
+    formDataService.saveCachedDataRows(formData, logger)
+    break*/
     case FormDataEvent.CHECK:
         logicCheck()
         break

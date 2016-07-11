@@ -185,7 +185,7 @@ void logicCheck() {
 
         // 4. Проверка допустимых значений «Графы 7»
         if (!['13', '21', '31', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43',
-                                 '44', '45', '46', '50'].contains(row.taxPeriod)) {
+              '44', '45', '46', '50'].contains(row.taxPeriod)) {
             errorMessage(row, 'taxPeriod', errorMsg)
         }
 
@@ -247,7 +247,7 @@ void logicCheck() {
 // «Графа 9» = «Графа 10» + «Графа 15» + «Графа16» + «Графа 17» + «Графа 22»
 def calc9( def row) {
     def tmp = ['dividendRussianTotal', 'dividendRussianPersonal', 'dividendForgeinOrgAll',
-            'dividendForgeinPersonalAll', 'dividendTaxUnknown'].sum { alias ->
+               'dividendForgeinPersonalAll', 'dividendTaxUnknown'].sum { alias ->
         return (row[alias] ?: 0)
     }
     return roundValue(tmp)
@@ -256,7 +256,7 @@ def calc9( def row) {
 // «Графа 10» = «Графа 11» + «Графа 12» + «Графа13» + «Графа 14»
 def calc10( def row) {
     def tmp = ['dividendRussianStavka0', 'dividendRussianStavka6', 'dividendRussianStavka9',
-            'dividendRussianTaxFree'].sum { alias ->
+               'dividendRussianTaxFree'].sum { alias ->
         return (row[alias] ?: 0)
     }
     return roundValue(tmp)
@@ -899,11 +899,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графы 8..31
     for (alias in ['totalDividend', 'dividendSumRaspredPeriod', 'dividendRussianTotal', 'dividendRussianStavka0',
-            'dividendRussianStavka6', 'dividendRussianStavka9', 'dividendRussianTaxFree',
-            'dividendRussianPersonal', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0',
-            'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendTaxUnknown',
-            'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
-            'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']) {
+                   'dividendRussianStavka6', 'dividendRussianStavka9', 'dividendRussianTaxFree',
+                   'dividendRussianPersonal', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0',
+                   'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendTaxUnknown',
+                   'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
+                   'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']) {
         colIndex++
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
