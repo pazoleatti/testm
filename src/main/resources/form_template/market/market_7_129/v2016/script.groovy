@@ -129,7 +129,7 @@ void logicCheck() {
         rowsMap[key].add(row)
         // 3. Проверка даты выдачи кредита
         if (row.docDate != null && row.creditDate != null && (row.creditDate < row.docDate)) {
-            logger.warn("Строка %s: Значение графа «%s» должно быть больше либо равно значения графы «%s»!",
+            logger.warn("Строка %s: Значение графа «%s» должно быть больше либо равно значению графы «%s»!",
                 row.getIndex(), getColumnName(row, 'creditDate'), getColumnName(row, 'docDate'))
         }
     }

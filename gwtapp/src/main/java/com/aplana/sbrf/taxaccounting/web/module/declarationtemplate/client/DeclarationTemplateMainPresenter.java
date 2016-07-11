@@ -27,6 +27,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
@@ -75,7 +76,6 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                 placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateInfo).
                         with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
                 TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
-
             }
         }, this).addCallback(new ManualRevealCallback<GetDeclarationTypeResult>(DeclarationTemplateMainPresenter.this)));
     }
@@ -394,16 +394,16 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
 
         handlerRegistrations[0] = getView().addChangeHandlerDect(vchDect);
         handlerRegistrations[1] = getView().addEndLoadHandlerDect(loadFileHandlerDect);
-        handlerRegistrations[2] = getView().addJrxmlLoadHandlerDect(getJrxmlFileExistHandler(true));
+        handlerRegistrations[2] = getView().addJrxmlLoadHandlerDect(getJrxmlFileExistHandler(true, DeclarationTemplateMainPresenter.this));
         handlerRegistrations[3] = getView().addStartLoadHandlerDect(startLoadFileHandler);
     }
 
-    public JrxmlFileExistEvent.JrxmlFileExistHandler getJrxmlFileExistHandler(final boolean isArchive){
+    public JrxmlFileExistEvent.JrxmlFileExistHandler getJrxmlFileExistHandler(final boolean isArchive, final HasHandlers hasHandlers){
         return new JrxmlFileExistEvent.JrxmlFileExistHandler() {
             @Override
             public void onJrxmlExist(final JrxmlFileExistEvent event) {
-                LockInteractionEvent.fire(DeclarationTemplateMainPresenter.this, false);
-                LogAddEvent.fire(DeclarationTemplateMainPresenter.this, event.getErrorUuid());
+                LockInteractionEvent.fire(hasHandlers, false);
+                LogAddEvent.fire(hasHandlers, event.getErrorUuid());
                 Dialog.confirmMessage("Загрузка jrxml файла", JRXML_INFO_MES,
                         new DialogHandler() {
                             @Override
@@ -421,14 +421,14 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                                         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<ResidualSaveResult>() {
                                             @Override
                                             public void onSuccess(ResidualSaveResult result) {
-                                                declarationTemplateExt.getDeclarationTemplate().setJrxmlBlobId(event.getErrorUuid());
+                                                declarationTemplateExt.getDeclarationTemplate().setJrxmlBlobId(result.getUploadUuid());
                                                 Dialog.infoMessage("Макет успешно обновлен");
-                                                LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
-                                                LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getSuccessUuid(), true);
+                                                LogCleanEvent.fire(hasHandlers);
+                                                LogAddEvent.fire(hasHandlers, result.getSuccessUuid(), true);
                                             }
-                                        }, DeclarationTemplateMainPresenter.this));
+                                        }, hasHandlers));
                                     }
-                                }, DeclarationTemplateMainPresenter.this));
+                                }, hasHandlers));
                             }
                         });
             }

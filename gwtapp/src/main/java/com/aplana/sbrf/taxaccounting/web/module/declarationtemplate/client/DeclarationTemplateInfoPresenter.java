@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -23,6 +24,7 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.*;
+import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
@@ -35,7 +37,7 @@ public class DeclarationTemplateInfoPresenter
     private static final String ERROR_MSG = "Не удалось загрузить макет";
     private static final String SUCCESS_MSG = "Файл загружен";
 
-    private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[5];
+    private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[7];
 
     @Override
     public void onCheckBeforeDeleteJrxml() {
@@ -120,6 +122,8 @@ public class DeclarationTemplateInfoPresenter
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
         HandlerRegistration addValueChangeHandlerJrxml(ValueChangeHandler<String> valueChangeHandler);
         HandlerRegistration addValueChangeHandlerXsd(ValueChangeHandler<String> valueChangeHandler);
+        HandlerRegistration addStartLoadHandlerXsd(StartLoadFileEvent.StartLoadFileHandler handler);
+        HandlerRegistration addStartLoadHandlerJrxml(StartLoadFileEvent.StartLoadFileHandler handler);
         HandlerRegistration addEndLoadHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler);
         HandlerRegistration addEndLoadHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler);
         HandlerRegistration addJrxmlLoadHandler(JrxmlFileExistEvent.JrxmlFileExistHandler handler);
@@ -171,6 +175,15 @@ public class DeclarationTemplateInfoPresenter
                     Dialog.errorMessage(ERROR_MSG);
                 }
                 LogAddEvent.fire(DeclarationTemplateInfoPresenter.this, event.getUuid());
+                LockInteractionEvent.fire(DeclarationTemplateInfoPresenter.this, false);
+            }
+        };
+        StartLoadFileEvent.StartLoadFileHandler startLoadFileHandler = new StartLoadFileEvent.StartLoadFileHandler() {
+            @Override
+            public void onStartLoad(StartLoadFileEvent event) {
+                // Чистим логи и блокируем форму
+                LogCleanEvent.fire(DeclarationTemplateInfoPresenter.this);
+                LockInteractionEvent.fire(DeclarationTemplateInfoPresenter.this, true);
             }
         };
 
@@ -178,7 +191,9 @@ public class DeclarationTemplateInfoPresenter
         handlerRegistrations[1] = getView().addValueChangeHandlerXsd(vchXsd);
         handlerRegistrations[2] = getView().addEndLoadHandlerXsd(loadFileHandlerContent);
         handlerRegistrations[3] = getView().addEndLoadHandlerJrxml(loadFileHandlerContent);
-        handlerRegistrations[4] = getView().addJrxmlLoadHandler(declarationTemplateMainPresenter.getJrxmlFileExistHandler(false));
+        handlerRegistrations[4] = getView().addJrxmlLoadHandler(declarationTemplateMainPresenter.getJrxmlFileExistHandler(false, DeclarationTemplateInfoPresenter.this));
+        handlerRegistrations[5] = getView().addStartLoadHandlerXsd(startLoadFileHandler);
+        handlerRegistrations[6] = getView().addStartLoadHandlerJrxml(startLoadFileHandler);
     }
 
     @ProxyEvent
@@ -195,10 +210,16 @@ public class DeclarationTemplateInfoPresenter
         templateExt.setEndDate(getView().getEndDate());
     }
 
-    private HandlerRegistration closeDTHandlerRegistration;
-
     @Override
     public void onInfoChanged(){
         declarationTemplateMainPresenter.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
+    }
+
+    @Override
+    protected void onUnbind() {
+        super.onUnbind();
+        for (HandlerRegistration han : handlerRegistrations){
+            han.removeHandler();
+        }
     }
 }

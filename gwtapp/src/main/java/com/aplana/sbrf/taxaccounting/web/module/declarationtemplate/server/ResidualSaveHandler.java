@@ -43,20 +43,22 @@ public class ResidualSaveHandler extends AbstractActionHandler<ResidualSaveActio
     @Override
     public ResidualSaveResult execute(ResidualSaveAction action, ExecutionContext context) throws ActionException {
         Logger logger = new Logger();
+        ResidualSaveResult result = new ResidualSaveResult();
         if (action.isArchive()){
             BlobData data = blobDataService.get(action.getUploadUuid());
             DeclarationTemplate declarationTemplate = declarationTemplateImpexService.importDeclarationTemplate
                     (securityService.currentUserInfo(), action.getDtId(), data.getInputStream());
             Date endDate = declarationTemplateService.getDTEndDate(action.getDtId());
             mainOperatingService.edit(declarationTemplate, endDate, logger, securityService.currentUserInfo());
+            result.setUploadUuid(declarationTemplate.getJrxmlBlobId());
         } else {
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(action.getDtId());
             declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript((action.getDtId())));
             declarationTemplate.setJrxmlBlobId(action.getUploadUuid());
             declarationTemplateService.save(declarationTemplate);
+            result.setUploadUuid(declarationTemplate.getJrxmlBlobId());
         }
 
-        ResidualSaveResult result = new ResidualSaveResult();
         result.setSuccessUuid(logEntryService.save(logger.getEntries()));
         return result;
     }

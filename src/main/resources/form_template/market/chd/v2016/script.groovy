@@ -150,19 +150,19 @@ void logicCheck() {
 
         // 5. Проверка даты выдачи кредита
         if (row.docDate != null && row.docDate2 != null && row.docDate2 < row.docDate) {
-            logger.warn("Строка %s: Значение графы «%s» должно быть больше либо равно значения графы «%s»!",
+            logger.warn("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»!",
                     row.getIndex(), getColumnName(row, 'docDate2'), getColumnName(row, 'docDate'))
         }
 
         // 6. Проверка даты погашения кредита
         if (row.docDate != null && row.docDate3 != null && row.docDate3 < row.docDate) {
-            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значения графы «%s»!",
+            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»!",
                     row.getIndex(), getColumnName(row, 'docDate3'), getColumnName(row, 'docDate'))
         }
 
         // 7. Проверка даты погашения кредита 2
         if (row.docDate2 != null && row.docDate3 != null && row.docDate3 < row.docDate2) {
-            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значения графы «%s»!",
+            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»!",
                     row.getIndex(), getColumnName(row, 'docDate3'), getColumnName(row, 'docDate2'))
         }
     }
