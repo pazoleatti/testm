@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.Decla
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.FormElement;
@@ -133,6 +134,16 @@ public class DeclarationTemplateInfoView extends ViewWithUiHandlers<DeclarationT
     @Override
     public HandlerRegistration addJrxmlLoadHandler(JrxmlFileExistEvent.JrxmlFileExistHandler handler) {
         return uploadJrxmlFile.addJrxmlLoadHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addStartLoadHandlerXsd(StartLoadFileEvent.StartLoadFileHandler handler) {
+        return uploadXsdFile.addStartLoadHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addStartLoadHandlerJrxml(StartLoadFileEvent.StartLoadFileHandler handler) {
+        return uploadJrxmlFile.addStartLoadHandler(handler);
     }
 
     private void setEnabled(boolean isEnable){

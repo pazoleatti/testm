@@ -7,6 +7,7 @@ import com.gwtplatform.dispatch.shared.Result;
  */
 public class ResidualSaveResult implements Result {
     private String successUuid;
+    private String uploadUuid;
 
     public String getSuccessUuid() {
         return successUuid;
@@ -14,5 +15,13 @@ public class ResidualSaveResult implements Result {
 
     public void setSuccessUuid(String successUuid) {
         this.successUuid = successUuid;
+    }
+
+    public String getUploadUuid() {
+        return uploadUuid;
+    }
+
+    public void setUploadUuid(String uploadUuid) {
+        this.uploadUuid = uploadUuid;
     }
 }

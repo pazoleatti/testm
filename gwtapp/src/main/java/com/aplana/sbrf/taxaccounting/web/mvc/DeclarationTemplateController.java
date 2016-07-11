@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -277,7 +278,7 @@ public class DeclarationTemplateController {
 	}
 
     private void checkErrors(Logger logger) throws IOException {
-        if (!logger.getEntries().isEmpty()){
+        if (logger.containsLevel(LogLevel.ERROR)){
            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
