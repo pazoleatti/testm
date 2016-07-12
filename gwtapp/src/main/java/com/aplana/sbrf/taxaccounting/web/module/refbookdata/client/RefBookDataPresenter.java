@@ -228,6 +228,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                         if (result.isAvailable()) {
                                             getView().resetSearchInputBox();
                                             editFormPresenter.setVersionMode(false);
+                                            getView().setVersionView(false);
                                     /*editFormPresenter.setRecordId(null);*/
                                             GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 

@@ -258,6 +258,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                 registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(getClick());
                                 if (result.isAvailable()) {
                                     commonEditPresenter.setVersionMode(false);
+                                    getView().setVersionView(false);
                                     /*commonEditPresenter.setRecordId(null);*/
 
                                     GetRefBookAttributesAction action = new GetRefBookAttributesAction(refBookId);
