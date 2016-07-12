@@ -592,7 +592,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			LOG.trace(sql.getSecond());
 			LOG.trace(sql.getFirst());
 		}
-		getJdbcTemplate().setFetchSize(200);
 		return getNamedParameterJdbcTemplate().query(sql.getFirst(), sql.getSecond(), dataRowMapper);
 	}
 
