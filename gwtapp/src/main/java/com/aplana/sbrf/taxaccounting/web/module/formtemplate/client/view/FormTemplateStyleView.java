@@ -8,6 +8,7 @@ import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -158,6 +159,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 		newStyle.setFontColor(Color.WHITE);
 		styles.add(newStyle);
 		setupStyles(styles.size() - 1);
+		onDataChanged();
 	}
 
 	@UiHandler("removeStyle")
@@ -170,6 +172,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 		else {
 			setupStyles(0);
 		}
+		onDataChanged();
 	}
 
 	@UiHandler("alias")
@@ -182,11 +185,28 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	public void onChangeAlias(ChangeEvent event){
 		flush();
 		setupStyles(styleListBox.getSelectedIndex());
+		onDataChanged();
+	}
+
+	@UiHandler(value = {"italic", "bold"})
+	public void onChangeCheckBoxes(ValueChangeEvent<Boolean> event){
+		onDataChanged();
+	}
+
+	@UiHandler(value = {"fontColor", "backColor"})
+	public void onChangeListColors(ValueChangeEvent<Color> event){
+		onDataChanged();
 	}
 
 	private void flush() {
 		if (styles != null && !styles.isEmpty()) {
 			driver.flush();
+		}
+	}
+
+	private void onDataChanged(){
+		if (getUiHandlers() != null) {
+			getUiHandlers().onDataViewChanged();
 		}
 	}
 

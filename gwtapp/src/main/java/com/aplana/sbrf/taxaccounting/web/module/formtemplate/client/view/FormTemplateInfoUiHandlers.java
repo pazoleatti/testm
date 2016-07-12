@@ -14,4 +14,5 @@ public interface FormTemplateInfoUiHandlers extends UiHandlers {
     void setName(String name);
 	void setFullname(String fullName);
 	void setHeader(String header);
+	void onDataViewChanged();
 }

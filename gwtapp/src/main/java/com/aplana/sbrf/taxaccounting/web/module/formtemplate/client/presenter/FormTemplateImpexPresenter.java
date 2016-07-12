@@ -55,11 +55,14 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 		void setFormId(int formId);
 	}
 
+    private FormTemplateMainPresenter formTemplateMainPresenter;
+
 	@Inject
-	public FormTemplateImpexPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
+	public FormTemplateImpexPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, FormTemplateMainPresenter formTemplateMainPresenter) {
 		super(eventBus, view, proxy, FormTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
         getView().setFormId(ftId);
+        this.formTemplateMainPresenter = formTemplateMainPresenter;
 	}
 
     @Override
@@ -87,5 +90,9 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
     public void uploadDectResponseWithErrorUuid(String uuid) {
         LogAddEvent.fire(this, uuid);
         Dialog.errorMessage("Загрузить макет не удалось.");
+    }
+
+    public void onDataViewChanged(){
+        formTemplateMainPresenter.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
     }
 }

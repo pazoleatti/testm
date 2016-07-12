@@ -3,8 +3,11 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 import com.aplana.gwt.client.mask.ui.YearMaskBox;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateInfoPresenter;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -92,4 +95,24 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 		getUiHandlers().setHeader(headerBox.getValue());
 	}
 
+    @UiHandler(value={"nameBox", "fullnameBox", "headerBox"})
+    void onTextBoxesChanged(ChangeEvent event) {
+        onDataChanged();
+    }
+
+    @UiHandler(value={"versionDateBegin", "versionDateEnd"})
+    void onDatesChanged(ValueChangeEvent<Date> event) {
+        onDataChanged();
+    }
+
+    @UiHandler(value={"fixedRowsCheckBox", "monthlyCheckBox", "comparativeCheckBox", "accruingCheckBox", "updatingCheckBox"})
+    void onCheckBoxesChanged(ValueChangeEvent<Boolean> event) {
+        onDataChanged();
+    }
+
+    private void onDataChanged(){
+        if (getUiHandlers() != null) {
+            getUiHandlers().onDataViewChanged();
+        }
+    }
 }

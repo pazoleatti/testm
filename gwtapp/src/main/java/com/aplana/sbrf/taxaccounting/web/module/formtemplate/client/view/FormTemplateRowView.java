@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.StyleCell
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
@@ -256,6 +258,14 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		});
 		formDataTable.addColumn(editTextAliasColumn, "Код строки");
 		formDataTable.setColumnWidth(editTextAliasColumn, "10em");
+		editTextAliasColumn.addCellModifiedEventHandler(new CellModifiedEventHandler() {
+			@Override
+			public void onCellModified(CellModifiedEvent event, boolean withReference) {
+				if (getUiHandlers() != null) {
+					getUiHandlers().onDataViewChanged();
+				}
+			}
+		});
 
 		//create form columns
 		for (Column col : columns) {
@@ -267,6 +277,14 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 			} else if (col.getWidth() == 0) {
                 formDataTable.setColumnWidth(tableCol, WIDTH_FOR_ZERO_COLUMN + "em");
             }
+			((DataRowColumn<?>)tableCol).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+				@Override
+				public void onCellModified(CellModifiedEvent event, boolean withReference) {
+					if (getUiHandlers() != null) {
+						getUiHandlers().onDataViewChanged();
+					}
+				}
+			});
             formDataTable.addColumn(tableCol, col.getName());
 		}
 		//TODO КОСТЫЛИ! По возможности убрать.

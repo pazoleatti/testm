@@ -10,14 +10,18 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.entry.client.TaPlaceManagerImpl;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateMainUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.event.CreateNewVersionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.FormVersionHistoryPresenter;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -140,6 +144,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
     @Override
 	public void reset() {
         super.onReset();
+        setOnLeaveConfirmation(null);
 		setFormTemplate();
 	}
 
@@ -149,6 +154,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
         unlockForm((formTemplate != null && formTemplate.getId() != null)?formTemplate.getId():0);
         if (closeFormTemplateHandlerRegistration != null)
 		    closeFormTemplateHandlerRegistration.removeHandler();
+        setOnLeaveConfirmation(null);
 	}
 
 	/**
@@ -384,5 +390,43 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
             return;
         versionHistoryPresenter.init(id);
         addToPopupSlot(versionHistoryPresenter);
+    }
+
+    private Integer extractFormTemplateId(String historyToken) {
+        RegExp regExp = RegExp.compile("^!(\\w*);" + AdminConstants.NameTokens.formTemplateId + "=(\\d+)");
+        MatchResult matcher = regExp.exec(historyToken);
+        if (matcher != null && matcher.getGroupCount() > 1) {
+            return Integer.parseInt(matcher.getGroup(2));
+        }
+        return null;
+    }
+
+    public void setOnLeaveConfirmation(String msg) {
+        placeManager.setOnLeaveConfirmation(msg);
+        TaPlaceManagerImpl taPlaceManager = (TaPlaceManagerImpl) placeManager;
+        if (msg == null) {
+            taPlaceManager.setCheckOnLeaveConfirmationNeededHandler(null);
+            return;
+        }
+        if (taPlaceManager.getCheckOnLeaveConfirmationNeededHandler() == null) {
+            taPlaceManager.setCheckOnLeaveConfirmationNeededHandler(new TaPlaceManagerImpl.CheckOnLeaveConfirmationNeededHandler() {
+                @Override
+                public boolean isNeeded(ValueChangeEvent<String> event) {
+                    return !isTabPage(event.getValue()) &&
+                            formTemplate.getId() != null && !formTemplate.getId().equals(extractFormTemplateId(event.getValue()));
+                }
+            });
+        }
+    }
+
+    private boolean isTabPage(String path){
+        return path.contains(AdminConstants.NameTokens.formTemplateInfoPage) ||
+                path.contains(AdminConstants.NameTokens.formTemplateScriptCodePage) ||
+                path.contains(AdminConstants.NameTokens.formTemplateColumnPage) ||
+                path.contains(AdminConstants.NameTokens.formTemplateStylePage) ||
+                path.contains(AdminConstants.NameTokens.formTemplateRowPage) ||
+                path.contains(AdminConstants.NameTokens.formTemplateHeaderPage) ||
+                path.contains(AdminConstants.NameTokens.formTemplateColumnPage) ||
+                path.contains(AdminConstants.NameTokens.formTemplateImpexPage);
     }
 }

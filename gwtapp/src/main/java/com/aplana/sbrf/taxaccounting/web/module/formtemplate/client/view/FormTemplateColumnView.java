@@ -131,6 +131,13 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	public FormTemplateColumnView(Binder binder) {
 		init();
 		initWidget(binder.createAndBindUi(this));
+
+		columnAttributeEditor.addChangeHandler(new ColumnAttributeEditor.ChangeHandler(){
+			@Override
+			public void onChange(){
+				onDataChanged();
+			}
+		});
 	}
 
 	private void init() {
@@ -245,6 +252,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 				columns.set(ind, exchange);
 				setColumnList();
 				columnListBox.setSelectedIndex(ind - 1);
+				onDataChanged();
 			}
 		}
 	}
@@ -264,6 +272,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 				columns.set(ind, exchange);
 				setColumnList();
 				columnListBox.setSelectedIndex(ind + 1);
+				onDataChanged();
 			}
 		}
 	}
@@ -293,6 +302,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		newColumn.setOrder(columns.size() + 1);
 		getUiHandlers().addColumn(newColumn);
 		setupColumns(columns.size() - 1);
+		onDataChanged();
 	}
 
 	@UiHandler("removeColumn")
@@ -310,6 +320,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		else {
 			setupColumns(0);
 		}
+		onDataChanged();
 	}
 
 	@UiHandler("stringMaxLengthBox")
@@ -356,6 +367,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			numericMaxLengthBox.setValue(NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION + precisionBox.getValue());
 		}
 		setNumValueRestrictions(numericMaxLengthBox.getValue(), precisionBox.getValue());
+		onDataChanged();
 	}
 
 	@UiHandler("precisionBox")
@@ -364,6 +376,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			numericMaxLengthBox.setValue(NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION + precisionBox.getValue());
 		}
 		setNumValueRestrictions(numericMaxLengthBox.getValue(), precisionBox.getValue());
+		onDataChanged();
 	}
 
     @UiHandler("refBookBox")
@@ -378,6 +391,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         refBookAttrBox.setValue(event.getValue().getAttributes().get(0));
         refBookAttrBox.setAcceptableValues(event.getValue().getAttributes());
         updateReferenceColumn(event.getValue(), currentColumn);
+		onDataChanged();
 	}
 
     @UiHandler("refBookAttrBox")
@@ -407,6 +421,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             if (currentColumn instanceof RefBookColumn)
                 ((RefBookColumn) currentColumn).setRefBookAttributeId2(null);
         }
+		onDataChanged();
     }
 
     @UiHandler("refBookAttrRefBox")
@@ -418,7 +433,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         } else if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
             ((RefBookColumn) currentColumn).setRefBookAttributeId2(event.getValue().getId());
             ((RefBookColumn) currentColumn).setRefBookAttribute(event.getValue());
-        }
+        } else {
+			return;
+		}
+		onDataChanged();
     }
 
     @UiHandler("refBookAttrFilterArea")
@@ -439,12 +457,29 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         currentColumn.setParentId(event.getValue().getId());
         refBookAttrBox.setValue(refBookAttribute, false);
         refBookAttrBox.setAcceptableValues(refBookAttributeList);
+		onDataChanged();
     }
 
     @UiHandler("autoNumerationBox")
     public void onAutoNumerationBox(ValueChangeEvent<AutoNumerationColumn> event) {
         ((AutoNumerationColumn) columns.get(columnIndex)).setNumerationType(event.getValue().getNumerationType());
+		onDataChanged();
     }
+
+	@UiHandler(value={"typeColumnDropBox", "refBookAttrFilterArea", "nameBox"})
+	public void onChangeListStrAttrBox(ValueChangeEvent<String> event) {
+		onDataChanged();
+	}
+
+	@UiHandler(value={"stringMaxLengthBox"})
+	public void onChangeListIntAttrBox(ValueChangeEvent<Integer> event) {
+		onDataChanged();
+	}
+
+	@UiHandler(value={"dateFormat"})
+	public void onChangeListFmtAttrBox(ValueChangeEvent<Formats> event) {
+		onDataChanged();
+	}
 
 	@Override
 	public final void setColumnList(List<Column> columnList, boolean isFormChanged) {
@@ -789,4 +824,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         ((NumericColumn) columns.get(columnIndex)).setMaxLength(unscaledValue);
         ((NumericColumn) columns.get(columnIndex)).setPrecision(scale);
     }
+
+	private void onDataChanged(){
+		if (getUiHandlers() != null) {
+			getUiHandlers().onDataViewChanged();
+		}
+	}
 }

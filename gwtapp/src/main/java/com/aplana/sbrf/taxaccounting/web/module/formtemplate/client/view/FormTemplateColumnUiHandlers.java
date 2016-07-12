@@ -22,4 +22,6 @@ public interface FormTemplateColumnUiHandlers extends UiHandlers {
     int getNextGeneratedColumnId();
 
     void changeColumnType(int position, Column oldColumn, Column newColumn);
+
+    void onDataViewChanged();
 }

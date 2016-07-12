@@ -42,12 +42,14 @@ public class FormTemplateHeaderPresenter
 	}
 
 	private FormTemplate formTemplate;
+	private FormTemplateMainPresenter formTemplateMainPresenter;
 
 	@Inject
 	public FormTemplateHeaderPresenter(final EventBus eventBus, final MyView view,
-	                                   final MyProxy proxy) {
+	                                   final MyProxy proxy, FormTemplateMainPresenter formTemplateMainPresenter) {
 		super(eventBus, view, proxy);
 		getView().setUiHandlers(this);
+		this.formTemplateMainPresenter = formTemplateMainPresenter;
 	}
 
 	@ProxyEvent
@@ -114,6 +116,10 @@ public class FormTemplateHeaderPresenter
 			formTemplate.getHeaders().add(row);
 			getView().setHeaderData(formTemplate.getHeaders());
 		}
+	}
+
+	public void onDataViewChanged(){
+		formTemplateMainPresenter.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
 	}
 
 }

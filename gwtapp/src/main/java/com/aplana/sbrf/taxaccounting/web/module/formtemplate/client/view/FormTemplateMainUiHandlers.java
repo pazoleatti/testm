@@ -9,4 +9,5 @@ public interface FormTemplateMainUiHandlers extends UiHandlers {
     void activate(boolean force);
     void onReturnClicked();
     void onHistoryClicked();
+    void setOnLeaveConfirmation(String msg);
 }

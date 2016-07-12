@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.EditTextColumn;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TableCellElement;
@@ -180,6 +182,14 @@ public class FormTemplateHeaderView extends ViewWithUiHandlers<FormTemplateHeade
 					return aliasRow.getCell(col.getAlias()).getValue() == null ? col.getName() : aliasRow.getCell(col.getAlias()).getValue().toString();
 				}
 			};
+			editTextAliasColumn.addCellModifiedEventHandler(new CellModifiedEventHandler() {
+				@Override
+				public void onCellModified(CellModifiedEvent event, boolean withReference) {
+					if (getUiHandlers() != null) {
+						getUiHandlers().onDataViewChanged();
+					}
+				}
+			});
 			if (col.getWidth() >= 0) {
 				formDataTable.setColumnWidth(editTextAliasColumn, col.getWidth() + "em");
 			}

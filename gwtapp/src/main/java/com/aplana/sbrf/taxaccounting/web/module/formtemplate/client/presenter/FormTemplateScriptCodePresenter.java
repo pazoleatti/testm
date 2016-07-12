@@ -38,12 +38,14 @@ public class FormTemplateScriptCodePresenter
 	}
 
 	private FormTemplate formTemplate;
+	private FormTemplateMainPresenter formTemplateMainPresenter;
 
 	@Inject
 	public FormTemplateScriptCodePresenter(final EventBus eventBus,
-			final MyView view, final MyProxy proxy) {
+			final MyView view, final MyProxy proxy, FormTemplateMainPresenter formTemplateMainPresenter) {
 		super(eventBus, view, proxy, FormTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
+		this.formTemplateMainPresenter = formTemplateMainPresenter;
 	}
 	
 	@Override
@@ -83,6 +85,10 @@ public class FormTemplateScriptCodePresenter
 		// Workaround
 		// Почему то тупит CodeMirror когда инициализация представления происходит до reveal
 		getView().setScriptCode(getView().getScriptCode());
+	}
+
+	public void onDataViewChanged(){
+		formTemplateMainPresenter.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
 	}
 
 }

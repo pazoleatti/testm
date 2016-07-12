@@ -45,12 +45,14 @@ public class FormTemplateRowPresenter
 	}
 
 	private FormTemplate formTemplate;
+	private FormTemplateMainPresenter formTemplateMainPresenter;
 
 	@Inject
 	public FormTemplateRowPresenter(final EventBus eventBus, final MyView view,
-			final MyProxy proxy) {
+			final MyProxy proxy, FormTemplateMainPresenter formTemplateMainPresenter) {
 		super(eventBus, view, proxy, FormTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
+		this.formTemplateMainPresenter = formTemplateMainPresenter;
 	}
 
 	@ProxyEvent
@@ -88,6 +90,10 @@ public class FormTemplateRowPresenter
 		getView().setColumnsData(formTemplate.getColumns());
 		getView().setRowsData(formTemplate.getRows());
 		getView().addCustomHeader(formTemplate.getHeaders());
+	}
+
+	public void onDataViewChanged(){
+		formTemplateMainPresenter.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
 	}
 
 }

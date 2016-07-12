@@ -36,11 +36,13 @@ public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePrese
 	}
 
 	private int formTemplateId;
+	private FormTemplateMainPresenter formTemplateMainPresenter;
 
 	@Inject
-	public FormTemplateStylePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
+	public FormTemplateStylePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, FormTemplateMainPresenter formTemplateMainPresenter) {
 		super(eventBus, view, proxy, FormTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
+		this.formTemplateMainPresenter = formTemplateMainPresenter;
 	}
 	
 	@Override
@@ -62,6 +64,10 @@ public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePrese
 	@Override
 	public void onFlush(FormTemplateFlushEvent event) {
 		getView().onFlush();
+	}
+
+	public void onDataViewChanged(){
+		formTemplateMainPresenter.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
 	}
 
 }

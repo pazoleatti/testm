@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateScriptCodePresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -16,7 +18,7 @@ public class FormTemplateScriptCodeView extends ViewWithUiHandlers<FormTemplateS
 	public interface Binder extends UiBinder<Widget, FormTemplateScriptCodeView> { }
 
 	@UiField
-	HasText script;
+	CodeMirror script;
 
 	@Inject
 	public FormTemplateScriptCodeView(Binder binder) {
@@ -26,6 +28,13 @@ public class FormTemplateScriptCodeView extends ViewWithUiHandlers<FormTemplateS
 	@Override
 	public void setScriptCode(String text) {
 		script.setText(text);
+	}
+
+	@UiHandler("script")
+	void onDecNameChanged(ChangeEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onDataViewChanged();
+		}
 	}
 
 	@Override

@@ -40,11 +40,13 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 
 	private FormTemplateExt formTemplateExt;
     private FormTemplate formTemplate;
+	private FormTemplateMainPresenter formTemplateMainPresenter;
 
 	@Inject
-	public FormTemplateInfoPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
+	public FormTemplateInfoPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, FormTemplateMainPresenter formTemplateMainPresenter) {
 		super(eventBus, view, proxy, FormTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
+		this.formTemplateMainPresenter = formTemplateMainPresenter;
 	}
 	
 	@Override
@@ -114,5 +116,10 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	@Override
 	public void setHeader(String header) {
 		formTemplate.setHeader(header);
+	}
+
+	@Override
+	public void onDataViewChanged(){
+		formTemplateMainPresenter.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
 	}
 }

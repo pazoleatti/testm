@@ -7,4 +7,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface FormTemplateRowUiHandlers extends UiHandlers {
 	void onRemoveButton(DataRow<Cell> row);
+	void onDataViewChanged();
 }

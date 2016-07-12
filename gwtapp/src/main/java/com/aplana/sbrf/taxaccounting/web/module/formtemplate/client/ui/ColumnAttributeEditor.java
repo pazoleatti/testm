@@ -4,8 +4,11 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.*;
 
@@ -42,8 +45,28 @@ public class ColumnAttributeEditor extends Composite implements Editor<Column>, 
 	@UiField
 	IntegerBox width;
 
-	@UiField
-	CheckBox checking;
+    @UiField
+    CheckBox checking;
+
+    @UiHandler(value = {"shortName", "alias", "width"})
+    public void onShortNameChanged(ChangeEvent event) {
+        if (changeHandler != null) changeHandler.onChange();
+    }
+
+    @UiHandler("checking")
+    public void onShortNameChanged(ValueChangeEvent<Boolean> event) {
+        if (changeHandler != null) changeHandler.onChange();
+    }
+
+    public interface ChangeHandler {
+        void onChange();
+    }
+
+    private ChangeHandler changeHandler;
+
+    public void addChangeHandler(ChangeHandler changeHandler) {
+        this.changeHandler = changeHandler;
+    }
 
 	public ColumnAttributeEditor() {
 		super();

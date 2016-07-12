@@ -98,6 +98,7 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event){
 		if(getUiHandlers()!=null){
+			getUiHandlers().setOnLeaveConfirmation(null);
 			getUiHandlers().save();
 		}
 	}
@@ -111,6 +112,10 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
+		if (getUiHandlers() == null)
+			return;
+
+		getUiHandlers().setOnLeaveConfirmation(null);
         Dialog.confirmMessage(formId != 0 ?"Редактирование версии макета" : "Создание версии макета", "Сохранить изменения?",
                 new DialogHandler() {
                     @Override
