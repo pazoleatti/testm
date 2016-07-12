@@ -235,8 +235,13 @@ public class DeclarationDataPresenter
                                 onTimerReport(DeclarationDataReportType.PDF_DEC, false);
                                 onTimerReport(DeclarationDataReportType.EXCEL_DEC, false);
                             } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
-                                getView().showNoPdf("Загрузка формы предварительного просмотра");
-                                getPdf();
+                                if (getView().isVisiblePDF()) {
+                                    getView().showNoPdf("Загрузка формы предварительного просмотра");
+                                    getPdf();
+                                } else {
+                                    getView().showNoPdf((!TaxType.DEAL.equals(taxType) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D) +
+                                            " Форма предварительного просмотра недоступна");
+                                }
                             }
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не существует и нет блокировки(т.е. задачу отменили или ошибка при формировании)
                             getView().stopTimerReport(type);
@@ -248,7 +253,7 @@ public class DeclarationDataPresenter
                                             " Форма предварительного просмотра не сформирована");
                                 } else {
                                     getView().showNoPdf((!TaxType.DEAL.equals(taxType) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D) +
-                                            "  Форма предварительного просмотра недоступна");
+                                            " Форма предварительного просмотра недоступна");
                                 }
                             }
                             getView().updatePrintReportButtonName(type, false);

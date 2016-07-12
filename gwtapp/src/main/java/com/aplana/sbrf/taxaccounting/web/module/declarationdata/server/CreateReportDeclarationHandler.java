@@ -55,13 +55,14 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     @Override
     public CreateReportResult execute(final CreateReportAction action, ExecutionContext executionContext) throws ActionException {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(action.getType());
-        if (ddReportType.isSubreport()) {
-            TAUserInfo userInfo = securityService.currentUserInfo();
-            DeclarationData declaration = declarationDataService.get(action.getDeclarationDataId(), userInfo);
-            ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), action.getType()));
-        }
         CreateReportResult result = new CreateReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
+        if (ddReportType.isSubreport()) {
+            DeclarationData declaration = declarationDataService.get(action.getDeclarationDataId(), userInfo);
+            ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), action.getType()));
+        } else if (ddReportType.equals(DeclarationDataReportType.PDF_DEC) && !declarationDataService.isVisiblePDF(declarationDataService.get(action.getDeclarationDataId(), userInfo), userInfo)) {
+            throw new ActionException("Данное действие недоступно");
+        }
         Logger logger = new Logger();
         String uuidXml = reportService.getDec(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
