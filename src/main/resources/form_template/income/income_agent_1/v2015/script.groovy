@@ -192,7 +192,7 @@ def logicCheck() {
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка на заполнение зависимого поля ИНН и КПП (графа 14 и 15)
-         if (row.type?.intValue() in [1, 3, 4, 5] && row.status == 1 && (row.inn == null || row.kpp == null)) {
+        if (row.type?.intValue() in [1, 3, 4, 5] && row.status == 1 && (row.inn == null || row.kpp == null)) {
             // с 9 месяцев 2015 года
             logger.error("Строка $index: В случае если графы «%s» равна значению «1» / «3» / «4» / «5» и графа и «%s» равны значению «1», должна быть заполнена графа «%s» и «%s»!",
                     getColumnName(row, 'type'), getColumnName(row, 'status'), getColumnName(row, 'inn'), getColumnName(row, 'kpp'))
@@ -272,7 +272,7 @@ def logicCheck() {
         if (row.type != null && (row.type?.intValue() in [2, 3, 4, 5]) &&
                 (row.withheldSum == null || row.withheldDate == null || row.withheldNumber == null)) {
             logger.warn("Строка $index: В случае если графа «%s» равна значению «2» / «3» / «4» / «5», должна быть заполнена графа «%s», «%s», «%s»!",
-                            getColumnName(row, 'type'), getColumnName(row, 'withheldSum'), getColumnName(row, 'withheldDate'), getColumnName(row, 'withheldNumber'))
+                    getColumnName(row, 'type'), getColumnName(row, 'withheldSum'), getColumnName(row, 'withheldDate'), getColumnName(row, 'withheldNumber'))
         }
 
         // 13. Проверка заполнения графы 27
