@@ -705,9 +705,9 @@ public class FlexiblePager extends AbstractPager {
 
     /**  Обновить количество строк на странице в локальном хранилище браузера. */
     private void updateRowsCountOnPage() {
-        if (rowsCountOnPage.getValue() != null) {
+        if (rowsCountOnPage.getValue() != null && rowsCountOnPage.getValue() > 0) {
+            getDisplay().setVisibleRange(new Range(0, rowsCountOnPage.getValue()));
             setPageSize(rowsCountOnPage.getValue());
-            getDisplay().setVisibleRange(new Range(0, getPageSize()));
         }
     }
 
