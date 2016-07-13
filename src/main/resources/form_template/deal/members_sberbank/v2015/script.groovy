@@ -333,7 +333,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // графа 4 - атрибут 5216 - STATREPORT_ID - «ИД в АС "Статотчетность"», справочник 520 «Участники ТЦО»
     def colIndex = 3
     def map
-    def value = getCodeOrganization(values[colIndex])
+    def value = values[colIndex]
     if (value == null || value.isEmpty()) {
         logger.warn("Строка %s, столбец %s содержит пустое значение «%s»!", fileRowIndex, colIndex + colOffset, getColumnName(newRow, 'statReportId'))
     } else {
@@ -400,19 +400,6 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.sign = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
-}
-
-def getCodeOrganization(String code) {
-    if (code && !hasOnlyDecimal(code)) {
-        // если не только цифры
-        return code
-    }
-    return null
-}
-
-// проверка наличия только цифр
-def hasOnlyDecimal(def value) {
-    return value?.replaceAll('_', '').matches('\\d*')
 }
 
 // Сортировка групп и строк
