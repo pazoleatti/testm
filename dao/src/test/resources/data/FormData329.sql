@@ -108,8 +108,8 @@ INSERT INTO form_data(id, form_template_id, department_report_period_id, state, 
 INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign, number_current_row) VALUES (330, 330, 101, 1, 3, 0, 2);
 
 INSERT INTO form_data_329(id, form_data_id, temporary, manual, ord, alias, c3291, c3292, c3293, c3294, c3295)
-  SELECT 1, 329, 0, 0, 1, trim('row_alias №1'), trim('number'), 636, null, null, null FROM DUAL UNION
-  SELECT 2, 329, 0, 0, 2, null, trim('some string'), null, null, null, null FROM DUAL UNION
+  SELECT 1, 329, 0, 0, 1, trim('row_alias №1'), trim('number'), 636, null, null, 182633 FROM DUAL UNION
+  SELECT 2, 329, 0, 0, 2, null, trim('some string'), null, null, null, 182632 FROM DUAL UNION
 
   SELECT 3, 329, 1, 0, 1, null, null, 666, null, null, null FROM DUAL UNION
   SELECT 4, 329, 1, 0, 2, null, trim('qwerty'), null, null, null, null FROM DUAL UNION

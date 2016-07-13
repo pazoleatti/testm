@@ -10,32 +10,33 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 /**
  * User: lhaziev
  */
 public class DataRowServiceImplTest {
-/*
     private static DataRowService dataRowService = new DataRowServiceImpl();
     private static DataRowDao dataRowDao = Mockito.mock(DataRowDao.class);
     private static FormData formData;
-    private static List<Column> columnList;
+    private static PagingResult<FormDataSearchResult> daoResult;
 
     private static final String ALIAS_1 = "column1";
     private static final String ALIAS_2 = "column2";
     private static final String ALIAS_3 = "column3";
     private static final String ALIAS_4 = "column4";
     private static final String ALIAS_5 = "column5";
+    private static final int row_nums = 2;
+    private static final int col_nums = 5;
+
+    private static Object[][] table = {
+            {"row keeyyy",  new BigDecimal(123.45), new Date(), "ref keeyyy",   "ref2 keeyyy"},
+            {"row 2",       new BigDecimal(0.00),   new Date(), "row keeYYyy",  "row keeYyy"}
+    };
 
     @BeforeClass
     public static void init() {
@@ -46,74 +47,63 @@ public class DataRowServiceImplTest {
         formData.setId(1L);
         formData.setManual(false);
 
-        columnList = new LinkedList<Column>();
-        Column column1 = new StringColumn();
-        Column column2 = new NumericColumn();
-        Column column3 = new DateColumn();
-        Column column4 = new RefBookColumn();
-        ReferenceColumn column5 = new ReferenceColumn();
-        column1.setAlias(ALIAS_1);
-        column1.setId(1);
-        column1.setOrder(1);
-        column2.setAlias(ALIAS_2);
-        column2.setId(2);
-        column2.setOrder(1);
-        column3.setAlias(ALIAS_3);
-        column3.setId(3);
-        column3.setOrder(3);
-        column4.setAlias(ALIAS_4);
-        column4.setId(4);
-        column4.setOrder(4);
-        column5.setAlias(ALIAS_5);
-        column5.setId(5);
-        column5.setParentId(4);
-        column5.setOrder(5);
-        columnList.addAll(Arrays.asList(column1, column2, column3, column4, column5));
-        formData.setFormColumns(columnList);
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(1);
+        formTemplate.setName("template1");
+
+        for (int i = 1; i <= col_nums; i++) {
+            Column column;
+            switch (i) {
+                case 1: column = new StringColumn(); break;
+                case 2: column = new NumericColumn(); break;
+                case 3: column = new DateColumn(); break;
+                case 4: column = new RefBookColumn(); break;
+                default: column = new ReferenceColumn(); break;
+            }
+            column.setAlias("column" + i);
+            column.setId(i);
+            column.setOrder(i);
+            formTemplate.addColumn(column);
+        }
+        formData.initFormTemplateParams(formTemplate);
+
+        List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
+        DataRow<Cell> row;
+        for (int i = 0; i < row_nums; i++) {
+            row = formData.createDataRow();
+            row.setIndex(i + 1);
+            row.getCell(ALIAS_1).setStringValue((String) table[i][0]);
+            row.getCell(ALIAS_2).setNumericValue((BigDecimal) table[i][1]);
+            row.getCell(ALIAS_3).setDateValue((Date) table[i][2]);
+            row.getCell(ALIAS_4).setRefBookDereference((String) table[i][3]);
+            row.getCell(ALIAS_5).setRefBookDereference((String) table[i][4]);
+            rows.add(row);
+        }
 
         FormDataDao formDataDao = Mockito.mock(FormDataDao.class);
         ReflectionTestUtils.setField(dataRowService, "formDataDao", formDataDao);
-        when(formDataDao.get(formData.getId(), formData.isManual())).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                formData.setFormColumns(columnList);
-                return formData;
-            }
-        });
-
-        List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
-        DataRow<Cell> row1 = formData.createDataRow();
-        row1.setIndex(1);
-        row1.getCell(ALIAS_1).setStringValue("row keeyyy");
-        row1.getCell(ALIAS_2).setNumericValue(new BigDecimal(123.45));
-        row1.getCell(ALIAS_3).setDateValue(new Date());
-        row1.getCell(ALIAS_4).setRefBookDereference("ref keeyyy");
-        row1.getCell(ALIAS_5).setRefBookDereference("ref2 keeyyy");
-        rows.add(row1);
-
-        DataRow<Cell> row2 = formData.createDataRow();
-        row2.setIndex(2);
-        row2.getCell(ALIAS_1).setStringValue("row 2");
-        row2.getCell(ALIAS_2).setNumericValue(new BigDecimal(0.00));
-        row2.getCell(ALIAS_3).setDateValue(new Date());
-        row2.getCell(ALIAS_4).setRefBookDereference("row keeYYyy");
-        row2.getCell(ALIAS_5).setRefBookDereference("row keeYyy");
-        rows.add(row2);
+        when(formDataDao.get(formData.getId(), formData.isManual())).thenReturn(formData);
 
         ReflectionTestUtils.setField(dataRowService, "dataRowDao", dataRowDao);
-        when(dataRowDao.getRows(formData, null)).thenReturn(rows);
+        when(dataRowDao.getRowsRefColumnsOnly(formData, null)).thenReturn(rows);
+
+        daoResult = new PagingResult<FormDataSearchResult>();
+        FormDataSearchResult daoRow;
+        daoRow = new FormDataSearchResult();
+        daoRow.setRowIndex(1L);
+        daoRow.setIndex(1L);
+        daoRow.setColumnIndex(1L);
+        daoRow.setStringFound("row keeyyy");
+        daoResult.add(daoRow);
     }
 
     @Test
     public void test(){
         String key = "keeyyy";
-
         DataRowRange range = new DataRowRange();
         range.setOffset(1);
         range.setCount(5);
-
-        when(dataRowDao.searchByKey(formData.getId(), range, key, true, formData.isManual())).thenReturn(new PagingResult<FormDataSearchResult>());
-
+        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, true, formData.isManual())).thenReturn(new PagingResult<FormDataSearchResult>());
         PagingResult<FormDataSearchResult> results = dataRowService.searchByKey(formData.getId(), range, key, true, false);
         Assert.assertEquals(2, results.size());
 
@@ -131,40 +121,43 @@ public class DataRowServiceImplTest {
     @Test
     public void test2(){
         String key = "keeyyy";
-
         DataRowRange range = new DataRowRange();
         range.setOffset(1);
         range.setCount(10);
-
-        when(dataRowDao.searchByKey(formData.getId(), range, key, false, formData.isManual())).thenReturn(new PagingResult<FormDataSearchResult>());
+        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, false, formData.isManual())).thenReturn(daoResult);
         PagingResult<FormDataSearchResult>  results = dataRowService.searchByKey(formData.getId(), range, key, false, false);
-        Assert.assertEquals(4, results.size());
+        Assert.assertEquals(5, results.size());
 
         Assert.assertEquals(new Long(1), results.get(0).getIndex());
-        Assert.assertEquals("ref keeyyy", results.get(0).getStringFound());
+        Assert.assertEquals("row keeyyy", results.get(0).getStringFound());
         Assert.assertEquals(new Long(1), results.get(0).getRowIndex());
-        Assert.assertEquals(new Long(4), results.get(0).getColumnIndex());
+        Assert.assertEquals(new Long(1), results.get(0).getColumnIndex());
 
         Assert.assertEquals(new Long(2), results.get(1).getIndex());
-        Assert.assertEquals("ref2 keeyyy", results.get(1).getStringFound());
+        Assert.assertEquals("ref keeyyy", results.get(1).getStringFound());
         Assert.assertEquals(new Long(1), results.get(1).getRowIndex());
-        Assert.assertEquals(new Long(5), results.get(1).getColumnIndex());
+        Assert.assertEquals(new Long(4), results.get(1).getColumnIndex());
 
         Assert.assertEquals(new Long(3), results.get(2).getIndex());
-        Assert.assertEquals("row keeYYyy", results.get(2).getStringFound());
-        Assert.assertEquals(new Long(2), results.get(2).getRowIndex());
-        Assert.assertEquals(new Long(4), results.get(2).getColumnIndex());
+        Assert.assertEquals("ref2 keeyyy", results.get(2).getStringFound());
+        Assert.assertEquals(new Long(1), results.get(2).getRowIndex());
+        Assert.assertEquals(new Long(5), results.get(2).getColumnIndex());
 
         Assert.assertEquals(new Long(4), results.get(3).getIndex());
-        Assert.assertEquals("row keeYyy", results.get(3).getStringFound());
+        Assert.assertEquals("row keeYYyy", results.get(3).getStringFound());
         Assert.assertEquals(new Long(2), results.get(3).getRowIndex());
-        Assert.assertEquals(new Long(5), results.get(3).getColumnIndex());
+        Assert.assertEquals(new Long(4), results.get(3).getColumnIndex());
+
+        Assert.assertEquals(new Long(5), results.get(4).getIndex());
+        Assert.assertEquals("row keeYyy", results.get(4).getStringFound());
+        Assert.assertEquals(new Long(2), results.get(4).getRowIndex());
+        Assert.assertEquals(new Long(5), results.get(4).getColumnIndex());
 
         range = new DataRowRange();
         range.setOffset(3);
         range.setCount(4);
 
-        when(dataRowDao.searchByKey(formData.getId(), range, key, false, formData.isManual())).thenReturn(new PagingResult<FormDataSearchResult>());
+        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, false, formData.isManual())).thenReturn(new PagingResult<FormDataSearchResult>());
         results = dataRowService.searchByKey(formData.getId(), range, key, false, false);
         Assert.assertEquals(2, results.size());
         Assert.assertEquals(new Long(3), results.get(0).getIndex());
@@ -197,7 +190,7 @@ public class DataRowServiceImplTest {
         pagingResult.setTotalCount(1);
         pagingResult.add(formDataSearchResult);
 
-        when(dataRowDao.searchByKey(formData.getId(), range, key, false, formData.isManual())).thenReturn(pagingResult);
+        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, false, formData.isManual())).thenReturn(pagingResult);
 
         PagingResult<FormDataSearchResult> results = dataRowService.searchByKey(formData.getId(), range, key, false, formData.isManual());
         Assert.assertEquals(5, results.size());
@@ -216,5 +209,5 @@ public class DataRowServiceImplTest {
 
         Assert.assertEquals(new Long(5), results.get(4).getIndex());
         Assert.assertEquals("row keeYyy", results.get(4).getStringFound());
-    }*/
+    }
 }

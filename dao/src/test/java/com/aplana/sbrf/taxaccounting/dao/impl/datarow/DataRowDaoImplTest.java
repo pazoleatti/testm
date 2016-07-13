@@ -117,6 +117,15 @@ public class DataRowDaoImplTest extends Assert {
     }
 
     @Test
+    public void getRowsRefColumnsOnly() {
+        FormData formData = formDataDao.get(329, false);
+        List<DataRow<Cell>> rows = dataRowDao.getRowsRefColumnsOnly(formData, null);
+        assertEquals(2, rows.get(0).keySet().size());
+        assertEquals(null, rows.get(0).get("dateColumn"));
+        assertEquals(182633L, rows.get(0).get("refBookColumn"));
+    }
+
+    @Test
     public void getRowCount() {
         FormData formData = formDataDao.get(329, false);
         assertEquals(2, dataRowDao.getRowCount(formData));
@@ -338,7 +347,7 @@ public class DataRowDaoImplTest extends Assert {
 
         List<Integer> recordIds = jdbc.queryForList("SELECT record_id FROM form_data_ref_book WHERE " +
                 "form_data_id = :form_data_id AND ref_book_id = :ref_book_id", params, Integer.class);
-        assertEquals(1, recordIds.size());
+        assertEquals(2, recordIds.size());
         assertEquals(Integer.valueOf(182632), recordIds.get(0));
     }
 
