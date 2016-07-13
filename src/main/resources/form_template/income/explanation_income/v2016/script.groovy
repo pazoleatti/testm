@@ -293,7 +293,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // графа 3
     colIndex = 2
     if (map != null) {
-        formDataService.checkReferenceValue(28, values[colIndex], map.OPU?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        formDataService.checkReferenceValue(28, values[colIndex], [map.OPU?.stringValue], fileRowIndex, colIndex + colOffset, logger, false)
     }
 
     // графа 4
