@@ -3,6 +3,7 @@ package refbook.income102
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.Income102
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -48,6 +49,9 @@ void importData() {
     if (list != null && !list.isEmpty()) {
         List<Map<String, RefBookValue>> records = new LinkedList<Map<String, RefBookValue>>()
         for (Income102 item : list) {
+            if (item.getItemName() != null && item.getItemName().length() > 255) {
+                logger.error("В строке с \"Символ = %s\" превышена максимальная длина строки значения поля  \"Наименование статьи\"!", item.getOpuCode())
+            }
             Map<String, RefBookValue> map = new HashMap<String, RefBookValue>()
             map.put('OPU_CODE', new RefBookValue(RefBookAttributeType.STRING, item.getOpuCode()))
             map.put('TOTAL_SUM', new RefBookValue(RefBookAttributeType.NUMBER, item.getTotalSum()))
@@ -64,7 +68,9 @@ void importData() {
             logger.error(matchedRecords.join(', '))
             return
         }
-        provider.updateRecords(null, null, records)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            provider.updateRecords(null, null, records)
+        }
     } else {
         throw new ServiceException('Файл не содержит данных. Файл не может быть загружен.')
     }
