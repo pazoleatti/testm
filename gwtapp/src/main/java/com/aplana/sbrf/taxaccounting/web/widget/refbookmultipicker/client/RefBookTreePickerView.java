@@ -483,14 +483,13 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     @Override
     public void unselectAll(DeferredInvokeHandler handler) {
-        if (multiSelect) {
-            for (RefBookUiTreeItem uiTreeItem : tree.getAllLoadedItems()) {
-                tree.setSelected(uiTreeItem, false);
-            }
-            widgetFireChangeEvent(getSelectedIds());
-            if (handler != null) {
-                handler.onInvoke();
-            }
+        cleanValues();
+        for (RefBookUiTreeItem uiTreeItem : tree.getAllLoadedItems()) {
+            tree.setSelected(uiTreeItem, false);
+        }
+        widgetFireChangeEvent(getSelectedIds());
+        if (handler != null) {
+            handler.onInvoke();
         }
     }
 
