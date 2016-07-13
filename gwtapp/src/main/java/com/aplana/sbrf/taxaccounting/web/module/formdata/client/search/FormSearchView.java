@@ -45,7 +45,7 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
 
     private final PopupPanel widget;
 
-    private AsyncDataProvider<FormDataSearchResult> dataProvider = new  AsyncDataProvider<FormDataSearchResult>() {
+    private AsyncDataProvider<FormDataSearchResult> dataProvider = new AsyncDataProvider<FormDataSearchResult>() {
         @Override
         protected void onRangeChanged(HasData<FormDataSearchResult> display) {
             if (getUiHandlers() != null && !filterText.getText().isEmpty()){
@@ -91,7 +91,6 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     }
 
     private void init(){
-
         pager.setDisplay(searchResultTable);
         searchResultTable.setPageSize(pager.getPageSize());
 
@@ -186,7 +185,11 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     public void onSearchClicked(ClickEvent event){
         if (!filterText.getText().isEmpty()){
             if (filterText.getText().length()>=3) {
-                getUiHandlers().onRangeChange(0, pager.getPageSize());
+                if (pager.getPage() != 0) {
+                    pager.firstPage();
+                } else {
+                    getUiHandlers().onRangeChange(0, pager.getPageSize());
+                }
             } else {
                 Dialog.warningMessage("Слишком короткая строка запроса. Для поиска наберите не менее 3-х символов.");
             }

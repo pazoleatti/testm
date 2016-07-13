@@ -66,7 +66,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	private DataRowColumnFactory factory = new DataRowColumnFactory();
 
-	private AsyncDataProvider<DataRow<Cell>> dataProvider = new  AsyncDataProvider<DataRow<Cell>>() {
+	private AsyncDataProvider<DataRow<Cell>> dataProvider = new AsyncDataProvider<DataRow<Cell>>() {
 		@Override
 		protected void onRangeChanged(HasData<DataRow<Cell>> display) {
 			Range range = display.getVisibleRange();
