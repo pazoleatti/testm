@@ -16,6 +16,9 @@ public abstract class ComparatorWithNull<T, K extends Comparable<K>> implements 
         } else if (o1 == null && o2 == null) {
             return 0;
         } else {
+            if (o1.getClass() == String.class) {
+                return o1.toString().compareToIgnoreCase(o2.toString());
+            }
             return o1.compareTo(o2);
         }
     }
