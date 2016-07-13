@@ -49,9 +49,6 @@ void importData() {
     if (list != null && !list.isEmpty()) {
         List<Map<String, RefBookValue>> records = new LinkedList<Map<String, RefBookValue>>()
         for (Income102 item : list) {
-            if (item.getItemName() != null && item.getItemName().length() > 255) {
-                logger.error("В строке с \"Символ = %s\" превышена максимальная длина строки значения поля  \"Наименование статьи\"!", item.getOpuCode())
-            }
             Map<String, RefBookValue> map = new HashMap<String, RefBookValue>()
             map.put('OPU_CODE', new RefBookValue(RefBookAttributeType.STRING, item.getOpuCode()))
             map.put('TOTAL_SUM', new RefBookValue(RefBookAttributeType.NUMBER, item.getTotalSum()))
@@ -67,6 +64,11 @@ void importData() {
             logger.error("Следующие коды ОПУ указаны в форме более одного раза:")
             logger.error(matchedRecords.join(', '))
             return
+        }
+        for (Income102 item : list) {
+            if (item.getItemName() != null && item.getItemName().length() > 255) {
+                logger.error("В строке с \"Символ = %s\" превышена максимальная длина строки значения поля  \"Наименование статьи\"!", item.getOpuCode())
+            }
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
             provider.updateRecords(null, null, records)
