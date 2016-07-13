@@ -50,6 +50,7 @@ public class GetDeadlineDepartmentsHandler extends AbstractActionHandler<GetDead
 				case INCOME:
 				case DEAL:
 				case VAT:
+                case MARKET:
                 case ETR:
 					departments.addAll(departmentService.getBADepartments(userInfo.getUser()));
 					d = departmentService.getBankDepartment();
