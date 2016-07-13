@@ -3,6 +3,7 @@ package form_template.deal.members_sberbank.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -120,23 +121,13 @@ def getPeriodOrder() {
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    if (value == null || value.trim().isEmpty()) {
-        return null
-    }
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
 def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                     def boolean required = false) {
     if (value == null || value == '') {
         return null
     }
     return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
-            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, new Logger(), required)
 }
 
 // Разыменование записи справочника
@@ -339,23 +330,37 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    def int colIndex = 1
+    // графа 4 - атрибут 5216 - STATREPORT_ID - «ИД в АС "Статотчетность"», справочник 520 «Участники ТЦО»
+    def colIndex = 3
+    def map
+    def value = getCodeOrganization(values[colIndex])
+    if (value == null || value.isEmpty()) {
+        logger.warn("Строка %s, столбец %s содержит пустое значение «%s»!", fileRowIndex, colIndex + colOffset, getColumnName(newRow, 'statReportId'))
+    } else {
+        map = getRecordImport(520L, 'STATREPORT_ID', value, fileRowIndex, colIndex + colOffset)
+        if (map == null || map.isEmpty()) {
+            logger.warn("Строка %s, столбец %s в справочнике «Участники ТЦО» не найдена запись со значением атрибута «ИД в АС «Статотчетность» равная значению «%s»!",
+                    fileRowIndex, colIndex + colOffset, value)
+        } else {
+            newRow.name = map.record_id.value
+        }
+    }
 
-    def recordId = getTcoRecordId(values[1], values[9], getColumnName(newRow, 'iksr'), fileRowIndex, colIndex, getReportPeriodEndDate(), true, logger, refBookFactory, recordCache)
-    def map = getRefBookValue(520, recordId)
-
+    colIndex = 1
     // графа 2
-    newRow.name = recordId
-    colIndex++
+    if (map != null) {
+        if (!values[colIndex].equalsIgnoreCase(map.NAME?.stringValue)) {
+            logger.warn("Строка %s, столбец %s значение графы «%s» в файле не совпадает со значением в справочнике. Значение в файле «%s», значение в справочнике «%s». Графа заполнена справочным значением!",
+                    fileRowIndex, colIndex + colOffset, getColumnName(newRow, 'name'), values[colIndex], map.NAME?.stringValue)
+        }
+    }
+    colIndex = 2
 
     // графа 3
     newRow.pseudoName = values[colIndex]
     colIndex++
 
     // графа 4 - атрибут 5216 - STATREPORT_ID - «ИД в АС "Статотчетность"», справочник 520 «Участники ТЦО»
-    if (map != null) {
-        formDataService.checkReferenceValue(520, values[colIndex], map.STATREPORT_ID?.stringValue as String, fileRowIndex, colIndex + colOffset, logger, false)
-    }
     colIndex++
 
     // графа 5
@@ -380,7 +385,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 10
     if (map != null) {
-        formDataService.checkReferenceValue(520, values[colIndex], map.IKSR?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        if (!values[colIndex].equalsIgnoreCase(map.IKSR?.stringValue)) {
+            logger.warn("Строка %s, столбец %s значение графы «%s» в файле не совпадает со значением в справочнике. Значение в файле «%s», значение в справочнике «%s». Графа заполнена справочным значением!",
+                    fileRowIndex, colIndex + colOffset, getColumnName(newRow, 'iksr'), values[colIndex], map.IKSR?.stringValue)
+        }
     }
     colIndex++
 
@@ -392,6 +400,19 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.sign = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+def getCodeOrganization(String code) {
+    if (code && !hasOnlyDecimal(code)) {
+        // если не только цифры
+        return code
+    }
+    return null
+}
+
+// проверка наличия только цифр
+def hasOnlyDecimal(def value) {
+    return value?.replaceAll('_', '').matches('\\d*')
 }
 
 // Сортировка групп и строк
