@@ -233,6 +233,7 @@ def consolidation() {
 
     // консолидация из таблицы 2
     consolidationFromTable2(dataRows, formSources)
+    addExplanationPrev(dataRows, 'consumptionTypeId')
 }
 
 boolean isFromSummary(def formSources) {
@@ -346,7 +347,7 @@ void consolidationFromTable2(def dataRows, def formSources) {
             def columnName16 = getColumnName(dataRows[0], 'table2')
             def template = formDataService.getFormTemplate(formTypeId_TABLE2, formData.reportPeriodId)
             def table2Name = (template?.name ?: 'Таблица 2. Пояснение отклонений от ОФР в простом регистре налогового учёта «Расходы»')
-            logger.warn("Строка %s: Графа «%s» заполнена значением «0», т.к. не найдены строки по требуемым КНУ в форме-источнике «%s»!",
+            logger.warn("Строки %s: Для заполнения графы «%s» не найдены строки по требуемым КНУ в форме-источнике «%s»!",
                     subMsg, columnName16, table2Name)
         }
     }
@@ -534,4 +535,30 @@ def fillTotalRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex,
     // графа 9
     def colIndex = 8
     dataRow.consumptionTaxSumS = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+}
+
+/**
+ * Добавить "Пояснение" из формы пред периода
+ * @param dataRows строки формы
+ */
+void addExplanationPrev(def dataRows, def codeAlias) {
+    // Отчётный период.
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    if (reportPeriod.order == 1) {
+        return
+    }
+    // Форма предыдущего периода
+    def formDataOld = formDataService.getFormDataPrev(formData)
+    if (formDataOld == null || formDataOld.state != WorkflowState.ACCEPTED) {
+        return
+    }
+    def dataRowsPrev = formDataService.getDataRowHelper(formDataOld).allSaved
+    for (row in dataRows) {
+        if (!(row.getAlias() in skipAliases)) {
+            if (dataRowsPrev != null && !(dataRowsPrev.isEmpty())) {
+                def prevRow = dataRowsPrev.find { it[codeAlias] == row[codeAlias] }
+                row.table2 = (row.table2 ?: BigDecimal.ZERO) + (prevRow?.table2 ?: BigDecimal.ZERO)
+            }
+        }
+    }
 }
