@@ -287,7 +287,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
                 if (reportPeriod == null) {
                     String reportPeriodName = "";
-                    String filter = "CODE=" + reportPeriodCode + " AND " + formType.getTaxType().getCode() + "=1";
+                    String filter = "CODE='" + reportPeriodCode + "' AND " + formType.getTaxType().getCode() + "=1";
                     PagingResult<Map<String, RefBookValue>> reportPeriodDicts = refBookDao.getRecords(REF_BOOK_PERIOD_DICT, null, null, filter, null);
                     if (reportPeriodDicts.size() == 1) {
                         reportPeriodName = reportPeriodDicts.get(0).get("NAME").getStringValue();
