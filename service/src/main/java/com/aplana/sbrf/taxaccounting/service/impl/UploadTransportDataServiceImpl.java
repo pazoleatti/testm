@@ -397,7 +397,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             if (formDepartment == null) {
                 logger.warn(U2, fileName);
                 RefBook refBook = refBookDao.get(REF_BOOK_DEPARTMENT);
-                logger.warn(U2_1, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(),transportDataParam.getDepartmentCode());
+                logger.warn(U2_1, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), transportDataParam.getDepartmentCode());
                 return null;
             }
 

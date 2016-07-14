@@ -341,9 +341,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Указан несуществующий код подразделения
                 if (formDepartment == null) {
                     RefBook refBook = refBookDao.get(REF_BOOK_DEPARTMENT);
-                    log(userInfo, LogData.L5, logger, lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode, fileName);
+                    log(userInfo, LogData.L5, logger, lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), departmentCode, fileName);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), reportPeriodCode, fileName))), logger, lockId);
+                            Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), departmentCode, fileName))), logger, lockId);
                     fail++;
                     continue;
                 }
