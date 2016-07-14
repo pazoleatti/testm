@@ -99,33 +99,33 @@ def refBookCache = [:]
 @Field
 def allColumns = ['rowNum', 'fix', 'period', 'number', 'sumPlus', 'sumMinus', 'numberNds', 'sumNdsPlus', 'sumNdsMinus', 'rateNds', 'sum']
 
-// Редактируемые атрибуты (графа 2,3,6-8) не для разделов 1-6
+// Редактируемые атрибуты (графа 2, 3, 6-8) не для разделов 1-7
 @Field
 def editableColumns = ['period', 'number', 'numberNds', 'sumNdsPlus', 'sumNdsMinus']
 
 // Редактируемые атрибуты (графа 2-8) для разделов 1-6
 @Field
-def editableColumns_1_6 = ['period', 'number', 'sumPlus', 'sumMinus', 'numberNds', 'sumNdsPlus', 'sumNdsMinus']
+def editableColumns_1_7 = ['period', 'number', 'sumPlus', 'sumMinus', 'numberNds', 'sumNdsPlus', 'sumNdsMinus']
 
 // Проверяемые на пустые значения атрибуты (графа 2, 3, 9, 10)
 @Field
 def nonEmptyColumns = ['period', 'number', 'rateNds', 'sum']
 
 @Field
-def emptyColumns_7_9 = ['sumPlus', 'sumMinus']
+def emptyColumns_8_9 = ['sumPlus', 'sumMinus']
 
 // Атрибуты итоговых строк для которых вычисляются суммы
-// для групп 1 - 6, "ВСЕГО по дополнительному листу книги продаж..." (графа 4, 5, 7, 8, 10)
+// для групп 1 - 7, "ВСЕГО по дополнительному листу книги продаж..." (графа 4, 5, 7, 8, 10)
 @Field
-def totalColumns1_6_Sale = ['sumPlus', 'sumMinus', 'sumNdsPlus', 'sumNdsMinus', 'sum']
+def totalColumns1_7_Sale = ['sumPlus', 'sumMinus', 'sumNdsPlus', 'sumNdsMinus', 'sum']
 
 // для группы "ВСЕГО по разделам 1-6" (графа 7, 8)
 @Field
 def totalColumnsMega = ['sumNdsPlus', 'sumNdsMinus']
 
-// для группы 7, 8, 9, "ВСЕГО по дополнительному листу книги покупок..." (графа 7, 8, 10)
+// для группы 8, 9, "ВСЕГО по дополнительному листу книги покупок..." (графа 7, 8, 10)
 @Field
-def totalColumns7_9_Purchase = ['sumNdsPlus', 'sumNdsMinus', 'sum']
+def totalColumns8_9_Purchase = ['sumNdsPlus', 'sumNdsMinus', 'sum']
 
 @Field
 def skipColumns = ['sumMinus', 'sumNdsMinus']
@@ -227,7 +227,7 @@ def addRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def index
-    boolean isGroup_1_6 = false
+    boolean isGroup_1_7 = false
     if (currentDataRow != null) {
         def alias = currentDataRow.getAlias()
         index = currentDataRow.getIndex()
@@ -237,17 +237,17 @@ def addRow() {
         if (alias != null && alias == "mega_total") {
             index += 2
         }
-        isGroup_1_6 = getDataRow(dataRows, 'mega_total').getIndex() > currentDataRow.getIndex()
+        isGroup_1_7 = getDataRow(dataRows, 'head_8').getIndex() > currentDataRow.getIndex()
     } else {
         index = dataRows.size() + 1
     }
-    dataRowHelper.insert(getNewRow(isGroup_1_6), index)
+    dataRowHelper.insert(getNewRow(isGroup_1_7), index)
 }
 
 /** Получить новую строку с заданными стилями. */
-def getNewRow(boolean isGroup_1_6) {
+def getNewRow(boolean isGroup_1_7) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
-    def columns = isGroup_1_6 ? editableColumns_1_6 : editableColumns
+    def columns = isGroup_1_7 ? editableColumns_1_7 : editableColumns
     columns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).styleAlias = 'Редактируемая'
@@ -575,7 +575,7 @@ void calcMegaTotal(def megaTotal, def dataRows) {
 // Считаем супер-итоги для "Всего за налоговый период по доп. листу книги покупок/продаж"
 def calcSuperTotals(def dataRows) {
     def sectionsSuper = ['sale_18' : ['1', '3', '5', '6', '7'], 'sale_10' : ['2', '4'], 'purchase' : ['8', '9']]
-    def totalColumnsSuper = ['sale_18' : totalColumns1_6_Sale, 'sale_10' : totalColumns1_6_Sale, 'purchase' : totalColumns7_9_Purchase]
+    def totalColumnsSuper = ['sale_18' : totalColumns1_7_Sale, 'sale_10' : totalColumns1_7_Sale, 'purchase' : totalColumns8_9_Purchase]
 
     def superRows = []
     sectionsSuper.keySet().each { key ->
@@ -685,10 +685,10 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows, def section,
         rows.add(dataRows.get(j))
     }
     def columns
-    if (section != null && Integer.valueOf(section) < 7) {
-        columns = totalColumns1_6_Sale
-    } else if (section != null && Integer.valueOf(section) > 6) {
-        columns = totalColumns7_9_Purchase
+    if (section != null && Integer.valueOf(section) < 8) {
+        columns = totalColumns1_7_Sale
+    } else if (section != null && Integer.valueOf(section) > 7) {
+        columns = totalColumns8_9_Purchase
     }
     calcSpecificTotals(rows, newRow, columns)
     return newRow
@@ -711,14 +711,14 @@ def getSuperTotalRow(def key, def periodId) {
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def isAfterSection6 = false
+    def isAfterSection7 = false
     def section = null
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             if (row.getAlias().startsWith('head_')){
                 section = row.getAlias().replaceAll('head_', '')
-                if (section == '7') {
-                    isAfterSection6 = true
+                if (section == '8') {
+                    isAfterSection7 = true
                 }
             }
             continue
@@ -737,22 +737,22 @@ void logicCheck() {
         }
 
         // 3. Проверка незаполненности граф с суммой корректировки
-        if (isAfterSection6 && emptyColumns_7_9.find { row[it] != null } != null) {
+        if (isAfterSection7 && emptyColumns_8_9.find { row[it] != null } != null) {
             logger.error("Строка $index: Графы с суммой корректировки (+, -) налоговой базы (раздел 7-9) не должны быть заполнены!")
         }
 
         // 4. Проверка на заполнение хотя бы одной из граф «+», «-» с суммой корректировки
         // 5. Проверка положительности суммы корректировки
         // 6. Проверка отрицательности суммы корректировки
-        if (!isAfterSection6) {
+        if (!isAfterSection7) {
             if (row.sumPlus == null && row.sumMinus == null) {
-                logger.error("Строка $index: Должна быть заполнена хотя бы одна из граф с суммой корректировки (+, -) налоговой базы (раздел 1-6)!")
+                logger.error("Строка $index: Должна быть заполнена хотя бы одна из граф с суммой корректировки (+, -) налоговой базы (раздел 1-7)!")
             }
             if (row.sumPlus != null && !(row.sumPlus > 0)) {
-                logger.error("Строка $index: Графа с суммой корректировки (+) налоговой базы (раздел 1-6) должна быть заполнена значением больше «0»!")
+                logger.error("Строка $index: Графа с суммой корректировки (+) налоговой базы (раздел 1-7) должна быть заполнена значением больше «0»!")
             }
             if (row.sumMinus != null && !(row.sumMinus < 0)) {
-                logger.error("Строка $index: Графа с суммой корректировки (-) налоговой базы (раздел 1-6) должна быть заполнена значением меньше «0»!")
+                logger.error("Строка $index: Графа с суммой корректировки (-) налоговой базы (раздел 1-7) должна быть заполнена значением меньше «0»!")
             }
         }
 
@@ -792,8 +792,8 @@ void logicCheck() {
     // 15. Проверка разрядности итоговых значений, используемых для заполнения строк Раздела 3 декларации НДС, разрядность которых 14
     def size = 14
     def rows = []
-    def checkColumns = totalColumns1_6_Sale
-    ['total_1_', 'total_2_', 'total_3_', 'total_4_', 'total_5_', 'total_6_', 'total_8_', 'total_9_'].each { subAlias ->
+    def checkColumns = totalColumns1_7_Sale
+    ['total_1_', 'total_2_', 'total_3_', 'total_4_', 'total_5_', 'total_6_', 'total_7_', 'total_8_', 'total_9_'].each { subAlias ->
         def row = dataRows.find { it.getAlias()?.contains(subAlias) }
         if (row) {
             rows.add(row)
@@ -1088,7 +1088,7 @@ void importData() {
 
         // простая строка
         rowIndex++
-        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, Integer.valueOf(sectionIndex) < 7)
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, Integer.valueOf(sectionIndex) < 8)
         sectionMap[sectionIndex].add(newRow)
         rows.add(newRow)
 
@@ -1161,8 +1161,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, boolean isGroup_1_6) {
-    def newRow = getNewRow(isGroup_1_6)
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, boolean isGroup_1_7) {
+    def newRow = getNewRow(isGroup_1_7)
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
@@ -1272,10 +1272,10 @@ void compareSpecificTotalValues(def dataRows, def sectionMap) {
             @Override
             String check(DataRow<Cell> row1, DataRow<Cell> row2) {
                 def columns
-                if (Integer.valueOf(section) < 7) {
-                    columns = totalColumns1_6_Sale - skipColumns
-                } else if (Integer.valueOf(section) > 6) {
-                    columns = totalColumns7_9_Purchase - skipColumns
+                if (Integer.valueOf(section) < 8) {
+                    columns = totalColumns1_7_Sale - skipColumns
+                } else if (Integer.valueOf(section) > 7) {
+                    columns = totalColumns8_9_Purchase - skipColumns
                 }
                 for (def column : columns) {
                     if (row1[column] != row2[column]) {
@@ -1321,7 +1321,7 @@ void compareSpecificTotalValues(def dataRows, def sectionMap) {
         if (calcRow == null) {
             rowLog(logger, superRow, String.format("Строка %d: Строка итога не относится к какой-либо группе!", superRow.getIndex()), logLevel)
         } else {
-            def compareColumns = (superRow.getAlias().startsWith('super_sale') ? totalColumns1_6_Sale : totalColumns7_9_Purchase) - skipColumns
+            def compareColumns = (superRow.getAlias().startsWith('super_sale') ? totalColumns1_7_Sale : totalColumns8_9_Purchase) - skipColumns
             if (isImport) {
                 compareTotalValues(superRow, calcRow, compareColumns, logger, !isImport)
             } else {
