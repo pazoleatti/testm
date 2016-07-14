@@ -193,7 +193,7 @@
         <name>Доля налогоплательщика в праве на ТС</name>
         <shortName>Доля налогоплательщика</shortName>
         <order>19</order>
-        <width>9</width>
+        <width>10</width>
         <maxLength>21</maxLength>
         <prevLength>0</prevLength>
     </columns>
