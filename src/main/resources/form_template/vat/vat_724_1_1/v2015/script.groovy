@@ -737,7 +737,7 @@ void importData() {
             rowValues.clear()
             continue
         } else if (firstValue.startsWith("ВСЕГО по дополнительному листу")) {
-            if (sectionIndex != '7') {
+            if (sectionIndex != '7' && sectionIndex != '9') {
                 throw new ServiceException("Строка %d: Структура файла не соответствует макету налоговой формы", fileRowIndex)
             }
             def entry = megaTotalsPatterns.find { key, pattern -> firstValue ==~ pattern}
