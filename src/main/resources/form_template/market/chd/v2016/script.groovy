@@ -1,4 +1,4 @@
-package form_template.market.mis.v2016
+package form_template.market.chd.v2016
 
 import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent

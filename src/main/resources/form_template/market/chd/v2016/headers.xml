@@ -1,10 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?><rows>
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
     <row alias="">
         <cell alias="rowNum" colSpan="1" rowSpan="2" value="№ п/п"/>
         <cell alias="name" colSpan="6" rowSpan="1" value="Заёмщик"/>
+        <cell alias="opf" colSpan="1" rowSpan="1"/>
+        <cell alias="country" colSpan="1" rowSpan="1"/>
+        <cell alias="innKio" colSpan="1" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="docNum" colSpan="1" rowSpan="1"/>
         <cell alias="docDate" colSpan="8" rowSpan="1" value="Кредитный договор"/>
+        <cell alias="docDate2" colSpan="1" rowSpan="1"/>
+        <cell alias="docDate3" colSpan="1" rowSpan="1"/>
+        <cell alias="partRepayment" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="currencyCode" colSpan="1" rowSpan="1"/>
+        <cell alias="creditSum" colSpan="1" rowSpan="1"/>
+        <cell alias="creditRate" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="1"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Наименование заёмщика"/>
         <cell alias="opf" colSpan="1" rowSpan="1" value="ОПФ"/>
         <cell alias="country" colSpan="1" rowSpan="1" value="Страна регистрации (местоположения заемщика)"/>

@@ -8,89 +8,89 @@
         <cell alias="creditPeriod" colSpan="1" rowSpan="1" value="Срок кредита"/>
         <cell alias="count1year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min1year100" colSpan="8" rowSpan="1" value="до 1 года (включ.)"/>
-        <cell alias="max1year100" colSpan="1" rowSpan="1" value="до 1 года (включ.)"/>
-        <cell alias="count1year100_1000" colSpan="1" rowSpan="1" value="до 1 года (включ.)"/>
-        <cell alias="min1year100_1000" colSpan="1" rowSpan="1" value="до 1 года (включ.)"/>
-        <cell alias="max1year100_1000" colSpan="1" rowSpan="1" value="до 1 года (включ.)"/>
-        <cell alias="count1year1000" colSpan="1" rowSpan="1" value="до 1 года (включ.)"/>
-        <cell alias="min1year1000" colSpan="1" rowSpan="1" value="до 1 года (включ.)"/>
-        <cell alias="max1year1000" colSpan="1" rowSpan="1" value="до 1 года (включ.)"/>
+        <cell alias="max1year100" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="count1year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="min1year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="max1year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="count1year1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="min1year1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="max1year1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count1_5year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min1_5year100" colSpan="8" rowSpan="1" value="от 1 года до 5 лет (включ.)"/>
-        <cell alias="max1_5year100" colSpan="1" rowSpan="1" value="от 1 года до 5 лет (включ.)"/>
-        <cell alias="count1_5year100_1000" colSpan="1" rowSpan="1" value="от 1 года до 5 лет (включ.)"/>
-        <cell alias="min1_5year100_1000" colSpan="1" rowSpan="1" value="от 1 года до 5 лет (включ.)"/>
-        <cell alias="max1_5year100_1000" colSpan="1" rowSpan="1" value="от 1 года до 5 лет (включ.)"/>
-        <cell alias="count1_5year1000" colSpan="1" rowSpan="1" value="от 1 года до 5 лет (включ.)"/>
-        <cell alias="min1_5year1000" colSpan="1" rowSpan="1" value="от 1 года до 5 лет (включ.)"/>
-        <cell alias="max1_5year1000" colSpan="1" rowSpan="1" value="от 1 года до 5 лет (включ.)"/>
+        <cell alias="max1_5year100" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="count1_5year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="min1_5year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="max1_5year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="count1_5year1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="min1_5year1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="max1_5year1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count5_10year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min5_10year100" colSpan="8" rowSpan="1" value="от 5 до 10 лет (включ.)"/>
-        <cell alias="max5_10year100" colSpan="1" rowSpan="1" value="от 5 до 10 лет (включ.)"/>
-        <cell alias="count5_10year100_1000" colSpan="1" rowSpan="1" value="от 5 до 10 лет (включ.)"/>
-        <cell alias="min5_10year100_1000" colSpan="1" rowSpan="1" value="от 5 до 10 лет (включ.)"/>
-        <cell alias="max5_10year100_1000" colSpan="1" rowSpan="1" value="от 5 до 10 лет (включ.)"/>
-        <cell alias="count5_10year1000" colSpan="1" rowSpan="1" value="от 5 до 10 лет (включ.)"/>
-        <cell alias="min5_10year1000" colSpan="1" rowSpan="1" value="от 5 до 10 лет (включ.)"/>
-        <cell alias="max5_10year1000" colSpan="1" rowSpan="1" value="от 5 до 10 лет (включ.)"/>
+        <cell alias="max5_10year100" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="count5_10year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="min5_10year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="max5_10year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="count5_10year1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="min5_10year1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="max5_10year1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count10year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min10year100" colSpan="8" rowSpan="1" value="свыше 10 лет"/>
-        <cell alias="max10year100" colSpan="1" rowSpan="1" value="свыше 10 лет"/>
-        <cell alias="count10year100_1000" colSpan="1" rowSpan="1" value="свыше 10 лет"/>
-        <cell alias="min10year100_1000" colSpan="1" rowSpan="1" value="свыше 10 лет"/>
-        <cell alias="max10year100_1000" colSpan="1" rowSpan="1" value="свыше 10 лет"/>
-        <cell alias="count10year1000" colSpan="1" rowSpan="1" value="свыше 10 лет"/>
-        <cell alias="min10year1000" colSpan="1" rowSpan="1" value="свыше 10 лет"/>
-        <cell alias="max10year1000" colSpan="1" rowSpan="1" value="свыше 10 лет"/>
+        <cell alias="max10year100" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="count10year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="min10year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="max10year100_1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="count10year1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="min10year1000" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="max10year1000" colSpan="1" rowSpan="1" value=""/>
     </row>
     <row alias="">
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
-        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ пп"/>
-        <cell alias="creditRating" colSpan="1" rowSpan="1" value="Кредитный рейтинг заемщика"/>
-        <cell alias="category" colSpan="1" rowSpan="1" value="Категория обеспечения кредита"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="category" colSpan="1" rowSpan="1" value=""/>
         <cell alias="creditPeriod" colSpan="1" rowSpan="1" value="Объем кредита в рублёвом эквиваленте"/>
         <cell alias="count1year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min1year100" colSpan="2" rowSpan="1" value="до 100 млн. (включ.)"/>
-        <cell alias="max1year100" colSpan="1" rowSpan="1" value="до 100 млн. (включ.)"/>
+        <cell alias="max1year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count1year100_1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min1year100_1000" colSpan="2" rowSpan="1" value="от 100 млн. до 1 млрд. (включ.)"/>
-        <cell alias="max1year100_1000" colSpan="1" rowSpan="1" value="от 100 млн. до 1 млрд. (включ.)"/>
+        <cell alias="max1year100_1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count1year1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min1year1000" colSpan="2" rowSpan="1" value="свыше 1 млрд."/>
-        <cell alias="max1year1000" colSpan="1" rowSpan="1" value="свыше 1 млрд."/>
+        <cell alias="max1year1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count1_5year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min1_5year100" colSpan="2" rowSpan="1" value="до 100 млн. (включ.)"/>
-        <cell alias="max1_5year100" colSpan="1" rowSpan="1" value="до 100 млн. (включ.)"/>
+        <cell alias="max1_5year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count1_5year100_1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min1_5year100_1000" colSpan="2" rowSpan="1" value="от 100 млн. до 1 млрд. (включ.)"/>
-        <cell alias="max1_5year100_1000" colSpan="1" rowSpan="1" value="от 100 млн. до 1 млрд. (включ.)"/>
+        <cell alias="max1_5year100_1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count1_5year1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min1_5year1000" colSpan="2" rowSpan="1" value="свыше 1 млрд."/>
-        <cell alias="max1_5year1000" colSpan="1" rowSpan="1" value="свыше 1 млрд."/>
+        <cell alias="max1_5year1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count5_10year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min5_10year100" colSpan="2" rowSpan="1" value="до 100 млн. (включ.)"/>
-        <cell alias="max5_10year100" colSpan="1" rowSpan="1" value="до 100 млн. (включ.)"/>
+        <cell alias="max5_10year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count5_10year100_1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min5_10year100_1000" colSpan="2" rowSpan="1" value="от 100 млн. до 1 млрд. (включ.)"/>
-        <cell alias="max5_10year100_1000" colSpan="1" rowSpan="1" value="от 100 млн. до 1 млрд. (включ.)"/>
+        <cell alias="max5_10year100_1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count5_10year1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min5_10year1000" colSpan="2" rowSpan="1" value="свыше 1 млрд."/>
-        <cell alias="max5_10year1000" colSpan="1" rowSpan="1" value="свыше 1 млрд."/>
+        <cell alias="max5_10year1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count10year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min10year100" colSpan="2" rowSpan="1" value="до 100 млн. (включ.)"/>
-        <cell alias="max10year100" colSpan="1" rowSpan="1" value="до 100 млн. (включ.)"/>
+        <cell alias="max10year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count10year100_1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min10year100_1000" colSpan="2" rowSpan="1" value="от 100 млн. до 1 млрд. (включ.)"/>
-        <cell alias="max10year100_1000" colSpan="1" rowSpan="1" value="от 100 млн. до 1 млрд. (включ.)"/>
+        <cell alias="max10year100_1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="count10year1000" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min10year1000" colSpan="2" rowSpan="1" value="свыше 1 млрд."/>
-        <cell alias="max10year1000" colSpan="1" rowSpan="1" value="свыше 1 млрд."/>
+        <cell alias="max10year1000" colSpan="1" rowSpan="1" value=""/>
     </row>
     <row alias="">
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
-        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ пп"/>
-        <cell alias="creditRating" colSpan="1" rowSpan="1" value="Кредитный рейтинг заемщика"/>
-        <cell alias="category" colSpan="1" rowSpan="1" value="Категория обеспечения кредита"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="category" colSpan="1" rowSpan="1" value=""/>
         <cell alias="creditPeriod" colSpan="1" rowSpan="1" value="Границы процентного интервала"/>
         <cell alias="count1year100" colSpan="1" rowSpan="1" value=""/>
         <cell alias="min1year100" colSpan="1" rowSpan="1" value="min"/>
