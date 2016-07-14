@@ -521,13 +521,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 if (column.getWidth() == 0 && columnAlias != null) {
                     if (columns.size() == i + 1)
                         continue;
-                    Cell cell = mergedDataCells(dataRow.getCell(columnAlias), row, i, false);
-                    CellStyle cellStyle = getCellStyle(formStyle, CellType.STRING, columnAlias);
-                    cell.setCellStyle(cellStyle);
-                    cell.setCellValue((String) dataRow.get(columnAlias));
-                    if (dataRow.getCell(columnAlias).getColSpan() > 1)
-                        i = i + dataRow.getCell(columnAlias).getColSpan() - 1;
-                    continue;
                 }
                 Object obj = dataRow.get(columnAlias);
                 Cell cell = mergedDataCells(dataRow.getCell(columnAlias), row, i, false);
