@@ -25,6 +25,7 @@ public class LogSearchResultItem implements Serializable {
     private String reportPeriodName;
     private String blobDataId;
     private Integer formTypeId;
+    private String auditFormTypeName;
     private Integer cnt;
     private String server;
 
@@ -157,6 +158,14 @@ public class LogSearchResultItem implements Serializable {
 
     public void setBlobDataId(String blobDataId) {
         this.blobDataId = blobDataId;
+    }
+
+    public String getAuditFormTypeName() {
+        return auditFormTypeName;
+    }
+
+    public void setAuditFormTypeName(String auditFormTypeName) {
+        this.auditFormTypeName = auditFormTypeName;
     }
 
     public String getServer() {

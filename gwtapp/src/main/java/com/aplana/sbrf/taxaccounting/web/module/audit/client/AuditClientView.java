@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
-import com.aplana.sbrf.taxaccounting.model.AuditFormType;
 import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
@@ -300,18 +299,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         TextColumn<LogSearchResultItem> typeColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                if (object.getFormTypeName() != null) {
-                    if (object.getDepartmentName()!=null)
-                        return AuditFormType.FORM_TYPE_TAX.getName();
-                    else
-                        return AuditFormType.FORM_TEMPLATE_VERSION.getName();
-                } else if (object.getDeclarationTypeName() != null) {
-                    if (object.getDepartmentName()!=null)
-                        return AuditFormType.FORM_TYPE_DECLARATION.getName();
-                    else
-                        return AuditFormType.DECLARATION_VERSION.getName();
-                }
-                return null;
+                return object.getAuditFormTypeName();
             }
         };
 

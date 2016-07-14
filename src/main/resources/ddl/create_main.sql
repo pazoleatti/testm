@@ -598,6 +598,12 @@ comment on column log_business.user_department_name is 'Подразделени
 
 create sequence seq_log_business;
 ------------------------------------------------------------------------------------------------------
+CREATE TABLE AUDIT_FORM_TYPE
+  (
+    ID   NUMBER(9,0) PRIMARY KEY,
+    NAME VARCHAR2(1000) NOT NULL
+  );
+------------------------------------------------------------------------------------------------------
 CREATE TABLE log_system (
   id                    NUMBER(18, 0) PRIMARY KEY,
   log_date              DATE                NOT NULL,
@@ -616,6 +622,7 @@ CREATE TABLE log_system (
   blob_data_id          VARCHAR2(36),
   form_type_id               NUMBER(9,0),
   is_error NUMBER(1) DEFAULT 0 NOT NULL,
+  audit_form_type_id       NUMBER(9,0),
   server varchar2(200)
 );
 comment on table log_system is  'Системный журнал';
@@ -636,6 +643,7 @@ comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор �
 comment on column log_system.blob_data_id is 'Ссылка на логи';
 comment on column log_system.form_type_id is 'Идентификатор вида НФ';
 comment on column log_system.is_error is 'Признак ошибки';
+comment on column log_system.AUDIT_FORM_TYPE_ID is 'Тип формы';
 comment on column log_system.server is 'Сервер';
 
 create sequence seq_log_system start with 10000;

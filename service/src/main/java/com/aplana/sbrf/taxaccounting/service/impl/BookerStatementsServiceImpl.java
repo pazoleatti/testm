@@ -49,7 +49,6 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static final String NO_DATA_FILE_MSG = "Файл не содержит данных. Файл не может быть загружен.";
     private static final String ACCOUNT_PERIOD_INVALID = "Период не указан.";
     private static final String DEPARTMENTID_INVALID = "Подразделение не указано.";
-    private static final String ACCOUNT_LOG = "Вид бух. отчетности - %s";
 
     @Autowired
     PeriodService reportPeriodService;
@@ -109,7 +108,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         refBookValueMap = dataProvider.getRecordData(refBookValueMap.get("ACCOUNT_PERIOD_ID").getReferenceValue());
         String name = refBookValueMap.get("NAME").getStringValue();
 
-        String msg = String.format("Импорт бухгалтерской отчётности: %s", realFileName);
+        String msg = String.format(IMPORT_BO_MSG, realFileName);
         auditService.add(FormDataEvent.IMPORT, userInfo, date + " " + name, departmentId, null, formTypeName, null, msg, null);
     }
 

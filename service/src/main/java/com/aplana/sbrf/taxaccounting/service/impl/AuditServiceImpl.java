@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.aplana.sbrf.taxaccounting.dao.AuditDao.SAMPLE_NUMBER;
 
@@ -243,6 +245,45 @@ public class AuditServiceImpl implements AuditService {
         return auditDao.firstDateOfLog();
     }
 
+    // TODO в метод add передавать параметр AuditFormType извне, а не вычислять как тут
+    private AuditFormType getAuditFormType(String formTypeName, String declarationTypeName, String departmentName, String note){
+        if (formTypeName != null) {
+            AuditFormType formType = getBoFormType(formTypeName, note);
+            if (formType != null)
+                return formType;
+            else if (departmentName != null)
+                return AuditFormType.FORM_TYPE_TAX;
+            else
+                return AuditFormType.FORM_TEMPLATE_VERSION;
+        } else if (declarationTypeName != null) {
+            if (departmentName != null)
+                return AuditFormType.FORM_TYPE_DECLARATION;
+            else
+                return AuditFormType.DECLARATION_VERSION;
+        }
+        return null;
+    }
+    private AuditFormType getBoFormType(String formTypeName, String note) {
+        if (note != null && note.contains(BookerStatementsService.IMPORT_BO_MSG.replace("%s", ""))) {
+            String boFormType = extractBoFormType(formTypeName);
+            if (boFormType != null) {
+                if (boFormType.equals(AuditFormType.INCOME101.getName()))
+                    return AuditFormType.INCOME101;
+                if (boFormType.equals(AuditFormType.INCOME102.getName()))
+                    return AuditFormType.INCOME102;
+            }
+        }
+        return null;
+    }
+    private String extractBoFormType(String formTypeName) {
+        Pattern pattern = Pattern.compile(BookerStatementsService.ACCOUNT_LOG.replace("%s", "(.*)"));
+        Matcher matcher = pattern.matcher(formTypeName);
+        if (matcher.groupCount() > 0) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
     private void add(FormDataEvent event, TAUserInfo userInfo, String departmentName, Integer departmentId, String reportPeriodName,
                      String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId){
         LogSystem log = new LogSystem();
@@ -267,6 +308,8 @@ public class AuditServiceImpl implements AuditService {
         log.setFormTypeName(formTypeName);
         log.setFormKindId(formKindId);
         log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
+        AuditFormType auditFormType = getAuditFormType(formTypeName, declarationTypeName, departmentName, note);
+        log.setAuditFormTypeId(auditFormType == null ? null : auditFormType.getId());
         int userDepId = userInfo.getUser().getDepartmentId();
         String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
         log.setUserDepartmentName(userDepartmentName != null ? userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)):null);

@@ -49,6 +49,7 @@ public class AuditDaoTest {
         logSystem.setNote("the best note");
         logSystem.setUserDepartmentName("Подразделение");
         logSystem.setFormTypeId(null);
+        logSystem.setAuditFormTypeId(1);
         logSystem.setServer("server");
 
         auditDao.add(logSystem);
@@ -59,13 +60,13 @@ public class AuditDaoTest {
         LogSystemFilter filter = new LogSystemFilter();
         filter.setCountOfRecords(10);
         filter.setStartIndex(0);
-        filter.setFromSearchDate(new Date(1304247365000l));
-        filter.setToSearchDate(new Date(1369911365000l));
-        filter.setFilter("controlBank");
-        filter.setAuditFieldList(Arrays.asList(AuditFieldList.ALL.getId()));
+        filter.setFromSearchDate(new Date(1304247365000L));
+        filter.setToSearchDate(new Date(1369911365000L));
+        filter.setFilter("Налоговая форма");
+        filter.setAuditFieldList(Arrays.asList(AuditFieldList.TYPE.getId()));
 
         long count = auditDao.getCount(filter);
-        assertEquals(4, count);
+        assertEquals(3, count);
     }
 
     @Test

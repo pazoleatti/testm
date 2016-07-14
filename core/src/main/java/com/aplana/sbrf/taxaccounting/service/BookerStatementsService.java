@@ -11,6 +11,8 @@ import java.io.InputStream;
  * @author Stanislav Yasinskiy
  */
 public interface BookerStatementsService {
+    String ACCOUNT_LOG = "Вид бух. отчетности - %s";
+    String IMPORT_BO_MSG = "Импорт бухгалтерской отчётности: %s";
 
     /**
      * Загрузка бух отчетности

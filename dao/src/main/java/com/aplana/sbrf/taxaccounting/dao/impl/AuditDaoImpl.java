@@ -34,22 +34,17 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     private static final String LOG_SYSTEM_DATA_BY_FILTER = "select ordDat.* from (select dat.*, count(*) over() cnt, rownum as rn from ( select DISTINCT " +
             "ls.id, ls.log_date, ls.ip, ls.event_id, ev.name event, ls.user_login user_login, ls.roles, ls.department_name, " +
             "ls.report_period_name, ls.declaration_type_name, ls.form_type_name, ls.form_kind_id, ls.form_type_id, " +
-            "fk.name form_kind_name, ls.note, %s ls.user_department_name, ls.blob_data_id, ls.server " +
+            "fk.name form_kind_name, ls.note, aft.name type_name, ls.user_department_name, ls.blob_data_id, ls.server " +
             "from log_system ls " +
             "left join event ev on ls.event_id=ev.\"ID\" " +
-            "left join form_kind fk on ls.form_kind_id=fk.\"ID\" ";
+            "left join form_kind fk on ls.form_kind_id=fk.\"ID\" " +
+            "left join audit_form_type aft on ls.audit_form_type_id = aft.id\n";
 
 	@Override
 	public PagingResult<LogSearchResultItem> getLogsForAdmin(LogSystemFilter filter) {
         cutOffLogSystemFilter(filter);
         PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery(
-                String.format(LOG_SYSTEM_DATA_BY_FILTER,
-                        filter.getSearchOrdering() == HistoryBusinessSearchOrdering.FORM_TYPE ?
-                                "case when ls.declaration_type_name is not null then ls.declaration_type_name else ls.form_type_name end as type_name, "
-                                :
-                                ""
-                ));
+        ps.appendQuery(LOG_SYSTEM_DATA_BY_FILTER);
         ps.appendQuery("WHERE ");
         appendSelectWhereClause(ps, filter, "");
 
@@ -128,6 +123,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "              ls.note,\n" +
                     "              ls.user_department_name,\n" +
                     "              ls.blob_data_id," +
+                    "              aft.name type_name,\n" +
                     "              ls.server\n" +
                     "            FROM log_system ls\n" +
                     "              LEFT JOIN event ev ON ls.event_id = ev.\"ID\"\n" +
@@ -148,6 +144,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "                                                    filter3.dep_id = ls.FORM_DEPARTMENT_ID\n" +
                     "                                                    AND\n" +
                     "                                                    %s\n" +
+                    "              LEFT JOIN audit_form_type aft on ls.audit_form_type_id = aft.id\n " +
                     "            WHERE (\n" +
                     "              (%s AND %s)\n" +
                     "              OR\n" +
@@ -220,6 +217,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             "                                                    filter3.dep_id = ls.FORM_DEPARTMENT_ID\n" +
             "                                                    AND\n" +
             "                                                    %s\n" +
+            "              LEFT JOIN audit_form_type aft on ls.audit_form_type_id = aft.id\n" +
             "            WHERE (\n" +
             "              (%s AND %s)\n" +
             "              OR\n" +
@@ -301,6 +299,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "              ls.note,\n" +
                     "              ls.user_department_name,\n" +
                     "              ls.blob_data_id,\n" +
+                    "              aft.name type_name,\n" +
                     "              ls.server\n" +
                     "            FROM log_system ls LEFT JOIN event ev ON ls.event_id = ev.\"ID\"\n" +
                     "              LEFT JOIN form_kind fk ON ls.form_kind_id = fk.\"ID\"\n" +
@@ -308,6 +307,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "                                                   ls.form_kind_id = filter1.kind AND\n" +
                     "                                                   ls.FORM_TYPE_ID = filter1.form_type_id AND                                                   \n" +
                     "                                                   %s\n" +
+            "                      LEFT JOIN audit_form_type aft on ls.audit_form_type_id = aft.id\n " +
                     "            WHERE (\n" +
                     "              (%s AND %s)\n" +
                     "              OR\n" +
@@ -354,6 +354,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             "                                                   ls.form_kind_id = filter1.kind AND\n" +
             "                                                   ls.FORM_TYPE_ID = filter1.form_type_id AND                                                   \n" +
             "                                                   %s\n" +
+            "              LEFT JOIN audit_form_type aft on ls.audit_form_type_id = aft.id\n " +
             "            WHERE (\n" +
             "              (%s AND %s)\n" +
             "              OR\n" +
@@ -392,13 +393,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         cutOffLogSystemFilter(filter);
 
         PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery(
-                String.format(LOG_SYSTEM_DATA_BY_FILTER,
-                        filter.getSearchOrdering() == HistoryBusinessSearchOrdering.FORM_TYPE ?
-                                "case when ls.declaration_type_name is not null then ls.declaration_type_name else ls.form_type_name end as type_name, "
-                                :
-                                ""
-                ));
+        ps.appendQuery(LOG_SYSTEM_DATA_BY_FILTER);
 
         ps.appendQuery("WHERE (");
         ps.appendQuery(SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
@@ -451,7 +446,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     private static final String LOG_SYSTEM_DATA_BY_FILTER_COUNT = "select count(*) " +
             "from log_system ls " +
             "left join event ev on ls.event_id=ev.\"ID\" " +
-            "left join form_kind fk on ls.form_kind_id=fk.\"ID\" ";
+            "left join form_kind fk on ls.form_kind_id=fk.\"ID\" " +
+            "left join audit_form_type aft on ls.audit_form_type_id = aft.id\n";
 
     @Override
     public long getCount(final LogSystemFilter filter) {
@@ -482,8 +478,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             jt.update(
                     "insert into log_system (id, log_date, ip, event_id, user_login, roles, department_name, report_period_name, " +
                             "declaration_type_name, form_type_name, form_kind_id, note, user_department_name, form_department_id, " +
-                            "blob_data_id, form_type_id, server)" +
-                            " values (?, SYSDATE, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            "blob_data_id, form_type_id, audit_form_type_id, server)" +
+                            " values (?, SYSDATE, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
                     logSystem.getIp(),
                     logSystem.getEventId(),
@@ -499,6 +495,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     logSystem.getFormDepartmentId(),
                     logSystem.getBlobDataId(),
                     logSystem.getFormTypeId(),
+                    logSystem.getAuditFormTypeId(),
                     logSystem.getServer()
             );
         } catch (DataAccessException e){
@@ -579,8 +576,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
             if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
                     || logSystemFilter.getAuditFieldList().contains(AuditFieldList.TYPE.getId())) {
-                ps.appendQuery(String.format(" OR lower(case when ls.form_type_name is not null then '" +
-                        AuditFormType.FORM_TYPE_TAX.getName() + "' when ls.declaration_type_name is not null then '" + AuditFormType.FORM_TYPE_DECLARATION.getName() + "' else '' end) LIKE lower(?)"));
+                ps.appendQuery(" OR lower(aft.name) LIKE lower(?)");
                 ps.addParam("%" + filter + "%");
             }
 
@@ -673,6 +669,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			log.setUserDepartmentName(rs.getString("user_department_name"));
 			log.setBlobDataId(rs.getString("blob_data_id"));
             log.setFormTypeId(SqlUtils.getInteger(rs, "form_type_id"));
+            log.setAuditFormTypeName(rs.getString("type_name"));
             if (isSupportOver())log.setCnt(SqlUtils.getInteger(rs, "cnt"));
             log.setServer(rs.getString("server"));
 			return log;
