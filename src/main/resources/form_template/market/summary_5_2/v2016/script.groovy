@@ -183,6 +183,13 @@ void logicCheck() {
         if (row.economyRate != null && row.economyRate < 0) {
             logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно 0!", row.getIndex(), getColumnName(row, 'economyRate'))
         }
+        // 4. Проверка ИНН на паттерн
+        if (row.innKio && !checkFormat(row.innKio, INN_JUR_PATTERN)) {
+            logger.error("Строка %s: Значение графы «%s» должно состоять из 10 цифр. Первые две цифры принимают значения 0-9 и 1-9 ИЛИ 1-9 и 0-9!",
+                    row.getIndex(), getColumnName(row, 'innKio'))
+        } else if (!exclusiveInns.contains(row.innKio)) { // Проверка контрольного числа ИНН
+            checkControlSumInn(logger, row, 'innKio', row.innKio, true)
+        }
     }
 }
 
