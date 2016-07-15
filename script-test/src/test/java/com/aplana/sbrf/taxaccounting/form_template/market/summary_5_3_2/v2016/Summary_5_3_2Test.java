@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.form_template.market.summary_5_3_2.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
@@ -10,9 +12,10 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.reset;
@@ -20,8 +23,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * 5.3.2 Внутренние интервалы процентных ставок по Кредитным продуктам и Субординированным кредитам.
- *
- * TODO: недоделана консолидация, т.к. источника еще нет в git
  */
 public class Summary_5_3_2Test extends ScriptTestBase {
     private static final int TYPE_ID = 908;
@@ -90,28 +91,163 @@ public class Summary_5_3_2Test extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev) недоотлажен
     // консолидация с 1 источником
-    // @Test
+    @Test
     public void compose1SourceTest() {
+        // получение макета текущей форму
+        FormData formData = getFormData();
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//market//summary_5_3_2//v2016//"));
+        when(testHelper.getFormDataService().getFormTemplate(eq(getFormData().getFormTemplateId()))).thenReturn(formData.getFormTemplate());
+
+        // для поиска кредитного рейтинга
+        when(testHelper.getFormDataService().getRefBookRecord(eq(603L), anyMap(), anyMap(), anyMap(), anyString(),
+                anyString(), any(Date.class), anyInt(), anyString(), any(Logger.class), anyBoolean())).thenAnswer(
+                new Answer<Map<String, RefBookValue>>() {
+                    @Override
+                    public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
+                        Long refBookId = (Long) invocation.getArguments()[0];
+                        String value = (String) invocation.getArguments()[5];
+                        if (value == null || "".equals(value.trim())) {
+                            return null;
+                        }
+                        Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
+                        for (Long id : records.keySet()) {
+                            Map<String, RefBookValue> record = records.get(id);
+                            if (record.get("CREDIT_RATING").getStringValue().equals(value)) {
+                                return record;
+                            }
+                        }
+                        return null;
+                    }
+                });
+
+        // для поиска курса валют
+        when(testHelper.getFormDataService().getRefBookRecord(eq(22L), anyMap(), anyMap(), anyMap(), anyString(),
+                anyString(), any(Date.class), anyInt(), anyString(), any(Logger.class), anyBoolean())).thenAnswer(
+                new Answer<Map<String, RefBookValue>>() {
+                    @Override
+                    public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
+                        Long refBookId = (Long) invocation.getArguments()[0];
+                        String value = (String) invocation.getArguments()[5];
+                        if (value == null || "".equals(value.trim())) {
+                            return null;
+                        }
+                        Long tmp = Long.valueOf(value);
+                        Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
+                        for (Long id : records.keySet()) {
+                            Map<String, RefBookValue> record = records.get(id);
+                            if (record.get("CODE_LETTER").getReferenceValue().equals(tmp)) {
+                                return record;
+                            }
+                        }
+                        return null;
+                    }
+                });
+
+        // вспомогательные данные источника
+        FormType formType = new FormType();
+        formType.setName("testName");
+        Department department = new Department();
+        department.setName("testDepartmentName");
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2016);
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setName("testReportPeriodName");
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+
         // задать источники
         List<Relation> sourcesInfo = new ArrayList<Relation>();
         Relation relarion = new Relation();
-        relarion.setFormDataId(1L); // TODO (Ramil Timerbaev)
+        relarion.setFormDataId(1L);
+        relarion.setFormType(formType);
+        relarion.setDepartment(department);
+        relarion.setDepartmentReportPeriod(departmentReportPeriod);
         sourcesInfo.add(relarion);
         when(testHelper.getFormDataService().getSourcesInfo(any(FormData.class), anyBoolean(), anyBoolean(),
                 any(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(sourcesInfo);
 
         // получение одного источника
-        FormData sourceformData = new FormData();
-        sourceformData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//market//summary_5_2//v2016//"));
-        when(testHelper.getFormDataService().get(anyLong(), isNull(Boolean.class))).thenReturn(sourceformData);
+        FormData sourceFormData = new FormData();
+        sourceFormData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//market//summary_5_2//v2016//"));
+        when(testHelper.getFormDataService().get(anyLong(), isNull(Boolean.class))).thenReturn(sourceFormData);
 
-        // заполнение данных источника
+        // получение строк источника
         List<DataRow<Cell>> sourceDataRows = new ArrayList<DataRow<Cell>>();
-        DataRow<Cell> sourceDataRow = sourceformData.createDataRow();
+        DataRow<Cell> sourceDataRow = sourceFormData.createDataRow();
         sourceDataRow.setIndex(1);
-        long testRecordkId = 1L;
+        sourceDataRows.add(sourceDataRow);
+        DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
+        sourceDataRowHelper.setAllCached(sourceDataRows);
+        when(testHelper.getFormDataService().getDataRowHelper(eq(sourceFormData))).thenReturn(sourceDataRowHelper);
+        int expected;
+
+        // 1. консолидация должна пройти без проблем, 1 подходящая строка источника, в приемнике должен получится 1 блок из 20 строк
+//        long testMinMax = 1000L;
+//        setDefaultValues(sourceDataRow);
+//        // графа 28
+//        sourceDataRow.getCell("economyRate").setValue(testMinMax, sourceDataRow.getIndex());
+//        testHelper.execute(FormDataEvent.COMPOSE);
+//        expected = 20;
+//        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+//        // количество
+//        DataRow<Cell> tmpDataRow = testHelper.getDataRowHelper().getAll().get(2);
+//        long expectedCount = 1L;
+//        Assert.assertEquals(expectedCount, tmpDataRow.getCell("count1_5year100").getNumericValue().longValue());
+//        // min, max
+//        tmpDataRow = testHelper.getDataRowHelper().getAll().get(3);
+//        Assert.assertEquals(testMinMax, tmpDataRow.getCell("min1_5year100").getNumericValue().longValue());
+//        Assert.assertEquals(testMinMax, tmpDataRow.getCell("max1_5year100").getNumericValue().longValue());
+//        checkLogger();
+//
+//        // 2. консолидация должна пройти без проблем, 1 подходящая строка источника, в приемнике должен получится 1 блок из 20 строк
+//        setDefaultValues(sourceDataRow);
+//        // графа 8
+//        sourceDataRow.getCell("creditRating").setValue(3L, sourceDataRow.getIndex());
+//        // графа 28
+//        sourceDataRow.getCell("economyRate").setValue(testMinMax, sourceDataRow.getIndex());
+//        testHelper.execute(FormDataEvent.COMPOSE);
+//        expected = 20;
+//        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+//        // количество
+//        tmpDataRow = testHelper.getDataRowHelper().getAll().get(2);
+//        expectedCount = 1L;
+//        Assert.assertEquals(expectedCount, tmpDataRow.getCell("count1_5year100").getNumericValue().longValue());
+//        // min, max
+//        tmpDataRow = testHelper.getDataRowHelper().getAll().get(3);
+//        Assert.assertEquals(testMinMax, tmpDataRow.getCell("min1_5year100").getNumericValue().longValue());
+//        Assert.assertEquals(testMinMax, tmpDataRow.getCell("max1_5year100").getNumericValue().longValue());
+//        checkLogger();
+
+        // 3. консолидация не должна пройти, должно быть 1 фатальное сообщение
+        setDefaultValues(sourceDataRow);
+        // графа 16
+        sourceDataRow.getCell("currencyCode").setValue(4L, sourceDataRow.getIndex());
+        testHelper.getDataRowHelper().getAll().clear();
+        testHelper.execute(FormDataEvent.COMPOSE);
+        expected = 0;
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        int i = 0;
+        String msg = entries.get(i++).getMessage();
+        boolean isContainErrorMsg = (msg.contains("Не найден курс валюты для "));
+        Assert.assertEquals("Must have fatal error", true, isContainErrorMsg);
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 4. консолидация должна пройти без проблем, нет подходящих строк источника, в приемнике не должно быть строк
+        setDefaultValues(sourceDataRow);
+        // графа 29
+        sourceDataRow.getCell("groupExclude").setValue(0L, sourceDataRow.getIndex());
+        testHelper.getDataRowHelper().getAll().clear();
+        testHelper.execute(FormDataEvent.COMPOSE);
+        expected = 0;
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLogger();
+    }
+
+    private void setDefaultValues(DataRow<Cell> sourceDataRow) {
+        Long testRecordkId = 1L;
         // графа 2
         sourceDataRow.getCell("dealNum").setValue("test", sourceDataRow.getIndex());
         // графа 3
@@ -132,16 +268,5 @@ public class Summary_5_3_2Test extends ScriptTestBase {
         sourceDataRow.getCell("economyRate").setValue(1000L, sourceDataRow.getIndex());
         // графа 29
         sourceDataRow.getCell("groupExclude").setValue(testRecordkId, sourceDataRow.getIndex());
-        sourceDataRows.add(sourceDataRow);
-
-        // получение строк источника
-        DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
-        sourceDataRowHelper.setAllCached(sourceDataRows);
-        when(testHelper.getFormDataService().getDataRowHelper(eq(sourceformData))).thenReturn(sourceDataRowHelper);
-
-        testHelper.execute(FormDataEvent.COMPOSE);
-        int expected = 0;
-        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-        checkLogger();
     }
 }

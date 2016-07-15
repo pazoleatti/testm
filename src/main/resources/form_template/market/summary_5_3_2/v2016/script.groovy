@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormTemplate
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -131,6 +132,9 @@ void consolidation() {
             }
         }
     }
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
 
     // мапа с валютами (буквенные код валюты -> список из двух списков строк: фиксированная процентная ставка и плавающая процентная ставка)
     def currencyMap = [:]
@@ -166,7 +170,7 @@ void consolidation() {
         rateTypes.each { groupKeys ->
             def groupRows = getGroupRows(groupRowsMap, groupKeys, rowNum)
             dataRows.addAll(groupRows)
-            // нумерации
+            // нумерация
             rowNum = groupRows[-1].rowNum
         }
     }
@@ -205,13 +209,14 @@ void consolidation() {
  */
 String getKey(def row, Relation source) {
     // 1. Кредитный рейтинг заёмщика
-    def creditRating = null
-    def ratingName = getRefBookValue(604L, row.creditRating)?.NAME?.value
-    def columnName = getColumnName(row, 'creditRating')
-    def record603 = getRefBookRecord(603L, 'CREDIT_RATING', ratingName, getReportPeriodEndDate(), row.getIndex(), columnName, false)
-    if (record603) {
-        def className = record603?.CREDIT_QUALITY_CLASS?.value
-        creditRating = getRefBookValue(601L, className)?.CREDIT_QUALITY_CLASS?.value
+    def creditRating = getRefBookValue(604L, row.creditRating)?.NAME?.value
+    if (!(creditRating in ['1 КЛАСС', '2 КЛАСС', '3 КЛАСС'])) {
+        def columnName = getColumnName(row, 'creditRating')
+        def record603 = getRefBookRecord(603L, 'CREDIT_RATING', creditRating, getReportPeriodEndDate(), row.getIndex(), columnName, false)
+        if (record603) {
+            def className = record603?.CREDIT_QUALITY_CLASS?.value
+            creditRating = getRefBookValue(601L, className)?.CREDIT_QUALITY_CLASS?.value
+        }
     }
     if (creditRating == null) {
         creditRating = null
@@ -247,13 +252,13 @@ String getKey(def row, Relation source) {
         columnName = getColumnName(row, 'currencyCode')
         def record22 = getRefBookRecord(22L, 'CODE_LETTER', row.currencyCode.toString(), getReportPeriodEndDate(), row.getIndex(), columnName, false)
         if (record22) {
-            credit = (record22?.RATE?.value ? credit * record22?.RATE?.value : null)
+            credit = (record22?.RATE?.value ? round(credit * record22?.RATE?.value, 2) : null)
         } else {
             // 1. В справочнике «Курсы валют» не найден курс для заданной валюты на заданную дату
             def msg = "Форма-источника: «%s», Подразделение: «%s», Период: «%s», строка %d: Не найден курс валюты для «%s» на дату %s!"
-            def formName = source.formType.name
-            def departmentName = source.department.name
-            def periodName = source.departmentReportPeriod.reportPeriod.name + ' ' + source.departmentReportPeriod.reportPeriod.taxPeriod.year
+            def formName = source?.formType?.name
+            def departmentName = source?.department?.name
+            def periodName = source?.departmentReportPeriod?.reportPeriod?.name + ' ' + source?.departmentReportPeriod?.reportPeriod?.taxPeriod?.year
             def dateInStr = getReportPeriodEndDate()?.format('dd.MM.yyyy')
             logger.error(msg, formName, departmentName, periodName, row.getIndex(), code, dateInStr)
         }
@@ -325,9 +330,10 @@ def calcMinOrMax(def rows, def isMin) {
         double k = (isMin ? n / 4 : n * 0.75)
         def precision = k % 1
         if (precision == 0) {
-            result = (values[k - 1] + values[k]) / 2
+            int index = k.intValue()
+            result = (values[index - 1] + values[index]) / 2
         } else {
-            int index = (k - precision).longValue()
+            int index = (k - precision).intValue()
             result = values[index]
         }
     }
