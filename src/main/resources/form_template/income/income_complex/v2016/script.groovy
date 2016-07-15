@@ -223,6 +223,7 @@ def consolidation() {
     def isFromSummary = isFromSummary(formSources)
     isFromSummary ? consolidationFromSummary(dataRows, formSources) : consolidationFromPrimary(dataRows, formSources)
     calcExplanation(dataRows, formSources, isFromSummary)
+    addExplanationPrev(dataRows, 'incomeTypeId')
 }
 
 boolean isFromSummary(def formSources) {
@@ -432,7 +433,7 @@ void calcExplanation(def dataRows, def formSources, def isFromSummary) {
         }
     }
     if (!rowNumbers.isEmpty()) {
-        logger.warn("Строка %s: Графа «%s» заполнена значением «0», т.к. не найдены строки по требуемым КНУ в форме-источнике «%s»!",
+        logger.warn("Строки %s: Для заполнения графы «%s» не найдены строки по требуемым КНУ в форме-источнике «%s»!",
                 rowNumbers.join(', '), getColumnName(dataRows[0], 'explanation'), formTypeService.get(formTypeId_Tab1).name)
     }
 }
@@ -749,4 +750,31 @@ def fillTotalRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex,
     // графа 9
     def colIndex = 8
     dataRow.incomeTaxSumS = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+}
+
+/**
+ * Добавить "Пояснение" из формы пред периода
+ * @param dataRows строки формы
+ * @param codeAlias алиас строки КНУ
+ */
+void addExplanationPrev(def dataRows, def codeAlias) {
+    // Отчётный период.
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    if (reportPeriod.order == 1) {
+        return
+    }
+    // Форма предыдущего периода
+    def formDataOld = formDataService.getFormDataPrev(formData)
+    if (formDataOld == null || formDataOld.state != WorkflowState.ACCEPTED) {
+        return
+    }
+    def dataRowsPrev = formDataService.getDataRowHelper(formDataOld).allSaved
+    for (row in dataRows) {
+        if ((rowsAliasesForFirstControlSum + rowsAliasesForSecondControlSum).contains(row.getAlias())) {
+            if (dataRowsPrev != null && !(dataRowsPrev.isEmpty())) {
+                def prevRow = dataRowsPrev.find { it[codeAlias] == row[codeAlias] }
+                row.explanation = (row.explanation ?: BigDecimal.ZERO) + (prevRow?.explanation ?: BigDecimal.ZERO)
+            }
+        }
+    }
 }
