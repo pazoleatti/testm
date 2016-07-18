@@ -75,13 +75,13 @@ public class AuditServiceImpl implements AuditService {
             ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
             rpName = String.format(RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName());
         }
-        add(event, userInfo, rpName, departmentId, declarationTypeName, formTypeName, formKindId, note, blobDataId);
+        add(event, userInfo, rpName, departmentId, declarationTypeName, formTypeName, formKindId, note, null, blobDataId);
     }
 
     @Override
     @Transactional(readOnly = false)
     public void add(final FormDataEvent event, final TAUserInfo userInfo, final String reportPeriodName, final Integer departmentId,
-                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String blobDataId) {
+                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final AuditFormType formType, final String blobDataId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
@@ -95,7 +95,7 @@ public class AuditServiceImpl implements AuditService {
                         );
                 String mnote = note != null ? note.substring(0, Math.min(note.length(), 2000)) : null;
 
-                add(event, userInfo, departmentName, departmentId, reportPeriodName, declarationTypeName, formTypeName, formKindId, mnote, blobDataId);
+                add(event, userInfo, departmentName, departmentId, reportPeriodName, declarationTypeName, formTypeName, formKindId, mnote, formType, blobDataId);
                 return null;
             }
         });
@@ -118,7 +118,7 @@ public class AuditServiceImpl implements AuditService {
                 }
                 String mnote = note != null ? note.substring(0, Math.min(note.length(), 2000)) : null;
 
-                add(event, userInfo, null, null, rpName, declarationTemplateName, formTemplateName, null, mnote, blobDataId);
+                add(event, userInfo, null, null, rpName, declarationTemplateName, formTemplateName, null, mnote, null, blobDataId);
 				return null;
             }
         });
@@ -155,7 +155,7 @@ public class AuditServiceImpl implements AuditService {
                     formKindId = formData.getKind().getId();
                 }
 
-                add(event, userInfo, departmentName, departmentId, rpName, decTypeName, ftName, formKindId, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, blobDataId);
+                add(event, userInfo, departmentName, departmentId, rpName, decTypeName, ftName, formKindId, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, null, blobDataId);
                 return null;
             }
         });
@@ -246,12 +246,9 @@ public class AuditServiceImpl implements AuditService {
     }
 
     // TODO в метод add передавать параметр AuditFormType извне, а не вычислять как тут
-    private AuditFormType getAuditFormType(String formTypeName, String declarationTypeName, String departmentName, String note){
+    private AuditFormType getAuditFormType(String formTypeName, String declarationTypeName, String departmentName){
         if (formTypeName != null) {
-            AuditFormType formType = getBoFormType(formTypeName, note);
-            if (formType != null)
-                return formType;
-            else if (departmentName != null)
+            if (departmentName != null)
                 return AuditFormType.FORM_TYPE_TAX;
             else
                 return AuditFormType.FORM_TEMPLATE_VERSION;
@@ -263,29 +260,9 @@ public class AuditServiceImpl implements AuditService {
         }
         return null;
     }
-    private AuditFormType getBoFormType(String formTypeName, String note) {
-        if (note != null && note.contains(BookerStatementsService.IMPORT_BO_MSG.replace("%s", ""))) {
-            String boFormType = extractBoFormType(formTypeName);
-            if (boFormType != null) {
-                if (boFormType.equals(AuditFormType.INCOME101.getName()))
-                    return AuditFormType.INCOME101;
-                if (boFormType.equals(AuditFormType.INCOME102.getName()))
-                    return AuditFormType.INCOME102;
-            }
-        }
-        return null;
-    }
-    private String extractBoFormType(String formTypeName) {
-        Pattern pattern = Pattern.compile(BookerStatementsService.ACCOUNT_LOG.replace("%s", "(.*)"));
-        Matcher matcher = pattern.matcher(formTypeName);
-        if (matcher.groupCount() > 0) {
-            return matcher.group(1);
-        }
-        return null;
-    }
 
     private void add(FormDataEvent event, TAUserInfo userInfo, String departmentName, Integer departmentId, String reportPeriodName,
-                     String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId){
+                     String declarationTypeName, String formTypeName, Integer formKindId, String note, AuditFormType formType, String blobDataId){
         LogSystem log = new LogSystem();
         log.setIp(userInfo.getIp());
         log.setEventId(event.getCode());
@@ -305,10 +282,13 @@ public class AuditServiceImpl implements AuditService {
         log.setFormDepartmentId(departmentId);
         log.setReportPeriodName(reportPeriodName);
         log.setDeclarationTypeName(declarationTypeName);
-        log.setFormTypeName(formTypeName);
         log.setFormKindId(formKindId);
+        log.setFormTypeName(formTypeName);
         log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
-        AuditFormType auditFormType = getAuditFormType(formTypeName, declarationTypeName, departmentName, note);
+        AuditFormType auditFormType = formType;
+        if (formType == null) {
+            auditFormType = getAuditFormType(formTypeName, declarationTypeName, departmentName);
+        }
         log.setAuditFormTypeId(auditFormType == null ? null : auditFormType.getId());
         int userDepId = userInfo.getUser().getDepartmentId();
         String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);

@@ -359,7 +359,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                                 Dialog.confirmMessage("Информация",
                                         "Найдены экземпляры " +
                                                 ( formTemplate.getType().getTaxType().isTax() ? "налоговых форм" : "форм" )
-                                                + ", использующие версию макета. Продожить сохранение?",
+                                                + ", использующие версию макета. Продолжить сохранение?",
                                         new DialogHandler() {
                                             @Override
                                             public void yes() {

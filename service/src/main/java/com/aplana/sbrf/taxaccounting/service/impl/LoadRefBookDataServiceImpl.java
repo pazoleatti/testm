@@ -726,10 +726,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             }
             if (accept) {
                 String msg = String.format("Загрузка данных из файла \"%s\" в справочник \"%s\" произошла успешно", fileName, refBook.getName());
-                auditService.add(FormDataEvent.IMPORT, userInfo, date, null, null, null, null, msg, logEntryService.save(logger.getEntries()));
+                auditService.add(FormDataEvent.IMPORT, userInfo, date, null, null, null, null, msg, null, logEntryService.save(logger.getEntries()));
             } else {
                 String msg = String.format("При загрузке данных из файла \"%s\" в справочник \"%s\" произошла ошибка. Подробности записаны в журнал сервера", fileName, refBook.getName());
-                auditService.add(FormDataEvent.IMPORT, userInfo, date, null, null, null, null, msg, logEntryService.save(logger.getEntries()));
+                auditService.add(FormDataEvent.IMPORT, userInfo, date, null, null, null, null, msg, null, logEntryService.save(logger.getEntries()));
             }
         }
     }

@@ -233,7 +233,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                             LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
                             if (result.isConfirmNeeded()) {
                                 Dialog.confirmMessage("Информация",
-                                        "Найдены экземпляры деклараций, использующие версию макета. Продожить сохранение?",
+                                        "Найдены экземпляры деклараций, использующие версию макета. Продолжить сохранение?",
                                         new DialogHandler() {
                                             @Override
                                             public void yes() {

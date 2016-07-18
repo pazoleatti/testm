@@ -106,15 +106,13 @@ public class BookerStatementsServiceImplTest {
         reportPeriod.setTaxPeriod(taxPeriod);
         when(periodService.getReportPeriod(reportPeriod.getId())).thenReturn(reportPeriod);
 
-        String account1 = "Вид бух. отчетности - " + BookerStatementsType.INCOME101.getName();
-        String account2 = "Вид бух. отчетности - " + BookerStatementsType.INCOME102.getName();
         String note = "Импорт бухгалтерской отчётности: test.xls";
 
         bookerStatementsService.importData("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, department.getId(), new TAUserInfo());
-        verify(auditService, Mockito.atLeastOnce()).add(eq(FormDataEvent.IMPORT), any(TAUserInfo.class), eq("2014 год"), eq(department.getId()), isNull(String.class), eq(account1), isNull(Integer.class), eq(note), isNull(String.class));
+        verify(auditService, Mockito.atLeastOnce()).add(eq(FormDataEvent.IMPORT), any(TAUserInfo.class), eq("2014 год"), eq(department.getId()), isNull(String.class), isNull(String.class), isNull(Integer.class), eq(note), eq(AuditFormType.INCOME101), isNull(String.class));
 
         bookerStatementsService.importData("test.xls", get102Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, department.getId(), new TAUserInfo());
-        verify(auditService, Mockito.atLeastOnce()).add(eq(FormDataEvent.IMPORT), any(TAUserInfo.class),  eq("2014 год"), eq(department.getId()), isNull(String.class), eq(account2), isNull(Integer.class), eq(note), isNull(String.class));
+        verify(auditService, Mockito.atLeastOnce()).add(eq(FormDataEvent.IMPORT), any(TAUserInfo.class),  eq("2014 год"), eq(department.getId()), isNull(String.class), isNull(String.class), isNull(Integer.class), eq(note), eq(AuditFormType.INCOME102), isNull(String.class));
     }
 
     private static InputStream getEmptyStream() {

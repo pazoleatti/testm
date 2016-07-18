@@ -49,6 +49,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static final String NO_DATA_FILE_MSG = "Файл не содержит данных. Файл не может быть загружен.";
     private static final String ACCOUNT_PERIOD_INVALID = "Период не указан.";
     private static final String DEPARTMENTID_INVALID = "Подразделение не указано.";
+    private static final String IMPORT_BO_MSG = "Импорт бухгалтерской отчётности: %s";
 
     @Autowired
     PeriodService reportPeriodService;
@@ -93,7 +94,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         Logger logger = new Logger();
 
         Long refBookId = (typeId == 0 ? RefBookIncome101Dao.REF_BOOK_ID : RefBookIncome102Dao.REF_BOOK_ID);
-        String formTypeName = String.format(ACCOUNT_LOG, typeId == 0 ? BookerStatementsType.INCOME101.getName() : BookerStatementsType.INCOME102.getName());
+        AuditFormType formType = typeId == 0 ? AuditFormType.INCOME101 : AuditFormType.INCOME102;
 
         //Выполняем логику скрипта
         refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
@@ -109,7 +110,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         String name = refBookValueMap.get("NAME").getStringValue();
 
         String msg = String.format(IMPORT_BO_MSG, realFileName);
-        auditService.add(FormDataEvent.IMPORT, userInfo, date + " " + name, departmentId, null, formTypeName, null, msg, null);
+        auditService.add(FormDataEvent.IMPORT, userInfo, date + " " + name, departmentId, null, null, null, msg, formType, null);
     }
 
     @Override

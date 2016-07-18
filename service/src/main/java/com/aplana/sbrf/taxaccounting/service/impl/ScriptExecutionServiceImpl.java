@@ -288,7 +288,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                     }
                 }
             }
-            auditService.add(FormDataEvent.SCRIPTS_IMPORT, userInfo, "", null, null, null, null, auditMsg.toString(), logEntryService.save(logger.getEntries()));
+            auditService.add(FormDataEvent.SCRIPTS_IMPORT, userInfo, "", null, null, null, null, auditMsg.toString(), null, logEntryService.save(logger.getEntries()));
             if (zis != null) {
                 try {
                     zis.close();

@@ -66,10 +66,11 @@ public interface AuditService {
      * @param formTypeName наименование типа НФ (необязательное) Хранится для информации о виде НФ, даже если она будет изменена
      * @param formKindId вид НФ (необязательное)
      * @param note пояснение (необязательное)
+     * @param formType тип формы (необязательное)
      * @param blobDataId ссылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
      */
     void add(FormDataEvent event, TAUserInfo userInfo,  String reportPeriodName, Integer departmentId,
-             String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId);
+             String declarationTypeName, String formTypeName, Integer formKindId, String note, AuditFormType formType, String blobDataId);
 
     /**
      * Добавить информацию о логировании из версий макетов
