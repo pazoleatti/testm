@@ -37,4 +37,13 @@ public enum AuditFormType {
     public void setName(String name) {
         this.name = name;
     }
+
+    public static AuditFormType fromId(int typeId) {
+        for (AuditFormType type: values()) {
+            if (type.id == typeId) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Wrong AuditFormType id: " + typeId);
+    }
 }

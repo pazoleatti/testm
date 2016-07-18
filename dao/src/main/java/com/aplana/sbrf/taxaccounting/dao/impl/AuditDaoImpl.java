@@ -34,7 +34,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     private static final String LOG_SYSTEM_DATA_BY_FILTER = "select ordDat.* from (select dat.*, count(*) over() cnt, rownum as rn from ( select DISTINCT " +
             "ls.id, ls.log_date, ls.ip, ls.event_id, ev.name event, ls.user_login user_login, ls.roles, ls.department_name, " +
             "ls.report_period_name, ls.declaration_type_name, ls.form_type_name, ls.form_kind_id, ls.form_type_id, " +
-            "fk.name form_kind_name, ls.note, aft.name type_name, ls.user_department_name, ls.blob_data_id, ls.server " +
+            "fk.name form_kind_name, ls.note, audit_form_type_id, ls.user_department_name, ls.blob_data_id, ls.server " +
             "from log_system ls " +
             "left join event ev on ls.event_id=ev.\"ID\" " +
             "left join form_kind fk on ls.form_kind_id=fk.\"ID\" " +
@@ -123,7 +123,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "              ls.note,\n" +
                     "              ls.user_department_name,\n" +
                     "              ls.blob_data_id," +
-                    "              aft.name type_name,\n" +
+                    "              audit_form_type_id,\n" +
                     "              ls.server\n" +
                     "            FROM log_system ls\n" +
                     "              LEFT JOIN event ev ON ls.event_id = ev.\"ID\"\n" +
@@ -299,7 +299,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "              ls.note,\n" +
                     "              ls.user_department_name,\n" +
                     "              ls.blob_data_id,\n" +
-                    "              aft.name type_name,\n" +
+                    "              audit_form_type_id,\n" +
                     "              ls.server\n" +
                     "            FROM log_system ls LEFT JOIN event ev ON ls.event_id = ev.\"ID\"\n" +
                     "              LEFT JOIN form_kind fk ON ls.form_kind_id = fk.\"ID\"\n" +
@@ -669,7 +669,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			log.setUserDepartmentName(rs.getString("user_department_name"));
 			log.setBlobDataId(rs.getString("blob_data_id"));
             log.setFormTypeId(SqlUtils.getInteger(rs, "form_type_id"));
-            log.setAuditFormTypeName(rs.getString("type_name"));
+            if (SqlUtils.getInteger(rs, "audit_form_type_id") != null) {
+                log.setAuditFormType(AuditFormType.fromId(SqlUtils.getInteger(rs, "audit_form_type_id")));
+            }
             if (isSupportOver())log.setCnt(SqlUtils.getInteger(rs, "cnt"));
             log.setServer(rs.getString("server"));
 			return log;

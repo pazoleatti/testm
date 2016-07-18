@@ -299,7 +299,11 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         TextColumn<LogSearchResultItem> typeColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                return object.getAuditFormTypeName();
+                if (object.getAuditFormType() != null) {
+                    return object.getAuditFormType().getName();
+                } else {
+                    return "";
+                }
             }
         };
 
