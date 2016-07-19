@@ -552,5 +552,34 @@ end;
 /
 COMMIT;
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16273: 1.1 ЗемНалог. Реализовать справочник "Периоды строительства"
+declare l_task_name varchar2(128) := 'DML Block #8 (SBRFACCTAX-16273 - Construction phases))';
+begin	
+	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (701,'Периоды строительства',1,0,0,null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7011, 701, 'Код','CODE',2,1,null,null,1,0,5,1,1,null,null,0,2);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7012, 701, 'Наименование','NAME',1,2,null,null,1,null,25,1,0,null,null,0,255);
+	
+	INSERT INTO ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 701, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		INSERT INTO ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 7011, 1);		
+		INSERT INTO ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7012, '3 года');	
+
+	INSERT INTO ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 701, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		INSERT INTO ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 7011, 2);	
+		INSERT INTO ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7012, 'Свыше 3 лет');	
+	
+	dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book or its attributes already exist ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
