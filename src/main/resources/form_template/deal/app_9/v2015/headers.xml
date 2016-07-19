@@ -1,27 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="">
-        <cell alias="rowNumber" colSpan="1" rowSpan="3" value="№ п/п"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ п/п"/>
         <cell alias="name" colSpan="2" rowSpan="1" value="Информация о лице"/>
         <cell alias="ikksr" colSpan="1" rowSpan="1" value="Информация о лице"/>
-        <cell alias="sum4" colSpan="12" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum42" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum43" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum44" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum46" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum51" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum52" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum53" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum54" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum55" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum56" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
-        <cell alias="sum6" colSpan="1" rowSpan="3" value="Итого, руб."/>
-    </row>
-    <row alias="">
-        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
-        <cell alias="name" colSpan="1" rowSpan="2" value="Полное наименование и ОПФ юридического лица"/>
-        <cell alias="ikksr" colSpan="1" rowSpan="2" value="ИНН и КПП или его аналог (при наличии)"/>
         <cell alias="sum4" colSpan="6" rowSpan="1" value="Сумма доходов, руб."/>
         <cell alias="sum42" colSpan="1" rowSpan="1" value="Сумма доходов, руб."/>
         <cell alias="sum43" colSpan="1" rowSpan="1" value="Сумма доходов, руб."/>
@@ -34,7 +16,7 @@
         <cell alias="sum54" colSpan="1" rowSpan="1" value="Сумма расходов, руб."/>
         <cell alias="sum55" colSpan="1" rowSpan="1" value="Сумма расходов, руб."/>
         <cell alias="sum56" colSpan="1" rowSpan="1" value="Сумма расходов, руб."/>
-        <cell alias="sum6" colSpan="1" rowSpan="1" value="Итого, руб."/>
+        <cell alias="sum6" colSpan="1" rowSpan="2" value="Итого, руб."/>
     </row>
     <row alias="">
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
