@@ -1,7 +1,7 @@
 set serveroutput on size 1000000;
 ---------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15922: 1.1 РнРнтб. Реализовать справочник "Классы кредитоспособности"
-declare l_task_name varchar2(128) := 'DML Block #1 (SBRFACCTAX-15922 - Credit quality rates))';
+declare l_task_name varchar2(128) := 'RefBook Block #1 (SBRFACCTAX-15922 - Credit quality rates))';
 begin
 	
 	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (601,'Классы кредитоспособности',1,0,0,null);
@@ -30,7 +30,7 @@ end;
 COMMIT;
 ---------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15924: 1.1 РнРнтб. Реализовать справочник "Международные кредитные рейтинги по шкале S&P"
-declare l_task_name varchar2(128) := 'DML Block #2 (SBRFACCTAX-15924 - S'||chr(38)||'P credit ratings))';
+declare l_task_name varchar2(128) := 'RefBook Block #2 (SBRFACCTAX-15924 - S'||chr(38)||'P credit ratings))';
 begin
 	
 	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (602,'Международные кредитные рейтинги по шкале S'||chr(38)||'P',1,0,0,null);
@@ -105,7 +105,7 @@ COMMIT;
 
 ---------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15921: 1.1 РнРнтб. Реализовать справочник "Кредитные рейтинги"
-declare l_task_name varchar2(128) := 'DML Block #3 (SBRFACCTAX-15921 - Credit ratings))';
+declare l_task_name varchar2(128) := 'RefBook Block #3 (SBRFACCTAX-15921 - Credit ratings))';
 begin
 	
 	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (603,'Кредитные рейтинги',1,0,0,null);
@@ -274,7 +274,7 @@ end;
 COMMIT;
 ---------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15923: 1.1 РнРнтб. Реализовать справочник "Кредитные рейтинги и классы кредитоспособности"
-declare l_task_name varchar2(128) := 'DML Block #4 (SBRFACCTAX-15923 - Credit ratings and credit quality classes))';
+declare l_task_name varchar2(128) := 'RefBook Block #4 (SBRFACCTAX-15923 - Credit ratings and credit quality classes))';
 begin
 	
 	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (604,'Кредитные рейтинги и классы кредитоспособности',1,0,1,null);
@@ -294,7 +294,7 @@ end;
 COMMIT;
 ---------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15925: 1.1 РнРнтб. Реализовать справочник "Организационно-правовые формы"
-declare l_task_name varchar2(128) := 'DML Block #5 (SBRFACCTAX-15925 - Organizational legal forms))';
+declare l_task_name varchar2(128) := 'RefBook Block #5 (SBRFACCTAX-15925 - Organizational legal forms))';
 begin
 	
 	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (605,'Организационно-правовые формы',1,0,0,null);
@@ -489,7 +489,7 @@ end;
 COMMIT;
 ---------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-16012: 1.1 РнРнтб. Реализовать справочник "Категории обеспечения"
-declare l_task_name varchar2(128) := 'DML Block #6 (SBRFACCTAX-16012 - Collateral types))';
+declare l_task_name varchar2(128) := 'RefBook Block #6 (SBRFACCTAX-16012 - Collateral types))';
 begin	
 	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (606,'Категории обеспечения',1,0,0,null);
 	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6061, 606, 'Наименование', 'NAME',1,1,null,null,1,null,10,1,1,null,null,0,50);
@@ -517,7 +517,7 @@ end;
 COMMIT;
 ---------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-16013: 1.1 РнРнтб. Реализовать справочник "Исключаемые типы кредитов"
-declare l_task_name varchar2(128) := 'DML Block #7 (SBRFACCTAX-16013 - Excludable credit types))';
+declare l_task_name varchar2(128) := 'RefBook Block #7 (SBRFACCTAX-16013 - Excludable credit types))';
 begin	
 	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (607,'Исключаемые типы кредитов',1,0,0,null);
 	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6071, 607, 'Код','CODE',1,1,null,null,1,null,5,1,1,null,null,0,10);
@@ -553,7 +553,7 @@ end;
 COMMIT;
 ---------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-16273: 1.1 ЗемНалог. Реализовать справочник "Периоды строительства"
-declare l_task_name varchar2(128) := 'DML Block #8 (SBRFACCTAX-16273 - Construction phases))';
+declare l_task_name varchar2(128) := 'RefBook Block #8 (SBRFACCTAX-16273 - Construction phases))';
 begin	
 	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (701,'Периоды строительства',1,0,0,null);
 	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7011, 701, 'Код','CODE',2,1,null,null,1,0,5,1,1,null,null,0,2);
