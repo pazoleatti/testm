@@ -581,5 +581,53 @@ end;
 COMMIT;
 
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16291: 1.1 ЗемНалог. Добавить элементы в справочник "Коды представления налоговой декларации по месту нахождения (учёта)"
+declare l_task_name varchar2(128) := 'RefBook Block #9 (SBRFACCTAX-16291 - Tax declaration''s codes - new records))';
+begin	
+	
+	for x in (WITH t as (SELECT '250' as code from dual UNION ALL SELECT '251' as code from dual)
+				SELECT t.code, d.id
+				FROM   t
+				LEFT   JOIN (SELECT r.id, v.string_value AS code
+							 FROM   ref_book_record r
+							 JOIN   ref_book_value v ON r.id = v.record_id AND
+														v.attribute_id = 3
+							 WHERE  r.ref_book_id = 2 AND v.string_value IN ('250', '251') AND
+									r.version = to_date('01.01.2012', 'DD.MM.YYYY') AND
+									r.status <> -1) d ON t.code = d.code) loop
+		if (x.code = '250' and x.id is null) then
+			INSERT INTO ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, seq_ref_book_record_row_id.nextval, 2, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+				INSERT INTO ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 3, '250');		
+				INSERT INTO ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 4, 'По месту нахождения участка недр, предоставленного на условиях СРП');	
+				
+			dbms_output.put_line(l_task_name||'[INFO]: Code ''250'' added');		
+		elsif (x.code = '250' and x.id is not null) then	
+			dbms_output.put_line(l_task_name||'[WARN]: Code ''250'' already exists');		
+		end if;
+		
+		if (x.code = '251' and x.id is null) then
+			INSERT INTO ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, seq_ref_book_record_row_id.nextval, 2, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+				INSERT INTO ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 3, '251');		
+				INSERT INTO ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 4, 'По месту нахождения организации – инвестора СРП, если участок недр расположен на континентальном шельфе Российской Федерации и (или) в пределах исключительной экономической зоны Российской Федерации');	
+				
+			dbms_output.put_line(l_task_name||'[INFO]: Code ''251'' added');		
+		elsif (x.code = '251' and x.id is not null) then	
+			dbms_output.put_line(l_task_name||'[WARN]: Code ''251'' already exists');		
+		end if;			
+	end loop;			
+	
+	dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book or its attributes already exist ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
