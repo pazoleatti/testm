@@ -183,41 +183,41 @@ public class Summary_5_3_2Test extends ScriptTestBase {
         int expected;
 
         // 1. консолидация должна пройти без проблем, 1 подходящая строка источника, в приемнике должен получится 1 блок из 20 строк
-//        long testMinMax = 1000L;
-//        setDefaultValues(sourceDataRow);
-//        // графа 28
-//        sourceDataRow.getCell("economyRate").setValue(testMinMax, sourceDataRow.getIndex());
-//        testHelper.execute(FormDataEvent.COMPOSE);
-//        expected = 20;
-//        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-//        // количество
-//        DataRow<Cell> tmpDataRow = testHelper.getDataRowHelper().getAll().get(2);
-//        long expectedCount = 1L;
-//        Assert.assertEquals(expectedCount, tmpDataRow.getCell("count1_5year100").getNumericValue().longValue());
-//        // min, max
-//        tmpDataRow = testHelper.getDataRowHelper().getAll().get(3);
-//        Assert.assertEquals(testMinMax, tmpDataRow.getCell("min1_5year100").getNumericValue().longValue());
-//        Assert.assertEquals(testMinMax, tmpDataRow.getCell("max1_5year100").getNumericValue().longValue());
-//        checkLogger();
-//
-//        // 2. консолидация должна пройти без проблем, 1 подходящая строка источника, в приемнике должен получится 1 блок из 20 строк
-//        setDefaultValues(sourceDataRow);
-//        // графа 8
-//        sourceDataRow.getCell("creditRating").setValue(3L, sourceDataRow.getIndex());
-//        // графа 28
-//        sourceDataRow.getCell("economyRate").setValue(testMinMax, sourceDataRow.getIndex());
-//        testHelper.execute(FormDataEvent.COMPOSE);
-//        expected = 20;
-//        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-//        // количество
-//        tmpDataRow = testHelper.getDataRowHelper().getAll().get(2);
-//        expectedCount = 1L;
-//        Assert.assertEquals(expectedCount, tmpDataRow.getCell("count1_5year100").getNumericValue().longValue());
-//        // min, max
-//        tmpDataRow = testHelper.getDataRowHelper().getAll().get(3);
-//        Assert.assertEquals(testMinMax, tmpDataRow.getCell("min1_5year100").getNumericValue().longValue());
-//        Assert.assertEquals(testMinMax, tmpDataRow.getCell("max1_5year100").getNumericValue().longValue());
-//        checkLogger();
+        long testMinMax = 1000L;
+        setDefaultValues(sourceDataRow);
+        // графа 28
+        sourceDataRow.getCell("economyRate").setValue(testMinMax, sourceDataRow.getIndex());
+        testHelper.execute(FormDataEvent.COMPOSE);
+        expected = 20;
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        // количество
+        DataRow<Cell> tmpDataRow = testHelper.getDataRowHelper().getAll().get(2);
+        long expectedCount = 1L;
+        Assert.assertEquals(expectedCount, tmpDataRow.getCell("count1_5year100").getNumericValue().longValue());
+        // min, max
+        tmpDataRow = testHelper.getDataRowHelper().getAll().get(3);
+        Assert.assertEquals(testMinMax, tmpDataRow.getCell("min1_5year100").getNumericValue().longValue());
+        Assert.assertEquals(testMinMax, tmpDataRow.getCell("max1_5year100").getNumericValue().longValue());
+        checkLogger();
+
+        // 2. консолидация должна пройти без проблем, 1 подходящая строка источника, в приемнике должен получится 1 блок из 20 строк
+        setDefaultValues(sourceDataRow);
+        // графа 8
+        sourceDataRow.getCell("creditRating").setValue(3L, sourceDataRow.getIndex());
+        // графа 28
+        sourceDataRow.getCell("economyRate").setValue(testMinMax, sourceDataRow.getIndex());
+        testHelper.execute(FormDataEvent.COMPOSE);
+        expected = 20;
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        // количество
+        tmpDataRow = testHelper.getDataRowHelper().getAll().get(2);
+        expectedCount = 1L;
+        Assert.assertEquals(expectedCount, tmpDataRow.getCell("count1_5year100").getNumericValue().longValue());
+        // min, max
+        tmpDataRow = testHelper.getDataRowHelper().getAll().get(3);
+        Assert.assertEquals(testMinMax, tmpDataRow.getCell("min1_5year100").getNumericValue().longValue());
+        Assert.assertEquals(testMinMax, tmpDataRow.getCell("max1_5year100").getNumericValue().longValue());
+        checkLogger();
 
         // 3. консолидация не должна пройти, должно быть 1 фатальное сообщение
         setDefaultValues(sourceDataRow);

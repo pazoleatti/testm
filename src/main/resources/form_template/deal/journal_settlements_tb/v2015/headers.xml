@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="2" value="№"/>
+        <cell alias="name" colSpan="1" rowSpan="2" value="Наименования статей"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="2"
+              value="Код организации - участника группы (подразделения ПАО Сбербанк), с которым осуществляются взаиморасчеты"/>
+        <cell alias="orgName" colSpan="1" rowSpan="2"
+              value="Наименование организации - участника группы (подразделения ПАО Сбербанк), с которым осуществляются взаиморасчеты"/>
+        <cell alias="currency" colSpan="1" rowSpan="2" value="Наименование валюты"/>
+        <cell alias="currencySum" colSpan="2" rowSpan="1"
+              value="Суммы доходов / расходов, учтенные на счетах бухгалтерского учета по состоянию на отчетную дату"/>
+        <cell alias="sum" colSpan="1" rowSpan="1"
+              value="Суммы доходов / расходов, учтенные на счетах бухгалтерского учета по состоянию на отчетную дату"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="2"
+              value="Суммы доходов / расходов, относящиеся к отчетному периоду, но не проведенные по счетам бухгалтерского учета по состоянию на отчетную дату в номинале валюты, тыс.единиц"/>
+        <cell alias="description" colSpan="1" rowSpan="2" value="Краткое описание операции, сделки"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименования статей"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1"
+              value="Код организации - участника группы (подразделения ПАО Сбербанк), с которым осуществляются взаиморасчеты"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1"
+              value="Наименование организации - участника группы (подразделения ПАО Сбербанк), с которым осуществляются взаиморасчеты"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="Наименование валюты"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" value="в номинале валюты, тыс.единиц"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" value="в пересчете на рубли, тыс.рублей"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1"
+              value="Суммы доходов / расходов, относящиеся к отчетному периоду, но не проведенные по счетам бухгалтерского учета по состоянию на отчетную дату в номинале валюты, тыс.единиц"/>
+        <cell alias="description" colSpan="1" rowSpan="1" value="Краткое описание операции, сделки"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="1.1"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="1.2"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" value="2.1"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" value="2.2"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" value="4.1"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" value="4.2"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="description" colSpan="1" rowSpan="1" value="6"/>
+    </row>
+</rows>

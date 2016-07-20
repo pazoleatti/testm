@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="header1">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="" styleAlias="Заголовок"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="ДОХОДЫ" styleAlias="Заголовок"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+    </row>
+    <row alias="subHeader1">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Процентные доходы от:" styleAlias="Заголовок"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+    </row>
+    <row alias="01">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="01" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="размещения средств в кредитных организациях, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="02">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="02" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="ссуд, предоставленных клиентам, не являющимся кредитными организациями, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="03">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="03" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="оказания услуг по финансовой аренде (лизингу), в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="04">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="04" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="вложений в ценные бумаги, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="05">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="05" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Комиссионные доходы - всего, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="05.1">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="05.1" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="агентское (комиссионное) вознаграждение по договорам пенсионного страхования с НПФ Сбербанка, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="05.2">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="05.2" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="агентское (комиссионное) вознаграждение по договорам страхования, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="05.3">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="05.3" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="прочие комиссии, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="06">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="06" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Прочие доходы - всего, в. т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="06.1">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="06.1" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="по арендным (в том числе по операциям сублизинга), коммунальным и аналогичным платежам, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="06.2">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="06.2" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="по возмещаемым затратам и оказанным услугам, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="06.3">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="06.3" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="доходы от операций с производными финансовыми инструментами в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="06.4">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="06.4" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="доходы за информационные услуги, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="06.5">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="06.5" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="прочие (предоставить расшифровку по видам операций с указанием сумм), в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="99.1">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="99.1" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="ИТОГО ДОХОДОВ" styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="header2">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="РАСХОДЫ" styleAlias="Заголовок"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+    </row>
+    <row alias="subHeader2">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Процентные расходы по" styleAlias="Заголовок"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+    </row>
+    <row alias="20">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="20" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="привлеченным средствам кредитных организаций, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="21">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="21" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="привлеченным средствам клиентов, не являющихся кредитными организациями, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="22">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="22" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="выпущенным долговым обязательствам, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="23">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="23" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Комиссионные расходы - всего, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="23.1">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="23.1" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="агентское (комиссионное) вознаграждение по договорам пенсионного страхования с НПФ Сбербанка, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="23.2">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="23.2" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="агентское (комиссионное) вознаграждение по договорам страхования, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="23.3">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="23.3" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="прочие комиссии, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="24">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="24" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Прочие расходы - всего, в. т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="24.1">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="24.1" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="по арендным (в том числе по операциям сублизинга), коммунальным и аналогичным платежам, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="24.2">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="24.2" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="по возмещаемым затратам и оказанным услугам, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="24.3">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="24.3" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="расходы от операций с производными финансовыми инструментами в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="24.4">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="24.4" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="расходы за информационные услуги, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="24.5">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="24.5" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="прочие (предоставить расшифровку по видам операций с указанием сумм), в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="99.2">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="99.2" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="ИТОГО РАСХОДОВ" styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="subHeader3">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Изменение резерва на возможные потери по"
+              styleAlias="Заголовок"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+    </row>
+    <row alias="30">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="30" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="кредитам (займам) и дебиторской задолженности, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="31">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="31" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="начисленным процентным доходам, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="32">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="32" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="прочим операциям, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="40">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="40" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Сумма уплаченных процентов за полученные кредиты, отнесенная на увеличение стоимости инвестиционных активов, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="50">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="50" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Сумма уплаченного комиссионного вознаграждения, которая уменьшила прибыль от реализации имущества, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="51">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="51" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Сумма уплаченного комиссионного вознаграждения, которая увеличила убыток от реализации имущества, в т.ч.:"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="otherSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="description" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+</rows>
