@@ -177,9 +177,10 @@ def logicCheck() {
     def departmentCode = getRefBookValue(30, formDataDepartment.id)?.CODE?.value
     def userDepartmentInn = getDepartmentParams(userDepartment.id)?.INN?.value
     def yearRowMap = [:]
+    def isNot15521 = (departmentCode != 15521)
 
     // 14. Проверка заполнения ИНН для подразделения
-    if (departmentCode != '15521' && !userDepartmentInn) {
+    if (isNot15521 && !userDepartmentInn) {
         def periodName = period?.taxPeriod?.year + ' ' + period?.name
         logger.error("В настройках подразделения «%s» за период «%s» не заполнен атрибут «ИНН»!", userDepartment.name, periodName)
     }
@@ -282,7 +283,7 @@ def logicCheck() {
         }
 
         // 15. Проверка заполнения «Графы 4», «Графы 5»
-        if (departmentCode != '15521' && userDepartmentInn && row.dividends > 0 && row.sum > 0 && row.withheldSum >= 0 && row.emitentInn == userDepartmentInn) {
+        if (isNot15521 && userDepartmentInn && row.dividends > 0 && row.sum > 0 && row.withheldSum >= 0 && row.emitentInn == userDepartmentInn) {
             ['all', 'rateZero'].each { alias ->
                 if (row[alias] == null) {
                     logger.warn("Строка $index: Графа «%s» должна быть заполнена, т.к. значение используется при консолидации в сводную форму 03А!", getColumnName(row, alias))
