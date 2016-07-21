@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>Итоговые данные книги продаж</name>
     <fullName>Итоговые данные книги продаж</fullName>
-    <header>937.2</header>
+    <header>937.2-1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
