@@ -15,15 +15,15 @@ import groovy.transform.Field
  * Загрзука из экселя нестандартная: эксель не из нашей системы, а сформированный другой системой, формат xls, поэтому используется старая загрузка.
  */
 
-// графа 1 - rowNum
-// графа 2 - name
-// графа 3 - statReportId  - атрибут 5216 - STATREPORT_ID - «ИД в АС "Статотчетность"», справочник 520 «Участники ТЦО»
-// графа 4 - orgName       - зависит от графы 3 - атрибут 5201 - NAME - «Полное наименование юридического лица с указанием ОПФ», справочник 520 «Участники ТЦО»
-// графа 5 - currency      - атрибут 66 - NAME - «Наименование», справочник 15 «Общероссийский классификатор валют»
-// графа 6 - currencySum
-// графа 7 - sum
-// графа 8 - otherSum
-// графа 9 - description
+// графа 1 (1.1) - rowNum
+// графа 2 (1.2) - name
+// графа 3 (2.1) - statReportId  - атрибут 5216 - STATREPORT_ID - «ИД в АС "Статотчетность"», справочник 520 «Участники ТЦО»
+// графа 4 (2.2) - orgName       - зависит от графы 3 - атрибут 5201 - NAME - «Полное наименование юридического лица с указанием ОПФ», справочник 520 «Участники ТЦО»
+// графа 5 (3)   - currency      - атрибут 66 - NAME - «Наименование», справочник 15 «Общероссийский классификатор валют»
+// графа 6 (4.1) - currencySum
+// графа 7 (4.2) - sum
+// графа 8 (5)   - otherSum
+// графа 9 (6)   - description
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -361,8 +361,12 @@ void importData() {
 
         // простая строка
         if (isData) {
-            def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
-            mapRows[sectionIndex].add(newRow)
+            // пропускать строки, в которых не заполнены графа 3..9
+            def isNotEmpty = rowValues[2..8].find { it }
+            if (isNotEmpty) {
+                def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+                mapRows[sectionIndex].add(newRow)
+            }
             // освободить ненужные данные - иначе не хватит памяти
             allValues.remove(rowValues)
             rowValues.clear()

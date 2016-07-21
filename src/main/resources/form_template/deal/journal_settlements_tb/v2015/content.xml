@@ -55,7 +55,7 @@
         <columnType>REFBOOK</columnType>
         <name>Наименование валюты</name>
         <order>5</order>
-        <width>6</width>
+        <width>8</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>66</nameAttributeId>
         <refBookAttributeId>66</refBookAttributeId>

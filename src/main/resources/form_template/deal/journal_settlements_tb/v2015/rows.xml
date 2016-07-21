@@ -220,7 +220,7 @@
     </row>
     <row alias="subHeader2">
         <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
-        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Процентные расходы по" styleAlias="Заголовок"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Процентные расходы по:" styleAlias="Заголовок"/>
         <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
         <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
         <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
@@ -404,7 +404,7 @@
     </row>
     <row alias="subHeader3">
         <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
-        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Изменение резерва на возможные потери по"
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Изменение резерва на возможные потери по:"
               styleAlias="Заголовок"/>
         <cell alias="statReportId" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
         <cell alias="orgName" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
