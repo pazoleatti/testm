@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.LockInfo;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
@@ -8,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellEnteredEditModeEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellEnteredEditModeEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
@@ -18,12 +22,13 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.EventTarget;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.TableCellElement;
+import com.google.gwt.dom.builder.shared.TableRowBuilder;
+import com.google.gwt.dom.client.*;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ScrollEvent;
+import com.google.gwt.event.dom.client.ScrollHandler;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -31,8 +36,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
@@ -70,6 +74,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		@Override
 		protected void onRangeChanged(HasData<DataRow<Cell>> display) {
 			Range range = display.getVisibleRange();
+            formDataTableFixed.setPageStart(range.getStart());
+            formDataTableFixed.setPageSize(range.getLength());
+            setupFixedHeader();
 			getUiHandlers().onRangeChange(range.getStart(), range.getLength());
 		}
 	};
@@ -90,6 +97,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@UiField
     GenericDataGrid<DataRow<Cell>> formDataTable;
+    @UiField
+    GenericDataGrid<DataRow<Cell>> formDataTableFixed;
 	@UiField
 	FlexiblePager pager;
 	@UiField
@@ -171,7 +180,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     Label editModeLabel;
     @UiField
-    ResizeLayoutPanel tableWrapper;
+    LayoutPanel tableWrapper;
     @UiField
     LinkButton search;
 
@@ -250,7 +259,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         formDataTable.setEmptyTableWidget(noResultLabel);
         formDataTable.setRowData(new ArrayList());
 
+        setupFixedTable();
+
         formDataTable.setPageSize(pager.getPageSize());
+        formDataTableFixed.setPageSize(pager.getPageSize());
         pager.setDisplay(formDataTable);
         recalcReportPeriodLabelWidth();     // пересчитаем при первом отображении страницы
 
@@ -260,6 +272,42 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 recalcReportPeriodLabelWidth();
             }
         });
+    }
+
+    private void setupFixedTable() {
+        formDataTable.getContentPanel().addAttachHandler(new AttachEvent.Handler() {
+            @Override
+            public void onAttachOrDetach(AttachEvent event) {
+                setupFixedHeader();
+            }
+        });
+        formDataTableFixed.setLoadingIndicator(null);
+        formDataTableFixed.getContentPanel().getWidget().getElement().getStyle().setPaddingBottom(34, com.google.gwt.dom.client.Style.Unit.PX);
+        formDataTableFixed.getContentPanel().setVerticalScrollbar(null, 0);
+        formDataTableFixed.getContentPanel().setHorizontalScrollbar(null, 0);
+        formDataTable.getContentPanel().addScrollHandler(new ScrollHandler() {
+            @Override
+            public void onScroll(ScrollEvent event) {
+                formDataTableFixed.getContentPanel().setVerticalScrollPosition(
+                        formDataTable.getContentPanel().getVerticalScrollPosition());
+            }
+        });
+        formDataTableFixed.getContentPanel().addScrollHandler(new ScrollHandler() {
+            @Override
+            public void onScroll(ScrollEvent event) {
+                formDataTable.getContentPanel().setVerticalScrollPosition(
+                        formDataTableFixed.getContentPanel().getVerticalScrollPosition());
+            }
+        });
+    }
+
+    private void setupFixedHeader() {
+        if (formDataTableFixed.getHeaderWidget() != null) {
+            int headerHeight = formDataTable.getTableHeadElement().getClientHeight();
+            formDataTableFixed.getTableHeadElement().getStyle().setHeight(headerHeight, com.google.gwt.dom.client.Style.Unit.PX);
+            formDataTableFixed.getContentPanel().getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.RELATIVE);
+            formDataTableFixed.getHeaderWidget().getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.RELATIVE);
+        }
     }
 
     @Override
@@ -287,24 +335,28 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		while (formDataTable.getColumnCount() > 0) {
 			formDataTable.removeColumn(0);
 		}
-		//Create order column
-		NumericColumn numericColumn = new NumericColumn();
 
-		DataRowColumn<Integer> indexColumn = new DataRowColumn<Integer>(new IndexCell(), numericColumn) {
-			@Override
-			public Integer getValue(DataRow<Cell> object) {
-				return object.getIndex();
-			}
+        int indexColumnWidth = 3;
+        if (formDataTableFixed.getColumnCount() == 0) {
+            //Create order column
+            NumericColumn numericColumn = new NumericColumn();
+            DataRowColumn<Integer> indexColumn = new DataRowColumn<Integer>(new IndexCell(), numericColumn) {
+                @Override
+                public Integer getValue(DataRow<Cell> object) {
+                    return object.getIndex();
+                }
 
-            @Override
-            public String getCellStyleNames(com.google.gwt.cell.client.Cell.Context context, DataRow<Cell> object) {
-                // этот метод не вызывается при выделении строк при работе с NoSelectionModel
-                DataRow<Cell> selectedRow = getSelectedRow();
-                return selectedRow != null && selectedRow.equals(object) ? "orderSelected" : "order";
-            }
-        };
-		formDataTable.addColumn(indexColumn, "№");
-		formDataTable.setColumnWidth(indexColumn, 3, Style.Unit.EM);
+                @Override
+                public String getCellStyleNames(com.google.gwt.cell.client.Cell.Context context, DataRow<Cell> object) {
+                    super.getCellStyleNames(context, object);
+                    // этот метод не вызывается при выделении строк при работе с NoSelectionModel
+                    DataRow<Cell> selectedRow = getSelectedRow();
+                    return selectedRow != null && selectedRow.equals(object) ? "orderSelected" : "order";
+                }
+            };
+            formDataTableFixed.addColumn(indexColumn, "№");
+            formDataTableFixed.setColumnWidth(indexColumn, indexColumnWidth, Style.Unit.EM);
+        }
 
 		factory.setReadOnly(readOnly);
 		factory.setSuperEditMode(forceEditMode);
@@ -331,7 +383,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                         if (withReference) {
                             formDataTable.redrawRow(event.getDataRow().getIndex() - 1);
                         }
+                        formDataTableFixed.redrawRow(event.getDataRow().getIndex() - 1);
                     }
+                }
+            });
+            ((DataRowColumn<?>)tableCol).addCellEnteredEditModeEventHandler(new CellEnteredEditModeEventHandler() {
+                @Override
+                public void onCellEnteredEditMode(CellEnteredEditModeEvent event) {
+                    formDataTableFixed.redrawRow(event.getDataRow().getIndex() - 1);
                 }
             });
             if (!showCheckedColumns.getValue() && col.isChecking()) {
@@ -356,9 +415,28 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			}
 			tableWidth += Float.parseFloat(width);
 		}
+        tableWidth += indexColumnWidth;
 		formDataTable.setTableWidth(tableWidth, Style.Unit.EM);
+        formDataTableFixed.setTableWidth(indexColumnWidth, Style.Unit.EM);
         noResultLabel.setWidth(tableWidth + "em");
 	}
+
+    private double calcRowSize(int rowIndex) {
+        int height = formDataTable.getRowElement(rowIndex).getClientHeight();
+        int offset1 = formDataTable.getRowElement(rowIndex).getOffsetTop();
+        int offset2 = formDataTableFixed.getRowElement(rowIndex).getOffsetTop();
+        if (Math.abs(offset2 - offset1) >= 1) {
+            height -= offset2 - offset1;
+        }
+        return height;
+    }
+
+    private void syncFixedTable() {
+        for (int rowIndex = 0; rowIndex < formDataTable.getVisibleItemCount(); rowIndex++) {
+            TableRowElement row = formDataTableFixed.getRowElement(rowIndex);
+            row.getStyle().setHeight(calcRowSize(rowIndex), Style.Unit.PX);
+        }
+    }
 
     @Override
     public void setTableLockMode(boolean lockMode) {
@@ -369,6 +447,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData) {
 		formDataTable.setRowCount(totalCount);
 		formDataTable.setRowData(start, rowsData);
+        formDataTableFixed.setRowCount(totalCount);
+        formDataTableFixed.setRowData(start, rowsData);
+        syncFixedTable();
+
         if (needScrollToRow != null && !fixedRows) {
             selectRow(needScrollToRow);
             formDataTable.setKeyboardSelectedRow(needScrollToRow - 1 - formDataTable.getPageStart());
@@ -388,7 +470,28 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void addCustomTableStyles(List<FormStyle> allStyles) {
 		CustomTableBuilder<DataRow<Cell>> builder = new CustomTableBuilder<DataRow<Cell>>(formDataTable, false);
 		formDataTable.setTableBuilder(builder);
+        setFixedTableBuilder();
 	}
+
+    private void setFixedTableBuilder() {
+        formDataTableFixed.setTableBuilder(new CustomTableBuilder<DataRow<Cell>>(formDataTableFixed, false) {
+            int rowIndex;
+            @Override
+            public void addRowAttributes(TableRowBuilder row) {
+                if (rowIndex >= formDataTable.getVisibleItemCount())
+                    return;
+                if (formDataTable.getRowElement(rowIndex) != null && cellTable.getRowElement(rowIndex) != null) {
+                    row.attribute("height", calcRowSize(rowIndex) + "px");
+                }
+            }
+
+            @Override
+            public void buildRowImpl(DataRow<Cell> rowValue, int absRowIndex) {
+                this.rowIndex = absRowIndex;
+                super.buildRowImpl(rowValue, absRowIndex);
+            }
+        });
+    }
 
     @UiHandler("correctionButton")
     void onCorrectionLinkButtonClicked(ClickEvent event) {
@@ -803,6 +906,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
 	public void updateData() {
         formDataTable.setVisibleRangeAndClearData(formDataTable.getVisibleRange(), true);
+        formDataTableFixed.setVisibleRangeAndClearData(formDataTableFixed.getVisibleRange(), true);
 	}
 
     @UiFactory
@@ -835,6 +939,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             this.taxType = taxType;
             pager.setType("formData" + taxType.getCode());
             formDataTable.setPageSize(pager.getPageSize());
+            formDataTableFixed.setPageSize(pager.getPageSize());
         }
         updateData(0);
     }
@@ -904,6 +1009,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         });
 
         formDataTable.setSelectionModel(singleSelectionModel);
+        formDataTableFixed.setSelectionModel(singleSelectionModel);
     }
 
     @Override

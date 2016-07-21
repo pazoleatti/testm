@@ -311,9 +311,14 @@
 
                 <g:Label ui:field="lockInformation" visible="false"  addStyleNames="{lock.lockInformation}"/>
 
-                <g:ResizeLayoutPanel ui:field="tableWrapper" addStyleNames="{style.table}">
-                    <style:GenericDataGrid ui:field="formDataTable" width="100%" height="100%"/>
-                </g:ResizeLayoutPanel>
+                <g:LayoutPanel ui:field="tableWrapper" addStyleNames="{style.table}">
+                    <g:layer top="0px" bottom="0px" width="3em" left="0px">
+                        <style:GenericDataGrid ui:field="formDataTableFixed" width="100%" height="100%"/>
+                    </g:layer>
+                    <g:layer top="0px" bottom="0px" left="3em" right="0px">
+                        <style:GenericDataGrid ui:field="formDataTable" width="100%" height="100%"/>
+                    </g:layer>
+                </g:LayoutPanel>
 
                 <pager:FlexiblePager ui:field="pager" addStyleNames="{style.pager}"
                                      location="CENTER" showFastForwardButton="false"
