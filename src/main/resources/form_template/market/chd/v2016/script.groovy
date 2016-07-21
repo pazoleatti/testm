@@ -370,12 +370,7 @@ Map<Long, Map<String, RefBookValue>> getRecords520() {
     if (records520 == null) {
         def date = getReportPeriodEndDate()
         def provider = formDataService.getRefBookProvider(refBookFactory, 520, providerCache)
-        // найдем все версии больше даты актуальности
-        def versions = provider.getVersions(date + 1, null)
-        // найдем минимальную дату среди этих версий
-        def minVersion = versions.min()
-
-        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(minVersion, null)
+        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
         records520 = provider.getRecordData(uniqueRecordIds)
     }
     return records520

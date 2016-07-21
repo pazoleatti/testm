@@ -2,6 +2,7 @@ package form_template.market.amrlirt.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 
 /**
@@ -269,6 +270,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     newRow.lgd = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
+    // Заполнение общей информации о заемщике при загрузке из Excel
+    fillDebtorInfo(newRow)
+
     return newRow
 }
 
@@ -282,4 +286,54 @@ def getNewRow() {
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return newRow
+}
+
+@Field
+Map<Long, Map<String, RefBookValue>> records520
+
+Map<Long, Map<String, RefBookValue>> getRecords520() {
+    if (records520 == null) {
+        def date = getReportPeriodEndDate()
+        def provider = formDataService.getRefBookProvider(refBookFactory, 520, providerCache)
+        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
+        records520 = provider.getRecordData(uniqueRecordIds)
+    }
+    return records520
+}
+
+void fillDebtorInfo(def newRow) {
+    // Найти множество записей справочника «Участники ТЦО», периоды актуальности которых содержат определенную выше дату актуальности
+    Map<Long, Map<String, RefBookValue>> records = getRecords520()
+    String debtorNumber = newRow.inn
+    if (debtorNumber == null || debtorNumber.isEmpty()) {
+        return
+    }
+    def debtorRecords = records.values().findAll { def refBookValueMap ->
+        debtorNumber.equalsIgnoreCase(refBookValueMap.INN.stringValue) || debtorNumber.equalsIgnoreCase(refBookValueMap.KIO.stringValue)
+    }
+    if (debtorRecords.size() > 1) {
+        logger.warn("Найдено больше одной записи соотвествующей данным ИНН/КИО = " + debtorNumber)
+        return
+    }
+    if (debtorRecords.size() == 0) {
+        return
+    }
+    // else
+    String fileDebtorName = newRow.debtorName
+    newRow.debtorName = debtorRecords[0].NAME?.stringValue ?: ""
+    if (! newRow.debtorName.equalsIgnoreCase(fileDebtorName)) {
+        def refBook = refBookFactory.get(520)
+        def refBookAttrName = refBook.getAttribute('INN').name + '/' + refBook.getAttribute('KIO').name
+        if (fileDebtorName) {
+            rowWarning(logger, newRow, String.format("На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
+                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
+                    "В файле указано другое наименование заемщика - «%s»!",
+                    newRow.debtorName, refBookAttrName, newRow.inn, fileDebtorName))
+        } else {
+            rowWarning(logger, newRow, String.format("На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
+                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
+                    "Наименование заемщика в файле не заполнено!",
+                    newRow.debtorName, refBookAttrName, newRow.inn))
+        }
+    }
 }
