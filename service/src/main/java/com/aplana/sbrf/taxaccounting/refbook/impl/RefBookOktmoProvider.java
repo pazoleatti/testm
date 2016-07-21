@@ -198,7 +198,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
                 updateResults(results, result);
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
-                refBookDao.deleteRecordVersions(getTableName(), Arrays.asList(result.getRecordId()));
+                refBookDao.deleteRecordVersions(getTableName(), Arrays.asList(result.getRecordId()), false);
                 updateResults(results, result);
             }
         }
@@ -272,7 +272,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
         for (Long uniqueRecordId : uniqueRecordIds) {
             List<Long> relatedVersions = dao.getRelatedVersions(getTableName(), uniqueRecordIds);
             if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
-                refBookDao.deleteRecordVersions(getTableName(), relatedVersions);
+                refBookDao.deleteRecordVersions(getTableName(), relatedVersions, false);
             }
             Long recordId = dao.getRecordId(getTableName(), uniqueRecordId);
             crossVersionsProcessing(dao.checkCrossVersions(getTableName(), recordId, versionEnd, null, null),

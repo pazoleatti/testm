@@ -320,7 +320,7 @@ public class RefBookUniversalTest {
         verify(refBookDao).isVersionUsedInRefBooks(any(Long.class), any(List.class), eq(versionFrom), eq(versionTo), any(Boolean.class), any(List.class));
         verify(refBookDao).updateVersionRelevancePeriod(any(String.class), any(Long.class), eq(versionFrom));
         //Удаление предыдущей даты окончания - нет
-        verify(refBookDao, never()).deleteRecordVersions(any(String.class), any(List.class));
+        verify(refBookDao, never()).deleteRecordVersions(any(String.class), any(List.class), any(Boolean.class));
         verify(refBookDao, never()).createFakeRecordVersion(any(Long.class), any(Long.class), any(Date.class));
         verify(refBookDao, times(1)).updateRecordVersion(any(Long.class), any(Long.class), eq(records));
     }
@@ -425,7 +425,7 @@ public class RefBookUniversalTest {
         provider.updateRecordVersion(logger, 1L, versionFrom, versionTo, records);
         //Удаление даты окончания предыдущей версии
         verify(refBookDao).findRecord(any(Long.class), any(Long.class), eq(versionFrom));
-        verify(refBookDao).deleteRecordVersions(any(String.class), eq(Arrays.asList(123L)));
+        verify(refBookDao).deleteRecordVersions(any(String.class), eq(Arrays.asList(123L)), eq(false));
     }
 
     @Test
@@ -454,7 +454,7 @@ public class RefBookUniversalTest {
         verify(refBookDao).isVersionUsedInRefBooks(any(Long.class), any(List.class), eq(versionFrom), eq(versionTo), any(Boolean.class), any(List.class));
         verify(refBookDao).updateVersionRelevancePeriod(any(String.class), any(Long.class), eq(versionFrom));
         //Удаление предыдущей даты окончания - нет
-        verify(refBookDao, never()).deleteRecordVersions(any(String.class), any(List.class));
+        verify(refBookDao, never()).deleteRecordVersions(any(String.class), any(List.class), any(Boolean.class));
         verify(refBookDao).createFakeRecordVersion(any(Long.class), any(Long.class), eq(SimpleDateUtils.addDayToDate(versionTo, 1)));
         verify(refBookDao, times(1)).updateRecordVersion(any(Long.class), any(Long.class), eq(records));
     }
@@ -485,7 +485,7 @@ public class RefBookUniversalTest {
         verify(refBookDao).isVersionUsedInRefBooks(any(Long.class), any(List.class), eq(versionFrom), eq(versionTo), any(Boolean.class), any(List.class));
         verify(refBookDao).updateVersionRelevancePeriod(any(String.class), any(Long.class), eq(versionFrom));
         //Удаление предыдущей даты окончания - да
-        verify(refBookDao).deleteRecordVersions(any(String.class), eq(Arrays.asList(111L)));
+        verify(refBookDao).deleteRecordVersions(any(String.class), eq(Arrays.asList(111L)), any(Boolean.class));
         verify(refBookDao, never()).createFakeRecordVersion(any(Long.class), any(Long.class), any(Date.class));
         verify(refBookDao, times(1)).updateRecordVersion(any(Long.class), any(Long.class), eq(records));
     }

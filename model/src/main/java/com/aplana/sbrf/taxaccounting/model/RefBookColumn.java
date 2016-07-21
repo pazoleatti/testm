@@ -60,6 +60,7 @@ public class RefBookColumn extends FilterColumn {
         this.isHierarchical = isHierarchical;
     }
 
+    @XmlTransient
     public boolean isVersioned() {
         return versioned;
     }

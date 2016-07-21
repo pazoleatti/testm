@@ -523,7 +523,7 @@ public class RefBookDaoTest {
     public void deleteRecordVersions() {
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, null);
         assertEquals(2, records.size());
-        refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, asList(1L));
+        refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, asList(1L), false);
         records = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, null);
         assertEquals(1, records.size());
     }

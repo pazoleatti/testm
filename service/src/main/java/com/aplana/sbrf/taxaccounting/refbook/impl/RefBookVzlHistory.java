@@ -109,7 +109,7 @@ public class RefBookVzlHistory implements RefBookDataProvider {
     @Override
     public void deleteRecordVersionsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
         try {
-            refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds);
+            refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds, false);
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
