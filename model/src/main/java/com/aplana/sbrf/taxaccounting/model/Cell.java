@@ -113,7 +113,7 @@ public class Cell extends AbstractCell {
 			return null;
 		}
 		// Устанавливаем значение в главную ячейку (SBRFACCTAX-2082)
-		if (hasValueOwner()) {
+		if (!force && hasValueOwner()) {
 			return null;
 		}
 		// Формируем заготовки сообщений. Используются при оформлении ошибок

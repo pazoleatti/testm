@@ -44,9 +44,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     private static final Log LOG = LogFactory.getLog(FormDataXlsmReportBuilder.class);
 
-    private final int ROW_NUMBER = 9;
+    protected int ROW_NUMBER = 9; // для переопределения в скриптах
 
-    private int rowNumber = ROW_NUMBER;
+    protected int rowNumber = ROW_NUMBER; // для переопределения в скриптах
 
     private boolean isShowChecked;
 
@@ -122,6 +122,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
                     cellStyle.setWrapText(true);
                     cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+                    cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
                     cellStyle.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.getPrecision(((NumericColumn) currColumn).getPrecision())));
                     break;
                 case NUMERATION:
@@ -132,6 +133,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 case STRING:
                     cellStyle.setAlignment(CellStyle.ALIGN_LEFT);
                     cellStyle.setWrapText(true);
+                    cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
                     break;
                 case EMPTY:
                     cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
@@ -274,9 +276,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
                     //Удаляем скрытый столбец таблицы
                     for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow: this.dataRows) {
-                        String value = (String) dataRow.get(c.getAlias());
                         com.aplana.sbrf.taxaccounting.model.Cell cell = dataRow.getCell(c.getAlias());
                         if (nextColumn != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)) {
+                            String value = (dataRow.get(c.getAlias()) != null) ? String.valueOf(dataRow.get(c.getAlias())) : null;
                             if (value != null && !value.isEmpty()) {
                                 //Если в скрытом столбце есть какие то значения и он объединяется с соседними столбцами/ячейками (т.е значение для объединенной ячейки хранится в скрытой), то перед удалением переносим значения в соседний
                                 dataRow.putForce(nextColumn.getAlias(), value);

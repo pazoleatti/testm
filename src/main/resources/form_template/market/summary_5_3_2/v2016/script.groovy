@@ -2,11 +2,23 @@ package form_template.market.summary_5_3_2.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataReport
 import com.aplana.sbrf.taxaccounting.model.FormTemplate
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.XlsxReportMetadata
 import groovy.transform.Field
+import org.apache.commons.io.IOUtils
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.ss.usermodel.DataFormat
+import org.apache.poi.ss.usermodel.Font
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.ss.util.AreaReference
+import org.apache.poi.ss.util.CellRangeAddress
 
 /**
  * 5.3.2 Внутренние интервалы процентных ставок по Кредитным продуктам и Субординированным кредитам.
@@ -72,6 +84,15 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.CALCULATE_TASK_COMPLEXITY:
+        calcTaskComplexity()
+        break
+    case FormDataEvent.GET_SPECIFIC_REPORT_TYPES:
+        specificReportType.add("Таблица внутренних рыночных интервалов")
+        break
+    case FormDataEvent.CREATE_SPECIFIC_REPORT:
+        createSpecificReport()
         break
 }
 
@@ -384,7 +405,7 @@ def getGroupRows(def groupRowsMap, def groupKeys, def rowNum) {
 
         // определить alias колонок
         def columnSubAlias = criteria[2] + criteria[3] // 1year / 1_5year / 5_10year / 10year + 100 / 100_1000 / 1000
-        def columnCoumn = 'count' + columnSubAlias
+        def columnCount = 'count' + columnSubAlias
         def columnMin = 'min' + columnSubAlias
         def columnMax = 'max' + columnSubAlias
 
@@ -396,7 +417,7 @@ def getGroupRows(def groupRowsMap, def groupKeys, def rowNum) {
         // количество
         def row = templateRows.find { it.getAlias() == aliasForCount }
         if (row) {
-            row[columnCoumn] = rows.size()
+            row[columnCount] = rows.size()
         }
         // min, max
         row = templateRows.find { it.getAlias() == aliasForMinMax }
@@ -445,3 +466,199 @@ void deleteAllRows() {
     dataRowHelper.allCached = []
     formDataService.saveCachedDataRows(formData, logger)
 }
+
+@Field
+def REPORT_COLUMN_COUNT = 28
+
+void calcTaskComplexity() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allSaved
+    def rowCount = dataRows.size() + 8 // + 8 строк
+    taskComplexityHolder.setValue(REPORT_COLUMN_COUNT * rowCount)
+}
+
+/** Специфический отчет "Контролируемые лица" XLSM*/
+void createSpecificReport() {
+    FormDataReport data = new FormDataReport()
+    data.setData(formData)
+    getTemplateRows() // заполняет formTemplate
+    data.setFormTemplate(formTemplate)
+    formData.setHeaders(formTemplate.getHeaders())
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    data.setReportPeriod(reportPeriod)
+    def dataRows = formDataService.getDataRowHelper(formData).allSaved
+    def periodCode = refBookFactory.getDataProvider(8L).getRecordData(reportPeriod.getDictTaxPeriodId()).get('CODE')
+    FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data, false, dataRows, periodCode, true) {
+        {
+            ROW_NUMBER = 4;
+            rowNumber = ROW_NUMBER;
+        }
+
+        @Override
+        protected void fillHeader() {
+            clearSheet(workBook, sheet)
+            fillHeaderCells(workBook, sheet)
+        }
+        @Override
+        protected void fillFooter() {
+            // footer пустой
+        }
+    };
+    String filePath = builder.createReport()
+    def file = new File(filePath)
+    try {
+        IOUtils.copy(new FileInputStream(file), scriptSpecificReportHolder.getFileOutputStream())
+    } finally {
+        file.delete()
+    }
+
+    // название файла
+    scriptSpecificReportHolder.setFileName("Таблица внутренних рыночных интервалов.xlsm")
+}
+
+enum StyleType {
+    TITLE_CENTER,
+    TITLE_RIGHT,
+}
+
+void clearSheet(Workbook workBook, Sheet sheet) {
+    // убрать объединения
+    def count = sheet.getNumMergedRegions()
+    for (int i = count - 1; i >= 0; i--) {
+        sheet.removeMergedRegion(i)
+    }
+    // очистим пустые строки в начале
+    sheet.removeRow(sheet.getRow(0))
+    sheet.removeRow(sheet.getRow(1))
+    sheet.removeRow(sheet.getRow(2))
+    sheet.removeRow(sheet.getRow(3))
+    workBook.removeName(XlsxReportMetadata.RANGE_DATE_CREATE);
+    workBook.removeName(XlsxReportMetadata.RANGE_REPORT_CODE);
+    workBook.removeName(XlsxReportMetadata.RANGE_REPORT_PERIOD);
+    workBook.removeName(XlsxReportMetadata.RANGE_REPORT_NAME);
+    workBook.removeName(XlsxReportMetadata.RANGE_SUBDIVISION);
+    workBook.removeName(XlsxReportMetadata.RANGE_SUBDIVISION_SIGN);
+    workBook.removeName(XlsxReportMetadata.RANGE_FIO);
+}
+
+void fillHeaderCells(Workbook workBook, Sheet sheet) {
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def order = reportPeriod.order
+    def isFirstHalfYear = order == 1
+    def yyyy = reportPeriod.taxPeriod.year
+    def zzzz = reportPeriod.taxPeriod.year + 1
+    String dateStart = isFirstHalfYear ? "01.08.$yyyy" : "01.02.$zzzz"
+    String dateEnd = isFirstHalfYear ? "01.02.$zzzz" : "31.07.$zzzz"
+    String date1 = isFirstHalfYear ? "01.08.$yyyy" : "01.02.$zzzz"
+    String date2 = isFirstHalfYear ? "01.08.$yyyy" : "01.02.$zzzz"
+
+    CellRangeAddress region
+
+    def rowIndex = 0
+    tmpRow = sheet.createRow(rowIndex)
+    tmpRow.setHeightInPoints(33.75)
+
+    cell = tmpRow.createCell(0)
+    cell.setCellValue("Внутренние интерквартильные интервалы ставок / Внутренние интервалы ставок / Внутренние рыночные ставки (в % годовых) для проверки рыночности совокупных процентных ставок по договорам о предоставлении Кредитных продуктов и Субординированных кредитов, заключенным Банком с его Взаимозависимыми лицами и Резидентами Оффшорных зон, с использованием внутренних источников информации")
+    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_CENTER))
+    // объединение 28-и ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 0, 27)
+    sheet.addMergedRegion(region)
+
+    rowIndex++
+    tmpRow = sheet.createRow(rowIndex)
+
+    cell = tmpRow.createCell(0)
+    cell.setCellValue("в период с")
+    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_RIGHT))
+    // объединение 4-х ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 0, 3)
+    sheet.addMergedRegion(region)
+
+    cell = tmpRow.createCell(4)
+    cell.setCellValue(dateStart)
+    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_CENTER))
+    // объединение 3-х ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 4, 6)
+    sheet.addMergedRegion(region)
+
+    cell = tmpRow.createCell(7)
+    cell.setCellValue("по")
+    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_CENTER))
+
+    cell = tmpRow.createCell(8)
+    cell.setCellValue(dateEnd)
+    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_CENTER))
+    // объединение 3-х ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 8, 10)
+    sheet.addMergedRegion(region)
+
+    rowIndex++
+    tmpRow = sheet.createRow(rowIndex)
+
+    cell = tmpRow.createCell(0)
+    cell.setCellValue("включая заключённые до")
+    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_RIGHT))
+    // объединение 4-х ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 0, 3)
+    sheet.addMergedRegion(region)
+
+    cell = tmpRow.createCell(4)
+    cell.setCellValue(date1)
+    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_CENTER))
+    // объединение 3-х ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 4, 6)
+    sheet.addMergedRegion(region)
+
+    cell = tmpRow.createCell(7)
+    cell.setCellValue("существенные условия по которым были изменены после")
+    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_CENTER))
+    // объединение 9-и ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 7, 15)
+    sheet.addMergedRegion(region)
+
+    cell = tmpRow.createCell(16)
+    cell.setCellValue(date2)
+    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_CENTER))
+    // объединение 3-х ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 16, 18)
+    sheet.addMergedRegion(region)
+}
+
+@Field
+def cellStyleMap = [:]
+
+CellStyle getCellStyle(def workBook, StyleType styleType) {
+    def alias = styleType.name()
+    if (cellStyleMap.containsKey(alias)) {
+        return cellStyleMap.get(alias)
+    }
+    CellStyle style = workBook.createCellStyle()
+    switch (styleType) {
+        case StyleType.TITLE_CENTER :
+            style.setWrapText(true)
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER)
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(12 as short)
+            font.setFontName('Calibri')
+            style.setFont(font)
+            break
+        case StyleType.TITLE_RIGHT :
+            style.setWrapText(true)
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER)
+            style.setAlignment(CellStyle.ALIGN_RIGHT)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(12 as short)
+            font.setFontName('Calibri')
+            style.setFont(font)
+            break
+    }
+    cellStyleMap.put(alias, style)
+    return style
+}
+
