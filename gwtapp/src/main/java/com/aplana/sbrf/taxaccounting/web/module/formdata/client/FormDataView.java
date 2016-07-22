@@ -180,7 +180,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     Label editModeLabel;
     @UiField
-    LayoutPanel tableWrapper;
+    ResizeLayoutPanel tableWrapper;
     @UiField
     LinkButton search;
 
