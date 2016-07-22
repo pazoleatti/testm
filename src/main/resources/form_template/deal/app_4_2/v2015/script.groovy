@@ -366,6 +366,7 @@ void sortFormDataRows(def saveInDB = true) {
 def sourceRefbook520AliasMap = [
         // Журнал взаиморасчетов
         807 : ['statReportId1', 'statReportId2'],
+        854 : ['name'], // Приложение 9
 
         // формы РНУ
         818 : ['name'], // РНУ-101
@@ -521,7 +522,7 @@ def getNewRow(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, d
     newRow.sum53 = calc7(record520, sourceAllDataRowsMap)
 
     // графа 8
-    newRow.sum54 = calc8(record520, sourceFormDatasMap, sourceDataRowsMap)
+    newRow.sum54 = calc8(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap)
 
     // графа 9
     newRow.sum55 = calc9(record520, sourceAllDataRowsMap)
@@ -539,7 +540,7 @@ def getNewRow(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, d
     newRow.sum63 = calc13(record520, sourceAllDataRowsMap)
 
     // графа 14
-    newRow.sum64 = calc14(record520, sourceFormDatasMap, sourceDataRowsMap)
+    newRow.sum64 = calc14(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap)
 
     // графа 15
     newRow.sum65 = calc15(record520, sourceAllDataRowsMap)
@@ -562,8 +563,8 @@ def calc7(def record520, def sourceAllDataRowsMap) {
     return calc7or13(record520, sourceAllDataRowsMap, true)
 }
 
-def calc8(def record520, def sourceFormDatasMap, def sourceDataRowsMap) {
-    return calc8or14(record520, sourceFormDatasMap, sourceDataRowsMap, true)
+def calc8(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, def sourceDataRowsMap) {
+    return calc8or14(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap, true)
 }
 
 def calc9(def record520, def sourceAllDataRowsMap) {
@@ -586,8 +587,8 @@ def calc13(def record520, def sourceAllDataRowsMap) {
     return calc7or13(record520, sourceAllDataRowsMap, false)
 }
 
-def calc14(def record520, def sourceFormDatasMap, def sourceDataRowsMap) {
-    return calc8or14(record520, sourceFormDatasMap, sourceDataRowsMap, false)
+def calc14(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, def sourceDataRowsMap) {
+    return calc8or14(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap, false)
 }
 
 def calc15(def record520, def sourceAllDataRowsMap) {
@@ -598,8 +599,20 @@ def calc16(def record520, def sourceAllDataRowsMap) {
     return calc10or16(record520, sourceAllDataRowsMap, false)
 }
 
-def calc5or11(def record520, def sourceAllDataRowsMap, def isCalc5) {
+def calcA(def record520, def sourceAllDataRowsMap, def sumColumn) {
     def result = 0
+    def formTypeId = 854 // Приложение 9
+    def rows = sourceAllDataRowsMap[formTypeId]
+    for (def row : rows) {
+        if (row.name == record520?.record_id?.value) {
+            result += (row[sumColumn] ?: 0)
+        }
+    }
+    return result
+}
+
+def calc5or11(def record520, def sourceAllDataRowsMap, def isCalc5) {
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc5 ? 'sum4' : 'sum51'))
     def formTypeIds = [
             806, // 6.6
             827, // 6.11
@@ -634,7 +647,7 @@ def calc5or11(def record520, def sourceAllDataRowsMap, def isCalc5) {
 }
 
 def calc6or12(def record520, def sourceAllDataRowsMap, def isCalc6) {
-    def result = 0
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc6 ? 'sum42' : 'sum52'))
     def formTypeIds = [
             835, // 6.14
             839, // 6.16
@@ -668,7 +681,7 @@ def calc6or12(def record520, def sourceAllDataRowsMap, def isCalc6) {
 }
 
 def calc7or13(def record520, def sourceAllDataRowsMap, def isCalc7) {
-    def result = 0
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc7 ? 'sum43' : 'sum53'))
     def formTypeIds = [
             804, // 6.2
             837, // 6.15
@@ -711,8 +724,8 @@ def calc7or13(def record520, def sourceAllDataRowsMap, def isCalc7) {
     return result
 }
 
-def calc8or14(def record520, def sourceFormDatasMap, def sourceDataRowsMap, def isCalc8) {
-    def result = 0
+def calc8or14(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, def sourceDataRowsMap, def isCalc8) {
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc8 ? 'sum44' : 'sum54'))
     def formTypeId = 807
     sourceFormDatas = sourceFormDatasMap[formTypeId]
     sourceFormDatas.each { sourceFormData ->
@@ -730,6 +743,9 @@ def getNeedRowsForCalc8or14(def dataRows, def isCalc8) {
     def rows = []
     def findSection = isCalc8
     for (def row : dataRows) {
+        if (!row.getAlias() && row.sbrfCode1 != getDepartment99_0000_00Id()) {
+            continue
+        }
         if (isCalc8) {
             // строки доходов
             if (!row.getAlias()) {
@@ -754,8 +770,18 @@ def getNeedRowsForCalc8or14(def dataRows, def isCalc8) {
     return rows
 }
 
+@Field
+def department99_0000_00Id = null
+
+def getDepartment99_0000_00Id() {
+    if (department99_0000_00Id == null) {
+        department99_0000_00Id = getRecordId(30L, 'SBRF_CODE', '99_0000_00')
+    }
+    return department99_0000_00Id
+}
+
 def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
-    def result = 0
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc9 ? 'sum45' : 'sum55'))
     def formTypeIds = [
             816, // 6.1
             812, // 6.3
@@ -823,7 +849,7 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
 }
 
 def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
-    def result = 0
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc10 ? 'sum46' : 'sum56'))
     def formTypeIds = [
             818, // РНУ-101
             820, // РНУ-102
