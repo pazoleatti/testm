@@ -48,7 +48,7 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
         List<Integer> departmentIds;
         //Условие из http://conf.aplana.com/pages/viewpage.action?pageId=9570811#id-Ведениепериодов-Требованиякправамдоступа
         if (user.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                && (action.getTaxType() == TaxType.PROPERTY || action.getTaxType() == TaxType.TRANSPORT)) {
+                && (action.getTaxType() == TaxType.PROPERTY || action.getTaxType() == TaxType.TRANSPORT || action.getTaxType() == TaxType.LAND)) {
             departmentIds = departmentService.getAllChildrenIds(user.getUser().getDepartmentId());
         } else {
             departmentIds = departmentService.getBADepartmentIds(user.getUser());

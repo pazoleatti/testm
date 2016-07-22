@@ -50,6 +50,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
             switch (taxType) {
                 case PROPERTY:
                 case TRANSPORT:
+                case LAND:
                     res.setCanChangeDepartment(true);
 	                departments.addAll(departmentService.getTBDepartments(userInfo.getUser()));
 	                Set<Integer> depIds = new HashSet<Integer>();
@@ -101,6 +102,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	        switch (taxType) {
 		        case PROPERTY:
 		        case TRANSPORT:
+                case LAND:
 			        res.setCanEdit(true);
 			        break;
 		        case INCOME:

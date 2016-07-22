@@ -426,6 +426,7 @@ public class PeriodServiceImpl implements PeriodService {
         switch (taxType) {
             case PROPERTY:
             case TRANSPORT:
+            case LAND:
                 departmentIds = departmentService.getAllChildrenIds(drp.getDepartmentId());
                 break;
             case INCOME:
@@ -569,6 +570,7 @@ public class PeriodServiceImpl implements PeriodService {
 					break;
 				case PROPERTY:
 				case TRANSPORT:
+                case LAND:
 					switch (operation) {
 						case FIND:
 							return Collections.singletonList(departmentId);
@@ -597,6 +599,7 @@ public class PeriodServiceImpl implements PeriodService {
 					break;
 				case PROPERTY:
 				case TRANSPORT:
+                case LAND:
 					switch (operation) {
 						case FIND:
 							return departmentService.getTBDepartmentIds(user);

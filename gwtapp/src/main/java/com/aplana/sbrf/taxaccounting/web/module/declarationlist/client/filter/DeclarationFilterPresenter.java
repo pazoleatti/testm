@@ -108,7 +108,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 	private Map<Integer, String> fillDeclarationTypesMap(DeclarationDataFilterAvailableValues source){
 		Map<Integer, String> declarationTypeMap = new LinkedHashMap<Integer, String>();
-		declarationTypeMap.put(null, "");
 		for(DeclarationType declarationType : source.getDeclarationTypes()){
 			declarationTypeMap.put(declarationType.getId(), declarationType.getName());
 		}

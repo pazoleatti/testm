@@ -89,6 +89,7 @@ public class GetMainMenuActionHandler extends
                 taxMenu.getSubMenu().add(new MenuItem(TaxType.VAT.getName(), "", TaxType.VAT.name()));
                 taxMenu.getSubMenu().add(new MenuItem(TaxType.PROPERTY.getName(), "", TaxType.PROPERTY.name()));
                 taxMenu.getSubMenu().add(new MenuItem(TaxType.TRANSPORT.getName(), "", TaxType.TRANSPORT.name()));
+                taxMenu.getSubMenu().add(new MenuItem(TaxType.LAND.getName(), "", TaxType.LAND.name()));
                 taxMenu.getSubMenu().add(new MenuItem("Учет КС", "", TaxType.DEAL.name()));
                 taxMenu.getSubMenu().add(new MenuItem("Рыночные интервалы ТЦО", "", TaxType.MARKET.name()));
                 taxMenu.getSubMenu().add(new MenuItem("ЭНС", "", TaxType.ETR.name()));
