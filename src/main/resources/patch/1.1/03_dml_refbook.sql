@@ -629,5 +629,121 @@ end;
 /
 COMMIT;
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16309: 1.1 НДС. Реализовать и наполнить справочник "Коды видов операций НДС"
+declare l_task_name varchar2(128) := 'RefBook Block #10 (SBRFACCTAX-16309 - Vat operation codes))';
+begin	
+	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (650,'Коды видов операций НДС',1,0,0,null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6501, 650, 'Код вида операции','CODE',1,1,null,null,1,null,5,1,1,null,null,0,2);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6502, 650, 'Наименование вида операции','NAME',1,2,null,null,1,null,25,1,0,null,null,0,1000);
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '01');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Отгрузка (передача) или приобретение товаров (работ, услуг), имущественных прав, включая операции, перечисленные в подпунктах 2 и 3 пункта 1 статьи 146, 162, в пунктах 3, 4, 5.1 статьи 154, в подпункте 1 пункта 3 статьи 170 Налогового кодекса Российской Федерации (Собрание законодательства Российской Федерации, 2000, N 32, ст. 3340; 2016, N 14, ст. 1902), операции, облагаемые по налоговой ставке 0 процентов, операции, осуществляемые на основе договоров комиссии, агентских договоров, предусматривающих реализацию и (или) приобретение товаров (работ, услуг), имущественных прав от имени комиссионера (агента) или на основе договоров транспортной экспедиции, операции по возврату налогоплательщиком-покупателем товаров продавцу или получение продавцом от указанного лица товаров, за исключением операций, перечисленных по кодам 06; 10; 13; 14; 15; 16; 27; составление или получение единого корректировочного счета-фактуры');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '02');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Оплата, частичная оплата (полученная или переданная) в счет предстоящих поставок товаров (работ, услуг), имущественных прав, включая операции, осуществляемые на основе договоров комиссии, агентских договоров, предусматривающих реализацию и (или) приобретение товаров (работ, услуг), имущественных прав от имени комиссионера (агента) или на основе договоров транспортной экспедиции, за исключением операций, перечисленных по кодам 06; 28');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 4, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '06');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Операции, совершаемые налоговыми агентами, перечисленными в статье 161 Налогового кодекса Российской Федерации (Собрание законодательства Российской Федерации, 2000, N 32, ст. 3340; 2016, N 14, ст. 1902), в том числе операции по приобретению товаров (работ, услуг), имущественных прав на основе договоров поручения, комиссии, агентских договоров, заключенных налоговыми агентами с налогоплательщиком, за исключением операций, указанных в пунктах 4 и 5 данной статьи Налогового кодекса Российской Федерации');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 5, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '10');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Отгрузка (передача) товаров (выполнение работ, оказание услуг), имущественных прав на безвозмездной основе');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 6, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '13');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Выполнение подрядными организациями (застройщиками, заказчиками, выполняющими функции застройщика, техническими заказчиками) работ при осуществлении капитального строительства, модернизации (реконструкции) объектов недвижимости или приобретение этих работ налогоплательщиками-инвесторами; передача указанными лицами (приобретение) объектов завершенного (незавершенного) капитального строительства, оборудования, материалов в рамках исполнения договоров по капитальному строительству (модернизации, реконструкции)');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 7, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '14');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Передача имущественных прав, перечисленных в пунктах 1 - 4 статьи 155 Налогового кодекса Российской Федерации');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 8, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '15');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Составление (получение) счета-фактуры комиссионером (агентом) при реализации (получении) товаров (работ, услуг), имущественных прав от своего имени, в котором отражены данные в отношении собственных товаров (работ, услуг), имущественных прав, и данные в отношении товаров (работ, услуг), имущественных прав, реализуемых (приобретаемых) по договору комиссии (агентскому договору)');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 9, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '16');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Получение продавцом товаров, возвращенных покупателями, не являющимися налогоплательщиками налога на добавленную стоимость, и налогоплательщиками, освобожденным от исполнения обязанностей налогоплательщика, связанных с исчислением и уплатой налога, включая случаи частичного возврата товаров указанными лицами, а также отказ от товаров (работ, услуг) в случае, предусмотренном в абзаце втором пункта 5 статьи 171 Налогового кодекса Российской Федерации, за исключением операций, перечисленных по коду 17');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 10, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '17');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Получение продавцом товаров, возвращенных физическими лицами, а также отказ от товаров (работ, услуг) в случае, указанном в абзаце втором пункта 5 статьи 171 Налогового кодекса Российской Федерации');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 11, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '18');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Составление или получение корректировочного счета-фактуры в связи с изменением стоимости отгруженных товаров (работ, услуг), переданных имущественных прав в сторону уменьшения, в том числе в случае уменьшения цен (тарифов) и (или) уменьшения количества (объема) отгруженных товаров (работ, услуг), переданных имущественных прав');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 12, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '19');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Ввоз товаров на территорию Российской Федерации и иные территории, находящиеся под ее юрисдикцией, с территории государств Евразийского экономического союза');
+			
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 13, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '20');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Ввоз товаров на территорию Российской Федерации и иные территории, находящиеся под ее юрисдикцией, в таможенных процедурах выпуска для внутреннего потребления, переработки для внутреннего потребления, временного ввоза и переработки вне таможенной территории');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 14, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '21');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Операции по восстановлению сумм налога, указанные в пункте 8 статьи 145, пункте 3 статьи 170 (за исключением подпунктов 1 и 4 пункта 3 статьи 170), статье 171.1 Налогового кодекса Российской Федерации, а также при совершении операций, облагаемых по налоговой ставке 0 процентов по налогу на добавленную стоимость');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 15, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '22');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Операции по возврату авансовых платежей в случаях, перечисленных в абзаце втором пункта 5 статьи 171, а также операции, перечисленные в пункте 6 статьи 172 Налогового кодекса Российской Федерации');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 16, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '23');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Приобретение услуг, оформленных бланками строгой отчетности, в случаях, предусмотренных пунктом 7 статьи 171 Налогового кодекса Российской Федерации');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 17, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '24');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Регистрация счетов-фактур в книге покупок в случаях, предусмотренных абзацем вторым пункта 9 статьи 165 и пунктом 10 статьи 171 Налогового кодекса Российской Федерации');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 18, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '25');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Регистрация счетов-фактур в книге покупок в отношении сумм налога на добавленную стоимость, ранее восстановленных при совершении операций, облагаемых по налоговой ставке 0 процентов, а также в случаях, предусмотренных пунктом 7 статьи 172 Налогового кодекса Российской Федерации');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 19, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '26');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Составление продавцом счетов-фактур, первичных учетных документов, иных документов, содержащих суммарные (сводные) данные по операциям, совершенным в течение календарного месяца (квартала) при реализации товаров (работ, услуг), имущественных прав (в том числе в случае изменения стоимости отгруженных товаров (работ, услуг, имущественных прав)) лицам, не являющимся налогоплательщиками налога на добавленную стоимость, и налогоплательщикам, освобожденным от исполнения обязанностей налогоплательщика налога на добавленную стоимость, связанных с исчислением и уплатой налога, а также при получении от указанных лиц оплаты (частичной оплаты) в счет предстоящих поставок товаров (работ, услуг), имущественных прав; регистрация указанных документов в книге покупок в случаях, предусмотренных пунктами 6 и 10 статьи 172 Налогового кодекса Российской Федерации');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 20, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '27');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Составление счета-фактуры на основании двух и более счетов-фактур при реализации и (или) приобретении товаров (работ, услуг), имущественных прав в случае, предусмотренном пунктом 3.1 статьи 169 Налогового кодекса Российской Федерации, а также получение указанного счета-фактуры налогоплательщиком');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 21, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '28');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Составление счета-фактуры на основании двух и более счетов-фактур при получении оплаты, частичной оплаты в счет предстоящих поставок товаров (работ, услуг), имущественных прав, в случае, предусмотренном пунктом 3.1 статьи 169 Налогового кодекса Российской Федерации, а также получение указанного счета-фактуры налогоплательщиком');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 22, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '29');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Корректировка реализации товаров (работ, услуг), передачи имущественных прав, предприятия в целом как имущественного комплекса на основании пункта 6 статьи 105.3 Налогового кодекса Российской Федерации (Собрание законодательства Российской Федерации, 1998, N 31, ст. 3824; 2016, N 1, ст. 6)');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 23, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '30');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Отгрузка товаров, в отношении которых при таможенном декларировании был исчислен НДС в соответствии с абзацем первым подпункта 1.1 пункта 1 статьи 151 Налогового кодекса Российской Федерации');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 24, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '31');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Операция по уплате сумм НДС, исчисленных при таможенном декларировании товаров в случаях, предусмотренных абзацем вторым подпункта 1.1 пункта 1 статьи 151 Налогового кодекса Российской Федерации');
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 25, 650, to_date('01.07.2016', 'DD.MM.YYYY'), 0);	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6501, '32');	
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6502, 'Принятие к вычету сумм налога на добавленную стоимость, уплаченных или подлежащих уплате в случаях, предусмотренных пунктом 14 статьи 171 Налогового кодекса Российской Федерации');
+	
+	dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book or its attributes already exist ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
