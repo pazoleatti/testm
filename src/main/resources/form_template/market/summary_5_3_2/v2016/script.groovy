@@ -1,23 +1,33 @@
 package form_template.market.summary_5_3_2.v2016
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.Column
+import com.aplana.sbrf.taxaccounting.model.ColumnType
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataReport
+import com.aplana.sbrf.taxaccounting.model.FormStyle
 import com.aplana.sbrf.taxaccounting.model.FormTemplate
+import com.aplana.sbrf.taxaccounting.model.NumericColumn
+import com.aplana.sbrf.taxaccounting.model.RefBookColumn
+import com.aplana.sbrf.taxaccounting.model.ReferenceColumn
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder.CellType
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.XlsxReportMetadata
 import groovy.transform.Field
 import org.apache.commons.io.IOUtils
 import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.ss.usermodel.DataFormat
 import org.apache.poi.ss.usermodel.Font
+import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
-import org.apache.poi.ss.util.AreaReference
 import org.apache.poi.ss.util.CellRangeAddress
 
 /**
@@ -503,6 +513,110 @@ void createSpecificReport() {
         protected void fillFooter() {
             // footer пустой
         }
+
+        // почти скопировал метод ради выравнивания объединенных ячеек (если число - справа, иначе - слева)
+        @Override
+        protected void createDataForTable() {
+            rowNumber = (rowNumber > sheet.getLastRowNum() ? sheet.getLastRowNum() : rowNumber);//if we have empty strings
+            sheet.shiftRows(rowNumber, sheet.getLastRowNum(), dataRows.size() + 2);
+            // перебираем строки
+            for (DataRow<Cell> dataRow : dataRows) {
+                Row row = sheet.getRow(rowNumber) != null ? sheet.getRow(rowNumber++) : sheet.createRow(rowNumber++);
+                // перебираем столбцы
+                for (int i = 0; i < columns.size(); i++) {
+                    Column column = columns.get(i);
+                    if ((column.isChecking() && !isShowChecked)) {
+                        continue;
+                    }
+                    String columnAlias = column.getAlias();
+                    FormStyle formStyle = dataRow.getCell(columnAlias).getStyle();
+                    if (column.getWidth() == 0 && columnAlias != null) {
+                        if (columns.size() == i + 1)
+                            continue;
+                    }
+                    Object obj = dataRow.get(columnAlias);
+                    org.apache.poi.ss.usermodel.Cell cell = mergedDataCells(dataRow.getCell(columnAlias), row, i, false);
+                    CellStyle cellStyle;
+                    if (!dataRow.getCell(columnAlias).isForceValue()) {
+                        if (ColumnType.STRING.equals(column.getColumnType())) {
+                            String str = (String) obj;
+                            cellStyle = getCellStyle(formStyle, CellType.STRING, columnAlias);
+                            cell.setCellStyle(cellStyle);
+                            cell.setCellValue(str);
+                        } else if (ColumnType.DATE.equals(column.getColumnType())) {
+                            Date date = (Date) obj;
+                            if (date != null)
+                                cell.setCellValue(date);
+                            else
+                                cell.setCellValue("");
+                            cellStyle = getCellStyle(formStyle, CellType.DATE, columnAlias);
+                            cell.setCellStyle(cellStyle);
+                        } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
+                            BigDecimal bd = (BigDecimal) obj;
+                            cellStyle = getCellStyle(formStyle, CellType.BIGDECIMAL, columnAlias);
+                            cell.setCellStyle(cellStyle);
+                            cell.setCellType(org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC);
+
+                            if (bd != null){
+                                cell.setCellValue(((NumericColumn)column).getPrecision() >0 ? Double.parseDouble(bd.toString()) : bd.longValue());
+                            }
+                        } else if (ColumnType.AUTO.equals(column.getColumnType())) {
+                            Long bd = (Long) obj;
+                            cellStyle = getCellStyle(formStyle, CellType.NUMERATION, columnAlias);
+                            cell.setCellStyle(cellStyle);
+
+                            cell.setCellValue(bd != null ? String.valueOf(bd) : "");
+                        } else if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
+                            RefBookValue refBookValue = dataRow.getCell(columnAlias).getRefBookValue();
+                            cellStyle = getCellStyle(formStyle, CellType.REFBOOK, columnAlias);
+                            cell.setCellStyle(cellStyle);
+                            if (refBookValue != null) {
+                                switch (refBookValue.getAttributeType()) {
+                                    case RefBookAttributeType.DATE:
+                                        Date date = refBookValue.getDateValue();
+                                        if (date != null)
+                                            cell.setCellValue(date);
+                                        else
+                                            cell.setCellValue("");
+                                        break;
+                                    case RefBookAttributeType.NUMBER:
+                                        RefBookAttribute refBookAttribute;
+                                        if (ColumnType.REFBOOK.equals(column.getColumnType())) {
+                                            refBookAttribute = ((RefBookColumn)column).getRefBookAttribute();
+                                        } else {
+                                            refBookAttribute = ((ReferenceColumn)column).getRefBookAttribute();
+                                        }
+                                        Number bd = refBookValue.getNumberValue();
+                                        if (bd != null){
+                                            cell.setCellValue(refBookAttribute.getPrecision() >0 ? Double.parseDouble(bd.toString()) : bd.longValue());
+                                        }
+                                        break;
+                                    default:
+                                        cell.setCellValue(dataRow.getCell(columnAlias).getRefBookDereference());
+                                        break;
+                                }
+                            }
+                        } else if (obj == null) {
+                            cellStyle = getCellStyle(formStyle, CellType.EMPTY, columnAlias);
+                            cell.setCellStyle(cellStyle);
+                            cell.setCellValue("");
+                        }
+                    } else {
+                        String str = (String) obj;
+                        cellStyle = getCellStyle(formStyle, CellType.STRING, columnAlias);
+                        if (str != null && str.isInteger()) { // скопировал метод только ради этого выравнивания
+                            cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+                        } else {
+                            cellStyle.setAlignment(CellStyle.ALIGN_LEFT);
+                        }
+                        cell.setCellStyle(cellStyle);
+                        cell.setCellValue(str);
+                    }
+                    if (dataRow.getCell(columnAlias).getColSpan() > 1)
+                        i = i + dataRow.getCell(columnAlias).getColSpan() - 1;
+                }
+            }
+        }
     };
     String filePath = builder.createReport()
     def file = new File(filePath)
@@ -661,4 +775,3 @@ CellStyle getCellStyle(def workBook, StyleType styleType) {
     cellStyleMap.put(alias, style)
     return style
 }
-

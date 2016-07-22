@@ -180,7 +180,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     Label editModeLabel;
     @UiField
-    LayoutPanel tableWrapper;
+    ResizeLayoutPanel tableWrapper;
     @UiField
     LinkButton search;
 
@@ -335,28 +335,31 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		while (formDataTable.getColumnCount() > 0) {
 			formDataTable.removeColumn(0);
 		}
+        while (formDataTableFixed.getColumnCount() > 0) {
+            formDataTableFixed.removeColumn(0);
+        }
 
         int indexColumnWidth = 3;
-        if (formDataTableFixed.getColumnCount() == 0) {
-            //Create order column
-            NumericColumn numericColumn = new NumericColumn();
-            DataRowColumn<Integer> indexColumn = new DataRowColumn<Integer>(new IndexCell(), numericColumn) {
-                @Override
-                public Integer getValue(DataRow<Cell> object) {
-                    return object.getIndex();
-                }
+        //Create order column
+        NumericColumn numericColumn = new NumericColumn();
+        DataRowColumn<Integer> indexColumn = new DataRowColumn<Integer>(new IndexCell(), numericColumn) {
+            @Override
+            public Integer getValue(DataRow<Cell> object) {
+                return object.getIndex();
+            }
 
-                @Override
-                public String getCellStyleNames(com.google.gwt.cell.client.Cell.Context context, DataRow<Cell> object) {
-                    super.getCellStyleNames(context, object);
-                    // этот метод не вызывается при выделении строк при работе с NoSelectionModel
-                    DataRow<Cell> selectedRow = getSelectedRow();
-                    return selectedRow != null && selectedRow.equals(object) ? "orderSelected" : "order";
-                }
-            };
-            formDataTableFixed.addColumn(indexColumn, "№");
-            formDataTableFixed.setColumnWidth(indexColumn, indexColumnWidth, Style.Unit.EM);
-        }
+            @Override
+            public String getCellStyleNames(com.google.gwt.cell.client.Cell.Context context, DataRow<Cell> object) {
+                super.getCellStyleNames(context, object);
+                // этот метод не вызывается при выделении строк при работе с NoSelectionModel
+                DataRow<Cell> selectedRow = getSelectedRow();
+                return selectedRow != null && selectedRow.equals(object) ? "orderSelected" : "order";
+            }
+        };
+        formDataTableFixed.addColumn(indexColumn, "№");
+        formDataTableFixed.setColumnWidth(indexColumn, indexColumnWidth, Style.Unit.EM);
+        formDataTable.addColumn(indexColumn, "");
+        formDataTable.setColumnWidth(indexColumn, 0, Style.Unit.EM);
 
 		factory.setReadOnly(readOnly);
 		factory.setSuperEditMode(forceEditMode);
