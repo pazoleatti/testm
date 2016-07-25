@@ -116,7 +116,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
                     cellStyle.setWrapText(true);
                     cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
-                    cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
                     cellStyle.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.getPrecision(((NumericColumn) currColumn).getPrecision())));
                     break;
                 case NUMERATION:
@@ -127,7 +126,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 case STRING:
                     cellStyle.setAlignment(CellStyle.ALIGN_LEFT);
                     cellStyle.setWrapText(true);
-                    cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
                     break;
                 case EMPTY:
                     cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
@@ -835,7 +833,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
     }
 
-    private void autoSizeHeaderRowsHeight() {
+    protected void autoSizeHeaderRowsHeight() {
         Map<Integer, Integer> map = new HashMap<Integer, Integer>();
         for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
             CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
