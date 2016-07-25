@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+  <row alias="">
+    <cell alias="fix" colSpan="1" rowSpan="2" value=""/>
+    <cell alias="rowNum" colSpan="1" rowSpan="2" value="№ п/п"/>
+    <cell alias="typeCode" colSpan="1" rowSpan="2" value="Код вида операции"/>
+    <cell alias="invoice" colSpan="1" rowSpan="2" value="Номер и дата счета-фактуры продавца"/>
+    <cell alias="invoiceCorrecting" colSpan="1" rowSpan="2" value="Номер и дата исправления счета-фактуры продавца"/>
+    <cell alias="invoiceCorrection" colSpan="1" rowSpan="2" value="Номер и дата корректировочного счета-фактуры продавца"/>
+    <cell alias="invoiceCorrectingCorrection" colSpan="1" rowSpan="2" value="Номер и дата исправления корректировочного счета-фактуры продавца"/>
+    <cell alias="documentPay" colSpan="1" rowSpan="2" value="Номер и дата документа, подтверждающего уплату налога"/>
+    <cell alias="dateRegistration" colSpan="1" rowSpan="2" value="Дата принятия на учет товаров (работ, услуг), имущественных прав"/>
+    <cell alias="salesman" colSpan="1" rowSpan="2" value="Наименование продавца"/>
+    <cell alias="salesmanInnKpp" colSpan="1" rowSpan="2" value="ИНН/КПП продавца"/>
+    <cell alias="agentName" colSpan="2" rowSpan="1" value="Сведения о посреднике (комиссионере, агенте)"/>
+    <cell alias="agentInnKpp" colSpan="1" rowSpan="1" value="Сведения о посреднике (комиссионере, агенте)"/>
+    <cell alias="declarationNum" colSpan="1" rowSpan="2" value="Номер таможенной декларации"/>
+    <cell alias="currency" colSpan="1" rowSpan="2" value="Наименование и код валюты"/>
+    <cell alias="cost" colSpan="1" rowSpan="2" value="Стоимость покупок по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в валюте счета-фактуры"/>
+    <cell alias="nds" colSpan="1" rowSpan="2" value="Сумма НДС по счету-фактуре, разница суммы НДС по корректировочному счету-фактуре, принимаемая к вычету, в рублях и копейках"/>
+  </row>
+  <row alias="">
+    <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+    <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+    <cell alias="typeCode" colSpan="1" rowSpan="1" value="Код вида операции"/>
+    <cell alias="invoice" colSpan="1" rowSpan="1" value="Номер и дата счета-фактуры продавца"/>
+    <cell alias="invoiceCorrecting" colSpan="1" rowSpan="1" value="Номер и дата исправления счета-фактуры продавца"/>
+    <cell alias="invoiceCorrection" colSpan="1" rowSpan="1" value="Номер и дата корректировочного счета-фактуры продавца"/>
+    <cell alias="invoiceCorrectingCorrection" colSpan="1" rowSpan="1" value="Номер и дата исправления корректировочного счета-фактуры продавца"/>
+    <cell alias="documentPay" colSpan="1" rowSpan="1" value="Номер и дата документа, подтверждающего уплату налога"/>
+    <cell alias="dateRegistration" colSpan="1" rowSpan="1" value="Дата принятия на учет товаров (работ, услуг), имущественных прав"/>
+    <cell alias="salesman" colSpan="1" rowSpan="1" value="Наименование продавца"/>
+    <cell alias="salesmanInnKpp" colSpan="1" rowSpan="1" value="ИНН/КПП продавца"/>
+    <cell alias="agentName" colSpan="1" rowSpan="1" value="наименование посредника"/>
+    <cell alias="agentInnKpp" colSpan="1" rowSpan="1" value="ИНН/КПП посредника"/>
+    <cell alias="declarationNum" colSpan="1" rowSpan="1" value="Номер таможенной декларации"/>
+    <cell alias="currency" colSpan="1" rowSpan="1" value="Наименование и код валюты"/>
+    <cell alias="cost" colSpan="1" rowSpan="1" value="Стоимость покупок по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в валюте счета-фактуры"/>
+    <cell alias="nds" colSpan="1" rowSpan="1" value="Сумма НДС по счету-фактуре, разница суммы НДС по корректировочному счету-фактуре, принимаемая к вычету, в рублях и копейках"/>
+  </row>
+  <row alias="">
+    <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+    <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
+    <cell alias="typeCode" colSpan="1" rowSpan="1" value="2"/>
+    <cell alias="invoice" colSpan="1" rowSpan="1" value="3"/>
+    <cell alias="invoiceCorrecting" colSpan="1" rowSpan="1" value="4"/>
+    <cell alias="invoiceCorrection" colSpan="1" rowSpan="1" value="5"/>
+    <cell alias="invoiceCorrectingCorrection" colSpan="1" rowSpan="1" value="6"/>
+    <cell alias="documentPay" colSpan="1" rowSpan="1" value="7"/>
+    <cell alias="dateRegistration" colSpan="1" rowSpan="1" value="8"/>
+    <cell alias="salesman" colSpan="1" rowSpan="1" value="9"/>
+    <cell alias="salesmanInnKpp" colSpan="1" rowSpan="1" value="10"/>
+    <cell alias="agentName" colSpan="1" rowSpan="1" value="11"/>
+    <cell alias="agentInnKpp" colSpan="1" rowSpan="1" value="12"/>
+    <cell alias="declarationNum" colSpan="1" rowSpan="1" value="13"/>
+    <cell alias="currency" colSpan="1" rowSpan="1" value="14"/>
+    <cell alias="cost" colSpan="1" rowSpan="1" value="15"/>
+    <cell alias="nds" colSpan="1" rowSpan="1" value="16"/>
+  </row>
+</rows>

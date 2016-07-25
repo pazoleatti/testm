@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>(937.1.1) Сведения из дополнительных листов книги покупок</name>
-    <fullName>(937.1.1) Сведения из дополнительных листов книги покупок</fullName>
+    <name>(937.1) Итоговые данные книги покупок (с 3 квартала 2016)</name>
+    <fullName>(937.1) Итоговые данные книги покупок</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
@@ -22,15 +22,17 @@
         <width>5</width>
         <numerationType>SERIAL</numerationType>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>typeCode</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>REFBOOK</columnType>
         <name>Код вида операции</name>
         <order>3</order>
         <width>5</width>
-        <maxLength>2</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>6501</nameAttributeId>
+        <refBookAttributeId>6501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>invoice</alias>

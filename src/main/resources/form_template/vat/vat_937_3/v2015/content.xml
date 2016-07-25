@@ -3,7 +3,6 @@
     <fixedRows>false</fixedRows>
     <name>Итоговые данные из журнала полученных и выставленных счетов-фактур по посреднической деятельности</name>
     <fullName>Итоговые данные из журнала полученных и выставленных счетов-фактур по посреднической деятельности</fullName>
-    <header>937.3-1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
