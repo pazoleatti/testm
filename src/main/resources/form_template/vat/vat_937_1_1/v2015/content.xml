@@ -3,7 +3,6 @@
     <fixedRows>false</fixedRows>
     <name>(937.1.1) Сведения из дополнительных листов книги покупок</name>
     <fullName>(937.1.1) Сведения из дополнительных листов книги покупок</fullName>
-    <header>937.1.1-1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
