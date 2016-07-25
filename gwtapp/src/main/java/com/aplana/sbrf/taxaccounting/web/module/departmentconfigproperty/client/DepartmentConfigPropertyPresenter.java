@@ -16,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.ViewWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.*;
-import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaPresenter;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -33,7 +32,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private Long recordId;
 
-    private List<RefBookAttribute> attributes;
+    private List<Column> columns;
 
     private static final long TABLE_PROPERTY_REFBOOK_ID = 206L;
     private static final long PROPERTY_REFBOOK_ID = 99L;
@@ -97,7 +96,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
         StringColumn getTextColumn();
 
-        void setTableColumns(List<RefBookAttribute> attributes);
+        void setTableColumns(List<com.aplana.sbrf.taxaccounting.model.Column> columns);
 
         void setTextFieldsParams(List<RefBookAttribute> attributes);
 
@@ -172,13 +171,13 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                 Cell cell = row.getCell(h.name());
                 Object val = cell.getValue();
                 TableCell tableCell = new TableCell();
-                RefBookAttribute attr = getAttributeType(h.name());
-                switch (attr.getAttributeType()) {
+                Column column = getColumn(h.name());
+                switch (column.getColumnType()) {
                     case STRING:
                         tableCell.setStringValue((String) val);
                         tableCell.setType(RefBookAttributeType.STRING);
                         break;
-                    case REFERENCE:
+                    case REFBOOK:
                         tableCell.setRefValue((Long) val);
                         tableCell.setDeRefValue(cell.getRefBookDereference());
                         tableCell.setType(RefBookAttributeType.REFERENCE);
@@ -201,10 +200,10 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         saveData(convert(rows));
     }
 
-    private RefBookAttribute getAttributeType(String alias) {
-        for (RefBookAttribute attr : attributes) {
-            if (attr.getAlias().equals(alias)) {
-                return attr;
+    private Column getColumn(String alias) {
+        for (Column column : columns) {
+            if (column.getAlias().equals(alias)) {
+                return column;
             }
         }
 
@@ -355,8 +354,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                 .defaultCallback(new AbstractCallback<GetFormAttributesResult>() {
                     @Override
                     public void onSuccess(GetFormAttributesResult result) {
-                        DepartmentConfigPropertyPresenter.this.attributes = result.getTableAttributes();
-                        getView().setTableColumns(result.getTableAttributes());
+                        DepartmentConfigPropertyPresenter.this.columns = result.getTableColumns();
+                        getView().setTableColumns(result.getTableColumns());
                         getView().setTextFieldsParams(result.getAttributes());
                     }
                 }, this));
@@ -423,7 +422,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                 if (result.isHasFatalError()) {
                                                     switch (result.getErrorType()) {
                                                         case HAS_DUPLICATES:
-                                                            Dialog.errorMessage("Поля не уникальны", "Поля \"" + getAttributeType("TAX_ORGAN_CODE").getName() + "\" и \"" + getAttributeType("KPP").getName() + "\" таблицы должны быть уникальны");
+                                                            Dialog.errorMessage("Поля не уникальны", "Поля \"" + getColumn("TAX_ORGAN_CODE").getName() + "\" и \"" + getColumn("KPP").getName() + "\" таблицы должны быть уникальны");
                                                             break;
                                                         case INCORRECT_FIELDS:
                                                             Dialog.errorMessage("Поля блока \"Ответственный за декларацию\" заполнены некорректно");
@@ -489,7 +488,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private boolean checkBeforeSave(List<Map<String, TableCell>> rows) {
         if (!isKppTaxOrgCodeFiled(rows)) {
-            Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнены обязательные поля \"" + getAttributeType("TAX_ORGAN_CODE").getName() + "\" и \"" + getAttributeType("KPP").getName() + "\"");
+            Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнены обязательные поля \"" + getColumn("TAX_ORGAN_CODE").getName() + "\" и \"" + getColumn("KPP").getName() + "\"");
             return false;
         }
         return true;
