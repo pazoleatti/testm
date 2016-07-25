@@ -167,7 +167,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         if (onlyId) {
             ps.appendQuery("SELECT record_id FROM ");
         } else {
-            ps.appendQuery("SELECT res.*, rownum row_number_over FROM ");
+            ps.appendQuery("SELECT * FROM (SELECT res.*, rownum row_number_over FROM ");
         }
 
         ps.appendQuery("(select frb.id as ");
@@ -236,10 +236,10 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             ps.appendQuery(" , t.version\n");
         }
 
-        ps.appendQuery(") res ");
+        ps.appendQuery(") res) ");
 
         if (pagingParams != null) {
-            ps.appendQuery(" where rownum BETWEEN ? AND ?");
+            ps.appendQuery(" where row_number_over BETWEEN ? AND ?");
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
         }
