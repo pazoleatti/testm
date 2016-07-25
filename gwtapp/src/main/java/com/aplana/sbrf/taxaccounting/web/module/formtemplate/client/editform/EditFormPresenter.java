@@ -23,7 +23,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
         FormTypeTemplate getTypeData();
         void edit(FormTypeTemplate type);
-        void changeItem(FormTypeTemplate type);
+        void onSelectionChanged(FormTypeTemplate type);
         boolean checkIfrs();
     }
 
@@ -40,10 +40,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         getView().edit(new FormTypeTemplate());
     }
 
-    public void setFormTypeTemplate(FormTypeTemplate formTypeTemplate) {
-        if (formTypeTemplate != null) {
-            getView().changeItem(formTypeTemplate);
-        }
+    public void onSelectionChanged(FormTypeTemplate selectedItem) {
+        getView().onSelectionChanged(selectedItem);
     }
 
     @Override
