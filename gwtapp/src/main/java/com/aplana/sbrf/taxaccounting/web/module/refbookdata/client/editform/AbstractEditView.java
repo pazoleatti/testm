@@ -67,7 +67,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
         Panel editPanel = getRootFieldsPanel();
         editPanel.clear();
         if (widgets != null) widgets.clear();
-        Map<RefBookColumn, HasValue> widgets = new HashMap<RefBookColumn, HasValue>();
+        Map<RefBookColumn, HasValue> widgets = new LinkedHashMap<RefBookColumn, HasValue>();
         for (final RefBookColumn col : attributes) {
 
             HorizontalPanel oneField = new HorizontalPanel();
@@ -351,7 +351,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
     @SuppressWarnings("unchecked")
     private Map<String, RefBookValueSerializable> getFieldsValues(boolean checkRequired) throws BadValueException {
         Map<String, RefBookValueSerializable> fieldsValues = new HashMap<String, RefBookValueSerializable>();
-        Map<String, String> errorMap = new HashMap<String, String>();
+        Map<String, String> errorMap = new LinkedHashMap<String, String>();
         for (Map.Entry<RefBookColumn, HasValue> field : widgets.entrySet()) {
             RefBookValueSerializable value = new RefBookValueSerializable();
             try {

@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception;
 
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class BadValueException extends Exception implements Iterable<String> {
-    private Set<String> strings = new HashSet<String>();
+    private Set<String> strings = new LinkedHashSet<String>();
 
     private class BVIterator implements Iterator<String> {
 
