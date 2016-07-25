@@ -207,8 +207,9 @@ def BigDecimal calc12(DataRow row) {
 
 // Получить курс валюты value на дату date
 def getRate(def Date date, def value) {
-    def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', "$value",
-            date?:getReportPeriodEndDate(), -1, null, logger, true)
+    def codeValue = getRefBookValue(15L, value)?.CODE?.value
+    def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', "$value", codeValue,
+            date ?: getReportPeriodEndDate(), -1, null, logger, true)
 
     return record?.RATE?.numberValue
 }
