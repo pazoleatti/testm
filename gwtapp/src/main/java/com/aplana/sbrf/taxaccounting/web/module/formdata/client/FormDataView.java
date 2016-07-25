@@ -478,10 +478,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     private void setFixedTableBuilder() {
         formDataTableFixed.setTableBuilder(new CustomTableBuilder<DataRow<Cell>>(formDataTableFixed, false) {
-            int rowIndex;
+            int absRowIndex;
             @Override
             public void addRowAttributes(TableRowBuilder row) {
-                if (rowIndex >= formDataTable.getVisibleItemCount())
+                int rowIndex = absRowIndex - cellTable.getPageStart();
+                if (rowIndex >= cellTable.getVisibleItemCount())
                     return;
                 if (formDataTable.getRowElement(rowIndex) != null && cellTable.getRowElement(rowIndex) != null) {
                     row.attribute("height", calcRowSize(rowIndex) + "px");
@@ -490,7 +491,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
             @Override
             public void buildRowImpl(DataRow<Cell> rowValue, int absRowIndex) {
-                this.rowIndex = absRowIndex;
+                this.absRowIndex = absRowIndex;
                 super.buildRowImpl(rowValue, absRowIndex);
             }
         });
