@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>(937.1) Итоговые данные книги покупок (с 3 квартала 2016)</name>
-    <fullName>(937.1) Итоговые данные книги покупок</fullName>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>(937.1.1) Сведения из дополнительных листов книги покупок (с 3 квартала 2016)</name>
+    <fullName>(937.1.1) Сведения из дополнительных листов книги покупок</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

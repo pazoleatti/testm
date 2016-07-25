@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.vat.vat_937_1_3q2016.v2016;
+package com.aplana.sbrf.taxaccounting.form_template.vat.vat_937_1_1_3q2016.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
@@ -21,10 +21,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
- * (937.1) Итоговые данные книги покупок (с 3 квартала 2016)
+ * (937.1.1) Сведения из дополнительных листов книги покупок (с 3 квартала 2016)
  */
-public class Vat_937_1_3q2016_Test extends ScriptTestBase {
-    private static final int TYPE_ID = 855;
+public class Vat_937_1_1_3q2016_Test extends ScriptTestBase {
+    private static final int TYPE_ID = 856;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -48,7 +48,7 @@ public class Vat_937_1_3q2016_Test extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Vat_937_1_3q2016_Test.class);
+        return getDefaultScriptTestMockHelper(Vat_937_1_1_3q2016_Test.class);
     }
 
     @Before
@@ -64,8 +64,6 @@ public class Vat_937_1_3q2016_Test extends ScriptTestBase {
         departmentReportPeriod.setBalance(false);
 
         when(testHelper.getDepartmentReportPeriodService().get(DEPARTMENT_PERIOD_ID)).thenReturn(departmentReportPeriod);
-
-        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @After
@@ -85,7 +83,6 @@ public class Vat_937_1_3q2016_Test extends ScriptTestBase {
     @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
-        // ошибок быть не должно
         checkLogger();
     }
 
@@ -93,7 +90,6 @@ public class Vat_937_1_3q2016_Test extends ScriptTestBase {
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);
-        // ошибок быть не должно
         checkLogger();
     }
 
@@ -187,7 +183,7 @@ public class Vat_937_1_3q2016_Test extends ScriptTestBase {
         testHelper.initRowData();
 
         // Консолидация
-        int expected = testHelper.getDataRowHelper().getAll().size() + 2 + 2; // 2 строки из одного источника и +подзаголовок и +подитог источника (подразделения)
+        int expected = testHelper.getDataRowHelper().getAll().size() + 2 + 2; // 2 строки из одного источника и + подзаголовок (с названием подразделения) и +подитог источника (всего)
         testHelper.execute(FormDataEvent.COMPOSE);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
 
