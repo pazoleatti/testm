@@ -6,11 +6,10 @@ import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.TableSectionElement;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.*;
-import com.google.gwt.user.client.ui.CustomScrollPanel;
-import com.google.gwt.user.client.ui.HasEnabled;
-import com.google.gwt.user.client.ui.HeaderPanel;
+import com.google.gwt.user.client.ui.*;
 
 
 import java.util.List;
@@ -31,6 +30,18 @@ public class GenericDataGrid<T> extends DataGrid<T> implements HasEnabled{
 
         glassElement = WidgetUtils.createGlassElement();
 	}
+
+    public CustomScrollPanel getContentPanel() {
+        return (CustomScrollPanel) ((HeaderPanel) getWidget()).getContentWidget();
+    }
+
+    public Widget getHeaderWidget() {
+        return ((HeaderPanel) getWidget()).getHeaderWidget();
+    }
+
+    public TableSectionElement getTableHeadElement() {
+        return super.getTableHeadElement();
+    }
 
     public class DataGridResizableHeader extends ResizableHeader<T> {
         public DataGridResizableHeader(String title, Column<T, ?> column) {

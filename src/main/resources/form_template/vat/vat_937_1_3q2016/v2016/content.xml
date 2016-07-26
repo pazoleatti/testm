@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <name>(937.1) Итоговые данные книги покупок (с 3 квартала 2016)</name>
+    <fullName>(937.1) Итоговые данные книги покупок</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>fix</name>
+        <order>1</order>
+        <width>0</width>
+        <maxLength>2000</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ п/п</name>
+        <order>2</order>
+        <width>5</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>typeCode</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Код вида операции</name>
+        <order>3</order>
+        <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>6502</nameAttributeId>
+        <refBookAttributeId>6501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>invoice</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Номер и дата счета-фактуры продавца</name>
+        <order>4</order>
+        <width>6</width>
+        <maxLength>1011</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>invoiceCorrecting</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Номер и дата исправления счета-фактуры продавца</name>
+        <order>5</order>
+        <width>6</width>
+        <maxLength>14</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>invoiceCorrection</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Номер и дата корректировочного счета-фактуры продавца</name>
+        <order>6</order>
+        <width>7</width>
+        <maxLength>267</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>invoiceCorrectingCorrection</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Номер и дата исправления корректировочного счета-фактуры продавца</name>
+        <order>7</order>
+        <width>7</width>
+        <maxLength>14</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>documentPay</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Номер и дата документа, подтверждающего уплату налога</name>
+        <order>8</order>
+        <width>7</width>
+        <maxLength>267</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>dateRegistration</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата принятия на учет товаров (работ, услуг), имущественных прав</name>
+        <order>9</order>
+        <width>7</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>salesman</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование продавца</name>
+        <order>10</order>
+        <width>6</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>salesmanInnKpp</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>ИНН/КПП продавца</name>
+        <order>11</order>
+        <width>5</width>
+        <maxLength>20</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>agentName</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Сведения о посреднике (комиссионере, агенте). Наименование посредника</name>
+        <order>12</order>
+        <width>6</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>agentInnKpp</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Сведения о посреднике (комиссионере, агенте). ИНН/КПП посредника</name>
+        <order>13</order>
+        <width>5</width>
+        <maxLength>20</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>declarationNum</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Номер таможенной декларации</name>
+        <order>14</order>
+        <width>6</width>
+        <maxLength>1000</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>currency</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование и код валюты</name>
+        <order>15</order>
+        <width>6</width>
+        <maxLength>259</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>cost</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Стоимость покупок по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в валюте счета-фактуры</name>
+        <order>16</order>
+        <width>7</width>
+        <maxLength>19</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>nds</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма НДС по счету-фактуре, разница суммы НДС по корректировочному счету-фактуре, принимаемая к вычету, в рублях и копейках</name>
+        <order>17</order>
+        <width>7</width>
+        <maxLength>19</maxLength>
+        <precision>2</precision>
+    </columns>
+    <styles>
+        <alias>Раздел 2 уровня</alias>
+        <backColor>LIGHT_YELLOW</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

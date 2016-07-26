@@ -28,13 +28,7 @@ import org.springframework.util.ClassUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -44,20 +38,20 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     private static final Log LOG = LogFactory.getLog(FormDataXlsmReportBuilder.class);
 
-    private final int ROW_NUMBER = 9;
+    protected int ROW_NUMBER = 9; // для переопределения в скриптах
 
-    private int rowNumber = ROW_NUMBER;
+    protected int rowNumber = ROW_NUMBER; // для переопределения в скриптах
 
-    private boolean isShowChecked;
+    protected boolean isShowChecked;
 
-    private CellStyleBuilder cellStyleBuilder;
+    protected CellStyleBuilder cellStyleBuilder;
     private static final String TEMPLATE = ClassUtils
             .classPackageAsResourcePath(FormDataXlsmReportBuilder.class)
             + "/acctax.xlsm";
 
-    private static final int MERGE_REGIONS_NUM_BACK = 10;
+    protected static final int MERGE_REGIONS_NUM_BACK = 10;
 
-    private enum CellType{
+    public enum CellType{
         DATE,
         STRING,
         BIGDECIMAL,
@@ -196,15 +190,15 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
     }
 
-    private FormData data;
-    private List<DataRow<HeaderCell>> headers = new ArrayList<DataRow<HeaderCell>>();
-    private List<Column> columns = new ArrayList<Column>();
-    private RefBookValue periodCode;
-    private List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
-    private FormTemplate formTemplate;
-    private ReportPeriod reportPeriod,rpCompare;
-    private Date acceptanceDate;
-    private Date creationDate;
+    protected FormData data;
+    protected List<DataRow<HeaderCell>> headers = new ArrayList<DataRow<HeaderCell>>();
+    protected List<Column> columns = new ArrayList<Column>();
+    protected RefBookValue periodCode;
+    protected List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
+    protected FormTemplate formTemplate;
+    protected ReportPeriod reportPeriod,rpCompare;
+    protected Date acceptanceDate;
+    protected Date creationDate;
 
     private Map<String, XSSFFont> fontMap = new HashMap<String, XSSFFont>();
 
@@ -262,11 +256,13 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
 
         if (deleteHiddenColumns) {
+            Set<Integer> hiddenOrders = new HashSet<Integer>();
             Iterator<Column> iterator = this.columns.iterator();
             int i = 1;
             while (iterator.hasNext()) {
                 Column c = iterator.next();
                 if (c.getWidth() == 0) {
+                    hiddenOrders.add(c.getOrder());
                     Column nextColumn = null;
                     if (i < columns.size()) {
                         nextColumn = columns.get(i);
@@ -274,9 +270,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
                     //Удаляем скрытый столбец таблицы
                     for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow: this.dataRows) {
-                        String value = (String) dataRow.get(c.getAlias());
                         com.aplana.sbrf.taxaccounting.model.Cell cell = dataRow.getCell(c.getAlias());
                         if (nextColumn != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)) {
+                            String value = (dataRow.get(c.getAlias()) != null) ? String.valueOf(dataRow.get(c.getAlias())) : null;
                             if (value != null && !value.isEmpty()) {
                                 //Если в скрытом столбце есть какие то значения и он объединяется с соседними столбцами/ячейками (т.е значение для объединенной ячейки хранится в скрытой), то перед удалением переносим значения в соседний
                                 dataRow.putForce(nextColumn.getAlias(), value);
@@ -298,10 +294,19 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                             for (Column prevCol : columns) {
                                 if (prevCol.getOrder() < c.getOrder()) {
                                     com.aplana.sbrf.taxaccounting.model.Cell prevCell = dataRow.getCell(prevCol.getAlias());
-                                    if (prevCell.getColSpan() > 1 && (c.getOrder() - (prevCol.getOrder() + prevCell.getColSpan()) <= 1)) {
-                                        //Найденная ячейка объединяет скрытую
-                                        //Уменьшаем объединение столбцов на 1, т.к скрытый столбец будет удален
-                                        prevCell.setColSpan(prevCell.getColSpan() - 1);
+                                    if (prevCell.getColSpan() > 1) {
+                                        // считаем количество уже удаленных скрытых столбцов
+                                        int hiddenCount = 0;
+                                        for (Integer hiddenOrder : hiddenOrders) {
+                                            if (hiddenOrder < c.getOrder() && hiddenOrder > prevCol.getOrder()) {
+                                                hiddenCount++;
+                                            }
+                                        }
+                                        if (c.getOrder() - (prevCol.getOrder() + prevCell.getColSpan() + hiddenCount) < 0) {
+                                            //Найденная ячейка объединяет скрытую
+                                            //Уменьшаем объединение столбцов на 1, т.к скрытый столбец будет удален
+                                            prevCell.setColSpan(prevCell.getColSpan() - 1);
+                                        }
                                     }
                                 }
                             }
@@ -328,9 +333,18 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                             for (Column prevCol : columns) {
                                 if (prevCol.getOrder() < c.getOrder()) {
                                     HeaderCell prevHeaderCell = header.getCell(prevCol.getAlias());
-                                    if (prevHeaderCell.getColSpan() > 1 && (c.getOrder() - (prevCol.getOrder() + prevHeaderCell.getColSpan()) <= 1)) {
-                                        //Найденная ячейка объединяет скрытую
-                                        prevHeaderCell.setColSpan(prevHeaderCell.getColSpan() - 1);
+                                    if (prevHeaderCell.getColSpan() > 1) {
+                                        // считаем количество уже удаленных скрытых столбцов
+                                        int hiddenCount = 0;
+                                        for (Integer hiddenOrder : hiddenOrders) {
+                                            if (hiddenOrder < c.getOrder() && hiddenOrder > prevCol.getOrder()) {
+                                                hiddenCount++;
+                                            }
+                                        }
+                                        if (c.getOrder() - (prevCol.getOrder() + prevHeaderCell.getColSpan() + hiddenCount) < 0) {
+                                            //Найденная ячейка объединяет скрытую
+                                            prevHeaderCell.setColSpan(prevHeaderCell.getColSpan() - 1);
+                                        }
                                     }
                                 }
                             }
@@ -609,7 +623,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
      * @param columnAlias алиас столбца
      * @return
      */
-    private CellStyle getCellStyle(FormStyle formStyle, CellType cellType, String columnAlias) {
+    protected CellStyle getCellStyle(FormStyle formStyle, CellType cellType, String columnAlias) {
         return cellStyleBuilder.getCellStyle(cellType, columnAlias, formStyle);
     }
 
@@ -738,7 +752,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     /*
     * Merge rows with data. Depend on fields from com.aplana.sbrf.taxaccounting.model.Cell rowSpan and colSpan.
     */
-    private Cell mergedDataCells(AbstractCell cell, Row currRow, int currColumn, boolean isHeader){
+    protected Cell mergedDataCells(AbstractCell cell, Row currRow, int currColumn, boolean isHeader){
         Cell currCell;
         if(cell != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)){
             if(currColumn + cell.getColSpan() > columns.size()){
@@ -829,7 +843,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
     }
 
-    private void autoSizeHeaderRowsHeight() {
+    protected void autoSizeHeaderRowsHeight() {
         Map<Integer, Integer> map = new HashMap<Integer, Integer>();
         for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
             CellRangeAddress mergedRegion = sheet.getMergedRegion(i);

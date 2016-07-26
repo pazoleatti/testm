@@ -76,6 +76,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public static final String NOT_LINEAR_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является линейным";
 
     private static final String DELETE_VERSION = "update %s set status = -1 where %s";
+    private static final String DELETE_VERSION_DELETE = "delete from %s where %s";
 	private static final String STRING_VALUE_COLUMN_ALIAS = "string_value";
 	private static final String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
 	private static final String DATE_VALUE_COLUMN_ALIAS = "date_value";
@@ -198,6 +199,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+    @Override
+    public List<RefBookAttribute> getAttributesByReferenceId(Long refBookId) {
+        try {
+            return getJdbcTemplate().query(
+                    "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
+                            "is_unique, sort_order, format, read_only, max_length " +
+                            "from ref_book_attribute where reference_id = ?",
+                    new Object[]{refBookId}, new int[]{Types.NUMERIC},
+                    new RefBookAttributeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException(String.format("Не найдены атрибуты для справочника с id = %d", refBookId));
+        }
+    }
     /**
      * Настройка маппинга для атрибутов справочника
      */
@@ -295,6 +309,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
         result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
         return result;
+    }
+
+    @Override
+    public List<Long> getDeletedRecords(Long refBookId, String filter) {
+        PreparedStatementData ps = getRefBookSql2(refBookId, filter);
+        RefBook refBookClone = SerializationUtils.clone(get(refBookId));
+        List<Long> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowMapper<Long>() {
+            @Override
+            public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getLong("record_id");
+            }
+        });
+        return records;
     }
 
     @Override
@@ -576,16 +603,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final String RECORD_VERSIONS_ALL =
             "with recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r where r.ref_book_id = %d and r.status != -1), \n" +
-                    "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
+                    "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=" + VersionedObjectStatus.NORMAL.getId() + ")\n";
 
     private static final String RECORD_VERSIONS_STATEMENT_BY_ID =
             "with currentRecord as (select id, record_id, version from REF_BOOK_RECORD where id=%d),\n" +
                     "recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r, currentRecord cr where r.REF_BOOK_ID=%d and r.RECORD_ID=cr.RECORD_ID and r.status != -1), \n" +
-                    "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
+                    "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=" + VersionedObjectStatus.NORMAL.getId() + ")\n";
 
     private static final String RECORD_VERSIONS_STATEMENT_BY_RECORD_ID =
             "with recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r where r.record_id=%d and r.ref_book_id = %d and r.status != -1), \n" +
-                    "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
+                    "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=" + VersionedObjectStatus.NORMAL.getId() + ")\n";
 
     /**
      * Динамически формирует запрос для справочника
@@ -630,15 +657,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             if (uniqueRecordId != null){
                 //Ищем все версии по уникальному идентификатору
                 ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT_BY_ID, uniqueRecordId, refBookId));
-                ps.addParam(VersionedObjectStatus.NORMAL.getId());
             } else if (recordId != null){
                 //Ищем все версии в группе версий
                 ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT_BY_RECORD_ID, recordId, refBookId));
-                ps.addParam(VersionedObjectStatus.NORMAL.getId());
             } else {
                 //Ищем вообще все версии
                 ps.appendQuery(String.format(RECORD_VERSIONS_ALL, refBookId));
-                ps.addParam(VersionedObjectStatus.NORMAL.getId());
             }
         }
 
@@ -715,7 +739,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(" where\n  frb.ref_book_id = ");
         ps.appendQuery("?");
         ps.addParam(refBookId);
-        ps.appendQuery(" and\n  frb.status <> -1\n");
+        ps.appendQuery(" and frb.status <> -1\n");
 
         // обработка параметров фильтра
         if (filterPS.getQuery().length() > 0
@@ -740,6 +764,84 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(String.valueOf(pagingParams.getStartIndex() + pagingParams.getCount()));
         }
+
+        return ps;
+    }
+
+    private static final String RECORD_VERSIONS_DELETED =
+            "with t as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS from REF_BOOK_RECORD r where r.ref_book_id = %d ) ";
+
+    /**
+     * Динамически формирует запрос для справочника
+     *
+     * @param refBookId       код справочника
+     * @param filter          строка фильтрации
+     * @return
+     */
+    private PreparedStatementData getRefBookSql2(@NotNull Long refBookId, String filter) {
+        // модель которая будет возвращаться как результат
+        PreparedStatementData ps = new PreparedStatementData();
+
+        RefBook refBook = get(refBookId);
+        List<RefBookAttribute> attributes = refBook.getAttributes();
+
+        PreparedStatementData filterPS = new PreparedStatementData();
+        UniversalFilterTreeListener universalFilterTreeListener = applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+        universalFilterTreeListener.setPs(filterPS);
+        Filter.getFilterQuery(filter, universalFilterTreeListener);
+
+        StringBuilder fromSql = new StringBuilder("\nfrom\n");
+
+        fromSql.append("  ref_book_record frb join t on (frb.version = t.version and frb.record_id = t.record_id)\n");
+        //Ищем вообще все версии
+        ps.appendQuery(String.format(RECORD_VERSIONS_DELETED, refBookId));
+
+        ps.appendQuery("SELECT ");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        ps.appendQuery(" FROM ");
+        ps.appendQuery("(select\n");
+        ps.appendQuery(" frb.id as ");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+
+        for (int i = 0; i < attributes.size(); i++) {
+            RefBookAttribute attribute = attributes.get(i);
+            String alias = attribute.getAlias();
+
+            fromSql.append(" left join ref_book_value a");
+            fromSql.append(alias);
+            fromSql.append(" on a");
+            fromSql.append(alias);
+            fromSql.append(".record_id = frb.id and a");
+            fromSql.append(alias);
+            fromSql.append(".attribute_id = ");
+            fromSql.append(attribute.getId());
+        }
+
+        // добавляем join'ы относящиеся к фильтру
+        fromSql.append("\n");
+        if (filterPS.getJoinPartsOfQuery() != null) {
+            fromSql.append(filterPS.getJoinPartsOfQuery());
+        }
+
+        ps.appendQuery(fromSql.toString());
+        ps.appendQuery(" where\n  frb.ref_book_id = ");
+        ps.appendQuery("?");
+        ps.addParam(refBookId);
+        ps.appendQuery(" and frb.status = -1\n");
+
+        // обработка параметров фильтра
+        if (filterPS.getQuery().length() > 0
+                && !filterPS.getQuery().toString().trim().equals("()")) {
+            ps.appendQuery(" and\n ");
+            ps.appendQuery("(");
+            ps.appendQuery(filterPS.getQuery().toString());
+            ps.appendQuery(")");
+            ps.appendQuery("\n");
+            ps.addParam(filterPS.getParams());
+        }
+
+        ps.appendQuery(")");
 
         return ps;
     }
@@ -801,7 +903,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.addParam(version);
         } else {
             ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT_BY_ID, uniqueRecordId, refBookId));
-            ps.addParam(VersionedObjectStatus.NORMAL.getId());
         }
 
         ps.appendQuery(" SELECT ");
@@ -1905,7 +2006,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String CHECK_USAGES_IN_FORMS = "with forms as (\n" +
             "  select fd.*, drp.report_period_id as report_period_id, drp.department_id as department_id, drp.correction_date as correctionDate  from form_data fd \n" +
             "  join department_report_period drp on drp.id = fd.department_report_period_id \n" +
-            "  join form_data_ref_book fdrf on fdrf.form_data_id = fd.id \n" +
+            "  join form_data_ref_book fdrf on fdrf.form_data_id = fd.id and fdrf.ref_book_id = :refBookId\n" +
             "  where %s\n" +
             ")" +
             "select distinct f.id as formDataId, f.state, t.id as  formTypeId, t.tax_type, f.kind as formKind, t.name as formType, d.path as departmentPath, d.type as departmentType, rp.name as reportPeriodName, tp.year as year, f.period_order as month, f.correctionDate as correctionDate from forms f \n" +
@@ -2934,8 +3035,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds) {
-        String sql = String.format(DELETE_VERSION, tableName, transformToSqlInStatement("id", uniqueRecordIds));
+    public void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds, boolean isDelete) {
+        String sql = String.format(isDelete?DELETE_VERSION_DELETE:DELETE_VERSION, tableName, transformToSqlInStatement("id", uniqueRecordIds));
         getJdbcTemplate().update(sql);
     }
 

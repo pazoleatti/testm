@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 import java.util.List;
 import java.util.Set;
 
+import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.user.client.ui.HasValue;
@@ -22,6 +23,10 @@ public interface DepartmentPicker extends HasValue<List<Integer>>, LeafValueEdit
 	void setAvalibleValues(List<Department> departments, Set<Integer> availableDepartments);
 
     Integer getSingleValue();
+
+    void addOpenModalWindowHandler(OpenModalWindowEvent.OpenHandler handler);
+
+    void removeOpenModalWindowHandler();
 
     /**
      * Список подразделений доступных для выбора

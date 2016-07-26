@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -84,6 +81,11 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                     break;
                 }
                 action.setFieldId(result.getDefaultReportPeriod().getId());
+                result.setDepartments(new ArrayList<Department>(Collections.singletonList(
+                        departmentService.getDepartment(userInfo.getUser().getDepartmentId()))));
+                result.setDepartmentIds(new HashSet<Integer>(Collections.singletonList(userInfo.getUser().getDepartmentId())));
+                result.setDefaultDepartmentId(userInfo.getUser().getDepartmentId());
+                break;
             case SECOND:
                 List<Integer> departments =
                         departmentService.getOpenPeriodDepartments(userInfo.getUser(), asList(action.getTaxType()), action.getFieldId());
@@ -91,7 +93,7 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                     result.setDepartments(new ArrayList<Department>());
                     result.setDepartmentIds(new HashSet<Integer>());
                 } else {
-	                Set<Integer> departmentIds = new HashSet<Integer>(departments);
+                    Set<Integer> departmentIds = new HashSet<Integer>(departments);
                     result.setDepartments(new ArrayList<Department>(
                             departmentService.getRequiredForTreeDepartments(departmentIds).values()));
                     result.setDepartmentIds(departmentIds);

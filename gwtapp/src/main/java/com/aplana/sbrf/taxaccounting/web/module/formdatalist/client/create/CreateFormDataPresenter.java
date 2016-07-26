@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 
+import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -30,6 +31,9 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues, Integer departmentId);
         void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods, ReportPeriod reportPeriod);
         Integer getDefaultReportPeriodId();
+
+        void addOpenModalWindowHandler(OpenModalWindowEvent.OpenHandler handler);
+        void removeOpenModalWindowHandler();
 
         void setAcceptableMonthList(List<Months> monthList);
 
@@ -103,6 +107,15 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
     @Override
     public void onReportPeriodChange() {
+        getView().addOpenModalWindowHandler(new OpenModalWindowEvent.OpenHandler() {
+            @Override
+            public void onOpen(OpenModalWindowEvent event) {
+                loadDepartments();
+            }
+        });
+    }
+
+    private void loadDepartments() {
         List<Integer> reportIds = getView().getFilterData().getReportPeriodIds();
         if (reportIds == null || reportIds.isEmpty())
             return;
@@ -118,6 +131,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
                         getView().updateEnabled();
                         onDepartmentChanged();
+                        getView().removeOpenModalWindowHandler();
                     }
                 }, this));
     }
@@ -198,6 +212,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         getView().setAcceptableReportPeriods(result.getReportPeriods(), result.getDefaultReportPeriod());
                         getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
                         getView().updateEnabled();
+                        onReportPeriodChange();
                         onDepartmentChanged();
                         changeFilterElementNames(taxType);
 

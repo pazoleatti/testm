@@ -13,10 +13,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -50,6 +47,13 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     @UiField
     HorizontalPanel ifrsNamePanel;
 
+    @UiField
+    Button save;
+    @UiField
+    Button cancel;
+
+    FormTypeTemplate selectedItem;
+
     @Inject
     public EditFormView(Binder uiBinder, MyDriver driver) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -64,6 +68,15 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
                 if (!event.getValue()) ifrsName.setText("");
             }
         });
+    }
+
+    @UiHandler("formTypeName")
+    public void onNameChanged(ChangeEvent event) {
+        if (formTypeName.getText().isEmpty() || selectedItem == null) {
+            save.setEnabled(false);
+        } else {
+            save.setEnabled(true);
+        }
     }
 
     @UiHandler("cancel")
@@ -102,8 +115,24 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
         driver.edit(type);
     }
 
+    private void setButtonsEnabled(boolean enabled) {
+        save.setEnabled(enabled);
+        cancel.setEnabled(enabled);
+    }
+
     @Override
-    public void changeItem(final FormTypeTemplate type) {
+    public void onSelectionChanged(FormTypeTemplate type) {
+        selectedItem = type;
+        if (type == null) {
+            changeItem(new FormTypeTemplate());
+            setButtonsEnabled(false);
+        } else {
+            changeItem(type);
+            setButtonsEnabled(true);
+        }
+    }
+
+    private void changeItem(final FormTypeTemplate type) {
         if (driver.isDirty()){
             Dialog.confirmMessage("Редактирование макета", "Сохранить изменения?", new DialogHandler() {
                 @Override

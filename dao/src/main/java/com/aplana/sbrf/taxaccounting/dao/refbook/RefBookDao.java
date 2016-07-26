@@ -78,6 +78,13 @@ public interface RefBookDao {
                                                        RefBookAttribute sortAttribute);
 
     /**
+     * Загружает данные справочника
+     * @param refBookId код справочника
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return
+     */
+    List<Long> getDeletedRecords(Long refBookId, String filter);
+    /**
      * Получение row_num записи по заданным параметрам
      * @param refBookId код справочника
      * @param version дата актуальности
@@ -294,6 +301,11 @@ public interface RefBookDao {
      * @return набор атрибутов
      */
     List<RefBookAttribute> getAttributes(@NotNull Long refBookId);
+
+    /**
+     * Получает список атрибутов, которые ссылаются на @param refBookId
+     */
+    List<RefBookAttribute> getAttributesByReferenceId(Long refBookId);
 
     /**
      *
@@ -637,7 +649,7 @@ public interface RefBookDao {
      *
      * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
      */
-    void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds);
+    void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds, boolean isDelete);
 
 	/**
 	 * Разыменование набора ссылок для универсальных справочников

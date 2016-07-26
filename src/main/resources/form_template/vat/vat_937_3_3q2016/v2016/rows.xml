@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="part_1">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" styleAlias="Раздел 2 уровня"/>
+        <cell alias="fix" colSpan="19" rowSpan="1" stringValue="Часть 1. Выставленные счета-фактуры"
+              styleAlias="Раздел 2 уровня"/>
+        <cell alias="date" colSpan="1" rowSpan="1"/>
+        <cell alias="opTypeCode" colSpan="1" rowSpan="1"/>
+        <cell alias="invoiceNumDate" colSpan="1" rowSpan="1"/>
+        <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="1"/>
+        <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="1"/>
+        <cell alias="corrInvCorrNumDate" colSpan="1" rowSpan="1"/>
+        <cell alias="buyerName" colSpan="1" rowSpan="1"/>
+        <cell alias="buyerInnKpp" colSpan="1" rowSpan="1"/>
+        <cell alias="mediatorName" colSpan="1" rowSpan="1"/>
+        <cell alias="mediatorInnKpp" colSpan="1" rowSpan="1"/>
+        <cell alias="mediatorNumDate" colSpan="1" rowSpan="1"/>
+        <cell alias="currNameCode" colSpan="1" rowSpan="1"/>
+        <cell alias="cost" colSpan="1" rowSpan="1"/>
+        <cell alias="vatSum" colSpan="1" rowSpan="1"/>
+        <cell alias="diffDec" colSpan="1" rowSpan="1"/>
+        <cell alias="diffInc" colSpan="1" rowSpan="1"/>
+        <cell alias="diffVatDec" colSpan="1" rowSpan="1"/>
+        <cell alias="diffVatInc" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="total_1">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="fix" colSpan="13" rowSpan="1" stringValue="Всего" styleAlias="Контрольные суммы"/>
+        <cell alias="date" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="opTypeCode" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="invoiceNumDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="corrInvCorrNumDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="buyerName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="buyerInnKpp" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="mediatorName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="mediatorInnKpp" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="mediatorNumDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currNameCode" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="cost" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="vatSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="diffDec" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="diffInc" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="diffVatDec" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="diffVatInc" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="part_2">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" styleAlias="Раздел 2 уровня"/>
+        <cell alias="fix" colSpan="19" rowSpan="1" stringValue="Часть 2. Полученные счета-фактуры"
+              styleAlias="Раздел 2 уровня"/>
+        <cell alias="date" colSpan="1" rowSpan="1"/>
+        <cell alias="opTypeCode" colSpan="1" rowSpan="1"/>
+        <cell alias="invoiceNumDate" colSpan="1" rowSpan="1"/>
+        <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="1"/>
+        <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="1"/>
+        <cell alias="corrInvCorrNumDate" colSpan="1" rowSpan="1"/>
+        <cell alias="buyerName" colSpan="1" rowSpan="1"/>
+        <cell alias="buyerInnKpp" colSpan="1" rowSpan="1"/>
+        <cell alias="mediatorName" colSpan="1" rowSpan="1"/>
+        <cell alias="mediatorInnKpp" colSpan="1" rowSpan="1"/>
+        <cell alias="mediatorNumDate" colSpan="1" rowSpan="1"/>
+        <cell alias="currNameCode" colSpan="1" rowSpan="1"/>
+        <cell alias="cost" colSpan="1" rowSpan="1"/>
+        <cell alias="vatSum" colSpan="1" rowSpan="1"/>
+        <cell alias="diffDec" colSpan="1" rowSpan="1"/>
+        <cell alias="diffInc" colSpan="1" rowSpan="1"/>
+        <cell alias="diffVatDec" colSpan="1" rowSpan="1"/>
+        <cell alias="diffVatInc" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="total_2">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="fix" colSpan="13" rowSpan="1" stringValue="Всего" styleAlias="Контрольные суммы"/>
+        <cell alias="date" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="opTypeCode" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="invoiceNumDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="corrInvCorrNumDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="buyerName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="buyerInnKpp" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="mediatorName" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="mediatorInnKpp" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="mediatorNumDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currNameCode" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="cost" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="vatSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="diffDec" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="diffInc" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="diffVatDec" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="diffVatInc" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+</rows>

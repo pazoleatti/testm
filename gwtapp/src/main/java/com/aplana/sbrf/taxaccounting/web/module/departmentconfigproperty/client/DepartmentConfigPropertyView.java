@@ -356,7 +356,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     }
 
     @Override
-    public void setTableColumns(List<RefBookAttribute> attributes) {
+    public void setTableColumns(List<com.aplana.sbrf.taxaccounting.model.Column> columns) {
         model.getList().clear();
         table.redraw();
         removeAllColumns();
@@ -393,59 +393,20 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         table.setColumnWidth(indexColumn, 30, Style.Unit.PX);
         table.addColumn(indexColumn, "№ пп");
 
-        Map<String, RefBookAttribute> attributeMap = new HashMap<String, RefBookAttribute>();
+        Map<String, com.aplana.sbrf.taxaccounting.model.Column> columnMap = new HashMap<String, com.aplana.sbrf.taxaccounting.model.Column>();
 
-        for (RefBookAttribute attr : attributes) {
-            attributeMap.put(attr.getAlias(), attr);
+        for (com.aplana.sbrf.taxaccounting.model.Column column : columns) {
+            columnMap.put(column.getAlias(), column);
         }
         for (TableHeader h : getCurrentTableHeaders()) {
-            if (attributeMap.containsKey(h.name())) {
-                RefBookAttribute cell = attributeMap.get(h.name());
+            if (columnMap.containsKey(h.name())) {
+                com.aplana.sbrf.taxaccounting.model.Column column = columnMap.get(h.name());
 
                 Column<DataRow<Cell>, ?> paramColumnUI = null;
-                switch (cell.getAttributeType()) {
-                    case STRING:
-                        StringColumn textColumn = new StringColumn();
-                        textColumn.setId(cell.getId().intValue());
-                        textColumn.setAlias(h.name());
-                        textColumn.setName(cell.getName());
-                        textColumn.setMaxLength(cell.getMaxLength());
-                        textColumn.setWidth(cell.getWidth());
-
-                        paramColumnUI = factory.createTableColumn(textColumn, table);
-                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
-                        table.addColumn(paramColumnUI, textColumn.getName());
-                        columns.add(textColumn);
-                        break;
-                    case REFERENCE:
-                        RefBookColumn refColumn = new RefBookColumn();
-                        refColumn.setId(cell.getId().intValue());
-                        refColumn.setRefBookAttributeId(cell.getRefBookAttributeId());
-                        refColumn.setRefBookAttribute(cell.getRefBookAttribute());
-                        refColumn.setAlias(h.name());
-                        refColumn.setName(cell.getName());
-                        refColumn.setWidth(cell.getWidth());
-
-                        paramColumnUI = factory.createTableColumn(refColumn, table);
-                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
-                        table.addColumn(paramColumnUI, refColumn.getName());
-                        columns.add(refColumn);
-                        break;
-                    case NUMBER:
-                        NumericColumn numericColumn = new NumericColumn();
-                        numericColumn.setId(cell.getId().intValue());
-                        numericColumn.setAlias(h.name());
-                        numericColumn.setName(cell.getName());
-                        numericColumn.setWidth(cell.getWidth());
-                        numericColumn.setMaxLength(cell.getMaxLength());
-                        numericColumn.setPrecision(cell.getPrecision());
-
-                        paramColumnUI = factory.createTableColumn(numericColumn, table);
-                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
-                        table.addColumn(paramColumnUI, numericColumn.getName());
-                        columns.add(numericColumn);
-                        break;
-                }
+                paramColumnUI = factory.createTableColumn(column, table);
+                table.setColumnWidth(paramColumnUI, column.getWidth(), Style.Unit.EM);
+                table.addColumn(paramColumnUI, column.getName());
+                this.columns.add(column);
                 if (paramColumnUI != null) {
                     ((DataRowColumn<?>) paramColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
                         @Override

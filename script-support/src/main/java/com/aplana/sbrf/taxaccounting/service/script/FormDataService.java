@@ -126,6 +126,7 @@ public interface FormDataService {
      * @param providerCache Кэш провайдеров справочников
      * @param alias Искомый атрибут справочника
      * @param value Искомое значение справочника
+     * @param msgValue значение выводимое в сообщении об ошибке (в случае когда ищется запись по ссылочному атрибуту, что бы не выводить пользователю id записи)
      * @param date Дата
      * @param rowIndex Строка из файла для сообщения об ошибке
      * @param colIndex Колонка из файла для сообщения об ошибке
@@ -134,8 +135,13 @@ public interface FormDataService {
      * @return
      */
     Long getRefBookRecordIdImport(Long refBookId, Map<Long, Map<String, Long>> recordCache,
-                            Map<Long, RefBookDataProvider> providerCache, String alias, String value, Date date,
+                            Map<Long, RefBookDataProvider> providerCache, String alias, String value, String msgValue, Date date,
                             int rowIndex, int colIndex, Logger logger, boolean required);
+
+    @Deprecated
+    Long getRefBookRecordIdImport(Long refBookId, Map<Long, Map<String, Long>> recordCache,
+                                  Map<Long, RefBookDataProvider> providerCache, String alias, String value, Date date,
+                                  int rowIndex, int colIndex, Logger logger, boolean required);
 
     /**
      * Получение Id записи справочника при импорте
@@ -145,6 +151,7 @@ public interface FormDataService {
      * @param refBookCache Кэш записей справочников
      * @param alias Искомый атрибут справочника
      * @param value Искомое значение справочника
+     * @param msgValue значение выводимое в сообщении об ошибке (в случае когда ищется запись по ссылочному атрибуту, что бы не выводить пользователю id записи)
      * @param date Дата
      * @param rowIndex Строка из файла для сообщения об ошибке
      * @param colIndex Колонка из файла для сообщения об ошибке
@@ -157,8 +164,16 @@ public interface FormDataService {
                                   Map<Long, Map<String, Long>> recordCache,
                                   Map<Long, RefBookDataProvider> providerCache,
                                   Map<String, Map<String, RefBookValue>> refBookCache,
-                                  String alias, String value, Date date,
+                                  String alias, String value, String msgValue, Date date,
                                   int rowIndex, int colIndex, Logger logger, boolean required);
+
+    @Deprecated
+    Map<String, RefBookValue> getRefBookRecordImport(Long refBookId,
+                                                     Map<Long, Map<String, Long>> recordCache,
+                                                     Map<Long, RefBookDataProvider> providerCache,
+                                                     Map<String, Map<String, RefBookValue>> refBookCache,
+                                                     String alias, String value, Date date,
+                                                     int rowIndex, int colIndex, Logger logger, boolean required);
 
     /**
      * Получение Id записи справочника
@@ -167,6 +182,7 @@ public interface FormDataService {
      * @param providerCache Кэш провайдеров справочников
      * @param alias Искомый атрибут справочника
      * @param value Искомое значение справочника
+     * @param msgValue значение выводимое в сообщении об ошибке (в случае когда ищется запись по ссылочному атрибуту, что бы не выводить пользователю id записи)
      * @param date Дата
      * @param rowIndex Строка для сообщения об ошибке
      * @param columnName Графа для сообщения об ошибке
@@ -174,6 +190,11 @@ public interface FormDataService {
      * @param required Фатальность
      * @return
      */
+    Long getRefBookRecordId(Long refBookId, Map<Long, Map<String, Long>> recordCache,
+                            Map<Long, RefBookDataProvider> providerCache, String alias, String value, String msgValue, Date date,
+                            int rowIndex, String columnName, Logger logger, boolean required);
+
+    @Deprecated
     Long getRefBookRecordId(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                             Map<Long, RefBookDataProvider> providerCache, String alias, String value, Date date,
                             int rowIndex, String columnName, Logger logger, boolean required);
@@ -199,6 +220,13 @@ public interface FormDataService {
     /**
      * Получение записи справочника
      */
+    Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
+                                               Map<Long, RefBookDataProvider> providerCache,
+                                               Map<String, Map<String, RefBookValue>> refBookCache,
+                                               String alias, String value, String msgValue, Date date,
+                                               int rowIndex, String columnName, Logger logger, boolean required);
+
+    @Deprecated
     Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                                Map<Long, RefBookDataProvider> providerCache,
                                                Map<String, Map<String, RefBookValue>> refBookCache,

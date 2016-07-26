@@ -423,7 +423,7 @@ void fillDebtorInfo(def newRow) {
     if (debtorNumber == null || debtorNumber.isEmpty() || exclusiveInns.contains(debtorNumber)) {
         return
     }
-    def debtorRecords = records.findAll { def uniqueRecordId, refBookValueMap ->
+    def debtorRecords = records.values().findAll { def refBookValueMap ->
         debtorNumber.equalsIgnoreCase(refBookValueMap.INN.stringValue) || debtorNumber.equalsIgnoreCase(refBookValueMap.KIO.stringValue)
     }
     if (debtorRecords.size() > 1) {
@@ -440,15 +440,15 @@ void fillDebtorInfo(def newRow) {
         def refBook = refBookFactory.get(520)
         def refBookAttrName = refBook.getAttribute('INN').name + '/' + refBook.getAttribute('KIO').name
         if (fileDebtorName) {
-            rowWarning(logger, newRow, "На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
+            rowWarning(logger, newRow, String.format("На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
                     "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
                     "В файле указано другое наименование заемщика - «%s»!",
-                    newRow.debtorName, refBookAttrName, newRow.inn, fileDebtorName)
+                    newRow.debtorName, refBookAttrName, newRow.inn, fileDebtorName))
         } else {
-            rowWarning(logger, newRow, "На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
+            rowWarning(logger, newRow, String.format("На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
                     "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
                     "Наименование заемщика в файле не заполнено!",
-                    newRow.debtorName, refBookAttrName, newRow.inn)
+                    newRow.debtorName, refBookAttrName, newRow.inn))
         }
     }
 }

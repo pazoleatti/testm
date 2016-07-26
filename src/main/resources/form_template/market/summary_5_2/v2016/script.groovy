@@ -18,7 +18,7 @@ import java.math.RoundingMode
  *
  * @author Bulat Kinzyabulatov
  *
- * графа 1  - rowNum               - № п/п
+ * графа 1  - rowNum               - № пп
  * графа 2  - dealNum              - Номер сделки
  * графа 3  - debtorName           - Заёмщик. Наименование заёмщика и ОПФ
  * графа 4  - country              - Заёмщик. Страна регистрации (местоположения заемщика)
@@ -38,7 +38,7 @@ import java.math.RoundingMode
  * графа 18 - rateType             - Кредитный договор. Вид процентной ставки
  * графа 19 - rateBase             - Кредитный договор. База для расчета процентной ставки
  * графа 20 - rate                 - Кредитный договор. Процентная ставка, % годовых
- * графа 21 - creditRate           - Кредитный договор. Ставка кредитных плат, % годовых
+ * графа 21 - creditRate           - Кредитный договор. Ставка Кредитных плат, % годовых
  * графа 22 - totalRate            - Кредитный договор. Совокупная процентная ставка, % годовых
  * графа 23 - provideCategory      - Кредитный договор. Категория обеспечения
  * графа 24 - specialPurpose       - Целевые источники финансирования. Использование целевого финансирования (Да / Нет)
@@ -218,7 +218,7 @@ def getRatingRecord(def rating) {
         recordCache.put(filter, provider.getRecords(getReportPeriodEndDate(), null, filter, null))
     }
     def records = recordCache[filter]
-    if (records != null && records.isEmpty()) {
+    if (records != null && !records.isEmpty()) {
         return records[0]
     }
     return null
@@ -513,7 +513,7 @@ void fillRow(def newRow, def row2_6, def rowChd, def rowMis, def rowAmrlirt) {
     newRow.rateBase = rowMis.rateBase
     // графа 20 - rate                 - Кредитный договор. Процентная ставка, % годовых
     newRow.rate = row2_6.rate
-    // графа 21 - creditRate           - Кредитный договор. Ставка кредитных плат, % годовых
+    // графа 21 - creditRate           - Кредитный договор. Ставка Кредитных плат, % годовых
     newRow.creditRate = rowMis.creditRate
     // графа 22 - totalRate            - Кредитный договор. Совокупная процентная ставка, % годовых
     // skip

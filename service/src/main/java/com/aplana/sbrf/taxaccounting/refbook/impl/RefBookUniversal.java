@@ -604,7 +604,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 return false;
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
-                refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(result.getRecordId()));
+                refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(result.getRecordId()), false);
             }
         }
         return true;
@@ -774,7 +774,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                     if (previousVersion != null && (previousVersion.isVersionEndFake() && SimpleDateUtils.addDayToDate(previousVersion.getVersionEnd(), 1).equals(versionFrom))) {
                         //Если установлена дата окончания, которая совпадает с существующей фиктивной версией - то она удаляется
                         Long previousVersionEnd = refBookDao.findRecord(refBookId, recordId, versionFrom);
-                        refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(previousVersionEnd));
+                        refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(previousVersionEnd), false);
                     }
 
                     boolean delayedUpdate = false;
@@ -804,14 +804,14 @@ public class RefBookUniversal implements RefBookDataProvider {
                                 refBookDao.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
                             } else {
                                 //Удаляем дату окончания. Теперь дата окончания задается началом следующей версии
-                                refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
+                                refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions, false);
                             }
                         }
                     }
 
                     if (!relatedVersions.isEmpty() && versionTo == null) {
                         //Удаляем фиктивную запись - теперь у версии нет конца
-                        refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
+                        refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions, false);
                     }
 
                     if (delayedUpdate) {
@@ -982,7 +982,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             for (Long uniqueRecordId : uniqueRecordIds) {
                 List<Long> relatedVersions = refBookDao.getRelatedVersions(uniqueRecordIds);
                 if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
-                    refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
+                    refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions, false);
                 }
                 Long recordId = refBookDao.getRecordId(uniqueRecordId);
                 RefBook refBook = refBookDao.getByRecord(uniqueRecordId);
@@ -1167,7 +1167,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
                 uniqueRecordIds.addAll(fakeVersionIds);
             }
-            refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds);
+            refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds, false);
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);

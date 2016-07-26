@@ -1,7 +1,6 @@
 package form_template.deal.app_9.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -9,7 +8,7 @@ import groovy.transform.Field
 
 /**
  * 854 - Приложение 9. Отчет в отношении доходов и расходов ПАО "Сбербанк России"
- * TODO доработать после ЖВ по ТБ
+ *
  * formTemplateId=854
  */
 
@@ -151,7 +150,7 @@ void calc() {
 
 def BigDecimal calc16(def row) {
     // Графа 16 = сумма значений в графах 4-15
-    value = 0
+    def value = 0
     ['sum4', 'sum42', 'sum43', 'sum44', 'sum45', 'sum46', 'sum51', 'sum52', 'sum53', 'sum54', 'sum55', 'sum56'].each {
         value += row[it] ?: 0
     }
@@ -160,7 +159,14 @@ def BigDecimal calc16(def row) {
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
+
+    def reportPeriod = getReportPeriod()
     def records520 = getRecords520()
+    def records520Map = [:]
+    records520.each { record ->
+        records520Map[record?.record_id?.value] = record
+    }
+
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -170,17 +176,18 @@ void logicCheck() {
         // 1. Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
+        def isVZL = records520Map[row.name]
+
         // 2. Проверка на отсутствие в списке организаций, которые не являются ВЗЛ в данном налоговом периоде (год)
-        // 2. Проверка на отсутствие в списке не ВЗЛ ОРН (9 месяцев)
-        def reportPeriod = getReportPeriod()
-        def isVZL = records520?.find { it?.record_id?.value == row.name }
-        if (records520 && !isVZL) {
-            def value2 = getRefBookValue(520L, row.name)?.NAME?.value
-            if (reportPeriod.order == 4) {
-                logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом с общим режимом налогообложения в данном отчетном периоде!", rowNum, value2)
-            } else {
-                logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, value2)
-            }
+        if (reportPeriod.order == 4 && row.name && !isVZL) {
+            def name = getRefBookValue(520L, row.name)?.NAME?.value
+            logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, name)
+        }
+
+        // 3. Проверка на отсутствие в списке не ВЗЛ ОРН (9 месяцев)
+        if (reportPeriod.order == 3 && row.name && !isVZL) {
+            def name = getRefBookValue(520L, row.name)?.NAME?.value
+            logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом с общим режимом налогообложения в данном отчетном периоде!", rowNum, name)
         }
     }
 }
@@ -197,54 +204,57 @@ void sortFormDataRows(def saveInDB = true) {
     }
 }
 
-// список id типов источников
+// мапа в которой хранится id формы - список алиасов ссылающихся на справочник "участники ТЦО"
 @Field
-def sourceFormTypeIds = [
-        853, // Журнал взаиморасчетов по ТБ
-        818, // РНУ-101
-        820, // РНУ-102
-        821, // РНУ-107
-        822, // РНУ-110
-        808, // РНУ-111
-        824, // РНУ-112
-        829, // РНУ-114
-        842, // РНУ-115
-        844, // РНУ-116
-        809, // РНУ-117
-        840, // РНУ-122
-        841, // РНУ-123
-        843, // РНУ-171
-        816, // 6.1
-        804, // 6.2
-        812, // 6.3
-        813, // 6.4
-        814, // 6.5
-        806, // 6.6
-        805, // 6.7
-        815, // 6.8
-        817, // 6.9
-        823, // 6.10-1
-        825, // 6.10-2
-        827, // 6.11
-        819, // 6.12
-        826, // 6.13
-        835, // 6.14
-        837, // 6.15
-        839, // 6.16
-        811, // 6.17
-        838, // 6.18
-        828, // 6.19
-        831, // 6.20
-        830, // 6.21
-        834, // 6.22
-        832, // 6.23
-        833, // 6.24
-        836, // 6.25
+def sourceRefbook520AliasMap = [
+        // Журнал взаиморасчетов по ТБ
+        853 : ['statReportId'],
+
+        // формы РНУ
+        818 : ['name'], // РНУ-101
+        820 : ['name'], // РНУ-102
+        821 : ['name'], // РНУ-107
+        822 : ['name'], // РНУ-110
+        808 : ['name'], // РНУ-111
+        824 : ['name'], // РНУ-112
+        829 : ['name'], // РНУ-114
+        842 : ['name'], // РНУ-115
+        844 : ['name'], // РНУ-116
+        809 : ['name'], // РНУ-117
+        840 : ['name'], // РНУ-122
+        841 : ['name'], // РНУ-123
+        843 : ['name'], // РНУ-171
+
+        // формы приложений 6
+        816 : ['name'], // 6.1
+        804 : ['name'], // 6.2
+        812 : ['name'], // 6.3
+        813 : ['name'], // 6.4
+        814 : ['name'], // 6.5
+        806 : ['name'], // 6.6
+        805 : ['name'], // 6.7
+        815 : ['name'], // 6.8
+        817 : ['name'], // 6.9
+        823 : ['name'], // 6.10-1
+        825 : ['name'], // 6.10-2
+        827 : ['name'], // 6.11
+        819 : ['name'], // 6.12
+        826 : ['name'], // 6.13
+        835 : ['name'], // 6.14
+        837 : ['name'], // 6.15
+        839 : ['name'], // 6.16
+        811 : ['name'], // 6.17
+        838 : ['name'], // 6.18
+        828 : ['name'], // 6.19
+        831 : ['name'], // 6.20
+        830 : ['name'], // 6.21
+        834 : ['name'], // 6.22
+        832 : ['name'], // 6.23
+        833 : ['name'], // 6.24
+        836 : ['name'], // 6.25
 ]
 
-// Консолидация очень похожа на 4.2, отличие в:
-//  - дополнительные условия при получении данных из справочника "Участники ТЦО"
-//  - дополнительном расчете (графы 17)
+// Консолидация очень похожа на 4.2 и 4.1.9
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
@@ -254,6 +264,8 @@ void consolidation() {
     def sourceFormDatasMap = [:]
     // мапа со строками источников (formData - список строк отдельной формы)
     def sourceDataRowsMap = [:]
+    // id типов источников
+    def sourceFormTypeIds = sourceRefbook520AliasMap.keySet().toArray()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
@@ -283,15 +295,41 @@ void consolidation() {
     // получить значения из справочника "Участники ТЦО"
     def records520 = getRecords520()
     def dataRows = []
+    // найти среди строк источников используемые записи справочника "Участники ТЦО"
+    def useIds = getUseRecord520IsFromSources(sourceAllDataRowsMap)
     records520.each { record520 ->
-        // для каждой записи сформировать строку в приемнике
-        def newRow = getNewRow(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap)
-        dataRows.add(newRow)
+        // если запись используется хотя бы в одном источнике то сформироавть для нее строку в приемнике
+        if (record520?.record_id?.value in useIds) {
+            def newRow = getNewRow(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap)
+            dataRows.add(newRow)
+        }
     }
 
     sortRows(refBookService, logger, dataRows, null, null, null)
     updateIndexes(dataRows)
     dataRowHelper.allCached = dataRows
+}
+
+/**
+ * Получить список идентификаторов записи справочника "Участники ТЦО" используемых в источниках.
+ *
+ * @param sourceAllDataRowsMap мапа со всеми строками источников одного типа
+ */
+def getUseRecord520IsFromSources(def sourceAllDataRowsMap) {
+    def list = []
+    def formTypeIds = sourceAllDataRowsMap.keySet().toArray()
+    for (def formTypeId : formTypeIds) {
+        def rows = sourceAllDataRowsMap[formTypeId]
+        def aliases = sourceRefbook520AliasMap[formTypeId]
+        for (def row : rows) {
+            for (def alias : aliases) {
+                if (row[alias]) {
+                    list.add(row[alias])
+                }
+            }
+        }
+    }
+    return list.unique()
 }
 
 /**
@@ -508,14 +546,14 @@ def calc6or12(def record520, def sourceAllDataRowsMap, def isCalc6) {
     return result
 }
 
-def calc7or13(def record520, def sourceFormDatasMap, def sourceDataRowsMap, def isCalc7) { // TODO
+def calc7or13(def record520, def sourceFormDatasMap, def sourceDataRowsMap, def isCalc7) {
     def result = 0
     def formTypeId = 853
-    sourceFormDatas = sourceFormDatasMap[formTypeId]
+    def sourceFormDatas = sourceFormDatasMap[formTypeId]
     sourceFormDatas.each { sourceFormData ->
         def rows = getNeedRowsForCalc7or13(sourceDataRowsMap[sourceFormData], isCalc7)
         for (def row : rows) {
-            if (row.sbrfCode1 && row.statReportId2 == record520?.record_id?.value) {
+            if (row.statReportId == record520?.record_id?.value) {
                 result += (row.sum ?: 0)
             }
         }
@@ -523,7 +561,7 @@ def calc7or13(def record520, def sourceFormDatasMap, def sourceDataRowsMap, def 
     return result * 1000
 }
 
-def getNeedRowsForCalc7or13(def dataRows, def isCalc7) { // TODO
+def getNeedRowsForCalc7or13(def dataRows, def isCalc7) {
     def rows = []
     def findSection = isCalc7
     for (def row : dataRows) {
@@ -734,7 +772,7 @@ def getRecords520() {
         if (records && records.size() == 1) {
             taxStatusId = records.get(0)?.record_id?.value
         } else {
-            records520 =[]
+            records520 = []
             return records520
         }
         filter = "TAX_STATUS = $taxStatusId"
@@ -747,7 +785,7 @@ def getRecords520() {
         def start = record?.START_DATE?.value
         def end = record?.END_DATE?.value
         def typeId = record?.TYPE?.value
-        if (reportPeriod.order == 4 || isVZL(start, end, typeId)) {
+        if (isVZL(start, end, typeId)) {
             records520.add(record)
         }
     }

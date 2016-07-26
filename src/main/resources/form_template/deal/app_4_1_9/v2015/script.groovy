@@ -150,6 +150,12 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
+// Поиск записи в справочнике по значению (для расчетов)
+def Long getRecordId(def Long refBookId, def String alias, def String value) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), -1, null, logger, true)
+}
+
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row : dataRows) {
@@ -284,6 +290,7 @@ void sortFormDataRows(def saveInDB = true) {
 @Field
 def sourceFormTypeIds = [
         807, // Журнал взаиморасчетов
+        854, // Приложение 9
         818, // РНУ-101
         820, // РНУ-102
         821, // РНУ-107
@@ -401,7 +408,7 @@ def getNewRow(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, d
     newRow.sum43 = calc6(record520, sourceAllDataRowsMap)
 
     // графа 7
-    newRow.sum44 = calc7(record520, sourceFormDatasMap, sourceDataRowsMap)
+    newRow.sum44 = calc7(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap)
 
     // графа 8
     newRow.sum45 = calc8(record520, sourceAllDataRowsMap)
@@ -419,7 +426,7 @@ def getNewRow(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, d
     newRow.sum53 = calc12(record520, sourceAllDataRowsMap)
 
     // графа 13
-    newRow.sum54 = calc13(record520, sourceFormDatasMap, sourceDataRowsMap)
+    newRow.sum54 = calc13(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap)
 
     // графа 14
     newRow.sum55 = calc14(record520, sourceAllDataRowsMap)
@@ -445,8 +452,8 @@ def calc6(def record520, def sourceAllDataRowsMap) {
     return calc6or12(record520, sourceAllDataRowsMap, true)
 }
 
-def calc7(def record520, def sourceFormDatasMap, def sourceDataRowsMap) {
-    return calc7or13(record520, sourceFormDatasMap, sourceDataRowsMap, true)
+def calc7(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, def sourceDataRowsMap) {
+    return calc7or13(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap, true)
 }
 
 def calc8(def record520, def sourceAllDataRowsMap) {
@@ -469,8 +476,8 @@ def calc12(def record520, def sourceAllDataRowsMap) {
     return calc6or12(record520, sourceAllDataRowsMap, false)
 }
 
-def calc13(def record520, def sourceFormDatasMap, def sourceDataRowsMap) {
-    return calc7or13(record520, sourceFormDatasMap, sourceDataRowsMap, false)
+def calc13(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, def sourceDataRowsMap) {
+    return calc7or13(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap, false)
 }
 
 def calc14(def record520, def sourceAllDataRowsMap) {
@@ -481,8 +488,20 @@ def calc15(def record520, def sourceAllDataRowsMap) {
     return calc9or15(record520, sourceAllDataRowsMap, false)
 }
 
-def calc4or10(def record520, def sourceAllDataRowsMap, def isCalc4) {
+def calcA(def record520, def sourceAllDataRowsMap, def sumColumn) {
     def result = 0
+    def formTypeId = 854 // Приложение 9
+    def rows = sourceAllDataRowsMap[formTypeId]
+    for (def row : rows) {
+        if (row.name == record520?.record_id?.value) {
+            result += (row[sumColumn] ?: 0)
+        }
+    }
+    return result
+}
+
+def calc4or10(def record520, def sourceAllDataRowsMap, def isCalc4) {
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc4 ? 'sum4' : 'sum51'))
     def formTypeIds = [
             806, // 6.6
             827, // 6.11
@@ -517,7 +536,7 @@ def calc4or10(def record520, def sourceAllDataRowsMap, def isCalc4) {
 }
 
 def calc5or11(def record520, def sourceAllDataRowsMap, def isCalc5) {
-    def result = 0
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc5 ? 'sum42' : 'sum52'))
     def formTypeIds = [
             835, // 6.14
             839, // 6.16
@@ -551,7 +570,7 @@ def calc5or11(def record520, def sourceAllDataRowsMap, def isCalc5) {
 }
 
 def calc6or12(def record520, def sourceAllDataRowsMap, def isCalc6) {
-    def result = 0
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc6 ? 'sum43' : 'sum53'))
     def formTypeIds = [
             804, // 6.2
             837, // 6.15
@@ -594,8 +613,8 @@ def calc6or12(def record520, def sourceAllDataRowsMap, def isCalc6) {
     return result
 }
 
-def calc7or13(def record520, def sourceFormDatasMap, def sourceDataRowsMap, def isCalc7) {
-    def result = 0
+def calc7or13(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, def sourceDataRowsMap, def isCalc7) {
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc7 ? 'sum44' : 'sum54'))
     def formTypeId = 807
     sourceFormDatas = sourceFormDatasMap[formTypeId]
     sourceFormDatas.each { sourceFormData ->
@@ -613,6 +632,9 @@ def getNeedRowsForCalc7or13(def dataRows, def isCalc7) {
     def rows = []
     def findSection = isCalc7
     for (def row : dataRows) {
+        if (!row.getAlias() && row.sbrfCode1 != getDepartment99_0000_00Id()) {
+            continue
+        }
         if (isCalc7) {
             // строки доходов
             if (!row.getAlias()) {
@@ -637,8 +659,18 @@ def getNeedRowsForCalc7or13(def dataRows, def isCalc7) {
     return rows
 }
 
+@Field
+def department99_0000_00Id = null
+
+def getDepartment99_0000_00Id() {
+    if (department99_0000_00Id == null) {
+        department99_0000_00Id = getRecordId(30L, 'SBRF_CODE', '99_0000_00')
+    }
+    return department99_0000_00Id
+}
+
 def calc8or14(def record520, def sourceAllDataRowsMap, def isCalc8) {
-    def result = 0
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc8 ? 'sum45' : 'sum55'))
     def formTypeIds = [
             816, // 6.1
             812, // 6.3
@@ -706,7 +738,7 @@ def calc8or14(def record520, def sourceAllDataRowsMap, def isCalc8) {
 }
 
 def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
-    def result = 0
+    def result = calcA(record520, sourceAllDataRowsMap, (isCalc9 ? 'sum46' : 'sum56'))
     def formTypeIds = [
             818, // РНУ-101
             820, // РНУ-102

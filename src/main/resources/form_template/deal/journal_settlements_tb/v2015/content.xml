@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>Журнал взаиморасчетов по ТБ</name>
+    <fullName>Журнал учета взаиморасчетов доходов и расходов по ТБ</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>№</name>
+        <order>1</order>
+        <width>3</width>
+        <maxLength>10</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименования статей</name>
+        <order>2</order>
+        <width>26</width>
+        <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>statReportId</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Код организации - участника группы (подразделения ПАО Сбербанк), с которым осуществляются взаиморасчеты</name>
+        <order>3</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5201</nameAttributeId>
+        <refBookAttributeId>5216</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>orgName</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>Наименование организации - участника группы (подразделения ПАО Сбербанк), с которым осуществляются взаиморасчеты</name>
+        <order>4</order>
+        <width>15</width>
+        <parentAlias>statReportId</parentAlias>
+        <refBookAttributeId>5201</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>currency</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Наименование валюты</name>
+        <order>5</order>
+        <width>8</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>66</nameAttributeId>
+        <refBookAttributeId>66</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>currencySum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Суммы доходов / расходов, учтенные на счетах бухгалтерского учета по состоянию на отчетную дату в номинале валюты, тыс.единиц</name>
+        <order>6</order>
+        <width>9</width>
+        <maxLength>12</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Суммы доходов / расходов, учтенные на счетах бухгалтерского учета по состоянию на отчетную дату в пересчете на рубли, тыс.рублей</name>
+        <order>7</order>
+        <width>9</width>
+        <maxLength>12</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>otherSum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Суммы доходов / расходов, относящиеся к отчетному периоду, но не проведенные по счетам бухгалтерского учета по состоянию на отчетную дату в номинале валюты, тыс.единиц</name>
+        <order>8</order>
+        <width>10</width>
+        <maxLength>12</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>description</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Краткое описание операции, сделки</name>
+        <order>9</order>
+        <width>15</width>
+        <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Курсив</alias>
+        <backColor>WHITE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>true</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Заголовок</alias>
+        <backColor>DARK_GREY</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

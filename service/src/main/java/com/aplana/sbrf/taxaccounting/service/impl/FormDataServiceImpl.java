@@ -1227,8 +1227,11 @@ public class FormDataServiceImpl implements FormDataService {
         stateLogger.updateState("Удаление отчетов формы");
         reportService.delete(formData.getId(), null);
         //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией
-        stateLogger.updateState("Обновление сквозной нумерации");
-        updatePreviousRowNumber(formData, logger, userInfo, false, formData.getState() == WorkflowState.CREATED);
+        FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
+        if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
+            stateLogger.updateState("Обновление сквозной нумерации");
+            doUpdatePreviousRowNumber(formData, logger, userInfo, false, formData.getState() == WorkflowState.CREATED);
+        }
         //Обновление записей о консолидации
         sourceService.deleteFDConsolidationInfo(Arrays.asList(formData.getId()));
         sourceService.addFormDataConsolidationInfo(formData.getId(), srcAcceptedIds);
@@ -1608,41 +1611,44 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user, boolean isSave, boolean useZero) {
-        String msg = null;
-
         if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
-            // Получить налоговый период
-            TaxPeriod taxPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod();
-            // Получить тип налога
-            TaxType taxType = formData.getFormType().getTaxType();
-            // Получить список экземпляров НФ следующих периодов
-            List<FormData> formDataList = formDataDao.getNextFormDataList(formData, taxPeriod);
+            doUpdatePreviousRowNumber(formData, logger, user, isSave, useZero);
+        }
+    }
 
-            // Устанавливаем значение для текущего экземпляра НФ
-            Integer previousRowNumber = (useZero ? 0 : getPreviousRowNumber(formData, null));
-            formDataDao.updatePreviousRowNumber(formData, previousRowNumber);
+    private void doUpdatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user, boolean isSave, boolean useZero) {
+        String msg = null;
+        // Получить налоговый период
+        TaxPeriod taxPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod();
+        // Получить тип налога
+        TaxType taxType = formData.getFormType().getTaxType();
+        // Получить список экземпляров НФ следующих периодов
+        List<FormData> formDataList = formDataDao.getNextFormDataList(formData, taxPeriod);
 
-            StringBuilder stringBuilder = new StringBuilder();
-            // Обновляем последующие периоды
-            int size = formDataList.size();
+        // Устанавливаем значение для текущего экземпляра НФ
+        Integer previousRowNumber = (useZero ? 0 : getPreviousRowNumber(formData, null));
+        formDataDao.updatePreviousRowNumber(formData, previousRowNumber);
 
-            for (FormData data : formDataList) {
-                formDataDao.updatePreviousRowNumber(data, getPreviousRowNumber(data, isSave ? formData : null));
-                deleteReport(data.getId(), null, user.getUser().getId(), "Обновление автонумерации");
-                ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
-                stringBuilder.append(reportPeriod.getName()).append(" ").append(reportPeriod.getTaxPeriod().getYear());
-                if (--size > 0) {
-                    stringBuilder.append(", ");
-                }
-                msg = "Сквозная нумерация обновлена в " +
-                        (taxType.isTax() ? "налоговых формах" : "формах") +
-                        " следующих периодов текущей сквозной нумерации: " +
-                        stringBuilder.toString();
+        StringBuilder stringBuilder = new StringBuilder();
+        // Обновляем последующие периоды
+        int size = formDataList.size();
+
+        for (FormData data : formDataList) {
+            formDataDao.updatePreviousRowNumber(data, getPreviousRowNumber(data, isSave ? formData : null));
+            deleteReport(data.getId(), null, user.getUser().getId(), "Обновление автонумерации");
+            ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
+            stringBuilder.append(reportPeriod.getName()).append(" ").append(reportPeriod.getTaxPeriod().getYear());
+            if (--size > 0) {
+                stringBuilder.append(", ");
             }
+            msg = "Сквозная нумерация обновлена в " +
+                    (taxType.isTax() ? "налоговых формах" : "формах") +
+                    " следующих периодов текущей сквозной нумерации: " +
+                    stringBuilder.toString();
+        }
 
-            if (logger != null && msg != null) {
-                logger.info(msg);
-            }
+        if (logger != null && msg != null) {
+            logger.info(msg);
         }
     }
 

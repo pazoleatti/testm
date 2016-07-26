@@ -499,14 +499,22 @@ public class RefBookDepartment implements RefBookDataProvider {
                 List<Long> dftIds = departmentFormTypeService.getIdsByPerformerId(depId);
                 departmentFormTypeService.deleteByIds(dftIds);
 
-                List<Long> income101Ids = refBookIncome101.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!income101Ids.isEmpty())
-                    refBookIncome101.deleteRecordVersions(logger, income101Ids, false);
-                List<Long> income102Ids = refBookIncome102.getUniqueRecordIds(null,
-                        String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!income102Ids.isEmpty())
-                    refBookIncome102.deleteRecordVersions(logger, income102Ids, false);
+                //Удаление БО
+                List<Long> ids = rbFactory.getDataProvider(107L).getUniqueRecordIds(null, "department_id = " + depId);
+                /*for (Long accountPeriodId: ids) {
+                    List<Long> income101Ids = refBookIncome101.getUniqueRecordIds(null, String.format("account_period_id = %d", accountPeriodId));
+                    if (!income101Ids.isEmpty())
+                        refBookIncome101.deleteRecordVersions(logger, income101Ids, false);
+                    List<Long> income102Ids = refBookIncome102.getUniqueRecordIds(null,
+                            String.format("account_period_id = %d", accountPeriodId));
+                    if (!income102Ids.isEmpty())
+                        refBookIncome102.deleteRecordVersions(logger, income102Ids, false);
+                }*/
+                if (!ids.isEmpty()) {
+                    refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, ids, false);
+                }
 
+                //удаление назначений
                 Collection<Long> dftIsd = CollectionUtils.collect(sourceService.getDFTByDepartment(depId, null, null, null),
                         new Transformer() {
                             @Override
@@ -525,13 +533,34 @@ public class RefBookDepartment implements RefBookDataProvider {
                         });
                 if (!ddtIds.isEmpty())
                     sourceService.deleteDDT(ddtIds);
-                //
-                RefBookDataProvider provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_INCOME);
+
+                //удаление настроек подразделений
+                RefBookDataProvider provider = rbFactory.getDataProvider(RefBook.WithTable.INCOME.getRefBookId());
                 List<Long> uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
                 if (!uniqueIds.isEmpty()){
                     provider.deleteRecordVersions(logger, uniqueIds, false);
                 }
-                provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_TRANSPORT);
+                provider = rbFactory.getDataProvider(RefBook.WithTable.INCOME.getTableRefBookId());
+                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
+                if (!uniqueIds.isEmpty()){
+                    provider.deleteRecordVersions(logger, uniqueIds, false);
+                }
+                provider = rbFactory.getDataProvider(RefBook.WithTable.TRANSPORT.getRefBookId());
+                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
+                if (!uniqueIds.isEmpty()){
+                    provider.deleteRecordVersions(logger, uniqueIds, false);
+                }
+                provider = rbFactory.getDataProvider(RefBook.WithTable.TRANSPORT.getTableRefBookId());
+                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
+                if (!uniqueIds.isEmpty()){
+                    provider.deleteRecordVersions(logger, uniqueIds, false);
+                }
+                provider = rbFactory.getDataProvider(RefBook.WithTable.PROPERTY.getRefBookId());
+                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
+                if (!uniqueIds.isEmpty()){
+                    provider.deleteRecordVersions(logger, uniqueIds, false);
+                }
+                provider = rbFactory.getDataProvider(RefBook.WithTable.PROPERTY.getTableRefBookId());
                 uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
                 if (!uniqueIds.isEmpty()){
                     provider.deleteRecordVersions(logger, uniqueIds, false);
@@ -546,12 +575,16 @@ public class RefBookDepartment implements RefBookDataProvider {
                 if (!uniqueIds.isEmpty()){
                     provider.deleteRecordVersions(logger, uniqueIds, false);
                 }
-                provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_PROPERTY);
-                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!uniqueIds.isEmpty()){
-                    provider.deleteRecordVersions(logger, uniqueIds, false);
+
+                //удаление ссылок
+                if (deleteReference(new RefBookAttribute(){{setRefBookId(30L);setId(160L);}}, uniqueRecordIds.get(0), logger)) {
+                    throw new ServiceLoggerException(
+                            "Подразделение не может быть удалено, так как обнаружены ссылки на подразделение!",
+                            logEntryService.save(logger.getEntries())
+                    );
                 }
 
+                //удаление периодов
                 deleteDRPs(depId);
 
                 auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), 0, null, null, null, null,
@@ -567,6 +600,31 @@ public class RefBookDepartment implements RefBookDataProvider {
             throw new ServiceLoggerException(String.format(LOCK_MESSAGE, refBook.getName()),
                     logEntryService.save(logger.getEntries()));
         }
+    }
+
+    private boolean deleteReference(RefBookAttribute refBookAttribute, Long referenceId, Logger logger) {
+        boolean used = false;
+        //Проверка использования в нф
+        RefBook refBook = refBookDao.getByAttribute(refBookAttribute.getId());
+        List<FormLink> forms = refBookDao.isVersionUsedInForms(refBook.getId(), Arrays.asList(referenceId), new Date(100, 0, 1), null, null);
+        for (FormLink form : forms) {
+            logger.error(form.getMsg());
+            used = true;
+        }
+        List<RefBookAttribute> attributeList = refBookDao.getAttributesByReferenceId(refBookAttribute.getRefBookId());
+        for(RefBookAttribute referenceRefBookAttribute: attributeList) {
+            RefBook refBookReference = refBookDao.getByAttribute(referenceRefBookAttribute.getId());
+            if (refBookReference.getTableName() == null || refBookReference.getTableName().isEmpty()) {
+                List<Long> recordIds = refBookDao.getDeletedRecords(refBookReference.getId(), referenceRefBookAttribute.getAlias() + "=" + referenceId);
+                for (Long recordId : recordIds) {
+                    used = used || deleteReference(referenceRefBookAttribute, recordId, logger);
+                }
+            }
+        }
+        if (!used && refBookAttribute.getAlias() != null) {
+            refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(referenceId), true);
+        }
+        return used;
     }
 
     @Override
@@ -722,15 +780,18 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //7 точка запроса
-        List<Long> ref101 = refBookIncome101.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
-        List<Long> ref102 = refBookIncome102.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
-        for (Long id : ref101){
-            logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
-                    department.getName(), refBookIncome101Dao.getPeriodNameFromRefBook(id)));
-        }
-        for (Long id : ref102){
-            logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
-                    department.getName(), refBookIncome102Dao.getPeriodNameFromRefBook(id)));
+        List<Long> ids = rbFactory.getDataProvider(107L).getUniqueRecordIds(null, "department_id = " + department.getId());
+        for (Long accountPeriodId: ids) {
+            List<Long> ref101 = refBookIncome101.getUniqueRecordIds(null, String.format("account_period_id = %d", accountPeriodId));
+            List<Long> ref102 = refBookIncome102.getUniqueRecordIds(null, String.format("account_period_id = %d", accountPeriodId));
+            for (Long id : ref101) {
+                logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
+                        department.getName(), refBookIncome101Dao.getPeriodNameFromRefBook(id)));
+            }
+            for (Long id : ref102) {
+                logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
+                        department.getName(), refBookIncome102Dao.getPeriodNameFromRefBook(id)));
+            }
         }
 
         //8 точка запроса

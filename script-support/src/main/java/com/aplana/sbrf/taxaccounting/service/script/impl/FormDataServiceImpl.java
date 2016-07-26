@@ -368,6 +368,15 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                                                       Map<String, Map<String, RefBookValue>> refBookCache,
                                                       String alias, String value, Date date,
                                                       int rowIndex, String columnName, Logger logger, boolean required) {
+        return getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, null, date, rowIndex, columnName, logger, required);
+    }
+
+    @Override
+    public Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
+                                                      Map<Long, RefBookDataProvider> providerCache,
+                                                      Map<String, Map<String, RefBookValue>> refBookCache,
+                                                      String alias, String value, String msgValue, Date date,
+                                                      int rowIndex, String columnName, Logger logger, boolean required) {
         boolean tooManyValue = false;
         try {
             Map<String, RefBookValue> retVal = getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, date);
@@ -379,7 +388,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         }
         RefBook rb = refBookFactory.get(refBookId);
         String msg = columnName == null ?
-                String.format(tooManyValue ? REF_BOOK_TOO_MANY_FOUND_ERROR : REF_BOOK_NOT_FOUND_ERROR, rb.getName(), value, rb.getAttribute(alias).getName()) :
+                String.format(tooManyValue ? REF_BOOK_TOO_MANY_FOUND_ERROR : REF_BOOK_NOT_FOUND_ERROR, rb.getName(), msgValue != null ? msgValue : value, rb.getAttribute(alias).getName()) :
                 String.format(tooManyValue ? REF_BOOK_ROW_TOO_MANY_FOUND_ERROR : REF_BOOK_ROW_NOT_FOUND_ERROR, rowIndex, columnName.replaceAll("%%", "%"), rb.getName());
         if (required) {
             throw new ServiceException("%s", msg);
@@ -392,6 +401,13 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public Long getRefBookRecordIdImport(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                          Map<Long, RefBookDataProvider> providerCache, String alias, String value,
+                                         Date date, int rowIndex, int colIndex, Logger logger, boolean required) {
+        return getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value, null, date, rowIndex, colIndex, logger, required);
+    }
+
+    @Override
+    public Long getRefBookRecordIdImport(Long refBookId, Map<Long, Map<String, Long>> recordCache,
+                                         Map<Long, RefBookDataProvider> providerCache, String alias, String value, String msgValue,
                                          Date date, int rowIndex, int colIndex, Logger logger, boolean required) {
         if (refBookId == null) {
             return null;
@@ -411,7 +427,8 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         RefBook rb = refBookFactory.get(refBookId);
         String msg = String.format(tooManyValue ? ScriptUtils.REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR : ScriptUtils.REF_BOOK_NOT_FOUND_IMPORT_ERROR,
-                rowIndex, ScriptUtils.getXLSColumnName(colIndex), rb.getName(), rb.getAttribute(alias).getName(), value, (new SimpleDateFormat("dd.MM.yyyy")).format(date));
+                rowIndex, ScriptUtils.getXLSColumnName(colIndex), rb.getName(), rb.getAttribute(alias).getName(),
+                msgValue != null ? msgValue : value, (new SimpleDateFormat("dd.MM.yyyy")).format(date));
         if (required) {
             throw new ServiceException("%s", msg);
         } else {
@@ -427,6 +444,16 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                                                             Map<String, Map<String, RefBookValue>> refBookCache,
                                                             String alias, String value, Date date,
                                                             int rowIndex, int colIndex, Logger logger, boolean required) {
+        return getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value, null, date, rowIndex, colIndex, logger, required);
+    }
+
+    @Override
+    public Map<String, RefBookValue> getRefBookRecordImport(Long refBookId,
+                                                            Map<Long, Map<String, Long>> recordCache,
+                                                            Map<Long, RefBookDataProvider> providerCache,
+                                                            Map<String, Map<String, RefBookValue>> refBookCache,
+                                                            String alias, String value, String msgValue, Date date,
+                                                            int rowIndex, int colIndex, Logger logger, boolean required) {
         boolean tooManyValue = false;
         try {
             Map<String, RefBookValue> record = getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, date);
@@ -439,7 +466,8 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         RefBook rb = refBookFactory.get(refBookId);
         String msg = String.format(tooManyValue ? ScriptUtils.REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR : ScriptUtils.REF_BOOK_NOT_FOUND_IMPORT_ERROR,
-                rowIndex, ScriptUtils.getXLSColumnName(colIndex), rb.getName(), rb.getAttribute(alias).getName(), value, (new SimpleDateFormat("dd.MM.yyyy")).format(date));
+                rowIndex, ScriptUtils.getXLSColumnName(colIndex), rb.getName(), rb.getAttribute(alias).getName(),
+                msgValue != null ? msgValue : value, (new SimpleDateFormat("dd.MM.yyyy")).format(date));
         if (required) {
             throw new ServiceException("%s", msg);
         } else {
@@ -451,6 +479,13 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public Long getRefBookRecordId(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                    Map<Long, RefBookDataProvider> providerCache, String alias, String value, Date date,
+                                   int rowIndex, String columnName, Logger logger, boolean required) {
+        return getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, null, date, rowIndex, columnName, logger, required);
+    }
+
+    @Override
+    public Long getRefBookRecordId(Long refBookId, Map<Long, Map<String, Long>> recordCache,
+                                   Map<Long, RefBookDataProvider> providerCache, String alias, String value, String msgValue, Date date,
                                    int rowIndex, String columnName, Logger logger, boolean required) {
 
         boolean tooManyValue = false;
@@ -469,7 +504,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         RefBook rb = refBookFactory.get(refBookId);
         String msg = columnName == null ?
-                String.format(tooManyValue ? REF_BOOK_TOO_MANY_FOUND_ERROR : REF_BOOK_NOT_FOUND_ERROR, rb.getName(), value, rb.getAttribute(alias).getName()) :
+                String.format(tooManyValue ? REF_BOOK_TOO_MANY_FOUND_ERROR : REF_BOOK_NOT_FOUND_ERROR, rb.getName(), msgValue != null ? msgValue : value, rb.getAttribute(alias).getName()) :
                 String.format(tooManyValue ? REF_BOOK_ROW_TOO_MANY_FOUND_ERROR : REF_BOOK_ROW_NOT_FOUND_ERROR, rowIndex, columnName.replaceAll("%%", "%"), rb.getName());
         if (required) {
             throw new ServiceException("%s", msg);

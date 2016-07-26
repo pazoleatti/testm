@@ -39,6 +39,7 @@ public class GetDeadlineDepartmentsHandler extends AbstractActionHandler<GetDead
 			switch (taxType) {
 				case PROPERTY:
 				case TRANSPORT:
+                case LAND:
 					departments.addAll(departmentService.getAllChildren(action.getDepartment().getDepartmentId()));
 					for (Department dep : departments) {
 						if (dep.getType() == DepartmentType.TERR_BANK) {

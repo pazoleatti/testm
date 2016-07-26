@@ -108,7 +108,7 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Override
     public void deleteRecordVersions(String tableName, List<Long> uniqueRecordIds) {
-        refBookDao.deleteRecordVersions(tableName, uniqueRecordIds);
+        refBookDao.deleteRecordVersions(tableName, uniqueRecordIds, false);
     }
 
     @Override

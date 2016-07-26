@@ -30,6 +30,7 @@ public class GetFilterFormTemplateDataHandler extends AbstractActionHandler<GetF
         taxTypes.add(TaxType.INCOME);
         taxTypes.add(TaxType.PROPERTY);
         taxTypes.add(TaxType.TRANSPORT);
+        taxTypes.add(TaxType.LAND);
         taxTypes.add(TaxType.MARKET);
         taxTypes.add(TaxType.ETR);
 

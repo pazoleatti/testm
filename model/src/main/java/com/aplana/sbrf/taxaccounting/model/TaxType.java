@@ -31,7 +31,11 @@ public enum TaxType {
     /**
      * ЭНС
      */
-    ETR('E', "Эффективная налоговая ставка", "");
+    ETR('E', "Эффективная налоговая ставка", ""),
+    /**
+     * Земельный налог
+     */
+    LAND('L', "Земельный налог", "");
 
 	private final char code;
 	private final String name;

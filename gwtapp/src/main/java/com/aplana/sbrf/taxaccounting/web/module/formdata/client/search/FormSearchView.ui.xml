@@ -58,7 +58,7 @@
 
     </ui:style>
 
-    <dw:ModalWindow ui:field="modalWindow" modal="false" glassEnabled="false" height="400px" width="600px"
+    <dw:ModalWindow ui:field="modalWindow" modal="false" glassEnabled="false" height="400px" width="670px"
                     minWidth="520px"
                     iconUrl="resources/img/search.png" title="Поиск" resizable="true">
 

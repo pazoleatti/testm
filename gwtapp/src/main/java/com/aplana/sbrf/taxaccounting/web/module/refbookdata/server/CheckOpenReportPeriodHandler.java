@@ -48,6 +48,7 @@ public class CheckOpenReportPeriodHandler extends AbstractActionHandler<CheckOpe
         List<ReportPeriod> openReportPeriods = new ArrayList<ReportPeriod>(0);
         openReportPeriods.addAll(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, Arrays.asList(action.getDepId()), true, true));
         openReportPeriods.addAll(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.PROPERTY, Arrays.asList(action.getDepId()), true, true));
+        openReportPeriods.addAll(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.LAND, Arrays.asList(action.getDepId()), true, true));
         if (!openReportPeriods.isEmpty()){
             for (ReportPeriod period : openReportPeriods) {
                 logger.error(

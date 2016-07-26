@@ -332,6 +332,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     public void setValue(List<Long> value, boolean fireEvents) {
         prevState.setValues(state);
         if (value == null) {
+            isEnabledFireChangeEvent = false;
             state.setSetIds(null);
             prevState.setValues(state);
             clearSearchPattern();

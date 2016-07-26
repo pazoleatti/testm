@@ -370,12 +370,7 @@ Map<Long, Map<String, RefBookValue>> getRecords520() {
     if (records520 == null) {
         def date = getReportPeriodEndDate()
         def provider = formDataService.getRefBookProvider(refBookFactory, 520, providerCache)
-        // найдем все версии больше даты актуальности
-        def versions = provider.getVersions(date + 1, null)
-        // найдем минимальную дату среди этих версий
-        def minVersion = versions.min()
-
-        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(minVersion, null)
+        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
         records520 = provider.getRecordData(uniqueRecordIds)
     }
     return records520
@@ -388,7 +383,7 @@ void fillDebtorInfo(def newRow) {
     if (debtorNumber == null || debtorNumber.isEmpty()) {
         return
     }
-    def debtorRecords = records.findAll { def uniqueRecordId, refBookValueMap ->
+    def debtorRecords = records.values().findAll { def refBookValueMap ->
         debtorNumber.equalsIgnoreCase(refBookValueMap.INN.stringValue) || debtorNumber.equalsIgnoreCase(refBookValueMap.KIO.stringValue)
     }
     if (debtorRecords.size() > 1) {
@@ -405,15 +400,15 @@ void fillDebtorInfo(def newRow) {
         def refBook = refBookFactory.get(520)
         def refBookAttrName = refBook.getAttribute('INN').name + '/' + refBook.getAttribute('KIO').name
         if (fileDebtorName) {
-            rowWarning(logger, newRow, "На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
+            rowWarning(logger, newRow, String.format("На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
                     "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
                     "В файле указано другое наименование заемщика - «%s»!",
-                    newRow.debtorName, refBookAttrName, newRow.innKio, fileDebtorName)
+                    newRow.debtorName, refBookAttrName, newRow.innKio, fileDebtorName))
         } else {
-            rowWarning(logger, newRow, "На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
+            rowWarning(logger, newRow, String.format("На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
                     "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
                     "Наименование заемщика в файле не заполнено!",
-                    newRow.debtorName, refBookAttrName, newRow.innKio)
+                    newRow.debtorName, refBookAttrName, newRow.innKio))
         }
     }
 }

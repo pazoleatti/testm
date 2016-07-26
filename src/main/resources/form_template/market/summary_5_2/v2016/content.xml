@@ -11,7 +11,7 @@
         <alias>rowNum</alias>
         <checking>false</checking>
         <columnType>AUTO</columnType>
-        <name>№ п/п</name>
+        <name>№ пп</name>
         <order>1</order>
         <width>5</width>
         <numerationType>SERIAL</numerationType>
@@ -47,7 +47,6 @@
         <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>53</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
-        <versioned>true</versioned>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>relatedPerson</alias>
@@ -60,7 +59,6 @@
         <nameAttributeId>249</nameAttributeId>
         <refBookAttributeId>249</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
-        <versioned>true</versioned>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>offshore</alias>
@@ -73,7 +71,6 @@
         <nameAttributeId>249</nameAttributeId>
         <refBookAttributeId>249</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
-        <versioned>true</versioned>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>innKio</alias>
@@ -96,7 +93,6 @@
         <nameAttributeId>6041</nameAttributeId>
         <refBookAttributeId>6041</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
-        <versioned>true</versioned>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>internationalRating</alias>
@@ -108,8 +104,8 @@
         <hierarchical>false</hierarchical>
         <nameAttributeId>6033</nameAttributeId>
         <refBookAttributeId>6033</refBookAttributeId>
+        <refBookAttributeId2>6021</refBookAttributeId2>
         <searchEnabled>true</searchEnabled>
-        <versioned>true</versioned>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>docNum</alias>
@@ -159,7 +155,6 @@
         <nameAttributeId>250</nameAttributeId>
         <refBookAttributeId>250</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
-        <versioned>true</versioned>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>avgPeriod</alias>
@@ -182,7 +177,6 @@
         <nameAttributeId>66</nameAttributeId>
         <refBookAttributeId>65</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
-        <versioned>true</versioned>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>creditSum</alias>
@@ -205,7 +199,6 @@
         <nameAttributeId>647</nameAttributeId>
         <refBookAttributeId>646</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
-        <versioned>true</versioned>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>rateBase</alias>
@@ -231,7 +224,7 @@
         <alias>creditRate</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Кредитный договор. Ставка кредитных плат, % годовых</name>
+        <name>Кредитный договор. Ставка Кредитных плат, % годовых</name>
         <order>21</order>
         <width>10</width>
         <maxLength>10</maxLength>
@@ -258,7 +251,6 @@
         <nameAttributeId>6061</nameAttributeId>
         <refBookAttributeId>6061</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
-        <versioned>true</versioned>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>specialPurpose</alias>
@@ -271,7 +263,6 @@
         <nameAttributeId>249</nameAttributeId>
         <refBookAttributeId>249</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
-        <versioned>true</versioned>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>purposeSum</alias>
@@ -324,7 +315,6 @@
         <nameAttributeId>249</nameAttributeId>
         <refBookAttributeId>249</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
-        <versioned>true</versioned>
     </columns>
     <styles>
         <alias>Автозаполняемая</alias>
