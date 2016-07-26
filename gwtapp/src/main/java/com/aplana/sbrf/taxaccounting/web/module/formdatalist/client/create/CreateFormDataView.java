@@ -4,6 +4,7 @@ import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.ValueListBox;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
@@ -178,10 +179,16 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         );
     }
 
+    public void addOpenModalWindowHandler(OpenModalWindowEvent.OpenHandler handler) {
+        departmentPicker.addOpenModalWindowHandler(handler);
+    }
+
+    public void removeOpenModalWindowHandler() {
+        departmentPicker.removeOpenModalWindowHandler();
+    }
 
     @UiHandler("reportPeriodIds")
     public void onReportPeriodChange(ValueChangeEvent<List<Integer>> event) {
-        departmentPicker.setValue(null, true);
         if (getUiHandlers() != null) {
             getUiHandlers().onReportPeriodChange();
         }
