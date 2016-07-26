@@ -730,7 +730,7 @@ create table template_changes (
  event number(9),
  author number(9) not null,
  date_event date,
- ref_book_id number(9),
+ ref_book_id number(9)
 );
 
 comment on table template_changes is 'Изменение версий налоговых шаблонов';
