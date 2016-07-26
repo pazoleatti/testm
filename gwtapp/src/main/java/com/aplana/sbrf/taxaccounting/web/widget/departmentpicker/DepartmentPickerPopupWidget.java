@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
@@ -149,6 +150,17 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         }
         countItems.setText(String.valueOf(tree.getValue().size()));
         popupPanel.center();
+    }
+
+    private HandlerRegistration handlerRegistration;
+
+    public void addOpenModalWindowHandler(OpenModalWindowEvent.OpenHandler handler) {
+        handlerRegistration = popupPanel.addOpenModalWindowHandler(handler);
+    }
+
+    public void removeOpenModalWindowHandler() {
+        handlerRegistration.removeHandler();
+        handlerRegistration = null;
     }
 
     @UiHandler("clearButton")
