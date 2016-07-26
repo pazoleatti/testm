@@ -974,7 +974,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             singleSelectionModel.clear();
             selectRow(rowIndex.intValue());
             formDataTable.setKeyboardSelectedRow(rowIndex.intValue() - 1);
-            formDataTable.setKeyboardSelectedColumn(0);
+            formDataTable.setKeyboardSelectedColumn(1);
         } else {
             singleSelectionModel.clear();
             // go to essential page
@@ -985,7 +985,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             } else {
                 selectRow(rowIndex.intValue());
                 formDataTable.setKeyboardSelectedRow(rowIndex.intValue() - 1 - formDataTable.getPageStart());
-                formDataTable.setKeyboardSelectedColumn(0);
+                formDataTable.setKeyboardSelectedColumn(1);
             }
         }
     }
