@@ -218,7 +218,7 @@ def getRatingRecord(def rating) {
         recordCache.put(filter, provider.getRecords(getReportPeriodEndDate(), null, filter, null))
     }
     def records = recordCache[filter]
-    if (records != null && records.isEmpty()) {
+    if (records != null && !records.isEmpty()) {
         return records[0]
     }
     return null
