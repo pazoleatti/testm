@@ -402,6 +402,8 @@ void sortFormDataRows(def saveInDB = true) {
     if (!isGroups) {
         def totalRow = getDataRow(dataRows, 'total')
         dataRows.remove(totalRow)
+        def columnList = totalRow.keySet().collect { totalRow.getCell(it).getColumn() }
+        refBookService.dataRowsDereference(logger, dataRows, columnList)
         sortRows(dataRows, sortColumns)
         dataRows.add(totalRow)
     } else {
