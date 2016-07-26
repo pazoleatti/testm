@@ -14,12 +14,13 @@ import com.aplana.sbrf.taxaccounting.model.RefBookColumn
 import com.aplana.sbrf.taxaccounting.model.ReferenceColumn
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder
-import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder.CellType
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder.CellType // нужный импорт
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.XlsxReportMetadata
 import groovy.transform.Field
 import org.apache.commons.io.IOUtils
@@ -28,6 +29,7 @@ import org.apache.poi.ss.usermodel.Font
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.ss.util.AreaReference
 import org.apache.poi.ss.util.CellRangeAddress
 
 /**
@@ -514,7 +516,43 @@ void createSpecificReport() {
             // footer пустой
         }
 
-        // почти скопировал метод ради выравнивания объединенных ячеек (если число - справа, иначе - слева)
+        @Override
+        protected void createTableHeaders(){
+            // Поскольку имеется шаблон с выставленными алиасами, то чтобы не записать данные в ячейку с алиасом
+            // делаем проверку на то, что сумма начала записи таблицы и кол-ва строк не превышает номер строки с алиасом
+            // и если превышает, то сдвигаем
+            AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
+            Row r = sheet.getRow(ar.getFirstCell().getRow());
+            if (rowNumber + headers.size() >= r.getRowNum()){
+                int rowBreakes = rowNumber + headers.size() - r.getRowNum();
+                if(0 == rowBreakes)
+                    sheet.shiftRows(r.getRowNum(), r.getRowNum() + 1, 1);
+                else
+                    sheet.shiftRows(r.getRowNum(), r.getRowNum() + 1, rowBreakes);
+            }
+            for (DataRow<HeaderCell> headerCellDataRow : headers){
+                Row row = sheet.createRow(rowNumber);
+                for (int i=0; i<columns.size(); i++){
+                    Column column = columns.get(i);
+                    if (column.isChecking() && !isShowChecked){
+                        continue;
+                    }
+                    HeaderCell headerCell = headerCellDataRow.getCell(column.getAlias());
+                    org.apache.poi.ss.usermodel.Cell workBookcell = mergedDataCells(headerCellDataRow.getCell(column.getAlias()), row, i, true);
+                    CellStyle cellStyle = cellStyleBuilder.getCellStyle(CellType.HEADER, column.getAlias() + "_header");
+                    cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER)
+                    workBookcell.setCellStyle(cellStyle);
+                    workBookcell.setCellValue(String.valueOf(headerCell.getValue()));
+                    if(headerCell.getColSpan() > 1){
+                        i = i + headerCell.getColSpan() - 1;
+                    }
+                }
+                rowNumber++;
+            }
+            autoSizeHeaderRowsHeight();
+        }
+
+        // почти скопировал метод ради выравнивания объединенных ячеек (по центру)
         @Override
         protected void createDataForTable() {
             rowNumber = (rowNumber > sheet.getLastRowNum() ? sheet.getLastRowNum() : rowNumber);//if we have empty strings
@@ -541,7 +579,7 @@ void createSpecificReport() {
                         if (ColumnType.STRING.equals(column.getColumnType())) {
                             String str = (String) obj;
                             cellStyle = getCellStyle(formStyle, CellType.STRING, columnAlias);
-                            cell.setCellStyle(cellStyle);
+                            setCellStyle(cell, cellStyle)
                             cell.setCellValue(str);
                         } else if (ColumnType.DATE.equals(column.getColumnType())) {
                             Date date = (Date) obj;
@@ -550,11 +588,11 @@ void createSpecificReport() {
                             else
                                 cell.setCellValue("");
                             cellStyle = getCellStyle(formStyle, CellType.DATE, columnAlias);
-                            cell.setCellStyle(cellStyle);
+                            setCellStyle(cell, cellStyle)
                         } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
                             BigDecimal bd = (BigDecimal) obj;
                             cellStyle = getCellStyle(formStyle, CellType.BIGDECIMAL, columnAlias);
-                            cell.setCellStyle(cellStyle);
+                            setCellStyle(cell, cellStyle)
                             cell.setCellType(org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC);
 
                             if (bd != null){
@@ -563,13 +601,13 @@ void createSpecificReport() {
                         } else if (ColumnType.AUTO.equals(column.getColumnType())) {
                             Long bd = (Long) obj;
                             cellStyle = getCellStyle(formStyle, CellType.NUMERATION, columnAlias);
-                            cell.setCellStyle(cellStyle);
+                            setCellStyle(cell, cellStyle)
 
                             cell.setCellValue(bd != null ? String.valueOf(bd) : "");
                         } else if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
                             RefBookValue refBookValue = dataRow.getCell(columnAlias).getRefBookValue();
                             cellStyle = getCellStyle(formStyle, CellType.REFBOOK, columnAlias);
-                            cell.setCellStyle(cellStyle);
+                            setCellStyle(cell, cellStyle)
                             if (refBookValue != null) {
                                 switch (refBookValue.getAttributeType()) {
                                     case RefBookAttributeType.DATE:
@@ -598,17 +636,13 @@ void createSpecificReport() {
                             }
                         } else if (obj == null) {
                             cellStyle = getCellStyle(formStyle, CellType.EMPTY, columnAlias);
-                            cell.setCellStyle(cellStyle);
+                            setCellStyle(cell, cellStyle)
                             cell.setCellValue("");
                         }
                     } else {
                         String str = (String) obj;
                         cellStyle = getCellStyle(formStyle, CellType.STRING, columnAlias);
-                        if (str != null && str.isInteger()) { // скопировал метод только ради этого выравнивания
-                            cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
-                        } else {
-                            cellStyle.setAlignment(CellStyle.ALIGN_LEFT);
-                        }
+                        cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
                         cell.setCellStyle(cellStyle);
                         cell.setCellValue(str);
                     }
@@ -616,6 +650,12 @@ void createSpecificReport() {
                         i = i + dataRow.getCell(columnAlias).getColSpan() - 1;
                 }
             }
+        }
+
+        private setCellStyle(org.apache.poi.ss.usermodel.Cell cell, CellStyle cellStyle) {
+            cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+            cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+            cell.setCellStyle(cellStyle);
         }
     };
     String filePath = builder.createReport()
@@ -682,12 +722,9 @@ void fillHeaderCells(Workbook workBook, Sheet sheet) {
     rowIndex++
     tmpRow = sheet.createRow(rowIndex)
 
-    cell = tmpRow.createCell(0)
+    cell = tmpRow.createCell(3)
     cell.setCellValue("в период с")
     cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_RIGHT))
-    // объединение 4-х ячеек
-    region = new CellRangeAddress(rowIndex, rowIndex, 0, 3)
-    sheet.addMergedRegion(region)
 
     cell = tmpRow.createCell(4)
     cell.setCellValue(dateStart)
@@ -698,7 +735,7 @@ void fillHeaderCells(Workbook workBook, Sheet sheet) {
 
     cell = tmpRow.createCell(7)
     cell.setCellValue("по")
-    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_CENTER))
+    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_RIGHT))
 
     cell = tmpRow.createCell(8)
     cell.setCellValue(dateEnd)
@@ -710,12 +747,9 @@ void fillHeaderCells(Workbook workBook, Sheet sheet) {
     rowIndex++
     tmpRow = sheet.createRow(rowIndex)
 
-    cell = tmpRow.createCell(0)
+    cell = tmpRow.createCell(3)
     cell.setCellValue("включая заключённые до")
     cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_RIGHT))
-    // объединение 4-х ячеек
-    region = new CellRangeAddress(rowIndex, rowIndex, 0, 3)
-    sheet.addMergedRegion(region)
 
     cell = tmpRow.createCell(4)
     cell.setCellValue(date1)
@@ -726,16 +760,16 @@ void fillHeaderCells(Workbook workBook, Sheet sheet) {
 
     cell = tmpRow.createCell(7)
     cell.setCellValue("существенные условия по которым были изменены после")
-    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_CENTER))
-    // объединение 9-и ячеек
-    region = new CellRangeAddress(rowIndex, rowIndex, 7, 15)
+    cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_RIGHT))
+    // объединение 6-и ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 7, 12)
     sheet.addMergedRegion(region)
 
-    cell = tmpRow.createCell(16)
+    cell = tmpRow.createCell(13)
     cell.setCellValue(date2)
     cell.setCellStyle(getCellStyle(workBook, StyleType.TITLE_CENTER))
     // объединение 3-х ячеек
-    region = new CellRangeAddress(rowIndex, rowIndex, 16, 18)
+    region = new CellRangeAddress(rowIndex, rowIndex, 13, 15)
     sheet.addMergedRegion(region)
 }
 

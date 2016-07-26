@@ -294,14 +294,15 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                             for (Column prevCol : columns) {
                                 if (prevCol.getOrder() < c.getOrder()) {
                                     com.aplana.sbrf.taxaccounting.model.Cell prevCell = dataRow.getCell(prevCol.getAlias());
-                                    int hiddenCount = 0;
-                                    for (Integer hiddenOrder : hiddenOrders) {
-                                        if (hiddenOrder < c.getOrder() && hiddenOrder > prevCol.getOrder()) {
-                                            hiddenCount++;
-                                        }
-                                    }
                                     if (prevCell.getColSpan() > 1) {
-                                        if (c.getOrder() - (prevCol.getOrder() + prevCell.getColSpan() + hiddenCount) <= 1) {
+                                        // считаем количество уже удаленных скрытых столбцов
+                                        int hiddenCount = 0;
+                                        for (Integer hiddenOrder : hiddenOrders) {
+                                            if (hiddenOrder < c.getOrder() && hiddenOrder > prevCol.getOrder()) {
+                                                hiddenCount++;
+                                            }
+                                        }
+                                        if (c.getOrder() - (prevCol.getOrder() + prevCell.getColSpan() + hiddenCount) < 0) {
                                             //Найденная ячейка объединяет скрытую
                                             //Уменьшаем объединение столбцов на 1, т.к скрытый столбец будет удален
                                             prevCell.setColSpan(prevCell.getColSpan() - 1);
@@ -332,9 +333,18 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                             for (Column prevCol : columns) {
                                 if (prevCol.getOrder() < c.getOrder()) {
                                     HeaderCell prevHeaderCell = header.getCell(prevCol.getAlias());
-                                    if (prevHeaderCell.getColSpan() > 1 && (c.getOrder() - (prevCol.getOrder() + prevHeaderCell.getColSpan()) <= 1)) {
-                                        //Найденная ячейка объединяет скрытую
-                                        prevHeaderCell.setColSpan(prevHeaderCell.getColSpan() - 1);
+                                    if (prevHeaderCell.getColSpan() > 1) {
+                                        // считаем количество уже удаленных скрытых столбцов
+                                        int hiddenCount = 0;
+                                        for (Integer hiddenOrder : hiddenOrders) {
+                                            if (hiddenOrder < c.getOrder() && hiddenOrder > prevCol.getOrder()) {
+                                                hiddenCount++;
+                                            }
+                                        }
+                                        if (c.getOrder() - (prevCol.getOrder() + prevHeaderCell.getColSpan() + hiddenCount) < 0) {
+                                            //Найденная ячейка объединяет скрытую
+                                            prevHeaderCell.setColSpan(prevHeaderCell.getColSpan() - 1);
+                                        }
                                     }
                                 }
                             }
