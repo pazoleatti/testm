@@ -308,6 +308,7 @@ alter table log_system_report add constraint log_system_report_unq_sec_user uniq
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);
+create index i_form_data_com_dep_rep_id on form_data(comparative_dep_rep_per_id);
 create index i_form_data_form_template_id on form_data(form_template_id);
 create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
