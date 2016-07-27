@@ -1,7 +1,12 @@
 package form_template.vat.declaration_9_1.v2015
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -10,6 +15,9 @@ import groovy.xml.MarkupBuilder
 
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLStreamReader
+import java.sql.Connection
+import java.sql.ResultSet
+import java.sql.Statement
 
 /**
  * Декларация по НДС (раздел 9.1)
@@ -35,6 +43,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.PRE_CALCULATION_CHECK:
         checkDepartmentParams(LogLevel.WARNING)
+        preCalcCheck()
         break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
@@ -47,12 +56,29 @@ switch (formDataEvent) {
 // Кэш провайдеров
 @Field
 def providerCache = [:]
+@Field
+def refBookCache = [:]
 
 @Field
 def refBookMap = [:]
 
 @Field
 def version = '5.04'
+
+// текущая декларация
+@Field
+def declarationTypeId = 15
+
+// декларация по НДС (раздел 9 без консолид. формы)
+@Field
+def declarationType9_sources = 21
+
+@Field
+int bankDepartmentId = 1
+
+// id формы источника 724.1.1 (не требующего настройки пользователем, подтягивается скриптом)
+@Field
+int formType_724_1_1 = 848
 
 @Field
 def empty = 0
@@ -70,6 +96,11 @@ def getEndDate() {
         reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
     }
     return reportPeriodEndDate
+}
+
+// Разыменование с использованием кеширования
+def getRefBookValue(def long refBookId, def recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Получение провайдера с использованием кеширования
@@ -131,7 +162,7 @@ def declarationReportPeriod
 
 boolean useTaxOrganCodeProm() {
     if (declarationReportPeriod == null) {
-        declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        declarationReportPeriod = getReportPeriod()
     }
     return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
 }
@@ -153,7 +184,7 @@ void generateXML() {
             Calendar.getInstance().getTime().format('yyyyMMdd') + "_" +
             UUID.randomUUID().toString().toUpperCase()
     def index = "0000091"
-    def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
+    def corrNumber = getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
     // атрибуты, заполняемые по форме 937.2.1 (строки 001, 020-070 и 310-360 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
@@ -161,7 +192,12 @@ void generateXML() {
     def (code020, code030, code040, code050, code060, code070, code310, code320, code330, code340, code350, code360) =
     [null, null, null, null, null, null, null, null, null, null, null, null]
 
-    def codes = getCodes()
+    def codes = null
+    if (corrNumber == 1) {
+        codes = getCodesFromDeclaration9()
+    } else if (corrNumber > 1) {
+        codes = getCodesFromDeclaration9_1()
+    }
     code020 = codes?.code020
     code030 = codes?.code030
     code040 = codes?.code040
@@ -169,24 +205,26 @@ void generateXML() {
     code060 = codes?.code060
     code070 = codes?.code070
 
-    def sourceCorrNumber
+    def formData724_1_1 = getFormData724_1_1()
+    def rowsMap = getRows18And10Map(formData724_1_1)
+    def row18 = rowsMap?.row18
+    def row10 = rowsMap?.row10
+    code310 = (row18 ? row18.sumPlus : code020)
+    code320 = (row10 ? row10.sumPlus : code030)
+    code330 = code040
+    code340 = (row18 ? row18.sumNdsPlus : code050)
+    code350 = (row10 ? row10.sumNdsPlus : code060)
+    code360 = code070
+
+    def departmentReportPeriodId_937_2_1 = null
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()) {
+        // 937.2.1 - Сведения из дополнительных листов книги продаж
         if (formData.formType.id == 617) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
-            sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-
-            def totalRow = getDataRow(sourceDataRows, 'total') // "Всего"
-            code310 = totalRow?.saleCostB18
-            code320 = totalRow?.saleCostB10
-            code330 = totalRow?.saleCostB0
-            code340 = totalRow?.vatSum18
-            code350 = totalRow?.vatSum10
-            code360 = totalRow?.bonifSalesSum
+            departmentReportPeriodId_937_2_1 = formData.departmentReportPeriodId
         }
     }
-    if (corrNumber > 0) {
-        code001 = (corrNumber == sourceCorrNumber) ? 0 : 1
-    }
+    code001 = (declarationData.departmentReportPeriodId == departmentReportPeriodId_937_2_1) ? 0 : 1
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
@@ -214,7 +252,7 @@ void generateXML() {
                                 (code360 != null ? [СтПродОсвП1Р9Вс: code360] : [:])
 
                 ) {
-                    hasPage = false
+                    def hasPage = false
                     for (def row : sourceDataRows) {
                         if (row.getAlias() != null) {
                             continue
@@ -329,7 +367,7 @@ void generateXML() {
 
 def checkDeclarationFNS() {
     def declarationFnsId = 4
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    def reportPeriod = getReportPeriod()
     def declarationData = declarationService.getLast(declarationFnsId, declarationData.departmentId, reportPeriod.id)
     if (declarationData != null && declarationData.accepted) {
         def String event = (formDataEvent == FormDataEvent.MOVE_CREATED_TO_ACCEPTED) ? "Принять данную декларацию" : "Отменить принятие данной декларации"
@@ -371,22 +409,12 @@ def getCurrencyCode(String str) {
     return null
 }
 
-def getCodes() {
+/** Получить данные из декларации по НДС (раздел 9 без консолид. формы). */
+def getCodesFromDeclaration9() {
     def result = null
-    // получить данные "декларации 9 без консолидированных"
-    def declarationTypeId = 21
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-    def declarationData9 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
-    if (declarationData9 == null || !declarationData9.accepted) {
-        // при отсутствии данные "декларации 9 без консолидированных", получить данные "декларации 9"
-        declarationTypeId = 14
-        declarationData9 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
-        if (declarationData9 == null || !declarationData9.accepted) {
-            return result
-        }
-    }
-    if (declarationData9.id != null) {
-        def reader = declarationService.getXmlStreamReader(declarationData9.id)
+    def declarationData = getSourceDeclaration()
+    if (declarationData) {
+        def reader = declarationService.getXmlStreamReader(declarationData.id)
         if (reader == null) {
             return
         }
@@ -399,6 +427,37 @@ def getCodes() {
                     def code050 = getXmlDecimal(reader, "СумНДСВсКПр18")
                     def code060 = getXmlDecimal(reader, "СумНДСВсКПр10")
                     def code070 = getXmlDecimal(reader, "СтПродОсвВсКПр")
+                    result = ['code020' : code020, 'code030' : code030, 'code040' : code040,
+                              'code050' : code050, 'code060' : code060, 'code070' : code070]
+                    break
+                }
+                reader.next()
+            }
+        } finally {
+            reader.close()
+        }
+    }
+    return result
+}
+
+/** Получить данные из декларации по НДС (раздел 9.1). */
+def getCodesFromDeclaration9_1() {
+    def result = null
+    def declarationData = getSourceDeclaration()
+    if (declarationData) {
+        def reader = declarationService.getXmlStreamReader(declarationData.id)
+        if (reader == null) {
+            return
+        }
+        try{
+            while (reader.hasNext()) {
+                if (reader.startElement && QName.valueOf('КнигаПродДЛ').equals(reader.name)) {
+                    def code020 = getXmlDecimal(reader, "СтПродВсП1Р9_18")
+                    def code030 = getXmlDecimal(reader, "СтПродВсП1Р9_10")
+                    def code040 = getXmlDecimal(reader, "СтПродВсП1Р9_0")
+                    def code050 = getXmlDecimal(reader, "СумНДСВсП1Р9_18")
+                    def code060 = getXmlDecimal(reader, "СумНДСВсП1Р9_10")
+                    def code070 = getXmlDecimal(reader, "СтПродОсвП1Р9Вс")
                     result = ['code020' : code020, 'code030' : code030, 'code040' : code040,
                               'code050' : code050, 'code060' : code060, 'code070' : code070]
                     break
@@ -437,7 +496,7 @@ void logicCheckXML(LogLevel logLevel) {
         while (reader.hasNext()) {
             if (reader.startElement) {
                 elements[reader.name.localPart] = true
-                if (!fileFound && isCurrentNode([], elements)) {
+                if (!fileFound && isCurrentNode(['Файл'], elements)) {
                     fileFound = true
                     idFile = getXmlValue(reader, 'ИдФайл')
                     versForm = getXmlValue(reader, 'ВерсФорм')
@@ -507,7 +566,270 @@ def getRefBook(def id) {
  * @return
  */
 boolean isCurrentNode(List<String> nodeNames, Map<String, Boolean> elements) {
-    nodeNames.add('Файл')
     def enteredNodes = elements.findAll { it.value }.keySet() // узлы в которые вошли, но не вышли еще
     return enteredNodes.containsAll(nodeNames) && enteredNodes.size() == nodeNames.size()
+}
+
+@Field
+def reportPeriod = null
+
+def getReportPeriod() {
+    if (reportPeriod == null) {
+        reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    }
+    return reportPeriod
+}
+
+@Field
+def correctionNumberMap = [:]
+
+def getCorrectionNumber(def id) {
+    if (correctionNumberMap[id] == null) {
+        correctionNumberMap[id] = reportPeriodService.getCorrectionNumber(id)
+    }
+    return correctionNumberMap[id]
+}
+
+@Field
+def period4 = null
+
+/** Получить четвертый отчетный период (4 квартал) текущего налогового периода. */
+Integer getPeriod4Id() {
+    if (period4 == null) {
+        def year = getReportPeriod()?.taxPeriod?.year
+        def start = Date.parse('dd.MM.yyyy', '01.01.' + year)
+        def end = Date.parse('dd.MM.yyyy', '31.12.' + year)
+        def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.VAT, start, end)
+        period4 = reportPeriods.find { it.order == 4 }
+    }
+    return period4?.id
+}
+
+@Field
+def departmentReportPeriodMap = [:]
+
+DepartmentReportPeriod getDepartmentReportPeriod(def id) {
+    if (departmentReportPeriodMap[id] == null) {
+        departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)
+    }
+    return departmentReportPeriodMap[id]
+}
+
+@Field
+def formData724_1_1 = null
+
+/** Получить строки источника 724.1.1 (форма должна быть только в корректирующем периоде). */
+def getFormData724_1_1() {
+    if (formData724_1_1 == null) {
+        def formData = null
+        if (getPeriod4Id() != null) {
+            formData = formDataService.getLast(formType_724_1_1, FormDataKind.CONSOLIDATED, bankDepartmentId, getPeriod4Id(), null, null, false)
+        }
+        if (formData != null) {
+            def correctionDate = getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate
+            // период только корректирующий
+            if (formData.state == WorkflowState.ACCEPTED && correctionDate) {
+                formData724_1_1 = formData
+            }
+        }
+    }
+    return formData724_1_1
+}
+
+// TODO (Ramil Timerbaev) в 1.0 поменять на departmentReportPeriodService.getListByFilter()
+/** Получить список периодовов подразделения (корректирующих и некорректирующих). */
+List<DepartmentReportPeriod> getDepartmentReportPeriods(def periodId, def departmentId) {
+    def sql = "select * from department_report_period " +
+            " where report_period_id = %d and department_id = %s " +
+            " order by correction_date asc nulls first "
+    sql = String.format(sql, periodId, departmentId)
+    Connection connection = null
+    Statement stmt = null
+    ResultSet resultSet = null
+    List<DepartmentReportPeriod> departmentReportPeriods = []
+    try {
+        connection = dataSource.getConnection()
+        stmt = connection.createStatement()
+        resultSet = stmt.executeQuery(sql)
+        while (resultSet.next()) {
+            DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod()
+            departmentReportPeriod.setId(SqlUtils.getInteger(resultSet, "id"))
+            departmentReportPeriod.setDepartmentId(SqlUtils.getInteger(resultSet, "department_id"))
+            departmentReportPeriod.setReportPeriod(reportPeriodService.get(SqlUtils.getInteger(resultSet, "report_period_id")))
+            departmentReportPeriod.setActive(!SqlUtils.getInteger(resultSet, "is_active").equals(0))
+            departmentReportPeriod.setBalance(!SqlUtils.getInteger(resultSet, "is_balance_period").equals(0))
+            departmentReportPeriod.setCorrectionDate(resultSet.getDate("correction_date"))
+            departmentReportPeriods.add(departmentReportPeriod)
+        }
+    } finally {
+        resultSet.close()
+        stmt.close()
+        connection.close()
+    }
+    return departmentReportPeriods
+}
+
+/** Предварительные проверки перед расчетом раздела 9.1. */
+void preCalcCheck() {
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+    def correctionNumber = getCorrectionNumber(declarationData.departmentReportPeriodId)
+    def departmentName = departmentService.get(bankDepartmentId)?.name
+    def year = getReportPeriod()?.taxPeriod?.year
+    def period = getReportPeriod()?.name
+    def periodName = year + ', ' + period
+    def sourceDeclarationTypeId = (correctionNumber == 1 ? declarationType9_sources : declarationTypeId)
+    // TODO (Ramil Timerbaev) в 1.0 поменять на declarationService.getType(sourceDeclarationTypeId)
+    def declarationName = (sourceDeclarationTypeId == declarationTypeId ? 'Декларация по НДС (раздел 9.1)' : 'Декларация по НДС (раздел 9 без консолид. формы)')
+
+    // проверка декларации-источника «Декларация по НДС (раздел 9 без консолид. формы)» / «Декларация по НДС (раздел 9.1)»
+    DeclarationData declarationData9 = getSourceDeclaration()
+    if (declarationData9 == null) {
+        // сообщение 1
+        if (correctionNumber == 1) {
+            def msg = "Не найдена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s». Расчет раздела 9.1 не будет выполнен."
+            logger.error(msg, declarationName, departmentName, periodName)
+        } else if (correctionNumber > 1) {
+            def correctionDate = getDepartmentReportPeriod(declarationData.departmentReportPeriodId)?.correctionDate?.format('dd.MM.yyyy')
+            def msg = "Не найдена декларация-источник со строкой «001» равной «0». Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «меньше %s». Расчет раздела 9.1 не будет выполнен."
+            logger.error(msg, declarationName, departmentName, periodName, correctionDate)
+        }
+        return
+    }
+    // сообщение 2
+    def subMsg = ''
+    def correctionDate = getDepartmentReportPeriod(declarationData9.departmentReportPeriodId)?.correctionDate?.format('dd.MM.yyyy')
+    if (correctionDate) {
+        subMsg = String.format(", Дата сдачи корректировки: «%s»", correctionDate)
+    }
+    def msg = "Для заполнения строк 020-070, 330, 360 раздела 9.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s»%s."
+    logger.info(msg, declarationName, departmentName, periodName, subMsg)
+
+    // проверка формы 724.1.1
+    def formDataKind = FormDataKind.CONSOLIDATED.title
+    def forFormNamePeriod4Id = (getPeriod4Id() ?: declarationData.departmentReportPeriodId)
+    def formName = formDataService.getFormTemplate(formType_724_1_1, forFormNamePeriod4Id)?.name
+    def formData = getFormData724_1_1()
+    if (formData) {
+        correctionDate = getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate?.format('dd.MM.yyyy')
+        // поиск строк
+        def rowsMap = getRows18And10Map(formData)
+        def row18 = rowsMap?.row18
+        def row10 = rowsMap?.row10
+
+        if (row18 && row10) {
+            // сообщение 3
+            msg = "Для заполнения строк 310, 320, 340, 350 раздела 9.1 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «%s»."
+            logger.info(msg, formDataKind, formName, departmentName, periodName, correctionDate)
+        } else if (!row18 && !row10) {
+            // сообщение 4
+            msg = "Т.к. не найдены требуемые строки формы-источника 724.1.1, для заполнения строк 310, 320, 340, 350 раздела 9.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s»%s."
+            logger.info(msg, declarationName, departmentName, periodName, subMsg)
+        } else if (!row18 && row10) {
+            // сообщение 5.1
+            msg = "Т.к. не найдена требуемая строка формы-источника 724.1.1, для заполнения строк 310, 340 раздела 9.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s»%s."
+            logger.info(msg, declarationName, departmentName, periodName, subMsg)
+
+            // сообщение 5.2
+            msg = "Для заполнения строк 320, 350 раздела 9.1 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «%s»."
+            logger.info(msg, formDataKind, formName, departmentName, periodName, correctionDate)
+        } else {
+            // сообщение 5.1
+            msg = "Для заполнения строк 310, 340 раздела 9.1 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «%s»."
+            logger.info(msg, formDataKind, formName, departmentName, periodName, correctionDate)
+
+            // сообщение 5.2
+            msg = "Т.к. не найдена требуемая строка формы-источника 724.1.1, для заполнения строк 320, 350 раздела 9.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s»%s."
+            logger.info(msg, declarationName, departmentName, periodName, subMsg)
+        }
+    } else {
+        // сообщение 6
+        msg = "Т.к. не найдена форма-источник 724.1.1, для заполнения строк 310, 320, 340, 350 раздела 9.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s»%s."
+        logger.info(msg, declarationName, departmentName, periodName, subMsg)
+    }
+}
+
+@Field
+DeclarationData declarationSource = null
+
+/**
+ * Получить декларацию источник.
+ *
+ * @return «Декларация по НДС (раздел 9 без консолид. формы)» - если номер корректировки 1
+ *         «Декларация по НДС (раздел 9.1)» - если номер корректировки больше 1
+ */
+DeclarationData getSourceDeclaration() {
+    if (declarationSource != null) {
+        return declarationSource
+    }
+    List<DepartmentReportPeriod> departmentReportPeriods = getDepartmentReportPeriods(declarationData.reportPeriodId, bankDepartmentId)
+    def correctionNumber = getCorrectionNumber(declarationData.departmentReportPeriodId)
+    if (correctionNumber == 1) {
+        // декларация по НДС (раздел 9 без консолид. формы)
+        DepartmentReportPeriod dpr = departmentReportPeriods.get(0)
+        if (dpr && dpr.correctionDate == null) {
+            List<DeclarationData> declarations = declarationService.find(declarationType9_sources, dpr.id)
+            if (declarations != null && declarations.size() == 1 && declarations[0].accepted) {
+                declarationSource = declarations[0]
+            }
+        }
+        return declarationSource
+    }
+
+    // декларация по НДС (раздел 9.1)
+    if (!departmentReportPeriods.isEmpty()) {
+        departmentReportPeriods.remove(departmentReportPeriods.size() - 1)
+    }
+    // начиная с последней корректировки ищем декларацию с ПризнСвед91 = 0 (код строки декларации - 001)
+    for (drp in departmentReportPeriods.reverse()) {
+        List<DeclarationData> declarations = declarationService.find(declarationTypeId, drp.id)
+        if (declarations != null && declarations.size() == 1 && declarations[0].accepted && getDeclarationXmlAttr(declarations[0], ['Документ'], 'ПризнСвед91') == '0') {
+            declarationSource = declarations[0]
+            break
+        }
+    }
+    return declarationSource
+}
+
+// Получает из декларации атрибут
+def getDeclarationXmlAttr(def declarationData, def treePath, def attrName) {
+    // получение данных из xml'ки
+    def reader = declarationService.getXmlStreamReader(declarationData.id)
+    if (reader == null) {
+        return
+    }
+    def elements = [:]
+
+    try{
+        treePath.add('Файл')
+        while (reader.hasNext()) {
+            if (reader.startElement) {
+                elements[reader.name.localPart] = true
+                if (isCurrentNode(treePath, elements)) {
+                    return getXmlValue(reader, attrName)
+                }
+            }
+            if (reader.endElement) {
+                elements[reader.name.localPart] = false
+            }
+            reader.next()
+        }
+    } finally {
+        reader.close()
+    }
+    return null
+}
+
+def getRows18And10Map(def formData) {
+    if (formData == null) {
+        return null
+    }
+    def rows = formDataService.getDataRowHelper(formData)?.getAll()
+    def code = getRefBookValue(8, getReportPeriod()?.dictTaxPeriodId)?.CODE?.value
+    def rowAlias = 'super_sale_10_' + code
+    def row10 = rows.find { it.getAlias() == rowAlias }
+    rowAlias = 'super_sale_18_' + code
+    def row18 = rows.find { it.getAlias() == rowAlias }
+    return [ 'row10' : row10, 'row18' : row18 ]
 }
