@@ -564,9 +564,9 @@ boolean isOffshore(def countryId, def docDate) {
     if (countryId == null) {
         return false
     }
-    def countryName = getRefBookValue(10, countryId).NAME?.value
-    def filter = 'LOWER(NAME) = LOWER(\'' + countryName + '\') OR LOWER(FULLNAME) = LOWER(\'' + countryName + '\')'
-    def records = getRecords(10L, filter, docDate)
+    def countryName = getRefBookValue(10, countryId)?.NAME?.value
+    def filter = 'LOWER(NAME) = LOWER(\'' + countryName + '\') OR LOWER(SHORTNAME) = LOWER(\'' + countryName + '\')'
+    def records = getRecords(519L, filter, docDate)
     return records != null && !(records.isEmpty())
 }
 
