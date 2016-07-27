@@ -720,7 +720,7 @@ comment on column notification.user_id is 'Идентификатор польз
 comment on column notification.role_id is 'Идентификатор роли пользователя, который получит оповещение';
 comment on column notification.is_read is 'Признак прочтения';
 comment on column notification.blob_data_id is 'Ссылка на логи';
-comment on column notification.type is 'Тип оповещения(0 - обычное оповещение, 1 - содержит ссылку на отчет справочника)';
+comment on column notification.type is 'Тип оповещения (0 - обычное оповещение, 1 - содержит ссылку на отчет справочника)';
 comment on column notification.report_id is 'Идентификатор отчета';
 
 create sequence seq_notification start with 10000;
@@ -843,7 +843,7 @@ create table declaration_report
 (
 declaration_data_id number(18) not null,
 blob_data_id varchar2(36) not null,
-type number(9) not null,
+type number(1) not null,
 subreport_id number(9)
 );
 
