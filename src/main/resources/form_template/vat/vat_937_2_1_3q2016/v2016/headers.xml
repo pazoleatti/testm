@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+  <row alias="">
+    <cell alias="fix" colSpan="1" rowSpan="2" value=""/>
+    <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ п/п"/>
+    <cell alias="opTypeCode" colSpan="1" rowSpan="2" value="Код вида операции"/>
+    <cell alias="invoiceNumDate" colSpan="1" rowSpan="2" value="Номер и дата счета-фактуры продавца"/>
+    <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="2" value="Номер и дата исправления счета-фактуры продавца"/>
+    <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="2" value="Номер и дата корректировочного счета-фактуры продавца"/>
+    <cell alias="corrInvCorrNumDate" colSpan="1" rowSpan="2" value="Номер и дата исправления корректировочного счета-фактуры продавца"/>
+    <cell alias="buyerName" colSpan="1" rowSpan="2" value="Наименование покупателя"/>
+    <cell alias="buyerInnKpp" colSpan="1" rowSpan="2" value="ИНН/КПП покупателя"/>
+    <cell alias="mediatorName" colSpan="2" rowSpan="1" value="Сведения о посреднике (комиссионере, агенте)"/>
+    <cell alias="mediatorInnKpp" colSpan="1" rowSpan="1" value="Сведения о посреднике (комиссионере, агенте)"/>
+    <cell alias="paymentDocNumDate" colSpan="1" rowSpan="2" value="Номер и дата документа, подтверждающего оплату"/>
+    <cell alias="currNameCode" colSpan="1" rowSpan="2" value="Наименование и код валюты"/>
+    <cell alias="saleCostACurr" colSpan="2" rowSpan="1" value="Стоимость продаж по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в валюте счета-фактуры"/>
+    <cell alias="saleCostARub" colSpan="1" rowSpan="1" value="Стоимость продаж по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в валюте счета-фактуры"/>
+    <cell alias="saleCostB18" colSpan="3" rowSpan="1" value="Стоимость продаж, облагаемых налогом, по счету-фактуре, разница стоимости по корректировочному счету-фактуре (без НДС) в рублях и копейках, по ставке"/>
+    <cell alias="saleCostB10" colSpan="1" rowSpan="1" value="Стоимость продаж, облагаемых налогом, по счету-фактуре, разница стоимости по корректировочному счету-фактуре (без НДС) в рублях и копейках, по ставке"/>
+    <cell alias="saleCostB0" colSpan="1" rowSpan="1" value="Стоимость продаж, облагаемых налогом, по счету-фактуре, разница стоимости по корректировочному счету-фактуре (без НДС) в рублях и копейках, по ставке"/>
+    <cell alias="vatSum18" colSpan="2" rowSpan="1" value="Сумма НДС по счету-фактуре, разница стоимости по корректировочному счету-фактуре в рублях и копейках, по ставке"/>
+    <cell alias="vatSum10" colSpan="1" rowSpan="1" value="Сумма НДС по счету-фактуре, разница стоимости по корректировочному счету-фактуре в рублях и копейках, по ставке"/>
+    <cell alias="bonifSalesSum" colSpan="1" rowSpan="2" value="Стоимость продаж, освобождаемых от налога, по счету-фактуре, разница стоимости по корректировочному счету-фактуре в рублях и копейках"/>
+  </row>
+  <row alias="">
+    <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+    <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
+    <cell alias="opTypeCode" colSpan="1" rowSpan="1" value="Код вида операции"/>
+    <cell alias="invoiceNumDate" colSpan="1" rowSpan="1" value="Номер и дата счета-фактуры продавца"/>
+    <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="1" value="Номер и дата исправления счета-фактуры продавца"/>
+    <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="1" value="Номер и дата корректировочного счета-фактуры продавца"/>
+    <cell alias="corrInvCorrNumDate" colSpan="1" rowSpan="1" value="Номер и дата исправления корректировочного счета-фактуры продавца"/>
+    <cell alias="buyerName" colSpan="1" rowSpan="1" value="Наименование покупателя"/>
+    <cell alias="buyerInnKpp" colSpan="1" rowSpan="1" value="ИНН/КПП покупателя"/>
+    <cell alias="mediatorName" colSpan="1" rowSpan="1" value="наименование посредника"/>
+    <cell alias="mediatorInnKpp" colSpan="1" rowSpan="1" value=" ИНН/КПП посредника"/>
+    <cell alias="paymentDocNumDate" colSpan="1" rowSpan="1" value="Номер и дата документа, подтверждающего оплату"/>
+    <cell alias="currNameCode" colSpan="1" rowSpan="1" value="Наименование и код валюты"/>
+    <cell alias="saleCostACurr" colSpan="1" rowSpan="1" value="в валюте счета-фактуры"/>
+    <cell alias="saleCostARub" colSpan="1" rowSpan="1" value=" в рублях и копейках"/>
+    <cell alias="saleCostB18" colSpan="1" rowSpan="1" value="18 процентов"/>
+    <cell alias="saleCostB10" colSpan="1" rowSpan="1" value="10 процентов"/>
+    <cell alias="saleCostB0" colSpan="1" rowSpan="1" value="0 процентов"/>
+    <cell alias="vatSum18" colSpan="1" rowSpan="1" value="18 процентов"/>
+    <cell alias="vatSum10" colSpan="1" rowSpan="1" value="10 процентов"/>
+    <cell alias="bonifSalesSum" colSpan="1" rowSpan="1" value="Стоимость продаж, освобождаемых от налога, по счету-фактуре, разница стоимости по корректировочному счету-фактуре в рублях и копейках"/>
+  </row>
+  <row alias="">
+    <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+    <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
+    <cell alias="opTypeCode" colSpan="1" rowSpan="1" value="2"/>
+    <cell alias="invoiceNumDate" colSpan="1" rowSpan="1" value="3"/>
+    <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="1" value="4"/>
+    <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="1" value="5"/>
+    <cell alias="corrInvCorrNumDate" colSpan="1" rowSpan="1" value="6"/>
+    <cell alias="buyerName" colSpan="1" rowSpan="1" value="7"/>
+    <cell alias="buyerInnKpp" colSpan="1" rowSpan="1" value="8"/>
+    <cell alias="mediatorName" colSpan="1" rowSpan="1" value="9"/>
+    <cell alias="mediatorInnKpp" colSpan="1" rowSpan="1" value="10"/>
+    <cell alias="paymentDocNumDate" colSpan="1" rowSpan="1" value="11"/>
+    <cell alias="currNameCode" colSpan="1" rowSpan="1" value="12"/>
+    <cell alias="saleCostACurr" colSpan="1" rowSpan="1" value="13а"/>
+    <cell alias="saleCostARub" colSpan="1" rowSpan="1" value="13б"/>
+    <cell alias="saleCostB18" colSpan="1" rowSpan="1" value="14"/>
+    <cell alias="saleCostB10" colSpan="1" rowSpan="1" value="15"/>
+    <cell alias="saleCostB0" colSpan="1" rowSpan="1" value="16"/>
+    <cell alias="vatSum18" colSpan="1" rowSpan="1" value="17"/>
+    <cell alias="vatSum10" colSpan="1" rowSpan="1" value="18"/>
+    <cell alias="bonifSalesSum" colSpan="1" rowSpan="1" value="19"/>
+  </row>
+</rows>
