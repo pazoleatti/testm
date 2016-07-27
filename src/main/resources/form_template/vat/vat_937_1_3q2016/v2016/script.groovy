@@ -428,7 +428,7 @@ void sortFormDataRows(def saveInDB = true) {
             if (headRow && totalRow) {
                 def groupFrom = headRow.getIndex()
                 def groupTo = totalRow.getIndex() - 1
-                def rows = (groupFrom < groupTo ? dataRows[groupFrom..(groupTo - 1)] : [])
+                def rows = (groupFrom < groupTo ? dataRows.subList(groupFrom, groupTo) : [])
                 // Массовое разыменование строк НФ
                 def columnList = headRow.keySet().collect { headRow.getCell(it).getColumn() }
                 refBookService.dataRowsDereference(logger, rows, columnList)
