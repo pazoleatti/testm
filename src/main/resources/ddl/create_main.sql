@@ -598,11 +598,15 @@ comment on column log_business.user_department_name is 'Подразделени
 
 create sequence seq_log_business;
 ------------------------------------------------------------------------------------------------------
-CREATE TABLE AUDIT_FORM_TYPE
+create table audit_form_type
   (
-    ID   NUMBER(9,0) PRIMARY KEY,
-    NAME VARCHAR2(1000) NOT NULL
+    id   number(9,0) not null,
+    name varchar2(1000) not null
   );
+ 
+comment on table audit_form_type is 'Типы форм для журнала аудита';
+comment on column audit_form_type.id is 'Код записи';
+comment on column audit_form_type.name is 'Наименование типа';
 ------------------------------------------------------------------------------------------------------
 CREATE TABLE log_system (
   id                    NUMBER(18, 0) PRIMARY KEY,
@@ -637,13 +641,13 @@ comment on column log_system.report_period_name is 'Наименование о�
 comment on column log_system.form_kind_id is 'Код типа налоговой формы (1,2,3,4,5)';
 comment on column log_system.note is 'Текст сообщения';
 comment on column log_system.user_department_name is 'Наименование подразделения пользователя';
-comment on column LOG_SYSTEM.DECLARATION_TYPE_NAME is 'Вид декларации';
-comment on column LOG_SYSTEM.FORM_TYPE_NAME is 'Вид налоговой формы';
-comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор подразделения налоговой формы/декларации';
+comment on column log_system.declaration_type_name is 'Вид декларации';
+comment on column log_system.form_type_name is 'Вид налоговой формы';
+comment on column log_system.form_department_id is 'Идентификатор подразделения налоговой формы/декларации';
 comment on column log_system.blob_data_id is 'Ссылка на логи';
 comment on column log_system.form_type_id is 'Идентификатор вида НФ';
 comment on column log_system.is_error is 'Признак ошибки';
-comment on column log_system.AUDIT_FORM_TYPE_ID is 'Тип формы';
+comment on column log_system.audit_form_type_id is 'Тип формы';
 comment on column log_system.server is 'Сервер';
 
 create sequence seq_log_system start with 10000;

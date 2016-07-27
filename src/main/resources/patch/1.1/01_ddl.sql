@@ -129,8 +129,58 @@ EXCEPTION
 		dbms_output.put_line(l_task_name||'[FATAL]:'||sqlerrm);
 end;
 /
------------------------------------------------------------------------------------------------------------------------------
 
+--https://jira.aplana.com/browse/SBRFACCTAX-16253: 1.1 БД. Изменения в ЖА. Добавить столбец "Тип форм" 
+declare 
+	l_task_name varchar2(128) := 'DDL Block #3 (SBRFACCTAX-16253)';
+	l_rerun_condition decimal(1) := 0;
+	l_sql_query varchar2(4000) := '';
+begin
+	select count(*) into l_rerun_condition from user_tables where table_name = 'AUDIT_FORM_TYPE';
+	
+	if l_rerun_condition = 0 then 
+		execute immediate 'create table audit_form_type (id number(9,0) not null, name varchar2(1000) not null)';
+		execute immediate 'alter table audit_form_type add constraint audit_form_type_pk primary key (id)';
+		execute immediate 'comment on table audit_form_type is ''Типы форм для журнала аудита''';
+		execute immediate 'comment on column audit_form_type.id is ''Код записи''';
+		execute immediate 'comment on column audit_form_type.name is ''Наименование типа''';
+		
+		execute immediate 'alter table log_system add audit_form_type_id number(9,0)';
+		execute immediate 'comment on column log_system.audit_form_type_id is ''Тип формы''';
+		execute immediate 'alter table log_system add constraint log_system_fk_audit_form_type foreign key (audit_form_type_id) references audit_form_type (id)';
+		
+		execute immediate 'insert into audit_form_type (id, name) select 1, ''Налоговая форма'' from dual union select 2, ''Декларация'' from dual union select 3, ''Версия макета нф'' from dual union select 4, ''Версия макета декларации'' from dual union select 5, ''Форма 101'' from dual union select 6, ''Форма 102'' from dual';	
+			  
+		l_sql_query := 'update log_system ls 
+						set audit_form_type_id = 
+						  case 
+							when ls.form_type_name is not null 
+								then ( 
+									  case 
+										when (instr(ls.note, ''Импорт бухгалтерской отчётности: '') > 0 AND (instr(ls.form_type_name, ''Вид бух. отчетности - Форма 101'') > 0 OR instr(ls.form_type_name, ''Вид бух. отчетности - Форма 102'')   > 0)) 
+											then (case when instr(ls.form_type_name, ''Вид бух. отчетности - Форма 101'') > 0 then 5 else 6 end)
+										when ls.department_name is not null then 1 else 3 
+										end 
+									) 
+							when ls.declaration_type_name is not null 
+								then (case when ls.department_name is not null then 2 else 4 end) 
+						  end 
+						where ls.form_type_name is not null or ls.declaration_type_name is not null';
+		
+		execute immediate l_sql_query;	
+		execute immediate 'update log_system set form_type_name = null where audit_form_type_id in (5,6)';	
+		execute immediate 'alter table log_system add constraint log_system_chk_aft check (audit_form_type_id = 1 and not event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is not null or audit_form_type_id = 2 and not event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is not null or audit_form_type_id = 3 and event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is null or audit_form_type_id = 4 and event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is null or audit_form_type_id in (5,6) and event_id in (7) and form_type_name is null and declaration_type_name is null or audit_form_type_id is null)';
+		dbms_output.put_line(l_task_name||'[INFO]:'||' table AUDIT_FORM_TYPE created');
+	else
+		dbms_output.put_line(l_task_name||'[ERROR]:'||' table AUDIT_FORM_TYPE already exists');
+	end if;
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]:'||sqlerrm);
+end;
+/
+
+-----------------------------------------------------------------------------------------------------------------------------
 
 COMMIT;
 EXIT;
