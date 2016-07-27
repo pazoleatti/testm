@@ -331,7 +331,7 @@ class DBReport {
                                         } else if (flagA == null && !flagB || !flagA && flagB == null) {
                                             return '?'
                                         } else {
-                                            return '-'
+                                            return '—'
                                         }
                                     }
                                     def monthlyC = compareFunc(tmp1?.monthly, tmp2?.monthly)
