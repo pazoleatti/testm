@@ -506,7 +506,7 @@ void fillRow(def newRow, def row2_6, def rowChd, def rowMis, def rowAmrlirt) {
     // графа 16 - currencyCode         - Кредитный договор. Валюта суммы кредита
     newRow.currencyCode = row2_6.currencySum
     // графа 17 - creditSum            - Кредитный договор. Сумма кредита (по договору), ед. валюты
-    newRow.creditSum = row2_6.sumDoc
+    newRow.creditSum = (row2_6.sumDoc != null) ? (row2_6.sumDoc * 1000) : null
     // графа 18 - rateType             - Кредитный договор. Вид процентной ставки
     newRow.rateType = rowMis.rateType
     // графа 19 - rateBase             - Кредитный договор. База для расчета процентной ставки
