@@ -1,6 +1,38 @@
 set serveroutput on size 1000000;
 
 -----------------------------------------------------------------------------------------------------------------------------
+declare 
+	l_task_name varchar2(128) := 'DDL Block #0 - 1.0 rerun ';
+	l_rerun_condition decimal(1) := 0;
+begin
+	select count(*) into l_rerun_condition from user_indexes where index_name='FORM_TYPE_UNIQ_CODE';
+	
+	--part1: https://jira.aplana.com/browse/SBRFACCTAX-14930
+	if l_rerun_condition = 1 then 
+		execute immediate 'drop index form_type_uniq_code';
+	
+		dbms_output.put_line(l_task_name||'[INFO]:'||' index FORM_TYPE_UNIQ_CODE dropped');
+	else
+		dbms_output.put_line(l_task_name||'[INFO]:'||' index FORM_TYPE_UNIQ_CODE no longer exists');
+	end if;
+	
+	select count(*) into l_rerun_condition from user_cons_columns cc join user_constraints c on c.constraint_name = cc.constraint_name join user_tab_columns tc on tc.TABLE_NAME = cc.table_name and tc.COLUMN_NAME=cc.column_name where cc.table_name='FORM_DATA_REPORT' and cc.column_name='TYPE' and c.constraint_type = 'C';
+	
+	--part2: http://jira.aplana.com/browse/SBRFACCTAX-13912
+	if l_rerun_condition = 0 then 
+		execute immediate 'alter table form_data_report modify type not null';
+	
+		dbms_output.put_line(l_task_name||'[INFO]:'||' column FORM_DATA_REPORT.TYPE made explicitly not null');
+	else
+		dbms_output.put_line(l_task_name||'[INFO]:'||' column FORM_DATA_REPORT.TYPE was already explicitly not null');
+	end if;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]:'||sqlerrm);
+end;
+/
+-----------------------------------------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15969: 1.1 БД. Логирование изменения скриптов справочников
 declare 
 	l_task_name varchar2(128) := 'DDL Block #1 (SBRFACCTAX-15969)';
