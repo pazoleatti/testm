@@ -443,7 +443,7 @@ void sortFormDataRows(def saveInDB = true) {
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
-        updateIndexes(dataRows);
+        updateIndexes(dataRows)
     }
 }
 
@@ -603,7 +603,6 @@ void importData() {
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
         rowValues = allValues[0]
-        logger.info("rowValues = " + rowValues)
         fileRowIndex++
         // все строки пустые - выход
         if (!rowValues) {

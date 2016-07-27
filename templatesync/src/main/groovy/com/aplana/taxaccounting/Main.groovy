@@ -294,6 +294,7 @@ class Main {
                     'declaration_9'        : -14,
                     'declaration_9_1'      : -15,
                     'declaration_9_sources': -21,
+                    'declaration_9_3q2016' : -24, // Декларация по НДС (раздел 9 с 3 квартала 2016)
                     'declaration_10'       : -16,
                     'declaration_11'       : -17,
                     'vat_724_1'            : 600, // Отчет о суммах начисленного НДС по операциям Банка
