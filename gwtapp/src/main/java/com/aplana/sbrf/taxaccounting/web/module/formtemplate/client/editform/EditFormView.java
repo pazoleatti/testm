@@ -52,7 +52,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     @UiField
     Button cancel;
 
-    FormTypeTemplate selectedItem;
+    private FormTypeTemplate selectedItem;
 
     @Inject
     public EditFormView(Binder uiBinder, MyDriver driver) {
@@ -132,13 +132,20 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
         }
     }
 
+    @Override
+    public String getFormTypeName() {
+        return formTypeName.getText();
+    }
+
     private void changeItem(final FormTypeTemplate type) {
         if (driver.isDirty()){
             Dialog.confirmMessage("Редактирование макета", "Сохранить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
-                    getUiHandlers().onSave();
-                    doChange(type);
+                    if (getUiHandlers().onSave())
+                        doChange(type);
+                    else
+                        no();
                 }
 
                 @Override

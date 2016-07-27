@@ -24,6 +24,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         FormTypeTemplate getTypeData();
         void edit(FormTypeTemplate type);
         void onSelectionChanged(FormTypeTemplate type);
+        String getFormTypeName();
         boolean checkIfrs();
     }
 
@@ -45,10 +46,14 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     }
 
     @Override
-    public void onSave() {
+    public boolean onSave() {
+        if (getView().getFormTypeName() == null || getView().getFormTypeName().isEmpty()) {
+            Dialog.errorMessage("Макет не сохранен", "Поле \"Наименование\" должно быть заполнено!");
+            return false;
+        }
         if (!getView().checkIfrs()) {
             Dialog.errorMessage("Макет не сохранен", "При установке признака \"Отчетность для МСФО\" должно быть заполнено поле \"Наименование для МСФО\"!");
-            return;
+            return false;
         }
         EditFormTypeAction action = new EditFormTypeAction();
         FormTypeTemplate formTypeTemplate1 = getView().getTypeData();
@@ -66,6 +71,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                         UpdateTableEvent.fire(EditFormPresenter.this);
                     }
                 }, this));
+        return true;
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTypeTemp
 import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface EditFormUiHandlers extends UiHandlers {
-    void onSave();
+    boolean onSave();
     void onCancel();
     void setModel(FormTypeTemplate model);
 }
