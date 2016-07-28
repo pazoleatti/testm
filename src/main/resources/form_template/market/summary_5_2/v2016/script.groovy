@@ -342,7 +342,7 @@ void consolidation() {
                     }
                     formNames += ("«" + getFormTypeName(formTypeMis) + "»")
                 }
-                logger.warn("Форма-источник «%s», Подразделение = «%s», Период = «%s», строка %s: Сделка не была включена в отчет, т.к. не найдена связанная строка в формах-источниках: %s!",
+                logger.warn("Форма-источник «%s», Подразделение: «%s», Период: «%s», строка %s: Сделка не была включена в отчет, т.к. не найдена связанная строка в формах-источниках: %s!",
                         getFormTypeName(formType_2_6), depName, periodName, row2_6.getIndex(), formNames)
             } else {
                 def newRow = getNewRow()
