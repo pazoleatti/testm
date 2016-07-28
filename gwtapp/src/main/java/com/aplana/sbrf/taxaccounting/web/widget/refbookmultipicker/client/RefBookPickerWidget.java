@@ -155,7 +155,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             @Override
             public void onOpen(OpenModalWindowEvent event) {
                 isEnabledFireChangeEvent = false;
-                refBookView.load(state, false);
+                refBookView.load(state, true);
             }
         });
 
