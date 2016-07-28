@@ -394,21 +394,21 @@ void fillDebtorInfo(def newRow) {
         return
     }
     // else
-    String fileDebtorName = newRow.debtorName
-    newRow.debtorName = debtorRecords[0].NAME?.stringValue ?: ""
-    if (! newRow.debtorName.equalsIgnoreCase(fileDebtorName)) {
+    String fileDebtorName = newRow.name
+    newRow.name = debtorRecords[0].NAME?.stringValue ?: ""
+    if (! newRow.name.equalsIgnoreCase(fileDebtorName)) {
         def refBook = refBookFactory.get(520)
         def refBookAttrName = refBook.getAttribute('INN').name + '/' + refBook.getAttribute('KIO').name
         if (fileDebtorName) {
             rowWarning(logger, newRow, String.format("На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
                     "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
                     "В файле указано другое наименование заемщика - «%s»!",
-                    newRow.debtorName, refBookAttrName, newRow.innKio, fileDebtorName))
+                    newRow.name, refBookAttrName, newRow.innKio, fileDebtorName))
         } else {
             rowWarning(logger, newRow, String.format("На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
                     "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
                     "Наименование заемщика в файле не заполнено!",
-                    newRow.debtorName, refBookAttrName, newRow.innKio))
+                    newRow.name, refBookAttrName, newRow.innKio))
         }
     }
 }
