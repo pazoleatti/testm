@@ -1,4 +1,5 @@
 package form_template.market.market_2_6.v2016
+
 import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn
@@ -179,34 +180,34 @@ void logicCheck() {
         if (row.payFrequency != null && row.payFrequency <= 0) {
             logger.error("Строка %s: Значение графы «%s» должно быть больше 0!", row.getIndex(), getColumnName(row, 'payFrequency'))
         }
-        // 4. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
+        // 4. Проверка даты выдачи кредита
+        if (row.docDate != null && row.creditDate != null && (row.creditDate < row.docDate)) {
+            logger.warn("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»!",
+                row.getIndex(), getColumnName(row, 'creditDate'), getColumnName(row, 'docDate'))
+        }
+        // 5. Проверка даты погашения кредита
+        if (row.docDate != null && row.closeDate != null && (row.closeDate < row.docDate)) {
+            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»!",
+                    row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'docDate'))
+        }
+        // 6. Проверка даты погашения кредита 2
+        if (row.creditDate != null && row.closeDate != null && (row.closeDate < row.creditDate)) {
+            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»!",
+                    row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'creditDate'))
+        }
+        // 7. Проверка валюты
+        if (row.currencySum != null && ("RUB".equals(getRefBookValue(15, row.currencySum).CODE_2.value))) {
+            logger.error("Строка %s: Для российского рубля должно быть проставлено буквенное значение RUR!", row.getIndex())
+        }
+        // 8. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
         // группируем
         def key = getKey(row)
         if (rowsMap[key] == null) {
             rowsMap[key] = []
         }
         rowsMap[key].add(row)
-        // 5. Проверка даты выдачи кредита
-        if (row.docDate != null && row.creditDate != null && (row.creditDate < row.docDate)) {
-            logger.warn("Строка %s: Значение графа «%s» должно быть больше либо равно значению графы «%s»!",
-                row.getIndex(), getColumnName(row, 'creditDate'), getColumnName(row, 'docDate'))
-        }
-        // 6. Проверка даты погашения кредита
-        if (row.docDate != null && row.closeDate != null && (row.closeDate < row.docDate)) {
-            logger.error("Строка %s: Значение графа «%s» должно быть больше либо равно значению графы «%s»!",
-                    row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'docDate'))
-        }
-        // 7. Проверка даты погашения кредита 2
-        if (row.creditDate != null && row.closeDate != null && (row.closeDate < row.creditDate)) {
-            logger.error("Строка %s: Значение графа «%s» должно быть больше либо равно значению графы «%s»!",
-                    row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'creditDate'))
-        }
-        // 8. Проверка валюты
-        if (row.currencySum != null && ("RUB".equals(getRefBookValue(15, row.currencySum).CODE_2.value))) {
-            logger.error("Строка %s: Для российского рубля должно быть проставлено буквенное значение RUR!", row.getIndex())
-        }
     }
-    // 4. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
+    // 8. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
     rowsMap.each { def key, rows ->
         def size = rows.size()
         // пропускаем первую строку
@@ -279,7 +280,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -461,6 +462,6 @@ void sortFormDataRows(def saveInDB = true) {
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
-        updateIndexes(dataRows);
+        updateIndexes(dataRows)
     }
 }
