@@ -72,6 +72,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 
         refBookPiker.setVisible(false);
         refBookPiker.setVersionEnabled(column.isVersioned());
+		refBookPiker.setManualUpdate(true);
 	}
 
 	@Override
