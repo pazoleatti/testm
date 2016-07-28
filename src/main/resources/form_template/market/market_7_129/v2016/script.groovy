@@ -1,11 +1,10 @@
 package form_template.market.market_7_129.v2016
+
 import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
-
-import java.math.RoundingMode
 
 /**
  * 7.129 (Ежемесячный) Кредитные договоры в CRM
@@ -129,7 +128,7 @@ void logicCheck() {
         rowsMap[key].add(row)
         // 3. Проверка даты выдачи кредита
         if (row.docDate != null && row.creditDate != null && (row.creditDate < row.docDate)) {
-            logger.warn("Строка %s: Значение графа «%s» должно быть больше либо равно значению графы «%s»!",
+            logger.warn("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»!",
                 row.getIndex(), getColumnName(row, 'creditDate'), getColumnName(row, 'docDate'))
         }
     }
