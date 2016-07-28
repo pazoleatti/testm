@@ -157,6 +157,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (605,'Организационно-правовые формы',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (606,'Категории обеспечения',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (607,'Исключаемые типы кредитов',1,0,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (608,'Группы видов обязательств',1,0,0,null);
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (650,'Коды видов операций НДС',1,0,0,null);
 
@@ -812,6 +813,9 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6071, 607, 'Код','CODE',1,1,null,null,1,null,5,1,1,null,null,0,10);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6072, 607, 'Наименование','NAME',1,2,null,null,1,null,25,1,2,null,null,0,256);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6081, 608, 'Код','CODE',2,1,null,null,1,0,5,1,1,null,null,0,2);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6082, 608, 'Наименование группы','NAME',1,2,null,null,1,null,25,1,2,null,null,0,256);	
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6501, 650, 'Код вида операции','CODE',1,1,null,null,1,null,5,1,1,null,null,0,2);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6502, 650, 'Наименование вида операции','NAME',1,2,null,null,1,null,25,1,0,null,null,0,1000);	

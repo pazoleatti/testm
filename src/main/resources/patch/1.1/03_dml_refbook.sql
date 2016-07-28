@@ -789,5 +789,34 @@ end;
 /
 COMMIT;
 ---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16278: 1.1 РнРнтб. Реализовать справочник "Группы видов обязательств"
+declare l_task_name varchar2(128) := 'RefBook Block #11 (SBRFACCTAX-16278 - Labilities groups))';
+begin	
+	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (608,'Группы видов обязательств',1,0,0,null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6081, 608, 'Код','CODE',2,1,null,null,1,0,5,1,1,null,null,0,2);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6082, 608, 'Наименование группы','NAME',1,2,null,null,1,null,25,1,2,null,null,0,256);
+	
+	INSERT INTO ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 608, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		INSERT INTO ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6081, 1);		
+		INSERT INTO ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6082, 'Гарантия (поручительство) в пользу таможенного органа / налогового органа');	
+
+	INSERT INTO ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 608, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		INSERT INTO ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 6081, 2);	
+		INSERT INTO ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 6082, 'Иные гарантии и аккредитивы');	
+	
+	dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book or its attributes already exist ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
