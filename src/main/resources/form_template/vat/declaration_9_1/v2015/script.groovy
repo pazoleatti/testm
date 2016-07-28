@@ -211,7 +211,7 @@ void generateXML() {
     def row10 = rowsMap?.row10
     def total1 = rowsMap?.total1 // итог по секции 1
     def total2 = rowsMap?.total2 // итог по секции 2
-    def total7 = rowsMap?.total3 // итог по секции 7
+    def total7 = rowsMap?.total7 // итог по секции 7
     code310 = ((total1 || total7) ? ((total1?.sumPlus ?: BigDecimal.ZERO) + (total7?.sumPlus ?: BigDecimal.ZERO)) : code020)
     code320 = (total2 ? total2.sumPlus : code030)
     code330 = code040
