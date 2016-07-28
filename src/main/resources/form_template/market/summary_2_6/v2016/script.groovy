@@ -1,12 +1,11 @@
 package form_template.market.summary_2_6.v2016
+
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
-
-import java.math.RoundingMode
 
 /**
  * 2.6 (Сводный) Отчет о состоянии кредитного портфеля
@@ -146,28 +145,9 @@ def nonNegativeColumns = ['extendNum', 'sumDoc', 'sumGiven', 'rate', 'debtSum', 
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    // групируем по графам 8, 13, 14
-    def rowsMap = [:]
     for (row in dataRows) {
         // 1. Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
-        // 2. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
-        // группируем
-        def key = getKey(row)
-        if (rowsMap[key] == null) {
-            rowsMap[key] = []
-        }
-        rowsMap[key].add(row)
-    }
-    // 2. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
-    rowsMap.each { def key, rows ->
-        def size = rows.size()
-        // пропускаем первую строку
-        for (int i = 1; i < size; i++) {
-            def row = rows[i]
-            logger.error("Строка %s: На форме уже существует строка со значениями граф «%s» = «%s», «%s» = «%s», «%s» = «%s»!",
-                row.getIndex(), getColumnName(row, 'inn'), row.inn, getColumnName(row, 'docNum'), row.docNum, getColumnName(row, 'docDate'), row.docDate?.format('dd.MM.yyyy') ?: '')
-        }
     }
 }
 
@@ -224,7 +204,7 @@ void sortFormDataRows(def saveInDB = true) {
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
-        updateIndexes(dataRows);
+        updateIndexes(dataRows)
     }
 }
 
@@ -253,5 +233,4 @@ void consolidation() {
     updateIndexes(dataRows)
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.allCached = dataRows
-
 }
