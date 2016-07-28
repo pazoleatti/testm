@@ -155,11 +155,16 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     private HandlerRegistration handlerRegistration;
 
     public void addOpenModalWindowHandler(OpenModalWindowEvent.OpenHandler handler) {
+        if (handlerRegistration != null) {
+            removeOpenModalWindowHandler();
+        }
         handlerRegistration = popupPanel.addOpenModalWindowHandler(handler);
     }
 
     public void removeOpenModalWindowHandler() {
-        handlerRegistration.removeHandler();
+        if (handlerRegistration != null) {
+            handlerRegistration.removeHandler();
+        }
         handlerRegistration = null;
     }
 

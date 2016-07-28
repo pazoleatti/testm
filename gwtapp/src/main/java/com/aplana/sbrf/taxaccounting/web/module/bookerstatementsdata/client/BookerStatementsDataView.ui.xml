@@ -101,7 +101,7 @@
                 <fm:right>
                     <fm:Right>
                         <style:LeftBar childValign="middle" height="100%">
-                            <fileuplod:FileUploadWidget text="Загрузить файл" title="Загрузить файл с отчетностью" ui:field="fileUploader" height="22px"
+                            <fileuplod:FileUploadWidget text="Загрузить файл" title="Загрузить файл с отчетностью" ui:field="fileUploader"
                                                         addStyleNames="{style.fileUploader}"/>
 
                             <style:LinkButton ui:field="deleteButton" text="Удалить" title="Удалить выбранную отчетность" img="resources/img/row-delete.png"/>
