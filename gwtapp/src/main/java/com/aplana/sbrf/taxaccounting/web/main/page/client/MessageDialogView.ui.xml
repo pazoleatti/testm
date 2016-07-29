@@ -6,14 +6,17 @@
 
     <ui:style>
         .content {
-            margin: 15px 15px 18px 15px;
+            margin: 10px 10px 35px 10px;
+        }
+
+        .content2 {
             min-height: 50px;
         }
 
         .footerPanel {
             background-color: #E8E1CF;
             width: 100%;
-            height: 38px;
+            height: 100%;
         }
 
         .footerButton {
@@ -21,15 +24,15 @@
         }
 
         .image {
-            margin-right: 9px;
-            margin-bottom: 11px;
+            margin-right: 10px;
+            vertical-align: middle;
         }
     </ui:style>
 
     <dw:ModalWindow ui:field="dialogBox" title="Информация">
         <g:VerticalPanel width="450px" addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:VerticalPanel addStyleNames="{style.content}">
-                <g:HorizontalPanel>
+                <g:HorizontalPanel verticalAlignment="ALIGN_MIDDLE" addStyleNames="{style.content2}">
                     <g:Image ui:field="image" addStyleNames="{style.image}"/>
                     <g:Label ui:field="message"/>
                 </g:HorizontalPanel>
