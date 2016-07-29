@@ -427,7 +427,7 @@ void sortFormDataRows() {
     def lastRow = getDataRow(dataRows, 'total')
     def from = firstRow.getIndex()
     def to = lastRow.getIndex() - 1
-    def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
+    def sectionRows = (from < to ? dataRows.subList(from, to) : [])
 
     sortRowsSimple(sectionRows)
 

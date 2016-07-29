@@ -315,8 +315,8 @@ void deleteRows(def dataRows) {
  */
 def getRowsBySection32_1(def dataRows, def section) {
     def from = getDataRow(dataRows, section).getIndex()
-    def to = getDataRow(dataRows, 'total' + section).getIndex() - 2
-    return (from <= to ? dataRows[from..to] : [])
+    def to = getDataRow(dataRows, 'total' + section).getIndex() - 1
+    return (from < to ? dataRows.subList(from, to) : [])
 }
 
 /**
@@ -329,7 +329,7 @@ def getRowsBySection(def dataRows, def section) {
     def from = getDataRow(dataRows, section).getIndex()
     def toAlias = (section.toInteger() + 1).toString()
     def to = (section != '8' ? getDataRow(dataRows, toAlias).getIndex() - 2 : dataRows.size() - 1)
-    return (from <= to ? dataRows[from..to] : [])
+    return (from < to ? dataRows.subList(from, to) : [])
 }
 
 /**

@@ -258,9 +258,9 @@ void sort(def dataRows) {
     def sortRows = []
     groups.each { section ->
         def from = getDataRow(dataRows, section).getIndex()
-        def to = getDataRow(dataRows, 'total' + section).getIndex() - 2
-        if (from <= to) {
-            sortRows.add(dataRows[from..to])
+        def to = getDataRow(dataRows, 'total' + section).getIndex() - 1
+        if (from < to) {
+            sortRows.add(dataRows.subList(from, to))
         }
     }
     sortRows.each {
@@ -753,7 +753,7 @@ void sortFormDataRows(def saveInDB = true) {
         def lastRow = getDataRow(dataRows, "total$section")
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
-        def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
+        def sectionRows = (from < to ? dataRows.subList(from, to) : [])
 
         // Массовое разыменовывание граф НФ
         def columnNameList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }

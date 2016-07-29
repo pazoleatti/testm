@@ -307,9 +307,9 @@ void sort(def dataRows) {
     // подразделы, собрать список списков строк каждого раздела
     sections.each { section ->
         def from = getDataRow(dataRows, section).getIndex()
-        def to = getDataRow(dataRows, 'total' + section).getIndex() - 2
-        if (from <= to) {
-            sortRows.add(dataRows[from..to])
+        def to = getDataRow(dataRows, 'total' + section).getIndex() - 1
+        if (from < to) {
+            sortRows.add(dataRows.subList(from, to))
         }
     }
 
@@ -529,7 +529,7 @@ void sortFormDataRows(def saveInDB = true) {
         def lastRow = getDataRow(dataRows, 'total' + section)
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
-        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+        def sectionsRows = (from < to ? dataRows.subList(from, to) : [])
 
         // Массовое разыменование строк НФ
         def columnList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }

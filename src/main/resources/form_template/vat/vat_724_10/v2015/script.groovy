@@ -267,8 +267,8 @@ def getLastRowIndex(def dataRows, def section) {
 
 def getSectionRows(def dataRows, def section, def onlySimpleRows = false) {
     def from = getFirstRowIndex(dataRows, section)
-    def to = getLastRowIndex(dataRows, section) - (onlySimpleRows ? 2 : 1)
-    def sectionsRows = (from <= to ? dataRows[from..to] : [])
+    def to = getLastRowIndex(dataRows, section) - (onlySimpleRows ? 1 : 0)
+    def sectionsRows = (from < to ? dataRows.subList(from, to) : [])
     return sectionsRows
 }
 

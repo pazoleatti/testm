@@ -775,23 +775,23 @@ void sort(def dataRows) {
 
     // первые строки
     def from = 0
-    def to = getDataRow(dataRows, 'total').getIndex() - 2
-    if (from <= to) {
-        sortRows.add(dataRows[from..to])
+    def to = getDataRow(dataRows, 'total').getIndex() - 1
+    if (from < to) {
+        sortRows.add(dataRows.subList(from, to))
     }
 
     // раздел А
     from = getDataRow(dataRows, 'A').getIndex()
-    to = getDataRow(dataRows, 'totalA').getIndex() - 2
-    if (from <= to) {
-        sortRows.add(dataRows[from..to])
+    to = getDataRow(dataRows, 'totalA').getIndex() - 1
+    if (from < to) {
+        sortRows.add(dataRows.subList(from, to))
     }
 
     // раздела Б
     from = getDataRow(dataRows, 'B').getIndex()
-    to = getDataRow(dataRows, 'totalB').getIndex() - 2
-    if (from <= to) {
-        sortRows.add(dataRows[from..to])
+    to = getDataRow(dataRows, 'totalB').getIndex() - 1
+    if (from < to) {
+        sortRows.add(dataRows.subList(from, to))
     }
 
     sortRows.each {
@@ -900,7 +900,7 @@ void sortFormDataRows() {
         def lastRow = getDataRow(dataRows, "total$section")
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
-        def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
+        def sectionRows = (from < to ? dataRows.subList(from, to) : [])
 
         // Массовое разыменовывание граф НФ
         def columnNameList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
