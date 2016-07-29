@@ -1,6 +1,7 @@
 package form_template.vat.declaration_8_1.v2015
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
@@ -209,6 +210,9 @@ void preXmlCheck() {
                 break
             }
         }
+    } else {
+        logger.error("Расчет текущего экземпляра декларации не будет выполнен, т.к. раздел 8.1 должен формироваться в корректирующем периоде")
+        return
     }
     boolean isFirstCorrection = corrNumber == 1
     def declarationTypeName = isFirstCorrection ? declarationType8sourcesName : declarationType8_1Name
@@ -303,14 +307,12 @@ void generateXML() {
     def index = "0000081"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
-    // атрибуты, заполняемые по форме 937.1.1 (строки 001, 005 и 190 отдельно, остальное в массиве sourceDataRows)
-    def sourceDataRows = []
+    // атрибуты, заполняемые по форме 937.1.1 (строки 001, 005 и 190 отдельно, остальное в массиве sourceDataRowsAll)
+    def sourceDataRowsAll = []
     def code001 = 1
-    for (def formData : declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()) {
-        if (formData.formType.id == 616) {
-            sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
-            code001 = 0
-        }
+    for (def formData : getSources()) {
+        sourceDataRowsAll.addAll(formDataService.getDataRowHelper(formData)?.getAll())
+        code001 = 0
     }
     def code005 = getCode005(corrNumber)
     def code190 = (sourceSuperRow != null) ? sourceSuperRow.sumNdsPlus : code005
@@ -331,12 +333,13 @@ void generateXML() {
                                 (code190 != null ? [СумНДСИтП1Р8: code190] : [:])
                 ) {
                     hasPage = false
-                    for (def row : sourceDataRows) {
+                    def rowNum = 1
+                    for (def row : sourceDataRowsAll) {
                         if (row.getAlias() != null) {
                             continue
                         }
                         hasPage = true
-                        def code008 = row.rowNum
+                        def code008 = rowNum++
                         def code010 = row.typeCode
                         def code020 = getNumber(row.invoice)
                         def code030 = getDate(row.invoice)
@@ -493,6 +496,18 @@ def getCode005(def corrNumber) {
         }
     }
     return result
+}
+
+// получаем источники и сортируем по ТБ
+def getSources() {
+    def sourceFormDataList = []
+    for (def FormData formData : declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()) {
+        if (formData.formType.id == 616) {
+            sourceFormDataList.add(formData)
+        }
+    }
+    sourceFormDataList.sort { FormData formData -> getRefBookValue(30, formData.departmentId)?.NAME?.value }
+    return sourceFormDataList
 }
 
 // Логические проверки (Проверки значений атрибутов формы настроек подразделения, атрибутов файла формата законодателя)
