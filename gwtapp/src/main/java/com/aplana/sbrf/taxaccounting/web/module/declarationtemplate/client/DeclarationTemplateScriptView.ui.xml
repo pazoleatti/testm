@@ -9,12 +9,9 @@
         .table {
             z-index: 0;
             position: absolute !important;
-            bottom: 0;
-            right: 1px;
-            left: 1px;
-            top: 33px;
-            height: inherit !important;
-            border-top: 1px solid #aeaeac;
+            right: 4px;
+            left: 4px;
+            width: auto !important;
         }
 
     </ui:style>
