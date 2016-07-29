@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="">
-        <cell alias="fix1" colSpan="3" rowSpan="1" value="№"/>
-        <cell alias="sbrfCode1" colSpan="1" rowSpan="1" value="№"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1" value="№"/>
+        <cell alias="sbrfCode1" colSpan="2" rowSpan="1" value="№"/>
         <cell alias="statReportId1" colSpan="1" rowSpan="1" value="№"/>
         <cell alias="fix2" colSpan="1" rowSpan="1" value=""/>
         <cell alias="depName1" colSpan="2" rowSpan="1" value="Наименование статей"/>
