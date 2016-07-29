@@ -14,7 +14,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Matchers.*;
@@ -116,7 +115,7 @@ public class Summary2Test extends ScriptTestBase {
 
     @Test
     public void create() {
-        when(testHelper.getFormDataService().find(anyInt(), any(FormDataKind.class), anyInt(), (Integer) anyInt(), any(Integer.class), any(Boolean.class))).thenReturn(null);
+        when(testHelper.getFormDataService().find(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), any(Integer.class), any(Boolean.class))).thenReturn(null);
 
         testHelper.execute(FormDataEvent.CREATE);
         Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
@@ -137,7 +136,6 @@ public class Summary2Test extends ScriptTestBase {
         formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//deal//summary2//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         String msg;
         int i;
 
@@ -474,7 +472,6 @@ public class Summary2Test extends ScriptTestBase {
         Long testLong = 100L;
         Long testRefbookId = 1L;
         DataRow<Cell> row;
-        // TODO (Ramil Timerbaev) сделать аналогично как в тестах старого сводного отчета
         switch (sourceTemplateId) {
             case 816:
             case 804:
