@@ -212,23 +212,14 @@ def providerCache = [:]
 
 def getRatingRecord(def rating) {
     def ratingString = getRefBookValue(604, rating)?.NAME?.value
-    def filter = 'LOWER(INTERNATIONAL_CREDIT_RATING) = LOWER(\'' + ratingString + '\')'
+    def filter = 'LOWER(CREDIT_RATING) = LOWER(\'' + ratingString + '\')'
     if (recordCache[filter] == null) {
-        def provider = formDataService.getRefBookProvider(refBookFactory, 602L, providerCache)
+        def provider = formDataService.getRefBookProvider(refBookFactory, 603L, providerCache)
         recordCache.put(filter, provider.getRecords(getReportPeriodEndDate(), null, filter, null))
     }
-    def interRecords = recordCache[filter]
-    if (interRecords != null && !interRecords.isEmpty()) {
-        def interRecord = interRecords[0]
-        filter = 'INTERNATIONAL_CREDIT_RATING = ' + interRecord.record_id.value
-        if (recordCache[filter] == null) {
-            def provider = formDataService.getRefBookProvider(refBookFactory, 603L, providerCache)
-            recordCache.put(filter, provider.getRecords(getReportPeriodEndDate(), null, filter, null))
-        }
-        def records = recordCache[filter]
-        if (records != null && !records.isEmpty()) {
-            return records[0]
-        }
+    def records = recordCache[filter]
+    if (records != null && !records.isEmpty()) {
+        return records[0]
     }
     return null
 }
