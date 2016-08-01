@@ -521,6 +521,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     protected void createDataForTable() {
         rowNumber = (rowNumber > sheet.getLastRowNum() ? sheet.getLastRowNum() : rowNumber);//if we have empty strings
         sheet.shiftRows(rowNumber, sheet.getLastRowNum(), dataRows.size() + 2);
+        sheet.createFreezePane(0, rowNumber);
 		// перебираем строки
         for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow : dataRows) {
             Row row = sheet.getRow(rowNumber) != null ? sheet.getRow(rowNumber++) : sheet.createRow(rowNumber++);
