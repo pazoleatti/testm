@@ -64,7 +64,7 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<C
 				String colAlias = ((DataRowColumn)getTable().getColumn(i)).getAlias();
 				if (!newHeaders.isEmpty() && (colAlias != null) && (header.getCell(colAlias).getValue() != null) && !header.getCell(colAlias).hasValueOwner()) {
                     String columnWidth = getTable().getColumnWidth(getTable().getColumn(i));
-					boolean needBorder = (header.getCell(colAlias).getColumn().getWidth() != 0)
+					boolean needBorder = (header.getCell(colAlias).getColSpan() != 1) || (header.getCell(colAlias).getColumn().getWidth() != 0)
                             && !columnWidth.equals("0em") && !columnWidth.equals("0.0em")
                             && !columnWidth.equals("0px") && !columnWidth.equals("0.0px");
                     if (needBorder) {
