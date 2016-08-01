@@ -76,7 +76,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			Range range = display.getVisibleRange();
             formDataTableFixed.setPageStart(range.getStart());
             formDataTableFixed.setPageSize(range.getLength());
-            setupFixedHeader();
 			getUiHandlers().onRangeChange(range.getStart(), range.getLength());
 		}
 	};
@@ -303,10 +302,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     private void setupFixedHeader() {
         if (formDataTableFixed.getHeaderWidget() != null) {
-            int headerHeight = formDataTable.getTableHeadElement().getClientHeight();
-            formDataTableFixed.getTableHeadElement().getStyle().setHeight(headerHeight, com.google.gwt.dom.client.Style.Unit.PX);
-            formDataTableFixed.getContentPanel().getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.RELATIVE);
-            formDataTableFixed.getHeaderWidget().getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.RELATIVE);
+            int headerHeight = formDataTable.getTableHeadElement().getOffsetHeight();
+            formDataTableFixed.getHeaderWidget().getElement().getStyle().setHeight(headerHeight, Style.Unit.PX);
+            formDataTableFixed.getTableHeadElement().getRows().getItem(0).getStyle().setHeight(headerHeight, Style.Unit.PX);
         }
     }
 
@@ -466,6 +464,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void addCustomHeader(List<DataRow<HeaderCell>> headers) {
 		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false, 1, headers);
 		formDataTable.setHeaderBuilder(builder);
+        setFixedTableHeaderBuilder();
 	}
 
 	// После вызова этого метода таблица получает возможность объединять ячейки и применять стили
@@ -475,6 +474,18 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		formDataTable.setTableBuilder(builder);
         setFixedTableBuilder();
 	}
+
+    private void setFixedTableHeaderBuilder() {
+        List<DataRow<HeaderCell>> header = new ArrayList<DataRow<HeaderCell>>();
+        header.add(new DataRow<HeaderCell>());
+        formDataTableFixed.setHeaderBuilder(new CustomHeaderBuilder(formDataTableFixed, false, 1, header) {
+            @Override
+            protected void addRowAttributes(TableRowBuilder row) {
+                int headerHeight = formDataTable.getTableHeadElement().getOffsetHeight();
+                row.attribute("height", headerHeight);
+            }
+        });
+    }
 
     private void setFixedTableBuilder() {
         formDataTableFixed.setTableBuilder(new CustomTableBuilder<DataRow<Cell>>(formDataTableFixed, false) {
