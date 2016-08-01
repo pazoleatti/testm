@@ -31,7 +31,7 @@
         <alias>creditRating</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Кредитный рейтинг заемщика</name>
+        <name>Кредитный рейтинг заёмщика</name>
         <order>3</order>
         <width>5</width>
         <maxLength>10</maxLength>
