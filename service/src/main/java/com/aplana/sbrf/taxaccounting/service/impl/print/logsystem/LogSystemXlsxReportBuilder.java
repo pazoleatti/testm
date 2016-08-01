@@ -124,6 +124,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_DATA_FORMAT);
 
+        sheet.createFreezePane(0, rowNumber);
         for(LogSearchResultItem item : items){
             if (LOG.isDebugEnabled())
                 LOG.debug("Data table " + item);

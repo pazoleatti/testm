@@ -112,6 +112,7 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
         cs.setBorderRight(CellStyle.BORDER_DOUBLE);
         cs.setBorderLeft(CellStyle.BORDER_DOUBLE);
 
+        sheet.createFreezePane(0, sheet.getLastRowNum() + 1);
         for (TAUserView user : taUserList){
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 

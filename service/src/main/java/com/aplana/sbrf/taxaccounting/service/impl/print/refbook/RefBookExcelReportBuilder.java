@@ -168,6 +168,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         if (LOG.isDebugEnabled())
             LOG.debug("Fill data for table. " + getClass() + "Data size: " + records.size());
 
+        sheet.createFreezePane(0, rowNumber);
         if (!refBook.isHierarchic()) {
             for (Map<String, RefBookValue> record : records) {
                 createRow(record);
