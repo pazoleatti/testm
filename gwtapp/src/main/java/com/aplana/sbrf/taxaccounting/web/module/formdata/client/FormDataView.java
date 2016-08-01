@@ -444,6 +444,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         factory.setLockMode(lockMode);
     }
 
+    @Override
+    public void redrawTable() {
+        formDataTable.redraw();
+    }
+
 	@Override
 	public void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData) {
 		formDataTable.setRowCount(totalCount);
