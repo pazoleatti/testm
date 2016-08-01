@@ -455,7 +455,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         if (needScrollToRow != null && !fixedRows) {
             selectRow(needScrollToRow);
             formDataTable.setKeyboardSelectedRow(needScrollToRow - 1 - formDataTable.getPageStart());
-            formDataTable.setKeyboardSelectedColumn(0);
+            formDataTable.setKeyboardSelectedColumn(1);
             needScrollToRow = null;
         }
     }
@@ -1012,7 +1012,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     public void setupSelectionModel(boolean fixedRows) {
         this.fixedRows = fixedRows;
         singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>(KEY_PROVIDER);
-        formDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
+        formDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.BOUND_TO_SELECTION);
         singleSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
