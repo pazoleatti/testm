@@ -52,7 +52,7 @@ public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationT
 
 	@UiField
 	@Editor.Ignore
-	Button saveButton, resetButton, cancelButton, activateVersion;
+	Button saveButton, cancelButton, activateVersion;
 
 	@UiField
 	@Editor.Ignore
@@ -164,14 +164,6 @@ public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationT
 	public void onSave(ClickEvent event){
         getUiHandlers().setOnLeaveConfirmation(null);
         getUiHandlers().save();
-	}
-
-
-	@UiHandler("resetButton")
-	public void onReset(ClickEvent event){
-		if(getUiHandlers()!=null){
-			getUiHandlers().reset();
-		}
 	}
 
 	@UiHandler("cancelButton")

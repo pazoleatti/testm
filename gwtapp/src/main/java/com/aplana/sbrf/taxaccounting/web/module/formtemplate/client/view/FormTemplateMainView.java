@@ -39,9 +39,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	Button saveButton;
 
 	@UiField
-	Button resetButton;
-
-	@UiField
 	Button cancelButton;
 
     @UiField
@@ -100,13 +97,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 		if(getUiHandlers()!=null){
 			getUiHandlers().setOnLeaveConfirmation(null);
 			getUiHandlers().save();
-		}
-	}
-
-	@UiHandler("resetButton")
-	public void onReset(ClickEvent event){
-		if(getUiHandlers()!=null){
-			getUiHandlers().reset();
 		}
 	}
 
