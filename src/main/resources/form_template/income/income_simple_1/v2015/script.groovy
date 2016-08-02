@@ -200,7 +200,7 @@ void fillRecordsMap(List<String> values, Date date) {
  * @param number балансовый счёт по учёту дохода (графа 4 сводной)
  */
 def getFilterForRefbook28(def knu, def number) {
-    def tmpNumber = number.replace('.', '')
+    def tmpNumber = number?.replace('.', '')
     return "LOWER(CODE) = LOWER('$knu') and LOWER(NUMBER) = LOWER('$tmpNumber')"
 }
 

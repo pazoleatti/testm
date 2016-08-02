@@ -206,11 +206,14 @@ void generateXML() {
     code070 = codes?.code070
 
     def formData724_1_1 = getFormData724_1_1()
-    def rowsMap = getRows18And10Map(formData724_1_1)
+    def rowsMap = getTotals724_1_1Map(formData724_1_1)
     def row18 = rowsMap?.row18
     def row10 = rowsMap?.row10
-    code310 = (row18 ? row18.sumPlus : code020)
-    code320 = (row10 ? row10.sumPlus : code030)
+    def total1 = rowsMap?.total1 // итог по секции 1
+    def total2 = rowsMap?.total2 // итог по секции 2
+    def total7 = rowsMap?.total7 // итог по секции 7
+    code310 = ((total1 || total7) ? ((total1?.sumPlus ?: BigDecimal.ZERO) + (total7?.sumPlus ?: BigDecimal.ZERO)) : code020)
+    code320 = (total2 ? total2.sumPlus : code030)
     code330 = code040
     code340 = (row18 ? row18.sumNdsPlus : code050)
     code350 = (row10 ? row10.sumNdsPlus : code060)
@@ -641,7 +644,13 @@ void preCalcCheck() {
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
-    def correctionNumber = getCorrectionNumber(declarationData.departmentReportPeriodId)
+    def correctionNumber = getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
+
+    if(correctionNumber == 0){
+        logger.error("Расчет текущего экземпляра декларации не будет выполнен, т.к. раздел 9.1 должен формироваться в корректирующем периоде")
+        return
+    }
+
     def departmentName = departmentService.get(bankDepartmentId)?.name
     def year = getReportPeriod()?.taxPeriod?.year
     def period = getReportPeriod()?.name
@@ -683,34 +692,34 @@ void preCalcCheck() {
     if (formData) {
         correctionDate = getDepartmentReportPeriod(formData.departmentReportPeriodId)?.correctionDate?.format('dd.MM.yyyy')
         // поиск строк
-        def rowsMap = getRows18And10Map(formData)
+        def rowsMap = getTotals724_1_1Map(formData)
         def row18 = rowsMap?.row18
         def row10 = rowsMap?.row10
+        def total1 = rowsMap?.total1 // итог по секции 1
+        def total2 = rowsMap?.total2 // итог по секции 2
+        def total7 = rowsMap?.total7 // итог по секции 7
 
-        if (row18 && row10) {
-            // сообщение 3
-            msg = "Для заполнения строк 310, 320, 340, 350 раздела 9.1 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «%s»."
-            logger.info(msg, formDataKind, formName, departmentName, periodName, correctionDate)
-        } else if (!row18 && !row10) {
-            // сообщение 4
-            msg = "Т.к. не найдены требуемые строки формы-источника 724.1.1, для заполнения строк 310, 320, 340, 350 раздела 9.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s»%s."
-            logger.info(msg, declarationName, departmentName, periodName, subMsg)
-        } else if (!row18 && row10) {
-            // сообщение 5.1
-            msg = "Т.к. не найдена требуемая строка формы-источника 724.1.1, для заполнения строк 310, 340 раздела 9.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s»%s."
-            logger.info(msg, declarationName, departmentName, periodName, subMsg)
+        def used724_1_1Map = ['310' : (total1 != null || total7 != null), '320' : (total2 != null), '340' : (row18 != null), '350' : (row10 != null)]
+        def codes724_1_1 = []
+        def codesDeclaration = []
+        used724_1_1Map.each { def code, use724_1_1 ->
+            if (use724_1_1) {
+                codes724_1_1 += code
+            } else {
+                codesDeclaration += code
+            }
+        }
 
-            // сообщение 5.2
-            msg = "Для заполнения строк 320, 350 раздела 9.1 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «%s»."
-            logger.info(msg, formDataKind, formName, departmentName, periodName, correctionDate)
-        } else {
-            // сообщение 5.1
-            msg = "Для заполнения строк 310, 340 раздела 9.1 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «%s»."
-            logger.info(msg, formDataKind, formName, departmentName, periodName, correctionDate)
+        // сообщение 5.1
+        if (!codes724_1_1.isEmpty()) {
+            msg = "Для заполнения строк %s раздела 9.1 определена форма-источник. Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s», Дата сдачи корректировки: «%s»."
+            logger.info(msg, codes724_1_1.join(', '), formDataKind, formName, departmentName, periodName, correctionDate)
+        }
 
-            // сообщение 5.2
-            msg = "Т.к. не найдена требуемая строка формы-источника 724.1.1, для заполнения строк 320, 350 раздела 9.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s»%s."
-            logger.info(msg, declarationName, departmentName, periodName, subMsg)
+        // сообщение 5.2
+        if (!codesDeclaration.isEmpty()) {
+            msg = "Т.к. не найдены требуемые строки формы-источника 724.1.1, для заполнения строк %s раздела 9.1 определена декларация-источник. Вид: «%s», Подразделение: «%s», Период: «%s»%s."
+            logger.info(msg, codesDeclaration.join(', '), declarationName, departmentName, periodName, subMsg)
         }
     } else {
         // сообщение 6
@@ -793,15 +802,21 @@ def getDeclarationXmlAttr(def declarationData, def treePath, def attrName) {
     return null
 }
 
-def getRows18And10Map(def formData) {
+def getTotals724_1_1Map(def formData) {
     if (formData == null) {
         return null
     }
     def rows = formDataService.getDataRowHelper(formData)?.getAll()
     def code = getRefBookValue(8, getReportPeriod()?.dictTaxPeriodId)?.CODE?.value
-    def rowAlias = 'super_sale_10_' + code
+    String rowAlias = 'super_sale_10_' + code
     def row10 = rows.find { it.getAlias() == rowAlias }
     rowAlias = 'super_sale_18_' + code
     def row18 = rows.find { it.getAlias() == rowAlias }
-    return [ 'row10' : row10, 'row18' : row18 ]
+    def map = [ 'row10' : row10, 'row18' : row18 ]
+    [1, 2, 7].each { section ->
+        rowAlias = 'total_' + section + '_' + code
+        def totalSection = rows.find { it.getAlias() == rowAlias }
+        map.put(((String) ("total" + section)), totalSection)
+    }
+    return map
 }

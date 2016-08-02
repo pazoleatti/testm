@@ -154,8 +154,9 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
                     ПоМесту: taxPlaceTypeCode
             ) {
                 def svnp = [ОКВЭД: okvedCode]
-                if (departmentParamTransportRow.OKVED_CODE) {
-                    svnp.Тлф = departmentParamTransportRow.PHONE
+                def phone = departmentParamTransportRow.PHONE
+                if (departmentParamTransportRow.OKVED_CODE && (phone != null) && !(phone.isEmpty())) {
+                    svnp.Тлф = phone
                 }
                 СвНП(svnp) {
                     НПЮЛ(
