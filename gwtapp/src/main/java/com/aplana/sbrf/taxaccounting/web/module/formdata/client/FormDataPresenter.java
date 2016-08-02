@@ -1229,7 +1229,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                     lockEditMode = result.getLockInfo().isEditMode();
                                     formMode = result.getFormMode();
                                 }
-                                getView().redrawTable();
                             }
 
                             @Override
