@@ -644,7 +644,13 @@ void preCalcCheck() {
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
-    def correctionNumber = getCorrectionNumber(declarationData.departmentReportPeriodId)
+    def correctionNumber = getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
+
+    if(correctionNumber == 0){
+        logger.error("Расчет текущего экземпляра декларации не будет выполнен, т.к. раздел 9.1 должен формироваться в корректирующем периоде")
+        return
+    }
+
     def departmentName = departmentService.get(bankDepartmentId)?.name
     def year = getReportPeriod()?.taxPeriod?.year
     def period = getReportPeriod()?.name
