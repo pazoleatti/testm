@@ -72,11 +72,11 @@ def allColumns = ['rowNum', 'nameBank', 'country', 'swift', 'creditRating', 'too
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['nameBank', 'country', 'swift', 'creditRating', 'tool', 'issueDate', 'expireDate', 'currency', 'sum', 'payRate']
+def editableColumns = ['nameBank', 'country', 'swift', 'creditRating', 'tool', 'issueDate', 'expireDate', 'period', 'currency', 'sum', 'payRate']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNum', 'period']
+def autoFillColumns = ['rowNum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -193,7 +193,6 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (row in dataRows) {
         calc2_3(row)
-        calc9(row)
     }
 }
 
@@ -210,12 +209,6 @@ void calc2_3(def row) {
     if (records != null && records.size() == 1) {
         row.nameBank = records.get(0).NAME.value
         row.country = records.get(0).COUNTRY_CODE.value
-    }
-}
-
-void calc9(def row) {
-    if (row.issueDate != null && row.expireDate != null) {
-        row.period = row.expireDate - row.issueDate
     }
 }
 
