@@ -280,6 +280,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.setImportIndex(fileRowIndex)
     def required = true
 
+    def debtorColIndex
     def colIndex = 0
     for (formColumn in formData.formColumns) {
         switch (formColumn.columnType) {
@@ -293,6 +294,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
                 break
             case ColumnType.STRING:
                 newRow[formColumn.alias] = values[colIndex]
+                if (formColumn.alias == 'debtorName') {
+                    debtorColIndex = colIndex + colOffset
+                }
                 break
             case ColumnType.REFBOOK:
                 def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
@@ -309,7 +313,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         colIndex++
     }
     // Заполнение общей информации о заемщике при загрузке из Excel
-    fillDebtorInfo(newRow)
+    fillDebtorInfo(newRow, 'innKio', 'debtorName', rowIndex, debtorColIndex)
     return newRow
 }
 
@@ -338,39 +342,50 @@ Map<Long, Map<String, RefBookValue>> getRecords520() {
     return records520
 }
 
-void fillDebtorInfo(def newRow) {
+void fillDebtorInfo(def newRow, def numberAlias, def debtorAlias, def rowIndex, def debtorIndex) {
     // Найти множество записей справочника «Участники ТЦО», периоды актуальности которых содержат определенную выше дату актуальности
     Map<Long, Map<String, RefBookValue>> records = getRecords520()
-    String debtorNumber = newRow.innKio
+    String debtorNumber = newRow[numberAlias]
+    String fileDebtorName = newRow[debtorAlias]
     if (debtorNumber == null || debtorNumber.isEmpty()) {
         return
     }
+    // ищем по ИНН и КИО
     def debtorRecords = records.values().findAll { def refBookValueMap ->
-        debtorNumber.equalsIgnoreCase(refBookValueMap.INN.stringValue) || debtorNumber.equalsIgnoreCase(refBookValueMap.KIO.stringValue)
+        debtorNumber.equalsIgnoreCase(refBookValueMap.INN.stringValue) ||
+                debtorNumber.equalsIgnoreCase(refBookValueMap.KIO.stringValue)
     }
     if (debtorRecords.size() > 1) {
-        logger.warn("Найдено больше одной записи соотвествующей данным ИНН/КИО = " + debtorNumber)
+        logger.warn("Строка %s: Найдено больше одной записи соотвествующей данным ИНН/КИО = %s", rowIndex, debtorNumber)
         return
     }
-    if (debtorRecords.size() == 0) {
+    if (debtorRecords.size() == 0) { // если в справочнике ТЦО записей нет
         return
     }
     // else
-    String fileDebtorName = newRow.debtorName
-    newRow.debtorName = debtorRecords[0].NAME?.stringValue ?: ""
-    if (! newRow.debtorName.equalsIgnoreCase(fileDebtorName)) {
-        def refBook = refBookFactory.get(520L)
-        def refBookAttrName = refBook.getAttribute('INN').name + '/' + refBook.getAttribute('KIO').name
+    // запись в справочнике ТЦО найдена, то берем данные из нее
+    newRow.put(debtorAlias, debtorRecords[0].NAME?.stringValue ?: "")
+    if (! newRow[debtorAlias].equalsIgnoreCase(fileDebtorName)) {
+        def refBook = refBookFactory.get(520)
+        def inn = debtorRecords[0].INN?.stringValue
+        def kio = debtorRecords[0].KIO?.stringValue
+        def attrCode
+        if (debtorNumber.equalsIgnoreCase(inn)) {
+            attrCode = 'INN'
+        } else if (debtorNumber.equalsIgnoreCase(kio)) {
+            attrCode = 'KIO'
+        }
+        def refBookAttrName = refBook.getAttribute(attrCode).name
         if (fileDebtorName) {
-            rowWarning(logger, newRow, String.format("На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
+            logger.warn("Строка %s, столбец %s: На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
                     "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
                     "В файле указано другое наименование заемщика - «%s»!",
-                    newRow.debtorName, refBookAttrName, newRow.innKio, fileDebtorName))
+                    rowIndex, getXLSColumnName(debtorIndex), newRow[debtorAlias], refBookAttrName, newRow[numberAlias], fileDebtorName)
         } else {
-            rowWarning(logger, newRow, String.format("На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
+            logger.warn("Строка %s, столбец %s: На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
                     "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
                     "Наименование заемщика в файле не заполнено!",
-                    newRow.debtorName, refBookAttrName, newRow.innKio))
+                    rowIndex, getXLSColumnName(debtorIndex), newRow[debtorAlias], refBookAttrName, newRow[numberAlias])
         }
     }
 }

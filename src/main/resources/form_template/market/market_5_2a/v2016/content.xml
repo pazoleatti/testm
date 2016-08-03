@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>5.2(а) Отчет о выданных Банком инструментах торгового финансирования</name>
+    <fullName>5.2(а) Отчет о выданных Банком инструментах торгового финансирования</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ п/п</name>
+        <order>1</order>
+        <width>5</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>nameBank</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование банка-эмитента</name>
+        <order>2</order>
+        <width>20</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>country</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Страна регистрации (местоположения)</name>
+        <order>3</order>
+        <width>9</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
+        <refBookAttributeId>53</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>swift</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>SWIFT</name>
+        <order>4</order>
+        <width>5</width>
+        <maxLength>11</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>creditRating</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Кредитный рейтинг</name>
+        <order>5</order>
+        <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>6034</nameAttributeId>
+        <refBookAttributeId>6034</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>tool</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Референс инструмента</name>
+        <order>6</order>
+        <width>6</width>
+        <maxLength>16</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>issueDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата выдачи</name>
+        <order>7</order>
+        <width>5</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>expireDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата окончания действия</name>
+        <order>8</order>
+        <width>5</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>period</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Срок обязательства (дней)</name>
+        <order>9</order>
+        <width>8</width>
+        <maxLength>4</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>currency</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Валюта обязательства</name>
+        <order>10</order>
+        <width>7</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>66</nameAttributeId>
+        <refBookAttributeId>65</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма обязательства, тыс. ед. валюты</name>
+        <order>11</order>
+        <width>10</width>
+        <maxLength>11</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>payRate</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Плата, % годовых</name>
+        <order>12</order>
+        <width>6</width>
+        <maxLength>6</maxLength>
+        <precision>4</precision>
+    </columns>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

@@ -1,4 +1,4 @@
-package form_template.market.market_2_6.v2016
+package form_template.market.market_5_2a.v2016
 
 import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -11,52 +11,23 @@ import groovy.transform.Field
 import java.math.RoundingMode
 
 /**
- * 2.6 (Ежемесячный) Отчет о состоянии кредитного портфеля
- * formTemplateId = 900
+ * 5.2(а) Отчет о выданных Банком инструментах торгового финансирования
+ * formTemplateId = 911
  *
  * @author Bulat Kinzyabulatov
  *
- * графа 1  - rowNum             - № п/п
- * графа 2  - codeBank           - Код банка
- * графа 3  - nameBank           - Наименование банка
- * графа 4  - depNumber          - Номер отделения, выдавшего кредит / кредитующее подразделение ЦА, к компетенции которого относится договор
- * графа 5  - okved              - Код отрасли по ОКВЭД
- * графа 6  - opf                - Организационно-правовая форма
- * графа 7  - debtorName         - Наименование заемщика
- * графа 8  - inn                - ИНН заемщика
- * графа 9  - sign               - Признак СМП
- * графа 10 - direction          - Направление бизнес плана, к которому относится кредит
- * графа 11 - law                - Номер Регламента, в рамках которого предоставлен кредит
- * графа 12 - creditType         - Тип кредита
- * графа 13 - docNum             - № кредитного договора
- * графа 14 - docDate            - Дата кредитного договора
- * графа 15 - creditDate         - Дата выдачи кредита
- * графа 16 - closeDate          - Дата погашения с учетом последней пролонгации
- * графа 17 - extendNum          - Количество пролонгаций
- * графа 18 - creditMode         - Режим кредитования
- * графа 19 - currencySum        - Валюта суммы кредита (лимита кредитной линии)
- * графа 20 - sumDoc             - Сумма кредита (по договору), лимит кредитной линии, тыс. ед. валюты
- * графа 21 - sumGiven           - Сумма выданного кредита, тыс. ед. валюты
- * графа 22 - rate               - Действующая процентная ставка
- * графа 23 - payFrequency       - Периодичность уплаты процентов
- * графа 24 - currencyCredit     - Валюта выдачи кредита
- * графа 25 - debtSum            - Остаток задолженности на отчетную дату (тыс. руб.). Ссудная задолженность, всего
- * графа 26 - inTimeDebtSum      - Остаток задолженности на отчетную дату (тыс. руб.). В т.ч. срочная
- * графа 27 - overdueDebtSum     - Остаток задолженности на отчетную дату (тыс. руб.). В т.ч. просроченная
- * графа 28 - percentDebtSum     - Остаток задолженности на отчетную дату (тыс. руб.). Задолженность по просроченным %
- * графа 29 - deptDate           - Дата вынесения на просрочку основного долга
- * графа 30 - percentDate        - Дата вынесения на просрочку процентов
- * графа 31 - percentPeriod      - Срок нахождения на счетах просроченных требований и/или процентов, дней
- * графа 32 - provision          - Обеспечение
- * графа 33 - provisionComment   - Примечание к обеспечению
- * графа 34 - loanSign           - Признак реструктурированной ссуды
- * графа 35 - loanQuality        - Категория качества ссуды
- * графа 36 - finPosition        - Финансовое положение
- * графа 37 - debtService        - Обслуживание долга
- * графа 38 - creditRisk         - Категория кредитного риска / класс кредитоспособности
- * графа 39 - portfolio          - Портфель однородных требований
- * графа 40 - reservePercent     - Величина отчислений в резерв, %
- * графа 41 - reserveSum         - Сформированный резерв в тыс. руб.
+ * графа 1  - rowNum          - № п/п
+ * графа 2  - nameBank        - Наименование банка-эмитента
+ * графа 3  - country         - Страна регистрации (местоположения)
+ * графа 4  - swift           - SWIFT
+ * графа 5  - creditRating    - Кредитный рейтинг
+ * графа 6  - tool            - Референс инструмента
+ * графа 7  - issueDate       - Дата выдачи
+ * графа 8  - expireDate      - Дата окончания действия
+ * графа 9  - period          - Срок обязательства (дней)
+ * графа 10 - currency        - Валюта обязательства
+ * графа 11 - sum             - Сумма обязательства, тыс. ед. валюты
+ * графа 12 - payRate         - Плата, % годовых
  */
 
 switch (formDataEvent) {
@@ -97,30 +68,19 @@ switch (formDataEvent) {
 }
 
 @Field
-def allColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtorName', 'inn', 'sign', 'direction',
-                  'law', 'creditType', 'docNum', 'docDate', 'creditDate', 'closeDate', 'extendNum', 'creditMode',
-                  'currencySum', 'sumDoc', 'sumGiven', 'rate', 'payFrequency', 'currencyCredit', 'debtSum', 'inTimeDebtSum',
-                  'overdueDebtSum', 'percentDebtSum', 'deptDate', 'percentDate', 'percentPeriod', 'provision', 'provisionComment',
-                  'loanSign', 'loanQuality', 'finPosition', 'debtService', 'creditRisk', 'portfolio', 'reservePercent', 'reserveSum']
+def allColumns = ['rowNum', 'nameBank', 'country', 'swift', 'creditRating', 'tool', 'issueDate', 'expireDate', 'period', 'currency', 'sum', 'payRate']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtorName', 'inn', 'sign', 'direction',
-                       'law', 'creditType', 'docNum', 'docDate', 'creditDate', 'closeDate', 'extendNum', 'creditMode',
-                       'currencySum', 'sumDoc', 'sumGiven', 'rate', 'payFrequency', 'currencyCredit', 'debtSum', 'inTimeDebtSum',
-                       'overdueDebtSum', 'percentDebtSum', 'deptDate', 'percentDate', 'percentPeriod', 'provision', 'provisionComment',
-                       'loanSign', 'loanQuality', 'finPosition', 'debtService', 'creditRisk', 'portfolio', 'reservePercent', 'reserveSum']
+def editableColumns = ['nameBank', 'country', 'swift', 'creditRating', 'tool', 'issueDate', 'expireDate', 'currency', 'sum', 'payRate']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = []
+def autoFillColumns = ['rowNum', 'period']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtorName', 'inn', 'sign', 'direction',
-                       'law', 'creditType', 'docNum', 'docDate', 'closeDate', 'extendNum', 'creditMode',
-                       'currencySum', 'sumDoc', 'sumGiven', 'rate', 'payFrequency', 'currencyCredit', 'debtSum', 'inTimeDebtSum',
-                       'overdueDebtSum', 'percentDebtSum', 'provision', 'loanSign', 'loanQuality', 'finPosition', 'debtService', 'creditRisk', 'reservePercent', 'reserveSum']
+def nonEmptyColumns = ['nameBank', 'swift', 'creditRating', 'tool', 'issueDate', 'expireDate', 'period', 'currency', 'sum', 'payRate']
 
 @Field
 def startDate = null
@@ -160,46 +120,37 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 }
 
 @Field
-def nonNegativeColumns = ['extendNum', 'sumDoc', 'sumGiven', 'rate', 'debtSum', 'inTimeDebtSum',
-                  'overdueDebtSum', 'percentDebtSum', 'percentPeriod', 'reservePercent', 'reserveSum']
+def nonNegativeColumns = ['period', 'payRate']
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    // групируем по графам 8, 13, 14
+    // групируем по графам 4, 6, 7
     def rowsMap = [:]
     for (row in dataRows) {
         // 1. Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
-        // 2. 17, 20, 21, 22,  25, 26, 27, 28, 31, 40, 41 неотрицательность графы
+        // 2. 9, 12 неотрицательность графы
         nonNegativeColumns.each { alias ->
             if (row[alias] != null && row[alias] < 0) {
                 logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно 0!", row.getIndex(), getColumnName(row, alias))
             }
         }
         // 3. Положительность графы
-        if (row.payFrequency != null && row.payFrequency <= 0) {
-            logger.error("Строка %s: Значение графы «%s» должно быть больше 0!", row.getIndex(), getColumnName(row, 'payFrequency'))
+        if (row.sum != null && row.sum <= 0) {
+            logger.error("Строка %s: Значение графы «%s» должно быть больше 0!", row.getIndex(), getColumnName(row, 'sum'))
         }
-        // 4. Проверка даты выдачи кредита
-        if (row.docDate != null && row.creditDate != null && (row.creditDate < row.docDate)) {
-            logger.warn("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»!",
-                row.getIndex(), getColumnName(row, 'creditDate'), getColumnName(row, 'docDate'))
-        }
-        // 5. Проверка даты погашения кредита
-        if (row.docDate != null && row.closeDate != null && (row.closeDate < row.docDate)) {
+        // 4. Дата выдачи должна попадать в отчетный период
+        checkDatePeriod(logger, row, 'issueDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
+        // 5. Проверка даты выдачи обязательства
+        if (row.issueDate != null && row.expireDate != null && (row.expireDate < row.issueDate)) {
             logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»!",
-                    row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'docDate'))
+                    row.getIndex(), getColumnName(row, 'expireDate'), getColumnName(row, 'issueDate'))
         }
-        // 6. Проверка даты погашения кредита 2
-        if (row.creditDate != null && row.closeDate != null && (row.closeDate < row.creditDate)) {
-            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»!",
-                    row.getIndex(), getColumnName(row, 'closeDate'), getColumnName(row, 'creditDate'))
-        }
-        // 7. Проверка валюты
-        if (row.currencySum != null && ("RUB".equals(getRefBookValue(15, row.currencySum).CODE_2.value))) {
+        // 6. Проверка валюты
+        if (row.currency != null && ("RUB".equals(getRefBookValue(15, row.currency).CODE_2.value))) {
             logger.error("Строка %s: Для российского рубля должно быть проставлено буквенное значение RUR!", row.getIndex())
         }
-        // 8. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
+        // 7. Проверка на отсутствие нескольких записей по одном и тому же ИТФ
         // группируем
         def key = getKey(row)
         if (rowsMap[key] == null) {
@@ -207,20 +158,20 @@ void logicCheck() {
         }
         rowsMap[key].add(row)
     }
-    // 8. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
+    // 7. Проверка на отсутствие нескольких записей по одном и тому же ИТФ
     rowsMap.each { def key, rows ->
         def size = rows.size()
         // пропускаем первую строку
         for (int i = 1; i < size; i++) {
             def row = rows[i]
             logger.error("Строка %s: На форме уже существует строка со значениями граф «%s» = «%s», «%s» = «%s», «%s» = «%s»!",
-                row.getIndex(), getColumnName(row, 'inn'), row.inn, getColumnName(row, 'docNum'), row.docNum, getColumnName(row, 'docDate'), row.docDate?.format('dd.MM.yyyy') ?: '')
+                row.getIndex(), getColumnName(row, 'swift'), row.swift, getColumnName(row, 'tool'), row.tool, getColumnName(row, 'issueDate'), row.issueDate?.format('dd.MM.yyyy') ?: '')
         }
     }
 }
 
 String getKey(def row) {
-    return (row.inn?.trim() + "#" + row.docNum?.trim() + "#" + row.docDate?.format('dd.MM.yyyy')).toLowerCase()
+    return (row.swift?.trim() + "#" + row.tool?.trim() + "#" + row.issueDate?.format('dd.MM.yyyy')).toLowerCase()
 }
 
 @Field
@@ -229,8 +180,8 @@ def recordCache = [:]
 @Field
 def providerCache = [:]
 
-def getRecords(def inn) {
-    def filter = 'LOWER(INN) = LOWER(\'' + inn + '\') OR LOWER(KIO) = LOWER(\'' + inn + '\')'
+def getRecords(def swift) {
+    def filter = 'LOWER(SWIFT) = LOWER(\'' + swift + '\') OR LOWER(INN) = LOWER(\'' + swift + '\') OR LOWER(KIO) = LOWER(\'' + swift + '\')'
     def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
     if (recordCache[filter] == null) {
         recordCache.put(filter, provider.getRecords(getReportPeriodEndDate(), null, filter, null))
@@ -241,32 +192,36 @@ def getRecords(def inn) {
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (row in dataRows) {
-        calc7(row)
+        calc2_3(row)
+        calc9(row)
     }
 }
 
-@Field
-def exclusiveInns = ['9999999999', '9999999998']
+void calc2_3(def row) {
+//    1.	Найти в справочнике «Участники ТЦО» запись, для которой выполнено одно из условий:
+//            -	Значение поля «Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)» равно значению графы 4;
+//    -	Значение поля «ИНН (заполняется для резидентов, некредитных организаций)» = значение графы 4;
+//    -	Значение поля «КИО (заполняется для нерезидентов)» = значение графы 4.
+//    2.	Если запись найдена, тогда:
+//    Графа 2 = значение поля «Полное наименование юридического лица с указанием ОПФ»;
+//    Графа 3 = значение поля «Краткое наименование» записи справочника ОК 025-2001 (Общероссийский классификатор стран мира), у которой значение поле «Код» равно значению поля «Код страны по ОКСМ» найденной записи справочника «Участники ТЦО».
+//    3.	Если запись не найдена, тогда графа 2 и графа 3 не рассчитываются (если до выполнения расчета в графе 2 и 3 были указаны значения, то эти значения должны сохраниться)
+    def records = getRecords(row.swift?.trim()?.toLowerCase())
+    if (records != null && records.size() == 1) {
+        row.nameBank = records.get(0).NAME.value
+        row.country = records.get(0).COUNTRY_CODE.value
+    }
+}
 
-void calc7(def row) {
-    //Если значение графы 8 не равно значениям “9999999999”, “9999999998”, тогда:
-    //1.	Найти в справочнике «Участники ТЦО» запись, для которой выполнено одно из условий:
-    //        -	Значение поля «ИНН (заполняется для резидентов, некредитных организаций)» = значение графы 8;
-    //-	Значение поля «КИО (заполняется для нерезидентов)» = значение графы 8.
-    //2.	Если запись найдена, тогда:
-    //Графа 7 = значение поля «Полное наименование юридического лица с указанием ОПФ».
-    //3.	Если запись не найдена, тогда графа 7 не рассчитывается (если до выполнения расчета в графе 7 было указано значение, то это значение должно сохраниться)
-    if (!exclusiveInns.contains(row.inn)) {
-        def records = getRecords(row.inn?.trim()?.toLowerCase())
-        if (records != null && records.size() == 1) {
-            row.debtorName = records.get(0).NAME.value
-        }
+void calc9(def row) {
+    if (row.issueDate != null && row.expireDate != null) {
+        row.period = row.expireDate - row.issueDate
     }
 }
 
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 41
+    int COLUMN_COUNT = 12
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = tmpRow.getCell('rowNum').column.name
     String TABLE_END_VALUE = null
@@ -335,7 +290,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
     def headerMapping =[[:]]
     def index = 0
     allColumns.each { alias ->
-        if (!['inTimeDebtSum', 'overdueDebtSum', 'percentDebtSum'].contains(alias)) {
+        if (['rowNum', 'nameBank', 'tool'].contains(alias)) {
             headerMapping.add(([(headerRows[0][index]): headers[0][alias]]))
         }
         headerMapping.add(([(headerRows[1][index]): headers[1][alias]]))
@@ -358,8 +313,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
     def required = true
+    def countryString
+    def countryColIndex
     def debtorColIndex
-
     def colIndex = 0
     for (formColumn in formData.formColumns) {
         switch (formColumn.columnType) {
@@ -373,26 +329,32 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
                 break
             case ColumnType.STRING:
                 newRow[formColumn.alias] = values[colIndex]
-                if (formColumn.alias == 'debtorName') {
+                if (formColumn.alias == 'nameBank') {
                     debtorColIndex = colIndex + colOffset
                 }
                 break
             case ColumnType.REFBOOK:
-                def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
-                def refBookId = refBookFactory.getByAttribute(refBookAttribute.id).id
-                def refBookAttrAlias = refBookAttribute.alias
-                def value = values[colIndex]
-                if (RefBookAttributeType.NUMBER.equals(refBookAttribute.attributeType)) {
-                    value = new BigDecimal(value).setScale(refBookAttribute.precision, RoundingMode.HALF_UP).toString()
+                if (formColumn.alias != 'country') {
+                    def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
+                    def refBookId = refBookFactory.getByAttribute(refBookAttribute.id).id
+                    def refBookAttrAlias = refBookAttribute.alias
+                    def value = values[colIndex]
+                    if (RefBookAttributeType.NUMBER.equals(refBookAttribute.attributeType)) {
+                        value = new BigDecimal(value).setScale(refBookAttribute.precision, RoundingMode.HALF_UP).toString()
+                    }
+                    def recordId = getRecordIdImport(refBookId, refBookAttrAlias, value, fileRowIndex, colIndex + colOffset, false)
+                    newRow[formColumn.alias] = recordId
+                } else {
+                    countryString = values[colIndex]
+                    countryColIndex = colIndex + colOffset
+                    // заполняем в fillDebtorInfo
                 }
-                def recordId = getRecordIdImport(refBookId, refBookAttrAlias, value, fileRowIndex, colIndex + colOffset, false)
-                newRow[formColumn.alias] = recordId
                 break
         }
         colIndex++
     }
     // Заполнение общей информации о заемщике при загрузке из Excel
-    fillDebtorInfo(newRow, 'inn', 'debtorName', rowIndex, debtorColIndex)
+    fillDebtorInfo(newRow, 'swift', 'nameBank', 'country', countryString, rowIndex, debtorColIndex, countryColIndex)
     return newRow
 }
 
@@ -421,38 +383,59 @@ Map<Long, Map<String, RefBookValue>> getRecords520() {
     return records520
 }
 
-void fillDebtorInfo(def newRow, def numberAlias, def debtorAlias, def rowIndex, def debtorIndex) {
+void fillDebtorInfo(def newRow, def numberAlias, def debtorAlias, def countryAlias, def countryString, def rowIndex, def debtorIndex, def countryIndex) {
     // Найти множество записей справочника «Участники ТЦО», периоды актуальности которых содержат определенную выше дату актуальности
     Map<Long, Map<String, RefBookValue>> records = getRecords520()
     String debtorNumber = newRow[numberAlias]
     String fileDebtorName = newRow[debtorAlias]
-    if (debtorNumber == null || debtorNumber.isEmpty() || exclusiveInns.contains(debtorNumber)) {
+    if (debtorNumber == null || debtorNumber.isEmpty()) {
         return
     }
-    // ищем по ИНН и КИО
+    // ищем по ИНН, КИО и SWIFT
     def debtorRecords = records.values().findAll { def refBookValueMap ->
         debtorNumber.equalsIgnoreCase(refBookValueMap.INN.stringValue) ||
-                debtorNumber.equalsIgnoreCase(refBookValueMap.KIO.stringValue)
+                debtorNumber.equalsIgnoreCase(refBookValueMap.KIO.stringValue) ||
+                debtorNumber.equalsIgnoreCase(refBookValueMap.SWIFT.stringValue)
     }
     if (debtorRecords.size() > 1) {
-        logger.warn("Строка %s: Найдено больше одной записи соотвествующей данным ИНН/КИО = %s", rowIndex, debtorNumber)
+        logger.warn("Строка %s: Найдено больше одной записи соотвествующей данным ИНН/КИО/SWIFT = %s", rowIndex, debtorNumber)
         return
     }
+    // находим страну по файлу
+    def countryRecord
+    if (countryString) {
+        def provider = formDataService.getRefBookProvider(refBookFactory, 10L, providerCache)
+        def filter = 'LOWER(NAME) = LOWER(\'' + countryString + '\') OR LOWER(FULLNAME) = LOWER(\'' + countryString + '\')'
+        def countryRecords = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+        if (countryRecords != null && !countryRecords.isEmpty() && countryRecords.size() == 1) {
+            countryRecord = countryRecords[0]
+        }
+    }
     if (debtorRecords.size() == 0) { // если в справочнике ТЦО записей нет
+        if (countryRecord != null) { // берем из файла
+            newRow.put(countryAlias, countryRecord.record_id.value)
+        } else { // если в файле не определилось, то выводим нефатальную ошибку
+            logger.warn("Строка %s, столбец %s: Страна с названием «%s» не найдена в справочнике «ОК 025-2001 (Общероссийский классификатор стран мира)»",
+                    rowIndex, getXLSColumnName(countryIndex), countryString)
+        }
         return
     }
     // else
     // запись в справочнике ТЦО найдена, то берем данные из нее
     newRow.put(debtorAlias, debtorRecords[0].NAME?.stringValue ?: "")
+    newRow.put(countryAlias, debtorRecords[0].COUNTRY_CODE?.value)
     if (! newRow[debtorAlias].equalsIgnoreCase(fileDebtorName)) {
         def refBook = refBookFactory.get(520)
         def inn = debtorRecords[0].INN?.stringValue
         def kio = debtorRecords[0].KIO?.stringValue
+        def swift = debtorRecords[0].SWIFT?.stringValue
         def attrCode
         if (debtorNumber.equalsIgnoreCase(inn)) {
             attrCode = 'INN'
         } else if (debtorNumber.equalsIgnoreCase(kio)) {
             attrCode = 'KIO'
+        } else if (debtorNumber.equalsIgnoreCase(swift)) {
+            attrCode = 'SWIFT'
         }
         def refBookAttrName = refBook.getAttribute(attrCode).name
         if (fileDebtorName) {
@@ -466,6 +449,14 @@ void fillDebtorInfo(def newRow, def numberAlias, def debtorAlias, def rowIndex, 
                     "Наименование заемщика в файле не заполнено!",
                     rowIndex, getXLSColumnName(debtorIndex), newRow[debtorAlias], refBookAttrName, newRow[numberAlias])
         }
+    }
+    countryRecord = getRefBookValue(10, debtorRecords[0].COUNTRY_CODE?.value)
+    def shortName = countryRecord.NAME.value
+    def fullName = countryRecord.FULLNAME.value
+    if (!shortName.equalsIgnoreCase(countryString) && !fullName.equalsIgnoreCase(countryString)) {
+        logger.warn("Строка %s, столбец %s содержит значение «%s», которое не соответствует справочному значению «%s», «%s» " +
+                "графы «Страна регистрации (местоположения заемщика)», найденному для «%s»!",
+                rowIndex, getXLSColumnName(countryIndex), countryString, shortName, fullName, newRow[debtorAlias])
     }
 }
 

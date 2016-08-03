@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.market.chd.v2016;
+package com.aplana.sbrf.taxaccounting.form_template.market.market_5_2a.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -18,20 +18,22 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
- * Отчет о кредитах (ЦХД)
+ * 5.2(а) Отчет о выданных Банком инструментах торгового финансирования
  */
-public class CHDTest extends ScriptTestBase {
-    private static final int TYPE_ID = 900;
+public class Market_5_2aTest extends ScriptTestBase {
+    private static final int TYPE_ID = 911;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -55,7 +57,7 @@ public class CHDTest extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(CHDTest.class);
+        return getDefaultScriptTestMockHelper(Market_5_2aTest.class);
     }
 
     @After
@@ -96,17 +98,16 @@ public class CHDTest extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Наименование заёмщика"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "ОПФ"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "ИНН / КИО заёмщика"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Номер кредитного договора"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата кредитного договора (дд.мм.гг.)"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата планируемого погашения с учетом последней пролонгации (дд.мм.гг.)"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Частичное погашение основного долга (Да / Нет)"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Срок кредита, лет"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Валюта суммы кредита"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма кредита (по договору), ед. валюты"), entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Процентная ставка, % годовых"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Наименование банка-эмитента"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "SWIFT"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Кредитный рейтинг"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Референс инструмента"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата выдачи"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Дата окончания действия"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Срок обязательства (дней)"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Валюта обязательства"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Сумма обязательства, тыс. ед. валюты"), entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.WRONG_NON_EMPTY, 1, "Плата, % годовых"), entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -116,47 +117,42 @@ public class CHDTest extends ScriptTestBase {
         // 5. Проверка даты выдачи кредита
         // 6. Проверка даты погашения кредита
         // 7. Проверка даты погашения кредита 2
-        row.getCell("name").setValue("string1", null);
-        row.getCell("opf").setValue(1L, null);
-        row.getCell("innKio").setValue("string2", null);
+        row.getCell("nameBank").setValue("string1", null);
+        row.getCell("country").setValue(1L, null);
+        row.getCell("swift").setValue("string2", null);
         row.getCell("creditRating").setValue(1L, null);
-        row.getCell("docNum").setValue("string3", null);
-        row.getCell("docDate").setValue(sdf.parse("04.01.2990"), null);
-        row.getCell("docDate2").setValue(sdf.parse("03.01.2990"), null);
-        row.getCell("docDate3").setValue(sdf.parse("02.01.2990"), null);
-        row.getCell("partRepayment").setValue(1L, null);
-        row.getCell("creditPeriod").setValue(-1L, null);
-        row.getCell("currencyCode").setValue(1L, null);
-        row.getCell("creditSum").setValue(-1L, null);
-        row.getCell("creditRate").setValue(1, null);
+        row.getCell("tool").setValue("string3", null);
+        row.getCell("issueDate").setValue(sdf.parse("04.01.2990"), null);
+        row.getCell("expireDate").setValue(sdf.parse("03.01.2990"), null);
+        row.getCell("period").setValue(-1L, null);
+        row.getCell("currency").setValue(1L, null);
+        row.getCell("sum").setValue(-1L, null);
+        row.getCell("payRate").setValue(1, null);
 
         testHelper.execute(FormDataEvent.CHECK);
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Срок кредита, лет» должно быть больше либо равно 0!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Сумма кредита (по договору), ед. валюты» должно быть больше либо равно 0!", entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата кредитного договора (дд.мм.гг.)","01.01.2014", "31.12.2014"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата выдачи (дд.мм.гг.)» должно быть больше либо равно значению графы «Дата кредитного договора (дд.мм.гг.)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата планируемого погашения с учетом последней пролонгации (дд.мм.гг.)» должно быть больше либо равно значению графы «Дата кредитного договора (дд.мм.гг.)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата планируемого погашения с учетом последней пролонгации (дд.мм.гг.)» должно быть больше либо равно значению графы «Дата выдачи (дд.мм.гг.)»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Срок обязательства (дней)» должно быть больше либо равно 0!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма обязательства, тыс. ед. валюты» должно быть больше 0!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата выдачи","01.01.2014", "31.12.2014"), entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Дата окончания действия» должно быть больше либо равно значению графы «Дата выдачи»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         // для попадания в ЛП:
         // 4. Проверка на отсутствие нескольких записей по одном и тому же кредитному договору
-        row.getCell("creditPeriod").setValue(1L, null);
-        row.getCell("creditSum").setValue(0L, null);
-        row.getCell("docDate").setValue(sdf.parse("02.01.2014"), null);
-        row.getCell("docDate2").setValue(sdf.parse("03.01.2014"), null);
-        row.getCell("docDate3").setValue(sdf.parse("04.01.2014"), null);
+        row.getCell("period").setValue(1L, null);
+        row.getCell("sum").setValue(1L, null);
+        row.getCell("issueDate").setValue(sdf.parse("02.01.2014"), null);
+        row.getCell("expireDate").setValue(sdf.parse("03.01.2014"), null);
         dataRows.add(row);
 
         testHelper.execute(FormDataEvent.CALCULATE);
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: На форме уже существует строка со значениями граф «ИНН / КИО заёмщика» = «string2», «Номер кредитного договора» = «string3», «Дата кредитного договора (дд.мм.гг.)» = «02.01.2014»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: На форме уже существует строка со значениями граф «SWIFT» = «string2», «Референс инструмента» = «string3», «Дата выдачи» = «02.01.2014»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -205,7 +201,26 @@ public class CHDTest extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
+        FormTemplate formTemplate = testHelper.getFormTemplate();
+        ((RefBookColumn) formTemplate.getColumn("currency")).setRefBookAttribute(new RefBookAttribute() {{
+            setId(65L);
+            setAttributeType(RefBookAttributeType.STRING);
+            setAlias("CODE_2");
+            setName("Код валюты. Буквенный");
+        }});
+        ((RefBookColumn) formTemplate.getColumn("creditRating")).setRefBookAttribute(new RefBookAttribute() {{
+            setId(6034L);
+            setAttributeType(RefBookAttributeType.STRING);
+            setAlias("SHORT_NAME");
+            setName("Наименование");
+        }});
+        when(testHelper.getRefBookFactory().getByAttribute(eq(6034L))).thenReturn(new RefBook() {{
+            setId(603L);
+        }});
+        when(testHelper.getRefBookFactory().getByAttribute(eq(65L))).thenReturn(new RefBook() {{
+            setId(15L);
+        }});
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(formTemplate);
         RefBookUniversal provider = mock(RefBookUniversal.class);
         provider.setRefBookId(10L);
         when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(10L), any(Map.class))).thenReturn(provider);
@@ -219,11 +234,14 @@ public class CHDTest extends ScriptTestBase {
                         char country = str.charAt(0);
                         long id = 0;
                         switch (country) {
-                            case 'A':  id = 1L;
+                            case 'A':
+                                id = 1L;
                                 break;
-                            case 'B':  id = 2L;
+                            case 'B':
+                                id = 2L;
                                 break;
-                            default: str = null;
+                            default:
+                                str = null;
                         }
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
@@ -232,31 +250,47 @@ public class CHDTest extends ScriptTestBase {
                         return result;
                     }
                 });
-        int expected = 2; // в файле 2 строки
+        int expected = 1; // в файле 1 строка
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
+        printLog();
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-        List<String> aliases = Arrays.asList("name", "innKio", "docNum", "docDate", "docDate2", "docDate3", "creditPeriod", "creditSum", "creditRate");
-        defaultCheckLoadData(aliases, expected);
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }
 
     // Проверить загруженные данные
     void checkLoadData(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(1L, dataRows.get(0).getCell("opf").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("opf").getNumericValue().longValue());
+        compareRow(dataRows.get(0), "Просто Банк", 1L, "SWIFT", 1L, "1", "01.01.2016", "01.07.2016", 182.00, 1L, 1000.00, 1.00);
+    }
 
-        Assert.assertEquals(1L, dataRows.get(0).getCell("country").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("country").getNumericValue().longValue());
-
-        Assert.assertEquals(1L, dataRows.get(0).getCell("creditRating").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("creditRating").getNumericValue().longValue());
-
-        Assert.assertEquals(1L, dataRows.get(0).getCell("partRepayment").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("partRepayment").getNumericValue().longValue());
-
-        Assert.assertEquals(1L, dataRows.get(0).getCell("currencyCode").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("currencyCode").getNumericValue().longValue());
+    void compareRow(DataRow<Cell> row, Object... args) {
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        int skipColumnCount = 1;
+        List<Column> columns = testHelper.getFormTemplate().getColumns();
+        for (int i = 0; i < (columns.size() - skipColumnCount); i++) {
+            int columnCount = i + skipColumnCount;
+            Column column = columns.get(columnCount);
+            Object expected = null;
+            String alias = column.getAlias();
+            if (i < args.length) {
+                expected = args[i];
+            }
+            if (expected != null) {
+                if (column.getColumnType() == ColumnType.NUMBER) {
+                    expected = BigDecimal.valueOf((Double) expected).setScale(((NumericColumn)column).getPrecision(), BigDecimal.ROUND_HALF_UP);
+                }
+                if (column.getColumnType() == ColumnType.DATE) {
+                    try {
+                        expected = format.parse((String)expected);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+                Assert.assertEquals("row." + alias + "[" + row.getIndex() + "]", expected, row.getCell(alias).getValue());
+            } else {
+                Assert.assertNull("row." + alias + "[" + row.getIndex() + "]", row.getCell(alias).getValue());
+            }
+        }
     }
 }
