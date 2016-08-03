@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -20,6 +21,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -165,15 +167,17 @@ public class TestScriptHelper {
             formTemplate.getRows().clear();
             String rowsString = readFile(path + ROWS_FILE_NAME, XML_ENCODING);
             if (rowsString != null && !rowsString.isEmpty()) {
-                formTemplate.getRows().addAll(xmlSerializationUtils.deserialize(rowsString,
-                        formTemplate.getColumns(), formTemplate.getStyles(), Cell.class));
+                List<DataRow<Cell>> fixedRows = xmlSerializationUtils.deserialize(rowsString, formTemplate.getColumns(), formTemplate.getStyles(), Cell.class);
+                FormDataUtils.setValueOwners(fixedRows);
+                formTemplate.getRows().addAll(fixedRows);
             }
             // headers.xml
             formTemplate.getHeaders().clear();
             String headersString = readFile(path + HEADERS_FILE_NAME, XML_ENCODING);
             if (headersString != null && !headersString.isEmpty()) {
-                formTemplate.getHeaders().addAll(xmlSerializationUtils.deserialize(headersString,
-                        formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class));
+                List<DataRow<HeaderCell>> headerRows = xmlSerializationUtils.deserialize(headersString, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class);
+                FormDataUtils.setValueOwners(headerRows);
+                formTemplate.getHeaders().addAll(headerRows);
             }
             if (isUsedInside) {
                 this.formTemplate = formTemplate;

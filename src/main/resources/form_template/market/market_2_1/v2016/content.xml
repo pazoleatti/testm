@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>true</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>2.1 (Ежемесячный) Реестр выданных Банком гарантий (контргарантий, поручительств)</name>
+    <fullName>2.1 (Ежемесячный) Реестр выданных Банком гарантий (контргарантий, поручительств)</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>code</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Код подразделения</name>
+        <order>1</order>
+        <width>7</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование подразделения</name>
+        <order>2</order>
+        <width>10</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ п/п</name>
+        <order>3</order>
+        <width>5</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>guarantor</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование подразделения-гаранта</name>
+        <order>4</order>
+        <width>10</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>vnd</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>ВНД, в рамках которого выдано ГО</name>
+        <order>5</order>
+        <width>10</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>level</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Уровень принятия решения о выдаче обязательства</name>
+        <order>6</order>
+        <width>10</width>
+        <maxLength>64</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>procuct1</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Вид обязательства. Продукт 1</name>
+        <order>7</order>
+        <width>10</width>
+        <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>procuct2</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Вид обязательства. Продукт 2 (используемые преференции)</name>
+        <order>8</order>
+        <width>10</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>procuct3</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Вид обязательства. Продукт 3 специфика обязательства</name>
+        <order>9</order>
+        <width>10</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>taxpayerName</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование Принципала / Налогоплательщика</name>
+        <order>10</order>
+        <width>10</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>taxpayerInn</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>ИНН Принципала / Налогоплательщика</name>
+        <order>11</order>
+        <width>10</width>
+        <maxLength>12</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>okved</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Код ОКВЭД Принципала</name>
+        <order>12</order>
+        <width>10</width>
+        <maxLength>16</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>creditRating</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Финансовое состояние Принципала. Рейтинг</name>
+        <order>13</order>
+        <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>6034</nameAttributeId>
+        <refBookAttributeId>6034</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>creditClass</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Финансовое состояние Принципала. Класс кредитоспособности</name>
+        <order>14</order>
+        <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>6011</nameAttributeId>
+        <refBookAttributeId>6011</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>beneficiaryName</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование Бенефициара</name>
+        <order>15</order>
+        <width>10</width>
+        <maxLength>240</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>beneficiaryInn</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>ИНН Бенефициара</name>
+        <order>16</order>
+        <width>10</width>
+        <maxLength>12</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>emitentName</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование Банка-эмитента (инструктируемого банка)</name>
+        <order>17</order>
+        <width>10</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>instructingName</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование инструктирующего банка</name>
+        <order>18</order>
+        <width>10</width>
+        <maxLength>240</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>number</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Номер обязательства</name>
+        <order>19</order>
+        <width>8</width>
+        <maxLength>240</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>issuanceDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата выдачи обязательства</name>
+        <order>20</order>
+        <width>8</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>additionDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата выдачи дополнения к обязательству</name>
+        <order>21</order>
+        <width>8</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>startDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата вступления в силу обязательства</name>
+        <order>22</order>
+        <width>8</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>conditionEffective</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Условие вступления обязательства в силу</name>
+        <order>23</order>
+        <width>10</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>endDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата окончания действия обязательства</name>
+        <order>24</order>
+        <width>8</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sumInCurrency</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма обязательства. В иностранной валюте</name>
+        <order>25</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sumInRub</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма обязательства. Рублёвый эквивалент на отчетную дату</name>
+        <order>26</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>currency</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Валюта обязательства</name>
+        <order>27</order>
+        <width>7</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>66</nameAttributeId>
+        <refBookAttributeId>65</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>debtBalance</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Остаток задолженности по обязательству на отчетную дату в рублевом эквиваленте, рублей (сч.91315.01)</name>
+        <order>28</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>isNonRecurring</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Порядок уплаты вознаграждения. Единовременно до выдачи обязательства</name>
+        <order>29</order>
+        <width>7</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>250</nameAttributeId>
+        <refBookAttributeId>250</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>paymentPeriodic</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Порядок уплаты вознаграждения. На периодической основе</name>
+        <order>30</order>
+        <width>10</width>
+        <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>isCharged</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Размер вознаграждения Банка. Вознаграждение взимается</name>
+        <order>31</order>
+        <width>7</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>250</nameAttributeId>
+        <refBookAttributeId>250</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>tariff</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Размер вознаграждения Банка. Тариф за выдачу обязательства (в процентах годовых / МБ процентах от суммы)</name>
+        <order>32</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>remuneration</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Размер вознаграждения Банка. Размер вознаграждения за выдачу обязательства, установленный в абсолютном выражении (в рублевом эквиваленте)</name>
+        <order>33</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>remunerationStartYear</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Размер вознаграждения Банка. Размер полученного вознаграждения нарастающим итогом с начала года (в рублевом эквиваленте)</name>
+        <order>34</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>remunerationIssuance</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Размер вознаграждения Банка. Размер полученного вознаграждения нарастающим итогом с даты выдачи обязательства (в рублевом эквиваленте)</name>
+        <order>35</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>provide</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Вид обеспечения обязательства</name>
+        <order>36</order>
+        <width>10</width>
+        <maxLength>64</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>numberGuarantee</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Серийный номер бланка гарантии / контргарантии</name>
+        <order>37</order>
+        <width>10</width>
+        <maxLength>240</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>numberAddition</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Серийный номер бланка дополнения к гарантии / контргарантии</name>
+        <order>38</order>
+        <width>10</width>
+        <maxLength>240</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>isGuaranetee</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Гарантийный случай по обязательству. Факт наступления гарантийного случая (по состоянию на отчетную дату)</name>
+        <order>39</order>
+        <width>7</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>250</nameAttributeId>
+        <refBookAttributeId>250</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>dateGuaranetee</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Гарантийный случай по обязательству. Дата исполнения Банком требования по обязательству при наступлении гарантийного случая</name>
+        <order>40</order>
+        <width>8</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sumGuaranetee</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Гарантийный случай по обязательству. Cумма исполнения Банком обязательства при наступлении гарантийного случая</name>
+        <order>41</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>term</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Гарантийный случай по обязательству. Срок возмещения платежа по исполненному Банком обязательству</name>
+        <order>42</order>
+        <width>10</width>
+        <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sumDiversion</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Гарантийный случай по обязательству. Размер платы за вынужденное отвлечение денежных средств (в процентах годовых)</name>
+        <order>43</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>arrears</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Наличие просроченной задолженности по уплате вознаграждения. Сумма просроченной задолженности Принципала по уплатевознаграждения по состоянию на отчетную дату (в рублевом эквиваленте)</name>
+        <order>44</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>arrearsDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Наличие просроченной задолженности по уплате вознаграждения. Дата переноса суммы задолженности Принципала по уплате вознаграждения на счет по учету просроченной задолженности</name>
+        <order>45</order>
+        <width>10</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>arrearsGuarantee</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Наличие просроченной задолженностиповозмещению платежапо гарантии. Сумма просроченной задолженности Принципала инструктирующего банка по возмещению платежа по гарантии по состоянию на отчетную дату (в рублевом эквиваленте)</name>
+        <order>46</order>
+        <width>12</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>arrearsGuaranteeDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Наличие просроченной задолженности повозмещению платежапо гарантии. Дата переноса суммы задолженности Принципала/ инструктирующего банка на счет по учету просроченной задолженности</name>
+        <order>47</order>
+        <width>10</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>reserve</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма резерва по обязательству, сформированная в соответствии с требованиями Регламента №1237-2-р (ежеквартально)</name>
+        <order>48</order>
+        <width>10</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>comment</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Комментарии</name>
+        <order>49</order>
+        <width>10</width>
+        <maxLength>240</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>segment</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Сегмент</name>
+        <order>50</order>
+        <width>10</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>
