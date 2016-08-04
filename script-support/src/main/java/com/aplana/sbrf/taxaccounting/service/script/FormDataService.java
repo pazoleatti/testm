@@ -266,7 +266,7 @@ public interface FormDataService {
      *
      * @param referenceValue значение зависомого поля (в загружаемом файле)
      * @param expectedValues список ожидаемых значений (в БД)
-     * @param parentColumnName названия родительской графы
+     * @param columnName название зависомой графы
      * @param parentColumnValue значение родительской графы
      * @param rowIndex номер строки в транспортном файле
      * @param colIndex номер колонки в транспортном файле
@@ -274,7 +274,7 @@ public interface FormDataService {
      * @param required фатальность/обязательность
      */
     void checkReferenceValue(String referenceValue, List<String> expectedValues,
-                                    String parentColumnName, String parentColumnValue,
+                                    String columnName, String parentColumnValue,
                                     int rowIndex, int colIndex, Logger logger, boolean required);
 
     /**

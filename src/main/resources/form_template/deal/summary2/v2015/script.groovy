@@ -1894,37 +1894,36 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         // 49. п. 020 "Сведения об организации"
         colIndex = 47
         def record513 = getRefBookValue(513, record520.ORG_CODE?.value)
-        def parentColumnName = getColumnName(newRow, 'organName')
         def parentColumnValue = record520?.NAME?.value
         def expectedValue = record513?.CODE?.value?.toString()
         def expValueNumeric = new BigDecimal(expectedValue).setScale(1).toString()
-        formDataService.checkReferenceValue(values[colIndex], [expectedValue, expValueNumeric], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue, expValueNumeric], getColumnName(newRow, 'organInfo'), parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 52. п. 050 "ИНН организации"
         colIndex = 50
         expectedValue = (record520.INNKIO?.stringValue != null ? record520.INNKIO?.stringValue : "")
-        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue], getColumnName(newRow, 'organINN'), parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 53. п. 060 "КПП организации"
         colIndex++
         expectedValue = (record520.KPP?.stringValue != null ? record520.KPP?.stringValue : "")
-        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue], getColumnName(newRow, 'organKPP'), parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 54. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
         colIndex++
         expectedValue = (record520.RS?.stringValue != null ? record520.RS?.stringValue : "")
-        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue], getColumnName(newRow, 'organRegNum'), parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 55. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
         colIndex++
         expectedValue = (record520.TAX_CODE_INCORPORATION?.stringValue != null ? record520.TAX_CODE_INCORPORATION?.stringValue : "")
-        formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
+        formDataService.checkReferenceValue(values[colIndex], [expectedValue], getColumnName(newRow, 'taxpayerCode'), parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
 
         // 56. п. 090 "Адрес"
         colIndex++
         if(record513?.CODE?.value == 2) {
             expectedValue = (record520.ADDRESS?.stringValue != null ? record520.ADDRESS?.stringValue : "")
-            formDataService.checkReferenceValue(values[colIndex], [expectedValue], parentColumnName, parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
+            formDataService.checkReferenceValue(values[colIndex], [expectedValue], getColumnName(newRow, 'address'), parentColumnValue, fileRowIndex, colIndex + colOffset, logger, false)
         }
         newRow.address = (record513?.CODE?.value == 2 ? record520?.ADDRESS?.value : '')
     }

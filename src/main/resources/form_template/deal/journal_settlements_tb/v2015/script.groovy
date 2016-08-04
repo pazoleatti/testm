@@ -529,7 +529,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     if (record520) {
         colIndex = 3
         def expectedValues = [ record520.NAME?.value ]
-        formDataService.checkReferenceValue(values[colIndex], expectedValues, getColumnName(newRow, 'statReportId'), record520?.STATREPORT_ID?.value, fileRowIndex, colIndex + colOffset, logger, false)
+        formDataService.checkReferenceValue(values[colIndex], expectedValues, getColumnName(newRow, 'orgName'), record520?.STATREPORT_ID?.value, fileRowIndex, colIndex + colOffset, logger, false)
     }
 
     // графа 5 - атрибут 66 - NAME - «Наименование», справочник 15 «Общероссийский классификатор валют»

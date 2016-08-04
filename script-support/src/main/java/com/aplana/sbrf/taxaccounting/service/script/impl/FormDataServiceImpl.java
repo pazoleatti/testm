@@ -601,7 +601,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public void checkReferenceValue(String referenceValue, List<String> expectedValues,
-                                    String parentColumnName, String parentColumnValue,
+                                    String columnName, String parentColumnValue,
                                     int rowIndex, int colIndex, Logger logger, boolean required) {
         if (checkReferenceValue(referenceValue, expectedValues)) {
             return;
@@ -616,7 +616,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         // обернуть значения из базы ковычками
         String expectedValuesInStr = StringUtils.join(tmpArray, "», «", null);
         String msg = String.format(ScriptUtils.REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR_2, rowIndex, ScriptUtils.getXLSColumnName(colIndex),
-                referenceValue, expectedValuesInStr, parentColumnName, parentColumnValue);
+                referenceValue, expectedValuesInStr, columnName, parentColumnValue);
         if (required) {
             throw new ServiceException("%s", msg);
         } else {
