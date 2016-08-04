@@ -16,11 +16,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellEnteredEditModeEvent;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellEnteredEditModeEventHandler;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -29,10 +25,6 @@ import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -45,10 +37,9 @@ import static com.google.gwt.dom.client.BrowserEvents.*;
  * An editable text cell. Click to edit, escape to cancel, return to commit.
  */
 public class KeyPressableTextInputCell extends
-        AbstractEditableCell<String, KeyPressableTextInputCell.ViewData>  implements HasHandlers, HasCellEnteredEditModeEvent {
+        AbstractEditableCell<String, KeyPressableTextInputCell.ViewData> {
 
     private boolean textRight = false;
-	private HandlerManager handlerManager;
 
     interface Template extends SafeHtmlTemplates {
         @Template("<input type=\"text\" value=\"{0}\" tabindex=\"-1\"></input>")
@@ -164,16 +155,6 @@ public class KeyPressableTextInputCell extends
 		this(SimpleSafeHtmlRenderer.getInstance(), false);
 	}
 
-	@Override
-	public void fireEvent(GwtEvent<?> event) {
-		handlerManager.fireEvent(event);
-	}
-
-	public HandlerRegistration addCellEnteredEditModeEventHandler(
-			CellEnteredEditModeEventHandler handler) {
-		return handlerManager.addHandler(CellEnteredEditModeEvent.TYPE, handler);
-	}
-
 	/**
 	 * Construct a new EditTextCell that will use a given {@link SafeHtmlRenderer}
 	 * to render the value when not in edit mode.
@@ -199,7 +180,6 @@ public class KeyPressableTextInputCell extends
 			throw new IllegalArgumentException("renderer == null");
 		}
 		this.renderer = renderer;
-		handlerManager = new HandlerManager(this);
 	}
 
 	@Override
@@ -230,8 +210,6 @@ public class KeyPressableTextInputCell extends
 					viewData.setEditing(true);
 				}
 				edit(context, parent, value);
-				CellEnteredEditModeEvent cellEnteredEditModeEvent = new CellEnteredEditModeEvent((DataRow<Cell>) context.getKey());
-				fireEvent(cellEnteredEditModeEvent);
 			}
 		}
 	}

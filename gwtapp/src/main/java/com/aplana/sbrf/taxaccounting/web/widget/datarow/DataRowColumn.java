@@ -1,10 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.HasCellEnteredEditModeEvent;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.KeyPressableTextInputCell;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellEnteredEditModeEvent;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellEnteredEditModeEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.google.gwt.cell.client.Cell;
@@ -33,14 +29,6 @@ public abstract class DataRowColumn<T> extends Column<DataRow<com.aplana.sbrf.ta
 	public HandlerRegistration addCellModifiedEventHandler(
 			CellModifiedEventHandler handler) {
 		return handlerManager.addHandler(CellModifiedEvent.TYPE, handler);
-	}
-
-	public HandlerRegistration addCellEnteredEditModeEventHandler(
-			CellEnteredEditModeEventHandler handler) {
-		if (getCell() instanceof HasCellEnteredEditModeEvent) {
-			return ((HasCellEnteredEditModeEvent) getCell()).addCellEnteredEditModeEventHandler(handler);
-		}
-		return null;
 	}
 
     public String getAlias() {

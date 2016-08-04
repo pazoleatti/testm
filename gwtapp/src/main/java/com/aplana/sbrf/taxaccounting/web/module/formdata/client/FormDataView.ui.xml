@@ -86,14 +86,6 @@
             top: 104px;     /*@see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView.DEFAULT_TABLE_TOP_POSITION"*/
         }
 
-        .tableFixed {
-            position: relative !important;
-        }
-
-        .tableMain {
-            position: absolute !important;
-        }
-
         .pager {
             position: absolute;
             bottom: 0;
@@ -320,14 +312,7 @@
                 <g:Label ui:field="lockInformation" visible="false"  addStyleNames="{lock.lockInformation}"/>
 
                 <g:ResizeLayoutPanel ui:field="tableWrapper" addStyleNames="{style.table}">
-                    <g:LayoutPanel>
-                        <g:layer top="0px" bottom="0px" width="40px" left="0px" addStyleNames="{style.tableFixed}">
-                            <style:GenericDataGrid ui:field="formDataTableFixed" width="100%" height="100%"/>
-                        </g:layer>
-                        <g:layer top="0px" bottom="0px" left="40px" right="0px" addStyleNames="{style.tableMain}">
-                            <style:GenericDataGrid ui:field="formDataTable" width="100%" height="100%"/>
-                        </g:layer>
-                    </g:LayoutPanel>
+                    <style:GenericDataGrid ui:field="formDataTable" width="100%" height="100%"/>
                 </g:ResizeLayoutPanel>
 
                 <pager:FlexiblePager ui:field="pager" addStyleNames="{style.pager}"

@@ -54,7 +54,6 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<C
 		int c = 0;
 		for (DataRow<HeaderCell> header : newHeaders) {
 			TableRowBuilder tr = startRow();
-			addRowAttributes(tr);
 			for (; c<offset; c++) {
 				Header defHeader = new TextHeader(getTable().getHeader(c).getValue().toString());
 				buildHeader(tr, defHeader, 0, newHeaders.size(), true);
@@ -78,8 +77,5 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<C
 			}
 			tr.endTR();
 		}
-	}
-
-	protected void addRowAttributes(TableRowBuilder row) {
 	}
 }
