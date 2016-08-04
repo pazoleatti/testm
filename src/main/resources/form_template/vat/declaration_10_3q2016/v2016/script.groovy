@@ -1,6 +1,5 @@
 package form_template.vat.declaration_10_3q2016.v2016
 
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -154,14 +153,15 @@ void generateXML() {
     def index = "0000100"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
-    // атрибуты, заполняемые по форме 937.3 (строка 001 отдельно, остальное в массиве sourceDataRowsAll)
-    def sourceDataRowsAll = []
+    // атрибуты, заполняемые по форме 937.3 (строка 001 отдельно, остальное в массиве sourceDataRows)
+    def sourceDataRows = []
     def code001 = null
     def sourceCorrNumber
-    for (def formData : getSources()) {
-        def sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
-        sourceDataRowsAll.addAll(sourceDataRows)
-        sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
+    for (def formData : declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()) {
+        if (formData.formType.id == 859) {
+            sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
+            sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
+        }
     }
     if (corrNumber > 0) {
         code001 = (corrNumber == sourceCorrNumber) ? 0 : 1
@@ -180,8 +180,7 @@ void generateXML() {
             if (code001 != 1) {
                 ЖУчВыстСчФ() {
                     hasPage = false
-                    def rowNum = 1
-                    for (def row : sourceDataRowsAll) {
+                    for (def row : sourceDataRows) {
                         if (row.getAlias() != null) {
                             if (row.getAlias() == "part_2") {
                                 break
@@ -192,7 +191,7 @@ void generateXML() {
                             continue
                         }
                         hasPage = true
-                        def code005 = rowNum++
+                        def code005 = row.rowNumber
                         def code010 = row.date?.format('dd.MM.yyyy')
                         def code020 = getRefBookValue(650L, row.opTypeCode)?.CODE?.value
                         def code030 = getNumber(row.invoiceNumDate)
@@ -339,18 +338,6 @@ def getCurrencyCode(String str) {
         }
     }
     return null
-}
-
-// получаем источники и сортируем по ТБ
-def getSources() {
-    sourceFormDataList = []
-    for (def FormData formData : declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()) {
-        if (formData.formType.id == 859) {
-            sourceFormDataList.add(formData)
-        }
-    }
-    sourceFormDataList.sort { FormData formData -> getRefBookValue(30, formData.departmentId)?.NAME?.value }
-    return sourceFormDataList
 }
 
 // Логические проверки (Проверки значений атрибутов формы настроек подразделения, атрибутов файла формата законодателя)
