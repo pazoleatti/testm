@@ -136,17 +136,7 @@ def nonEmptyColumns = ['code', 'name', 'rowNum', 'guarantor', 'procuct1', 'taxpa
         'remunerationStartYear', 'remunerationIssuance', 'provide', 'numberGuarantee']
 
 @Field
-def startDate = null
-
-@Field
 def endDate = null
-
-def getReportPeriodStartDate() {
-    if (startDate == null) {
-        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    }
-    return startDate
-}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {

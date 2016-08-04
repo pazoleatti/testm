@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="code" colSpan="1" rowSpan="2" value="Код подразделения"/>
+        <cell alias="name" colSpan="1" rowSpan="2" value="Наименование подразделения"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="2" value="№ п/п"/>
+        <cell alias="guarantor" colSpan="1" rowSpan="2" value="Наименование подразделения-гаранта"/>
+        <cell alias="vnd" colSpan="1" rowSpan="2" value="ВНД, в рамках которого выдано ГО"/>
+        <cell alias="level" colSpan="1" rowSpan="2" value="Уровень принятия решения о выдаче обязательства"/>
+        <cell alias="procuct1" colSpan="3" rowSpan="1" value="Вид обязательства"/>
+        <cell alias="procuct2" colSpan="1" rowSpan="1" value="Вид обязательства"/>
+        <cell alias="procuct3" colSpan="1" rowSpan="1" value="Вид обязательства"/>
+        <cell alias="taxpayerName" colSpan="1" rowSpan="2" value="Наименование Принципала / Налогоплательщика"/>
+        <cell alias="taxpayerInn" colSpan="1" rowSpan="2" value="ИНН Принципала / Налогоплательщика"/>
+        <cell alias="okved" colSpan="1" rowSpan="2" value="Код ОКВЭД Принципала"/>
+        <cell alias="creditRating" colSpan="2" rowSpan="1" value="Финансовое состояние Принципала"/>
+        <cell alias="creditClass" colSpan="1" rowSpan="1" value="Финансовое состояние Принципала"/>
+        <cell alias="beneficiaryName" colSpan="1" rowSpan="2" value="Наименование Бенефициара"/>
+        <cell alias="beneficiaryInn" colSpan="1" rowSpan="2" value="ИНН Бенефициара"/>
+        <cell alias="emitentName" colSpan="1" rowSpan="2" value="Наименование Банка-эмитента (инструктируемого банка)"/>
+        <cell alias="instructingName" colSpan="1" rowSpan="2" value="Наименование инструктирующего банка"/>
+        <cell alias="number" colSpan="1" rowSpan="2" value="Номер обязательства"/>
+        <cell alias="issuanceDate" colSpan="1" rowSpan="2" value="Дата выдачи обязательства"/>
+        <cell alias="additionDate" colSpan="1" rowSpan="2" value="Дата выдачи дополнения к обязательству"/>
+        <cell alias="startDate" colSpan="1" rowSpan="2" value="Дата вступления в силу обязательства"/>
+        <cell alias="conditionEffective" colSpan="1" rowSpan="2" value="Условие вступления обязательства в силу"/>
+        <cell alias="endDate" colSpan="1" rowSpan="2" value="Дата окончания действия обязательства"/>
+        <cell alias="sumInCurrency" colSpan="2" rowSpan="1" value="Сумма обязательства"/>
+        <cell alias="sumInRub" colSpan="1" rowSpan="1" value="Сумма обязательства"/>
+        <cell alias="currency" colSpan="1" rowSpan="2" value="Валюта обязательства"/>
+        <cell alias="debtBalance" colSpan="1" rowSpan="2"
+              value="Остаток задолженности по обязательству на отчетную дату в рублевом эквиваленте, рублей (сч.91315.01)"/>
+        <cell alias="isNonRecurring" colSpan="2" rowSpan="1" value="Порядок уплаты вознаграждения"/>
+        <cell alias="paymentPeriodic" colSpan="1" rowSpan="1" value="Порядок уплаты вознаграждения"/>
+        <cell alias="isCharged" colSpan="5" rowSpan="1" value="Размер вознаграждения Банка"/>
+        <cell alias="tariff" colSpan="1" rowSpan="1" value="Размер вознаграждения Банка"/>
+        <cell alias="remuneration" colSpan="1" rowSpan="1" value="Размер вознаграждения Банка"/>
+        <cell alias="remunerationStartYear" colSpan="1" rowSpan="1" value="Размер вознаграждения Банка"/>
+        <cell alias="remunerationIssuance" colSpan="1" rowSpan="1" value="Размер вознаграждения Банка"/>
+        <cell alias="provide" colSpan="1" rowSpan="2" value="Вид обеспечения обязательства"/>
+        <cell alias="numberGuarantee" colSpan="1" rowSpan="2" value="Серийный номер бланка гарантии / контргарантии"/>
+        <cell alias="numberAddition" colSpan="1" rowSpan="2"
+              value="Серийный номер бланка дополнения к гарантии / контргарантии"/>
+        <cell alias="isGuaranetee" colSpan="5" rowSpan="1" value="Гарантийный случай по обязательству"/>
+        <cell alias="dateGuaranetee" colSpan="1" rowSpan="1" value="Гарантийный случай по обязательству"/>
+        <cell alias="sumGuaranetee" colSpan="1" rowSpan="1" value="Гарантийный случай по обязательству"/>
+        <cell alias="term" colSpan="1" rowSpan="1" value="Гарантийный случай по обязательству"/>
+        <cell alias="sumDiversion" colSpan="1" rowSpan="1" value="Гарантийный случай по обязательству"/>
+        <cell alias="arrears" colSpan="2" rowSpan="1"
+              value="Наличие просроченной задолженности по уплате вознаграждения"/>
+        <cell alias="arrearsDate" colSpan="1" rowSpan="1"
+              value="Наличие просроченной задолженности по уплате вознаграждения"/>
+        <cell alias="arrearsGuarantee" colSpan="2" rowSpan="1"
+              value="Наличие просроченной задолженностиповозмещению платежапо гарантии"/>
+        <cell alias="arrearsGuaranteeDate" colSpan="1" rowSpan="1"
+              value="Наличие просроченной задолженностиповозмещению платежапо гарантии"/>
+        <cell alias="reserve" colSpan="1" rowSpan="2"
+              value="Сумма резерва по обязательству, сформированная в соответствии с требованиями Регламента №1237-2-р (ежеквартально)"/>
+        <cell alias="comment" colSpan="1" rowSpan="2" value="Комментарии"/>
+        <cell alias="segment" colSpan="1" rowSpan="2" value="Сегмент"/>
+    </row>
+    <row alias="">
+        <cell alias="code" colSpan="1" rowSpan="1" value="Код подразделения"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименование подразделения"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="guarantor" colSpan="1" rowSpan="1" value="Наименование подразделения-гаранта"/>
+        <cell alias="vnd" colSpan="1" rowSpan="1" value="ВНД, в рамках которого выдано ГО"/>
+        <cell alias="level" colSpan="1" rowSpan="1" value="Уровень принятия решения о выдаче обязательства"/>
+        <cell alias="procuct1" colSpan="1" rowSpan="1" value="Продукт 1"/>
+        <cell alias="procuct2" colSpan="1" rowSpan="1" value="Продукт 2 (используемые преференции)"/>
+        <cell alias="procuct3" colSpan="1" rowSpan="1" value="Продукт 3 специфика обязательства"/>
+        <cell alias="taxpayerName" colSpan="1" rowSpan="1" value="Наименование Принципала / Налогоплательщика"/>
+        <cell alias="taxpayerInn" colSpan="1" rowSpan="1" value="ИНН Принципала / Налогоплательщика"/>
+        <cell alias="okved" colSpan="1" rowSpan="1" value="Код ОКВЭД Принципала"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1" value="Рейтинг"/>
+        <cell alias="creditClass" colSpan="1" rowSpan="1" value="Класс кредитоспособности"/>
+        <cell alias="beneficiaryName" colSpan="1" rowSpan="1" value="Наименование Бенефициара"/>
+        <cell alias="beneficiaryInn" colSpan="1" rowSpan="1" value="ИНН Бенефициара"/>
+        <cell alias="emitentName" colSpan="1" rowSpan="1" value="Наименование Банка-эмитента (инструктируемого банка)"/>
+        <cell alias="instructingName" colSpan="1" rowSpan="1" value="Наименование инструктирующего банка"/>
+        <cell alias="number" colSpan="1" rowSpan="1" value="Номер обязательства"/>
+        <cell alias="issuanceDate" colSpan="1" rowSpan="1" value="Дата выдачи обязательства"/>
+        <cell alias="additionDate" colSpan="1" rowSpan="1" value="Дата выдачи дополнения к обязательству"/>
+        <cell alias="startDate" colSpan="1" rowSpan="1" value="Дата вступления в силу обязательства"/>
+        <cell alias="conditionEffective" colSpan="1" rowSpan="1" value="Условие вступления обязательства в силу"/>
+        <cell alias="endDate" colSpan="1" rowSpan="1" value="Дата окончания действия обязательства"/>
+        <cell alias="sumInCurrency" colSpan="1" rowSpan="1" value="в иностранной валюте"/>
+        <cell alias="sumInRub" colSpan="1" rowSpan="1" value="рублёвый эквивалент на отчетную дату"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="Валюта обязательства"/>
+        <cell alias="debtBalance" colSpan="1" rowSpan="1"
+              value="Остаток задолженности по обязательству на отчетную дату в рублевом эквиваленте, рублей (сч.91315.01)"/>
+        <cell alias="isNonRecurring" colSpan="1" rowSpan="1" value="единовременно до выдачи обязательства"/>
+        <cell alias="paymentPeriodic" colSpan="1" rowSpan="1" value="на периодической основе"/>
+        <cell alias="isCharged" colSpan="1" rowSpan="1" value="Вознаграждение взимается"/>
+        <cell alias="tariff" colSpan="1" rowSpan="1"
+              value="Тариф за выдачу обязательства (в процентах годовых / МБ процентах от суммы)"/>
+        <cell alias="remuneration" colSpan="1" rowSpan="1"
+              value="Размер вознаграждения за выдачу обязательства, установленный в абсолютном выражении (в рублевом эквиваленте)"/>
+        <cell alias="remunerationStartYear" colSpan="1" rowSpan="1"
+              value="Размер полученного вознаграждения нарастающим итогом с начала года (в рублевом эквиваленте)"/>
+        <cell alias="remunerationIssuance" colSpan="1" rowSpan="1"
+              value="Размер полученного вознаграждения нарастающим итогом с даты выдачи обязательства (в рублевом эквиваленте)"/>
+        <cell alias="provide" colSpan="1" rowSpan="1" value="Вид обеспечения обязательства"/>
+        <cell alias="numberGuarantee" colSpan="1" rowSpan="1" value="Серийный номер бланка гарантии / контргарантии"/>
+        <cell alias="numberAddition" colSpan="1" rowSpan="1"
+              value="Серийный номер бланка дополнения к гарантии / контргарантии"/>
+        <cell alias="isGuaranetee" colSpan="1" rowSpan="1"
+              value="факт наступления гарантийного случая (по состоянию на отчетную дату)"/>
+        <cell alias="dateGuaranetee" colSpan="1" rowSpan="1"
+              value="дата исполнения Банком требования по обязательству при наступлении гарантийного случая"/>
+        <cell alias="sumGuaranetee" colSpan="1" rowSpan="1"
+              value="сумма исполнения Банком обязательства при наступлении гарантийного случая"/>
+        <cell alias="term" colSpan="1" rowSpan="1"
+              value="срок возмещения платежа по исполненному Банком обязательству"/>
+        <cell alias="sumDiversion" colSpan="1" rowSpan="1"
+              value="размер платы за вынужденное отвлечение денежных средств (в процентах годовых)"/>
+        <cell alias="arrears" colSpan="1" rowSpan="1"
+              value="сумма просроченной задолженности Принципала по уплатевознаграждения по состоянию на отчетную дату (в рублевом эквиваленте)"/>
+        <cell alias="arrearsDate" colSpan="1" rowSpan="1"
+              value="дата переноса суммы задолженности Принципала по уплате вознаграждения на счет по учету просроченной задолженности"/>
+        <cell alias="arrearsGuarantee" colSpan="1" rowSpan="1"
+              value="сумма просроченной задолженности Принципала инструктирующего банка по возмещению платежа по гарантии по состоянию на отчетную дату (в рублевом эквиваленте)"/>
+        <cell alias="arrearsGuaranteeDate" colSpan="1" rowSpan="1"
+              value="дата переноса суммы задолженности Принципала/ инструктирующего банка на счет по учету просроченной задолженности"/>
+        <cell alias="reserve" colSpan="1" rowSpan="1"
+              value="Сумма резерва по обязательству, сформированная в соответствии с требованиями Регламента №1237-2-р (ежеквартально)"/>
+        <cell alias="comment" colSpan="1" rowSpan="1" value="Комментарии"/>
+        <cell alias="segment" colSpan="1" rowSpan="1" value="Сегмент"/>
+    </row>
+    <row alias="">
+        <cell alias="code" colSpan="1" rowSpan="1" value="1.1"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="1.2"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="guarantor" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="vnd" colSpan="1" rowSpan="1" value="3.1"/>
+        <cell alias="level" colSpan="1" rowSpan="1" value="3.2"/>
+        <cell alias="procuct1" colSpan="1" rowSpan="1" value="4.1"/>
+        <cell alias="procuct2" colSpan="1" rowSpan="1" value="4.2"/>
+        <cell alias="procuct3" colSpan="1" rowSpan="1" value="4.3"/>
+        <cell alias="taxpayerName" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="taxpayerInn" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="okved" colSpan="1" rowSpan="1" value="6.1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1" value="7.1"/>
+        <cell alias="creditClass" colSpan="1" rowSpan="1" value="7.2"/>
+        <cell alias="beneficiaryName" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="beneficiaryInn" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="emitentName" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="instructingName" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="number" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="issuanceDate" colSpan="1" rowSpan="1" value="13"/>
+        <cell alias="additionDate" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="startDate" colSpan="1" rowSpan="1" value="15"/>
+        <cell alias="conditionEffective" colSpan="1" rowSpan="1" value="16"/>
+        <cell alias="endDate" colSpan="1" rowSpan="1" value="17"/>
+        <cell alias="sumInCurrency" colSpan="1" rowSpan="1" value="18.1"/>
+        <cell alias="sumInRub" colSpan="1" rowSpan="1" value="18.2"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="19"/>
+        <cell alias="debtBalance" colSpan="1" rowSpan="1" value="20"/>
+        <cell alias="isNonRecurring" colSpan="1" rowSpan="1" value="21.1"/>
+        <cell alias="paymentPeriodic" colSpan="1" rowSpan="1" value="21.2"/>
+        <cell alias="isCharged" colSpan="1" rowSpan="1" value="22.1"/>
+        <cell alias="tariff" colSpan="1" rowSpan="1" value="22.2"/>
+        <cell alias="remuneration" colSpan="1" rowSpan="1" value="22.3"/>
+        <cell alias="remunerationStartYear" colSpan="1" rowSpan="1" value="22.4"/>
+        <cell alias="remunerationIssuance" colSpan="1" rowSpan="1" value="22.5"/>
+        <cell alias="provide" colSpan="1" rowSpan="1" value="23"/>
+        <cell alias="numberGuarantee" colSpan="1" rowSpan="1" value="24"/>
+        <cell alias="numberAddition" colSpan="1" rowSpan="1" value="25"/>
+        <cell alias="isGuaranetee" colSpan="1" rowSpan="1" value="26"/>
+        <cell alias="dateGuaranetee" colSpan="1" rowSpan="1" value="26.1"/>
+        <cell alias="sumGuaranetee" colSpan="1" rowSpan="1" value="26.2"/>
+        <cell alias="term" colSpan="1" rowSpan="1" value="26.3"/>
+        <cell alias="sumDiversion" colSpan="1" rowSpan="1" value="26.4"/>
+        <cell alias="arrears" colSpan="1" rowSpan="1" value="27.1"/>
+        <cell alias="arrearsDate" colSpan="1" rowSpan="1" value="27.2"/>
+        <cell alias="arrearsGuarantee" colSpan="1" rowSpan="1" value="28.1"/>
+        <cell alias="arrearsGuaranteeDate" colSpan="1" rowSpan="1" value="28.2"/>
+        <cell alias="reserve" colSpan="1" rowSpan="1" value="29"/>
+        <cell alias="comment" colSpan="1" rowSpan="1" value="30"/>
+        <cell alias="segment" colSpan="1" rowSpan="1" value="31"/>
+    </row>
+</rows>
