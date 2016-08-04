@@ -15,7 +15,8 @@ import javax.xml.stream.XMLStreamReader
 /**
  * Декларация по НДС (раздел 8 с 3 квартала 2016)
  *
- * declarationTemplateId= TODO
+ * declarationTypeId=28
+ * declarationTemplateId=2028
  */
 
 switch (formDataEvent) {
