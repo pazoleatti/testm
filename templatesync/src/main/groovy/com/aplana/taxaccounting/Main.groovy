@@ -290,6 +290,7 @@ class Main {
                     'declaration_short'     : -20,
                     'declaration_8'         : -12,
                     'declaration_8_1'       : -13,
+                    'declaration_8_1_3q2016': -29,
                     'declaration_8_sources' : -18,
                     'declaration_8_3q2016'  : -28,
                     'declaration_9'         : -14,
