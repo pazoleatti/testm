@@ -2,9 +2,7 @@ package form_template.income.income_complex.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -220,6 +218,9 @@ void logicCheck() {
 def consolidation() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(), getReportPeriodStartDate(), getReportPeriodEndDate())
+    if (!preConsolidationCheck(formSources, formTypeId_Tab1)) {
+        return
+    }
     def isFromSummary = isFromSummary(formSources)
     isFromSummary ? consolidationFromSummary(dataRows, formSources) : consolidationFromPrimary(dataRows, formSources)
     calcExplanation(dataRows, formSources, isFromSummary)
@@ -432,6 +433,7 @@ void calcExplanation(def dataRows, def formSources, def isFromSummary) {
             }
         }
     }
+    // Логическая проверка 4. Проверка наличия данных в форме-источнике «Таблица 1»
     if (!rowNumbers.isEmpty()) {
         logger.warn("Строки %s: Для заполнения графы «%s» не найдены строки по требуемым КНУ в форме-источнике «%s»!",
                 rowNumbers.join(', '), getColumnName(dataRows[0], 'explanation'), formTypeService.get(formTypeId_Tab1).name)
@@ -777,4 +779,22 @@ void addExplanationPrev(def dataRows, def codeAlias) {
             }
         }
     }
+}
+
+/**
+ * Условия выполнения консолидации. Проверяет наличие 1 источника (таблица 1 или таблица 2).
+ *
+ * @param formSources источники
+ * @param checkedFormTypeId id проверяемой формы
+ * @return true - все нормально, false - назначено несколько источников
+ */
+def preConsolidationCheck(def formSources, checkedFormTypeId) {
+    def tmpSources = formSources.findAll { it.formTypeId == checkedFormTypeId }
+    if (tmpSources && tmpSources.size() > 1) {
+        logger.error("Для текущей формы источником назначено несколько форм вида «%s». " +
+                "Источником должно быть назначено не более одной формы данного вида",
+                formTypeService.get(checkedFormTypeId).name)
+        return false
+    }
+    return true
 }

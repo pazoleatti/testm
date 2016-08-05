@@ -2,7 +2,6 @@ package form_template.income.outcome_complex.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
@@ -226,6 +225,9 @@ def consolidation() {
 
     // получение источников
     def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind, getReportPeriodStartDate(), getReportPeriodEndDate())
+    if (!preConsolidationCheck(formSources, formTypeId_TABLE2)) {
+        return
+    }
     def isFromSummary = isFromSummary(formSources)
 
     // консолидация из рну или сводных
@@ -559,4 +561,22 @@ void addExplanationPrev(def dataRows, def codeAlias) {
             }
         }
     }
+}
+
+/**
+ * Условия выполнения консолидации. Проверяет наличие 1 источника (таблица 1 или таблица 2).
+ *
+ * @param formSources источники
+ * @param checkedFormTypeId id проверяемой формы
+ * @return true - все нормально, false - назначено несколько источников
+ */
+def preConsolidationCheck(def formSources, checkedFormTypeId) {
+    def tmpSources = formSources.findAll { it.formTypeId == checkedFormTypeId }
+    if (tmpSources && tmpSources.size() > 1) {
+        logger.error("Для текущей формы источником назначено несколько форм вида «%s». " +
+                "Источником должно быть назначено не более одной формы данного вида",
+                formTypeService.get(checkedFormTypeId).name)
+        return false
+    }
+    return true
 }
