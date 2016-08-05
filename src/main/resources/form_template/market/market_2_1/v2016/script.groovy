@@ -190,7 +190,7 @@ void logicCheck() {
         }
 
         // 4. Проверка даты выдачи кредита
-        if (row.issuanceDate && row.endDate && (row.endDate > row.issuanceDate)) {
+        if (row.issuanceDate && row.endDate && (row.issuanceDate > row.endDate)) {
             logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»!",
                 row.getIndex(), getColumnName(row, 'endDate'), getColumnName(row, 'issuanceDate'))
         }
