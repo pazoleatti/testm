@@ -1194,5 +1194,187 @@ end;
 /
 COMMIT;
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16477: 1.1 ЗемНалог. Реализовать справочник "Коды налоговых льгот земельного налога"
+declare l_task_name varchar2(128) := 'RefBook Block #15 (SBRFACCTAX-16477 - Tax concession codes(L))';
+begin
+	
+	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (704,'Коды налоговых льгот земельного налога',1,1,0,null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7041, 704, 'Код', 'CODE',1,1,null,null,1,null,10,1,1,null,null,0,7);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7042, 704, 'Наименование льготы', 'NAME',1,2,null,null,1,null,30,1,0,null,null,0,2000);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7043, 704, 'Основание', 'BASE',1,3,null,null,1,null,10,1,0,null,null,0,500);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7044, 704, 'Код родительской записи', 'PARENT_ID',4,4,704,7041,1,null,10,0,0,null,null,0,null);
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021000');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'НАЛОГОВЫЕ ЛЬГОТЫ, ПРЕДОСТАВЛЯЕМЫЕ НА ФЕДЕРАЛЬНОМ УРОВНЕ');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Глава 31 "Земельный налог" Налогового кодекса');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021100');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'НАЛОГОВЫЕ ЛЬГОТЫ, ПРЕДУСМАТРИВАЮЩИЕ ОСВОБОЖДЕНИЕ ОТ НАЛОГООБЛОЖЕНИЯ');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Статья 395 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021110');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Организации и учреждения уголовно-исполнительной системы Министерства юстиции Российской Федерации - в отношении земельных участков, предоставленных для непосредственного выполнения возложенных на эти организации и учреждения функций');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 1 статьи 395 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021100';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 4, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021120');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Организации - в отношении земельных участков, занятых государственными автомобильными дорогами общего пользования');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 2 статьи 395 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021100';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 5, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021160');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Религиозные организации - в отношении принадлежащих им земельных участков, на которых расположены здания, строения и сооружения религиозного и благотворительного назначения');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 4 статьи 395 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021100';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 6, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021170');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Общероссийские общественные организации инвалидов (в том числе созданные как союзы общественных организаций инвалидов), среди членов которых инвалиды и их законные представители составляют не менее 80 процентов, - в отношении земельных участков, используемых ими для осуществления уставной деятельности');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Абзац 1 пункта 5 статьи 395 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021100';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 7, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021180');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Организации, уставный капитал которых полностью состоит из вкладов указанных общероссийских общественных организаций инвалидов, если среднесписочная численность инвалидов среди их работников составляет не менее 50 процентов, а их доля в фонде оплаты труда - не менее 25 процентов, - в отношении земельных участков, используемых ими для производства и (или) реализации товаров (за исключением подакцизных товаров, минерального сырья и иных полезных ископаемых, а также иных товаров по перечню, утверждаемому Правительством Российской Федерации по согласованию с общероссийскими общественными организациями инвалидов), работ и услуг (за исключением брокерских и иных посреднических услуг)');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Абзац 2 пункта 5 статьи 395 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021100';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 8, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021190');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Учреждения, единственными собственниками имущества которых являются указанные общероссийские общественные организации инвалидов, - в отношении земельных участков, используемых ими для достижения образовательных, культурных, лечебно-оздоровительных, физкультурно-спортивных, научных, информационных и иных целей социальной защиты и реабилитации инвалидов, а также для оказания правовой и иной помощи инвалидам, детям-инвалидам и их родителям');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Абзац 3 пункта 5 статьи 395 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021100';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 9, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021191');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Организации народных художественных промыслов - в отношении земельных участков, находящихся в местах традиционного бытования народных художественных промыслов и используемых для производства и реализации изделий народных художественных промыслов');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 6 статьи 395 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021100';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 10, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021192');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Физические лица, относящиеся к коренным малочисленным народам Севера, Сибири и Дальнего Востока Российской Федерации, а также общины таких народов - в отношении земельных участков, используемых для сохранения и развития их традиционного образа жизни, хозяйствования и промыслов');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 7 статьи 395 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021100';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 11, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021194');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Организации - резиденты особой экономической зоны - в отношении земельных участков, расположенных на территории особой экономической зоны, сроком на пять лет с момента возникновения права собственности на каждый земельный участок');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 9 статьи 395 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021100';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 12, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021195');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Организации, признаваемые управляющими компаниями в соответствии с Федеральным законом от 28 сентября 2010 г. N 244-ФЗ "Об инновационном центре "Сколково" (Собрание законодательства Российской Федерации, 2010, N 40, ст. 4970; N 52, ст. 7000; 2011, N 29, ст. 4291, ст. 4300), - в отношении земельных участков, предоставленных для непосредственного выполнения возложенных на эти организации функций в соответствии с указанным Федеральным законом');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 10 статьи 395 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021100';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 13, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021200');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'НАЛОГОВЫЕ ЛЬГОТЫ, УМЕНЬШАЮЩИЕ ВЕЛИЧИНУ НАЛОГОВОЙ БАЗЫ, ПРЕДОСТАВЛЕННЫЕ В ВИДЕ НЕ ОБЛАГАЕМОЙ НАЛОГОМ СУММЫ');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 5 статьи 391 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 14, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021210');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Герои Советского Союза, Герои Российской Федерации, полные кавалеры ордена Славы');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Подпункт 1 пункта 5 статьи 391 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021200';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 15, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021220');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Инвалиды, имеющие I группу инвалидности, а также лица, имеющие II группу инвалидности, установленную до 1 января 2004 года');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Подпункт 2 пункта 5 статьи 391 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021200';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 16, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021230');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Инвалиды с детства');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Подпункт 3 пункта 5 статьи 391 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021200';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 17, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021240');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Ветераны и инвалиды Великой Отечественной войны, а также ветераны и инвалиды боевых действий');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Подпункт 4 пункта 5 статьи 391 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021200';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 18, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021250');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Физические лица, имеющие право на получение социальной поддержки в соответствии с Законом Российской Федерации от 15 мая 1991 г. N 1244-1 "О социальной защите граждан, подвергшихся воздействию катастрофы на Чернобыльской АЭС" (в редакции Закона Российской Федерации от 18 июня 1992 г. N 3061-1) (Ведомости Съезда народных депутатов и Верховного Совета РСФСР, 1991, N 21, ст. 699; Ведомости Съезда народных депутатов и Верховного Совета Российской Федерации, 1992, N 32, ст. 1861), в соответствии с Федеральным законом от 26 ноября 1998 г. N 175-ФЗ "О социальной защите граждан Российской Федерации, подвергшихся воздействию радиации вследствие аварии в 1957 году на производственном объединении "Маяк" и сбросов радиоактивных отходов в реку Теча" (Собрание законодательства Российской Федерации, 1998, N 48, ст. 5850; 2000, N 33, ст. 3348; 2004, N 35, ст. 3607; 2008, N 30, ст. 3616; 2011, N 1, ст. 26) и в соответствии с Федеральным законом от 10 января 2002 г. N 2-ФЗ "О социальных гарантиях гражданам, подвергшимся радиационному воздействию вследствие ядерных испытаний на Семипалатинском полигоне" (Собрание законодательства Российской Федерации, 2002, N 2, ст. 128; 2004, N 12, ст. 1035; N 35, ст. 3607; 2008, N 9, ст. 817, N 29, ст. 3410, N 30, ст. 3616, N 52, ст. 6224, ст. 6236; 2009, N 18, ст. 2152, N 30, ст. 3739, N 52, ст. 6452)');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Подпункт 5 пункта 5 статьи 391 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021200';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 19, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021260');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Физические лица, принимавшие в составе подразделений особого риска непосредственное участие в испытаниях ядерного и термоядерного оружия, ликвидации аварий ядерных установок на средствах вооружения и военных объектах');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Подпункт 6 пункта 5 статьи 391 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021200';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 20, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021270');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Физические лица, получившие или перенесшие лучевую болезнь или ставшие инвалидами в результате испытаний, учений и иных работ, связанных с любыми видами ядерных установок, включая ядерное оружие и космическую технику');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Подпункт 7 пункта 5 статьи 391 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3021200';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 21, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3022000');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'ЛЬГОТЫ ПО ЗЕМЕЛЬНОМУ НАЛОГУ, УСТАНАВЛИВАЕМЫЕ НОРМАТИВНЫМИ ПРАВОВЫМИ АКТАМИ ПРЕДСТАВИТЕЛЬНЫХ ОРГАНОВ МУНИЦИПАЛЬНЫХ ОБРАЗОВАНИЙ (ЗАКОНАМИ ГОРОДОВ ФЕДЕРАЛЬНОГО ЗНАЧЕНИЯ МОСКВЫ И САНКТ- ПЕТЕРБУРГА)');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 2 статьи 387 Налогового кодекса');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 22, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3022100');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Льготы по земельному налогу, предоставляемые в виде не облагаемой налогом суммы');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 2 статьи 387 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3022000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 23, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3022200');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Льготы по земельному налогу, уменьшающие исчисленную сумму налога');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 2 статьи 387 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3022000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 24, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3022300');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Льготы по земельному налогу в виде доли необлагаемой площади земельного участка');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 2 статьи 387 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3022000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 25, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3022400');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Льготы по земельному налогу в виде освобождения от налогообложения');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 2 статьи 387 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3022000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 26, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3022500');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'Льготы по земельному налогу в виде снижения налоговой ставки');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Пункт 2 статьи 387 Налогового кодекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7044, record_id from ref_book_value where attribute_id = 7041  and string_value='3022000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 27, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3029000');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7042, 'ЛЬГОТЫ (ОСВОБОЖДЕНИЕ) ПО ЗЕМЕЛЬНОМУ НАЛОГУ, ПРЕДУСМОТРЕННЫЕ МЕЖДУНАРОДНЫМИ ДОГОВОРАМИ РОССИЙСКОЙ ФЕДЕРАЦИИ');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7043, 'Статья 7 Налогового кодекса');
+
+	dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book or its attributes already exist ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
