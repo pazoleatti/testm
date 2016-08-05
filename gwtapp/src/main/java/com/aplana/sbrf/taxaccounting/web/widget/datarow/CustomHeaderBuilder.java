@@ -62,10 +62,13 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<C
 				Header newHeader;
 				String colAlias = ((DataRowColumn)getTable().getColumn(i)).getAlias();
 				if (!newHeaders.isEmpty() && (colAlias != null) && (header.getCell(colAlias).getValue() != null) && !header.getCell(colAlias).hasValueOwner()) {
-                    String columnWidth = getTable().getColumnWidth(getTable().getColumn(i));
-					boolean needBorder = (header.getCell(colAlias).getColSpan() != 1) || (header.getCell(colAlias).getColumn().getWidth() != 0)
-                            && !columnWidth.equals("0em") && !columnWidth.equals("0.0em")
-                            && !columnWidth.equals("0px") && !columnWidth.equals("0.0px");
+					boolean needBorder = isVisible(header, i);
+					if (!needBorder) {
+						for (int cs = 1; cs < (header.getCell(colAlias).getColSpan()); cs++) {
+							if (needBorder = isVisible(header, i + cs))
+								break;
+						}
+					}
                     if (needBorder) {
                         newHeader = new TextHeader(header.getCell(colAlias).getValue().toString());
                     } else {
@@ -77,5 +80,12 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<C
 			}
 			tr.endTR();
 		}
+	}
+	private boolean isVisible(DataRow<HeaderCell> header, Integer colIndex) {
+		String colAlias = ((DataRowColumn)getTable().getColumn(colIndex)).getAlias();
+		String columnWidth = getTable().getColumnWidth(getTable().getColumn(colIndex));
+		return (header.getCell(colAlias).getColumn().getWidth() != 0)
+				&& !columnWidth.equals("0em") && !columnWidth.equals("0.0em")
+				&& !columnWidth.equals("0px") && !columnWidth.equals("0.0px");
 	}
 }
