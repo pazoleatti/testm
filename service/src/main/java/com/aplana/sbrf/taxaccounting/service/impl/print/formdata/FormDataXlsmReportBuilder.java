@@ -247,7 +247,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     for(DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow: this.dataRows) {
                         dataRow.removeColumn(c);
                     }
-                    for(DataRow<HeaderCell> header: this.data.getHeaders()) {
+                    for(DataRow<HeaderCell> header: this.headers) {
                         header.removeColumn(c);
                     }
                     iterator.remove();

@@ -157,7 +157,7 @@ public class Market_2_1Test extends ScriptTestBase {
         // 4. Проверка даты выдачи кредита
         setDefaultValues(row);
         Date tmpDate = new Date(0L);
-        row.getCell("issuanceDate").setValue(tmpDate, rowIndex);
+        row.getCell("endDate").setValue(tmpDate, rowIndex);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
         String columnName1 = row.getCell("endDate").getColumn().getName();
