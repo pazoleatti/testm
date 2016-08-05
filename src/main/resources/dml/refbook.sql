@@ -797,6 +797,7 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5422, 542, 'Наименование','NAME',1,2,null,null,1,null,10,1,0,null,null,0,255);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6011, 601, 'Класс кредитоспособности', 'CREDIT_QUALITY_CLASS',1,1,null,null,1,null,10,1,1,null,null,0,20);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6012, 601, 'Краткое наименование', 'SHORT_NAME',1,2,null,null,1,null,10,1,2,null,null,0,10);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (6021, 602, 'Международный кредитный рейтинг', 'INTERNATIONAL_CREDIT_RATING',1,1,null,null,1,null,10,1,1,null,null,0,20);
 
