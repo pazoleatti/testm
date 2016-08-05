@@ -1145,5 +1145,54 @@ end;
 /
 COMMIT;
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16478: 1.1 ЗемНалог. Реализовать справочник "Коды бюджетной классификации земельного налога"
+declare l_task_name varchar2(128) := 'RefBook Block #14 (SBRFACCTAX-16478 - Budget classification codes(L)))';
+begin
+	
+	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (703,'Коды бюджетной классификации земельного налога',1,0,0,null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7031, 703, 'Код', 'CODE',1,1,null,null,1,null,5,1,1,null,null,0,20);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7032, 703, 'Наименование', 'NAME',1,2,null,null,1,null,20,1,0,null,null,0,256);
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '10606031030000110');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах внутригородских муниципальных образований городов федерального значения');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '10606032040000110');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах городских округов');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '10606032110000110');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах городских округов с внутригородским делением');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 4, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '10606032120000110');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах внутригородских районов');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 5, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '10606033050000110');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах межселенных территорий');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 6, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '10606033100000110');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах сельских поселений');
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 7, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '10606033130000110');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах городских поселений');
+	
+	dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book or its attributes already exist ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
