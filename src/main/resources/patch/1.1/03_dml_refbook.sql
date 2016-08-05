@@ -986,5 +986,164 @@ end;
 /
 COMMIT;
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16479: 1.1 ЗемНалог. Реализовать справочник "Категории земли"
+declare l_task_name varchar2(128) := 'RefBook Block #13 (SBRFACCTAX-16479 - Land types))';
+begin
+	
+	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (702,'Категории земли',1,1,0,null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7021, 702, 'Код', 'CODE',1,1,null,null,1,null,10,1,1,null,null,0,12);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7022, 702, 'Наименование категории земли', 'NAME',1,2,null,null,1,null,10,1,0,null,null,0,1000);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7023, 702, 'Код родительской записи', 'PARENT_ID',4,3,702,7021,1,null,10,0,0,null,null,0,null);
+	
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003001000000');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'ЗЕМЛИ СЕЛЬСКОХОЗЯЙСТВЕННОГО НАЗНАЧЕНИЯ');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003001000010');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Сельскохозяйственные угодья');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003001000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003001000020');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земли, занятые внутрихозяйственными дорогами, коммуникациями, лесными насаждениями, предназначенными для обеспечения защиты земель от воздействия негативных (вредных) природных, антропогенных и техногенных явлений, водными объектами, а также занятые зданиями, строениями, сооружениями, используемыми для производства, хранения и переработки сельскохозяйственной продукции');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003001000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 4, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003001000030');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Прочие земли сельскохозяйственного назначения');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003001000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 5, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003002000000');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'ЗЕМЛИ НАСЕЛЕННЫХ ПУНКТОВ');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 6, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003002000010');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земли в пределах населенных пунктов, отнесенные к территориальным зонам сельскохозяйственного использования');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003002000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 7, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003002000020');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земельные участки, занятые жилищным фондом и объектами инженерной инфраструктуры жилищно-коммунального комплекса');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003002000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 8, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003002000030');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земельные участки, предоставленные для жилищного строительства');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003002000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 9, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003002000040');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земельные участки, приобретенные в собственность юридическими и физическими лицами на условиях осуществления на них жилищного строительства (за исключением индивидуального жилищного строительства)');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003002000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 10, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003002000050');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земельные участки, приобретенные в собственность физическими лицами на условиях осуществления на них индивидуального жилищного строительства');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003002000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 11, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003002000060');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земельные участки, предоставленные для ведения личного подсобного хозяйства, садоводства и огородничества или животноводства, а также дачного хозяйства');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003002000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 12, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003002000070');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земельные участки, предоставленные юридическим лицам для ведения садоводства и огородничества или животноводства, а также дачного хозяйства');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003002000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 13, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003002000080');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земельные участки, предоставленные физическим лицам для личного подсобного хозяйства, садоводства и огородничества или животноводства, а также дачного хозяйства');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003002000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 14, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003002000090');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земли в пределах населенных пунктов, отнесенные к производственным территориальным зонам и зонам инженерных и транспортных инфраструктур');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003002000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 15, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003002000100');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Прочие земельные участки');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003002000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 16, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003003000000');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'ЗЕМЛИ ПРОМЫШЛЕННОСТИ, ЭНЕРГЕТИКИ, ТРАНСПОРТА, СВЯЗИ, РАДИОВЕЩАНИЯ, ТЕЛЕВИДЕНИЯ, ИНФОРМАТИКИ, ЗЕМЛИ ДЛЯ ОБЕСПЕЧЕНИЯ КОСМИЧЕСКОЙ ДЕЯТЕЛЬНОСТИ, ЗЕМЛИ ОБОРОНЫ, БЕЗОПАСНОСТИ И ЗЕМЛИ ИНОГО СПЕЦИАЛЬНОГО НАЗНАЧЕНИЯ');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 17, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003003000010');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земли промышленности');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003003000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 18, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003003000020');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земли энергетики');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003003000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 19, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003003000030');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земли транспорта');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003003000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 20, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003003000040');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земли связи, радиовещания, телевидения, информатики');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003003000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 21, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003003000050');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Прочие земли');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003003000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 22, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003003000060');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земли обороны');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003003000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 23, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003003000070');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земли безопасности');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003003000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 24, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003003000080');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Земли иного специального назначения');
+		insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 7023, record_id from ref_book_value where attribute_id = 7021  and string_value='003003000000';
+
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 25, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003004000000');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'ЗЕМЛИ ОСОБО ОХРАНЯЕМЫХ ТЕРРИТОРИЙ И ОБЪЕКТОВ');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 26, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003005000000');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'ЗЕМЛИ ЛЕСНОГО ФОНДА');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 27, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003006000000');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'ЗЕМЛИ ВОДНОГО ФОНДА');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 28, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003007000000');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'ЗЕМЛИ ЗАПАСА');
+		
+	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 29, 702, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7021, '003008000000');
+		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7022, 'Прочие земли');
+	
+	dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book or its attributes already exist ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
