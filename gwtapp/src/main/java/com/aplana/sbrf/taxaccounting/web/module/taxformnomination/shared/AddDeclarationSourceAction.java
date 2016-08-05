@@ -7,7 +7,7 @@ import java.util.List;
 
 public class AddDeclarationSourceAction  extends UnsecuredActionImpl<AddDeclarationSourceResult> {
 	List<Integer> departmentId;
-	List<Integer> declarationTypeId;
+	List<Long> declarationTypeId;
 	TaxType taxType;
 
 	public TaxType getTaxType() {
@@ -26,11 +26,11 @@ public class AddDeclarationSourceAction  extends UnsecuredActionImpl<AddDeclarat
 		this.departmentId = departmentId;
 	}
 
-	public List<Integer> getDeclarationTypeId() {
+	public List<Long> getDeclarationTypeId() {
 		return declarationTypeId;
 	}
 
-	public void setDeclarationTypeId(List<Integer> declarationTypeId) {
+	public void setDeclarationTypeId(List<Long> declarationTypeId) {
 		this.declarationTypeId = declarationTypeId;
 	}
 }

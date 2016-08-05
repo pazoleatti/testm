@@ -42,7 +42,7 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
 	public AddDeclarationSourceResult execute(AddDeclarationSourceAction action, ExecutionContext executionContext) throws ActionException {
 		List<LogEntry> logs = new ArrayList<LogEntry>();
 		for (Integer depId : action.getDepartmentId()) {
-			for (Integer dt : action.getDeclarationTypeId()) {
+			for (Long dt : action.getDeclarationTypeId()) {
 				boolean canAssign = true;
                 //TODO тоже надо откуда то брать период
 				for (DepartmentDeclarationType ddt : departmentFormTypeService.getDDTByDepartment(depId.intValue(), action.getTaxType(), new Date(), new Date())) {
@@ -53,7 +53,7 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
 					}
 				}
 				if (canAssign) {
-					departmentFormTypeService.saveDDT((long)depId, dt);
+					departmentFormTypeService.saveDDT((long)depId, dt.intValue());
 				}
 			}
 		}

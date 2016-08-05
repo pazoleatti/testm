@@ -66,7 +66,7 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 
 	public interface MyView extends PopupView, HasUiHandlers<DeclarationDestinationsUiHandlers>{
 		List<Integer> getSelectedDepartments();
-	    List<Integer> getSelectedDeclarationTypes();
+	    List<Long> getSelectedDeclarationTypes();
 	    void setDepartments(List<Department> departments, Set<Integer> availableValues);
         void setDeclarationTypeFilter(TaxType taxType);
         // обновлели надписей в зависимости от вида налога
