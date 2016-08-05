@@ -725,18 +725,19 @@ def calc7or13(def record520, def sourceAllDataRowsMap, def isCalc7) {
 }
 
 def calc8or14(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, def sourceDataRowsMap, def isCalc8) {
-    def result = calcA(record520, sourceAllDataRowsMap, (isCalc8 ? 'sum44' : 'sum54'))
+    def a = calcA(record520, sourceAllDataRowsMap, (isCalc8 ? 'sum44' : 'sum54'))
+    def b = 0
     def formTypeId = 807
     sourceFormDatas = sourceFormDatasMap[formTypeId]
     sourceFormDatas.each { sourceFormData ->
         def rows = getNeedRowsForCalc8or14(sourceDataRowsMap[sourceFormData], isCalc8)
         for (def row : rows) {
             if (row.sbrfCode1 && row.statReportId2 == record520?.record_id?.value) {
-                result += (row.sum ?: 0)
+                b += (row.sum ?: 0)
             }
         }
     }
-    return result * 1000
+    return a + 1000 * b
 }
 
 def getNeedRowsForCalc8or14(def dataRows, def isCalc8) {
