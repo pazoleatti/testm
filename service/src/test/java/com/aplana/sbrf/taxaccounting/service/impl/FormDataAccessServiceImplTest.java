@@ -710,7 +710,7 @@ public class FormDataAccessServiceImplTest {
         userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, ROOT_BANK_ID, TARole.ROLE_OPER));
         assertArrayEquals(new Object[]{}, service.getAvailableMoves(userInfo, BANK_ACCEPTED_FORMDATA_ID).toArray());
         userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL));
-        assertArrayEquals(new Object[]{}, service.getAvailableMoves(userInfo, BANK_ACCEPTED_FORMDATA_ID).toArray());
+        assertArrayEquals(new Object[]{WorkflowMove.ACCEPTED_TO_APPROVED}, service.getAvailableMoves(userInfo, BANK_ACCEPTED_FORMDATA_ID).toArray());
     }
 
     @Test
