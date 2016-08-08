@@ -240,13 +240,35 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         this.columns = this.formTemplate.cloneColumns();
 
         if (!isShowChecked) {
+            Set<Integer> checkedOrders = new HashSet<Integer>();
             Iterator<Column> iterator = this.columns.iterator();
             while (iterator.hasNext()) {
                 Column c = iterator.next();
                 if (c.isChecking()) {
+                    checkedOrders.add(c.getOrder());
                     for(DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow: this.dataRows) {
+                        for (Column prevCol : columns) {
+                            if (prevCol.getOrder() < c.getOrder()) {
+                                com.aplana.sbrf.taxaccounting.model.Cell prevCell = dataRow.getCell(prevCol.getAlias());
+                                if (prevCell.getColSpan() > 1) {
+                                    // считаем количество уже удаленных столбцов
+                                    int deletedCount = 0;
+                                    for (Integer checkedOrder : checkedOrders) {
+                                        if (checkedOrder < c.getOrder() && checkedOrder > prevCol.getOrder()) {
+                                            deletedCount++;
+                                        }
+                                    }
+                                    if (c.getOrder() - (prevCol.getOrder() + prevCell.getColSpan() + deletedCount) < 0) {
+                                        //Найденная ячейка объединяет удаленную контрольную графу
+                                        //Уменьшаем объединение столбцов на 1, т.к столбец будет удален
+                                        prevCell.setColSpan(prevCell.getColSpan() - 1);
+                                    }
+                                }
+                            }
+                        }
                         dataRow.removeColumn(c);
                     }
+                    // в шапках обычно контрольные графы отделены
                     for(DataRow<HeaderCell> header: this.headers) {
                         header.removeColumn(c);
                     }
