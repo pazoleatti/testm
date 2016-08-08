@@ -358,8 +358,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         switch (formColumn.columnType) {
             case ColumnType.AUTO:
                 break
-            case ColumnType.DATE:
-                newRow[formColumn.alias] = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+            case ColumnType.DATE: // чтобы нефатально обрабатывал даты формата 00.00.0000
+                newRow[formColumn.alias] = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
                 break
             case ColumnType.NUMBER:
                 newRow[formColumn.alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)

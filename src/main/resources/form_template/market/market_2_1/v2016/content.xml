@@ -146,8 +146,8 @@
         <order>14</order>
         <width>6</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>6011</nameAttributeId>
-        <refBookAttributeId>6011</refBookAttributeId>
+        <nameAttributeId>6012</nameAttributeId>
+        <refBookAttributeId>6012</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
