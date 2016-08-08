@@ -546,7 +546,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public List<DataRow<Cell>> getTempRows(FormData fd, DataRowRange range) {
-		return getRowsInternal(fd, range, DataRowType.TEMP, false);
+		return getRowsInternal(fd, range, DataRowType.TEMP, true);
 	}
 
 	@Override
