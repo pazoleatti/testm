@@ -224,7 +224,7 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 
 		@Override
 		protected void onRangeChanged(HasData<RefBookDataRow> display) {
-			if (refBookId == null) return;
+			if (refBookId == null || recordId == null) return;
 			final Range range = display.getVisibleRange();
             GetRefBookRecordVersionAction action = new GetRefBookRecordVersionAction();
             action.setRefBookId(refBookId);
