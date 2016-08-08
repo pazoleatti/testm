@@ -135,14 +135,20 @@ boolean isCurrentNode(List<String> nodeNames, Map<String, Boolean> elements) {
 // Мапа соответсвтия id и наименований типов деклараций 8-11
 def declarations() {
     [
-            declaration8 : [12, 'Декларация по НДС (раздел 8)'],
-            declaration8n: [18, 'Декларация по НДС (раздел 8 без консолид. формы)'],
-            declaration81: [13, 'Декларация по НДС (раздел 8.1)'],
-            declaration9 : [14, 'Декларация по НДС (раздел 9)'],
-            declaration9n: [21, 'Декларация по НДС (раздел 9 без консолид. формы)'],
-            declaration91: [15, 'Декларация по НДС (раздел 9.1)'],
-            declaration10: [16, 'Декларация по НДС (раздел 10)'],
-            declaration11: [17, 'Декларация по НДС (раздел 11)']
+            declaration8  : [12, 'Декларация по НДС (раздел 8)', '8'],
+            declaration8n : [18, 'Декларация по НДС (раздел 8 без консолид. формы)', '8'],
+            declaration8q : [28, 'Декларация по НДС (раздел 8 с 3 квартала 2016)', '8'],
+            declaration81 : [13, 'Декларация по НДС (раздел 8.1)', '8.1'],
+            declaration81q: [29, 'Декларация по НДС (раздел 8.1 с 3 квартала 2016)', '8.1'],
+            declaration9  : [14, 'Декларация по НДС (раздел 9)', '9'],
+            declaration9n : [21, 'Декларация по НДС (раздел 9 без консолид. формы)', '9'],
+            declaration9q : [24, 'Декларация по НДС (раздел 9 с 3 квартала 2016)', '9'],
+            declaration91 : [15, 'Декларация по НДС (раздел 9.1)', '9.1'],
+            declaration91q: [27, 'Декларация по НДС (раздел 9.1 с 3 квартала 2016)', '9.1'],
+            declaration10 : [16, 'Декларация по НДС (раздел 10)', '10'],
+            declaration10q: [26, 'Декларация по НДС (раздел 10 с 3 квартала 2016)', '10'],
+            declaration11 : [17, 'Декларация по НДС (раздел 11)', '11'],
+            declaration11q: [25, 'Декларация по НДС (раздел 11 с 3 квартала 2016)', '11']
     ]
 }
 
@@ -297,28 +303,41 @@ void generateXML() {
     def reorgFormCode = departmentParam?.REORG_FORM_CODE?.referenceValue
     def prPodp = (signatoryId != null ? signatoryId : 1)
 
-    def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1)
-    def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1)
+    def declarationsMap = declarations()
+    def parts = getParts(declarationsMap)
+    def has8 = (isDeclarationExist(parts, declarationsMap.declaration8[0]) == 1)
+    def has8n = (isDeclarationExist(parts, declarationsMap.declaration8n[0]) == 1)
+    def has8q = (isDeclarationExist(parts, declarationsMap.declaration8q[0]) == 1)
+    def has81 = (isDeclarationExist(parts, declarationsMap.declaration81[0]) == 1)
+    def has81q = (isDeclarationExist(parts, declarationsMap.declaration81q[0]) == 1)
 
-    def has9 = (isDeclarationExist(declarations().declaration9[0]) == 1)
-    def has9n = (isDeclarationExist(declarations().declaration9n[0]) == 1)
+    def has9 = (isDeclarationExist(parts, declarationsMap.declaration9[0]) == 1)
+    def has9n = (isDeclarationExist(parts, declarationsMap.declaration9n[0]) == 1)
+    def has9q = (isDeclarationExist(parts, declarationsMap.declaration9q[0]) == 1)
+    def has91 = (isDeclarationExist(parts, declarationsMap.declaration91[0]) == 1)
+    def has91q = (isDeclarationExist(parts, declarationsMap.declaration91q[0]) == 1)
 
-    def sign812 = hasOneOrMoreDeclaration()
+    def has10 = (isDeclarationExist(parts, declarationsMap.declaration10[0]) == 1)
+    def has10q = (isDeclarationExist(parts, declarationsMap.declaration10q[0]) == 1)
+    def has11 = (isDeclarationExist(parts, declarationsMap.declaration11[0]) == 1)
+    def has11q = (isDeclarationExist(parts, declarationsMap.declaration11q[0]) == 1)
+
+    def sign812 = hasOneOrMoreDeclaration(parts, declarationsMap)
     def has812 = (sign812 == 1)
-    def sign8 = (has8 || has8n) ? 1 : 0
-    def sign81 = isDeclarationExist(declarations().declaration81[0])
-    def sign9 = (has9 || has9n) ? 1 : 0
-    def sign91 = isDeclarationExist(declarations().declaration91[0])
-    def sign10 = isDeclarationExist(declarations().declaration10[0])
-    def sign11 = isDeclarationExist(declarations().declaration11[0])
+    def sign8 = (has8 || has8n || has8q) ? 1 : 0
+    def sign81 = (has81 || has81q) ? 1 : 0
+    def sign9 = (has9 || has9n || has9q) ? 1 : 0
+    def sign91 = (has91 || has91q) ? 1 : 0
+    def sign10 = (has10 || has10q) ? 1 : 0
+    def sign11 = (has11 || has11q) ? 1 : 0
     def sign12 = 0
 
-    def nameDecl8 = getDeclarationFileName(has8 ? declarations().declaration8[0] : declarations().declaration8n[0])
-    def nameDecl81 = getDeclarationFileName(declarations().declaration81[0])
-    def nameDecl9 = getDeclarationFileName(has9 ? declarations().declaration9[0] : declarations().declaration9n[0])
-    def nameDecl91 = getDeclarationFileName(declarations().declaration91[0])
-    def nameDecl10 = getDeclarationFileName(declarations().declaration10[0])
-    def nameDecl11 = getDeclarationFileName(declarations().declaration11[0])
+    def nameDecl8 = getDeclarationFileName(parts, has8 ? declarationsMap.declaration8[0] : (has8n ? declarationsMap.declaration8n[0] : declarationsMap.declaration8q[0]))
+    def nameDecl81 = getDeclarationFileName(parts, has81 ? declarationsMap.declaration81[0] : declarationsMap.declaration81q[0])
+    def nameDecl9 = getDeclarationFileName(parts, has9 ? declarationsMap.declaration9[0] : (has9n ? declarationsMap.declaration9n[0] : declarationsMap.declaration9q[0]))
+    def nameDecl91 = getDeclarationFileName(parts, has91 ? declarationsMap.declaration91[0] : declarationsMap.declaration91q[0])
+    def nameDecl10 = getDeclarationFileName(parts, has10 ? declarationsMap.declaration10[0] : declarationsMap.declaration10q[0])
+    def nameDecl11 = getDeclarationFileName(parts, has11 ? declarationsMap.declaration11[0] : declarationsMap.declaration11q[0])
 
     /** Отчётный период. */
     def reportPeriod = getReportPeriod()
@@ -793,15 +812,27 @@ void logicCheck2() {
         return
     }
 
-    def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1)
-    def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1)
-    def has9 = (isDeclarationExist(declarations().declaration9[0]) == 1)
-    def has9n = (isDeclarationExist(declarations().declaration9n[0]) == 1)
+    def declarationMap = declarations()
+    def parts = getParts(declarationMap)
+    def has8 = (isDeclarationExist(parts, declarationMap.declaration8[0]) == 1)
+    def has8n = (isDeclarationExist(parts, declarationMap.declaration8n[0]) == 1)
+    def has8q = (isDeclarationExist(parts, declarationMap.declaration8q[0]) == 1)
+    def has81 = (isDeclarationExist(parts, declarationMap.declaration81[0]) == 1)
+    def has81q = (isDeclarationExist(parts, declarationMap.declaration81q[0]) == 1)
+    def has9 = (isDeclarationExist(parts, declarationMap.declaration9[0]) == 1)
+    def has9n = (isDeclarationExist(parts, declarationMap.declaration9n[0]) == 1)
+    def has9q = (isDeclarationExist(parts, declarationMap.declaration9q[0]) == 1)
+    def has91 = (isDeclarationExist(parts, declarationMap.declaration91[0]) == 1)
+    def has91q = (isDeclarationExist(parts, declarationMap.declaration91q[0]) == 1)
+    def has10 = (isDeclarationExist(parts, declarationMap.declaration10[0]) == 1)
+    def has10q = (isDeclarationExist(parts, declarationMap.declaration10q[0]) == 1)
+    def has11 = (isDeclarationExist(parts, declarationMap.declaration11[0]) == 1)
+    def has11q = (isDeclarationExist(parts, declarationMap.declaration11q[0]) == 1)
 
-    declaration8 = has8n ? declarations().declaration8n[0] : declarations().declaration8[0]
-    declaration9 = has9n ? declarations().declaration9n[0] : declarations().declaration9[0]
-    declaration81 = declarations().declaration81[0]
-    declaration91 = declarations().declaration91[0]
+    def declaration8 = has8q ? declarationMap.declaration8q[0] : (has8n ? declarationMap.declaration8n[0] : declarationMap.declaration8[0])
+    def declaration9 = has9q ? declarationMap.declaration9q[0] : (has9n ? declarationMap.declaration9n[0] : declarationMap.declaration9[0])
+    def declaration81 = has81q ? declarationMap.declaration81q[0] : declarationMap.declaration81[0]
+    def declaration91 = has91q ? declarationMap.declaration91q[0] : declarationMap.declaration91[0]
 
     def elements = [:]
 
@@ -889,24 +920,32 @@ void logicCheck2() {
     }
 
     def reader8
-    if (has8) {
-        reader8 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration8[0]).id)
+    if (has8q) {
+        reader8 = declarationService.getXmlStreamReader(parts.get(declarationMap.declaration8q[0]).id)
     } else if (has8n) {
-        reader8 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration8n[0]).id)
+        reader8 = declarationService.getXmlStreamReader(parts.get(declarationMap.declaration8n[0]).id)
+    } else if (has8) {
+        reader8 = declarationService.getXmlStreamReader(parts.get(declarationMap.declaration8[0]).id)
     }
     def reader81
-    if (isDeclarationExist(declaration81) == 1) {
-        reader81 = declarationService.getXmlStreamReader(getParts().get(declaration81).id)
+    if (has81q) {
+        reader81 = declarationService.getXmlStreamReader(parts.get(declarationMap.declaration81q[0]).id)
+    } else if (has81) {
+        reader81 = declarationService.getXmlStreamReader(parts.get(declarationMap.declaration81[0]).id)
     }
     def reader9
-    if (has9) {
-        reader9 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration9[0]).id)
+    if (has9q) {
+        reader9 = declarationService.getXmlStreamReader(parts.get(declarationMap.declaration9q[0]).id)
     } else if (has9n) {
-        reader9 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration9n[0]).id)
+        reader9 = declarationService.getXmlStreamReader(parts.get(declarationMap.declaration9n[0]).id)
+    } else if (has9) {
+        reader9 = declarationService.getXmlStreamReader(parts.get(declarationMap.declaration9[0]).id)
     }
     def reader91
-    if (isDeclarationExist(declaration91) == 1) {
-        reader91 = declarationService.getXmlStreamReader(getParts().get(declaration91).id)
+    if (has91q) {
+        reader91 = declarationService.getXmlStreamReader(parts.get(declarationMap.declaration91q[0]).id)
+    } else if (has91) {
+        reader91 = declarationService.getXmlStreamReader(parts.get(declarationMap.declaration91[0]).id)
     }
 
     if (reader8 != null) {
@@ -1040,46 +1079,63 @@ void logicCheck2() {
         }
     }
 
-    // 1. Не создан ни один из экземпляров декларации по НДС (раздел 8), (раздел 8 без консолид. формы) текущего периода и подразделения
-    // ИЛИ
-    // Создан только один из экземпляров декларации по НДС (раздел 8), (раздел 8 без консолид. формы) текущего периода и подразделения.
-    if (has8 && has8n) {
-        logger.error("Созданы два экземпляра декларации раздела 8 (раздел 8 и раздел 8 без консолид. формы) текущего периода и подразделения! Один из экземпляров декларации раздела 8 необходимо удалить!")
+    def reportPeriod = getReportPeriod()
+    def department = departmentService.get(declarationData.departmentId)
+    // 1. Экземпляры декларации вида «Декларация по НДС (раздел 8)», «Декларация по НДС (раздел 8 без консолид. формы)»,
+    // «Декларация по НДС (раздел 8 с 3 квартала 2016)» в текущем периоде и подразделении не созданы либо создан только один из этих экземпляров
+    if (((has8 ? 1 : 0) + (has8n ? 1 : 0) + (has8q ? 1 : 0)) > 1) {
+        logger.error("В подразделении «%s» в периоде «%s %s» создано несколько экземпляров декларации по разделу 8! Необходимо оставить только один из экземпляров",
+                department.name, reportPeriod.name, reportPeriod.taxPeriod.year)
     }
 
-    // 1. Не создан ни один из экземпляров декларации по НДС (раздел 9), (раздел 9 без консолид. формы) текущего периода и подразделения
-    // ИЛИ
-    // Создан только один из экземпляров декларации по НДС (раздел 9), (раздел 9 без консолид. формы) текущего периода и подразделения.
-    if (has9 && has9n) {
-        logger.error("Созданы два экземпляра декларации раздела 9 (раздел 9 и раздел 9 без консолид. формы) текущего периода и подразделения! Один из экземпляров декларации раздела 9 необходимо удалить!")
+    // 2. Экземпляры декларации вида «Декларация по НДС (раздел 9)», «Декларация по НДС (раздел 9 без консолид. формы)»,
+    // «Декларация по НДС (раздел 9 с 3 квартала 2016)» в текущем периоде и подразделении не созданы либо создан только один из этих экземпляров
+    if (((has9 ? 1 : 0) + (has9n ? 1 : 0) + (has9q ? 1 : 0)) > 1) {
+        logger.error("В подразделении «%s» в периоде «%s %s» создано несколько экземпляров декларации по разделу 9! Необходимо оставить только один из экземпляров",
+                department.name, reportPeriod.name, reportPeriod.taxPeriod.year)
+    }
+
+    // 3. Экземпляры декларации вида «Декларация по НДС (раздел 10)», «Декларация по НДС (раздел 10 с 3 квартала 2016)»
+    // в текущем периоде и подразделении не созданы либо создан только один из этих экземпляров
+    if (has10 && has10q) {
+        logger.error("В подразделении «%s» в периоде «%s %s» создано несколько экземпляров декларации по разделу 10! Необходимо оставить только один из экземпляров",
+                department.name, reportPeriod.name, reportPeriod.taxPeriod.year)
+    }
+
+    // 4. Экземпляры декларации вида «Декларация по НДС (раздел 11)», «Декларация по НДС (раздел 11 с 3 квартала 2016)»
+    // в текущем периоде и подразделении не созданы либо создан только один из этих экземпляров
+    if (has11 && has11q) {
+        logger.error("В подразделении «%s» в периоде «%s %s» создано несколько экземпляров декларации по разделу 11! Необходимо оставить только один из экземпляров",
+                department.name, reportPeriod.name, reportPeriod.taxPeriod.year)
     }
 
     // 2. Существующие экземпляры декларации по НДС (раздел 8/раздел 8 без консолид. формы/8.1/9/раздел 9 без консолид. формы/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
-    def reportPeriod = getReportPeriod()
-    declarations().each { declaration ->
+    declarationMap.each { declaration ->
         def declarationData = declarationService.getLast(declaration.value[0], declarationData.departmentId, reportPeriod.id)
         if (declarationData != null && !declarationData.accepted) {
-            logger.error("Экземпляр декларации вида «${declaration.value[1]}» текущего периода и подразделения не находится в состоянии «Принята»!")
+            logger.error("Экземпляр декларации вида «%s», периода «%s %s» и подразделения «%s» не находится в состоянии «Принята»!",
+                    declaration.value[1], reportPeriod.name, reportPeriod.taxPeriod.year, department.name)
         }
     }
 
     // 3. Атрибуты признаки наличия разделов 8-11 (в том числе раздел 8 и 9 без консолид. формы) заполнены согласно алгоритмам
-    if (hasOneOrMoreDeclaration() == 1) {
+    def hasOneOrMoreDeclaration = hasOneOrMoreDeclaration(parts, declarationMap)
+    if (hasOneOrMoreDeclaration == 1) {
         def checkMap = [
                 'Признак наличия разделов с 8 по 12'
-                : [getXmlValue(exist8_12) as BigDecimal, hasOneOrMoreDeclaration()],
+                : [getXmlValue(exist8_12) as BigDecimal, hasOneOrMoreDeclaration],
                 'Признак наличия сведений из книги покупок об операциях, отражаемых за истекший налоговый период'
-                : [getXmlValue(exist8) as BigDecimal, (has8 || has8n) ? 1 : 0],
+                : [getXmlValue(exist8) as BigDecimal, (has8 || has8n || has8q) ? 1 : 0],
                 'Признак наличия сведений из дополнительного листа книги покупок'
-                : [getXmlValue(exist81) as BigDecimal, isDeclarationExist(declaration81)],
+                : [getXmlValue(exist81) as BigDecimal, (has81 || has81q) ? 1 : 0],
                 'Признак наличия сведений из книги продаж об операциях, отражаемых за истекший налоговый период'
-                : [getXmlValue(exist9) as BigDecimal, (has9 || has9n) ? 1 : 0],
+                : [getXmlValue(exist9) as BigDecimal, (has9 || has9n || has9q) ? 1 : 0],
                 'Признак наличия сведений из дополнительного листа книги продаж'
-                : [getXmlValue(exist91) as BigDecimal, isDeclarationExist(declaration91)],
+                : [getXmlValue(exist91) as BigDecimal, (has91 || has91q) ? 1 : 0],
                 'Признак наличия сведений из журнала учета выставленных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
-                : [getXmlValue(exist10) as BigDecimal, isDeclarationExist(declarations().declaration10[0])],
+                : [getXmlValue(exist10) as BigDecimal, (has10 || has10q) ? 1 : 0],
                 'Признак наличия сведений из журнала учета полученных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
-                : [getXmlValue(exist11) as BigDecimal, isDeclarationExist(declarations().declaration11[0])],
+                : [getXmlValue(exist11) as BigDecimal, (has11 || has11q) ? 1 : 0],
                 'Признак наличия сведений из счетов-фактур, выставленных лицами, указанными в пункте 5 статьи 173 Налогового кодекса Российской Федерации'
                 : [getXmlValue(exist12) as BigDecimal, 0]
         ]
@@ -1110,44 +1166,44 @@ void logicCheck2() {
                 "вычеты не обоснованы, либо налоговая база занижена, так как суммы отработанных авансов не включены в реализацию.")
     }
     // 1.25 (8, 8.1, 9, 9.1)
-    if (checkReader('1.25', [(declaration8): reader8, (declaration81): reader81, (declaration9): reader9, (declaration91): reader91])) {
+    if (checkReader('1.25', parts, [(declaration8): reader8, (declaration81): reader81, (declaration9): reader9, (declaration91): reader91])) {
         def sum25 = r8str190 + (r81str190 - r81str005) - (r9str260 + r9str270) - (r9str200sum + r9str210sum) + (r91str340 + r91str350 - r91str050 - r91str060) - (r91str280sum + r91str290sum)
         if (r1str050 > 0 && sum25 <= 0) {
             logger.warn("КС 1.25. Возможно нарушение ст. 173 завышение суммы НДС, подлежащей возмещению за онп.")
         }
     }
     // 1.26 (9, 9.1)
-    if (checkReader('1.26', [(declaration9): reader9, (declaration91): reader91])) {
+    if (checkReader('1.26', parts, [(declaration9): reader9, (declaration91): reader91])) {
         if (r2str060sum < r9str200sum + r9str210sum + r91str280sum + r91str290sum) {
             logger.warn("КС 1.26. Возможно нарушение ст. 161, п. 4 ст. 173 занижение суммы НДС, подлежащей уплате в бюджет.")
         }
     }
     // 1.27 (9, 9.1)
-    if (checkReader('1.27', [(declaration9): reader9, (declaration91): reader91])) {
+    if (checkReader('1.27', parts, [(declaration9): reader9, (declaration91): reader91])) {
         if (r3g5str110 + r2str060sum < r9str260 + r9str270 + r91str340 + r91str350 - r91str050 - r91str060) {
             logger.warn("КС 1.27. Возможно нарушение РФ ст. 153, 161, 164, 165, 166, 167, 173 занижение суммы НДС, исчисленного к уплате в бюджет.")
         }
     }
     // 1.28 (8, 8.1)
-    if (checkReader('1.28', [(declaration8): reader8, (declaration81): reader81])) {
+    if (checkReader('1.28', parts, [(declaration8): reader8, (declaration81): reader81])) {
         if (r3g3str190 > r8str190 + r81str190 - r81str005) {
             logger.warn("КС 1.28. Возможно нарушение ст. 171, 172 завышение суммы НДС, подлежащей вычету.")
         }
     }
     // 1.31 (8, 8.1)
-    if (checkReader('1.31', [(declaration8): reader8, (declaration81): reader81])) {
+    if (checkReader('1.31', parts, [(declaration8): reader8, (declaration81): reader81])) {
         if (r3g3str180 > r8str180sum + r81str180sum) {
             logger.warn("КС 1.31. Возможно нарушение ст. 161, 171, 172 завышение суммы НДС, подлежащей вычету.")
         }
     }
     // 1.33 (8.1)
-    if (checkReader('1.33', [(declaration81): reader81])) {
+    if (checkReader('1.33', parts, [(declaration81): reader81])) {
         if (r81str005 + r81str180sum < r81str190) {
             logger.warn("КС 1.33. Возможно нарушение ст. 171, 172 возможно завышение суммы НДС, подлежащей вычету.")
         }
     }
     // 1.36 (9)
-    if (checkReader('1.36', [(declaration9): reader9])) {
+    if (checkReader('1.36', parts, [(declaration9): reader9])) {
         //logger.info(""+r9str190sum + " >= " +r9str250)
         if (r9str250 > r9str190sum) {
             logger.warn("КС 1.36. Возможно нарушение ст. 164, 165, 167, 173 возможно занижение исчисленной суммы НДС вследствие " +
@@ -1155,35 +1211,35 @@ void logicCheck2() {
         }
     }
     // 1.39 (9.1)
-    if (checkReader('1.39', [(declaration91): reader91])) {
+    if (checkReader('1.39', parts, [(declaration91): reader91])) {
         if (r91str020 + r91str250sum > r91str310) {
             logger.warn("КС 1.39. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 возможно " +
                     "занижение суммы НДС, исчисленного к уплате в бюджет (при условии, что соотношение 1.32 и 1.49 выполняются)")
         }
     }
     // 1.40 (9.1)
-    if (checkReader('1.40', [(declaration91): reader91])) {
+    if (checkReader('1.40', parts, [(declaration91): reader91])) {
         if (r91str020 + r91str260sum > r91str320) {
             logger.warn("КС 1.40. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
                     "возможно занижение суммы НДС, исчисленного к уплате в бюджет")
         }
     }
     // 1.41  (9.1)
-    if (checkReader('1.41', [(declaration91): reader91])) {
+    if (checkReader('1.41', parts, [(declaration91): reader91])) {
         if (r91str020 + r91str270sum > r91str330) {
             logger.warn("КС 1.41. Возможно нарушение ст. 164, 165, 167, 173 возможно занижение исчисленной суммы НДС, " +
                     "вследствие неполного отражения НБ либо неверное применение ставки по НДС")
         }
     }
     // 1.42 (9.1)
-    if (checkReader('1.42', [(declaration91): reader91])) {
+    if (checkReader('1.42', parts, [(declaration91): reader91])) {
         if (r91str020 + r91str280sumAll > r91str340) {
             logger.warn("КС 1.42. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
                     "возможно занижение суммы НДС, исчисленного к уплате в бюджет (при условии, что соотношение 1.32 выполняется)")
         }
     }
     // 1.43 (9.1)
-    if (checkReader('1.43', [(declaration91): reader91])) {
+    if (checkReader('1.43', parts, [(declaration91): reader91])) {
         if (r91str020 + r91str290sumAll > r91str350) {
             logger.warn("КС 1.43. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
                     "возможно занижение суммы НДС, исчисленного к уплате в бюджет")
@@ -1200,11 +1256,11 @@ def getXmlValue(def value) {
 }
 
 // Заполнение мапы с данными о декларациях 8-11
-def Map<Long, Expando> getParts() {
+def Map<Long, Expando> getParts(def declarationMap) {
     if (declarationParts == null) {
         declarationParts = new HashedMap<Long, Expando>()
         def reportPeriod = getReportPeriod()
-        declarations().each { declaration ->
+        declarationMap.each { declaration ->
             id = declaration.value[0]
             name = declaration.value[1]
             def declarationData = declarationService.getLast(id, declarationData.departmentId, reportPeriod.id)
@@ -1212,6 +1268,7 @@ def Map<Long, Expando> getParts() {
             def result = new Expando()
             result.id = (declarationData?.id)
             result.name = declaration.value[1]
+            result.section = declaration.value[2]
             result.exist = (declarationData != null)
             result.accepted = (declarationData?.accepted)
 
@@ -1224,32 +1281,32 @@ def Map<Long, Expando> getParts() {
     return declarationParts
 }
 
-def String getDeclarationFileName(def declarationTypeId) {
-    return getParts().get(declarationTypeId)?.fileName ?: empty
+def String getDeclarationFileName(def parts, def declarationTypeId) {
+    return parts.get(declarationTypeId)?.fileName ?: empty
 }
 
-def BigDecimal isDeclarationExist(def declarationTypeId) {
-    return getParts().get(declarationTypeId)?.exist ? 1 : 0
+def BigDecimal isDeclarationExist(def parts, def declarationTypeId) {
+    return parts.get(declarationTypeId)?.exist ? 1 : 0
 }
 
-def boolean checkReader(String number, Map<Integer, XMLStreamReader> map) {
+def boolean checkReader(String number, def parts, Map<Integer, XMLStreamReader> map) {
     boolean exist = true
     map.each { id, reader ->
-        if (!isDeclarationExist(id)) {
-            logger.warn("%s. Экземпляр декларации вида «%s» не создан. Проверка контрольного соотношения невозможна.", number, getParts().get(id).name)
+        if (!isDeclarationExist(parts, id)) {
+            logger.warn("%s. Экземпляр декларации по разделу %s не создан. Проверка контрольного соотношения невозможна.", number, parts.get(id).section)
             exist = false
         } else if (!reader) {
-            logger.warn("%s. Экземпляр декларации вида «%s» создан, но не рассчитан. Проверка контрольного соотношения невозможна.", number, getParts().get(id).name)
+            logger.warn("%s. Экземпляр декларации по разделу %s создан, но не рассчитан. Проверка контрольного соотношения невозможна.", number, parts.get(id).section)
             exist = false
         }
     }
     return exist
 }
 
-def BigDecimal hasOneOrMoreDeclaration() {
+def BigDecimal hasOneOrMoreDeclaration(def parts, def declarationsMap) {
     def BigDecimal hasDeclaration = 0
-    declarations().each { declaration ->
-        if (isDeclarationExist(declaration.value[0]) == 1) {
+    declarationsMap.each { declaration ->
+        if (isDeclarationExist(parts, declaration.value[0]) == 1) {
             hasDeclaration = 1
         }
     }
