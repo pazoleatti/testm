@@ -481,188 +481,173 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             return result;
         }
 
-        // Проверка периода ввода остатков
-        if (departmentReportPeriod.isBalance()) {
+        // Призрак передачи НФ на вышестоящий уровень
+        boolean sendToNextLevel;
+        try {
+            // Проверки статуса приемников
+            sendToNextLevel = checkDestinations(formDataId, userInfo, new Logger());
+        } catch (ServiceException e) {
+            // Нет
+            return result;
+        }
+
+        // Признак контролера вышестоящего уровня
+        boolean isUpControl = userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                && formData.getDepartmentId() != userInfo.getUser().getDepartmentId();
+
+        if (asList(FormDataKind.PRIMARY, FormDataKind.ADDITIONAL).contains(formData.getKind()) &&
+                sendToNextLevel) {
+            // Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор» и передаваемых на
+            // вышестоящий уровень
+
             switch (formData.getState()) {
                 case CREATED:
-                    result.add(WorkflowMove.CREATED_TO_ACCEPTED);
+                    // Повысить статус могут все, кто имеет доступ для чтения
+                    if (userInfo.getUser().hasRole(TARole.ROLE_OPER)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        result.add(WorkflowMove.CREATED_TO_PREPARED);
+                    }
+                    break;
+                case PREPARED:
+                    // Повысить и понизить статус могут все контролеры, которые имеют доступ для чтения
+                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        result.add(WorkflowMove.PREPARED_TO_CREATED);
+                        result.add(WorkflowMove.PREPARED_TO_APPROVED);
+                    }
+                    break;
+                case APPROVED:
+                    // Повысить и понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
+                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+                        result.add(WorkflowMove.APPROVED_TO_PREPARED);
+                        result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
+                    }
                     break;
                 case ACCEPTED:
-                    result.add(WorkflowMove.ACCEPTED_TO_CREATED);
+                    // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
+                    // Форма "Согласование организации" не распринимается
+                    if ((userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))) {
+                        result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
+                    }
                     break;
                 default:
                     LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-							formData.getKind().getTitle(), formData.getState()));
+                            formData.getKind().getTitle(), formData.getState().getTitle()));
+            }
+        } else if (asList(FormDataKind.PRIMARY, FormDataKind.ADDITIONAL, FormDataKind.UNP).contains(
+                formData.getKind()) && !sendToNextLevel) {
+            // Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор» и НЕ передаваемых на
+            // вышестоящий уровень
+            switch (formData.getState()) {
+                case CREATED:
+                    // Повысить статус могут все, кто имеет доступ для чтения
+                    if (userInfo.getUser().hasRole(TARole.ROLE_OPER)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        result.add(WorkflowMove.CREATED_TO_PREPARED);
+                    }
+                    break;
+                case PREPARED:
+                    // Повысить и понизить статус могут все контролеры, которые имеют доступ для чтения
+                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        result.add(WorkflowMove.PREPARED_TO_CREATED);
+                        result.add(WorkflowMove.PREPARED_TO_ACCEPTED);
+                    }
+                    break;
+                case APPROVED:
+                    // !!!!!!    Такая ситуация по идее не возможна, но если некорректно манипулировать источникми-приемниками то может произойти  !!!!!
+                    // в этом случае отображаем "шаг назад" без условий чтобы вывести нф из тупика
+                    result.add(WorkflowMove.APPROVED_TO_PREPARED);
+                    break;
+                case ACCEPTED:
+                    // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
+                    if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+                        result.add(WorkflowMove.ACCEPTED_TO_PREPARED);
+                    }
+                    break;
+                default:
+                    LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+                            formData.getKind().getTitle(), formData.getState().getTitle()));
+            }
+        } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED, FormDataKind.CALCULATED).contains(formData.getKind())
+                && !sendToNextLevel) {
+            // Жизненный цикл налоговых форм, формируемых автоматически и НЕ передаваемых на вышестоящий уровень
+            switch (formData.getState()) {
+                case CREATED:
+                    // Повысить статус могут все контролеры, которые имеют доступ для чтения
+                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        result.add(WorkflowMove.CREATED_TO_ACCEPTED);
+                    }
+                    break;
+                case APPROVED:
+                    // !!!!!!    Такая ситуация по идее не возможна, но если некорректно манипулировать источникми-приемниками то может произойти  !!!!!
+                    // в этом случае отображаем "шаг назад" без условий чтобы вывести нф из тупика
+                    result.add(WorkflowMove.APPROVED_TO_CREATED);
+                    break;
+                case ACCEPTED:
+                    // Понизить статус могут все контролеры, которые имеют доступ для чтения
+                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        result.add(WorkflowMove.ACCEPTED_TO_CREATED);
+                    }
+                    break;
+                default:
+                    LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+                            formData.getKind().getTitle(), formData.getState().getTitle()));
+
+            }
+        } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED, FormDataKind.CALCULATED).contains(formData.getKind())
+                && sendToNextLevel) {
+            // Жизненный цикл налоговых форм, формируемых автоматически и передаваемых на вышестоящий уровень
+            switch (formData.getState()) {
+                case CREATED:
+                    // Повысить статус могут все контролеры, которые имеют доступ для чтения
+                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        result.add(WorkflowMove.CREATED_TO_APPROVED);
+                    }
+                    break;
+                case APPROVED:
+                    // Пониизить статус могут все контролеры, которые имеют доступ для чтения
+                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        result.add(WorkflowMove.APPROVED_TO_CREATED);
+                    }
+                    // Повысить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
+                    if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+                        result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
+                    }
+                    break;
+                case ACCEPTED:
+                    // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
+                    if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+                        result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
+                    }
+                    break;
+                default:
+                    LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getTitle(), formData.getState().getTitle()));
             }
         } else {
-            // Призрак передачи НФ на вышестоящий уровень
-            boolean sendToNextLevel;
-            try {
-                // Проверки статуса приемников
-                sendToNextLevel = checkDestinations(formDataId, userInfo, new Logger());
-            } catch (ServiceException e) {
-                // Нет
-                return result;
-            }
-
-            // Признак контролера вышестоящего уровня
-            boolean isUpControl = userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                    && formData.getDepartmentId() != userInfo.getUser().getDepartmentId();
-
-            if (asList(FormDataKind.PRIMARY, FormDataKind.ADDITIONAL).contains(formData.getKind()) &&
-                    sendToNextLevel) {
-                // Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор» и передаваемых на
-                // вышестоящий уровень
-
-                switch (formData.getState()) {
-                    case CREATED:
-                        // Повысить статус могут все, кто имеет доступ для чтения
-                        if (userInfo.getUser().hasRole(TARole.ROLE_OPER)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-                            result.add(WorkflowMove.CREATED_TO_PREPARED);
-                        }
-                        break;
-                    case PREPARED:
-                        // Повысить и понизить статус могут все контролеры, которые имеют доступ для чтения
-                        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-                            result.add(WorkflowMove.PREPARED_TO_CREATED);
-                            result.add(WorkflowMove.PREPARED_TO_APPROVED);
-                        }
-                        break;
-                    case APPROVED:
-                        // Повысить и понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
-                            result.add(WorkflowMove.APPROVED_TO_PREPARED);
-                            result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
-                        }
-                        break;
-                    case ACCEPTED:
-                        // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                        // Форма "Согласование организации" не распринимается
-                        if ((userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))) {
-                            result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
-                        }
-                        break;
-                    default:
-                        LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-								formData.getKind().getTitle(), formData.getState().getTitle()));
-                }
-            } else if (asList(FormDataKind.PRIMARY, FormDataKind.ADDITIONAL, FormDataKind.UNP).contains(
-                    formData.getKind()) && !sendToNextLevel) {
-                // Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор» и НЕ передаваемых на
-                // вышестоящий уровень
-                switch (formData.getState()) {
-                    case CREATED:
-                        // Повысить статус могут все, кто имеет доступ для чтения
-                        if (userInfo.getUser().hasRole(TARole.ROLE_OPER)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-                            result.add(WorkflowMove.CREATED_TO_PREPARED);
-                        }
-                        break;
-                    case PREPARED:
-                        // Повысить и понизить статус могут все контролеры, которые имеют доступ для чтения
-                        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-                            result.add(WorkflowMove.PREPARED_TO_CREATED);
-                            result.add(WorkflowMove.PREPARED_TO_ACCEPTED);
-                        }
-                        break;
-                    case APPROVED:
-                        // !!!!!!    Такая ситуация по идее не возможна, но если некорректно манипулировать источникми-приемниками то может произойти  !!!!!
-                        // в этом случае отображаем "шаг назад" без условий чтобы вывести нф из тупика
-                        result.add(WorkflowMove.APPROVED_TO_PREPARED);
-                        break;
-                    case ACCEPTED:
-                        // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                        if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
-                            result.add(WorkflowMove.ACCEPTED_TO_PREPARED);
-                        }
-                        break;
-                    default:
-                        LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-								formData.getKind().getTitle(), formData.getState().getTitle()));
-                }
-            } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED, FormDataKind.CALCULATED).contains(formData.getKind())
-                    && !sendToNextLevel) {
-                // Жизненный цикл налоговых форм, формируемых автоматически и НЕ передаваемых на вышестоящий уровень
-                switch (formData.getState()) {
-                    case CREATED:
-                        // Повысить статус могут все контролеры, которые имеют доступ для чтения
-                        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-                            result.add(WorkflowMove.CREATED_TO_ACCEPTED);
-                        }
-                        break;
-                    case APPROVED:
-                        // !!!!!!    Такая ситуация по идее не возможна, но если некорректно манипулировать источникми-приемниками то может произойти  !!!!!
-                        // в этом случае отображаем "шаг назад" без условий чтобы вывести нф из тупика
-                        result.add(WorkflowMove.APPROVED_TO_CREATED);
-                        break;
-                    case ACCEPTED:
-                        // Понизить статус могут все контролеры, которые имеют доступ для чтения
-                        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-                            result.add(WorkflowMove.ACCEPTED_TO_CREATED);
-                        }
-                        break;
-                    default:
-                        LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-								formData.getKind().getTitle(), formData.getState().getTitle()));
-
-                }
-            } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED, FormDataKind.CALCULATED).contains(formData.getKind())
-                    && sendToNextLevel) {
-                // Жизненный цикл налоговых форм, формируемых автоматически и передаваемых на вышестоящий уровень
-                switch (formData.getState()) {
-                    case CREATED:
-                        // Повысить статус могут все контролеры, которые имеют доступ для чтения
-                        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-                            result.add(WorkflowMove.CREATED_TO_APPROVED);
-                        }
-                        break;
-                    case APPROVED:
-                        // Пониизить статус могут все контролеры, которые имеют доступ для чтения
-                        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-                            result.add(WorkflowMove.APPROVED_TO_CREATED);
-                        }
-                        // Повысить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                        if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
-                            result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
-                        }
-                        break;
-                    case ACCEPTED:
-                        // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                        if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
-                            result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
-                        }
-                        break;
-                    default:
-                        LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getTitle(), formData.getState().getTitle()));
-                }
-            } else {
-                LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-						formData.getKind().getTitle(), formData.getState().getTitle()));
-            }
+            LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+                    formData.getKind().getTitle(), formData.getState().getTitle()));
         }
         return result;
     }
