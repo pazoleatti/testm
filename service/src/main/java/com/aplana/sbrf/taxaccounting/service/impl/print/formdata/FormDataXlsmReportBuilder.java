@@ -863,7 +863,10 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
 
         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-            sheet.getRow(entry.getKey()).setHeight((short) (sheet.getDefaultRowHeight() * entry.getValue()));
+            int rowHeight = sheet.getDefaultRowHeight() * entry.getValue();
+            if (rowHeight != 0) {
+                sheet.getRow(entry.getKey()).setHeight((short) (rowHeight));
+            }
         }
     }
 
