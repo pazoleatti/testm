@@ -299,9 +299,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                         if (result.isHasFatalErrors()) {
                             Dialog.errorMessage("Удаление периода", "Удаление периода невозможно!");
                         }
-                        if (getView().getRowsCount() == 0) {
-                            disableButtons();
-                        }
+                        disableButtons();
 					}
 				}, PeriodsPresenter.this));
 	}
