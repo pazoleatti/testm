@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -18,6 +15,9 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Dmitriy Levykin
@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 public class RefBookScriptingServiceImplTest {
 
     private RefBookScriptingServiceImpl rbScriptingService;
+    private TemplateChangesService templateChangesService;
     private static String SCRIPT_TEST_DATA =
             "switch (formDataEvent) {\n" +
             "   case FormDataEvent.IMPORT:\n" +
@@ -64,7 +65,8 @@ public class RefBookScriptingServiceImplTest {
         LogEntryService logEntryService = mock(LogEntryService.class);
         ReflectionTestUtils.setField(rbScriptingService, "logEntryService", logEntryService);
 
-        ReflectionTestUtils.setField(rbScriptingService, "templateChangesService", mock(TemplateChangesService.class));
+        templateChangesService = mock(TemplateChangesService.class);
+        ReflectionTestUtils.setField(rbScriptingService, "templateChangesService", templateChangesService);
 
         TransactionHelper tx = new TransactionHelper() {
             @Override
@@ -93,6 +95,9 @@ public class RefBookScriptingServiceImplTest {
         String script = IOUtils.toString(stream, "UTF-8");
         Logger logger = new Logger();
         rbScriptingService.saveScript(refBookId, script, logger, userInfo);
+        ArgumentCaptor<TemplateChanges> argument = ArgumentCaptor.forClass(TemplateChanges.class);
+        verify(templateChangesService, times(1)).save(argument.capture());
+        Assert.assertEquals(FormDataEvent.TEMPLATE_MODIFIED, argument.getAllValues().get(0).getEvent());
     }
 
     @Test(expected = ServiceLoggerException.class)
@@ -103,5 +108,18 @@ public class RefBookScriptingServiceImplTest {
         String script = IOUtils.toString(stream, "UTF-8");
         Logger logger = new Logger();
         rbScriptingService.saveScript(refBookId, script, logger, userInfo);
+    }
+
+    @Test
+    public void importScript() throws IOException {
+        TAUserInfo userInfo = new TAUserInfo();
+        long refBookId = 0L;
+        InputStream stream = RefBookScriptingServiceImplTest.class.getResourceAsStream("saveRefBookScript1.groovy");
+        String script = IOUtils.toString(stream, "UTF-8");
+        Logger logger = new Logger();
+        rbScriptingService.importScript(refBookId, script, logger, userInfo);
+        ArgumentCaptor<TemplateChanges> argument = ArgumentCaptor.forClass(TemplateChanges.class);
+        verify(templateChangesService, times(1)).save(argument.capture());
+        Assert.assertEquals(FormDataEvent.SCRIPTS_IMPORT, argument.getAllValues().get(0).getEvent());
     }
 }
