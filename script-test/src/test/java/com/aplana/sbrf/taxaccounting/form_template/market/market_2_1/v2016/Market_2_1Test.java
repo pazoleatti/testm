@@ -259,7 +259,7 @@ public class Market_2_1Test extends ScriptTestBase {
         }});
 
         // графа 14 (7.2)
-        when(testHelper.getRefBookFactory().getByAttribute(eq(6011L))).thenReturn(new RefBook() {{
+        when(testHelper.getRefBookFactory().getByAttribute(eq(6012L))).thenReturn(new RefBook() {{
             setId(601L);
         }});
 
@@ -285,10 +285,10 @@ public class Market_2_1Test extends ScriptTestBase {
 
         // графа 14 (7.2)
         ((RefBookColumn) formTemplate.getColumn("creditClass")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(6011L);
+            setId(6012L);
             setAttributeType(RefBookAttributeType.STRING);
-            setAlias("CREDIT_QUALITY_CLASS");
-            setName("Класс кредитоспособности");
+            setAlias("SHORT_NAME");
+            setName("Краткое наименование");
         }});
 
         // графа 27 (19)

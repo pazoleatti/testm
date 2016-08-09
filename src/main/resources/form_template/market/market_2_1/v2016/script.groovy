@@ -30,7 +30,7 @@ import java.math.RoundingMode
 // графа 11 (6)    - taxpayerInn
 // графа 12 (6.1)  - okved
 // графа 13 (7.1)  - creditRating              - атрибут 6034 - SHORT_NAME - «Краткое наименование», справочник 603 «Кредитные рейтинги»
-// графа 14 (7.2)  - creditClass               - атрибут 6011 - CREDIT_QUALITY_CLASS - «Краткое наименование», справочник 601 «Классы кредитоспособности»
+// графа 14 (7.2)  - creditClass               - атрибут 6012 - SHORT_NAME - «Краткое наименование», справочник 601 «Классы кредитоспособности»
 // графа 15 (8)    - beneficiaryName
 // графа 16 (9)    - beneficiaryInn
 // графа 17 (10)   - emitentName
