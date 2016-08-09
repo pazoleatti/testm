@@ -66,6 +66,19 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		}
     }
 
+	@Override
+	public void save(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds) {
+		if (departmentIds == null || departmentIds.isEmpty())
+			throw new ServiceException(ERROR_BATCH_MESSAGE);
+		try {
+			departmentReportPeriodDao.save(departmentReportPeriod, departmentIds);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
+	}
+
     @Override
     public void updateActive(int id, boolean active, boolean isBalance) {
 		try {
@@ -76,6 +89,19 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
+
+	@Override
+	public void updateActive(List<Integer> ids, boolean active, boolean isBalance) {
+		if (ids == null || ids.isEmpty())
+			throw new ServiceException(ERROR_BATCH_MESSAGE);
+		try {
+			departmentReportPeriodDao.updateActive(ids, active, isBalance);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
+	}
 
     @Override
     public void updateActive(List<Integer> ids, boolean active) {

@@ -30,10 +30,14 @@ public interface DepartmentReportPeriodDao {
 	 */
 	int save(DepartmentReportPeriod departmentReportPeriod);
 
+    void save(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds);
+
     /**
      * Открытие/закрытие отчетного периода подразделения
      */
     void updateActive(int id, boolean active, boolean isBalance);
+
+    void updateActive(final List<Integer> ids, final boolean active, final boolean isBalance);
 
     /**
      * Открытие/закрытие отчетного периода подразделения (batch)

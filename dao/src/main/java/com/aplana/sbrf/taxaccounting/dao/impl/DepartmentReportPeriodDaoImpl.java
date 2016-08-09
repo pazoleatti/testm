@@ -182,6 +182,30 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
+    @Transactional(readOnly = false)
+    public void save(final DepartmentReportPeriod departmentReportPeriod, final List<Integer> departmentIds) {
+        getJdbcTemplate()
+                .batchUpdate("insert into DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, " +
+                                "IS_BALANCE_PERIOD, CORRECTION_DATE) select seq_department_report_period.nextval, ?, ?, ?, ?, ? from dual",
+                        new BatchPreparedStatementSetter() {
+                            @Override
+                            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                                ps.setInt(1, departmentIds.get(i));
+                                ps.setInt(2, departmentReportPeriod.getReportPeriod().getId());
+                                ps.setInt(3, departmentReportPeriod.isActive() ? 1 : 0);
+                                ps.setInt(4, departmentReportPeriod.isBalance() ? 1 : 0);
+                                ps.setDate(5, departmentReportPeriod.getCorrectionDate() == null ? null : new java.sql.Date(departmentReportPeriod.getCorrectionDate().getTime()));
+                            }
+
+                            @Override
+                            public int getBatchSize() {
+                                return departmentIds.size();
+                            }
+                        });
+
+    }
+
+    @Override
     public void updateActive(int id, boolean active, boolean isBalance) {
         getJdbcTemplate().update(
                 "update department_report_period set is_active = ?, is_balance_period = ? where id = ?",
@@ -191,13 +215,14 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    public void updateActive(final List<Integer> ids, final boolean active) {
+    public void updateActive(final List<Integer> ids, final boolean active, final boolean isBalance) {
         try {
-            getJdbcTemplate().batchUpdate("update department_report_period set is_active = ? where id = ?", new BatchPreparedStatementSetter() {
+            getJdbcTemplate().batchUpdate("update department_report_period set is_active = ?, is_balance_period = ? where id = ?", new BatchPreparedStatementSetter() {
                 @Override
                 public void setValues(PreparedStatement ps, int i) throws SQLException {
                     ps.setInt(1, active ? 1 : 0);
-                    ps.setInt(2, ids.get(i));
+                    ps.setInt(2, isBalance ? 1 : 0);
+                    ps.setInt(3, ids.get(i));
                 }
 
                 @Override
@@ -205,6 +230,17 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                     return ids.size();
                 }
             });
+        } catch (DataAccessException e) {
+            LOG.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
+    public void updateActive(final List<Integer> ids, final boolean active) {
+        try {
+            getJdbcTemplate().update(String.format("update department_report_period set is_active = ? where id in (%s)", StringUtils.join(ids.toArray(), ',')),
+                    new Object[]{active ? 1 : 0});
         } catch (DataAccessException e){
 			LOG.error("", e);
             throw new DaoException("", e);

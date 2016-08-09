@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import org.apache.commons.lang3.time.DateUtils;
@@ -157,6 +158,29 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertTrue(savedDepartmentReportPeriod.isBalance());
         Assert.assertEquals(1, savedDepartmentReportPeriod.getDepartmentId().intValue());
         Assert.assertEquals(1, savedDepartmentReportPeriod.getReportPeriod().getId().intValue());
+    }
+
+    @Test
+    public void saveBatchTest() {
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        ReportPeriod reportPeriod = reportPeriodDao.get(11);
+        departmentReportPeriod.setActive(true);
+        departmentReportPeriod.setBalance(true);
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        List<Integer> depIds = new ArrayList<Integer>();
+        depIds.add(2);
+        depIds.add(3);
+        depIds.add(4);
+        departmentReportPeriodDao.save(departmentReportPeriod, depIds);
+
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setIsActive(true);
+        filter.setIsBalance(true);
+        filter.setReportPeriodIdList(Collections.singletonList(reportPeriod.getId()));
+        filter.setDepartmentIdList(depIds);
+        List<DepartmentReportPeriod> savedDepartmentReportPeriods = departmentReportPeriodDao.getListByFilter(filter);
+        Assert.assertEquals(savedDepartmentReportPeriods.size(), 3);
+
     }
 
     @Test

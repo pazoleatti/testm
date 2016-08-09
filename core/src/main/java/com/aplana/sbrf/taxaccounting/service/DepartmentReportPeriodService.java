@@ -25,10 +25,14 @@ public interface DepartmentReportPeriodService {
      */
     int save(DepartmentReportPeriod departmentReportPeriod);
 
+    void save(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds);
+
     /**
      * Открытие/закрытие отчетного периода подразделения
      */
     void updateActive(int id, boolean active, boolean isBalance);
+
+    void updateActive(List<Integer> ids, boolean active, boolean isBalance);
 
     /**
      * Открытие/закрытие отчетного периода подразделения

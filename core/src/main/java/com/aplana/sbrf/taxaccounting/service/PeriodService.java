@@ -42,6 +42,8 @@ public interface PeriodService {
      */
     void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<LogEntry> logs);
 
+	void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs);
+
 	/**
 	 * Закрыть период
 	 * @param taxType тип налога
