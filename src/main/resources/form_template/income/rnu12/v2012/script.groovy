@@ -165,14 +165,17 @@ def getTotalRow(def dataRows) {
 /**
  * Получить подитоговую строку.
  *
- * @param rowNumber номер строки
  * @param code КНУ
  * @param key ключ для сравнения подитоговых строк при импорте
  */
-def getSubTotalRow(def rowNumber, def code, def key) {
-    def title = 'Итого по КНУ ' + (!code || 'null'.equals(code?.trim()) ? '"КНУ не задано"' : code?.trim())
-    def alias = 'total' + key.toString() + '#' + rowNumber
+def getSubTotalRow(def code, def key) {
+    def title = getTitle(code)
+    def alias = 'total' + key.toString()
     return getTotalRow(title, alias)
+}
+
+String getTitle(def code) {
+    return 'Итого по КНУ ' + (!code || 'null'.equals(code?.trim()) ? '"КНУ не задано"' : code?.trim())
 }
 
 def getTotalRow(def title, def alias) {
@@ -468,10 +471,10 @@ void importData() {
             def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
 
             // наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
-            if (totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] == null) {
-                totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] = []
+            if (totalRowFromFileMap[subTotalRow.getAlias()] == null) {
+                totalRowFromFileMap[subTotalRow.getAlias()] = []
             }
-            totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]].add(subTotalRow)
+            totalRowFromFileMap[subTotalRow.getAlias()].add(subTotalRow)
             rows.add(subTotalRow)
 
             allValues.remove(rowValues)
@@ -491,12 +494,12 @@ void importData() {
     if (!totalRowFromFileMap.isEmpty()) {
         def tmpSubTotalRowsMap = calcSubTotalRowsMap(rows)
         tmpSubTotalRowsMap.each { subTotalRow, groupValues ->
-            def totalRows = totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]]
+            def totalRows = totalRowFromFileMap[subTotalRow.getAlias()]
             if (totalRows) {
                 totalRows.each { totalRow ->
                     compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
                 }
-                totalRowFromFileMap.remove(subTotalRow.getAlias().split('#')[0])
+                totalRowFromFileMap.remove(subTotalRow.getAlias())
             } else {
                 rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, groupValues))
             }
@@ -632,7 +635,7 @@ def getNewSubTotalRowFromXls(def key, def values, def colOffset, def fileRowInde
     // графа fix
     def title = values[1]
     def code = title?.substring('Итого по КНУ '.size())?.trim()
-    def newRow = getSubTotalRow(rowIndex, code, key)
+    def newRow = getSubTotalRow(code, key)
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
@@ -678,7 +681,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def tmpRow = dataRows.get(i)
     def key = getKey(tmpRow)
     def code = getKnu(tmpRow?.opy)
-    def newRow = getSubTotalRow(i, code, key)
+    def newRow = getSubTotalRow(code, key)
 
     // Расчеты подитоговых значений
     def rows = []
@@ -713,6 +716,20 @@ void checkItog(def dataRows) {
                 }
             }
             return null
+        }
+    }, new ScriptUtils.CheckDiffGroup() {
+        @Override
+        Boolean check(DataRow<Cell> row1, DataRow<Cell> row2, List<String> groupColumns) {
+            if (groupColumns.find{ row1[it] != null } == null) {
+                return null // для строк с пустыми графами группировки не надо проверять итоги
+            }
+            if (row1.getAlias() == null && row2.getAlias() == null) {
+                return isDiffRow(row1, row2, groupColumns)
+            } else {
+                String value1 = (row1.getAlias() == null ? getTitle(row1.opy) : row1.fix) ?: ""
+                String value2 = (row2.getAlias() == null ? getTitle(row2.opy) : row2.fix) ?: ""
+                return !value1.equalsIgnoreCase(value2)
+            }
         }
     })
 }
