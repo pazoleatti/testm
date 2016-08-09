@@ -11,24 +11,15 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DataRowType;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResult;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
-import org.apache.commons.collections4.IterableUtils;
-import org.apache.commons.collections4.Predicate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
-import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
-import org.springframework.jdbc.core.namedparam.ParsedSql;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -61,8 +52,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private FormDataDao formDataDao;
 
 	@Override
-	public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual) {
-		Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, formTemplateId, key, isCaseSensitive, manual);
+	public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual, boolean correctionDiff) {
+		Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, formTemplateId, key, isCaseSensitive, manual, correctionDiff);
 		// get query and params
 		String query = sql.getFirst();
 		Map<String, Object> params = sql.getSecond();
@@ -100,7 +91,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 *
 	 * @return
 	 */
-	private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive, boolean manual) {
+	private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive, boolean manual, boolean correctionDiff) {
 		FormData formData = formDataDao.get(formDataId, manual);
 		StringBuilder stringBuilder = new StringBuilder("");
 		StringBuilder listColumnIndex = new StringBuilder("");
@@ -144,7 +135,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("fdId", formDataId);
 		params.put("key", "%" + key + "%");
-		params.put("temporary", DataRowType.SAVED.getCode());
+		params.put("temporary", correctionDiff ? DataRowType.TEMP.getCode() : DataRowType.SAVED.getCode());
 		params.put("manual", manual);
 
 		String sql =
@@ -535,8 +526,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public List<DataRow<Cell>> getRowsRefColumnsOnly(FormData fd, DataRowRange range) {
-		return getRowsInternal(fd, range, DataRowType.SAVED, false);
+	public List<DataRow<Cell>> getRowsRefColumnsOnly(FormData fd, DataRowRange range, boolean correctionDiff) {
+		return getRowsInternal(fd, range, correctionDiff ? DataRowType.TEMP : DataRowType.SAVED, false );
 	}
 
 	@Override

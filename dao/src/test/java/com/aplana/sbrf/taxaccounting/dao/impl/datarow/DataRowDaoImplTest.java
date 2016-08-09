@@ -119,7 +119,7 @@ public class DataRowDaoImplTest extends Assert {
     @Test
     public void getRowsRefColumnsOnly() {
         FormData formData = formDataDao.get(329, false);
-        List<DataRow<Cell>> rows = dataRowDao.getRowsRefColumnsOnly(formData, null);
+        List<DataRow<Cell>> rows = dataRowDao.getRowsRefColumnsOnly(formData, null, false);
         assertEquals(2, rows.get(0).keySet().size());
         assertEquals(null, rows.get(0).get("dateColumn"));
         assertEquals(182633L, rows.get(0).get("refBookColumn"));

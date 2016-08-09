@@ -54,6 +54,11 @@
         .msiImg {
             width: 16px;
         }
+
+        .hiddenXScroll {
+            overflow-x: hidden !important;
+            overflow-y: scroll !important;
+        }
     </ui:style>
 
     <g:VerticalPanel styleName="{style.msiMainPanel}">

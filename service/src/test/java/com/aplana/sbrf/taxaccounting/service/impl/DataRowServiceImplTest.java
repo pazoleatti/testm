@@ -85,7 +85,7 @@ public class DataRowServiceImplTest {
         when(formDataDao.get(formData.getId(), formData.isManual())).thenReturn(formData);
 
         ReflectionTestUtils.setField(dataRowService, "dataRowDao", dataRowDao);
-        when(dataRowDao.getRowsRefColumnsOnly(formData, null)).thenReturn(rows);
+        when(dataRowDao.getRowsRefColumnsOnly(formData, null, false)).thenReturn(rows);
 
         daoResult = new PagingResult<FormDataSearchResult>();
         FormDataSearchResult daoRow;
@@ -103,8 +103,8 @@ public class DataRowServiceImplTest {
         DataRowRange range = new DataRowRange();
         range.setOffset(1);
         range.setCount(5);
-        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, true, formData.isManual())).thenReturn(new PagingResult<FormDataSearchResult>());
-        PagingResult<FormDataSearchResult> results = dataRowService.searchByKey(formData.getId(), range, key, true, false);
+        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, true, formData.isManual(), false)).thenReturn(new PagingResult<FormDataSearchResult>());
+        PagingResult<FormDataSearchResult> results = dataRowService.searchByKey(formData.getId(), range, key, true, false, false);
         Assert.assertEquals(2, results.size());
 
         Assert.assertEquals(new Long(1), results.get(0).getIndex());
@@ -124,8 +124,8 @@ public class DataRowServiceImplTest {
         DataRowRange range = new DataRowRange();
         range.setOffset(1);
         range.setCount(10);
-        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, false, formData.isManual())).thenReturn(daoResult);
-        PagingResult<FormDataSearchResult>  results = dataRowService.searchByKey(formData.getId(), range, key, false, false);
+        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, false, formData.isManual(), false)).thenReturn(daoResult);
+        PagingResult<FormDataSearchResult>  results = dataRowService.searchByKey(formData.getId(), range, key, false, false, false);
         Assert.assertEquals(5, results.size());
 
         Assert.assertEquals(new Long(1), results.get(0).getIndex());
@@ -157,8 +157,8 @@ public class DataRowServiceImplTest {
         range.setOffset(3);
         range.setCount(4);
 
-        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, false, formData.isManual())).thenReturn(new PagingResult<FormDataSearchResult>());
-        results = dataRowService.searchByKey(formData.getId(), range, key, false, false);
+        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, false, formData.isManual(), false)).thenReturn(new PagingResult<FormDataSearchResult>());
+        results = dataRowService.searchByKey(formData.getId(), range, key, false, false, false);
         Assert.assertEquals(2, results.size());
         Assert.assertEquals(new Long(3), results.get(0).getIndex());
         Assert.assertEquals("row keeYYyy", results.get(0).getStringFound());
@@ -190,9 +190,9 @@ public class DataRowServiceImplTest {
         pagingResult.setTotalCount(1);
         pagingResult.add(formDataSearchResult);
 
-        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, false, formData.isManual())).thenReturn(pagingResult);
+        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, false, formData.isManual(), false)).thenReturn(pagingResult);
 
-        PagingResult<FormDataSearchResult> results = dataRowService.searchByKey(formData.getId(), range, key, false, formData.isManual());
+        PagingResult<FormDataSearchResult> results = dataRowService.searchByKey(formData.getId(), range, key, false, formData.isManual(), false);
         Assert.assertEquals(5, results.size());
 
         Assert.assertEquals(new Long(1), results.get(0).getIndex());

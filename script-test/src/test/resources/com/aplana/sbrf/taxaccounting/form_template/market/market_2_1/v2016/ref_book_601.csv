@@ -1,4 +1,4 @@
-record_id(N);CREDIT_QUALITY_CLASS(S)
-1;1 КЛАСС
-2;2 КЛАСС
-3;3 КЛАСС
+record_id(N);SHORT_NAME(S)
+1;1
+2;2
+3;3

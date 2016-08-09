@@ -36,7 +36,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     Label label;
 
     @UiField
-    ScrollPanel scrollPanel;
+    protected ScrollPanel scrollPanel;
 
     /** Дерево. */
     @UiField(provided = true)
@@ -64,10 +64,11 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
         String msiTreeItem();
         String msiTableTag();
         String msiImg();
+        String hiddenXScroll();
     }
 
     @UiField
-    Style style;
+    protected Style style;
 
     public interface MultiSelectTreeResources extends Tree.Resources {
 
