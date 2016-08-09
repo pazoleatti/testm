@@ -19,6 +19,7 @@ public class PeriodPickerWidget extends SimpleTree implements PeriodPicker{
 
     public PeriodPickerWidget(boolean multiselect){
         super("Выберите период", multiselect);
+        scrollPanel.addStyleName(style.hiddenXScroll());
     }
 
     @Override

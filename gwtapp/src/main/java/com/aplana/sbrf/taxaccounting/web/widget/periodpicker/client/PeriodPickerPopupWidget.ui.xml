@@ -50,11 +50,9 @@
             margin: 8px 10px 8px 0 !important;
         }
 
-        .widgetWrapper {
+        .margin {
             margin: 5px;
-            overflow-x: hidden !important;
         }
-
     </ui:style>
 
     <g:HTMLPanel ui:field="wrappingPanel" addStyleNames="{style.minWidthWidget}">
@@ -73,9 +71,9 @@
                            width="400px" height="300px">
                 <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
                     <g:cell>
-                        <g:ScrollPanel addStyleNames="{style.widgetWrapper}">
+                        <g:VerticalPanel addStyleNames="{style.margin}">
                             <p:PeriodPickerWidget ui:field="periodPicker" width="390px" height="270px"/>
-                        </g:ScrollPanel>
+                        </g:VerticalPanel>
 
                     </g:cell>
                     <g:cell horizontalAlignment="right">
