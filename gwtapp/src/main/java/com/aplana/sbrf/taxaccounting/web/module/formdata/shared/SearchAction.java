@@ -17,6 +17,7 @@ public class SearchAction extends UnsecuredActionImpl<SearchResult> implements A
     private boolean caseSensitive;
     private boolean manual;
     private Integer formTemplateId;
+    private boolean correctionDiff;
 
     public Integer getFormTemplateId() {
         return formTemplateId;
@@ -77,5 +78,13 @@ public class SearchAction extends UnsecuredActionImpl<SearchResult> implements A
 
     public void setManual(boolean manual) {
         this.manual = manual;
+    }
+
+    public boolean isCorrectionDiff() {
+        return correctionDiff;
+    }
+
+    public void setCorrectionDiff(boolean correctionDiff) {
+        this.correctionDiff = correctionDiff;
     }
 }

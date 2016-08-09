@@ -81,7 +81,7 @@ public class DataRowServiceImpl implements DataRowService {
     }
 
     @Override
-    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual) {
+    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual, boolean correctionDiff) {
         PagingResult<FormDataSearchResult> results = new PagingResult<FormDataSearchResult>();
         List<FormDataSearchResult> resultsList = new ArrayList<FormDataSearchResult>();
         FormData formData = formDataDao.get(formDataId, manual);
@@ -95,7 +95,7 @@ public class DataRowServiceImpl implements DataRowService {
         }
         Long index = 0L;
         if (existRefBookColumn) {
-            List<DataRow<Cell>> rows = dataRowDao.getRowsRefColumnsOnly(formData, null);
+            List<DataRow<Cell>> rows = dataRowDao.getRowsRefColumnsOnly(formData, null, correctionDiff);
             refBookHelper.dataRowsDereference(new Logger(), rows, formData.getFormColumns());
             String searchKey = key;
             if (!isCaseSensitive) searchKey = searchKey.toUpperCase();
@@ -141,7 +141,7 @@ public class DataRowServiceImpl implements DataRowService {
         }
         PagingResult<FormDataSearchResult> daoResults;
         if (existCommonColumn) {
-            daoResults = dataRowDao.searchByKey(formDataId, formData.getFormTemplateId(), range, key, isCaseSensitive, manual);
+            daoResults = dataRowDao.searchByKey(formDataId, formData.getFormTemplateId(), range, key, isCaseSensitive, manual, correctionDiff);
         } else {
             // если нет *обычных*(числовых, строковых, автонумеруемых) граф, то нет смысла проводить поиск
             daoResults = new PagingResult<FormDataSearchResult>();

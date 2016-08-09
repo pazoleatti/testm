@@ -1102,7 +1102,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     getView().updateData();
                     getView().setSelectedRow(result.getCurrentRow(), true);
-                    formSearchPresenter.open(readOnlyMode, formData.isManual());
+                    formSearchPresenter.open(readOnlyMode, formData.isManual(), absoluteView);
                     addToPopupSlot(formSearchPresenter);
                 }
 
@@ -1117,7 +1117,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
             }, FormDataPresenter.this));
         } else {
-            formSearchPresenter.open(readOnlyMode, formData.isManual());
+            formSearchPresenter.open(readOnlyMode, formData.isManual(), absoluteView);
             addToPopupSlot(formSearchPresenter);
         }
     }
