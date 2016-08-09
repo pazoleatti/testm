@@ -60,7 +60,7 @@ public interface DataRowDao {
 	 * Метод возвращает строки сохраненного среза строк НФ со столбцами ссылочного типа или даты.
 	 *
 	 */
-	List<DataRow<Cell>> getRowsRefColumnsOnly(FormData formData, DataRowRange range);
+	List<DataRow<Cell>> getRowsRefColumnsOnly(FormData formData, DataRowRange range, boolean correctionDiff);
 
 	/**
 	 * Метод возвращает количество строк НФ
@@ -184,7 +184,7 @@ public interface DataRowDao {
      * @param manual ручной ввод
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
-    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual);
+    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual, boolean correctionDiff);
 
 	/**
 	 * Обновляет существующие строки НФ

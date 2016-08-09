@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.scriptsimport.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
@@ -62,7 +63,7 @@ public class ScriptsImportPresenter extends Presenter<ScriptsImportPresenter.MyV
                 LogCleanEvent.fire(ScriptsImportPresenter.this);
                 ScriptsImportAction importAction = new ScriptsImportAction();
                 importAction.setUuid(event.getValue());
-                dispatcher.execute(importAction, new AbstractCallback<ScriptsImportResult>() {
+                dispatcher.execute(importAction, CallbackUtils.defaultCallback(new AbstractCallback<ScriptsImportResult>() {
                     @Override
                     public void onSuccess(ScriptsImportResult result) {
                         if (result.getUuid() != null) {
@@ -75,7 +76,7 @@ public class ScriptsImportPresenter extends Presenter<ScriptsImportPresenter.MyV
                         super.onFailure(caught);
                         onEndLoad();
                     }
-                });
+                }, ScriptsImportPresenter.this));
             }
         };
         getView().addImportHandler(importHandler);

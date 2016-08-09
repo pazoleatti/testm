@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import au.com.bytecode.opencsv.CSVReader
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
@@ -708,12 +707,11 @@ String pure(String cell) {
 /**
  * Получить подитоговую строку.
  *
- * @param rowNumber номер строки
  * @param issuer эмитент
  * @param key ключ для сравнения подитоговых строк при импорте
  */
-def getSubTotalRow(def rowNumber, def issuer, def key) {
-    def alias = 'total' + key.toString() + '#' + rowNumber
+def getSubTotalRow(def issuer, def key) {
+    def alias = 'total' + key.toString()
     def title = getTitle(issuer)
     return getTotalRow(title, alias)
 }
@@ -844,10 +842,10 @@ void importData() {
             def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
 
             // наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
-            if (totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] == null) {
-                totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] = []
+            if (totalRowFromFileMap[subTotalRow.getAlias()] == null) {
+                totalRowFromFileMap[subTotalRow.getAlias()] = []
             }
-            totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]].add(subTotalRow)
+            totalRowFromFileMap[subTotalRow.getAlias()].add(subTotalRow)
             rows.add(subTotalRow)
 
             allValues.remove(rowValues)
@@ -867,12 +865,12 @@ void importData() {
     if (!totalRowFromFileMap.isEmpty()) {
         def tmpSubTotalRowsMap = calcSubTotalRowsMap(rows)
         tmpSubTotalRowsMap.each { subTotalRow, groupValues ->
-            def totalRows = totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]]
+            def totalRows = totalRowFromFileMap[subTotalRow.getAlias()]
             if (totalRows) {
                 totalRows.each { totalRow ->
                     compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
                 }
-                totalRowFromFileMap.remove(subTotalRow.getAlias().split('#')[0])
+                totalRowFromFileMap.remove(subTotalRow.getAlias())
             } else {
                 rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, groupValues))
             }
@@ -1024,7 +1022,7 @@ def getNewSubTotalRowFromXls(def key, def values, def colOffset, def fileRowInde
     def title = values[1]
     def name = title?.substring(0, title.toLowerCase().indexOf(' итог'))?.trim()
 
-    def newRow = getSubTotalRow(rowIndex, name, key)
+    def newRow = getSubTotalRow(name, key)
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
@@ -1076,7 +1074,7 @@ def calcSubTotalRowsMap(def dataRows) {
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def tmpRow = dataRows.get(i)
     def key = getKey(tmpRow)
-    def newRow = getSubTotalRow(i, tmpRow?.issuer, key)
+    def newRow = getSubTotalRow(tmpRow?.issuer, key)
 
     // Расчеты подитоговых значений
     def rows = []
