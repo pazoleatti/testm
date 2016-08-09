@@ -143,16 +143,18 @@ public class DepartmentServiceImplTest {
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) {
+                List<DepartmentReportPeriod> result = new ArrayList<DepartmentReportPeriod>();
                 DepartmentReportPeriodFilter drpf = (DepartmentReportPeriodFilter) invocation.getArguments()[0];
-                Integer depId = drpf.getDepartmentIdList().get(0);
                 Integer repId = drpf.getReportPeriodIdList().get(0);
-                if ((depId.equals(root.getId()) && repId.equals(0)) ||
-                        (depId.equals(departmentTB2.getId()) && repId.equals(0)) ||
-                        (depId.equals(departmentOSB311.getId()) && repId.equals(0))
-                        ) {
-                    return Arrays.asList(new DepartmentReportPeriod());
+                for(final Integer depId: drpf.getDepartmentIdList()) {
+                    if ((depId.equals(root.getId()) && repId.equals(0)) ||
+                            (depId.equals(departmentTB2.getId()) && repId.equals(0)) ||
+                            (depId.equals(departmentOSB311.getId()) && repId.equals(0))
+                            ) {
+                        result.add(new DepartmentReportPeriod(){{setDepartmentId(depId);}});
+                    }
                 }
-                return new ArrayList<DepartmentReportPeriod>();
+                return result;
             }
         }).when(departmentReportPeriodDao).getListByFilter(any(DepartmentReportPeriodFilter.class));
 

@@ -341,22 +341,13 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<Integer> retList = new ArrayList<Integer>();
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser, taxTypes, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-        for (Integer departmentId : list) {
-            // Открытый период подразделения для пары «Подразделение — Отчетный период» может быть только один
-            DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
-            departmentReportPeriodFilter.setIsActive(true);
-            departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(departmentId));
-            departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
-            List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
-
-            DepartmentReportPeriod departmentReportPeriod = null;
-            if (departmentReportPeriodList.size() == 1) {
-                departmentReportPeriod = departmentReportPeriodList.get(0);
-            }
-            if (departmentReportPeriod != null) {
-                // Подразделения, для которых открыт указанный период
-                retList.add(departmentId);
-            }
+        DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
+        departmentReportPeriodFilter.setIsActive(true);
+        departmentReportPeriodFilter.setDepartmentIdList(list);
+        departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
+        for(DepartmentReportPeriod departmentReportPeriod: departmentReportPeriodList) {
+            retList.add(departmentReportPeriod.getDepartmentId());
         }
 
         Set<Integer> setItems = new HashSet<Integer>(retList);

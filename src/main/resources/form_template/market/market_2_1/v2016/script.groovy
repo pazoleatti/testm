@@ -30,7 +30,7 @@ import java.math.RoundingMode
 // графа 11 (6)    - taxpayerInn
 // графа 12 (6.1)  - okved
 // графа 13 (7.1)  - creditRating              - атрибут 6034 - SHORT_NAME - «Краткое наименование», справочник 603 «Кредитные рейтинги»
-// графа 14 (7.2)  - creditClass               - атрибут 6011 - CREDIT_QUALITY_CLASS - «Краткое наименование», справочник 601 «Классы кредитоспособности»
+// графа 14 (7.2)  - creditClass               - атрибут 6012 - SHORT_NAME - «Краткое наименование», справочник 601 «Классы кредитоспособности»
 // графа 15 (8)    - beneficiaryName
 // графа 16 (9)    - beneficiaryInn
 // графа 17 (10)   - emitentName
@@ -358,8 +358,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         switch (formColumn.columnType) {
             case ColumnType.AUTO:
                 break
-            case ColumnType.DATE:
-                newRow[formColumn.alias] = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+            case ColumnType.DATE: // чтобы нефатально обрабатывал даты формата 00.00.0000
+                newRow[formColumn.alias] = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
                 break
             case ColumnType.NUMBER:
                 newRow[formColumn.alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
