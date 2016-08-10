@@ -63,7 +63,7 @@ begin
 	update ref_book_attribute set ord = 9 where id = 3001;
 	update ref_book_attribute set ord = 8 where id = 3000;
 	update ref_book_attribute set ord = 7 where id = 31;
-	insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (3002,8,'Признак принадлежности к земельному налогу','L',2,7,null,null,0,0,10,0,0,null,6,0,1);
+	insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (3002,8,'Признак принадлежности к земельному налогу','L',2,6,null,null,0,0,10,0,0,null,6,0,1);
 	insert into ref_book_value (record_id, attribute_id, number_value) select id as record_id, 3002 as attribute_id, 0 as number_value from ref_book_record where ref_book_id = 8; 
 		
 	merge into ref_book_value tgt
