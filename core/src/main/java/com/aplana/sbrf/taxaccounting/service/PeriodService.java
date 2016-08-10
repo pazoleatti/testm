@@ -42,6 +42,12 @@ public interface PeriodService {
      */
     void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<LogEntry> logs);
 
+	/**
+	 * Создание или открытие периодов для нескольких подразделений
+	 * - Подразделение
+	 * - Отчетный период
+	 * - Дата корректировки
+	 */
 	void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs);
 
 	/**
