@@ -125,10 +125,10 @@ def editableColumns = ['code', 'name', 'guarantor', 'vnd', 'level', 'procuct1', 
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Проверяемые на пустые значения атрибуты (графа 1..4, 7, 10, 11, 15, 16, 19, 20, 22, 25..29, 31..37)
+// Проверяемые на пустые значения атрибуты (графа 1..4, 7, 10, 11, 15, 16, 19, 20, 25..29, 31..37)
 @Field
 def nonEmptyColumns = ['code', 'name', 'rowNum', 'guarantor', 'procuct1', 'taxpayerName', 'taxpayerInn',
-        'beneficiaryName', 'beneficiaryInn', 'number', 'issuanceDate', 'startDate', 'sumInCurrency',
+        'beneficiaryName', 'beneficiaryInn', 'number', 'issuanceDate', 'sumInCurrency',
         'sumInRub', 'currency', 'debtBalance', 'isNonRecurring', 'isCharged', 'tariff', 'remuneration',
         'remunerationStartYear', 'remunerationIssuance', 'provide', 'numberGuarantee']
 

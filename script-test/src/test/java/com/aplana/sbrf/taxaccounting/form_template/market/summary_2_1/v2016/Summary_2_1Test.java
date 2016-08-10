@@ -102,9 +102,9 @@ public class Summary_2_1Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         // должно быть много сообщении об незаполненности обязательных полей
         Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
-        // графа 1..4, 7, 10, 11, 15, 16, 19, 20, 22, 25..29, 31..37
+        // графа 1..4, 7, 10, 11, 15, 16, 19, 20, 25..29, 31..37
         String [] nonEmptyColumns = { "code", "name", "rowNum", "guarantor", "procuct1", "taxpayerName", "taxpayerInn",
-                "beneficiaryName", "beneficiaryInn", "number", "issuanceDate", "startDate", "sumInCurrency",
+                "beneficiaryName", "beneficiaryInn", "number", "issuanceDate", "sumInCurrency",
                 "sumInRub", "currency", "debtBalance", "isNonRecurring", "isCharged", "tariff", "remuneration",
                 "remunerationStartYear", "remunerationIssuance", "provide", "numberGuarantee" };
         i = 0;
