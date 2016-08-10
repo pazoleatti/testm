@@ -1,17 +1,9 @@
 package form_template.market.mis.v2016
 
-import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormTemplate
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn
-import com.aplana.sbrf.taxaccounting.model.ReferenceColumn
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
-
-import java.math.RoundingMode
 
 /**
  * Данные MIS
@@ -241,7 +233,7 @@ void importData() {
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(rows)
-        formDataService.getDataRowHelper(formData).save(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
@@ -279,39 +271,40 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
     def required = true
-
     def debtorColIndex
+
+    // графа 1
     def colIndex = 0
-    for (formColumn in formData.formColumns) {
-        switch (formColumn.columnType) {
-            case ColumnType.AUTO:
-                break
-            case ColumnType.DATE:
-                newRow[formColumn.alias] = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
-                break
-            case ColumnType.NUMBER:
-                newRow[formColumn.alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-                break
-            case ColumnType.STRING:
-                newRow[formColumn.alias] = values[colIndex]
-                if (formColumn.alias == 'debtorName') {
-                    debtorColIndex = colIndex + colOffset
-                }
-                break
-            case ColumnType.REFBOOK:
-                def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
-                def refBookId = refBookFactory.getByAttribute(refBookAttribute.id).id
-                def refBookAttrAlias = refBookAttribute.alias
-                def value = values[colIndex]
-                if (RefBookAttributeType.NUMBER.equals(refBookAttribute.attributeType)) {
-                    value = new BigDecimal(value).setScale(refBookAttribute.precision, RoundingMode.HALF_UP).toString()
-                }
-                def recordId = getRecordIdImport(refBookId, refBookAttrAlias, value, fileRowIndex, colIndex + colOffset, false)
-                newRow[formColumn.alias] = recordId
-                break
-        }
-        colIndex++
-    }
+    newRow.innKio = values[colIndex]
+    // графа 2
+    colIndex++
+    newRow.docNum = values[colIndex]
+    // графа 3
+    colIndex++
+    newRow.debtorName = values[colIndex]
+    debtorColIndex = colIndex + colOffset
+    // графа 4
+    colIndex++
+    newRow.docDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 5
+    colIndex++
+    newRow.rateType = getRecordIdImport(72L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 6
+    colIndex++
+    newRow.rateBase = values[colIndex]
+    // графа 7
+    colIndex++
+    newRow.creditRate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 8
+    colIndex++
+    newRow.specialPurpose = getRecordIdImport(38L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 9
+    colIndex++
+    newRow.fondRate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 10
+    colIndex++
+    newRow.etsRate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
     // Заполнение общей информации о заемщике при загрузке из Excel
     fillDebtorInfo(newRow, 'innKio', 'debtorName', rowIndex, debtorColIndex)
     return newRow

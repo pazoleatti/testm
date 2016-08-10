@@ -3,9 +3,6 @@ package com.aplana.sbrf.taxaccounting.form_template.market.market_2_1.v2016;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
@@ -21,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -238,77 +234,14 @@ public class Market_2_1Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        mockForImport();
+        FormTemplate formTemplate = testHelper.getFormTemplate();
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(formTemplate);
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         int expected = 1; // в файле 1 строка
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
-    }
-
-    private void mockForImport() {
-        FormTemplate formTemplate = testHelper.getFormTemplate();
-        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(formTemplate);
-
-        // настройка справочников для справочных граф
-
-        // графа 13 (7.1)
-        when(testHelper.getRefBookFactory().getByAttribute(eq(6034L))).thenReturn(new RefBook() {{
-            setId(603L);
-        }});
-
-        // графа 14 (7.2)
-        when(testHelper.getRefBookFactory().getByAttribute(eq(6012L))).thenReturn(new RefBook() {{
-            setId(601L);
-        }});
-
-        // графа 27 (19)
-        when(testHelper.getRefBookFactory().getByAttribute(eq(65L))).thenReturn(new RefBook() {{
-            setId(15L);
-        }});
-
-        // графа 29 (21.1), 31 (22.1), 39 (26)
-        when(testHelper.getRefBookFactory().getByAttribute(eq(250L))).thenReturn(new RefBook() {{
-            setId(38L);
-        }});
-
-        // настройка атрибутов справчоников для справочных граф
-
-        // графа 13 (7.1)
-        ((RefBookColumn) formTemplate.getColumn("creditRating")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(6034L);
-            setAttributeType(RefBookAttributeType.STRING);
-            setAlias("SHORT_NAME");
-            setName("Краткое наименование");
-        }});
-
-        // графа 14 (7.2)
-        ((RefBookColumn) formTemplate.getColumn("creditClass")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(6012L);
-            setAttributeType(RefBookAttributeType.STRING);
-            setAlias("SHORT_NAME");
-            setName("Краткое наименование");
-        }});
-
-        // графа 27 (19)
-        ((RefBookColumn) formTemplate.getColumn("currency")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(65L);
-            setAttributeType(RefBookAttributeType.STRING);
-            setAlias("CODE_2");
-            setName("Код валюты. Буквенный");
-        }});
-
-        // графа 29 (21.1), 31 (22.1), 39 (26)
-        RefBookAttribute tmpRefBookAttribute = new RefBookAttribute() {{
-            setId(250L);
-            setAttributeType(RefBookAttributeType.STRING);
-            setAlias("VALUE");
-            setName("Значение");
-        }};
-        ((RefBookColumn) formTemplate.getColumn("isNonRecurring")).setRefBookAttribute(tmpRefBookAttribute);
-        ((RefBookColumn) formTemplate.getColumn("isCharged")).setRefBookAttribute(tmpRefBookAttribute);
-        ((RefBookColumn) formTemplate.getColumn("isGuaranetee")).setRefBookAttribute(tmpRefBookAttribute);
     }
 
     // Проверить загруженные данные

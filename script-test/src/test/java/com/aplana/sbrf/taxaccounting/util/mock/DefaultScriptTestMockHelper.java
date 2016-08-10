@@ -141,11 +141,13 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
             }
             // Поиск производится только по числовому и строковому значению, другой поиск не требуется
             String refBookStringValue = refBookValue.getStringValue();
+            String tmpValue = value;
             if (entry.getValue().get(alias).getAttributeType() == RefBookAttributeType.NUMBER) {
                 refBookStringValue = String.valueOf(entry.getValue().get(alias).getNumberValue().longValue());
+                tmpValue = (value.endsWith(".0") ? value.replaceAll(".0", "") : value);
             }
 
-            if (refBookStringValue != null && refBookStringValue.equals(value)) {
+            if (refBookStringValue != null && refBookStringValue.equals(tmpValue)) {
                 return entry.getValue();
             }
         }

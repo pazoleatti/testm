@@ -1,14 +1,9 @@
 package form_template.market.market_5_2a.v2016
 
-import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
-
-import java.math.RoundingMode
 
 /**
  * 5.2(а) Отчет о выданных Банком инструментах торгового финансирования
@@ -265,7 +260,7 @@ void importData() {
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(rows)
-        formDataService.getDataRowHelper(formData).save(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
@@ -309,43 +304,44 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     def countryString
     def countryColIndex
     def debtorColIndex
-    def colIndex = 0
-    for (formColumn in formData.formColumns) {
-        switch (formColumn.columnType) {
-            case ColumnType.AUTO:
-                break
-            case ColumnType.DATE:
-                newRow[formColumn.alias] = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
-                break
-            case ColumnType.NUMBER:
-                newRow[formColumn.alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-                break
-            case ColumnType.STRING:
-                newRow[formColumn.alias] = values[colIndex]
-                if (formColumn.alias == 'nameBank') {
-                    debtorColIndex = colIndex + colOffset
-                }
-                break
-            case ColumnType.REFBOOK:
-                if (formColumn.alias != 'country') {
-                    def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
-                    def refBookId = refBookFactory.getByAttribute(refBookAttribute.id).id
-                    def refBookAttrAlias = refBookAttribute.alias
-                    def value = values[colIndex]
-                    if (RefBookAttributeType.NUMBER.equals(refBookAttribute.attributeType)) {
-                        value = new BigDecimal(value).setScale(refBookAttribute.precision, RoundingMode.HALF_UP).toString()
-                    }
-                    def recordId = getRecordIdImport(refBookId, refBookAttrAlias, value, fileRowIndex, colIndex + colOffset, false)
-                    newRow[formColumn.alias] = recordId
-                } else {
-                    countryString = values[colIndex]
-                    countryColIndex = colIndex + colOffset
-                    // заполняем в fillDebtorInfo
-                }
-                break
-        }
-        colIndex++
-    }
+
+    // графа 2
+    def colIndex = 1
+    newRow.nameBank = values[colIndex]
+    debtorColIndex = colIndex + colOffset
+    // графа 3
+    colIndex++
+    // заполняем в fillDebtorInfo
+    countryString = values[colIndex]
+    countryColIndex = colIndex + colOffset
+    // графа 4
+    colIndex++
+    newRow.swift = values[colIndex]
+    // графа 5
+    colIndex++
+    newRow.creditRating = getRecordIdImport(603L, 'SHORT_NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 6
+    colIndex++
+    newRow.tool = values[colIndex]
+    // графа 7
+    colIndex++
+    newRow.issueDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 8
+    colIndex++
+    newRow.expireDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 9
+    colIndex++
+    newRow.period = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 10
+    colIndex++
+    newRow.currency = getRecordIdImport(15L, 'CODE_2', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 11
+    colIndex++
+    newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 12
+    colIndex++
+    newRow.payRate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
     // Заполнение общей информации о заемщике при загрузке из Excel
     fillDebtorInfo(newRow, 'swift', 'nameBank', 'country', countryString, rowIndex, debtorColIndex, countryColIndex)
     return newRow

@@ -202,24 +202,6 @@ public class Market_5_2aTest extends ScriptTestBase {
     @Test
     public void importExcelTest() {
         FormTemplate formTemplate = testHelper.getFormTemplate();
-        ((RefBookColumn) formTemplate.getColumn("currency")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(65L);
-            setAttributeType(RefBookAttributeType.STRING);
-            setAlias("CODE_2");
-            setName("Код валюты. Буквенный");
-        }});
-        ((RefBookColumn) formTemplate.getColumn("creditRating")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(6034L);
-            setAttributeType(RefBookAttributeType.STRING);
-            setAlias("SHORT_NAME");
-            setName("Наименование");
-        }});
-        when(testHelper.getRefBookFactory().getByAttribute(eq(6034L))).thenReturn(new RefBook() {{
-            setId(603L);
-        }});
-        when(testHelper.getRefBookFactory().getByAttribute(eq(65L))).thenReturn(new RefBook() {{
-            setId(15L);
-        }});
         when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(formTemplate);
         RefBookUniversal provider = mock(RefBookUniversal.class);
         provider.setRefBookId(10L);

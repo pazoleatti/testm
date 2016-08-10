@@ -1,14 +1,9 @@
 package form_template.market.market_2_1.v2016
 
-import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
-
-import java.math.RoundingMode
 
 /**
  * 2.1 (Ежемесячный) Реестр выданных Банком гарантий (контргарантий, поручительств).
@@ -309,7 +304,7 @@ void importData() {
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(rows)
-        formDataService.getDataRowHelper(formData).save(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
@@ -351,39 +346,159 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
     def required = true
-
     def taxpayerColIndex
+
+    // графа 1  (1.1)
     def colIndex = 0
-    for (formColumn in formData.formColumns) {
-        switch (formColumn.columnType) {
-            case ColumnType.AUTO:
-                break
-            case ColumnType.DATE: // чтобы нефатально обрабатывал даты формата 00.00.0000
-                newRow[formColumn.alias] = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
-                break
-            case ColumnType.NUMBER:
-                newRow[formColumn.alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-                break
-            case ColumnType.STRING:
-                newRow[formColumn.alias] = values[colIndex]
-                if (formColumn.alias == 'taxpayerName') {
-                    taxpayerColIndex = colIndex + colOffset
-                }
-                break
-            case ColumnType.REFBOOK:
-                def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
-                def refBookId = refBookFactory.getByAttribute(refBookAttribute.id).id
-                def refBookAttrAlias = refBookAttribute.alias
-                def value = values[colIndex]
-                if (RefBookAttributeType.NUMBER.equals(refBookAttribute.attributeType)) {
-                    value = new BigDecimal(value).setScale(refBookAttribute.precision, RoundingMode.HALF_UP).toString()
-                }
-                def recordId = getRecordIdImport(refBookId, refBookAttrAlias, value, fileRowIndex, colIndex + colOffset, false)
-                newRow[formColumn.alias] = recordId
-                break
-        }
-        colIndex++
-    }
+    newRow.code = values[colIndex]
+    // графа 2  (1.2)
+    colIndex++
+    newRow.name = values[colIndex]
+    // графа 3  (2)
+    colIndex++
+    // графа 4  (3)
+    colIndex++
+    newRow.guarantor = values[colIndex]
+    // графа 5  (3.1)
+    colIndex++
+    newRow.vnd = values[colIndex]
+    // графа 6  (3.2)
+    colIndex++
+    newRow.level = values[colIndex]
+    // графа 7  (4.1)
+    colIndex++
+    newRow.procuct1 = values[colIndex]
+    // графа 8  (4.2)
+    colIndex++
+    newRow.procuct2 = values[colIndex]
+    // графа 9  (4.3)
+    colIndex++
+    newRow.procuct3 = values[colIndex]
+    // графа 10 (5)
+    colIndex++
+    newRow.taxpayerName = values[colIndex]
+    taxpayerColIndex = colIndex + colOffset
+    // графа 11 (6)
+    colIndex++
+    newRow.taxpayerInn = values[colIndex]
+    // графа 12 (6.1)
+    colIndex++
+    newRow.okved = values[colIndex]
+    // графа 13 (7.1)
+    colIndex++
+    newRow.creditRating = getRecordIdImport(603L, 'SHORT_NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 14 (7.2)
+    colIndex++
+    newRow.creditClass = getRecordIdImport(601L, 'SHORT_NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 15 (8)
+    colIndex++
+    newRow.beneficiaryName = values[colIndex]
+    // графа 16 (9)
+    colIndex++
+    newRow.beneficiaryInn = values[colIndex]
+    // графа 17 (10)
+    colIndex++
+    newRow.emitentName = values[colIndex]
+    // графа 18 (11)
+    colIndex++
+    newRow.instructingName = values[colIndex]
+    // графа 19 (12)
+    colIndex++
+    newRow.number = values[colIndex]
+    // графа 20 (13)
+    colIndex++
+    newRow.issuanceDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    // графа 21 (14)
+    colIndex++
+    newRow.additionDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    // графа 22 (15)
+    colIndex++
+    newRow.startDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    // графа 23 (16)
+    colIndex++
+    newRow.conditionEffective = values[colIndex]
+    // графа 24 (17)
+    colIndex++
+    newRow.endDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    // графа 25 (18.1)
+    colIndex++
+    newRow.sumInCurrency = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 26 (18.2)
+    colIndex++
+    newRow.sumInRub = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 27 (19)
+    colIndex++
+    newRow.currency = getRecordIdImport(15L, 'CODE_2', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 28 (20)
+    colIndex++
+    newRow.debtBalance = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 29 (21.1)
+    colIndex++
+    newRow.isNonRecurring = getRecordIdImport(38L, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 30 (21.2)
+    colIndex++
+    newRow.paymentPeriodic = values[colIndex]
+    // графа 31 (22.1)
+    colIndex++
+    newRow.isCharged = getRecordIdImport(38L, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 32 (22.2)
+    colIndex++
+    newRow.tariff = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 33 (22.3)
+    colIndex++
+    newRow.remuneration = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 34 (22.4)
+    colIndex++
+    newRow.remunerationStartYear = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 35 (22.5)
+    colIndex++
+    newRow.remunerationIssuance = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 36 (23)
+    colIndex++
+    newRow.provide = values[colIndex]
+    // графа 37 (24)
+    colIndex++
+    newRow.numberGuarantee = values[colIndex]
+    // графа 38 (25)
+    colIndex++
+    newRow.numberAddition = values[colIndex]
+    // графа 39 (26)
+    colIndex++
+    newRow.isGuaranetee = getRecordIdImport(38L, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 40 (26.1)
+    colIndex++
+    newRow.dateGuaranetee = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    // графа 41 (26.2)
+    colIndex++
+    newRow.sumGuaranetee = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 42 (26.3)
+    colIndex++
+    newRow.term = values[colIndex]
+    // графа 43 (26.4)
+    colIndex++
+    newRow.sumDiversion = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 44 (27.1)
+    colIndex++
+    newRow.arrears = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 45 (27.2)
+    colIndex++
+    newRow.arrearsDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    // графа 46 (28.1)
+    colIndex++
+    newRow.arrearsGuarantee = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 47 (28.2)
+    colIndex++
+    newRow.arrearsGuaranteeDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    // графа 48 (29)
+    colIndex++
+    newRow.reserve = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 49 (30)
+    colIndex++
+    newRow.comment = values[colIndex]
+    // графа 50 (31)
+    colIndex++
+    newRow.segment = values[colIndex]
+
     // Заполнение общей информации о заемщике при загрузке из Excel
     fillDebtorInfo(newRow, 'taxpayerInn', 'taxpayerName', rowIndex, taxpayerColIndex)
     return newRow

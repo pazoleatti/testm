@@ -1,17 +1,12 @@
 package com.aplana.sbrf.taxaccounting.form_template.market.mis.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -19,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -115,29 +109,11 @@ public class MisTest extends ScriptTestBase {
     @Test
     public void importExcelTest() {
         FormTemplate formTemplate = testHelper.getFormTemplate();
-        ((RefBookColumn) formTemplate.getColumn("rateType")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(646L);
-            setAttributeType(RefBookAttributeType.STRING);
-            setAlias("CODE");
-            setName("Код ставки");
-        }});
-        ((RefBookColumn) formTemplate.getColumn("specialPurpose")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(249L);
-            setAttributeType(RefBookAttributeType.NUMBER);
-            setPrecision(0);
-            setAlias("CODE");
-            setName("Код");
-        }});
         when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(formTemplate);
-        when(testHelper.getRefBookFactory().getByAttribute(eq(646L))).thenReturn(new RefBook() {{
-            setId(72L);
-        }});
-        when(testHelper.getRefBookFactory().getByAttribute(eq(249L))).thenReturn(new RefBook() {{
-            setId(38L);
-        }});
         int expected = 1; // в файле 1 строка
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
+        checkLogger();
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();

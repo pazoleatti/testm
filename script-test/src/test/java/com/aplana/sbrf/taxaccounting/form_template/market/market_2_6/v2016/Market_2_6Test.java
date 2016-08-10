@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.form_template.market.market_2_6.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -17,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -112,42 +108,6 @@ public class Market_2_6Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        FormTemplate formTemplate = testHelper.getFormTemplate();
-        ((RefBookColumn) formTemplate.getColumn("opf")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(6051L);
-            setAttributeType(RefBookAttributeType.NUMBER);
-            setAlias("CODE");
-            setPrecision(0);
-            setName("Код ОПФ");
-        }});
-        ((RefBookColumn) formTemplate.getColumn("currencySum")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(65L);
-            setAttributeType(RefBookAttributeType.STRING);
-            setAlias("CODE_2");
-            setName("Код валюты. Буквенный");
-        }});
-        ((RefBookColumn) formTemplate.getColumn("currencyCredit")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(65L);
-            setAttributeType(RefBookAttributeType.STRING);
-            setAlias("CODE_2");
-            setName("Код валюты. Буквенный");
-        }});
-        ((RefBookColumn) formTemplate.getColumn("creditRisk")).setRefBookAttribute(new RefBookAttribute() {{
-            setId(6041L);
-            setAttributeType(RefBookAttributeType.STRING);
-            setAlias("NAME");
-            setName("Наименование");
-        }});
-        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(formTemplate);
-        when(testHelper.getRefBookFactory().getByAttribute(eq(6051L))).thenReturn(new RefBook() {{
-            setId(605L);
-        }});
-        when(testHelper.getRefBookFactory().getByAttribute(eq(6041L))).thenReturn(new RefBook() {{
-            setId(604L);
-        }});
-        when(testHelper.getRefBookFactory().getByAttribute(eq(65L))).thenReturn(new RefBook() {{
-            setId(15L);
-        }});
         when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
         int expected = 1; // в файле 0 строк
         testHelper.setImportFileInputStream(getImportXlsInputStream());

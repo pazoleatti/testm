@@ -1,6 +1,5 @@
 package form_template.market.chd.v2016
 
-import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -262,7 +261,7 @@ void importData() {
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(rows)
-        formDataService.getDataRowHelper(formData).save(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
@@ -312,47 +311,53 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     def countryString
     def countryColIndex
     def debtorColIndex
-    def colIndex = 0
-    for (formColumn in formData.formColumns) {
-        switch (formColumn.columnType) {
-            case ColumnType.AUTO:
-                break
-            case ColumnType.DATE:
-                newRow[formColumn.alias] = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
-                break
-            case ColumnType.NUMBER:
-                newRow[formColumn.alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-                break
-            case ColumnType.STRING:
-                newRow[formColumn.alias] = values[colIndex]
-                if (formColumn.alias == 'name') {
-                    debtorColIndex = colIndex + colOffset
-                }
-                break
-            case ColumnType.REFBOOK:
-                switch (colIndex){
-                    case 2:
-                        newRow.opf = getRecordIdImport(605, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
-                        break
-                    case 3:
-                        countryString = values[colIndex]
-                        countryColIndex = colIndex + colOffset
-                        // заполняем в fillDebtorInfo
-                        break
-                    case 5:
-                        newRow.creditRating = getRecordIdImport(604, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
-                        break
-                    case 10:
-                        newRow.partRepayment = getRecordIdImport(38, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
-                        break
-                    case 12:
-                        newRow.currencyCode = getRecordIdImport(15, 'CODE_2', values[colIndex], fileRowIndex, colIndex + colOffset, false)
-                        break
-                }
-                break
-        }
-        colIndex++
-    }
+
+    // графа 2
+    def colIndex = 1
+    newRow.name = values[colIndex]
+    debtorColIndex = colIndex + colOffset
+    // графа 3
+    colIndex++
+    newRow.opf = getRecordIdImport(605L, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 4
+    colIndex++
+    // заполняем в fillDebtorInfo
+    countryString = values[colIndex]
+    countryColIndex = colIndex + colOffset
+    // графа 5
+    colIndex++
+    newRow.innKio = values[colIndex]
+    // графа 6
+    colIndex++
+    newRow.creditRating = getRecordIdImport(604L, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 7
+    colIndex++
+    newRow.docNum = values[colIndex]
+    // графа 8
+    colIndex++
+    newRow.docDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 9
+    colIndex++
+    newRow.docDate2 = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 10
+    colIndex++
+    newRow.docDate3 = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 11
+    colIndex++
+    newRow.partRepayment = getRecordIdImport(38L, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 12
+    colIndex++
+    newRow.creditPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 13
+    colIndex++
+    newRow.currencyCode = getRecordIdImport(15L, 'CODE_2', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 14
+    colIndex++
+    newRow.creditSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 15
+    colIndex++
+    newRow.creditRate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
     // Заполнение общей информации о заемщике при загрузке из Excel
     fillDebtorInfo(newRow, 'innKio', 'name', 'country', countryString, rowIndex, debtorColIndex, countryColIndex)
     return newRow

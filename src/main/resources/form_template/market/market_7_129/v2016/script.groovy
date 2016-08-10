@@ -1,6 +1,5 @@
 package form_template.market.market_7_129.v2016
 
-import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -242,7 +241,7 @@ void importData() {
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(rows)
-        formDataService.getDataRowHelper(formData).save(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
@@ -279,29 +278,34 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     def newRow = getNewRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
-    def required = true
     def debtorColIndex
 
-    def colIndex = 0
-    for (formColumn in formData.formColumns) {
-        switch (formColumn.columnType) {
-            case ColumnType.AUTO:
-                break
-            case ColumnType.DATE:
-                newRow[formColumn.alias] = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
-                break
-            case ColumnType.NUMBER:
-                newRow[formColumn.alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-                break
-            case ColumnType.STRING:
-                newRow[formColumn.alias] = values[colIndex]
-                if (formColumn.alias == 'debtorName') {
-                    debtorColIndex = colIndex + colOffset
-                }
-                break
-        }
-        colIndex++
-    }
+    // графа 2
+    def colIndex = 1
+    newRow.depName = values[colIndex]
+    // графа 3
+    colIndex++
+    newRow.inn = values[colIndex]
+    // графа 4
+    colIndex++
+    newRow.debtorName = values[colIndex]
+    debtorColIndex = colIndex + colOffset
+    // графа 5
+    colIndex++
+    newRow.docNum = values[colIndex]
+    // графа 6
+    colIndex++
+    newRow.docDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    // графа 7
+    colIndex++
+    newRow.creditDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    // графа 8
+    colIndex++
+    newRow.productId = values[colIndex]
+    // графа 9
+    colIndex++
+    newRow.clientId = values[colIndex]
+
     // Заполнение общей информации о заемщике при загрузке из Excel
     fillDebtorInfo(newRow, 'inn', 'debtorName', rowIndex, debtorColIndex)
     return newRow

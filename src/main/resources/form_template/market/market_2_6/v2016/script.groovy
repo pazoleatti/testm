@@ -1,14 +1,9 @@
 package form_template.market.market_2_6.v2016
 
-import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
-
-import java.math.RoundingMode
 
 /**
  * 2.6 (Ежемесячный) Отчет о состоянии кредитного портфеля
@@ -317,7 +312,7 @@ void importData() {
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(rows)
-        formDataService.getDataRowHelper(formData).save(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
@@ -360,37 +355,128 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     def required = true
     def debtorColIndex
 
-    def colIndex = 0
-    for (formColumn in formData.formColumns) {
-        switch (formColumn.columnType) {
-            case ColumnType.AUTO:
-                break
-            case ColumnType.DATE:
-                newRow[formColumn.alias] = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
-                break
-            case ColumnType.NUMBER:
-                newRow[formColumn.alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
-                break
-            case ColumnType.STRING:
-                newRow[formColumn.alias] = values[colIndex]
-                if (formColumn.alias == 'debtorName') {
-                    debtorColIndex = colIndex + colOffset
-                }
-                break
-            case ColumnType.REFBOOK:
-                def refBookAttribute = ((RefBookColumn) formColumn).refBookAttribute
-                def refBookId = refBookFactory.getByAttribute(refBookAttribute.id).id
-                def refBookAttrAlias = refBookAttribute.alias
-                def value = values[colIndex]
-                if (RefBookAttributeType.NUMBER.equals(refBookAttribute.attributeType)) {
-                    value = new BigDecimal(value).setScale(refBookAttribute.precision, RoundingMode.HALF_UP).toString()
-                }
-                def recordId = getRecordIdImport(refBookId, refBookAttrAlias, value, fileRowIndex, colIndex + colOffset, false)
-                newRow[formColumn.alias] = recordId
-                break
-        }
-        colIndex++
-    }
+    // графа 2
+    def colIndex = 1
+    newRow.codeBank = values[colIndex]
+    // графа 3
+    colIndex++
+    newRow.nameBank = values[colIndex]
+    // графа 4
+    colIndex++
+    newRow.depNumber = values[colIndex]
+    // графа 5
+    colIndex++
+    newRow.okved = values[colIndex]
+    // графа 6
+    colIndex++
+    newRow.opf = getRecordIdImport(605, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 7
+    colIndex++
+    newRow.debtorName = values[colIndex]
+    debtorColIndex = colIndex + colOffset
+    // графа 8
+    colIndex++
+    newRow.inn = values[colIndex]
+    // графа 9
+    colIndex++
+    newRow.sign = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 10
+    colIndex++
+    newRow.direction = values[colIndex]
+    // графа 11
+    colIndex++
+    newRow.law = values[colIndex]
+    // графа 12
+    colIndex++
+    newRow.creditType = values[colIndex]
+    // графа 13
+    colIndex++
+    newRow.docNum = values[colIndex]
+    // графа 14
+    colIndex++
+    newRow.docDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 15
+    colIndex++
+    newRow.creditDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 16
+    colIndex++
+    newRow.closeDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 17
+    colIndex++
+    newRow.extendNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 18
+    colIndex++
+    newRow.creditMode = values[colIndex]
+    // графа 19
+    colIndex++
+    newRow.currencySum = getRecordIdImport(15, 'CODE_2', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 20
+    colIndex++
+    newRow.sumDoc = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 21
+    colIndex++
+    newRow.sumGiven = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 22
+    colIndex++
+    newRow.rate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 23
+    colIndex++
+    newRow.payFrequency = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 24
+    colIndex++
+    newRow.currencyCredit = getRecordIdImport(15, 'CODE_2', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 25
+    colIndex++
+    newRow.debtSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 26
+    colIndex++
+    newRow.inTimeDebtSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 27
+    colIndex++
+    newRow.overdueDebtSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 28
+    colIndex++
+    newRow.percentDebtSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 29
+    colIndex++
+    newRow.deptDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 30
+    colIndex++
+    newRow.percentDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 31
+    colIndex++
+    newRow.percentPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 32
+    colIndex++
+    newRow.provision = values[colIndex]
+    // графа 33
+    colIndex++
+    newRow.provisionComment = values[colIndex]
+    // графа 34
+    colIndex++
+    newRow.loanSign = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 35
+    colIndex++
+    newRow.loanQuality = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 36
+    colIndex++
+    newRow.finPosition = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 37
+    colIndex++
+    newRow.debtService = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 38
+    colIndex++
+    newRow.creditRisk = getRecordIdImport(604, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 39
+    colIndex++
+    newRow.portfolio = values[colIndex]
+    // графа 40
+    colIndex++
+    newRow.reservePercent = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 41
+    colIndex++
+    newRow.reserveSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
     // Заполнение общей информации о заемщике при загрузке из Excel
     fillDebtorInfo(newRow, 'inn', 'debtorName', rowIndex, debtorColIndex)
     return newRow
