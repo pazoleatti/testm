@@ -117,7 +117,7 @@ def editableColumns = []
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = allColumns - editableColumns
+def autoFillColumns = []
 
 // Проверяемые на пустые значения атрибуты (графа 1..4, 7, 10, 11, 15, 16, 19, 20, 25..29, 31..37)
 @Field
