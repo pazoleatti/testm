@@ -77,8 +77,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             @Override
             public void onOpen(OpenEvent<TreeItem> event) {
                 RefBookUiTreeItem refBookUiTreeItem = (RefBookUiTreeItem) event.getTarget();
-                //TODO: надо было бы использовать параметр RefBookTreeItem.hasChild, чтобы не делать запрос в базу
-                if (!refBookUiTreeItem.isChildLoaded()) {
+                if (!refBookUiTreeItem.isChildLoaded() && refBookUiTreeItem.getRefBookTreeItem().isHasChild()) {
                     getUiHandlers().loadForItem(refBookUiTreeItem);
                     refBookUiTreeItem.setChildLoaded(true);
                 }
@@ -107,6 +106,10 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem uiTreeItem = new RefBookUiTreeItem(value, multiSelect);
             getUiHandlers().highLightItem(uiTreeItem);
+            if (!value.isHasChild()) {
+                uiTreeItem.setState(true);
+                uiTreeItem.setChildLoaded(true);
+            }
             tree.addTreeItem(uiTreeItem);
             if (openOnLoad) {
                 uiTreeItem.setState(true);
@@ -129,6 +132,10 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem item = new RefBookUiTreeItem(value, multiSelect);
             getUiHandlers().highLightItem(item);
+            if (!value.isHasChild()) {
+                item.setState(true);
+                item.setChildLoaded(true);
+            }
             tree.addTreeItem(uiTreeItem, item);
             if (openOnLoad) {
                 item.setState(true);

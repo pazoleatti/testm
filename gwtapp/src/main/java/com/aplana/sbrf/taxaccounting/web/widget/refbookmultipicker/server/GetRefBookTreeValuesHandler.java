@@ -132,6 +132,9 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
             List<RefBookRecordDereferenceValue> refBookDereferenceValues = new LinkedList<RefBookRecordDereferenceValue>();
 
             item.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+            if (record.get(RefBook.RECORD_HAS_CHILD_ALIAS) != null) {
+                item.setHasChild(record.get(RefBook.RECORD_HAS_CHILD_ALIAS).getNumberValue() != null);
+            }
 
             for (RefBookAttribute refBookAttribute : attributes) {
                 String alias = refBookAttribute.getAlias();

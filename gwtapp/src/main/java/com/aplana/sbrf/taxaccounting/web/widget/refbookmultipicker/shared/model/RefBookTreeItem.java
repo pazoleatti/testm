@@ -8,7 +8,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model
 public class RefBookTreeItem extends RefBookItem implements Comparable<RefBookTreeItem> {
 
     private RefBookTreeItem parent;
-    private boolean hasChild = false;
+    private boolean hasChild = true;
     private boolean canBeSelected;
     /* флаг для обозначения что при загрузке элемента его надо открыть для загрузки его чилдов */
     private boolean needToOpen = false;

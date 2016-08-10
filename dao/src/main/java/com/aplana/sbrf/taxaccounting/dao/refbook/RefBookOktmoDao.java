@@ -30,7 +30,7 @@ public interface RefBookOktmoDao {
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @return
      */
-    PagingResult<Map<String, RefBookValue>> getRecords(String tableName, Long refBookId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+    PagingResult<Map<String, RefBookValue>> getRecords(String tableName, Long refBookId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending, boolean calcHasChild);
 
     /**
      * Получение row_num записи по заданным параметрам
