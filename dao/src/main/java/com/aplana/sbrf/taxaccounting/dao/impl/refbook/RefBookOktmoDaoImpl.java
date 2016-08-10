@@ -51,14 +51,20 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     private ApplicationContext applicationContext;
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(String tableName, Long refBookId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+    public PagingResult<Map<String, RefBookValue>> getRecords(String tableName, Long refBookId, Date version, PagingParams pagingParams, String filter,
+                                                              RefBookAttribute sortAttribute, boolean isSortAscending, boolean calcHasChild) {
         RefBook refBook = refBookDao.get(refBookId);
         // получаем страницу с данными
-        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, null, version, sortAttribute, filter, pagingParams, isSortAscending, null, false);
-        List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, null, version, sortAttribute, filter, pagingParams, isSortAscending, null, false, calcHasChild);
+        List<Map<String, RefBookValue>> records;
+        if (calcHasChild) {
+            records = refBookDao.getRecordsWithHasChild(ps, refBook);
+        } else {
+            records = refBookDao.getRecordsData(ps, refBook);
+        }
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // получаем информацию о количестве всех записей с текущим фильтром
-        ps = getSimpleQuery(tableName, refBook, null, null, version, sortAttribute, filter, null, isSortAscending, null, false);
+        ps = getSimpleQuery(tableName, refBook, null, null, version, sortAttribute, filter, null, isSortAscending, null, false, false);
         result.setTotalCount(refBookDao.getRecordsCount(ps));
         return result;
     }
@@ -66,7 +72,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     @Override
     public Long getRowNum(String tableName, Long refBookId, Date version, Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         RefBook refBook = refBookDao.get(refBookId);
-        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, null, version, sortAttribute, filter, null, isSortAscending, null, false);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, null, version, sortAttribute, filter, null, isSortAscending, null, false, false);
         return refBookDao.getRowNum(ps, recordId);
     }
 
@@ -74,7 +80,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         RefBook refBook = refBookDao.get(refBookId);
         // получаем страницу с данными
         PreparedStatementData ps = getChildrenQuery(tableName, refBook, parentRecordId, version, sortAttribute, filter, pagingParams, isSortAscending, null);
-        List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
+        List<Map<String, RefBookValue>> records = refBookDao.getRecordsWithHasChild(ps, refBook);
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // получаем информацию о количестве всех записей с текущим фильтром
         ps = getChildrenQuery(tableName, refBook, parentRecordId, version, sortAttribute, filter, null, isSortAscending, null);
@@ -95,7 +101,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         refBook.setAttributes(new ArrayList<RefBookAttribute>());
         refBook.getAttributes().addAll(oldRefBook.getAttributes());
         // получаем страницу с данными
-        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, uniqueRecordId, null, sortAttribute, filter, pagingParams, isSortAscending, null, false);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, uniqueRecordId, null, sortAttribute, filter, pagingParams, isSortAscending, null, false, false);
 
         //Добавляем атрибуты версии, т.к они не хранятся в бд
         refBook.getAttributes().add(RefBook.getVersionFromAttribute());
@@ -140,7 +146,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
      * @return
      */
     private PreparedStatementData getSimpleQuery(String tableName, RefBook refBook, Long recordId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
-                                                String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause, boolean onlyId) {
+                                                String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause, boolean onlyId, boolean calcHasChild) {
         PreparedStatementData ps = new PreparedStatementData();
 
         if (version != null) {
@@ -182,10 +188,15 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             ps.appendQuery("  t.versionEnd as ");
             ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
         }
-        
+
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", frb.");
             ps.appendQuery(attribute.getAlias());
+        }
+
+        if (calcHasChild) {
+            ps.appendQuery(", (SELECT 1 FROM dual WHERE EXISTS(SELECT 1 from t, " + tableName + " frb1 " +
+                    "WHERE frb1.PARENT_ID = frb.ID AND (frb.version = t.version and frb.record_id = t.record_id))) as " + RefBook.RECORD_HAS_CHILD_ALIAS);
         }
 
         ps.appendQuery(" FROM t, ");
@@ -302,6 +313,32 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         }
         ps.appendQuery(") \n");
 
+        ps.appendQuery(", ct AS ");
+        ps.appendQuery("(select distinct ");
+        ps.appendQuery("frb.id as \"RECORD_ID\"");
+
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            ps.appendQuery(", frb.");
+            ps.appendQuery(attribute.getAlias());
+            ps.appendQuery(" as \"");
+            ps.appendQuery(attribute.getAlias());
+            ps.appendQuery("\"");
+        }
+        if (version == null) {
+            ps.appendQuery(", frb.version AS \"record_version_from\"");
+        }
+
+        ps.appendQuery(" FROM ");
+        ps.appendQuery(tableName);
+        ps.appendQuery(" frb ");
+
+        ps.appendQuery("START WITH frb.id IN (SELECT id FROM t) \n");
+        ps.appendQuery(" CONNECT BY PRIOR PARENT_ID = ID )");
+
+        ps.appendQuery("SELECT res.*, (SELECT 1 FROM dual WHERE EXISTS(SELECT 1 from ct \n" +
+                " WHERE ct.PARENT_ID = res.record_id)) as " + RefBook.RECORD_HAS_CHILD_ALIAS);
+        ps.appendQuery(" FROM (");
+
         ps.appendQuery("SELECT ");
         ps.appendQuery("record_id");
         if (isSupportOver() && sortAttribute != null) {
@@ -326,27 +363,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             ps.appendQuery(", \"record_version_from\", (SELECT MIN(VERSION) FROM " + tableName + " rbo1 where rbo.record_id=rbo1.record_id and rbo1.VERSION>\"record_version_from\") \"record_version_to\" ");
         }
 
-        ps.appendQuery(" FROM ");
-        ps.appendQuery("(select distinct ");
-        ps.appendQuery("frb.id as \"RECORD_ID\"");
-
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            ps.appendQuery(", frb.");
-            ps.appendQuery(attribute.getAlias());
-            ps.appendQuery(" as \"");
-            ps.appendQuery(attribute.getAlias());
-            ps.appendQuery("\"");
-        }
-        if (version == null) {
-            ps.appendQuery(", frb.version AS \"record_version_from\"");
-        }
-
-        ps.appendQuery(" FROM ");
-        ps.appendQuery(tableName);
-        ps.appendQuery(" frb ");
-
-        ps.appendQuery("START WITH frb.id IN (SELECT id FROM t) \n");
-        ps.appendQuery(" CONNECT BY PRIOR PARENT_ID = ID ) rbo \n");
+        ps.appendQuery(" FROM ct rbo \n");
         ps.appendQuery("WHERE ");
         ps.appendQuery(uniqueRecordId == null ? "PARENT_ID is null" : "PARENT_ID = " + uniqueRecordId);
 
@@ -355,6 +372,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
         }
+        ps.appendQuery(") res");
         return ps;
     }
 
@@ -390,10 +408,9 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(String tableName, Long refBookId, Date version, Long parentRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         if (filter == null) {
             String fullFilter = RefBook.RECORD_PARENT_ID_ALIAS + (parentRecordId == null ? " is null" : " = " + parentRecordId.toString());
-            return getRecords(tableName, refBookId, version, pagingParams, fullFilter, sortAttribute, true);
+            return getRecords(tableName, refBookId, version, pagingParams, fullFilter, sortAttribute, true, true);
         }
         else {
-            //return refBookDao.getChildrenRecords(refBookId, tableName, parentRecordId, pagingParams, filter, sortAttribute, true);
             return getChildrenRecords(tableName, refBookId, parentRecordId, version, pagingParams, filter, sortAttribute, true);
         }
     }
@@ -839,14 +856,14 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     @Override
     public List<Long> getUniqueRecordIds(Long refBookId, String tableName, Date version, String filter) {
         RefBook refBook = refBookDao.get(refBookId);
-        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, null, version, null, filter, null, false, null, true);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, null, version, null, filter, null, false, null, true, false);
         return getJdbcTemplate().queryForList(ps.getQuery().toString(), ps.getParams().toArray(), Long.class);
     }
 
     @Override
     public int getRecordsCount(Long refBookId, String tableName, Date version, String filter) {
         RefBook refBook = refBookDao.get(refBookId);
-        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, null, version, null, filter, null, false, null, true);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, null, version, null, filter, null, false, null, true, false);
         return refBookDao.getRecordsCount(ps);
     }
 
@@ -898,10 +915,10 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         refBookClone.getAttributes().addAll(refBook.getAttributes());
 
         // Получение количества данных в справочнике
-        PreparedStatementData ps = getSimpleQuery(tableName, refBookClone, recordId, null, null, sortAttribute, filter, pagingParams, false, null, false);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBookClone, recordId, null, null, sortAttribute, filter, pagingParams, false, null, false, false);
         Integer recordsCount = refBookDao.getRecordsCount(ps);
 
-        ps = getSimpleQuery(tableName, refBookClone, recordId, null, null, sortAttribute, filter, pagingParams, false, null, false);
+        ps = getSimpleQuery(tableName, refBookClone, recordId, null, null, sortAttribute, filter, pagingParams, false, null, false, false);
         refBookClone.addAttribute(RefBook.getVersionFromAttribute());
         refBookClone.addAttribute(RefBook.getVersionToAttribute());
 

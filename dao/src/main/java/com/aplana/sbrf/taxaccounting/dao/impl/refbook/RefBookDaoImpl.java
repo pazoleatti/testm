@@ -292,9 +292,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
-                                                              String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        PreparedStatementData ps = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, pagingParams, isSortAscending);
+    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams, String filter,
+                                                              RefBookAttribute sortAttribute, boolean isSortAscending, boolean calcHasChild, Long parentId) {
+        PreparedStatementData ps = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, pagingParams, isSortAscending, calcHasChild, parentId);
         RefBook refBookClone = SerializationUtils.clone(get(refBookId));
         if (version == null) {
             refBookClone.setAttributes(new ArrayList<RefBookAttribute>());
@@ -302,10 +302,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             refBookClone.getAttributes().add(RefBook.getVersionFromAttribute());
             refBookClone.getAttributes().add(RefBook.getVersionToAttribute());
         }
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBookClone));
+        List<Map<String, RefBookValue>> records;
+
+        if (calcHasChild) {
+            records = getRecordsWithHasChild(ps, refBookClone);
+        } else {
+            records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBookClone));
+        }
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справочнике
-        PreparedStatementData psForCount = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, null, true);
+        PreparedStatementData psForCount = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, null, true, false, null);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
         result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
         return result;
@@ -327,7 +333,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public Long getRowNum(Long refBookId, Date version, Long recordId,
                           String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        PreparedStatementData ps = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, null, isSortAscending);
+        PreparedStatementData ps = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, null, isSortAscending, false, null);
         return getRowNum(ps, recordId);
     }
 
@@ -485,7 +491,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public int getRecordsCount(Long refBookId, Date version, String filter) {
-        PreparedStatementData psForCount = getRefBookSql(refBookId, null, null, version, null, filter, null, true);
+        PreparedStatementData psForCount = getRefBookSql(refBookId, null, null, version, null, filter, null, true, false, null);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
         return getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray());
     }
@@ -494,7 +500,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                                                 String filter, RefBookAttribute sortAttribute, boolean isSortAscending, Long parentId) {
         PreparedStatementData ps = getChildrenStatement(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending, parentId);
         RefBook refBook = get(refBookId);
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
+        List<Map<String, RefBookValue>> records = getRecordsWithHasChild(ps, refBook);
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справкочнике
         PreparedStatementData psForCount = getChildrenStatement(refBookId, null, version, sortAttribute, filter, null, true, parentId);
@@ -506,7 +512,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version,
                                                               PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return getRecords(refBookId, version, pagingParams, filter, sortAttribute, true);
+        return getRecords(refBookId, version, pagingParams, filter, sortAttribute, true, false, null);
     }
 
     /**
@@ -627,7 +633,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      * @return
      */
     private PreparedStatementData getRefBookSql(@NotNull Long refBookId, Long uniqueRecordId, Long recordId, Date version, RefBookAttribute sortAttribute,
-                                                String filter, PagingParams pagingParams, boolean isSortAscending) {
+                                                String filter, PagingParams pagingParams, boolean isSortAscending, boolean calcHasChild, Long parentId) {
         // модель которая будет возвращаться как результат
         PreparedStatementData ps = new PreparedStatementData();
 
@@ -666,7 +672,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
         }
 
-        ps.appendQuery("SELECT * FROM "); //TODO: заменить "select *" на полное перечисление полей (Marat Fayzullin 30.01.2014)
+        ps.appendQuery(", res AS ");
         ps.appendQuery("(select\n");
         ps.appendQuery(" frb.id as ");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
@@ -754,6 +760,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         if (version == null) {
             ps.appendQuery("order by t.version\n");
+        }
+        ps.appendQuery(")");
+
+        ps.appendQuery("SELECT * from ("); //TODO: заменить "select *" на полное перечисление полей (Marat Fayzullin 30.01.2014)
+        ps.appendQuery("SELECT res.* ");
+        if (calcHasChild) {
+            ps.appendQuery(", (SELECT 1 FROM dual WHERE EXISTS (SELECT 1 FROM res r1 ");
+            ps.appendQuery(" WHERE r1." + RefBook.RECORD_PARENT_ID_ALIAS + " = res." + RefBook.RECORD_ID_ALIAS + ")) AS " + RefBook.RECORD_HAS_CHILD_ALIAS);
+        }
+        ps.appendQuery(" FROM res ");
+        if (calcHasChild) {
+            ps.appendQuery(" WHERE ");
+            ps.appendQuery(RefBook.RECORD_PARENT_ID_ALIAS + (parentId == null ? " is null" : " = " + parentId.toString()));
         }
         ps.appendQuery(")");
 
@@ -905,20 +924,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT_BY_ID, uniqueRecordId, refBookId));
         }
 
-        ps.appendQuery(" SELECT ");
-
-        appendSortClause(ps, refBook, sortAttribute, isSortAscending, true, "");
-        ps.appendQuery(",");
-
-        // выбираем все алиасы + row_number_over
-        List<String> aliases = new ArrayList<String>(attributes.size() + 1);
-        aliases.add("record_id");
-        for (RefBookAttribute attr : attributes) {
-            aliases.add(attr.getAlias());
-        }
-        ps.appendQuery(StringUtils.join(aliases.toArray(), ','));
-        ps.appendQuery(" FROM");
-        ps.appendQuery("(select distinct \n");
+        ps.appendQuery(", tc AS (select level as lvl, \n");
         ps.appendQuery(" CONNECT_BY_ROOT  r.id as \"RECORD_ID\", \n");
         if (version == null) {
             ps.appendQuery("  t.version as \"");
@@ -989,7 +995,23 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(" = ");
             ps.appendQuery(parentId.toString());
         }
-        ps.appendQuery(")");
+        ps.appendQuery(")\n");
+
+        ps.appendQuery("SELECT ");
+
+        appendSortClause(ps, refBook, sortAttribute, isSortAscending, true, "");
+        ps.appendQuery(", res.* FROM (");
+
+        ps.appendQuery("SELECT DISTINCT ");
+        // выбираем все алиасы + row_number_over
+        List<String> aliases = new ArrayList<String>(attributes.size() + 1);
+        aliases.add(RefBook.RECORD_ID_ALIAS);
+        for (RefBookAttribute attr : attributes) {
+            aliases.add(attr.getAlias());
+        }
+        ps.appendQuery(StringUtils.join(aliases.toArray(), ','));
+        ps.appendQuery(", (SELECT 1 FROM dual WHERE EXISTS (SELECT 1 FROM tc tc2 WHERE lvl > 1 AND tc2.record_id = tc.record_id)) as " + RefBook.RECORD_HAS_CHILD_ALIAS);
+        ps.appendQuery(" FROM tc ");
 
         if (pagingParams != null) {
             ps.appendQuery(" WHERE ");
@@ -998,6 +1020,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(String.valueOf(pagingParams.getStartIndex() + pagingParams.getCount()));
         }
+        ps.appendQuery(") res ");
 
         return ps;
     }
@@ -1040,7 +1063,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
          *
          */
         if (filter == null || filter.equals("")) {
-            return getRecords(refBookId, version, pagingParams, getParentFilter(filter, parentRecordId), sortAttribute, true);
+            return getRecords(refBookId, version, pagingParams, filter, sortAttribute, true, true, parentRecordId);
         } else {
             return getChildren(refBookId, version, pagingParams, filter, sortAttribute, true, parentRecordId);
         }
@@ -1493,7 +1516,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsById(Long refBookId, Long uniqueRecordId,
                                                                          PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, null, sortAttribute, filter, pagingParams, true);
+        PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, null, sortAttribute, filter, pagingParams, true, false, null);
         RefBook refBookClone = SerializationUtils.clone(get(refBookId));
         refBookClone.setAttributes(new ArrayList<RefBookAttribute>());
         refBookClone.getAttributes().addAll(get(refBookId).getAttributes());
@@ -1509,7 +1532,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long refBookId, Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        PreparedStatementData ps = getRefBookSql(refBookId, null, recordId, null, sortAttribute, filter, pagingParams, true);
+        PreparedStatementData ps = getRefBookSql(refBookId, null, recordId, null, sortAttribute, filter, pagingParams, true, false, null);
         RefBook refBookClone = SerializationUtils.clone(get(refBookId));
         refBookClone.setAttributes(new ArrayList<RefBookAttribute>());
         refBookClone.getAttributes().addAll(get(refBookId).getAttributes());
@@ -2716,15 +2739,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                                        String filter, PagingParams pagingParams, boolean isSortAscending) {
         String orderBy = "";
         PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery("SELECT ");
-        ps.appendQuery("RECORD_ID, ");
-        appendSortClause(ps, refBook, sortAttribute, isSortAscending, "");
 
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            ps.appendQuery(", ");
-            ps.appendQuery(attribute.getAlias());
-        }
-        ps.appendQuery(" FROM (SELECT distinct ");
+        ps.appendQuery("WITH tc AS (SELECT level as lvl, ");
         ps.appendQuery(" CONNECT_BY_ROOT frb.ID as \"RECORD_ID\" ");
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", CONNECT_BY_ROOT frb.");
@@ -2766,7 +2782,22 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(" START WITH ");
         ps.appendQuery(parentId == null ? " frb.PARENT_ID is null " : " frb.PARENT_ID = " + parentId);
 
-        ps.appendQuery(")");
+        ps.appendQuery(")\n");
+
+        ps.appendQuery("SELECT res.*, ");
+        appendSortClause(ps, refBook, sortAttribute, isSortAscending, "");
+        ps.appendQuery(" FROM (");
+        ps.appendQuery("SELECT DISTINCT ");
+        ps.appendQuery("RECORD_ID ");
+
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            ps.appendQuery(", ");
+            ps.appendQuery(attribute.getAlias());
+        }
+        ps.appendQuery(", (SELECT 1 FROM dual WHERE EXISTS (SELECT 1 FROM tc tc2 WHERE lvl > 1 AND tc2.record_id = tc.record_id)) AS " + RefBook.RECORD_HAS_CHILD_ALIAS);
+        ps.appendQuery(" FROM tc ");
+        ps.appendQuery(") res ");
+
 
         if (pagingParams != null) {
             ps.appendQuery(" WHERE ");
@@ -2874,7 +2905,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         RefBook refBook = get(refBookId);
         // получаем страницу с данными
         PreparedStatementData ps = getChildRecordsQuery(refBook, tableName, parentId, sortAttribute, filter, pagingParams, isSortAscending);
-        List<Map<String, RefBookValue>> records = getRecordsData(ps, refBook);
+        List<Map<String, RefBookValue>> records = getRecordsWithHasChild(ps, refBook);
+
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // получаем информацию о количестве всех записей с текущим фильтром
         ps = getChildRecordsQuery(refBook, tableName, parentId, sortAttribute, filter, null, isSortAscending);
@@ -2913,6 +2945,25 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         } else {
             return getJdbcTemplate().query(ps.getQuery().toString(), new RefBookValueMapper(refBook));
         }
+    }
+
+    /**
+     * Возвращает элементы справочника с вычисленным столбцом has_child
+     *
+     * @param ps
+     * @param refBook
+     * @return
+     */
+    @Override
+    public List<Map<String, RefBookValue>> getRecordsWithHasChild(PreparedStatementData ps, RefBook refBook) {
+        return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook){
+            @Override
+            public Map<String, RefBookValue> mapRow(ResultSet rs, int index) throws SQLException {
+                Map<String, RefBookValue> result = super.mapRow(rs, index);
+                result.put(RefBook.RECORD_HAS_CHILD_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, SqlUtils.getLong(rs, RefBook.RECORD_HAS_CHILD_ALIAS)));
+                return result;
+            }
+        });
     }
 
     @Override

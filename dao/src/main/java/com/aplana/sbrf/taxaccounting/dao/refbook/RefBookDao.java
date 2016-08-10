@@ -106,7 +106,7 @@ public interface RefBookDao {
 	 * @return
 	 */
 	PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, Date version, PagingParams pagingParams,
-		String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+		String filter, RefBookAttribute sortAttribute, boolean isSortAscending, boolean calcHasChild, Long parentId);
 
     /**
      * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
@@ -588,6 +588,8 @@ public interface RefBookDao {
                                                        String filter, RefBookAttribute sortAttribute, String whereClause);
 
     List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook);
+
+    List<Map<String, RefBookValue>> getRecordsWithHasChild(PreparedStatementData ps, RefBook refBook);
 
     /**
      * row_num
