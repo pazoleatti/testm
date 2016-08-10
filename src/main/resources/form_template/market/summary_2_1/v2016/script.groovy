@@ -111,15 +111,9 @@ def allColumns = ['code', 'name', 'rowNum', 'guarantor', 'vnd', 'level', 'procuc
         'numberGuarantee', 'numberAddition', 'isGuaranetee', 'dateGuaranetee', 'sumGuaranetee', 'term', 'sumDiversion',
         'arrears', 'arrearsDate', 'arrearsGuarantee', 'arrearsGuaranteeDate', 'reserve', 'comment', 'segment']
 
-// Редактируемые атрибуты (графа 1, 2, 4..50)
+// Редактируемые атрибуты ("Все поля формы должны быть недоступны пользователю для редактирования")
 @Field
-def editableColumns = ['code', 'name', 'guarantor', 'vnd', 'level', 'procuct1', 'procuct2', 'procuct3', 'taxpayerName',
-        'taxpayerInn', 'okved', 'creditRating', 'creditClass', 'beneficiaryName', 'beneficiaryInn', 'emitentName',
-        'instructingName', 'number', 'issuanceDate', 'additionDate', 'startDate', 'conditionEffective', 'endDate',
-        'sumInCurrency', 'sumInRub', 'currency', 'debtBalance', 'isNonRecurring', 'paymentPeriodic', 'isCharged',
-        'tariff', 'remuneration', 'remunerationStartYear', 'remunerationIssuance', 'provide', 'numberGuarantee',
-        'numberAddition', 'isGuaranetee', 'dateGuaranetee', 'sumGuaranetee', 'term', 'sumDiversion', 'arrears',
-        'arrearsDate', 'arrearsGuarantee', 'arrearsGuaranteeDate', 'reserve', 'comment', 'segment']
+def editableColumns = []
 
 // Автозаполняемые атрибуты
 @Field
