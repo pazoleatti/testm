@@ -489,6 +489,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @Override
     public void setDepartmentPanelEnabled(boolean isEnabled) {
+        refBookView.setShowDisabledDepartment(false);
         departmentPanel.setVisible(isEnabled);
         tuneWrapperTopShift(filterPanel.isVisible(), versionPanel.isVisible(), isEnabled);
     }

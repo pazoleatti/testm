@@ -55,7 +55,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     private Boolean isEnabledFireChangeEvent = true;
     private Boolean multiSelect = false;
-    private boolean showDisabledDepartment = false;
+    private boolean showDisabledDepartment = true;
+    private boolean isRedStarNeeded = false;
     private Long refBookId;
 
     /* флаг что идет операция последовательного открывания веток */
@@ -111,6 +112,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
                 }
             }
         }
+        this.isRedStarNeeded = true;
         this.showDisabledDepartment = showDisabledDepartment;
     }
 
@@ -144,7 +146,9 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     private void hideIfInactive(RefBookUiTreeItem uiTreeItem) {
         if (Department.REF_BOOK_ID.equals(refBookId)) {
             if (!isActive(uiTreeItem)) {
-                uiTreeItem.setInnerHtml(DepartmentTreeWidget.RED_STAR_SPAN + uiTreeItem.getName());
+                if (isRedStarNeeded) {
+                    uiTreeItem.setInnerHtml(DepartmentTreeWidget.RED_STAR_SPAN + uiTreeItem.getName());
+                }
                 if (!showDisabledDepartment) {
                     uiTreeItem.setVisible(false);
                 }
