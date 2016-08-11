@@ -212,7 +212,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         getView().setAcceptableReportPeriods(result.getReportPeriods(), result.getDefaultReportPeriod());
                         getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
                         getView().updateEnabled();
-                        onReportPeriodChange();
                         onDepartmentChanged();
                         changeFilterElementNames(taxType);
 
