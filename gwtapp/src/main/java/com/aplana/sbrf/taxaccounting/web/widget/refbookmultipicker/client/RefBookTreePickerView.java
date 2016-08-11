@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentTreeWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.LazyTree;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionHandler;
@@ -53,6 +55,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     private Boolean isEnabledFireChangeEvent = true;
     private Boolean multiSelect = false;
+    private boolean showDisabledDepartment = false;
+    private Long refBookId;
 
     /* флаг что идет операция последовательного открывания веток */
     private boolean isOpeningOperation = false;
@@ -92,6 +96,24 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         });
     }
 
+    public void setRefBookId(Long refBookId) {
+        this.refBookId = refBookId;
+    }
+
+    public void setShowDisabledDepartment(boolean showDisabledDepartment) {
+        for (RefBookUiTreeItem treeItem : tree.getAllLoadedItems()) {
+            if (!isActive(treeItem)) {
+                if (showDisabledDepartment) {
+                    treeItem.setVisible(true);
+                } else {
+                    treeItem.setVisible(false);
+                    treeItem.setItemState(false);
+                }
+            }
+        }
+        this.showDisabledDepartment = showDisabledDepartment;
+    }
+
     private void onSelection() {
         if (!isEnabledFireChangeEvent) {
             isEnabledFireChangeEvent = true;
@@ -105,6 +127,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         tree.clear();
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem uiTreeItem = new RefBookUiTreeItem(value, multiSelect);
+            hideIfInactive(uiTreeItem);
             getUiHandlers().highLightItem(uiTreeItem);
             if (!value.isHasChild()) {
                 uiTreeItem.setState(true);
@@ -116,6 +139,23 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             }
         }
         RootLoadedEvent.fire(this);
+    }
+
+    private void hideIfInactive(RefBookUiTreeItem uiTreeItem) {
+        if (Department.REF_BOOK_ID.equals(refBookId)) {
+            if (!isActive(uiTreeItem)) {
+                uiTreeItem.setInnerHtml(DepartmentTreeWidget.RED_STAR_SPAN + uiTreeItem.getName());
+                if (!showDisabledDepartment) {
+                    uiTreeItem.setVisible(false);
+                }
+            } else {
+                uiTreeItem.setVisible(true);
+            }
+        }
+    }
+
+    private boolean isActive(RefBookUiTreeItem uiTreeItem) {
+        return !"0".equals(RefBookPickerUtils.getDereferenceValue(uiTreeItem.getRefBookTreeItem().getRefBookRecordDereferenceValues(), "IS_ACTIVE"));
     }
 
     /**
@@ -131,6 +171,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     public void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values, boolean openOnLoad) {
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem item = new RefBookUiTreeItem(value, multiSelect);
+            hideIfInactive(item);
             getUiHandlers().highLightItem(item);
             if (!value.isHasChild()) {
                 item.setState(true);

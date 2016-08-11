@@ -71,6 +71,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                     }
                     ((RefBookColumn) result).setFilter(filter);
                     RefBook refBook = refBookDao.getByAttribute(attributeId);
+                    ((RefBookColumn) result).setRefBookId(refBook.getId());
                     ((RefBookColumn) result).setHierarchical(refBook.getType() == 1);
                     ((RefBookColumn) result).setVersioned(refBook.isVersioned());
                     RefBookAttribute refBookAttribute;

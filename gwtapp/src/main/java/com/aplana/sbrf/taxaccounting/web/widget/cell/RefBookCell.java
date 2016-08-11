@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerContext;
@@ -72,6 +69,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 
         refBookPiker.setVisible(false);
         refBookPiker.setVersionEnabled(column.isVersioned());
+		refBookPiker.setDepartmentPanelEnabled(Department.REF_BOOK_ID.equals(column.getRefBookId()));
 		refBookPiker.setManualUpdate(true);
 	}
 

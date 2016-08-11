@@ -89,4 +89,6 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
     void checkCount(String text, Date relevanceDate, boolean exactSearch, CheckValuesCountHandler checkValuesCountHandler);
 
     void cleanValues();
+
+    void setShowDisabledDepartment(boolean showDisabledDepartment);
 }

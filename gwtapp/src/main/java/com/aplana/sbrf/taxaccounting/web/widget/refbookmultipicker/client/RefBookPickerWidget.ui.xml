@@ -128,6 +128,13 @@
                         </g:cell>
                         <d:DateMaskBoxPicker ui:field="versionDateBox" width="148px" addStyleNames="{modal.fix}"/>
                     </g:HorizontalPanel>
+                    <g:HorizontalPanel ui:field="departmentPanel" spacing="0" width="100%"
+                                       verticalAlignment="middle" horizontalAlignment="right" visible="false">
+                        <g:cell horizontalAlignment="right" width="50%">
+                            <g:CheckBox ui:field="showDisabled" wordWrap="false"
+                                        text="Отображать *недействующие подразделения"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
 
                     <g:ResizeLayoutPanel ui:field="widgetWrapper" addStyleNames="{modal.widgetWrapper}"/>
                     <g:HorizontalPanel spacing="0" horizontalAlignment="right" verticalAlignment="middle"

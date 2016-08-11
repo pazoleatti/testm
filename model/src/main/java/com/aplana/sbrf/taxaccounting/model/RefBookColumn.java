@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlTransient;
 public class RefBookColumn extends FilterColumn {
 	private static final long serialVersionUID = -6969365681036598158L;
 
+    private Long refBookId;
 	private Long refBookAttributeId;
 
     private Long refBookAttributeId2;
@@ -44,7 +45,15 @@ public class RefBookColumn extends FilterColumn {
         searchEnabled = true;
     }
 
-	public Long getRefBookAttributeId() {
+    public Long getRefBookId() {
+        return refBookId;
+    }
+
+    public void setRefBookId(Long refBookId) {
+        this.refBookId = refBookId;
+    }
+
+    public Long getRefBookAttributeId() {
 		return refBookAttributeId;
 	}
 

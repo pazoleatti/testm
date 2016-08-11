@@ -462,4 +462,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     public void fireEvent(GwtEvent<?> event) {
         asWidget().fireEvent(event);
     }
+
+    public void setShowDisabledDepartment(boolean showDisabledDepartment) {
+    }
 }

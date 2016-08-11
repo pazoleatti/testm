@@ -35,6 +35,8 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     public interface MyView extends View, HasUiHandlers<RefBookTreePickerUiHandlers> {
 
+        void setRefBookId(Long refBookId);
+
         void loadRoot(List<RefBookTreeItem> values, boolean openOnLoad);
 
         void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values, boolean openOnLoad);
@@ -105,6 +107,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         dispatchRequest = dispatcher.execute(createLoadAction(null, null), CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookTreeValuesResult>() {
             @Override
             public void onSuccess(GetRefBookTreeValuesResult result) {
+                getView().setRefBookId(result.getRefBookId());
                 getView().loadRoot(result.getPage(), false);
                 if (isNeedSelectFirstItem && !result.getPage().isEmpty()) {
                     isNeedSelectFirstItem = false;
@@ -112,15 +115,6 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                     ps.getSetIds().add(result.getPage().get(0).getId());
                 }
                 trySelect(ps);
-
-               /* if (result.getRefBookId() == 30L) {
-                    RefBookUiTreeItem uiTreeItem = getView().getUiTreeItem(0L);
-                    if (uiTreeItem != null) {
-                        loadForItem(uiTreeItem);
-                        uiTreeItem.setChildLoaded(true);
-                        uiTreeItem.setState(true);
-                    }
-                }*/
             }
         }, this));
     }

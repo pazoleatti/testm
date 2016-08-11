@@ -8,6 +8,7 @@ import com.aplana.gwt.client.modal.OnHideHandler;
 import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentTreeWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerContext;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
@@ -73,6 +74,10 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     HorizontalPanel filterPanel;
     @UiField
     HorizontalPanel versionPanel;
+    @UiField
+    HorizontalPanel departmentPanel;
+    @UiField
+    CheckBox showDisabled;
     @UiField
     CheckBox pickAll;
     @UiField
@@ -167,6 +172,14 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
         glass = Document.get().createDivElement();
         glass.setAttribute("id", "666");
+
+        showDisabled.setHTML("Отображать " + DepartmentTreeWidget.RED_STAR_SPAN + "недействующие подразделения");
+        showDisabled.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                refBookView.setShowDisabledDepartment(event.getValue());
+            }
+        });
 
         Style style = glass.getStyle();
         style.setProperty("filter", "alpha(opacity=0)");
@@ -465,17 +478,26 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @Override
     public void setSearchEnabled(boolean isSearchEnabled) {
         filterPanel.setVisible(isSearchEnabled);
-        tuneWrapperTopShift(isSearchEnabled, versionPanel.isVisible());
+        tuneWrapperTopShift(isSearchEnabled, versionPanel.isVisible(), departmentPanel.isVisible());
     }
 
     @Override
     public void setVersionEnabled(boolean isVersionEnabled) {
         versionPanel.setVisible(isVersionEnabled);
-        tuneWrapperTopShift(filterPanel.isVisible(), isVersionEnabled);
+        tuneWrapperTopShift(filterPanel.isVisible(), isVersionEnabled, departmentPanel.isVisible());
     }
 
-    private void tuneWrapperTopShift(boolean isSearchEnabled, boolean isVersionEnabled) {
-        widgetWrapper.getElement().getStyle().setTop(isSearchEnabled && isVersionEnabled ? 55 : !isSearchEnabled && !isVersionEnabled ? 5 : 30, Style.Unit.PX);
+    @Override
+    public void setDepartmentPanelEnabled(boolean isEnabled) {
+        departmentPanel.setVisible(isEnabled);
+        tuneWrapperTopShift(filterPanel.isVisible(), versionPanel.isVisible(), isEnabled);
+    }
+
+    private void tuneWrapperTopShift(boolean isSearchEnabled, boolean isVersionEnabled, boolean isDepartmentPanelEnabled) {
+        int top = isSearchEnabled && isVersionEnabled ? 55 : !isSearchEnabled && !isVersionEnabled ? 5 : 30;
+        if (isDepartmentPanelEnabled)
+            top += 25;
+        widgetWrapper.getElement().getStyle().setTop(top, Style.Unit.PX);
     }
 
     @Override

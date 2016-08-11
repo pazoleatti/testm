@@ -107,6 +107,14 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
         }
     }
 
+    public void setInnerHtml(String name) {
+        label.getElement().setInnerHTML(name);
+        if (multiSelection != null){
+            checkBox.getElement().setInnerHTML(name);
+            radioButton.getElement().setInnerHTML(name);
+        }
+    }
+
     public String getName() {
         return multiSelection == null ? label.getText() : ((ButtonBase) getWidget()).getText();
     }
