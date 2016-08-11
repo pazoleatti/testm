@@ -29,7 +29,7 @@ begin
 		
 	merge into ref_book_value tgt
 		using (
-		  select rbr.id as record_id, 3001 as attribute_id, case when rbv.string_value in ('83', '84', '34') then 1 else 0 end as number_value 
+		  select rbr.id as record_id, 3001 as attribute_id, case when rbv.string_value in ('83', '84', '46') then 1 else 0 end as number_value 
 		  from ref_book_record rbr
 		  join ref_book_value rbv on rbv.record_id = rbr.id and rbv.attribute_id = 25) src
 		on (tgt.record_id = src.record_id and tgt.attribute_id = src.attribute_id) 
