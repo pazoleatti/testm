@@ -173,12 +173,10 @@ public class PeriodServiceImpl implements PeriodService {
 
 	@Override
 	public void close(TaxType taxType, int departmentReportPeriodId, List<LogEntry> logs, TAUserInfo user) {
-		logs.add(new LogEntry(LogLevel.INFO, "Закрытие периода:"));
         DepartmentReportPeriod drp = departmentReportPeriodService.get(departmentReportPeriodId);
 		List<Integer> departments = departmentService.getAllChildrenIds(drp.getDepartmentId());
 
         int reportPeriodId = drp.getReportPeriod().getId();
-		logs.add(new LogEntry(LogLevel.INFO, "checkBeforeClose"));
         if (checkBeforeClose(departments, reportPeriodId, logs, user.getUser())) {
             DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
             filter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
@@ -187,9 +185,7 @@ public class PeriodServiceImpl implements PeriodService {
                 filter.setIsCorrection(false);
             else
                 filter.setCorrectionDate(drp.getCorrectionDate());
-			logs.add(new LogEntry(LogLevel.INFO, "updateActive"));
             departmentReportPeriodService.updateActive(departmentReportPeriodService.getListIdsByFilter(filter), reportPeriodId, false);
-			logs.add(new LogEntry(LogLevel.INFO, "updateActive done"));
             List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
             for (DepartmentReportPeriod item : drpList){
                 if (item.isActive())
@@ -262,7 +258,6 @@ public class PeriodServiceImpl implements PeriodService {
 
 	@Override
 	public void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs) {
-		logs.add(new LogEntry(LogLevel.INFO, "Открытие периода:"));
 		List<Integer> reportIdsForUpdate = new ArrayList<Integer>();
 		List<Integer> departmentIdsForSave = new ArrayList<Integer>();
 		Integer reportPeriodId = departmentReportPeriod.getReportPeriod().getId();
@@ -270,44 +265,35 @@ public class PeriodServiceImpl implements PeriodService {
 		filter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
 		filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
 
-		for (int depId : departmentIds) {
-			filter.setDepartmentIdList(Collections.singletonList(depId));
-			List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
+		filter.setDepartmentIdList(departmentIds);
+		List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
 
-			DepartmentReportPeriod savedDepartmentReportPeriod = null;
-			if (departmentReportPeriodList.size() == 1) {
-				savedDepartmentReportPeriod = departmentReportPeriodList.get(0);
-			}
-
-			if (savedDepartmentReportPeriod == null) { //не существует
-				departmentIdsForSave.add(depId);
-			} else if (!savedDepartmentReportPeriod.isActive()) { // существует и не открыт
-				reportIdsForUpdate.add(savedDepartmentReportPeriod.getId());
-			}
+		departmentIdsForSave.addAll(departmentIds);
+		for (DepartmentReportPeriod depPeriod : departmentReportPeriodList) {
+			reportIdsForUpdate.add(depPeriod.getId());
+			departmentIdsForSave.remove(depPeriod.getDepartmentId());
 		}
 
-		logs.add(new LogEntry(LogLevel.INFO, "updateActive"));
 		if (!departmentIdsForSave.isEmpty()) {
 			departmentReportPeriodService.save(departmentReportPeriod, departmentIdsForSave);
 		}
 		if (!reportIdsForUpdate.isEmpty()) {
 			departmentReportPeriodService.updateActive(reportIdsForUpdate, reportPeriodId, true, departmentReportPeriod.isBalance());
 		}
-		logs.add(new LogEntry(LogLevel.INFO, "updateActive done"));
-		filter.setDepartmentIdList(departmentIds);
-		List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
+
+		departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
 		for (DepartmentReportPeriod period : departmentReportPeriodList) {
-			int year = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
-			if (departmentReportPeriod.getCorrectionDate() == null) {
+			int year = period.getReportPeriod().getTaxPeriod().getYear();
+			if (period.getCorrectionDate() == null) {
 				logs.add(new LogEntry(LogLevel.INFO,
-						"Период " + "\"" + departmentReportPeriod.getReportPeriod().getName() + "\" "
-								+ departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + " "
-								+ (departmentReportPeriod.isBalance() ? "\"ввод остатков\"" : "") + " "
+						"Период " + "\"" + period.getReportPeriod().getName() + "\" "
+								+ period.getReportPeriod().getTaxPeriod().getYear() + " "
+								+ (period.isBalance() ? "\"ввод остатков\"" : "") + " "
 								+ " открыт для \"" + departmentService.getDepartment(period.getDepartmentId()).getName() + "\""
 				));
 			} else {
-				logs.add(new LogEntry(LogLevel.INFO, "Корректирующий период: " + departmentReportPeriod.getReportPeriod().getName()
-						+ " " + year + " открыт для " + departmentService.getDepartment(departmentReportPeriod.getDepartmentId()).getName()));
+				logs.add(new LogEntry(LogLevel.INFO, "Корректирующий период: " + period.getReportPeriod().getName()
+						+ " " + year + " открыт для " + departmentService.getDepartment(period.getDepartmentId()).getName()));
 			}
 		}
 	}
@@ -472,7 +458,6 @@ public class PeriodServiceImpl implements PeriodService {
     //http://conf.aplana.com/pages/viewpage.action?pageId=11389882#id-Формаспискапериодов-Удалениепериода
 	@Override
 	public void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user) {
-		logger.getEntries().add(new LogEntry(LogLevel.INFO, "Удаление периода:"));
         //Проверка форм не относится к этой постановке
         List<Integer> departmentIds = new ArrayList<Integer>();
         DepartmentReportPeriod drp = departmentReportPeriodService.get(drpId);
@@ -557,9 +542,7 @@ public class PeriodServiceImpl implements PeriodService {
         filter.setDepartmentIdList(departmentIds);
         filter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
         List<Integer> drpIds = departmentReportPeriodService.getListIdsByFilter(filter);
-		logs.add(new LogEntry(LogLevel.INFO, "delete"));
         departmentReportPeriodService.delete(drpIds);
-		logs.add(new LogEntry(LogLevel.INFO, "delete done"));
 		for (Integer id : departmentIds) {
             if (logs != null) {
                 logs.add(new LogEntry(LogLevel.INFO,
