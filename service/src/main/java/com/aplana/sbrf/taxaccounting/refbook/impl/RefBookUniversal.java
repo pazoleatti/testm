@@ -278,9 +278,11 @@ public class RefBookUniversal implements RefBookDataProvider {
                     !refBookId.equals(RefBook.DEPARTMENT_CONFIG_DEAL) &&
                     !refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
                     !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) &&
+                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_LAND) &&
                     !refBookId.equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) &&
                     !refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) &&
-                    !refBookId.equals(RefBook.WithTable.INCOME.getTableRefBookId())
+                    !refBookId.equals(RefBook.WithTable.INCOME.getTableRefBookId()) &&
+                    !refBookId.equals(RefBook.WithTable.LAND.getTableRefBookId())
                     ) {
 
                 if (refBook.isVersioned()) {
@@ -338,9 +340,11 @@ public class RefBookUniversal implements RefBookDataProvider {
                 refBookId.equals(RefBook.DEPARTMENT_CONFIG_DEAL) ||
                 refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) ||
                 refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) ||
+                refBookId.equals(RefBook.DEPARTMENT_CONFIG_LAND) ||
                 refBookId.equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) ||
                 refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) ||
-                refBookId.equals(RefBook.WithTable.INCOME.getTableRefBookId());
+                refBookId.equals(RefBook.WithTable.INCOME.getTableRefBookId()) ||
+                refBookId.equals(RefBook.WithTable.LAND.getTableRefBookId());
 
         if (!isConfig) {
 

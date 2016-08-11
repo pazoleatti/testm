@@ -133,6 +133,7 @@ public class GetMainMenuActionHandler extends
                         if (!TaxType.PROPERTY.toString().equals(menu.getMeta())
                                 && !TaxType.TRANSPORT.toString().equals(menu.getMeta())
                                 && !TaxType.INCOME.toString().equals(menu.getMeta())
+                                && !TaxType.LAND.toString().equals(menu.getMeta())
                                 ) {
                             menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
                                     + DepartmentConfigTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));

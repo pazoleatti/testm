@@ -54,6 +54,9 @@ public class CheckSettingExistHandler extends AbstractActionHandler<CheckSetting
             case PROPERTY:
                 refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
                 break;
+            case LAND:
+                refBookId = RefBook.DEPARTMENT_CONFIG_LAND;
+                break;
         }
 
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
