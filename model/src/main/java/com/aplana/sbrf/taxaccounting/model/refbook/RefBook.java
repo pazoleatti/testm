@@ -39,6 +39,7 @@ public class RefBook implements Serializable {
     public static final Long DEPARTMENT_CONFIG_DEAL = 37L;
     public static final Long DEPARTMENT_CONFIG_VAT = 98L;
     public static final Long DEPARTMENT_CONFIG_PROPERTY = 99L;
+    public static final Long DEPARTMENT_CONFIG_LAND = WithTable.LAND.getRefBookId();
 
     public static final Long EMAIL_CONFIG = 400L;
     public static final Long ASYNC_CONFIG = 401L;
@@ -53,7 +54,8 @@ public class RefBook implements Serializable {
     public enum WithTable {
         TRANSPORT(TaxType.TRANSPORT, 31L, 310L),
         PROPERTY(TaxType.PROPERTY, 99L, 206L),
-        INCOME(TaxType.INCOME, 33L, 330L);
+        INCOME(TaxType.INCOME, 33L, 330L),
+        LAND(TaxType.LAND, 700L, 710L);
 
         private TaxType taxType;
         private Long refBookId;

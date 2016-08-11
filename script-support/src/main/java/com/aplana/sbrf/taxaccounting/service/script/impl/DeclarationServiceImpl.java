@@ -47,6 +47,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             put(TaxType.DEAL, RefBook.DEPARTMENT_CONFIG_DEAL);
             put(TaxType.VAT, RefBook.DEPARTMENT_CONFIG_VAT);
             put(TaxType.PROPERTY, RefBook.DEPARTMENT_CONFIG_PROPERTY);
+            put(TaxType.LAND, RefBook.DEPARTMENT_CONFIG_LAND);
         }
     };
 

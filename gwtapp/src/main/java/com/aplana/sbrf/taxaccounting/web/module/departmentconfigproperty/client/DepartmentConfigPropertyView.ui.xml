@@ -189,7 +189,7 @@
                                         <aplana:DoubleBox ui:field="taxRate" width="50px" enabled="false"/>
                                     </g:cell>
                                 </g:HorizontalPanel>
-                                <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle">
+                                <g:HorizontalPanel ui:field="formatVersionBlock" width="100%" spacing="1" verticalAlignment="middle">
                                     <g:cell width="1%" height="22px">
                                         <g:Label text="Версия формата:" addStyleNames="{style.leftLabels}"/>
                                     </g:cell>

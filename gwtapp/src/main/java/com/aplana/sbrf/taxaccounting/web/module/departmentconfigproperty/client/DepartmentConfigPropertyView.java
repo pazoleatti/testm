@@ -128,6 +128,26 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             new TableHeader("APPROVE_ORG_NAME")
     };
 
+    private TableHeader[] tableHeaderLand = new TableHeader[]{
+            new TableHeader("TAX_ORGAN_CODE"),
+            new TableHeader("TAX_ORGAN_CODE_PROM"),
+            new TableHeader("KPP"),
+            new TableHeader("TAX_PLACE_TYPE_CODE"),
+            new TableHeader("NAME"),
+            new TableHeader("OKVED_CODE"),
+            new TableHeader("PHONE"),
+            new TableHeader("PREPAYMENT"),
+            new TableHeader("REORG_FORM_CODE"),
+            new TableHeader("REORG_INN"),
+            new TableHeader("REORG_KPP"),
+            new TableHeader("SIGNATORY_ID"),
+            new TableHeader("SIGNATORY_SURNAME"),
+            new TableHeader("SIGNATORY_FIRSTNAME"),
+            new TableHeader("SIGNATORY_LASTNAME"),
+            new TableHeader("APPROVE_DOC_NAME"),
+            new TableHeader("APPROVE_ORG_NAME")
+    };
+
     public final class TableHeader {
         String name;
 
@@ -173,6 +193,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     Panel versionBlock;
     @UiField
     Panel taxRateBlock;
+    @UiField
+    Panel formatVersionBlock;
 
     @UiField
     Label editModeLabel;
@@ -304,6 +326,10 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             ConstIncomeHeaderBuilder hb = new ConstIncomeHeaderBuilder(table);
             hb.setNeedCheckedRow(false);
             table.setHeaderBuilder(hb);
+        } else if (taxType == TaxType.LAND) {
+            ConstLandHeaderBuilder hb = new ConstLandHeaderBuilder(table);
+            hb.setNeedCheckedRow(false);
+            table.setHeaderBuilder(hb);
         }
         table.setSelectionModel(selectionModel);
 
@@ -351,6 +377,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             return tableHeaderTransport;
         } else if (taxType == TaxType.INCOME) {
             return tableHeaderIncome;
+        } else if (taxType == TaxType.LAND) {
+            return tableHeaderLand;
         }
         return new TableHeader[0];
     }
@@ -442,10 +470,12 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         innCell.setStringValue(inn.getValue());
         params.put("INN", innCell);
 
-        TableCell formatVersionCell = new TableCell();
-        formatVersionCell.setType(RefBookAttributeType.STRING);
-        formatVersionCell.setStringValue(formatVersion.getValue());
-        params.put("FORMAT_VERSION", formatVersionCell);
+        if (taxType != TaxType.LAND) {
+            TableCell formatVersionCell = new TableCell();
+            formatVersionCell.setType(RefBookAttributeType.STRING);
+            formatVersionCell.setStringValue(formatVersion.getValue());
+            params.put("FORMAT_VERSION", formatVersionCell);
+        }
 
         if (taxType == TaxType.PROPERTY) {
             TableCell versionCell = new TableCell();
@@ -477,6 +507,10 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         } else if (taxType == TaxType.INCOME) {
             taxRateBlock.setVisible(true);
             taxTypeLbl.setText("Налог на прибыль");
+        } else if (taxType == TaxType.LAND) {
+            taxRateBlock.setVisible(false);
+            formatVersionBlock.setVisible(false);
+            taxTypeLbl.setText("Земельный налог");
         }
     }
 
@@ -495,7 +529,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @Override
     public void fillNotTableData(Map<String, TableCell> itemList) {
         inn.setText(itemList.get("INN").getStringValue());
-        formatVersion.setText(itemList.get("FORMAT_VERSION").getStringValue());
+        if (taxType != TaxType.LAND) {
+            formatVersion.setText(itemList.get("FORMAT_VERSION").getStringValue());
+        }
         if (taxType == TaxType.PROPERTY) {
             version.setText(itemList.get("PREPAYMENT_VERSION").getStringValue());
         } else if (taxType == TaxType.INCOME) {
