@@ -1376,5 +1376,50 @@ end;
 /
 COMMIT;
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16552: 1.1. Создать справочники для формы настроек подразделений ЗемНалога
+declare l_task_name varchar2(128) := 'RefBook Block #1 (SBRFACCTAX-16552 - Department settings (L)))';
+begin
+		
+	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (700, 'Параметры подразделения по земельному налогу',0,0,0,null);
+	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (710, 'Параметры подразделения по земельному налогу (таблица)',0,0,0,null);
+	
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7001,700,'Идентификатор (первичный ключ)','DEPARTMENT_ID',4,0,30,161,1,null,10,0,0,null,null,0,null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7002,700,'ИНН','INN',1,1,null,null,1,null,10,0,0,null,null,0,10);
+	
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7100, 710, 'Ссылка на родительскую запись', 'LINK', 4, 0, 700, 7001, 0, null, 10, 1, 0, null, null, 0, null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7101, 710, 'Порядок следования', 'ROW_ORD', 2, 1, null, null, 0, 0, 10, 1, 0, null, null, 0, 4);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7102, 710, 'Код налогового органа (кон.)', 'TAX_ORGAN_CODE', 1, 2, null, null, 1, null, 5, 0, 1, null, null, 0, 4);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7119, 710, 'Код налогового органа (пром.)','TAX_ORGAN_CODE_PROM', 1, 3, null, null, 1, null, 5, 0, 0, null, null,0, 4);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7103, 710, 'КПП', 'KPP', 1, 4, null, null, 1, null, 5, 0, 1, null, null, 0, 9);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7104, 710, 'Код по месту нахождения (учета)', 'TAX_PLACE_TYPE_CODE', 4, 5, 2, 3, 1, null, 6, 0, 0, null, null, 0, null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7105, 710, 'Наименование (налогоплательщик)', 'NAME', 1, 6, null, null, 1, null, 20, 0, 0, null, null, 0, 1000);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7106, 710, 'ОКВЭД', 'OKVED_CODE', 4, 7, 34, 210, 1, null, 5, 0, 0, null, null, 0, null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7107, 710, 'Номер контактного телефона', 'PHONE', 1, 8, null, null, 1, null, 10, 0, 0, null, null, 0, 20);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7108, 710, 'Обязанность по уплате авансовых платежей', 'PREPAYMENT', 4, 9, 38, 250, 1, null, 6, 0, 0, null, null, 0, null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7109, 710, 'Код формы реорганизации и ликвидации', 'REORG_FORM_CODE', 4, 10, 5, 13, 1, null, 10, 0, 0, null, null, 0, null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7110, 710, 'ИНН реорг. организации', 'REORG_INN', 1, 11, null, null, 1, null, 10, 0, 0, null, null, 0, 10);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7111, 710, 'КПП реорг. организации', 'REORG_KPP', 1, 12, null, null, 1, null, 10, 0, 0, null, null, 0, 9);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7112, 710, 'Признак лица подписавшего документ', 'SIGNATORY_ID', 4, 13, 35, 212, 1, null, 10, 0, 0, null, null, 0, null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7113, 710, 'Фамилия', 'SIGNATORY_SURNAME', 1, 14, null, null, 1, null, 10, 0, 0, null, null, 0, 60);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7114, 710, 'Имя', 'SIGNATORY_FIRSTNAME', 1, 15, null, null, 1, null, 10, 0, 0, null, null, 0, 60);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7115, 710, 'Отчество', 'SIGNATORY_LASTNAME', 1, 16, null, null, 1, null, 10, 0, 0, null, null, 0, 60);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7116, 710, 'Наименование документа представителя', 'APPROVE_DOC_NAME', 1, 17, null, null, 1, null, 30, 0, 0, null, null, 0, 120);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7117, 710, 'Наименование организации представителя', 'APPROVE_ORG_NAME', 1, 18, null, null, 1, null, 30, 0, 0, null, null, 0, 1000);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7118, 710, 'Код подразделения', 'DEPARTMENT_ID', 4, 19, 30, 161, 1, null, 10, 1, 0, null, null, 0, null);
+	
+	dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book or its attributes already exist ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+
+COMMIT;
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
