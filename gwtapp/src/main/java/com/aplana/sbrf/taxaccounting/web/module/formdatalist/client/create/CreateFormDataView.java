@@ -189,6 +189,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @UiHandler("reportPeriodIds")
     public void onReportPeriodChange(ValueChangeEvent<List<Integer>> event) {
+        departmentPicker.setValue(null, true);
         if (getUiHandlers() != null) {
             getUiHandlers().onReportPeriodChange();
         }

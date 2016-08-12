@@ -107,15 +107,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
     @Override
     public void onReportPeriodChange() {
-        getView().addOpenModalWindowHandler(new OpenModalWindowEvent.OpenHandler() {
-            @Override
-            public void onOpen(OpenModalWindowEvent event) {
-                loadDepartments();
-            }
-        });
-    }
-
-    private void loadDepartments() {
         List<Integer> reportIds = getView().getFilterData().getReportPeriodIds();
         if (reportIds == null || reportIds.isEmpty())
             return;
@@ -131,7 +122,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
                         getView().updateEnabled();
                         onDepartmentChanged();
-                        getView().removeOpenModalWindowHandler();
                     }
                 }, this));
     }
