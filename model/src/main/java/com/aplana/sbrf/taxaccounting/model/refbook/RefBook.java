@@ -87,6 +87,15 @@ public class RefBook implements Serializable {
             }
             throw new RuntimeException("Не найдено сочетание табличной и нетабличной части настроек подразделения для указанного налога");
         }
+
+        public static Long getTablesIdByRefBook(long refBookId) {
+            for (WithTable r: values()) {
+                if (r.refBookId == refBookId) {
+                    return r.getTableRefBookId();
+                }
+            }
+            return null;
+        }
     }
 
 	/** Код справочника */

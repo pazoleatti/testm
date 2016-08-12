@@ -116,6 +116,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             taxOrganKpp.setAttributeId(3305L);
         }
 
+        if (taxType == TaxType.LAND) {
+            taxOrganCode.setAttributeId(7102L);
+            taxOrganKpp.setAttributeId(7103L);
+        }
+
         if (filter != null && !filter.isEmpty()) {
             taxOrganKpp.setFilter(filter);
             taxOrganCode.setFilter(filter);
@@ -126,7 +131,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             taxOrganCode.setFilter("0 = 1");
         }
 
-        if (taxType == TaxType.TRANSPORT) {
+        if (taxType == TaxType.TRANSPORT || taxType == TaxType.LAND) {
             taxOrganCode.setTitle("Код налогового органа (кон.)");
             taxOrganCodeLabel.setText("Код налогового органа (кон.)");
         } else {
@@ -290,8 +295,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             declarationTypeLabel.setText(DECLARATION_TYPE_TITLE_D);
         }
 
-        boolean isCodeKppVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.INCOME);
-        boolean isCodeVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT);
+        boolean isCodeKppVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.INCOME) || taxType.equals(TaxType.LAND);
+        boolean isCodeVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.LAND);
         codePanel.setVisible(isCodeVisible);
         kppPanel.setVisible(isCodeKppVisible);
 
