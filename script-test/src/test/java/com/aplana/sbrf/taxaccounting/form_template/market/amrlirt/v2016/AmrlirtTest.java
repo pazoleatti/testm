@@ -2,10 +2,8 @@ package com.aplana.sbrf.taxaccounting.form_template.market.amrlirt.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
@@ -14,16 +12,13 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Matchers.*;
-import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -124,39 +119,15 @@ public class AmrlirtTest extends ScriptTestBase {
 
     @Test
     public void calc1Test() {
-        // провайдер для справочника 520
-        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), anyLong(),
-                anyMapOf(Long.class, RefBookDataProvider.class))).thenReturn(testHelper.getRefBookDataProvider());
-
-        // записи для справочника 520
-        when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), anyString(),
-                any(RefBookAttribute.class))).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                // ищет среди записей справочника запись соответствующую коду из фильтра
-                // в фильтре: INN = 'test' OR KIO = 'test'
-                String filter = (String) invocation.getArguments()[2];
-                String before = "INN = '";
-                String after = "' OR KIO = '";
-                int beforeIndex = filter.indexOf(before) + before.length();
-                int afterIndex = filter.indexOf(after);
-                String findValue = filter.substring(beforeIndex, afterIndex);
-                if (findValue == null) {
-                    return new PagingResult<Map<String, RefBookValue>>();
-                }
-                final Map<Long, Map<String, RefBookValue>> records = testHelper.getRefBookAllRecords(520L);
-                for (Map<String, RefBookValue> record : records.values()) {
-                    if (findValue.equals(record.get("INN").getStringValue()) || findValue.equals(record.get("KIO").getStringValue())) {
-                        List<Map<String, RefBookValue>> tmpRecords = Arrays.asList(record);
-                        return new PagingResult<Map<String, RefBookValue>>(tmpRecords);
-                    }
-                }
-                return new PagingResult<Map<String, RefBookValue>>();
-            }
-        });
+        // для справочника 520
+        RefBookUniversal provider = mock(RefBookUniversal.class);
+        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(520L), anyMap())).thenReturn(provider);
+        List<Long> ids = Arrays.asList(1L, 2L, 3L);
+        when(provider.getUniqueRecordIds(any(Date.class), (String) eq(null))).thenReturn(ids);
+        when(provider.getRecordData(eq(ids))).thenReturn(testHelper.getRefBookAllRecords(520L));
 
         FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//market//amrlirt//v2016//"));
+        formData.initFormTemplateParams(testHelper.getFormTemplate());
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         // строка
         DataRow<Cell> row = formData.createDataRow();
@@ -176,7 +147,7 @@ public class AmrlirtTest extends ScriptTestBase {
     @Test
     public void chec1kTest() {
         FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//market//amrlirt//v2016//"));
+        formData.initFormTemplateParams(testHelper.getFormTemplate());
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         String msg;
