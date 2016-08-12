@@ -241,7 +241,6 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
             Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
-                    setIsFormModified(false);
                     onSaveClicked(false);
                     SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                 }
