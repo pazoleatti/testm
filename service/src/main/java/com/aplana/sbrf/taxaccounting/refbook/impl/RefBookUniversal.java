@@ -865,8 +865,8 @@ public class RefBookUniversal implements RefBookDataProvider {
 
         //Проверка использования в справочниках
         List<String> refBooks = refBookDao.isVersionUsedInRefBooks(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
-                RefBookTableRef.getTablesIdByRefBook(refBookId) != null ?
-                        Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))) : null);
+                RefBook.WithTable.getTablesIdByRefBook(refBookId) != null ?
+                        Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBookId)) : null);
         for (String refBookMsg : refBooks) {
             logger.error(refBookMsg);
             used = true;
@@ -905,8 +905,8 @@ public class RefBookUniversal implements RefBookDataProvider {
 
         //Проверка использования в настройках подразделений
         List<String> configs = refBookDao.isVersionUsedInDepartmentConfigs(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
-                RefBookTableRef.getTablesIdByRefBook(refBookId) != null ?
-                        Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))) : null);
+                RefBook.WithTable.getTablesIdByRefBook(refBookId) != null ?
+                        Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBookId)) : null);
         for (String configMsg : configs) {
             logger.error(configMsg);
             used = true;
