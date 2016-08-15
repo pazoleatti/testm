@@ -1203,7 +1203,7 @@ begin
 	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7041, 704, 'Код', 'CODE',1,1,null,null,1,null,10,1,1,null,null,0,7);
 	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7042, 704, 'Наименование льготы', 'NAME',1,2,null,null,1,null,30,1,0,null,null,0,2000);
 	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7043, 704, 'Основание', 'BASE',1,3,null,null,1,null,10,1,0,null,null,0,500);
-	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7044, 704, 'Код родительской записи', 'PARENT_ID',4,4,704,7042,1,null,10,0,0,null,null,0,null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7044, 704, 'Код родительской записи', 'PARENT_ID',4,4,704,7041,1,null,10,0,0,null,null,0,null);
 	
 	insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 704, to_date('28.10.2011', 'DD.MM.YYYY'), 0);
 		insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7041, '3021000');
