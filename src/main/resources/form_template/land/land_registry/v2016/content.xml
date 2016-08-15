@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>Реестр земельных участков</name>
+    <fullName>Реестр земельных участков</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNumber</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ пп</name>
+        <order>1</order>
+        <width>4</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>oktmo</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Код ОКТМО</name>
+        <order>2</order>
+        <width>8</width>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>841</nameAttributeId>
+        <refBookAttributeId>840</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>cadastralNumber</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Кадастровый номер земельного участка</name>
+        <order>3</order>
+        <width>8</width>
+        <maxLength>100</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>landCategory</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Категория земель (код)</name>
+        <order>4</order>
+        <width>8</width>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>7022</nameAttributeId>
+        <refBookAttributeId>7021</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>constructionPhase</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Период строительства</name>
+        <order>5</order>
+        <width>8</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>7012</nameAttributeId>
+        <refBookAttributeId>7012</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>cadastralCost</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Кадастровая стоимость (доля стоимости) земельного участка</name>
+        <order>6</order>
+        <width>8</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>taxPart</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Доля налогоплательщика в праве на земельный участок</name>
+        <order>7</order>
+        <width>8</width>
+        <maxLength>21</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>ownershipDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата возникновения права собственности на земельный участок</name>
+        <order>8</order>
+        <width>5</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>terminationDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата прекращения права собственности на земельный участок</name>
+        <order>9</order>
+        <width>5</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>benefitCode</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Информация о налоговых льготах (в случае наличия). Код</name>
+        <order>10</order>
+        <width>8</width>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>7042</nameAttributeId>
+        <refBookAttributeId>7041</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>benefitBase</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>Информация о налоговых льготах (в случае наличия). Основание</name>
+        <order>11</order>
+        <width>7</width>
+        <parentAlias>benefitCode</parentAlias>
+        <refBookAttributeId>7043</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>benefitParam</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Информация о налоговых льготах (в случае наличия). Параметры льготы</name>
+        <order>12</order>
+        <width>8</width>
+        <maxLength>12</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>benefitPeriod</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Информация о налоговых льготах (в случае наличия). Срок использования льготы</name>
+        <order>13</order>
+        <width>8</width>
+        <maxLength>2</maxLength>
+        <precision>0</precision>
+    </columns>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

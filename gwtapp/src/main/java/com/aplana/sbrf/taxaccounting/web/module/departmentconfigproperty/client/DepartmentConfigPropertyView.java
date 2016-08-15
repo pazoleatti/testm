@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -195,6 +196,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     Panel taxRateBlock;
     @UiField
     Panel formatVersionBlock;
+
+    @UiField
+    LabelSeparator otherDetails;
 
     @UiField
     Label editModeLabel;
@@ -499,6 +503,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         initTable(taxType);
         versionBlock.setVisible(false);
         taxRateBlock.setVisible(false);
+        formatVersionBlock.setVisible(true);
+        otherDetails.setVisible(true);
         if (taxType == TaxType.TRANSPORT) {
             taxTypeLbl.setText("Транспортный налог");
         } else if (taxType == TaxType.PROPERTY) {
@@ -510,6 +516,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         } else if (taxType == TaxType.LAND) {
             taxRateBlock.setVisible(false);
             formatVersionBlock.setVisible(false);
+            otherDetails.setVisible(false);
             taxTypeLbl.setText("Земельный налог");
         }
     }

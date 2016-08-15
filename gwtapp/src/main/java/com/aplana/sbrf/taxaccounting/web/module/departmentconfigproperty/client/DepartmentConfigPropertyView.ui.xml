@@ -180,7 +180,7 @@
                                 <g:ResizeLayoutPanel height="300px" width="100%">
                                     <style:GenericDataGrid ui:field="table" height="100%" width="100%"/>
                                 </g:ResizeLayoutPanel>
-                                <style:LabelSeparator text="Прочие сведения" addStyleNames="{style.labelSeparetors}"/>
+                                <style:LabelSeparator ui:field="otherDetails" text="Прочие сведения" addStyleNames="{style.labelSeparetors}"/>
                                 <g:HorizontalPanel ui:field="taxRateBlock" width="100%" spacing="1" verticalAlignment="middle" visible="false">
                                     <g:cell width="1%" height="22px">
                                         <g:Label text="Ставка налога:" addStyleNames="{style.leftLabels}"/>

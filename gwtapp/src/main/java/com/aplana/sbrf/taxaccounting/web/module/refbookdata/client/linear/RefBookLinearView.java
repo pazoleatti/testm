@@ -50,6 +50,8 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
     @UiField
     FlexiblePager pager;
 
+    private boolean isEnabledSelectionChangedEvent = true;
+
     @Inject
     @UiConstructor
     public RefBookLinearView(final Binder uiBinder) {
@@ -58,7 +60,10 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                getUiHandlers().onSelectionChanged();
+                if (isEnabledSelectionChangedEvent) {
+                    getUiHandlers().onSelectionChanged();
+                }
+                isEnabledSelectionChangedEvent = true;
             }
         });
         pager.setDisplay(refBookDataTable);
@@ -271,12 +276,13 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
     }
 
     @Override
-    public void setSelected(Long recordId) {
+    public void setSelected(Long recordId, boolean isEnabledSelectionChangedEvent) {
         selectionModel.clear();
         int i = 0;
         for (RefBookDataRow row : refBookDataTable.getVisibleItems()) {
 
             if (row.getRefBookRowId().equals(recordId)) {
+                this.isEnabledSelectionChangedEvent = isEnabledSelectionChangedEvent;
                 selectionModel.setSelected(row, true);
                 refBookDataTable.setKeyboardSelectedRow(i, true);
                 return;
