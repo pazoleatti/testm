@@ -205,6 +205,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @UiField
     PeriodPickerPopupWidget periodPickerPopup;
 
+    private Label noResultLabel = new Label();
+
     MultiSelectionModel<DataRow<Cell>> selectionModel = new MultiSelectionModel<DataRow<Cell>>();
 
     List<DataRow<Cell>> checkedRows = new LinkedList<DataRow<Cell>>();
@@ -288,6 +290,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 ellipsizeDepartmentPickerLabel(departmentPicker.isEnabled());
             }
         };
+
+        // хак для горизонтального скроллбара у пустой таблицы
+        table.setEmptyTableWidget(noResultLabel);
     }
 
     private void initTable(TaxType taxType) {
@@ -360,6 +365,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         model.getList().clear();
         table.redraw();
         removeAllColumns();
+        int tableWidth = 0;
 
         checkColumn = new Column<DataRow<Cell>, Boolean>(
                 new CheckboxCell(false, true)) {
@@ -382,6 +388,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         });
 
         table.setColumnWidth(checkColumn, 2, Style.Unit.EM);
+        tableWidth += 2;
 
 
         indexColumn = new IdentityColumn<DataRow<Cell>>(new AbstractCell<DataRow<Cell>>() {
@@ -390,7 +397,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 sb.appendHtmlConstant("<span class=\"gwt-TextBox-readonly\">" + (context.getIndex() + 1) + "</span>");
             }
         });
-        table.setColumnWidth(indexColumn, 30, Style.Unit.PX);
+        table.setColumnWidth(indexColumn, 3, Style.Unit.EM);
+        tableWidth += 3;
         table.addColumn(indexColumn, "№ пп");
 
         Map<String, com.aplana.sbrf.taxaccounting.model.Column> columnMap = new HashMap<String, com.aplana.sbrf.taxaccounting.model.Column>();
@@ -405,6 +413,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 Column<DataRow<Cell>, ?> paramColumnUI = null;
                 paramColumnUI = factory.createTableColumn(column, table);
                 table.setColumnWidth(paramColumnUI, column.getWidth(), Style.Unit.EM);
+                tableWidth += column.getWidth();
                 table.addColumn(paramColumnUI, column.getName());
                 this.columns.add(column);
                 if (paramColumnUI != null) {
@@ -419,6 +428,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 }
             }
         }
+        noResultLabel.setWidth(tableWidth + "em");
     }
 
     @Override
