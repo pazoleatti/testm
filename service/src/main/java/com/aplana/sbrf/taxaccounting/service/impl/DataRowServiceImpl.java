@@ -91,7 +91,6 @@ public class DataRowServiceImpl implements DataRowService {
         }
 
         List<FormDataSearchResult> resultsList;
-        resultsList = new ArrayList<FormDataSearchResult>();
         FormData formData = formDataDao.get(formDataId, manual);
         boolean existCommonColumn = false; // признак наличия числовых, строковых и/или автонумеруемых граф
         boolean existRefBookColumn = false; // признак наличия справочных граф
@@ -101,51 +100,11 @@ public class DataRowServiceImpl implements DataRowService {
             else
                 existCommonColumn = true;
         }
-        Long index = 0L;
+        // поиск по ссылочным столбцам
         if (existRefBookColumn) {
-            List<DataRow<Cell>> rows = dataRowDao.getRowsRefColumnsOnly(formData, null, correctionDiff);
-            refBookHelper.dataRowsDereference(new Logger(), rows, formData.getFormColumns());
-            String searchKey = key;
-            if (!isCaseSensitive) searchKey = searchKey.toUpperCase();
-            for (DataRow<Cell> row : rows) {
-                for (Column column : formData.getFormColumns()) {
-                    if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
-                        Cell valueCell = row.getCell(column.getAlias());
-                        if (valueCell != null && valueCell.getRefBookDereference() != null && (isCaseSensitive && valueCell.getRefBookDereference().indexOf(searchKey) >= 0
-                                || !isCaseSensitive && valueCell.getRefBookDereference().toUpperCase().indexOf(searchKey) >= 0)) {
-                            if ((index++) < range.getCount()) {
-                                FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
-                                formDataSearchResult.setColumnIndex((long) column.getOrder());
-                                formDataSearchResult.setRowIndex(row.getIndex().longValue());
-                                formDataSearchResult.setStringFound(valueCell.getRefBookDereference());
-                                resultsList.add(formDataSearchResult);
-                            }
-                        }
-                    } else if (ColumnType.DATE.equals(column.getColumnType())) {
-                        Cell valueCell = row.getCell(column.getAlias());
-                        if (valueCell != null && valueCell.getDateValue() != null) {
-                            Formats formats = Formats.getById(((DateColumn) column).getFormatId());
-                            SimpleDateFormat df;
-                            if (formats.getId() == 0) {
-                                df = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
-                            } else {
-                                df = new SimpleDateFormat(formats.getFormat());
-                            }
-                            String valueStr = df.format(valueCell.getDateValue());
-                            if (isCaseSensitive && valueStr.indexOf(searchKey) >= 0
-                                    || !isCaseSensitive && valueStr.toUpperCase().indexOf(searchKey) >= 0) {
-                                if ((index++) < range.getCount()) {
-                                    FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
-                                    formDataSearchResult.setColumnIndex((long) column.getOrder());
-                                    formDataSearchResult.setRowIndex(row.getIndex().longValue());
-                                    formDataSearchResult.setStringFound(valueStr);
-                                    resultsList.add(formDataSearchResult);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            resultsList = searchByKeyInRefColumns(formData, range, key, isCaseSensitive, correctionDiff);
+        } else {
+            resultsList = new ArrayList<FormDataSearchResult>();
         }
         // очищаем таблицу
         dataRowDao.initSearchResult(key, sessionId);
@@ -160,6 +119,57 @@ public class DataRowServiceImpl implements DataRowService {
 
         results = dataRowDao.getSearchResult(key, sessionId, range);
         return results;
+    }
+
+    public List<FormDataSearchResult> searchByKeyInRefColumns(FormData formData, DataRowRange range, String key, boolean isCaseSensitive, boolean correctionDiff){
+        List<FormDataSearchResult> resultsList = new ArrayList<FormDataSearchResult>();
+        List<DataRow<Cell>> rows = dataRowDao.getRowsRefColumnsOnly(formData, null, correctionDiff);
+        refBookHelper.dataRowsDereference(new Logger(), rows, formData.getFormColumns());
+        String searchKey = key;
+        if (!isCaseSensitive) searchKey = searchKey.toUpperCase();
+        Long index = 0L;
+        for (DataRow<Cell> row : rows) {
+            for (Column column : formData.getFormColumns()) {
+                if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
+                    Cell valueCell = row.getCell(column.getAlias());
+                    if (valueCell != null && valueCell.getRefBookDereference() != null && (isCaseSensitive && valueCell.getRefBookDereference().indexOf(searchKey) >= 0
+                            || !isCaseSensitive && valueCell.getRefBookDereference().toUpperCase().indexOf(searchKey) >= 0)) {
+                        if ((index++) < range.getCount()) {
+                            FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
+                            formDataSearchResult.setIndex(index);
+                            formDataSearchResult.setColumnIndex((long) column.getOrder());
+                            formDataSearchResult.setRowIndex(row.getIndex().longValue());
+                            formDataSearchResult.setStringFound(valueCell.getRefBookDereference());
+                            resultsList.add(formDataSearchResult);
+                        }
+                    }
+                } else if (ColumnType.DATE.equals(column.getColumnType())) {
+                    Cell valueCell = row.getCell(column.getAlias());
+                    if (valueCell != null && valueCell.getDateValue() != null) {
+                        Formats formats = Formats.getById(((DateColumn) column).getFormatId());
+                        SimpleDateFormat df;
+                        if (formats.getId() == 0) {
+                            df = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
+                        } else {
+                            df = new SimpleDateFormat(formats.getFormat());
+                        }
+                        String valueStr = df.format(valueCell.getDateValue());
+                        if (isCaseSensitive && valueStr.indexOf(searchKey) >= 0
+                                || !isCaseSensitive && valueStr.toUpperCase().indexOf(searchKey) >= 0) {
+                            if ((index++) < range.getCount()) {
+                                FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
+                                formDataSearchResult.setIndex(index);
+                                formDataSearchResult.setColumnIndex((long) column.getOrder());
+                                formDataSearchResult.setRowIndex(row.getIndex().longValue());
+                                formDataSearchResult.setStringFound(valueStr);
+                                resultsList.add(formDataSearchResult);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return resultsList;
     }
 
     @Override

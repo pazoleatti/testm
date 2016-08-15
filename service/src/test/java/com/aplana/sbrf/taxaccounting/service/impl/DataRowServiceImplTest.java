@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import org.junit.Assert;
@@ -103,9 +104,7 @@ public class DataRowServiceImplTest {
         DataRowRange range = new DataRowRange();
         range.setOffset(1);
         range.setCount(5);
-        when(dataRowDao.getSearchResult(key, 0, range)).thenReturn(null);
-        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, 0, true, formData.isManual(), false)).thenReturn(new PagingResult<FormDataSearchResult>());
-        PagingResult<FormDataSearchResult> results = dataRowService.searchByKey(formData.getId(), range, key, 0, true, false, false);
+        List<FormDataSearchResult> results = dataRowService.searchByKeyInRefColumns(formData, range, key, true, false);
         Assert.assertEquals(2, results.size());
 
         Assert.assertEquals(new Long(1), results.get(0).getIndex());
@@ -117,101 +116,5 @@ public class DataRowServiceImplTest {
         Assert.assertEquals("ref2 keeyyy", results.get(1).getStringFound());
         Assert.assertEquals(new Long(1), results.get(1).getRowIndex());
         Assert.assertEquals(new Long(5), results.get(1).getColumnIndex());
-    }
-
-    @Test
-    public void test2(){
-        String key = "keeyyy";
-        DataRowRange range = new DataRowRange();
-        range.setOffset(1);
-        range.setCount(10);
-        when(dataRowDao.getSearchResult(key, 0, range)).thenReturn(null);
-        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, 0, false, formData.isManual(), false)).thenReturn(daoResult);
-        PagingResult<FormDataSearchResult>  results = dataRowService.searchByKey(formData.getId(), range, key, 0, false, false, false);
-        Assert.assertEquals(5, results.size());
-
-        Assert.assertEquals(new Long(1), results.get(0).getIndex());
-        Assert.assertEquals("row keeyyy", results.get(0).getStringFound());
-        Assert.assertEquals(new Long(1), results.get(0).getRowIndex());
-        Assert.assertEquals(new Long(1), results.get(0).getColumnIndex());
-
-        Assert.assertEquals(new Long(2), results.get(1).getIndex());
-        Assert.assertEquals("ref keeyyy", results.get(1).getStringFound());
-        Assert.assertEquals(new Long(1), results.get(1).getRowIndex());
-        Assert.assertEquals(new Long(4), results.get(1).getColumnIndex());
-
-        Assert.assertEquals(new Long(3), results.get(2).getIndex());
-        Assert.assertEquals("ref2 keeyyy", results.get(2).getStringFound());
-        Assert.assertEquals(new Long(1), results.get(2).getRowIndex());
-        Assert.assertEquals(new Long(5), results.get(2).getColumnIndex());
-
-        Assert.assertEquals(new Long(4), results.get(3).getIndex());
-        Assert.assertEquals("row keeYYyy", results.get(3).getStringFound());
-        Assert.assertEquals(new Long(2), results.get(3).getRowIndex());
-        Assert.assertEquals(new Long(4), results.get(3).getColumnIndex());
-
-        Assert.assertEquals(new Long(5), results.get(4).getIndex());
-        Assert.assertEquals("row keeYyy", results.get(4).getStringFound());
-        Assert.assertEquals(new Long(2), results.get(4).getRowIndex());
-        Assert.assertEquals(new Long(5), results.get(4).getColumnIndex());
-
-        range = new DataRowRange();
-        range.setOffset(3);
-        range.setCount(4);
-        when(dataRowDao.getSearchResult(key, 0, range)).thenReturn(null);
-
-        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, 0, false, formData.isManual(), false)).thenReturn(new PagingResult<FormDataSearchResult>());
-        results = dataRowService.searchByKey(formData.getId(), range, key, 0, false, false, false);
-        Assert.assertEquals(2, results.size());
-        Assert.assertEquals(new Long(3), results.get(0).getIndex());
-        Assert.assertEquals("row keeYYyy", results.get(0).getStringFound());
-        Assert.assertEquals(new Long(2), results.get(0).getRowIndex());
-        Assert.assertEquals(new Long(4), results.get(0).getColumnIndex());
-
-        Assert.assertEquals(new Long(4), results.get(1).getIndex());
-        Assert.assertEquals("row keeYyy", results.get(1).getStringFound());
-        Assert.assertEquals(new Long(2), results.get(1).getRowIndex());
-        Assert.assertEquals(new Long(5), results.get(1).getColumnIndex());
-
-    }
-
-    @Test
-    public void test3(){
-        String key = "keeyyy";
-
-        DataRowRange range = new DataRowRange();
-        range.setOffset(1);
-        range.setCount(10);
-        when(dataRowDao.getSearchResult(key, 0, range)).thenReturn(null);
-
-        FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
-        formDataSearchResult.setIndex(1L);
-        formDataSearchResult.setStringFound("row keeyyy");
-        formDataSearchResult.setRowIndex(2L);
-        formDataSearchResult.setColumnIndex(1L);
-
-        PagingResult<FormDataSearchResult> pagingResult = new PagingResult<FormDataSearchResult>();
-        pagingResult.setTotalCount(1);
-        pagingResult.add(formDataSearchResult);
-
-        when(dataRowDao.searchByKey(formData.getId(), formData.getFormTemplateId(), range, key, 0, false, formData.isManual(), false)).thenReturn(pagingResult);
-
-        PagingResult<FormDataSearchResult> results = dataRowService.searchByKey(formData.getId(), range, key, 0, false, formData.isManual(), false);
-        Assert.assertEquals(5, results.size());
-
-        Assert.assertEquals(new Long(1), results.get(0).getIndex());
-        Assert.assertEquals("ref keeyyy", results.get(0).getStringFound());
-
-        Assert.assertEquals(new Long(2), results.get(1).getIndex());
-        Assert.assertEquals("ref2 keeyyy", results.get(1).getStringFound());
-
-        Assert.assertEquals(new Long(3), results.get(2).getIndex());
-        Assert.assertEquals("row keeyyy", results.get(2).getStringFound());
-
-        Assert.assertEquals(new Long(4), results.get(3).getIndex());
-        Assert.assertEquals("row keeYYyy", results.get(3).getStringFound());
-
-        Assert.assertEquals(new Long(5), results.get(4).getIndex());
-        Assert.assertEquals("row keeYyy", results.get(4).getStringFound());
     }
 }
