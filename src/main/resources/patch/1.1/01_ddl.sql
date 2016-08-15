@@ -223,7 +223,7 @@ begin
 	
 	if l_rerun_condition = 0 then 
 		execute immediate 'create index i_dep_rep_per_report_period_id on department_report_period (report_period_id)';
-		dbms_output.put_line(l_task_name||'[INFO]:'||' index I_DEP_REP_PER_REPORT_PERIOD_ID on FORM_DATA created');
+		dbms_output.put_line(l_task_name||'[INFO]:'||' index I_DEP_REP_PER_REPORT_PERIOD_ID on DEPARTMENT_REPORT_PERIOD created');
 	else
 		dbms_output.put_line(l_task_name||'[ERROR]:'||' index I_DEP_REP_PER_REPORT_PERIOD_ID already exists');
 	end if;
