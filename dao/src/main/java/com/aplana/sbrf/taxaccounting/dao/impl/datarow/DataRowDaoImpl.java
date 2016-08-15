@@ -16,12 +16,15 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -51,39 +54,28 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	@Autowired
 	private FormDataDao formDataDao;
 
+	private RowMapper formDataSearchMapper = new RowMapper<FormDataSearchResult>() {
+		@Override
+		public FormDataSearchResult mapRow(ResultSet rs, int rowNum) throws SQLException {
+			FormDataSearchResult result = new FormDataSearchResult();
+			result.setIndex(SqlUtils.getLong(rs, "idx"));
+			result.setColumnIndex(SqlUtils.getLong(rs, "column_index"));
+			result.setRowIndex(SqlUtils.getLong(rs, "row_index"));
+			result.setStringFound(rs.getString("raw_value"));
+			return result;
+		}
+	};
+
 	@Override
-	public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual, boolean correctionDiff) {
+	public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, int sessionId,
+														  boolean isCaseSensitive, boolean manual, boolean correctionDiff) {
 		Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, formTemplateId, key, isCaseSensitive, manual, correctionDiff);
 		// get query and params
 		String query = sql.getFirst();
 		Map<String, Object> params = sql.getSecond();
 
-		List<FormDataSearchResult> dataRows;
-
-		String dataQuery = "SELECT idx, column_index, row_index, raw_value FROM (" + query + ") WHERE idx BETWEEN :from AND :to";
-		params.put("from", 0);
-		params.put("to", range.getCount());
-
-		dataRows = getNamedParameterJdbcTemplate().query(dataQuery, params, new RowMapper<FormDataSearchResult>() {
-			@Override
-			public FormDataSearchResult mapRow(ResultSet rs, int rowNum) throws SQLException {
-				FormDataSearchResult result = new FormDataSearchResult();
-				result.setIndex(SqlUtils.getLong(rs, "idx"));
-				result.setColumnIndex(SqlUtils.getLong(rs, "column_index"));
-				result.setRowIndex(SqlUtils.getLong(rs, "row_index"));
-				result.setStringFound(rs.getString("raw_value"));
-				return result;
-			}
-		});
-		int count = 0;
-		if (dataRows.size() > 0) {
-			try {
-				count = Integer.parseInt(dataRows.remove(0).getStringFound());
-			} catch (NumberFormatException ignored) {
-			}
-		}
-
-		return new PagingResult<FormDataSearchResult>(dataRows, count);
+		saveSearchResult(query, params);
+		return getSearchResult(key, sessionId, range);
 	}
 
 	/**
@@ -91,7 +83,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 *
 	 * @return
 	 */
-	private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive, boolean manual, boolean correctionDiff) {
+	@Override
+	public Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive, boolean manual, boolean correctionDiff) {
 		FormData formData = formDataDao.get(formDataId, manual);
 		StringBuilder stringBuilder = new StringBuilder("");
 		StringBuilder listColumnIndex = new StringBuilder("");
@@ -141,11 +134,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		String sql =
 				"WITH t AS (" +
 						stringBuilder.toString() +
-						")," +
-						"res AS (" +
-						" SELECT row_number() over (ORDER BY row_index, column_index) AS idx,\n" +
-						"  COUNT(*) over() num_rows,\n" +
-						"  row_index,\n" +
+						")" +
+						" SELECT row_index,\n" +
 						"  column_index,\n" +
 						"  raw_value\n" +
 						" FROM t UNPIVOT INCLUDE NULLS (raw_value FOR column_index IN (" + listColumnIndex.toString() + "))" +
@@ -154,12 +144,75 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 								isCaseSensitive ?
 										"            WHERE raw_value like :key \n" :
 										"            WHERE LOWER(raw_value) like LOWER(:key) \n"
-						) + ")" +
-						"SELECT 0 as idx,0 as row_index,'0' as column_index,to_char(num_rows) as raw_value FROM res\n" +
-						"UNION\n" +
-						"SELECT idx,row_index,column_index,raw_value FROM res";
+						);
 
 		return new Pair<String, Map<String, Object>>(sql, params);
+	}
+
+	private String TMP_SEARCH_FORM_TABLE = "TMP_SEARCH_FORM";
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public PagingResult<FormDataSearchResult> getSearchResult(String key, int sessionId, DataRowRange range) {
+		List<String> searchResultParams = getJdbcTemplate().queryForList(
+				"SELECT raw_value FROM " + TMP_SEARCH_FORM_TABLE + " WHERE row_index = 0 AND rownum <= 2", String.class);
+
+		Boolean searchResultExists = searchResultParams.size() >= 2 && searchResultParams.get(0).equals(key) && searchResultParams.get(1).equals(Integer.toString(sessionId));
+		if (searchResultExists) {
+			String dataQuery =
+					"WITH t AS (SELECT row_number() over (order by row_index, column_index) idx, column_index, row_index, raw_value \n" +
+					"FROM " + TMP_SEARCH_FORM_TABLE + " WHERE row_index > 0)\n" +
+					"SELECT 0 as idx,0 as row_index,0 as column_index,to_char(COUNT(*)) as raw_value FROM t\n" +
+					"UNION\n" +
+					"SELECT idx, row_index, column_index, raw_value FROM t\n" +
+					"WHERE idx BETWEEN :from AND :to";
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("from", range.getOffset());
+			params.put("to", range.getOffset() + range.getCount() - 1);
+
+			List<FormDataSearchResult> dataRows = getNamedParameterJdbcTemplate().query(dataQuery, params, formDataSearchMapper);
+			int count = 0;
+			if (dataRows.size() > 0) {
+				try {
+					count = Integer.parseInt(dataRows.remove(0).getStringFound());
+				} catch (NumberFormatException ignored) {
+				}
+			}
+
+			return new PagingResult<FormDataSearchResult>(dataRows, count);
+		}
+		return null;
+	}
+
+	@Override
+	public void initSearchResult(String key, int sessionId) {
+		getJdbcTemplate().update("TRUNCATE TABLE " + TMP_SEARCH_FORM_TABLE);
+		getJdbcTemplate().update("INSERT INTO " + TMP_SEARCH_FORM_TABLE + "(row_index, column_index, raw_value) VALUES (0, 0, '" + key + "')");
+		getJdbcTemplate().update("INSERT INTO " + TMP_SEARCH_FORM_TABLE + "(row_index, column_index, raw_value) VALUES (0, 1, '" + sessionId + "')");
+	}
+
+	@Override
+	public void saveSearchResult(final List<FormDataSearchResult> resultList) {
+		getJdbcTemplate().batchUpdate("INSERT INTO " + TMP_SEARCH_FORM_TABLE + "(row_index, column_index, raw_value) VALUES(?, ?, ?)", new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+					ps.setInt(1, resultList.get(i).getRowIndex().intValue());
+					ps.setInt(2, resultList.get(i).getColumnIndex().intValue());
+					ps.setString(3, resultList.get(i).getStringFound());
+			}
+
+			@Override
+			public int getBatchSize() {
+				return resultList.size();
+			}
+		});
+	}
+
+	@Override
+	public void saveSearchResult(String query, Map<String, Object> params) {
+		getNamedParameterJdbcTemplate().update(
+				"INSERT INTO " + TMP_SEARCH_FORM_TABLE + "(row_index, column_index, raw_value) " +
+				"SELECT row_index, column_index, raw_value FROM (" + query + ")", params);
 	}
 
 	@Override

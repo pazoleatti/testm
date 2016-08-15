@@ -43,6 +43,7 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     private Integer formTemplateId;
     private List<Integer> hiddenColumns;
     private boolean absoluteView;
+    private int sessionId;
 
     @Inject
     public FormSearchPresenter(final EventBus eventBus, final MyView view, DispatchAsync dispatcher) {
@@ -62,8 +63,9 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     }
 
     @Override
-    public void open(boolean readOnlyMode, boolean manual, boolean absoluteView) {
+    public void open(boolean readOnlyMode, boolean manual, boolean absoluteView, int sessionId) {
         this.absoluteView = absoluteView;
+        this.sessionId = sessionId;
         String searchKey = getView().getSearchKey();
         if (searchKey == null || searchKey.isEmpty()) {
             getView().setSearchKey(Cookies.getCookie(formDataId.toString()));
@@ -85,6 +87,7 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         action.setCaseSensitive(getView().isCaseSensitive());
         action.setManual(getView().isManual());
         action.setCorrectionDiff(!absoluteView);
+        action.setSessionId(sessionId);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SearchResult>() {
             @Override
             public void onSuccess(SearchResult result) {

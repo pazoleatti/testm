@@ -6,9 +6,11 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResult;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO для работы со строкам НФ.
@@ -24,6 +26,28 @@ public interface DataRowDao {
 	 * @param formData
 	 */
 	void removeCheckPoint(FormData formData);
+
+	void initSearchResult(String key, int sessionId);
+
+	/**
+	 * Если поиск уже производился по ключу key, то возвращает результат поиска
+	 * @param key строка поиска
+	 * @param range диапазон строк
+	 * @return результат поиска
+     */
+	PagingResult<FormDataSearchResult> getSearchResult(String key, int sessionId, DataRowRange range);
+
+	/**
+	 * сохраняет результат поиска по ключу key, чтобы потом не производить поиск занова при переходе со стр. на стр.
+	 * @param resultList результат поиска
+     */
+	void saveSearchResult(List<FormDataSearchResult> resultList);
+
+	/**
+	 * сохраняет результат поиска по ключу key, чтобы потом не производить поиск занова при переходе со стр. на стр.
+	 * @param query запрос поиска
+	 */
+	void saveSearchResult(String query, Map<String, Object> params);
 
 	/**
 	 * Копирование строк из НФ-источника в НФ-приемник.
@@ -173,6 +197,17 @@ public interface DataRowDao {
      */
     void saveTempRows(FormData formData, List<DataRow<Cell>> rows);
 
+	/**
+	 * Запрос полнотекстового поиска по данным налоговой формы
+	 * @param formDataId идентификатор НФ
+	 * @param formTemplateId идентификатор шаблона НФ
+	 * @param key ключ для поиска
+	 * @param isCaseSensitive чувствительность к регистру
+	 * @param manual ручной ввод
+	 * @return Pair<String, Map<String, Object>> - строка запроса и параметры
+	 */
+	Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive, boolean manual, boolean correctionDiff);
+
     /**
      * Полнотекстовый поиск по данным налоговой формы
      *
@@ -184,7 +219,7 @@ public interface DataRowDao {
      * @param manual ручной ввод
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
-    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual, boolean correctionDiff);
+    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, int sessionId, boolean isCaseSensitive, boolean manual, boolean correctionDiff);
 
 	/**
 	 * Обновляет существующие строки НФ

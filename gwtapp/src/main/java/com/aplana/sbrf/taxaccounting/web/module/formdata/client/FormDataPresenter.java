@@ -93,6 +93,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	public void prepareFromRequest(PlaceRequest request) {
         modifiedRows.clear();
         super.prepareFromRequest(request);
+        getView().generateNewSessionId();
         LogCleanEvent.fire(FormDataPresenter.this);
 		GetFormDataAction action = new GetFormDataAction();
         Long fdId = Long.parseLong(request.getParameter(FORM_DATA_ID, null));
@@ -1088,7 +1089,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
     @Override
-    public void onOpenSearchDialog() {
+    public void onOpenSearchDialog(final int sessionId) {
         LogCleanEvent.fire(FormDataPresenter.this);
         if (!modifiedRows.isEmpty()) {
             PreSearchAction preSearchAction = new PreSearchAction();
@@ -1102,7 +1103,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     getView().updateData();
                     getView().setSelectedRow(result.getCurrentRow(), true);
-                    formSearchPresenter.open(readOnlyMode, formData.isManual(), absoluteView);
+                    formSearchPresenter.open(readOnlyMode, formData.isManual(), absoluteView, getView().generateNewSessionId());
                     addToPopupSlot(formSearchPresenter);
                 }
 
@@ -1117,7 +1118,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
             }, FormDataPresenter.this));
         } else {
-            formSearchPresenter.open(readOnlyMode, formData.isManual(), absoluteView);
+            formSearchPresenter.open(readOnlyMode, formData.isManual(), absoluteView, sessionId);
             addToPopupSlot(formSearchPresenter);
         }
     }

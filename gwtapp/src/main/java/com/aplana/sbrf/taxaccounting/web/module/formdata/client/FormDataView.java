@@ -194,6 +194,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     private static final int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
     private static final int LOCK_INFO_BLOCK_HEIGHT = 25;
 
+    private int sessionId;
+
     /** Положение таблицы по высоте в данный момент времени */
     private int tableTopPosition = DEFAULT_TABLE_TOP_POSITION;
 
@@ -259,6 +261,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 recalcReportPeriodLabelWidth();
             }
         });
+    }
+
+    public int generateNewSessionId() {
+        sessionId = (int) System.currentTimeMillis();
+        return sessionId;
     }
 
     @Override
@@ -845,7 +852,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     @UiHandler("search")
     public void onSearchClicked(ClickEvent event){
-        getUiHandlers().onOpenSearchDialog();
+        getUiHandlers().onOpenSearchDialog(sessionId);
     }
 
     @UiHandler("filesComments")

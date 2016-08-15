@@ -53,7 +53,7 @@ public interface FormDataUiHandlers extends UiHandlers{
 
     void onEndLoad();
 
-    void onOpenSearchDialog();
+    void onOpenSearchDialog(int sessionId);
 
     void onCreateManualClicked();
 

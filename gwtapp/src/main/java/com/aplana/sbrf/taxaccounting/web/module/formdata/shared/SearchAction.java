@@ -18,6 +18,7 @@ public class SearchAction extends UnsecuredActionImpl<SearchResult> implements A
     private boolean manual;
     private Integer formTemplateId;
     private boolean correctionDiff;
+    private int sessionId;
 
     public Integer getFormTemplateId() {
         return formTemplateId;
@@ -86,5 +87,13 @@ public class SearchAction extends UnsecuredActionImpl<SearchResult> implements A
 
     public void setCorrectionDiff(boolean correctionDiff) {
         this.correctionDiff = correctionDiff;
+    }
+
+    public void setSessionId(int sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public int getSessionId() {
+        return sessionId;
     }
 }

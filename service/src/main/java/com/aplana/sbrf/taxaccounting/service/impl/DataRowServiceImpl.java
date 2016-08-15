@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
@@ -81,9 +82,16 @@ public class DataRowServiceImpl implements DataRowService {
     }
 
     @Override
-    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual, boolean correctionDiff) {
-        PagingResult<FormDataSearchResult> results = new PagingResult<FormDataSearchResult>();
-        List<FormDataSearchResult> resultsList = new ArrayList<FormDataSearchResult>();
+    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, int sessionId, boolean isCaseSensitive, boolean manual, boolean correctionDiff) {
+        PagingResult<FormDataSearchResult> results;
+        // если уже производился поиск, то берем данные из временной таблицы
+        results = dataRowDao.getSearchResult(key, sessionId, range);
+        if (results != null) {
+            return results;
+        }
+
+        List<FormDataSearchResult> resultsList;
+        resultsList = new ArrayList<FormDataSearchResult>();
         FormData formData = formDataDao.get(formDataId, manual);
         boolean existCommonColumn = false; // признак наличия числовых, строковых и/или автонумеруемых граф
         boolean existRefBookColumn = false; // признак наличия справочных граф
@@ -139,22 +147,18 @@ public class DataRowServiceImpl implements DataRowService {
                 }
             }
         }
-        PagingResult<FormDataSearchResult> daoResults;
+        // очищаем таблицу
+        dataRowDao.initSearchResult(key, sessionId);
+        // сохраняем результаты поиска (dataRowDao.searchByKey также сохраняет)
+        dataRowDao.saveSearchResult(resultsList);
         if (existCommonColumn) {
-            daoResults = dataRowDao.searchByKey(formDataId, formData.getFormTemplateId(), range, key, isCaseSensitive, manual, correctionDiff);
+            Pair<String, Map<String, Object>> sql = dataRowDao.getSearchQuery(formDataId, formData.getFormTemplateId(), key, isCaseSensitive, manual, correctionDiff);
+            dataRowDao.saveSearchResult(sql.getFirst(), sql.getSecond());
         } else {
             // если нет *обычных*(числовых, строковых, автонумеруемых) граф, то нет смысла проводить поиск
-            daoResults = new PagingResult<FormDataSearchResult>();
         }
-        results.setTotalCount(daoResults.getTotalCount() + index.intValue());
-        resultsList.addAll(daoResults);
-        Collections.sort(resultsList);
-        index = 1L;
-        for(FormDataSearchResult searchResult: resultsList) {
-            searchResult.setIndex(index++);
-        }
-        if (range.getOffset() <= resultsList.size())
-            results.addAll(resultsList.subList(range.getOffset() - 1, Math.min(range.getCount(), resultsList.size())));
+
+        results = dataRowDao.getSearchResult(key, sessionId, range);
         return results;
     }
 
