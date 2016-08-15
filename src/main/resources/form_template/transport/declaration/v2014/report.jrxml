@@ -31,14 +31,14 @@
 			<fieldDescription><![CDATA[@ОКТМО]]></fieldDescription>
 		</field>
 		<variable name="ОКТМО" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ОКТМО}.length() < 11 ?
-($F{ОКТМО}+"-----------").substring(0,11)
+			<variableExpression><![CDATA[$F{ОКТМО} == null ?
+"-----------"
 :
-$F{ОКТМО}]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ОКТМО}.length() < 11 ?
-($F{ОКТМО}+"-----------").substring(0,11)
+($F{ОКТМО}+"-----------").substring(0,11)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ОКТМО} == null ?
+"-----------"
 :
-$F{ОКТМО}]]></initialValueExpression>
+($F{ОКТМО}+"-----------").substring(0,11)]]></initialValueExpression>
 		</variable>
 		<variable name="NalIsch" class="java.lang.String">
 			<variableExpression><![CDATA[$F{НалИсчисл} == null ?
@@ -81,21 +81,21 @@ $F{ОКТМО}]]></initialValueExpression>
 ($F{АвПУКв3}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="NalPUP" class="java.lang.String">
-			<variableExpression><![CDATA[($F{НалПУ} == null) || (Long.parseLong($F{НалПУ})<0)  ?
+			<variableExpression><![CDATA[($F{НалПУ} == null) || $F{НалПУ}.length()<1 || (Long.parseLong($F{НалПУ})<0)  ?
 "---------------"
 :
 ($F{НалПУ}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{НалПУ} == null) || (Long.parseLong($F{НалПУ})<0)  ?
-"----------------"
+			<initialValueExpression><![CDATA[($F{НалПУ} == null) || $F{НалПУ}.length()<1 || (Long.parseLong($F{НалПУ})<0)  ?
+"---------------"
 :
 ($F{НалПУ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="NalPUO" class="java.lang.String">
-			<variableExpression><![CDATA[($F{НалПУ} == null) || (Long.parseLong($F{НалПУ})>0)  ?
+			<variableExpression><![CDATA[($F{НалПУ} == null) || $F{НалПУ}.length()<1 || (Long.parseLong($F{НалПУ})>0)  ?
 "----------------"
 :
 ($F{НалПУ}+"----------------").substring(1,16)]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{НалПУ} == null) || (Long.parseLong($F{НалПУ})>0)  ?
+			<initialValueExpression><![CDATA[($F{НалПУ} == null) || $F{НалПУ}.length()<1 || (Long.parseLong($F{НалПУ})>0)  ?
 "----------------"
 :
 ($F{НалПУ}+"----------------").substring(1,16)]]></initialValueExpression>
@@ -293,21 +293,21 @@ $F{ОКТМО}]]></initialValueExpression>
 ($F{ВладенТС}+"--").substring(0,2)]]></initialValueExpression>
 		</variable>
 		<variable name="kv" class="java.lang.String">
-			<variableExpression><![CDATA[((($F{КоэфКв} == null)
+			<variableExpression><![CDATA[((($F{КоэфКв} == null || $F{КоэфКв}.length()<1 || $F{КоэфКв}.indexOf(".") == 0)
 ?
 "-" :
 (
 	$F{КоэфКв}).substring(0, 1)
 )
 + "." +
-(($F{КоэфКв} == null)
+(($F{КоэфКв} == null || $F{КоэфКв}.length()<1 )
 ?
 "----" :
 (
 	$F{КоэфКв}.indexOf(".") < 0 ? "----" :
 	($F{КоэфКв}.substring(($F{КоэфКв}.indexOf("."))+1, $F{КоэфКв}.length())+"----").substring(0,4)
 ))).substring(0,6)]]></variableExpression>
-			<initialValueExpression><![CDATA[((($F{КоэфКв} == null)
+			<initialValueExpression><![CDATA[((($F{КоэфКв} == null || $F{КоэфКв}.length()<1 || $F{КоэфКв}.indexOf(".") == 0)
 ?
 "-" :
 (
@@ -365,7 +365,7 @@ $F{ОКТМО}]]></initialValueExpression>
 ($F{ЛьготМесТС}+"--").substring(0,2)]]></initialValueExpression>
 		</variable>
 		<variable name="kl" class="java.lang.String">
-			<variableExpression><![CDATA[((($F{КоэфКл} == null)
+			<variableExpression><![CDATA[((($F{КоэфКл} == null || $F{КоэфКл}.length()<1 || $F{КоэфКл}.indexOf(".") == 0)
 ?
 "-" :
 (
@@ -379,7 +379,7 @@ $F{ОКТМО}]]></initialValueExpression>
 	$F{КоэфКл}.indexOf(".") < 0 ? "----" :
 	($F{КоэфКл}.substring(($F{КоэфКл}.indexOf("."))+1, $F{КоэфКл}.length())+"----").substring(0,4)
 ))).substring(0,6)]]></variableExpression>
-			<initialValueExpression><![CDATA[((($F{КоэфКл} == null)
+			<initialValueExpression><![CDATA[((($F{КоэфКл} == null || $F{КоэфКл}.length()<1 || $F{КоэфКл}.indexOf(".") == 0)
 ?
 "-" :
 (
@@ -395,14 +395,14 @@ $F{ОКТМО}]]></initialValueExpression>
 ))).substring(0,6)]]></initialValueExpression>
 		</variable>
 		<variable name="KodOsv" class="java.lang.String">
-			<variableExpression><![CDATA[$F{КодОсвНал} == null || $F{КодОсвНал}.equals( "0" ) ?
+			<variableExpression><![CDATA[$F{КодОсвНал} == null || $F{КодОсвНал}.length() < 1 || $F{КодОсвНал}.equals( "0" ) ?
 "------------------"
 :
 ($F{КодОсвНал}.substring(0,5).equals( "30200" ) ?
   $F{КодОсвНал}.substring(0,5)+"-------------"
   :
   ($F{КодОсвНал}+"------------------").substring(0,18))]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{КодОсвНал} == null || $F{КодОсвНал}.equals( "0" ) ?
+			<initialValueExpression><![CDATA[$F{КодОсвНал} == null || $F{КодОсвНал}.length() < 1 || $F{КодОсвНал}.equals( "0" ) ?
 "------------------"
 :
 ($F{КодОсвНал}.substring(0,5).equals( "30200" ) ?
@@ -16690,7 +16690,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ЭкологКл} == null ?
+							<textFieldExpression><![CDATA[$F{ЭкологКл} == null || $F{ЭкологКл}.length() < 1 ?
 "-"
 :
 $F{ЭкологКл}]]></textFieldExpression>
