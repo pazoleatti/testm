@@ -115,7 +115,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
 
     @Override
     public void onRollbackTableRowSelection(RollbackTableRowSelection event) {
-        getView().setSelected(event.getRecordId());
+        getView().setSelected(event.getRecordId(), false);
     }
 
     @ProxyEvent
@@ -146,7 +146,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     public interface MyView extends View, HasUiHandlers<RefBookDataLinearUiHandlers> {
         void setTableColumns(final List<RefBookColumn> columns);
         void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows, Long selectedItem);
-        void setSelected(Long recordId);
+        void setSelected(Long recordId, boolean isEnabledSelectionChangedEvent);
         void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data);
         int getPageSize();
         void setRange(Range range);
