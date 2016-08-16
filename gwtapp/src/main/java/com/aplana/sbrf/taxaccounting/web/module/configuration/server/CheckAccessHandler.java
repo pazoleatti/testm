@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.configuration.server;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -10,14 +11,12 @@ import com.aplana.sbrf.taxaccounting.service.EmailService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.UserAuthenticationToken;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.CheckAccessAction;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.CheckAccessResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -53,9 +52,7 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
         } else if (group.equals(ConfigurationParamGroup.EMAIL)) {
             boolean success = emailService.testAuth(logger);
             if (!success) {
-                UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
-                        .getAuthentication().getPrincipal()));
-                auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
+                auditService.add(FormDataEvent.SEND_EMAIL, securityService.currentUserInfo(), 0, null, null, null, null,
                         logger.getEntries().get(0).getMessage(), uuid);
             }
         } else if (group.equals(ConfigurationParamGroup.ASYNC)) {

@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.UserAuthenticationToken;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.google.gwt.user.server.rpc.RPCServletUtils;
 import com.gwtplatform.dispatch.server.Dispatch;
 import com.gwtplatform.dispatch.server.RequestProvider;
@@ -41,6 +41,9 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
 
 	@Autowired
 	private ServerInfo serverInfo;
+
+    @Autowired
+    private SecurityService securityService;
 
     @Autowired
     public RpcDispatchServiceImpl(Logger logger, Dispatch dispatch, RequestProvider requestProvider) {
@@ -156,9 +159,7 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
 	 */
 	private String getSessionInfo() {
 		if (SecurityContextHolder.getContext().getAuthentication() != null) {
-			UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
-					.getAuthentication().getPrincipal()));
-			TAUserInfo userInfo = principal.getUserInfo();
+            TAUserInfo userInfo = securityService.currentUserInfo();
 			return String.format("Server: %s; Context path: %s; User: %s; IP-address: %s",
 					serverInfo.getServerName(),
 					getServletContext().getContextPath(),
