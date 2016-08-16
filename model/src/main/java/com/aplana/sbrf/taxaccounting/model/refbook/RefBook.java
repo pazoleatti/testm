@@ -32,7 +32,7 @@ public class RefBook implements Serializable {
     public static final String REF_BOOK_VERSION_TO_TITLE = "Дата окончания актуальности";
     public static final int REF_BOOK_VERSION_TO_WIDTH = 6;
 
-	public static final String RECORD_HAS_CHILD_ALIAS = "has_child";
+	public static final String RECORD_HAS_CHILD_ALIAS = "HAS_CHILD";
 
 	public static final String RECORD_SORT_ALIAS = "row_number_over";
 

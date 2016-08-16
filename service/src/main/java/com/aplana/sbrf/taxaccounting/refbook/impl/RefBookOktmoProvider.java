@@ -63,7 +63,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return dao.getRecords(getTableName(), refBookId, version, pagingParams, filter, sortAttribute, isSortAscending, false);
+        return dao.getRecords(getTableName(), refBookId, version, pagingParams, filter, sortAttribute, isSortAscending);
     }
 
     @Override

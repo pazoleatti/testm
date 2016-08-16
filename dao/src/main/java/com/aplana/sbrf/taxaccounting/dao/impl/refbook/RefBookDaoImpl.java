@@ -1010,7 +1010,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             aliases.add(attr.getAlias());
         }
         ps.appendQuery(StringUtils.join(aliases.toArray(), ','));
-        ps.appendQuery(", (SELECT 1 FROM dual WHERE EXISTS (SELECT 1 FROM tc tc2 WHERE lvl > 1 AND tc2.record_id = tc.record_id)) as " + RefBook.RECORD_HAS_CHILD_ALIAS);
+        ps.appendQuery(", case when EXISTS (SELECT 1 FROM tc tc2 WHERE lvl > 1 AND tc2.record_id = tc.record_id) then 1 else 0 end as " + RefBook.RECORD_HAS_CHILD_ALIAS);
         ps.appendQuery(" FROM tc ");
 
         if (pagingParams != null) {
