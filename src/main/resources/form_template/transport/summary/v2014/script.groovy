@@ -667,7 +667,7 @@ def formNewRow(def sRow, sFormTypeId, sDepartmentName) {
     // Если «Графа 25» формы-источника имеет пустое значение, то «Графа 36» не заполняется
     if (sRow.version != null) {
         // "Средняя стоимость транспортных средст"
-        def avgPriceRecord = getRefBookValue(208, sRow.version)
+        def avgPriceRecord = getRefBookValue(218, sRow.version)
         // В справочнике «Повышающие коэффициенты транспортного налога» найти записи
         def filter = "(YEAR_FROM < " + sRow.pastYear + ") " +
                 "and (YEAR_TO > " + sRow.pastYear + " or YEAR_TO = " + sRow.pastYear + ") " +

@@ -96,7 +96,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
 
         void setSelected(Long recordId);
 
-        void setSelection(RefBookTreeItem parentRefBookItem);
+        void setSelection(RefBookTreeItem parentRefBookItem, boolean isEnabledSelectionChangedEvent);
 
         void clearSelected();
 
@@ -184,7 +184,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     @Override
     public void onRollbackTableRowSelection(RollbackTableRowSelection event) {
         RefBookTreeItem parentRefBookItem = getView().getItemById(event.getRecordId());
-        getView().setSelection(parentRefBookItem);
+        getView().setSelection(parentRefBookItem, false);
     }
 
     private void onAddRowClicked() {
@@ -224,7 +224,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                             } else {
                                 commonEditPresenter.setIsFormModified(false);
                                 getView().deleteItem(selected);
-                                getView().setSelection(parentRefBookItem);
+                                getView().setSelection(parentRefBookItem, true);
                                 if (parentRefBookItem == null)
                                     ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);
                                 //editPresenter.show(null);
@@ -263,7 +263,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                                         editPresenter.setNeedToReload();*/
                                         commonEditPresenter.setIsFormModified(false);
                                         getView().deleteItem(selected);
-                                        getView().setSelection(parentRefBookItem);
+                                        getView().setSelection(parentRefBookItem, true);
                                     }
                                 }, RefBookHierDataPresenter.this));
                             }
@@ -281,7 +281,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                         /*editPresenter.clean();
                         editPresenter.setNeedToReload();*/
                         getView().deleteItem(selected);
-                        getView().setSelection(parentRefBookItem);
+                        getView().setSelection(parentRefBookItem, true);
                     }
                 }
             }, RefBookHierDataPresenter.this));

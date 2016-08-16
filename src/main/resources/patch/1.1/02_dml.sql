@@ -1,4 +1,5 @@
 set serveroutput on size 1000000;
+set linesize 128;
 
 --https://jira.aplana.com/browse/SBRFACCTAX-15978: 1.1 Добавить налог "Рыночные интервалы ТЦО"
 --https://jira.aplana.com/browse/SBRFACCTAX-15917: 1.1 РнРнтб. Добавить отчетные периоды

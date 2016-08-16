@@ -1,4 +1,5 @@
 set serveroutput on size 1000000;
+set linesize 128;
 ---------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-15922: 1.1 РнРнтб. Реализовать справочник "Классы кредитоспособности"
 declare l_task_name varchar2(128) := 'RefBook Block #1 (SBRFACCTAX-15922 - Credit quality rates))';

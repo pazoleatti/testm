@@ -18,7 +18,7 @@
     </row>
     <row alias="R2">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10001"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="23" stringValue="Доходы в виде платы за открытие и ведение банковских счетов клиентов, в т.ч.:  - банков-корреспондентов, и осуществления расчётов по их поручению, включая комиссионное и иное вознаграждение за переводные, кассовые, аккредитивные и другие операции,  оформление и обслуживание платёжных карт и иных специальных средств, предназначенных для совершения банковских операций, за предоставление выписок  и иных  документов  по счетам и за розыск сумм; - доходы от инкассации денежных средств,  векселей, платёжных и расчётных документов и кассового обслуживания клиентов"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="23" stringValue="Доходы в виде платы за открытие и ведение банковских счетов клиентов, в т.ч.: - банков-корреспондентов, и осуществления расчётов по их поручению, включая комиссионное и иное вознаграждение за переводные, кассовые, аккредитивные и другие операции, оформление и обслуживание платёжных карт и иных специальных средств, предназначенных для совершения банковских операций, за предоставление выписок и иных документов по счетам и за розыск сумм; - доходы от инкассации денежных средств, векселей, платёжных и расчётных документов и кассового обслуживания клиентов"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Вознаграждение за открытие и ведение банковских счетов"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12101"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -35,7 +35,7 @@
     <row alias="R3">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10006"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Вознаграждение за расчётное и кассовое обслуживание, в т.ч. комиссия по операциям инкассации для юридических (в т.ч. кредитных организаций) и физических лиц "/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Вознаграждение за расчётное и кассовое обслуживание, в т.ч. комиссия по операциям инкассации для юридических (в т.ч. кредитных организаций) и физических лиц"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12102"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -51,7 +51,7 @@
     <row alias="R4">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10041"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям с расчётными чеками "/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям с расчётными чеками"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -67,7 +67,7 @@
     <row alias="R5">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10300"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за выплату грантов, премий и иных аналогичных выплат  "/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за выплату грантов, премий и иных аналогичных выплат"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -99,7 +99,7 @@
     <row alias="R7">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10320"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue=" Комиссия за обслуживание бюджетных счетов, пенсионных и иных выплат по договорам (Соглашениям), заключенным Центральным аппаратом Сбербанка России"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за обслуживание бюджетных счетов, пенсионных и иных выплат по договорам (Соглашениям), заключенным Центральным аппаратом Сбербанка России"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.11"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -115,7 +115,7 @@
     <row alias="R8">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10330"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за обслуживание бюджетных счетов, пенсионных и иных выплат по договорам (Соглашениям), заключенным филиалами  Сбербанка России"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за обслуживание бюджетных счетов, пенсионных и иных выплат по договорам (Соглашениям), заключенным филиалами Сбербанка России"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.12"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -131,7 +131,7 @@
     <row alias="R9">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10340"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг  предприятиям, с которыми заключен договор эквайринга с использованием банковских карт международных платежных систем"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг предприятиям, с которыми заключен договор эквайринга с использованием банковских карт международных платежных систем"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.13"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -147,7 +147,7 @@
     <row alias="R10">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10350"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг  предприятиям, с которыми заключен договор эквайринга с использованием микропроцессорных банковских карт СБЕРКАРТ"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг предприятиям, с которыми заключен договор эквайринга с использованием микропроцессорных банковских карт СБЕРКАРТ"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.15"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -163,7 +163,7 @@
     <row alias="R11">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10360"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг  предприятиям, с которыми заключен &quot;зарплатный&quot; договор с использованием микропроцессорных банковских карт СБЕРКАРТ"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг предприятиям, с которыми заключен &quot;зарплатный&quot; договор с использованием микропроцессорных банковских карт СБЕРКАРТ"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.16"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -227,7 +227,7 @@
     <row alias="R15">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10450"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за предоставление услуги по продуктам линейки Cash Management по счетам  третьих лиц"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за предоставление услуги по продуктам линейки Cash Management по счетам третьих лиц"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.02"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -243,7 +243,7 @@
     <row alias="R16">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10460"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям для физических лиц "/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям для физических лиц"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.05"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -307,7 +307,7 @@
     <row alias="R20">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10571"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от юридических  лиц по операциям  кредитования, по которым фактический объем выполненных работ распределен по сроку действия договора"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от юридических лиц по операциям кредитования, по которым фактический объем выполненных работ распределен по сроку действия договора"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.14"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -323,7 +323,7 @@
     <row alias="R21">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10580"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от юридических лиц по операциям  кредитования, по которым весь фактический объем работ выполнен на дату оплаты"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от юридических лиц по операциям кредитования, по которым весь фактический объем работ выполнен на дату оплаты"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.15"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -339,7 +339,7 @@
     <row alias="R22">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10590"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от физических лиц по  операциям кредитования, по которым фактический объем выполненных работ распределен по сроку действия договора"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от физических лиц по операциям кредитования, по которым фактический объем выполненных работ распределен по сроку действия договора"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.16"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -355,7 +355,7 @@
     <row alias="R23">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10600"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от физических лиц по  операциям кредитования, по которым весь фактический объем работ выполнен на дату оплаты"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от физических лиц по операциям кредитования, по которым весь фактический объем работ выполнен на дату оплаты"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.17"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -531,7 +531,7 @@
     <row alias="R34">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10752"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по услугам хранения драгоценных металлов для физических лиц "/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по услугам хранения драгоценных металлов для физических лиц"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.23"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -547,7 +547,7 @@
     <row alias="R35">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10756"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям с драгоценными металлами (кроме транспортировки и хранения) "/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям с драгоценными металлами (кроме транспортировки и хранения)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.24"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -563,7 +563,7 @@
     <row alias="R36">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10760"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="2" stringValue="Доходы в виде платы от экспортеров и импортеров за выполнение функций агентов валютного контроля"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия при осуществлении функций  валютного контроля по операциям юридических лиц"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия при осуществлении функций валютного контроля по операциям юридических лиц"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.03"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -579,7 +579,7 @@
     <row alias="R37">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10770"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия при осуществлении функций  валютного контроля по операциям физических лиц"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия при осуществлении функций валютного контроля по операциям физических лиц"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.04"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -627,7 +627,7 @@
     <row alias="R40">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11140"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="4" stringValue="Выручка от реализации ценных бумаг обращающихся и не обращающихся на организованном рынке"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по брокерским  операциям  с ценными бумагами на фондовом рынке по поручению юридических лиц"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по брокерским операциям с ценными бумагами на фондовом рынке по поручению юридических лиц"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.05"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -659,7 +659,7 @@
     <row alias="R42">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11160"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за работу по размещению  ценных бумаг и выполнение функций агента по поручению эмитента"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за работу по размещению ценных бумаг и выполнение функций агента по поручению эмитента"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.08"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -675,7 +675,7 @@
     <row alias="R43">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11170"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от юридических лиц, а также органов государственной исполнительской власти, органов местного самоуправления, за оказание услуг по организации выпуска и размещения ценных бумаг "/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от юридических лиц, а также органов государственной исполнительской власти, органов местного самоуправления, за оказание услуг по организации выпуска и размещения ценных бумаг"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.09"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -707,7 +707,7 @@
     <row alias="R45">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11325"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям  юридических лиц с векселями Сбербанка России, депозитными сертификатами и другим операциям  юридических лиц с ценными бумагами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям юридических лиц с векселями Сбербанка России, депозитными сертификатами и другим операциям юридических лиц с ценными бумагами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.08"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -723,7 +723,7 @@
     <row alias="R46">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11330"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям  физических   лиц  с векселями Сбербанка России"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям физических лиц с векселями Сбербанка России"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.09"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -739,7 +739,7 @@
     <row alias="R47">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11335"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям  физических   лиц  со сберегательными сертификатами  и  другим операциям физических лиц с ценными бумагами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям физических лиц со сберегательными сертификатами и другим операциям физических лиц с ценными бумагами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.10"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -947,7 +947,7 @@
     <row alias="R60">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11380"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от купли-продажи иностранной валюты в наличной и безналичной формах от проведения наличных (кассовых) сделок с юридическими лицами "/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от купли-продажи иностранной валюты в наличной и безналичной формах от проведения наличных (кассовых) сделок с юридическими лицами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12201.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -963,7 +963,7 @@
     <row alias="R61">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11385"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от купли-продажи иностранной валюты в наличной и безналичной формах от проведения наличных (кассовых) сделок с физическими лицами "/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от купли-продажи иностранной валюты в наличной и безналичной формах от проведения наличных (кассовых) сделок с физическими лицами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12201.02"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -1106,7 +1106,7 @@
     </row>
     <row alias="R70">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11860"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Доходы в виде признанных должником или подлежащих уплате должником на основании решения суда, вступившего в законную силу, либо предусмотренных договором цессии штрафов, пеней и (или) иных санкций за нарушение договорных обязательств, "/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Доходы в виде признанных должником или подлежащих уплате должником на основании решения суда, вступившего в законную силу, либо предусмотренных договором цессии штрафов, пеней и (или) иных санкций за нарушение договорных обязательств,"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="По операциям привлечения и предоставления (размещения) денежных средств, отражённым на основании признания должника, договора цессии или на основании решения суда, вступившего в законную силу"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.17101"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -1171,7 +1171,7 @@
     <row alias="R74">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11970"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="2" stringValue="Доходы от сдачи имущества в аренду (суб-аренду), включая предоставление в аренду специально оборудованных помещений или сейфов для хранения документов и ценностей"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от сдачи имущества в аренду             "/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от сдачи имущества в аренду"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16301"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -1203,7 +1203,7 @@
     <row alias="R76">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="12010"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="40" stringValue="Доходы в виде процентов по договорам займа, кредита, банковского счёта, банковского вклада, размещения банком от своего имени и за свой счёт денежных средств, а также другим долговым обязательствам"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентные доходы по кредитам, предоставленным Минфину России "/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентные доходы по кредитам, предоставленным Минфину России"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.11101"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -1507,7 +1507,7 @@
     <row alias="R95">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="12400"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы прошлых лет в виде восстановленных сумм излишне причисленных  и зарезервированных процентов по вкладам населения прошлых лет, выявленные в отчетном году"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы прошлых лет в виде восстановленных сумм излишне причисленных и зарезервированных процентов по вкладам населения прошлых лет, выявленные в отчетном году"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.17201.05"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -1539,7 +1539,7 @@
     <row alias="R97">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="12420"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы  прошлых лет по операциям с приобретенными ценными бумагами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы прошлых лет по операциям с приобретенными ценными бумагами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.17202.05"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -1555,7 +1555,7 @@
     <row alias="R98">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="12430"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы  прошлых лет по операциям с выпущенными ценными бумагами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы прошлых лет по операциям с выпущенными ценными бумагами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.17202.06"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -2099,7 +2099,7 @@
     <row alias="R132">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="13290"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="4" stringValue="Доходы в виде сумм, полученных по возвращенным кредитам (ссудам), убытки от списания которых были ранее учтены в составе расходов, уменьшивших налоговую базу, либо списанных за счёт созданных резервов, отчисления на создание которых ранее уменьшали налоговую базу"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы, полученные в отчетном году  по кредитным операциям прошлых лет (по основному долгу) с кредитными организациями"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы, полученные в отчетном году по кредитным операциям прошлых лет (по основному долгу) с кредитными организациями"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.17201.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -2115,7 +2115,7 @@
     <row alias="R133">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="13300"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы, полученные в отчетном году  по кредитным операциям прошлых лет (по основному долгу) с другими клиентами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы, полученные в отчетном году по кредитным операциям прошлых лет (по основному долгу) с другими клиентами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.17201.02"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
