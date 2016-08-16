@@ -196,7 +196,7 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void batchUpdateActiveTest() {
-        departmentReportPeriodDao.updateActive(Arrays.asList(101, 102, 103), true);
+        departmentReportPeriodDao.updateActive(Arrays.asList(101, 201, 401), 1, true);
         Assert.assertTrue(departmentReportPeriodDao.get(101).isActive());
     }
 

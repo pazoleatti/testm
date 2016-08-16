@@ -2,7 +2,6 @@ package form_template.market.market_2_6.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 
 /**
@@ -224,39 +223,75 @@ def recordCache = [:]
 @Field
 def providerCache = [:]
 
-def getRecords(def inn) {
-    def filter = 'LOWER(INN) = LOWER(\'' + inn + '\') OR LOWER(KIO) = LOWER(\'' + inn + '\')'
-    def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
-    if (recordCache[filter] == null) {
-        recordCache.put(filter, provider.getRecords(getReportPeriodEndDate(), null, filter, null))
+/**
+ * Получить список записей из справочника "Участники ТЦО" (id = 520) по ИНН или КИО.
+ *
+ * @param value значение для поиска по совпадению
+ */
+def getRecords520(def value) {
+    return getRecordsByValue(520L, value, ['INN', 'KIO'])
+}
+
+// мапа хранящая мапы с записями справочника (ключ "id справочника" -> мапа с записями, ключ "значение атрибута" -> список записией)
+// например:
+// [ id 520 : мапа с записям ]
+//      мапа с записями = [ инн 1234567890 : список подходящих записей ]
+@Field
+def recordsMap = [:]
+
+/**
+ * Получить список записей из справочника атрибуты которых равны заданному значению.
+ *
+ * @param refBookId id справочника
+ * @param value значение для поиска
+ * @param attributesForSearch список атрибутов справочника по которым искать совпадения
+ */
+def getRecordsByValue(def refBookId, def value, def attributesForSearch) {
+    if (recordsMap[refBookId] == null) {
+        recordsMap[refBookId] = [:]
+        // получить все записи справочника и засунуть в мапу
+        def allRecords = getAllRecords(refBookId)?.values()
+        allRecords.each { record ->
+            attributesForSearch.each { attribute ->
+                def tmpKey = getKeyValue(record[attribute]?.value)
+                if (tmpKey) {
+                    if (recordsMap[refBookId][tmpKey] == null) {
+                        recordsMap[refBookId][tmpKey] = []
+                    }
+                    if (!recordsMap[refBookId][tmpKey].contains(record)) {
+                        recordsMap[refBookId][tmpKey].add(record)
+                    }
+                }
+            }
+        }
     }
-    return recordCache[filter]
+    def key = getKeyValue(value)
+    return recordsMap[refBookId][key]
+}
+
+def getKeyValue(def value) {
+    return value?.trim()?.toLowerCase()
 }
 
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (row in dataRows) {
-        calc7(row)
+        row.debtorName = calc7(row)
     }
 }
 
 @Field
 def exclusiveInns = ['9999999999', '9999999998']
 
-void calc7(def row) {
-    //Если значение графы 8 не равно значениям “9999999999”, “9999999998”, тогда:
-    //1.	Найти в справочнике «Участники ТЦО» запись, для которой выполнено одно из условий:
-    //        -	Значение поля «ИНН (заполняется для резидентов, некредитных организаций)» = значение графы 8;
-    //-	Значение поля «КИО (заполняется для нерезидентов)» = значение графы 8.
-    //2.	Если запись найдена, тогда:
-    //Графа 7 = значение поля «Полное наименование юридического лица с указанием ОПФ».
-    //3.	Если запись не найдена, тогда графа 7 не рассчитывается (если до выполнения расчета в графе 7 было указано значение, то это значение должно сохраниться)
+def calc7(def row) {
+    def tmp = row.debtorName
     if (!exclusiveInns.contains(row.inn)) {
-        def records = getRecords(row.inn?.trim()?.toLowerCase())
+        def records = getRecords520(row.inn)
         if (records != null && records.size() == 1) {
-            row.debtorName = records.get(0).NAME.value
+            tmp = records.get(0)?.NAME?.value
         }
     }
+    return tmp
 }
 
 void importData() {
@@ -495,36 +530,37 @@ def getNewRow() {
 }
 
 @Field
-Map<Long, Map<String, RefBookValue>> records520
+def allRecordsMap = [:]
 
-Map<Long, Map<String, RefBookValue>> getRecords520() {
-    if (records520 == null) {
+/**
+ * Получить все записи справочника.
+ *
+ * @param refBookId id справочника
+ * @return мапа с записями справочника (ключ "id записи" -> запись)
+ */
+def getAllRecords(def refBookId) {
+    if (allRecordsMap[refBookId] == null) {
         def date = getReportPeriodEndDate()
-        def provider = formDataService.getRefBookProvider(refBookFactory, 520, providerCache)
+        def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
         List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
-        records520 = provider.getRecordData(uniqueRecordIds)
+        allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
     }
-    return records520
+    return allRecordsMap[refBookId]
 }
 
 void fillDebtorInfo(def newRow, def numberAlias, def debtorAlias, def rowIndex, def debtorIndex) {
-    // Найти множество записей справочника «Участники ТЦО», периоды актуальности которых содержат определенную выше дату актуальности
-    Map<Long, Map<String, RefBookValue>> records = getRecords520()
     String debtorNumber = newRow[numberAlias]
     String fileDebtorName = newRow[debtorAlias]
     if (debtorNumber == null || debtorNumber.isEmpty() || exclusiveInns.contains(debtorNumber)) {
         return
     }
     // ищем по ИНН и КИО
-    def debtorRecords = records.values().findAll { def refBookValueMap ->
-        debtorNumber.equalsIgnoreCase(refBookValueMap.INN.stringValue) ||
-                debtorNumber.equalsIgnoreCase(refBookValueMap.KIO.stringValue)
-    }
-    if (debtorRecords.size() > 1) {
+    def debtorRecords = getRecords520(debtorNumber)
+    if (debtorRecords?.size() > 1) {
         logger.warn("Строка %s: Найдено больше одной записи соотвествующей данным ИНН/КИО = %s", rowIndex, debtorNumber)
         return
     }
-    if (debtorRecords.size() == 0) { // если в справочнике ТЦО записей нет
+    if (debtorRecords == null || debtorRecords.size() == 0) { // если в справочнике ТЦО записей нет
         return
     }
     // else

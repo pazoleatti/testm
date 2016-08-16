@@ -32,12 +32,12 @@ public interface DepartmentReportPeriodService {
      */
     void updateActive(int id, boolean active, boolean isBalance);
 
-    void updateActive(List<Integer> ids, boolean active, boolean isBalance);
+    void updateActive(List<Integer> ids, Integer report_period_id, boolean active, boolean isBalance);
 
     /**
      * Открытие/закрытие отчетного периода подразделения
      */
-    void updateActive(List<Integer> ids, boolean active);
+    void updateActive(List<Integer> ids, Integer report_period_id, boolean active);
 
     /**
      * Изменить дату корректировки

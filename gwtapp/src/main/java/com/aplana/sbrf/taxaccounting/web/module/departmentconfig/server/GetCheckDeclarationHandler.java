@@ -106,6 +106,9 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
             case PROPERTY:
                 refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
                 break;
+            case LAND:
+                refBookId = RefBook.DEPARTMENT_CONFIG_LAND;
+                break;
         }
         RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartment();

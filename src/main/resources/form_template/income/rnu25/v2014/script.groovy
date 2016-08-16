@@ -458,12 +458,11 @@ def getTotalRow(def title, def alias) {
 /**
  * Получить подитоговую строку с заданными стилями.
  *
- * @param rowNumber номер строки
  * @param title надпись для "... Итого"
  * @param key ключ для сравнения подитоговых строк при импорте
  */
-def getSubTotalRow(def rowNumber, def regNumber, def key) {
-    def alias = 'total' + key.toString() + '#' + rowNumber
+def getSubTotalRow(def regNumber, def key) {
+    def alias = 'total' + key.toString()
     def title = getTitle(regNumber)
     return getTotalRow(title, alias)
 }
@@ -771,10 +770,10 @@ void importData() {
             def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
 
             // наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
-            if (totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] == null) {
-                totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] = []
+            if (totalRowFromFileMap[subTotalRow.getAlias()] == null) {
+                totalRowFromFileMap[subTotalRow.getAlias()] = []
             }
-            totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]].add(subTotalRow)
+            totalRowFromFileMap[subTotalRow.getAlias()].add(subTotalRow)
             rows.add(subTotalRow)
 
             allValues.remove(rowValues)
@@ -794,12 +793,12 @@ void importData() {
     if (!totalRowFromFileMap.isEmpty()) {
         def tmpSubTotalRowsMap = calcSubTotalRowsMap(rows)
         tmpSubTotalRowsMap.each { subTotalRow, groupValues ->
-            def totalRows = totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]]
+            def totalRows = totalRowFromFileMap[subTotalRow.getAlias()]
             if (totalRows) {
                 totalRows.each { totalRow ->
                     compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
                 }
-                totalRowFromFileMap.remove(subTotalRow.getAlias().split('#')[0])
+                totalRowFromFileMap.remove(subTotalRow.getAlias())
             } else {
                 rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, groupValues))
             }
@@ -914,7 +913,7 @@ def getNewSubTotalRowFromXls(def key, def values, def colOffset, def fileRowInde
     def title = values[1]
     def name = title?.substring(0, title.toLowerCase().indexOf(' итог'))?.trim()
 
-    def newRow = getSubTotalRow(rowIndex, name, key)
+    def newRow = getSubTotalRow(name, key)
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
@@ -966,7 +965,7 @@ def calcSubTotalRowsMap(def dataRows) {
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def tmpRow = dataRows.get(i)
     def key = getKey(tmpRow)
-    def newRow = getSubTotalRow(i, tmpRow?.regNumber, key)
+    def newRow = getSubTotalRow(tmpRow?.regNumber, key)
 
     // Расчеты подитоговых значений
     def rows = []

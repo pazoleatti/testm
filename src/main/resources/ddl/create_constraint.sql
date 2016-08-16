@@ -331,3 +331,4 @@ create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
 create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 create index i_decl_subrep_blob_data_id on declaration_subreport(blob_data_id);
 create index i_notification_report_id on notification (report_id);
+create index i_dep_rep_per_report_period_id on department_report_period (report_period_id);
