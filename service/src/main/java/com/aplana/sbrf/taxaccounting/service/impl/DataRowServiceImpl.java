@@ -82,6 +82,7 @@ public class DataRowServiceImpl implements DataRowService {
     }
 
     @Override
+    @Transactional(readOnly = false)
     public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, int sessionId, boolean isCaseSensitive, boolean manual, boolean correctionDiff) {
         PagingResult<FormDataSearchResult> results;
         // если уже производился поиск, то берем данные из временной таблицы
