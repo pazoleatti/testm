@@ -93,6 +93,9 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
                 case PROPERTY:
                     refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
                     break;
+                case LAND:
+                    refBookId = RefBook.DEPARTMENT_CONFIG_LAND;
+                    break;
             }
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
             ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());

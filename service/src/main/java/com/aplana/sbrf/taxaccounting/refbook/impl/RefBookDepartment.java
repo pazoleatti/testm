@@ -476,7 +476,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
 
                 List<Integer> childIds = departmentService.getAllChildrenIds(depId);
-                if (!childIds.isEmpty() && childIds.size() > 1){
+                if (!childIds.isEmpty() && childIds.size() > 1) {
                     throw new ServiceLoggerException(
                             "Подразделение не может быть удалено, так как обнаружены подчиненные подразделения для %s!",
                             logEntryService.save(logger.getEntries()),
@@ -535,35 +535,19 @@ public class RefBookDepartment implements RefBookDataProvider {
                     sourceService.deleteDDT(ddtIds);
 
                 //удаление настроек подразделений
-                RefBookDataProvider provider = rbFactory.getDataProvider(RefBook.WithTable.INCOME.getRefBookId());
-                List<Long> uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!uniqueIds.isEmpty()){
-                    provider.deleteRecordVersions(logger, uniqueIds, false);
-                }
-                provider = rbFactory.getDataProvider(RefBook.WithTable.INCOME.getTableRefBookId());
-                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!uniqueIds.isEmpty()){
-                    provider.deleteRecordVersions(logger, uniqueIds, false);
-                }
-                provider = rbFactory.getDataProvider(RefBook.WithTable.TRANSPORT.getRefBookId());
-                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!uniqueIds.isEmpty()){
-                    provider.deleteRecordVersions(logger, uniqueIds, false);
-                }
-                provider = rbFactory.getDataProvider(RefBook.WithTable.TRANSPORT.getTableRefBookId());
-                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!uniqueIds.isEmpty()){
-                    provider.deleteRecordVersions(logger, uniqueIds, false);
-                }
-                provider = rbFactory.getDataProvider(RefBook.WithTable.PROPERTY.getRefBookId());
-                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!uniqueIds.isEmpty()){
-                    provider.deleteRecordVersions(logger, uniqueIds, false);
-                }
-                provider = rbFactory.getDataProvider(RefBook.WithTable.PROPERTY.getTableRefBookId());
-                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!uniqueIds.isEmpty()){
-                    provider.deleteRecordVersions(logger, uniqueIds, false);
+                RefBookDataProvider provider;
+                List<Long> uniqueIds;
+                for(RefBook.WithTable withTable: RefBook.WithTable.values()) {
+                    provider = rbFactory.getDataProvider(withTable.getRefBookId());
+                    uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
+                    if (!uniqueIds.isEmpty()) {
+                        provider.deleteRecordVersions(logger, uniqueIds, false);
+                    }
+                    provider = rbFactory.getDataProvider(withTable.getTableRefBookId());
+                    uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
+                    if (!uniqueIds.isEmpty()) {
+                        provider.deleteRecordVersions(logger, uniqueIds, false);
+                    }
                 }
                 provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_DEAL);
                 uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
@@ -837,7 +821,8 @@ public class RefBookDepartment implements RefBookDataProvider {
                                 RefBook.DEPARTMENT_CONFIG_TRANSPORT,
                                 RefBook.DEPARTMENT_CONFIG_DEAL,
                                 RefBook.DEPARTMENT_CONFIG_VAT,
-                                RefBook.DEPARTMENT_CONFIG_PROPERTY),
+                                RefBook.DEPARTMENT_CONFIG_PROPERTY,
+                                RefBook.DEPARTMENT_CONFIG_LAND),
                         Arrays.asList((long) department.getId())
                 );
         for (Map.Entry<Integer, Map<String, Object>> entry : records.entrySet()){
@@ -857,6 +842,9 @@ public class RefBookDepartment implements RefBookDataProvider {
                     break;
                 case 99:
                     taxType = TaxType.PROPERTY;
+                    break;
+                case 199: //ToDo
+                    taxType = TaxType.LAND;
                     break;
                 default:
                     taxType = TaxType.INCOME;

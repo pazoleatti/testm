@@ -38,7 +38,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     private static final Log LOG = LogFactory.getLog(FormDataXlsmReportBuilder.class);
 
-    protected int ROW_NUMBER = 9; // для переопределения в скриптах
+    protected int ROW_NUMBER = 5; // для переопределения в скриптах
 
     protected int rowNumber = ROW_NUMBER; // для переопределения в скриптах
 
@@ -453,25 +453,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         //Fill report name
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_NAME, formTemplate.getFullName(), 0, notNullColumn);
-
-        //Fill code
-        AreaReference ar2 = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_CODE).getRefersToFormula());
-        Row r2 = sheet.getRow(ar2.getFirstCell().getRow()) != null ? sheet.getRow(ar2.getFirstCell().getRow())
-                : sheet.createRow(ar2.getFirstCell().getRow());
-        int shiftCode = columns.size() - ar2.getFirstCell().getCol() - 2 - nullColumnCount;
-        int countColumnsCode = 1;
-        if (shiftCode < 0) {
-            countColumnsCode = shiftCode >= -1 ? -shiftCode : 0;
-            shiftCode = 0;
-        }
-        countColumnsCode += nullColumnCount;
-
-        String code = (formTemplate.getHeader() != null) ? formTemplate.getHeader().replace(XlsxReportMetadata.REPORT_DELIMITER, '\n') : "";
-        createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, code, 0, shiftCode);
-        for(int i = shiftCode; i <= shiftCode + countColumnsCode; i++) {
-            createNotHiddenCell(ar2.getFirstCell().getCol() + i, r2).setCellStyle(cellStyle);
-        }
-        r2.setHeight((short) -1);
 
         StringBuilder sbPeriodName = new StringBuilder();
         //Fill period

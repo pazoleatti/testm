@@ -22,7 +22,7 @@
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
               stringValue="Расходы на приобретение материалов, используемых при выполнении работ (оказании услуг) и (или) образующих их основу либо являющихся необходимым компонентом при выполнении работ (оказании услуг)"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы по изготовлению, приобретению, и пересылке бланков, информационных носителей, бумаги, упаковочных материалов для денежных билетов и монеты  "/>
+              stringValue="Расходы по изготовлению, приобретению, и пересылке бланков, информационных носителей, бумаги, упаковочных материалов для денежных билетов и монеты"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26412.01"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -41,7 +41,7 @@
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
               stringValue="Расходы на приобретение материалов, используемых при выполнении работ (оказании услуг) на производственные и хозяйственные нужды (контроль, содержание, эксплуатацию основных средств и иные подобные цели). расходы на приобретение работ и услуг производственного характера"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы на приобретение материалов для обслуживания вычислительной техники, машин, оборудования и инвентаря, используемых для банковской деятельности. Расходы на обслуживание вычислительной техники, машин, оборудования и инвентаря по договорам  со сторонними организациями (производственная сфера)"/>
+              stringValue="Расходы на приобретение материалов для обслуживания вычислительной техники, машин, оборудования и инвентаря, используемых для банковской деятельности. Расходы на обслуживание вычислительной техники, машин, оборудования и инвентаря по договорам со сторонними организациями (производственная сфера)"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26302.03"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -62,7 +62,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20310"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы на содержание ИТ-оборудования "/>
+              stringValue="Расходы на содержание ИТ-оборудования"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26302.13"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -81,7 +81,7 @@
         <cell alias="consumptionGroup" colSpan="1" rowSpan="7"
               stringValue="Расходы на приобретение инструментов, приспособлений, инвентаря, приборов, спецодежды и другого имущества, не являющихся амортизируемым имуществом"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Ввод в эксплуатацию инвентаря и принадлежностей,  относящихся к оборудованию объектов недвижимости, стоимостью до 40 000 руб., стоимость которых для целей бухгалтерского учета относится на расходы при передаче в эксплуатацию"/>
+              stringValue="Ввод в эксплуатацию инвентаря и принадлежностей, относящихся к оборудованию объектов недвижимости, стоимостью до 40 000 руб., стоимость которых для целей бухгалтерского учета относится на расходы при передаче в эксплуатацию"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26305.01"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -99,7 +99,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20332"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Ввод в эксплуатацию инвентаря и принадлежностей,  относящихся к спецбанковскому оборудованию, стоимостью до 40 000 руб., стоимость которых для целей бухгалтерского учета относится на расходы при передаче в эксплуатацию"/>
+              stringValue="Ввод в эксплуатацию инвентаря и принадлежностей, относящихся к спецбанковскому оборудованию, стоимостью до 40 000 руб., стоимость которых для целей бухгалтерского учета относится на расходы при передаче в эксплуатацию"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26305.04"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -117,7 +117,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20334"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Ввод в эксплуатацию инвентаря и принадлежностей,  относящихся к ИТ оборудованию, стоимостью до 40 000 руб., стоимость которых для целей бухгалтерского учета относится на расходы при передаче в эксплуатацию"/>
+              stringValue="Ввод в эксплуатацию инвентаря и принадлежностей, относящихся к ИТ оборудованию, стоимостью до 40 000 руб., стоимость которых для целей бухгалтерского учета относится на расходы при передаче в эксплуатацию"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26305.06"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -135,7 +135,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20336"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue=""/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Ввод в эксплуатацию инвентаря и принадлежностей,  относящихся к устройствам самообслуживания и оборудованию для работы с банковскими картами, стоимостью до 40 000 руб., стоимость которых для целей бухгалтерского учета относится на расходы при передаче в э"/>
+              stringValue="Ввод в эксплуатацию инвентаря и принадлежностей, относящихся к устройствам самообслуживания и оборудованию для работы с банковскими картами, стоимостью до 40 000 руб., стоимость которых для целей бухгалтерского учета относится на расходы при передаче в э"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26305.08"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -153,7 +153,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20338"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Ввод в эксплуатацию инвентаря и принадлежностей,  относящихся к оборудованию объектов недвижимости, стоимостью до 40 000 руб., стоимость которых для целей бухгалтерского учета относится на расходы при передаче в эксплуатацию"/>
+              stringValue="Ввод в эксплуатацию инвентаря и принадлежностей, относящихся к оборудованию объектов недвижимости, стоимостью до 40 000 руб., стоимость которых для целей бухгалтерского учета относится на расходы при передаче в эксплуатацию"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26305.10"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -208,7 +208,7 @@
         <cell alias="consumptionGroup" colSpan="1" rowSpan="19"
               stringValue="Расходы на приобретение работ и услуг производственного характера, выполняемых сторонними организациями или индивидуальными предпринимателями, а также выполнение этих работ за счёт собственных средств"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы по переводу пенсий и пособий, а также расходы по переводу денежных средств без открытия счетов физическим лицам. Расходы, уплачиваемые по договорам организациям, осуществляющим от своего имени, но за счет СБ РФ приём платежей физических лиц  в адрес организаций, с которыми у СБ РФ заключены договоры на приём платежей, комиссии уплачиваемые по внешним компаниям привлеченным для работы с внешними активами, комиссионное вознаграждение за сдачу в аренду или реализацию имущества Банка"/>
+              stringValue="Расходы по переводу пенсий и пособий, а также расходы по переводу денежных средств без открытия счетов физическим лицам. Расходы, уплачиваемые по договорам организациям, осуществляющим от своего имени, но за счет СБ РФ приём платежей физических лиц в адрес организаций, с которыми у СБ РФ заключены договоры на приём платежей, комиссии уплачиваемые по внешним компаниям привлеченным для работы с внешними активами, комиссионное вознаграждение за сдачу в аренду или реализацию имущества Банка"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.25206.02"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -538,7 +538,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20460"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы на ремонт  прочего имущества"/>
+              stringValue="Расходы на ремонт прочего имущества"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26301.15"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -646,7 +646,7 @@
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
               stringValue="Расходы на оплату труда работников, не состоящих в штате, за выполнение ими работ по заключённым договорам гражданско-правового характера (включая договора подряда)"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Начисленная заработная плата  несписочного состава"/>
+              stringValue="Начисленная заработная плата несписочного состава"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26101.02"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -687,7 +687,7 @@
     </row>
     <row alias="R35">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20500"/>
-        <cell alias="consumptionGroup" colSpan="1" rowSpan="5" stringValue="Иные расходы на оплату труда "/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="5" stringValue="Иные расходы на оплату труда"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Начисления стимулирующего (компенсирующего) характера, связанные с режимом работы, в т.ч. стоимость бесплатно предоставляемых работникам в соответствии с коллективными и трудовыми договорами коммунальных услуг, питания и продуктов, жилья Надбавки, обусловленные районным регулированием оплаты труда и надбавки, установленные Правительством РФ за непрерывный стаж работы в районах Крайнего Севера и приравненных к ним местностях. Доплаты инвалидам, предусмотренные законодательством РФ Расходы на оплату труда, сохраняемые в соответствии с законодательством РФ на время учебных отпусков, а также расходы на оплату проезда к месту учёбы и обратно"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26101.98"/>
@@ -746,7 +746,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20520"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Отчисления в резерв на выплату списочному составу вознаграждения за выслугу лет "/>
+              stringValue="Отчисления в резерв на выплату списочному составу вознаграждения за выслугу лет"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26101.06"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -786,7 +786,7 @@
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
               stringValue="Расходы на оплату проезда работников и лиц, находящихся у этих работников на иждивении, к месту использования отпуска на территории РФ и обратно (включая расходы на оплату провоза багажа работников"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Оплата проезда работников Банка, работающих в районах Крайнего Севера и приравненных к ним местностях один раз в два года к месту использования отпуска на территории РФ и обратно любым видом транспорта (кроме такси), и стоимость провоза багажа (до 30 кг. "/>
+              stringValue="Оплата проезда работников Банка, работающих в районах Крайнего Севера и приравненных к ним местностях один раз в два года к месту использования отпуска на территории РФ и обратно любым видом транспорта (кроме такси), и стоимость провоза багажа (до 30 кг."/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26101.08"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -806,7 +806,7 @@
     <row alias="R41">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20550"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
-              stringValue=" организаций, расположенных в районах Крайнего Севера и приравненных к ним местностях) в порядке, предусмотренном коллективным договором"/>
+              stringValue="организаций, расположенных в районах Крайнего Севера и приравненных к ним местностях) в порядке, предусмотренном коллективным договором"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Компенсация затрат при выезде из районов Крайнего Севера, стоимость провоза багажа (до 5000 кг.)"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26101.09"/>
@@ -894,7 +894,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20700"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы по договорам негосударственного пенсионного обеспечения работников "/>
+              stringValue="Расходы по договорам негосударственного пенсионного обеспечения работников"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26410.03"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -999,7 +999,7 @@
     <row alias="R50">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20816"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue=" Другие виды страхования"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Другие виды страхования"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26410.99"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -1299,7 +1299,7 @@
     <row alias="R65">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20970"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
-              stringValue=" операций и сохранности материальных ценностей (кроме расходов на экипировку, приобретение оружия и иных специальных средств защиты)"/>
+              stringValue="операций и сохранности материальных ценностей (кроме расходов на экипировку, приобретение оружия и иных специальных средств защиты)"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Оплата стоимости, хранения и технического обслуживания оружия МВД для работников охраны и инкассации"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26412.04"/>
@@ -1321,7 +1321,7 @@
     <row alias="R66">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21020"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
-              stringValue="Расходы по набору работников, включая расходы на услуги специализированных "/>
+              stringValue="Расходы по набору работников, включая расходы на услуги специализированных"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по подбору персонала"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26412.29"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
@@ -1342,7 +1342,7 @@
     <row alias="R67">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21025"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
-              stringValue="организаций по подбору персонала, выплаты по ученическим договорам. "/>
+              stringValue="организаций по подбору персонала, выплаты по ученическим договорам."/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Оплата услуг сторонним компаниям по предоставлению персонала"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26412.30"/>
@@ -1366,7 +1366,7 @@
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
               stringValue="Арендные (лизинговые) платежи за арендуемое (принятое в лизинг) имущество"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы в виде арендной платы по арендованным основным средствам и другому имуществу. Расходы по основным средствам, полученные в финансовую аренду (лизинг) Расходы по приобретению имущества, переданного в лизинг Расходы по аренде брокерских мест "/>
+              stringValue="Расходы в виде арендной платы по арендованным основным средствам и другому имуществу. Расходы по основным средствам, полученные в финансовую аренду (лизинг) Расходы по приобретению имущества, переданного в лизинг Расходы по аренде брокерских мест"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26303.01"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -1409,7 +1409,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21055"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы на содержание  спецавтотранспорта, "/>
+              stringValue="Расходы на содержание спецавтотранспорта,"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26302.07"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -1430,7 +1430,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21060"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы на содержание  воздушного транспорта, "/>
+              stringValue="Расходы на содержание воздушного транспорта,"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26302.09"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -1494,7 +1494,7 @@
         <cell alias="consumptionGroup" colSpan="1" rowSpan="6"
               stringValue="Расходы на юридические и информационные услуги, плата нотариусу за нотариальное оформление, консультационные и иные аналогичные услуги."/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue=" Подписка на периодические издания"/>
+              stringValue="Подписка на периодические издания"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26401.01"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -1597,7 +1597,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21170"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Услуги компаний, привлеченных для работы с проблемными активами "/>
+              stringValue="Услуги компаний, привлеченных для работы с проблемными активами"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26412.19"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -1775,7 +1775,7 @@
     <row alias="R89">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21340"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
-              stringValue="Расходы, связанные с приобретением права на использование программ для ЭВМ и баз данных по договорам с правообладателем (по лицензионным соглашениям) и обновление программ для ЭВМ и баз данных, а именно: "/>
+              stringValue="Расходы, связанные с приобретением права на использование программ для ЭВМ и баз данных по договорам с правообладателем (по лицензионным соглашениям) и обновление программ для ЭВМ и баз данных, а именно:"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Плата за право пользования объектами интеллектуальной собственности по объектам, оприходованным после 01.01.2009 (кроме доработки и обновления программных средств)"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26304"/>
@@ -1796,7 +1796,7 @@
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
               stringValue="- стоимость лицензий на занятие отдельными видами деятельности - разрешений - объектов интеллектуальной собственности&#160; стоимостью менее 40&#160;000&#160;руб. (включительно) и сроком использования&#160;более 12 месяцев"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы на доработку и обновление программных средств по объектам, оприходованным после 01.01.2009 "/>
+              stringValue="Расходы на доработку и обновление программных средств по объектам, оприходованным после 01.01.2009"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26406.12"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -1815,7 +1815,7 @@
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
               stringValue="- исключительных прав на программы для ЭВМ стоимостью менее 40 000&#160;руб. (включительно) - нематериальные активы в бухгалтерском учёте - объектов интеллектуальной собственности, не относящихся к нематериальным активам"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы на исключительные права на программы для ЭВМ стоимостью менее 40 000&#160;руб. (включительно) и сроком полезного использования более 12 месяцев, учитываемые как  нематериальные активы в бухгалтерском учёте, приобретенные после 01.01.2009"/>
+              stringValue="Расходы на исключительные права на программы для ЭВМ стоимостью менее 40 000&#160;руб. (включительно) и сроком полезного использования более 12 месяцев, учитываемые как нематериальные активы в бухгалтерском учёте, приобретенные после 01.01.2009"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26203"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -1832,7 +1832,7 @@
     <row alias="R92">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21400"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
-              stringValue="Расходы на текущее изучение (исследование) конъюнктуры рынка, сбор и распространение информации, "/>
+              stringValue="Расходы на текущее изучение (исследование) конъюнктуры рынка, сбор и распространение информации,"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Расходы по реализации программ лояльности клиентов"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26412.31"/>
@@ -1895,9 +1895,9 @@
     <row alias="R95">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21580"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
-              stringValue="Расходы по выплате в соответствии с законодательством РФ (Федеральный закон от 29.12.2006 №255-ФЗ) пособия по временной нетрудоспособности  (за исключением несчастных случаев на производстве и профессиональных заболеваний) за дни временной нетрудоспособно"/>
+              stringValue="Расходы по выплате в соответствии с законодательством РФ (Федеральный закон от 29.12.2006 №255-ФЗ) пособия по временной нетрудоспособности (за исключением несчастных случаев на производстве и профессиональных заболеваний) за дни временной нетрудоспособно"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Выплата пособий по временной нетрудоспособности "/>
+              stringValue="Выплата пособий по временной нетрудоспособности"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26104.07"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -1940,7 +1940,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21600"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы по наличной части  сделок по операциям СВОП, не признаваемым производными финансовыми инструментами "/>
+              stringValue="Расходы по наличной части сделок по операциям СВОП, не признаваемым производными финансовыми инструментами"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.22203.04"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -1958,7 +1958,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21610"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы по срочной части  сделок по операциям СВОП, не признаваемыми производным финансовым инструментом "/>
+              stringValue="Расходы по срочной части сделок по операциям СВОП, не признаваемыми производным финансовым инструментом"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.22203.05"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -3190,7 +3190,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22465"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Проценты по депозитам, уплаченные физическим лицам  нерезидентам"/>
+              stringValue="Проценты по депозитам, уплаченные физическим лицам нерезидентам"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.21602"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -3261,7 +3261,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22485"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Процентный расход по депозитным  сертификатам"/>
+              stringValue="Процентный расход по депозитным сертификатам"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.21802"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -3279,7 +3279,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22490"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Процентный расход по сберегательным  сертификатам"/>
+              stringValue="Процентный расход по сберегательным сертификатам"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.21803"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -3297,7 +3297,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22496"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расход по процентным векселям, выданным  юридическим лицам"/>
+              stringValue="Расход по процентным векселям, выданным юридическим лицам"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.21804.01"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -3315,7 +3315,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22498"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расход по процентным векселям, выданным  физическим лицам"/>
+              stringValue="Расход по процентным векселям, выданным физическим лицам"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.21804.02"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -3352,7 +3352,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22534"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы от применения встроенных производных инструментов, неотделяемых от основного договора от изменения курса ценных бумаг "/>
+              stringValue="Расходы от применения встроенных производных инструментов, неотделяемых от основного договора от изменения курса ценных бумаг"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70610.24201"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -3370,7 +3370,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22538"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы от применения встроенных производных инструментов, неотделяемых от основного договора от изменения валютного курса  "/>
+              stringValue="Расходы от применения встроенных производных инструментов, неотделяемых от основного договора от изменения валютного курса"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70610.24202"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -3388,7 +3388,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22540"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы от применения встроенных производных инструментов, неотделяемых от основного договора от изменения индекса цен "/>
+              stringValue="Расходы от применения встроенных производных инструментов, неотделяемых от основного договора от изменения индекса цен"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70610.24203"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -3406,7 +3406,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22544"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы от применения встроенных производных инструментов, неотделяемых от основного договора от изменения других переменных "/>
+              stringValue="Расходы от применения встроенных производных инструментов, неотделяемых от основного договора от изменения других переменных"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70610.24204"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -3633,7 +3633,7 @@
     <row alias="R189">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22710"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="2"
-              stringValue="Расходы, связанные с рассмотрением дела в третейском суде "/>
+              stringValue="Расходы, связанные с рассмотрением дела в третейском суде"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Третейский сбор"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26412.15"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
@@ -3670,7 +3670,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22720"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Судебные расходы и арбитражные сборы"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Судебные издержки и расходы по арбитражным делам, связанным с деятельностью Банка (включая  госпошлину) Возмещение Банком на основании решения суда сумм  судебных издержек и расходов в пользу истца (включая госпошлину) Вознаграждение арбитражному управляю"/>
+              stringValue="Судебные издержки и расходы по арбитражным делам, связанным с деятельностью Банка (включая госпошлину) Возмещение Банком на основании решения суда сумм судебных издержек и расходов в пользу истца (включая госпошлину) Вознаграждение арбитражному управляю"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26407"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
@@ -3776,7 +3776,7 @@
     <row alias="R196">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22840"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
-              stringValue="Комиссионные сборы за услуги по корреспондентским отношениям,  включая расходы"/>
+              stringValue="Комиссионные сборы за услуги по корреспондентским отношениям, включая расходы"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по кассовым операциям"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.25202.01"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
@@ -3794,7 +3794,7 @@
     <row alias="R197">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22850"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
-              stringValue=" по расчётно-кассовому обслуживанию клиентов, открытию им счетов в других банках,  плату другим банкам за "/>
+              stringValue="по расчётно-кассовому обслуживанию клиентов, открытию им счетов в других банках, плату другим банкам за"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по расчётным операциям"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.25202.02"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
@@ -3831,7 +3831,7 @@
     <row alias="R199">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="22870"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"
-              stringValue=" ценных бумаг, платёжных документов и иные аналогичные расходы"/>
+              stringValue="ценных бумаг, платёжных документов и иные аналогичные расходы"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Платежи в пользу банков - посредников за переводы физических лиц в иностранной валюте"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.25203.10"/>
@@ -3910,9 +3910,9 @@
     <row alias="R203">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="23100"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="2"
-              stringValue="Расходы  по операциям с финансовыми инструментами срочных сделок"/>
+              stringValue="Расходы по операциям с финансовыми инструментами срочных сделок"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы по расчетным (беспоставочным)  операциям с ПФИ (обращающимся на организованном рынке)"/>
+              stringValue="Расходы по расчетным (беспоставочным) операциям с ПФИ (обращающимся на организованном рынке)"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70614.25101.03"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -3930,7 +3930,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="23110"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Расходы по поставочным  операциям с ПФИ (обращающимся на организованном рынке)"/>
+              stringValue="Расходы по поставочным операциям с ПФИ (обращающимся на организованном рынке)"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70614.25101.05"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4113,7 +4113,7 @@
     <row alias="R213">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="50002"
               styleAlias="Итого (светло-коричневый)"/>
-        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue=" Контрольная сумма"
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Контрольная сумма"
               styleAlias="Итого (светло-коричневый)"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" styleAlias="Итого (светло-коричневый)"/>

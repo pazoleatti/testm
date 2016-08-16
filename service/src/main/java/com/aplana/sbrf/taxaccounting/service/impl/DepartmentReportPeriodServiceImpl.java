@@ -91,11 +91,11 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
 	@Override
-	public void updateActive(List<Integer> ids, boolean active, boolean isBalance) {
+	public void updateActive(List<Integer> ids, Integer report_period_id, boolean active, boolean isBalance) {
 		if (ids == null || ids.isEmpty())
 			throw new ServiceException(ERROR_BATCH_MESSAGE);
 		try {
-			departmentReportPeriodDao.updateActive(ids, active, isBalance);
+			departmentReportPeriodDao.updateActive(ids, report_period_id, active, isBalance);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
@@ -104,11 +104,11 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 	}
 
     @Override
-    public void updateActive(List<Integer> ids, boolean active) {
+    public void updateActive(List<Integer> ids, Integer report_period_id, boolean active) {
         if (ids == null || ids.isEmpty())
             throw new ServiceException(ERROR_BATCH_MESSAGE);
 		try {
-			departmentReportPeriodDao.updateActive(ids, active);
+			departmentReportPeriodDao.updateActive(ids, report_period_id, active);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {

@@ -383,7 +383,7 @@
     <row alias="R21">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11140"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактической выручки от реализации (выбытия) векселей,  ниже расчётной цены"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактической выручки от реализации (выбытия) векселей, ниже расчётной цены"/>
         <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -592,7 +592,7 @@
     <row alias="R32">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15230"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по сделкам РЕПО и сделкам по представлению займов  ценными бумагами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по сделкам РЕПО и сделкам по представлению займов ценными бумагами"/>
         <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1029,7 +1029,7 @@
     <row alias="R55">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16560"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по  дисконтным облигациям, облагаемый по ставке 20%"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по дисконтным облигациям, облагаемый по ставке 20%"/>
         <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1067,7 +1067,7 @@
     <row alias="R57">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16580"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по  дисконтным облигациям, облагаемый по ставке 9%"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Процентный доход по дисконтным облигациям, облагаемый по ставке 9%"/>
         <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1276,7 +1276,7 @@
     <row alias="R68">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17030"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы  по сделкам кредитно-дефолтный своп, предусматривающих покупку-продажу ценных бумаг, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по сделкам кредитно-дефолтный своп, предусматривающих покупку-продажу ценных бумаг, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
         <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1694,7 +1694,7 @@
     <row alias="R90">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19360"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="6" stringValue="Сумма уменьшения расходов, относимая на доходы от операций с Взаимозависимыми лицами и резидентами офшорных зон"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов от реализации вследствие оказания услуг по прочим операциям  в связи с применением цен не соответствующим рыночному уровню"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения расходов от реализации вследствие оказания услуг по прочим операциям в связи с применением цен не соответствующим рыночному уровню"/>
         <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1713,7 +1713,7 @@
     <row alias="R91">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="19390"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения внереализационных расходов  вследствие оказания услуг по прочим операциям в связи с применением цен не соответствующим рыночному уровню"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма уменьшения внереализационных расходов вследствие оказания услуг по прочим операциям в связи с применением цен не соответствующим рыночному уровню"/>
         <cell alias="incomeBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="incomeBuhSumAccepted" colSpan="1" rowSpan="1"/>

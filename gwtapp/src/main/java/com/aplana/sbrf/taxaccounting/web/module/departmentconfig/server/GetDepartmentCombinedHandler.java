@@ -96,6 +96,10 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
                 parentRefBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
                 provider = rbFactory.getDataProvider(parentRefBookId);
                 break;
+            case LAND:
+                parentRefBookId = RefBook.DEPARTMENT_CONFIG_LAND;
+                provider = rbFactory.getDataProvider(parentRefBookId);
+                break;
         }
 
         if (parentRefBookId != null) {

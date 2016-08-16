@@ -215,14 +215,15 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    public void updateActive(final List<Integer> ids, final boolean active, final boolean isBalance) {
+    public void updateActive(final List<Integer> ids, final Integer report_period_id, final boolean active, final boolean isBalance) {
         try {
-            getJdbcTemplate().batchUpdate("update department_report_period set is_active = ?, is_balance_period = ? where id = ?", new BatchPreparedStatementSetter() {
+            getJdbcTemplate().batchUpdate("update department_report_period set is_active = ?, is_balance_period = ? where report_period_id = ? AND id = ?", new BatchPreparedStatementSetter() {
                 @Override
                 public void setValues(PreparedStatement ps, int i) throws SQLException {
                     ps.setInt(1, active ? 1 : 0);
                     ps.setInt(2, isBalance ? 1 : 0);
-                    ps.setInt(3, ids.get(i));
+                    ps.setInt(3, report_period_id);
+                    ps.setInt(4, ids.get(i));
                 }
 
                 @Override
@@ -237,10 +238,21 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    public void updateActive(final List<Integer> ids, final boolean active) {
+    public void updateActive(final List<Integer> ids, final Integer report_period_id, final boolean active) {
         try {
-            getJdbcTemplate().update(String.format("update department_report_period set is_active = ? where id in (%s)", StringUtils.join(ids.toArray(), ',')),
-                    new Object[]{active ? 1 : 0});
+            getJdbcTemplate().batchUpdate("update department_report_period set is_active = ? where report_period_id = ? AND id = ?", new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setInt(1, active ? 1 : 0);
+                    ps.setInt(2, report_period_id);
+                    ps.setInt(3, ids.get(i));
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return ids.size();
+                }
+            });
         } catch (DataAccessException e){
 			LOG.error("", e);
             throw new DaoException("", e);

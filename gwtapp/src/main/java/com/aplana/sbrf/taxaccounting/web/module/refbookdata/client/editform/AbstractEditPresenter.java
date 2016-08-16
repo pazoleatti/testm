@@ -290,7 +290,6 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
             Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
-                    setIsFormModified(false);
                     onSaveClicked(false);
                     SetFormMode.fire(AbstractEditPresenter.this, FormMode.EDIT);
                     RollbackTableRowSelection.fire(AbstractEditPresenter.this, previousURId);

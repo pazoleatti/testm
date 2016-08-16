@@ -2,10 +2,6 @@ package com.aplana.sbrf.taxaccounting.form_template.market.chd.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
@@ -15,8 +11,6 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -206,32 +200,14 @@ public class CHDTest extends ScriptTestBase {
     @Test
     public void importExcelTest() {
         when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
+
+        // для справочника стран мира (id = 10)
         RefBookUniversal provider = mock(RefBookUniversal.class);
-        provider.setRefBookId(10L);
-        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(10L), any(Map.class))).thenReturn(provider);
-        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
-                any(RefBookAttribute.class))).thenAnswer(
-                new Answer<PagingResult<Map<String, RefBookValue>>>() {
-                    @Override
-                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
-                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-                        String str = ((String) invocation.getArguments()[2]).split("\'")[1];
-                        char country = str.charAt(0);
-                        long id = 0;
-                        switch (country) {
-                            case 'A':  id = 1L;
-                                break;
-                            case 'B':  id = 2L;
-                                break;
-                            default: str = null;
-                        }
-                        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
-                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, str));
-                        result.add(map);
-                        return result;
-                    }
-                });
+        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(10L), anyMap())).thenReturn(provider);
+        List<Long> ids = Arrays.asList(1L, 2L);
+        when(provider.getUniqueRecordIds(any(Date.class), (String) eq(null))).thenReturn(ids);
+        when(provider.getRecordData(eq(ids))).thenReturn(testHelper.getRefBookAllRecords(10L));
+
         int expected = 2; // в файле 2 строки
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);

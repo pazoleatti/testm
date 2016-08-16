@@ -5,6 +5,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -34,14 +35,20 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private List<Column> columns;
 
-    private static final long TABLE_PROPERTY_REFBOOK_ID = 206L;
-    private static final long PROPERTY_REFBOOK_ID = 99L;
+    private static final long TABLE_PROPERTY_REFBOOK_ID = RefBook.WithTable.PROPERTY.getTableRefBookId();
+    private static final long PROPERTY_REFBOOK_ID = RefBook.WithTable.PROPERTY.getRefBookId();
 
-    private static final long TABLE_TRANSPORT_REFBOOK_ID = 310L;
-    private static final long TRANSPORT_REFBOOK_ID = 31L;
-
+    private static final long TABLE_TRANSPORT_REFBOOK_ID = RefBook.WithTable.TRANSPORT.getTableRefBookId();
+    private static final long TRANSPORT_REFBOOK_ID = RefBook.WithTable.TRANSPORT.getRefBookId();
+/*
+    private static final long TABLE_INCOME_REFBOOK_ID = RefBook.WithTable.INCOME.getTableRefBookId();
+    private static final long INCOME_REFBOOK_ID = RefBook.WithTable.INCOME.getRefBookId();
+*/
     private static final long TABLE_INCOME_REFBOOK_ID = 330L;
     private static final long INCOME_REFBOOK_ID = 33L;
+
+    private static final long TABLE_LAND_REFBOOK_ID = RefBook.WithTable.LAND.getTableRefBookId();
+    private static final long LAND_REFBOOK_ID = RefBook.WithTable.LAND.getRefBookId();
 
     private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм/деклараций, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
@@ -223,6 +230,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
             return TRANSPORT_REFBOOK_ID;
         } else if (getView().getTaxType() == TaxType.INCOME) {
             return INCOME_REFBOOK_ID;
+        } else if (getView().getTaxType() == TaxType.LAND) {
+            return LAND_REFBOOK_ID;
         }
 
         return null;
@@ -235,6 +244,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
             return TABLE_TRANSPORT_REFBOOK_ID;
         } else if (getView().getTaxType() == TaxType.INCOME) {
             return TABLE_INCOME_REFBOOK_ID;
+        } else if (getView().getTaxType() == TaxType.LAND) {
+            return TABLE_LAND_REFBOOK_ID;
         }
 
         return null;

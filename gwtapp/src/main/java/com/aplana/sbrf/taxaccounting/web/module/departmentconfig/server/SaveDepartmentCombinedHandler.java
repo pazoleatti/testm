@@ -101,6 +101,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 case PROPERTY:
                     refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
                     break;
+                case LAND:
+                    refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
+                    break;
             }
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
             RefBook refBook = rbFactory.get(refBookId);
