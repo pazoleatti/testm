@@ -94,6 +94,12 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             @Override
             public void onValueChange(ValueChangeEvent<List<Long>> event) {
                 updateEnabled();
+                if (taxOrganCode.getFilter() != null) {
+                    taxOrganKpp.setFilter(taxOrganCode.getFilter() + " and TAX_ORGAN_CODE = '" + taxOrganCode.getDereferenceValue().trim() + "'");
+                    if (event.getValue() != null && !event.getValue().isEmpty() && !event.getValue().get(0).equals(taxOrganKpp.getSingleValue())) {
+                        taxOrganKpp.setSingleValue(null);
+                    }
+                }
             }
         });
     }
