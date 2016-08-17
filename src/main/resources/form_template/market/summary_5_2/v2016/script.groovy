@@ -196,11 +196,16 @@ void logicCheck() {
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (row in dataRows) {
-        calc9(row)
-        calc15(row)
-        calc22(row)
-        calc27(row)
-        calc28(row)
+        // графа 9
+        row.internationalRating = calc9(row)
+        // графа 15
+        row.avgPeriod = calc15(row)
+        // графа 22
+        row.totalRate = calc22(row)
+        // графа 27
+        row.economySum = calc27(row)
+        // графа 28
+        row.economyRate = calc28(row)
     }
 }
 
@@ -224,13 +229,13 @@ def getRatingRecord(def rating) {
     return null
 }
 
-void calc9(def row) {
-    row.internationalRating = getRatingRecord(row.creditRating)?.record_id?.value
+def calc9(def row) {
+    return getRatingRecord(row.creditRating)?.record_id?.value
 }
 
-void calc15(def row) {
+def calc15(def row) {
     if (row.docDate == null) {
-        return
+        return null
     }
     def start
     if (row.creditDate != null) {
@@ -240,28 +245,31 @@ void calc15(def row) {
     }
     def end = row.closeDate
     def period = new BigDecimal((end - start).toString())
-    row.avgPeriod = period.divide(new BigDecimal("365"), 1, RoundingMode.HALF_UP)
+    return period.divide(new BigDecimal("365"), 1, RoundingMode.HALF_UP)
 }
 
 // Графа 22 = графа 20 + графа 21
-void calc22(def row) {
-    if (row.rate != null && row.creditRate != null) {
-        row.totalRate = row.rate + row.creditRate
+def calc22(def row) {
+    if (row.rate == null || row.creditRate == null) {
+        return null
     }
+    return round(row.rate + row.creditRate, 6)
 }
 
 // Графа 27 = графа 26 – графа 25
-void calc27(def row) {
-    if (row.purposeFond != null && row.purposeSum != null) {
-        row.economySum = row.purposeFond - row.purposeSum
+def calc27(def row) {
+    if (row.purposeFond == null || row.purposeSum == null) {
+        return null
     }
+    return round(row.purposeFond - row.purposeSum, 6)
 }
 
 // Графа 28 = графа 22 + графа 27
-void calc28(def row) {
-    if (row.totalRate != null && row.economySum != null) {
-        row.economyRate = row.totalRate + row.economySum
+def calc28(def row) {
+    if (row.totalRate == null || row.economySum == null) {
+        return null
     }
+    return round(row.totalRate + row.economySum, 6)
 }
 
 // Сортировка групп и строк

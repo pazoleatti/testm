@@ -32,7 +32,7 @@ public class RefBook implements Serializable {
     public static final String REF_BOOK_VERSION_TO_TITLE = "Дата окончания актуальности";
     public static final int REF_BOOK_VERSION_TO_WIDTH = 6;
 
-	public static final String RECORD_HAS_CHILD_ALIAS = "has_child";
+	public static final String RECORD_HAS_CHILD_ALIAS = "HAS_CHILD";
 
 	public static final String RECORD_SORT_ALIAS = "row_number_over";
 
@@ -41,6 +41,7 @@ public class RefBook implements Serializable {
     public static final Long DEPARTMENT_CONFIG_DEAL = 37L;
     public static final Long DEPARTMENT_CONFIG_VAT = 98L;
     public static final Long DEPARTMENT_CONFIG_PROPERTY = 99L;
+    public static final Long DEPARTMENT_CONFIG_LAND = WithTable.LAND.getRefBookId();
 
     public static final Long EMAIL_CONFIG = 400L;
     public static final Long ASYNC_CONFIG = 401L;
@@ -55,7 +56,8 @@ public class RefBook implements Serializable {
     public enum WithTable {
         TRANSPORT(TaxType.TRANSPORT, 31L, 310L),
         PROPERTY(TaxType.PROPERTY, 99L, 206L),
-        INCOME(TaxType.INCOME, 33L, 330L);
+        INCOME(TaxType.INCOME, 33L, 330L),
+        LAND(TaxType.LAND, 700L, 710L);
 
         private TaxType taxType;
         private Long refBookId;
@@ -86,6 +88,15 @@ public class RefBook implements Serializable {
                 }
             }
             throw new RuntimeException("Не найдено сочетание табличной и нетабличной части настроек подразделения для указанного налога");
+        }
+
+        public static Long getTablesIdByRefBook(long refBookId) {
+            for (WithTable r: values()) {
+                if (r.refBookId == refBookId) {
+                    return r.getTableRefBookId();
+                }
+            }
+            return null;
         }
     }
 

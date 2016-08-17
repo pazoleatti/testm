@@ -31,6 +31,8 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     @UiField
     RefBookTreePickerView refbookDataTree;
 
+    private boolean isEnabledSelectionChangedEvent = true;
+
     private PickerState pickerState = new PickerState();
 
     @Inject
@@ -42,7 +44,10 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
         refbookDataTree.addValueChangeHandler(new ValueChangeHandler<Set<Long>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Set<Long>> event) {
-                getUiHandlers().onSelectionChanged();
+                if (isEnabledSelectionChangedEvent) {
+                    getUiHandlers().onSelectionChanged();
+                }
+                isEnabledSelectionChangedEvent = true;
             }
         });
 
@@ -72,10 +77,12 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     }
 
     @Override
-    public void setSelection(RefBookTreeItem parentRefBookItem) {
+    public void setSelection(RefBookTreeItem parentRefBookItem, boolean isEnabledSelectionChangedEvent) {
         refbookDataTree.clearSelected(false);
-        if (parentRefBookItem != null)
+        if (parentRefBookItem != null) {
+            this.isEnabledSelectionChangedEvent = isEnabledSelectionChangedEvent;
             refbookDataTree.setSelection(Arrays.asList(parentRefBookItem));
+        }
     }
 
     @Override

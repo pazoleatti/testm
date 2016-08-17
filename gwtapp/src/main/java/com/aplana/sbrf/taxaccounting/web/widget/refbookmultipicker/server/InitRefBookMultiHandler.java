@@ -39,9 +39,11 @@ public class InitRefBookMultiHandler extends AbstractActionHandler<InitRefBookMu
                 refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_DEAL) ||
                 refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_VAT) ||
                 refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) ||
+                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_LAND) ||
                 refBook.getId().equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) ||
                 refBook.getId().equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.INCOME.getTableRefBookId());
+                refBook.getId().equals(RefBook.WithTable.INCOME.getTableRefBookId()) ||
+                refBook.getId().equals(RefBook.WithTable.LAND.getTableRefBookId());
         result.setVersioned(refBook.isVersioned() && !isConfig);
         return result;
     }

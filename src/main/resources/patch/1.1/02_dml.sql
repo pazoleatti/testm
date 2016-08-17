@@ -1,4 +1,5 @@
 set serveroutput on size 1000000;
+set linesize 128;
 
 --https://jira.aplana.com/browse/SBRFACCTAX-15978: 1.1 Добавить налог "Рыночные интервалы ТЦО"
 --https://jira.aplana.com/browse/SBRFACCTAX-15917: 1.1 РнРнтб. Добавить отчетные периоды
@@ -29,7 +30,7 @@ begin
 		
 	merge into ref_book_value tgt
 		using (
-		  select rbr.id as record_id, 3001 as attribute_id, case when rbv.string_value in ('83', '84', '34') then 1 else 0 end as number_value 
+		  select rbr.id as record_id, 3001 as attribute_id, case when rbv.string_value in ('83', '84', '46') then 1 else 0 end as number_value 
 		  from ref_book_record rbr
 		  join ref_book_value rbv on rbv.record_id = rbr.id and rbv.attribute_id = 25) src
 		on (tgt.record_id = src.record_id and tgt.attribute_id = src.attribute_id) 
@@ -63,7 +64,7 @@ begin
 	update ref_book_attribute set ord = 9 where id = 3001;
 	update ref_book_attribute set ord = 8 where id = 3000;
 	update ref_book_attribute set ord = 7 where id = 31;
-	insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (3002,8,'Признак принадлежности к земельному налогу','L',2,7,null,null,0,0,10,0,0,null,6,0,1);
+	insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (3002,8,'Признак принадлежности к земельному налогу','L',2,6,null,null,0,0,10,0,0,null,6,0,1);
 	insert into ref_book_value (record_id, attribute_id, number_value) select id as record_id, 3002 as attribute_id, 0 as number_value from ref_book_record where ref_book_id = 8; 
 		
 	merge into ref_book_value tgt

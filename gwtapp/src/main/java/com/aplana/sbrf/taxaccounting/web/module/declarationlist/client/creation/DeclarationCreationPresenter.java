@@ -131,7 +131,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
             @Override
             public void onSuccess(GetDeclarationTypeResult result) {
                 getView().setAcceptableDeclarationTypes(result.getDeclarationTypes());
-                if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT || taxType == TaxType.INCOME) {
+                if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT || taxType == TaxType.INCOME || taxType == TaxType.LAND) {
                     getView().initRefBooks(result.getVersion(), result.getFilter(), taxType);
                 }
                 if (result.getCorrectionDate() != null) {

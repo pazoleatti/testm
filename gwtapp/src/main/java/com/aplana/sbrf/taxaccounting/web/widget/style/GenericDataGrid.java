@@ -31,18 +31,6 @@ public class GenericDataGrid<T> extends DataGrid<T> implements HasEnabled{
         glassElement = WidgetUtils.createGlassElement();
 	}
 
-    public CustomScrollPanel getContentPanel() {
-        return (CustomScrollPanel) ((HeaderPanel) getWidget()).getContentWidget();
-    }
-
-    public Widget getHeaderWidget() {
-        return ((HeaderPanel) getWidget()).getHeaderWidget();
-    }
-
-    public TableSectionElement getTableHeadElement() {
-        return super.getTableHeadElement();
-    }
-
     public class DataGridResizableHeader extends ResizableHeader<T> {
         public DataGridResizableHeader(String title, Column<T, ?> column) {
             super(title, GenericDataGrid.this, column);

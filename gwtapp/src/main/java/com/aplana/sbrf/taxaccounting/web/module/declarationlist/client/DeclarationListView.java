@@ -254,9 +254,9 @@ public class DeclarationListView extends
             declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
             declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
-            if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT) {
+            if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT || taxType == TaxType.LAND) {
                 declarationTable.addColumn(declarationTaxOrganColumn,
-                        declarationTable.createResizableHeader(taxType == TaxType.TRANSPORT ? TAX_ORGAN_CODE_TITLE_F : TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
+                        declarationTable.createResizableHeader((taxType == TaxType.TRANSPORT || taxType == TaxType.LAND) ? TAX_ORGAN_CODE_TITLE_F : TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
                 declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
             } else if (taxType == TaxType.INCOME){
                 declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));

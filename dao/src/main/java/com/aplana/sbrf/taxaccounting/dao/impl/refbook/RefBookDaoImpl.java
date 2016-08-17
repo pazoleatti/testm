@@ -1010,7 +1010,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             aliases.add(attr.getAlias());
         }
         ps.appendQuery(StringUtils.join(aliases.toArray(), ','));
-        ps.appendQuery(", (SELECT 1 FROM dual WHERE EXISTS (SELECT 1 FROM tc tc2 WHERE lvl > 1 AND tc2.record_id = tc.record_id)) as " + RefBook.RECORD_HAS_CHILD_ALIAS);
+        ps.appendQuery(", case when EXISTS (SELECT 1 FROM tc tc2 WHERE lvl > 1 AND tc2.record_id = tc.record_id) then 1 else 0 end as " + RefBook.RECORD_HAS_CHILD_ALIAS);
         ps.appendQuery(" FROM tc ");
 
         if (pagingParams != null) {
@@ -2275,9 +2275,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds) {
         return isVersionUsedInRefBooks(refBookId, uniqueRecordIds, null, null, true,
-                RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
+                RefBook.WithTable.getTablesIdByRefBook(refBookId) == null ?
                         Collections.<Long>emptyList() :
-                        Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
+                        Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBookId)));
     }
 
     private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id = ? and r.record_id = ? and r.status != -1 and r.version  = \n" +

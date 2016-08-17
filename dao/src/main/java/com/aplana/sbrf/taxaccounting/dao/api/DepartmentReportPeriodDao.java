@@ -37,12 +37,15 @@ public interface DepartmentReportPeriodDao {
      */
     void updateActive(int id, boolean active, boolean isBalance);
 
-    void updateActive(final List<Integer> ids, final boolean active, final boolean isBalance);
+    /**
+     * Открытие/закрытие отчетного периода подразделения (batch)
+     */
+    void updateActive(final List<Integer> ids, final Integer report_period_id, final boolean active, final boolean isBalance);
 
     /**
      * Открытие/закрытие отчетного периода подразделения (batch)
      */
-    void updateActive(List<Integer> ids, boolean active);
+    void updateActive(List<Integer> ids, final Integer report_period_id, boolean active);
 
     /**
      * Изменить дату корректировки

@@ -22,7 +22,7 @@
     <row alias="R2">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20020"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="3" stringValue="Расходы на приобретение материальных запасов, инструментов, приспособлений, инвентаря, приборов, спецодежды и другого имущества, не являющихся амортизируемым имуществом"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Ввод в эксплуатацию имущества стоимостью менее стоимости  амортизируемого имущества, определенной п. 1, ст. 256 НК РФ, учитываемого в бухгалтерском учёте как объекты основных средств. Удорожание (реконструкция, модернизация) в размере менее стоимости  амортизируемого имущества, определенной п. 1, ст. 256 НК РФ полностью самортизированного имущества или объектов основных средств, относящихся к «0» амортизационной группе, а также имущества, ранее отражённого в РНУ-10 (до изменения ВНД в РНУ-48) - независимо от суммы "/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Ввод в эксплуатацию имущества стоимостью менее стоимости амортизируемого имущества, определенной п. 1, ст. 256 НК РФ, учитываемого в бухгалтерском учёте как объекты основных средств. Удорожание (реконструкция, модернизация) в размере менее стоимости амортизируемого имущества, определенной п. 1, ст. 256 НК РФ полностью самортизированного имущества или объектов основных средств, относящихся к «0» амортизационной группе, а также имущества, ранее отражённого в РНУ-10 (до изменения ВНД в РНУ-48) - независимо от суммы"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -60,7 +60,7 @@
     <row alias="R4">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20050"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Часть стоимости переданного в эксплуатацию имущества (по объектам имущества, учитываемого в бухгалтерском учёте в качестве запасов), приобретенного на условиях отсрочки платежа,  в виде разницы между суммой, подлежащей оплате по договору, и стоимостью приобретения на условиях немедленной оплаты, признаваемой в бухгалтерском учете процентными расходам. "/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Часть стоимости переданного в эксплуатацию имущества (по объектам имущества, учитываемого в бухгалтерском учёте в качестве запасов), приобретенного на условиях отсрочки платежа, в виде разницы между суммой, подлежащей оплате по договору, и стоимостью приобретения на условиях немедленной оплаты, признаваемой в бухгалтерском учете процентными расходам."/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -193,7 +193,7 @@
     <row alias="R11">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20440"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по договорам негосударственного пенсионного обеспечения работников в рамках корпоративной пенсионной программы  в пределах установленных норм"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по договорам негосударственного пенсионного обеспечения работников в рамках корпоративной пенсионной программы в пределах установленных норм"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -325,8 +325,8 @@
     </row>
     <row alias="R18">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20520"/>
-        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Суммы начисленной амортизации при применении к основной норме амортизации  специального коэффициента"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Не выше 3 в отношении амортизируемых основных средств, являющихся предметом договора финансовой аренды (лизинга), когда данные основные средства должны учитываться в соответствии с  условиями договора финансовой аренды (лизинга)"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Суммы начисленной амортизации при применении к основной норме амортизации специального коэффициента"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Не выше 3 в отношении амортизируемых основных средств, являющихся предметом договора финансовой аренды (лизинга), когда данные основные средства должны учитываться в соответствии с условиями договора финансовой аренды (лизинга)"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -420,8 +420,8 @@
     </row>
     <row alias="R23">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20930"/>
-        <cell alias="consumptionGroup" colSpan="1" rowSpan="4" stringValue="Расходы, связанные с приобретением права на использование программ для ЭВМ и баз данных по договорам с правообладателем (по лицензионным соглашениям) и обновление программ для ЭВМ и баз данных, а именно: - стоимость лицензий на занятие отдельными видами деятельности - разрешений - объектов интеллектуальной собственности  стоимостью менее стоимости  амортизируемого имущества, определенной п.1 ст.256  и сроком использования более 12 месяцев - исключительных прав на программы для ЭВМ стоимостью менее стоимости  амортизируемого имущества, определенной п.1 ст.256  - нематериальные активы в бухгалтерском учёте - объектов интеллектуальной собственности, не относящихся к нематериальным активам"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Плата за право пользования объектами интеллектуальной собственности (в т.ч. на использование программ для ЭВМ и баз данных по лицензионным соглашениям), учитываемые в бухгалтерском учёте как  нематериальные активы (СПИ более 12 месяцев), оприходованные после 01.01.2009"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="4" stringValue="Расходы, связанные с приобретением права на использование программ для ЭВМ и баз данных по договорам с правообладателем (по лицензионным соглашениям) и обновление программ для ЭВМ и баз данных, а именно: - стоимость лицензий на занятие отдельными видами деятельности - разрешений - объектов интеллектуальной собственности  стоимостью менее стоимости амортизируемого имущества, определенной п.1 ст.256 и сроком использования более 12 месяцев - исключительных прав на программы для ЭВМ стоимостью менее стоимости амортизируемого имущества, определенной п.1 ст.256 - нематериальные активы в бухгалтерском учёте - объектов интеллектуальной собственности, не относящихся к нематериальным активам"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Плата за право пользования объектами интеллектуальной собственности (в т.ч. на использование программ для ЭВМ и баз данных по лицензионным соглашениям), учитываемые в бухгалтерском учёте как нематериальные активы (СПИ более 12 месяцев), оприходованные после 01.01.2009"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -440,7 +440,7 @@
     <row alias="R24">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20940"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Плата за право пользования объектами интеллектуальной собственности (в т.ч. на использование программ для ЭВМ и баз данных по лицензионным соглашениям), учитываемые в бухгалтерском учёте как  нематериальные активы (СПИ более 12 месяцев), оприходованные до 01.01.2009"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Плата за право пользования объектами интеллектуальной собственности (в т.ч. на использование программ для ЭВМ и баз данных по лицензионным соглашениям), учитываемые в бухгалтерском учёте как нематериальные активы (СПИ более 12 месяцев), оприходованные до 01.01.2009"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -459,7 +459,7 @@
     <row alias="R25">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20950"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на приобретение объектов интеллектуальной собственности (в том числе расходы на приобретение исключительных прав на программы для ЭВМ) менее стоимости  амортизируемого имущества, определенной п. 1, ст. 256 НК РФ и сроком полезного использования более 12 месяцев, учитываемые в бухгалтерском учёте как  нематериальные активы, оприходованные после 01.01.2009"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на приобретение объектов интеллектуальной собственности (в том числе расходы на приобретение исключительных прав на программы для ЭВМ) менее стоимости амортизируемого имущества, определенной п. 1, ст. 256 НК РФ и сроком полезного использования более 12 месяцев, учитываемые в бухгалтерском учёте как нематериальные активы, оприходованные после 01.01.2009"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -478,7 +478,7 @@
     <row alias="R26">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20960"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на приобретение объектов интеллектуальной собственности (в том числе расходы на приобретение исключительных прав на программы для ЭВМ) менее стоимости  амортизируемого имущества, определенной п. 1, ст. 256 НК РФ и сроком полезного использования более 12 месяцев, учитываемые в бухгалтерском учёте как  нематериальные активы, оприходованные после 01.01.2009"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на приобретение объектов интеллектуальной собственности (в том числе расходы на приобретение исключительных прав на программы для ЭВМ) менее стоимости амортизируемого имущества, определенной п. 1, ст. 256 НК РФ и сроком полезного использования более 12 месяцев, учитываемые в бухгалтерском учёте как нематериальные активы, оприходованные после 01.01.2009"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -516,7 +516,7 @@
     <row alias="R28">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20980"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на приобретение права на земельные участки, по ст. 264.1 НК РФ,  в течение срока действия договора аренды земельного участка, не подлежащего государственной регистрации (сроком менее 1 года)"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы на приобретение права на земельные участки, по ст. 264.1 НК РФ, в течение срока действия договора аренды земельного участка, не подлежащего государственной регистрации (сроком менее 1 года)"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -877,7 +877,7 @@
     <row alias="R47">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21320"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактических расходов на приобретение ценных бумаг от  рыночной цены"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактических расходов на приобретение ценных бумаг от рыночной цены"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -896,7 +896,7 @@
     <row alias="R48">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="21330"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактических расходов на приобретение ценных бумаг от  рыночной цены"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения фактических расходов на приобретение ценных бумаг от рыночной цены"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1256,7 +1256,7 @@
     </row>
     <row alias="R67">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26820"/>
-        <cell alias="consumptionGroup" colSpan="1" rowSpan="19" stringValue="Расходы  по операциям с финансовыми инструментами срочных сделок"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="19" stringValue="Расходы по операциям с финансовыми инструментами срочных сделок"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
@@ -1371,7 +1371,7 @@
     <row alias="R73">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26880"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы  по сделкам кредитно-дефолтный своп, предусматривающих покупку-продажу ценных бумаг, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы по сделкам кредитно-дефолтный своп, предусматривающих покупку-продажу ценных бумаг, квалифицированным в качестве операций с ФИСС для целей налогообложения."/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1409,7 +1409,7 @@
     <row alias="R75">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26900"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходыпо срочным сделкам, квалифицированным в качестве сделок с ФИСС и признаваемым обращающимися на организованном рынке "/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходыпо срочным сделкам, квалифицированным в качестве сделок с ФИСС и признаваемым обращающимися на организованном рынке"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1542,7 +1542,7 @@
     <row alias="R82">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26970"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения стоимости приобретения ценных бумаг от максимальной (расчетной) цены:  поставочный опцион, предусмаотривающий покупку-продажу ценных бумаг. "/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения стоимости приобретения ценных бумаг от максимальной (расчетной) цены: поставочный опцион, предусмаотривающий покупку-продажу ценных бумаг."/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1561,7 +1561,7 @@
     <row alias="R83">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26980"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения стоимости приобретения ценных бумаг от максимальной (расчетной) цены:  кредитно-дефолтный своп, предусматривающий продажу ценных бумаг."/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения стоимости приобретения ценных бумаг от максимальной (расчетной) цены: кредитно-дефолтный своп, предусматривающий продажу ценных бумаг."/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1580,7 +1580,7 @@
     <row alias="R84">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="26990"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от максимальной (расчетной) цены по операциям с  необращающимися ФИСС: уступка (новации) и досрочное прекращение (терминация) сделок с ФИСС"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма отклонения от максимальной (расчетной) цены по операциям с необращающимися ФИСС: уступка (новации) и досрочное прекращение (терминация) сделок с ФИСС"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>
@@ -1618,7 +1618,7 @@
     <row alias="R86">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="27060"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue="Прочие внереализационные расходы"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы в виде превышения   стоимости  приобретаемых активов  ( акций, долей, паев)  над стоимостью  имущества, переданного в их оплату "/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Расходы в виде превышения стоимости приобретаемых активов ( акций, долей, паев) над стоимостью имущества, переданного в их оплату"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1"/>

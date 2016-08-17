@@ -1,4 +1,5 @@
 set serveroutput on size 1000000;
+set linesize 128;
 
 -----------------------------------------------------------------------------------------------------------------------------
 declare 
@@ -212,6 +213,25 @@ EXCEPTION
 end;
 /
 
+-----------------------------------------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16542: добавить индекс для department_report_period.report_period_id
+declare 
+	l_task_name varchar2(128) := 'DDL Block #4 (SBRFACCTAX-16542)';
+	l_rerun_condition decimal(1) := 0;
+begin
+	select count(*) into l_rerun_condition from user_indexes where index_name = 'I_DEP_REP_PER_REPORT_PERIOD_ID';
+	
+	if l_rerun_condition = 0 then 
+		execute immediate 'create index i_dep_rep_per_report_period_id on department_report_period (report_period_id)';
+		dbms_output.put_line(l_task_name||'[INFO]:'||' index I_DEP_REP_PER_REPORT_PERIOD_ID on DEPARTMENT_REPORT_PERIOD created');
+	else
+		dbms_output.put_line(l_task_name||'[ERROR]:'||' index I_DEP_REP_PER_REPORT_PERIOD_ID already exists');
+	end if;
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]:'||sqlerrm);
+end;
+/
 -----------------------------------------------------------------------------------------------------------------------------
 
 COMMIT;

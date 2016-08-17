@@ -133,7 +133,8 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
 
             item.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
             if (record.get(RefBook.RECORD_HAS_CHILD_ALIAS) != null) {
-                item.setHasChild(record.get(RefBook.RECORD_HAS_CHILD_ALIAS).getNumberValue() != null);
+                Number hasChild = record.get(RefBook.RECORD_HAS_CHILD_ALIAS).getNumberValue();
+                item.setHasChild(hasChild != null && hasChild.intValue() == 1);
             }
 
             for (RefBookAttribute refBookAttribute : attributes) {

@@ -180,7 +180,7 @@ public class DeclarationDataPresenter
                                 getView().setVisiblePDF(result.isVisiblePDF());
                                 subreports = result.getSubreports();
                                 getView().setSubreports(result.getSubreports());
-                                if(taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT)){
+                                if(taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.LAND)){
                                     getView().setPropertyBlockVisible(true, true, taxType);
                                     getView().setTaxOrganCode(result.getTaxOrganCode());
                                     getView().setKpp(result.getKpp());

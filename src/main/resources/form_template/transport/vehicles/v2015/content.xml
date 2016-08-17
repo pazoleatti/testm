@@ -267,8 +267,8 @@
         <order>26</order>
         <width>8</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>2082</nameAttributeId>
-        <refBookAttributeId>2082</refBookAttributeId>
+        <nameAttributeId>2183</nameAttributeId>
+        <refBookAttributeId>2183</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
@@ -279,7 +279,7 @@
         <order>27</order>
         <width>5</width>
         <parentAlias>version</parentAlias>
-        <refBookAttributeId>2080</refBookAttributeId>
+        <refBookAttributeId>2181</refBookAttributeId>
         <refBookAttributeId2>2111</refBookAttributeId2>
     </columns>
     <styles>

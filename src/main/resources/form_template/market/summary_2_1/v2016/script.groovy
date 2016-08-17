@@ -95,6 +95,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
+        logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
@@ -117,7 +118,7 @@ def editableColumns = []
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = allColumns - editableColumns
+def autoFillColumns = []
 
 // Проверяемые на пустые значения атрибуты (графа 1..4, 7, 10, 11, 15, 16, 19, 20, 25..29, 31..37)
 @Field
@@ -150,18 +151,75 @@ String getKey(def row) {
 }
 
 @Field
-def recordCache = [:]
-
-@Field
 def providerCache = [:]
 
-def getRecords(def inn) {
-    def filter = "LOWER(INN) = LOWER('$inn') OR LOWER(KIO) = LOWER('$inn')".toString()
-    def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
-    if (recordCache[filter] == null) {
-        recordCache.put(filter, provider.getRecords(getReportPeriodEndDate(), null, filter, null))
+/**
+ * Получить список записей из справочника "Участники ТЦО" (id = 520) по ИНН или КИО.
+ *
+ * @param value значение для поиска по совпадению
+ */
+def getRecords520(def value) {
+    return getRecordsByValue(520L, value, ['INN', 'KIO'])
+}
+
+// мапа хранящая мапы с записями справочника (ключ "id справочника" -> мапа с записями, ключ "значение атрибута" -> список записией)
+// например:
+// [ id 520 : мапа с записям ]
+//      мапа с записями = [ инн 1234567890 : список подходящих записей ]
+@Field
+def recordsMap = [:]
+
+/**
+ * Получить список записей из справочника атрибуты которых равны заданному значению.
+ *
+ * @param refBookId id справочника
+ * @param value значение для поиска
+ * @param attributesForSearch список атрибутов справочника по которым искать совпадения
+ */
+def getRecordsByValue(def refBookId, def value, def attributesForSearch) {
+    if (recordsMap[refBookId] == null) {
+        recordsMap[refBookId] = [:]
+        // получить все записи справочника и засунуть в мапу
+        def allRecords = getAllRecords(refBookId)?.values()
+        allRecords.each { record ->
+            attributesForSearch.each { attribute ->
+                def tmpKey = getKeyValue(record[attribute]?.value)
+                if (tmpKey) {
+                    if (recordsMap[refBookId][tmpKey] == null) {
+                        recordsMap[refBookId][tmpKey] = []
+                    }
+                    if (!recordsMap[refBookId][tmpKey].contains(record)) {
+                        recordsMap[refBookId][tmpKey].add(record)
+                    }
+                }
+            }
+        }
     }
-    return recordCache[filter]
+    def key = getKeyValue(value)
+    return recordsMap[refBookId][key]
+}
+
+def getKeyValue(def value) {
+    return value?.trim()?.toLowerCase()
+}
+
+@Field
+def allRecordsMap = [:]
+
+/**
+ * Получить все записи справочника.
+ *
+ * @param refBookId id справочника
+ * @return мапа с записями справочника (ключ "id записи" -> запись)
+ */
+def getAllRecords(def refBookId) {
+    if (allRecordsMap[refBookId] == null) {
+        def date = getReportPeriodEndDate()
+        def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
+        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
+        allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
+    }
+    return allRecordsMap[refBookId]
 }
 
 void calc() {
@@ -178,7 +236,7 @@ def exclusiveInns = ['9999999999', '9999999998']
 def calc10(def row) {
     def tmp = row.taxpayerName
     if (!exclusiveInns.contains(row.taxpayerInn)) {
-        def records = getRecords(row.taxpayerInn?.trim()?.toLowerCase())
+        def records = getRecords520(row.taxpayerInn)
         if (records != null && records.size() == 1) {
             tmp = records.get(0)?.NAME?.value
         }
