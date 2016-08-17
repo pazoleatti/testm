@@ -18,6 +18,9 @@
     <bean class="org.mockito.Mockito" factory-method="mock" name="formTemplateMainOperatingService">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.MainOperatingService"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.TAUserService"/>
+    </bean>
 
     <bean id="formTemplateController" class="com.aplana.sbrf.taxaccounting.web.mvc.FormTemplateController"/>
 
