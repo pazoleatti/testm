@@ -100,7 +100,8 @@ public class RefBookReadHelper {
                         value = Long.valueOf(row);
                         break;
                     case NUMBER:
-                        value = BigDecimal.valueOf(Double.valueOf(row));
+                        // предполагается что record_id идет первый в строке и его тип должен быть Long как в ядре
+                        value = (j == 0 ? Long.valueOf(row) : new BigDecimal(row));
                         break;
                     case STRING:
                         value = row;

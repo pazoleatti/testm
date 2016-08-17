@@ -317,7 +317,6 @@ def getRecordsByRefbookId(long id) {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
-    def records520 = getRecordsByRefbookId(520L)
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
