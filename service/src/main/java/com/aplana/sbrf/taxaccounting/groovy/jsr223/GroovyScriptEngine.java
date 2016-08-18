@@ -1,13 +1,6 @@
 package com.aplana.sbrf.taxaccounting.groovy.jsr223;
 
-import groovy.lang.Binding;
-import groovy.lang.Closure;
-import groovy.lang.DelegatingMetaClass;
-import groovy.lang.MetaClass;
-import groovy.lang.MissingMethodException;
-import groovy.lang.MissingPropertyException;
-import groovy.lang.Script;
-import groovy.lang.Tuple;
+import groovy.lang.*;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.codehaus.groovy.runtime.InvokerHelper;
@@ -208,7 +201,11 @@ public class GroovyScriptEngine extends GroovyScriptEngineImpl {
                     }
                 });
 
-                return scriptObject.run();
+                try {
+                    return scriptObject.run();
+                } finally {
+                    scriptObject.setBinding(null);
+                }
             }
         } catch (Exception e) {
             throw new ScriptException(e);
@@ -218,6 +215,8 @@ public class GroovyScriptEngine extends GroovyScriptEngineImpl {
             // but should clean up afterwards
             ctx.removeAttribute("context", ScriptContext.ENGINE_SCOPE);
             ctx.removeAttribute("out", ScriptContext.ENGINE_SCOPE);
+            GroovySystem.getMetaClassRegistry().removeMetaClass(scriptClass.getClass());
+            getClassLoader().clearCache();
         }
     }
 
