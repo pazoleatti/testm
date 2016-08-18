@@ -91,7 +91,7 @@ public class GetMainMenuActionHandler extends
                 taxMenu.getSubMenu().add(new MenuItem(TaxType.TRANSPORT.getName(), "", TaxType.TRANSPORT.name()));
                 taxMenu.getSubMenu().add(new MenuItem(TaxType.LAND.getName(), "", TaxType.LAND.name()));
                 taxMenu.getSubMenu().add(new MenuItem("Учет КС", "", TaxType.DEAL.name()));
-                taxMenu.getSubMenu().add(new MenuItem("Рыночные интервалы ТЦО", "", TaxType.MARKET.name()));
+                taxMenu.getSubMenu().add(new MenuItem(TaxType.MARKET.name(), "", TaxType.MARKET.name()));
                 taxMenu.getSubMenu().add(new MenuItem("ЭНС", "", TaxType.ETR.name()));
 
                 for (MenuItem menu : taxMenu.getSubMenu()) {
@@ -106,6 +106,7 @@ public class GetMainMenuActionHandler extends
                             + ";" + TYPE + "=" + menu.getMeta()));
 
                     // декларации
+                    if (!menu.getMeta().equals(TaxType.LAND.name()))// до версии 1.2 деклараций по ЗемНалогу не будет
                     if (!isETR && !isMARKET && (currentUser.hasRole(TARole.ROLE_CONTROL)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))) {
