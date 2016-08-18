@@ -83,7 +83,7 @@
         <checking>false</checking>
         <name>Дата кредитного договора (дд.мм.гг.)</name>
         <order>8</order>
-        <width>5</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
@@ -91,7 +91,7 @@
         <checking>false</checking>
         <name>Дата выдачи (дд.мм.гг.)</name>
         <order>9</order>
-        <width>5</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
@@ -99,7 +99,7 @@
         <checking>false</checking>
         <name>Дата планируемого погашения с учетом последней пролонгации (дд.мм.гг.)</name>
         <order>10</order>
-        <width>5</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
