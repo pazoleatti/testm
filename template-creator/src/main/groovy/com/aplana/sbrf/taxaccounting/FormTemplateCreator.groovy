@@ -14,7 +14,7 @@ import javax.xml.bind.Unmarshaller
 
 /**
  * Утилита создания скрипта для создания макета через scriptExecution
- * Запускать через gradle installApp run
+ * Запускать через gradle installDist run
  * создает в папке template-creator текст скрипта
  * после его выполнения необходимо запустить create_form_data_nnn.txt c <a href="http://conf.aplana.com/pages/viewpage.action?pageId=20384703">страницы</a>
  */
@@ -32,24 +32,20 @@ static void main(String[] args) {
             true  // скрипты
     ]
     String resourcePath = "./src/main/resources/com/aplana/sbrf/taxaccounting/"
-    String templatePath = "../src/main/resources/form_template/income/reserve_debts_1/v2015/" // TODO поменять на путь до нужного макета
+    String templatePath = "../src/main/resources/form_template/market/market_5_2a/v2016/" // TODO поменять на путь до нужного макета
     def map = [ // TODO заполнить
                 // заполняем вручную
-                "%1%"  : '847',             // id типа НФ
-                "%2%"  : 'Сводный регистр налогового учета по формированию и использованию резерва по сомнительным долгам (с периода год 2015)', // имя типа НФ
-                "%3%"  : 'TaxType.INCOME',     // вид налога
+                "%1%"  : '911',             // id типа НФ
+                "%2%"  : '5.2(а) Отчет о выданных Банком инструментах торгового финансирования', // имя типа НФ
+                "%3%"  : 'TaxType.MARKET',     // вид налога
                 "%4%"  : 'false',           // isIFRS
                 "%5%"  : '',                // имя ИФРС
                 "%26%" : '',            // код НФ
-                "%6%"  : '847',             // id версии макета НФ
-                "%10%" : '01.01.2015',      // версия в формате 01.01.2015
-                "%11%" : 'false',           // ежемесячность
-                "%18%" : 'false',            // использование периода сравнения
-                "%27%" : 'false',            // признак расчета нарастающим итогом
-                "%28%" : 'false'             // отображать кнопку "Обновить"
+                "%6%"  : '911',             // id версии макета НФ
+                "%10%" : '01.01.2016'      // версия в формате 01.01.2015
     ]
 
-    String outputFileName = "add_reserve_debts_1.txt" // TODO поменять имя выходного файла
+    String outputFileName = "01_add_market_5_2a_v2016.txt" // TODO поменять имя выходного файла
     def writer
     try {
         File templateFile = new File(resourcePath + "scriptExecution_template.txt")
@@ -95,6 +91,10 @@ static void main(String[] args) {
         map["%8%"] = ft.getName().replaceAll(/"/, /\"/).replaceAll(/\n/, ' ').replaceAll(/ +/, " ")
         map["%9%"] = ft.getFullName().replaceAll(/"/, /\"/).replaceAll(/\n/, ' ').replaceAll(/ +/, " ")
         map["%12%"] = ft.getHeader()
+        map["%11%"] = String.valueOf(ft.monthly)           // ежемесячность
+        map["%18%"] = String.valueOf(ft.comparative)       // использование периода сравнения
+        map["%27%"] = String.valueOf(ft.accruing)          // признак расчета нарастающим итогом
+        map["%28%"] = String.valueOf(ft.updating)          // отображать кнопку "Обновить"
         map["%19%"] = flags[0].toString()
         map["%20%"] = flags[1].toString()
         map["%21%"] = flags[2].toString()
