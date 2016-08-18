@@ -724,4 +724,15 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         values.put("formDataId", formDataId);
         return getNamedParameterJdbcTemplate().queryForObject("SELECT note FROM form_data WHERE id = :formDataId", values, String.class);
     }
+
+    @Override
+    public boolean existFormData(long formDataId) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("formDataId", formDataId);
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject("SELECT id FROM form_data WHERE id = :formDataId", values, Long.class) > 0;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
+    }
 }

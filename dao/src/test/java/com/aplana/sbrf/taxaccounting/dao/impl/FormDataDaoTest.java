@@ -501,4 +501,13 @@ public class FormDataDaoTest {
         formDataDao.updateNote(1, "Проверка комментария к НФ");
         assertEquals(formDataDao.getNote(1), "Проверка комментария к НФ");
     }
+
+    @Test
+    public void testExist() {
+        assertTrue(formDataDao.existFormData(1));
+        assertTrue(formDataDao.existFormData(11));
+        FormData formData = formDataDao.get(1, null);
+        formDataDao.delete(formData.getFormTemplateId(), formData.getId());
+        assertFalse(formDataDao.existFormData(1));
+    }
 }

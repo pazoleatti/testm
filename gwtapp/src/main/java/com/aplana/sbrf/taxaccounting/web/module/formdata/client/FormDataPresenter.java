@@ -1149,6 +1149,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 if (isTimer && !timerEnabled)
                                     return;
                                 timerType = result.getTaskType();
+                                if (result.getFormMode().equals(TimerTaskResult.FormMode.NOT_EXIT)) {
+                                    stopTimer();
+                                    return;
+                                }
                                 boolean isUpdate = false;
                                 if (readOnlyMode) {
                                     if (timerType == null
