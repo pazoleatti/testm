@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
@@ -16,8 +17,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -26,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -36,6 +34,7 @@ public class RefBookScriptingServiceImplTest {
 
     private RefBookScriptingServiceImpl rbScriptingService;
     private TemplateChangesService templateChangesService;
+    private AuditService auditService;
     private static String SCRIPT_TEST_DATA =
             "switch (formDataEvent) {\n" +
             "   case FormDataEvent.IMPORT:\n" +
@@ -55,6 +54,7 @@ public class RefBookScriptingServiceImplTest {
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
         RefBook refBook = new RefBook();
         refBook.setScriptId("test-test");
+        refBook.setName("test");
         when(refBookFactory.get(0L)).thenReturn(refBook);
         ReflectionTestUtils.setField(rbScriptingService, "refBookFactory", refBookFactory);
 
@@ -67,6 +67,9 @@ public class RefBookScriptingServiceImplTest {
 
         templateChangesService = mock(TemplateChangesService.class);
         ReflectionTestUtils.setField(rbScriptingService, "templateChangesService", templateChangesService);
+
+        auditService = mock(AuditService.class);
+        ReflectionTestUtils.setField(rbScriptingService, "auditService", auditService);
 
         TransactionHelper tx = new TransactionHelper() {
             @Override
@@ -98,6 +101,8 @@ public class RefBookScriptingServiceImplTest {
         ArgumentCaptor<TemplateChanges> argument = ArgumentCaptor.forClass(TemplateChanges.class);
         verify(templateChangesService, times(1)).save(argument.capture());
         Assert.assertEquals(FormDataEvent.TEMPLATE_MODIFIED, argument.getAllValues().get(0).getEvent());
+        verify(auditService).add(FormDataEvent.TEMPLATE_MODIFIED, userInfo, null, null,
+                null, null, null, "Обнорвлен скрипт справочника \"test\"", null);
     }
 
     @Test(expected = ServiceLoggerException.class)
