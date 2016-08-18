@@ -287,4 +287,11 @@ public interface FormDataDao {
      * @return
      */
     String getNote(long formDataId);
+
+    /**
+     * Проверяет существование НФ
+     * @param formDataId
+     * @return
+     */
+    boolean existFormData(long formDataId);
 }

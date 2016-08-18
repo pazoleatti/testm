@@ -562,4 +562,11 @@ public interface FormDataService {
      * @return
      */
     Map<FormDataEvent, Boolean> getEventScriptStatus(FormTemplate formTemplate);
+
+    /**
+     * Проверяет существование НФ
+     * @param formDataId
+     * @return
+     */
+    boolean existFormData(long formDataId);
 }

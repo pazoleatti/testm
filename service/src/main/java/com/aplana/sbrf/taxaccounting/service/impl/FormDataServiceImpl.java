@@ -2241,4 +2241,9 @@ public class FormDataServiceImpl implements FormDataService {
         }
         return eventScriptStatus;
     }
+
+    @Override
+    public boolean existFormData(long formDataId) {
+        return formDataDao.existFormData(formDataId);
+    }
 }

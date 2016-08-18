@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.UserAuthenticationToken;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SendQueryAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SendQueryResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -14,7 +13,6 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -56,25 +54,24 @@ public class SendQueryHandler extends AbstractActionHandler<SendQueryAction, Sen
         SendQueryResult result = new SendQueryResult();
         result.setSuccess(false);
         Logger logger = new Logger();
-        UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal()));
 
         List<String> emails = getEmails();
         int count = emails.size();
+        TAUserInfo userInfo = securityService.currentUserInfo();
         if (count == 0) {
             logger.info(SEND_LOGGER);
-            auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), principal.getUserInfo().getUser().getDepartmentId(),
+            auditService.add(FormDataEvent.SEND_EMAIL, userInfo, userInfo.getUser().getDepartmentId(),
                     null, null, null, null, SEND_LOGGER, null);
         } else {
             try {
                 emailService.send(emails, TITLE, getMessage(action.getMessage()));
                 logger.info(SEND_SUCCESS);
-                auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
+                auditService.add(FormDataEvent.SEND_EMAIL, userInfo, 0, null, null, null, null,
                         count == 1 ? String.format(SEND_MAIL, emails.get(0)) : String.format(SEND_MAILS, StringUtils.join(emails.toArray(), ',')), null);
                 result.setSuccess(true);
             } catch (Exception e) {
                 logger.error(e.getMessage());
-                auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,e.getMessage(), null, null);
+                auditService.add(FormDataEvent.SEND_EMAIL, userInfo, 0, null, null, null, null,e.getMessage(), null, null);
                 throw new ActionException(e);
             }
         }

@@ -94,6 +94,12 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             @Override
             public void onValueChange(ValueChangeEvent<List<Long>> event) {
                 updateEnabled();
+                if (taxOrganCode.getFilter() != null) {
+                    taxOrganKpp.setFilter(taxOrganCode.getFilter() + " and TAX_ORGAN_CODE = '" + taxOrganCode.getDereferenceValue().trim() + "'");
+                    if (event.getValue() != null && !event.getValue().isEmpty() && !event.getValue().get(0).equals(taxOrganKpp.getSingleValue())) {
+                        taxOrganKpp.setSingleValue(null);
+                    }
+                }
             }
         });
     }
@@ -153,7 +159,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         departmentPicker.setEnabled(periodSelected);
         declarationTypeId.setEnabled(departmentSelected);
         taxOrganCode.setEnabled(departmentSelected);
-        taxOrganKpp.setEnabled((codePanel.isVisible() ? taxOrganCodeSelected : declarationTypeIdSelected));
+        taxOrganKpp.setEnabled(codePanel.isVisible() ? taxOrganCodeSelected : departmentSelected);
         // дата корректировки
         correctionPanel.setVisible(departmentSelected && correctionDateSelected);
     }
@@ -230,6 +236,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         declarationTypeId.setValue(null);
         taxOrganCode.setValue(null);
         taxOrganKpp.setValue(null);
+        if (getSelectedDepartment().isEmpty()) {
+            declarationTypeId.setEnabled(false);
+            taxOrganCode.setEnabled(false);
+            taxOrganKpp.setEnabled(false);
+        }
         getUiHandlers().onDepartmentChange();
     }
 

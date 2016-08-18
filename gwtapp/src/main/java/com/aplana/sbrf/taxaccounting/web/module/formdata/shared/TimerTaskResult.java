@@ -10,7 +10,8 @@ public class TimerTaskResult implements Result {
         LOCKED, // Открыта только для чтения
         LOCKED_READ, // Заблокирована в режиме просмотра текущим пользователем
         LOCKED_EDIT, // Заблокирована в режиме редактрирования текущим пользователем
-        EDIT // Открыта для редактирования
+        EDIT, // Открыта для редактирования
+        NOT_EXIT // Форма не существуует
     }
 
     private ReportType taskType;
