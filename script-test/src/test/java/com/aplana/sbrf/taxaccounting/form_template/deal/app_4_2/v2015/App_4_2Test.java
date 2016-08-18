@@ -2,12 +2,14 @@ package com.aplana.sbrf.taxaccounting.form_template.deal.app_4_2.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
@@ -32,7 +34,6 @@ import static org.mockito.Mockito.when;
  * Приложение 4.2. Отчет в отношении доходов и расходов Банка по сделкам с ВЗЛ, РОЗ, НЛ по итогам окончания Налогового периода
  *
  * TODO:
- *      - добавить тесты для всех вариантов скриптового метода calc4
  *      - добавить источников в методе getFillDataRows()
  */
 public class App_4_2Test extends ScriptTestBase {
@@ -191,72 +192,151 @@ public class App_4_2Test extends ScriptTestBase {
         checkLogger();
     }
 
-    // Проверка с данными
+    // Расчет с данными
     @Test
-    public void check1Test() throws ParseException {
+    public void calc1Test() {
+        // провайдеры и получения записей для справочников
+        mockProviders();
+
         FormData formData = getFormData();
         formData.initFormTemplateParams(testHelper.getFormTemplate());
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
 
-        // Проверка заполнения граф
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
         dataRows.add(row);
 
-        testHelper.execute(FormDataEvent.CHECK);
+        int rowIndex = row.getIndex();
+        String [] nonEmptyColumns = { "name", "group", "sum51", "sum52", "sum53", "sum54", "sum55", "sum56", "sum61", "sum62", "sum63",
+                "sum64", "sum65", "sum66", "sum7", "thresholdValue", "sign", "categoryRevised" };
+
+        // ошибок быть не должно
+        for (String column : nonEmptyColumns) {
+            row.getCell(column).setValue(1L, rowIndex);
+        }
+        testHelper.execute(FormDataEvent.CALCULATE);
+        checkLogger();
+
+        // проверка расчета графы 4, 17..20
+        for (String column : nonEmptyColumns) {
+            row.getCell(column).setValue(1L, rowIndex);
+        }
+        row.getCell("name").setValue(4L, rowIndex);
+        testHelper.execute(FormDataEvent.CALCULATE);
+        checkLogger();
+        // графа 4 - РОЗ и НЛ
+        Assert.assertEquals(3L, row.getCell("group").getNumericValue().longValue());
+        // графа 17
+        Assert.assertEquals(12L, row.getCell("sum7").getNumericValue().longValue());
+        // графа 18
+        Assert.assertEquals(3L, row.getCell("thresholdValue").getNumericValue().longValue());
+        // графа 19
+        Assert.assertEquals(2L, row.getCell("sign").getNumericValue().longValue());
+        // графа 20
+        Assert.assertEquals(5L, row.getCell("categoryRevised").getNumericValue().longValue());
+
+        // проверка расчета только графы 4 - ИВЗЛ
+        for (String column : nonEmptyColumns) {
+            row.getCell(column).setValue(1L, rowIndex);
+        }
+        row.getCell("name").setValue(2L, rowIndex);
+        testHelper.execute(FormDataEvent.CALCULATE);
+        // графа 4 - ИВЗЛ
+        Assert.assertEquals(3L, row.getCell("group").getNumericValue().longValue());
+
+        // проверка расчета только графы 4 - ВЗЛ СРН
+        for (String column : nonEmptyColumns) {
+            row.getCell(column).setValue(1L, rowIndex);
+        }
+        row.getCell("name").setValue(3L, rowIndex);
+        testHelper.execute(FormDataEvent.CALCULATE);
+        // графа 4 - ВЗЛ СРН
+        Assert.assertEquals(5L, row.getCell("group").getNumericValue().longValue());
+    }
+
+    // Проверка с данными
+    @Test
+    public void check1Test() throws ParseException {
+        // провайдеры и получения записей для справочников
+        mockProviders();
+
+        FormData formData = getFormData();
+        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
-        int i = 0;
 
-        Assert.assertEquals("Строка 1: Графа «Полное наименование и ОПФ юридического лица» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Группа юридического лица» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки с ценными бумагами» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки купли-продажи иностранной валюты» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки купли-продажи драгоценных металлов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки, отраженные в Журнале взаиморасчетов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма дополнительно начисленных налогооблагаемых доходов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки с ценными бумагами» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки купли-продажи иностранной валюты» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки купли-продажи драгоценных металлов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки, отраженные в Журнале взаиморасчетов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма дополнительно начисленных налогооблагаемых расходов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Итого объем доходов и расходов, руб.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Применимое Пороговое значение, руб» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Признак наличия Контролируемых сделок (Да / Нет)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Пересмотренная Категория юридического лица по состоянию на 1 апреля» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Для типа участника ТЦО «null» не задано пороговое значение в данном Налоговом периоде!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Для ожидаемого объема доходов и расходов не задано правило назначения категории в данном Налоговом периоде!", entries.get(i++).getMessage());
+        DataRow<Cell> row = formData.createDataRow();
+        row.setIndex(1);
+        dataRows.add(row);
 
+        String msg;
+        int i;
+        int rowIndex = row.getIndex();
+        String [] nonEmptyColumns = { "name", "group", "sum51", "sum52", "sum53", "sum54", "sum55", "sum56", "sum61", "sum62", "sum63",
+                "sum64", "sum65", "sum66", "sum7", "thresholdValue", "sign", "categoryRevised" };
+
+        // Дополнительная проверка - ошибок быть не должно
+        for (String column : nonEmptyColumns) {
+            row.getCell(column).setValue(1L, rowIndex);
+        }
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        checkLogger();
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        // для попадания в ЛП:
-        row.getCell("name").setValue(1L, null);
-        row.getCell("group").setValue(1L, null);
-        row.getCell("sum51").setValue(1L, null);
-        row.getCell("sum52").setValue(1L, null);
-        row.getCell("sum53").setValue(1L, null);
-        row.getCell("sum54").setValue(1L, null);
-        row.getCell("sum55").setValue(1L, null);
-        row.getCell("sum56").setValue(1L, null);
-        row.getCell("sum61").setValue(1L, null);
-        row.getCell("sum62").setValue(1L, null);
-        row.getCell("sum63").setValue(1L, null);
-        row.getCell("sum64").setValue(1L, null);
-        row.getCell("sum65").setValue(1L, null);
-        row.getCell("sum66").setValue(1L, null);
-        row.getCell("sum7").setValue(1L, null);
-        row.getCell("thresholdValue").setValue(1L, null);
-        row.getCell("sign").setValue(1L, null);
-        row.getCell("categoryRevised").setValue(1L, null);
-
+        // 1. Проверка заполнения обязательных полей
+        // очистить значения
+        for (String column : nonEmptyColumns) {
+            row.getCell(column).setValue(null, rowIndex);
+        }
         testHelper.execute(FormDataEvent.CHECK);
-
-        entries = testHelper.getLogger().getEntries();
+        // должно быть много сообщении об незаполненности обязательных полей
+        Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
         i = 0;
+        for (String alias : nonEmptyColumns) {
+            String columnName = row.getCell(alias).getColumn().getName();
+            msg = String.format(ScriptUtils.WRONG_NON_EMPTY, rowIndex, columnName);
+            Assert.assertEquals(msg, entries.get(i++).getMessage());
+        }
+        // лишние проверки 2 и 3
         Assert.assertEquals("Строка 1: Для типа участника ТЦО «null» не задано пороговое значение в данном Налоговом периоде!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Для ожидаемого объема доходов и расходов не задано правило назначения категории в данном Налоговом периоде!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        // 2. Наличие порогового значения
+        for (String column : nonEmptyColumns) {
+            row.getCell(column).setValue(1L, rowIndex);
+        }
+        row.getCell("group").setValue(4L, rowIndex);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        Assert.assertEquals("Строка 1: Для типа участника ТЦО «TEST» не задано пороговое значение в данном Налоговом периоде!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        // 3. Наличие правила назначения категории
+        for (String column : nonEmptyColumns) {
+            row.getCell(column).setValue(1L, rowIndex);
+        }
+        row.getCell("group").setValue(5L, rowIndex);
+        row.getCell("sum7").setValue(100L, rowIndex);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        Assert.assertEquals("Строка 1: Для ожидаемого объема доходов и расходов не задано правило назначения категории в данном Налоговом периоде!", entries.get(i++).getMessage());
+        // лишняя проверка 4
+        Assert.assertEquals("Строка 1: Для ожидаемого объема доходов и расходов указана неверная категория!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        // 4. Проверка соответствия категории пороговым значениям
+        for (String column : nonEmptyColumns) {
+            row.getCell(column).setValue(1L, rowIndex);
+        }
+        row.getCell("categoryRevised").setValue(2L, rowIndex);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
         Assert.assertEquals("Строка 1: Для ожидаемого объема доходов и расходов указана неверная категория!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -300,11 +380,7 @@ public class App_4_2Test extends ScriptTestBase {
                 any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
 
         // провайдеры и получения записей для справочников
-        mockProvider(520L);
-        mockProvider(525L);
-        mockProvider(505L);
-        mockProvider(514L);
-        mockProvider(515L);
+        mockProviders();
 
         testHelper.initRowData();
 
@@ -500,6 +576,13 @@ public class App_4_2Test extends ScriptTestBase {
         Assert.assertEquals(1L, row.getCell("sign").getNumericValue().longValue());
         // графа 20 (10)
         Assert.assertEquals(3L, row.getCell("categoryRevised").getNumericValue().longValue());
+    }
+
+    private void mockProviders() {
+        long [] refBookIds = { 505L, 511L, 513L, 514L, 515L, 520L, 525L };
+        for (long id : refBookIds) {
+            mockProvider(id);
+        }
     }
 
     private void mockProvider(final Long refBookId) {
