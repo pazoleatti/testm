@@ -9057,7 +9057,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement uuid="e136de8d-2c77-41cc-9c27-e7285c232744" x="583" y="829" width="13" height="13" backcolor="#000000"/>
+				<reportElement uuid="e136de8d-2c77-41cc-9c27-e7285c232744" x="587" y="829" width="13" height="13" backcolor="#000000"/>
 			</rectangle>
 			<rectangle>
 				<reportElement uuid="a3969783-7511-4649-a9da-00aae5310960" key="1233456" x="0" y="829" width="13" height="13" backcolor="#000000"/>
@@ -9484,7 +9484,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<reportElement uuid="33df9a4a-e50d-44d0-8e76-51741a5a7f26" x="132" y="0" width="13" height="13" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
 			</rectangle>
 			<staticText>
-				<reportElement uuid="17cf932c-1492-4624-ba45-691763a13a31" x="1" y="52" width="600" height="30" isPrintWhenDetailOverflows="true">
+				<reportElement uuid="17cf932c-1492-4624-ba45-691763a13a31" x="0" y="52" width="600" height="30" isPrintWhenDetailOverflows="true">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.2_Разд.1"/>
 					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.061f"/>
 				</reportElement>
@@ -9522,7 +9522,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[010]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="d793683a-4601-4f73-8208-e09a0451cf1f" x="1" y="802" width="600" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="d793683a-4601-4f73-8208-e09a0451cf1f" x="0" y="802" width="600" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
@@ -9833,7 +9833,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[Показатели]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement uuid="26fddf09-95d1-4027-bee8-66454289bdc2" x="583" y="829" width="13" height="13" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
+				<reportElement uuid="26fddf09-95d1-4027-bee8-66454289bdc2" x="587" y="829" width="13" height="13" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
 			</rectangle>
 			<rectangle>
 				<reportElement uuid="6b015266-8a45-4b8d-a8ae-04432f902e23" x="0" y="829" width="13" height="13" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
