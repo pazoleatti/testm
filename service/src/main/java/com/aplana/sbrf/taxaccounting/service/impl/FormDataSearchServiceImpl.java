@@ -59,6 +59,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentIds());
         // Отчетные периоды
         formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
+        formDataDaoFilter.setComparativePeriodId(formDataFilter.getComparativePeriodId());
         if (formDataFilter.getFormDataKind() != null) {
             formDataDaoFilter.setFormDataKind((List<FormDataKind>) CollectionUtils.collect(formDataFilter.getFormDataKind(), new Transformer() {
                 @Override

@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.model.TaxType.ETR;
+
 /**
  * Сервис работы с периодами
  *
@@ -485,6 +487,7 @@ public class PeriodServiceImpl implements PeriodService {
             dataFilter.setCorrectionTag(false);
         }
         dataFilter.setDepartmentIds(departmentIds);
+		// Проверка на наличие форм в периоде
         dataFilter.setReportPeriodIds(Collections.singletonList(drp.getReportPeriod().getId()));
         List<FormData> formDatas = formDataSearchService.findDataByFilter(dataFilter);
         for (FormData fd : formDatas) {
@@ -492,6 +495,18 @@ public class PeriodServiceImpl implements PeriodService {
                     fd.getFormType().getName(), fd.getKind().getTitle(),
                     departmentService.getDepartment(fd.getDepartmentId()).getName());
         }
+
+		if (taxType.equals(ETR)) {
+			// Проверка на наличие форм в периоде сравнения
+			dataFilter.setReportPeriodIds(null);
+			dataFilter.setComparativePeriodId(Collections.singletonList(drp.getReportPeriod().getId()));
+			formDatas = formDataSearchService.findDataByFilter(dataFilter);
+			for (FormData fd : formDatas) {
+				logger.error("Форма \"%s\" \"%s\" в подразделении \"%s\" находится в удаляемом периоде!",
+						fd.getFormType().getName(), fd.getKind().getTitle(),
+						departmentService.getDepartment(fd.getDepartmentId()).getName());
+			}
+		}
 
         DeclarationDataFilter filter = new DeclarationDataFilter();
         filter.setDepartmentIds(departmentIds);
