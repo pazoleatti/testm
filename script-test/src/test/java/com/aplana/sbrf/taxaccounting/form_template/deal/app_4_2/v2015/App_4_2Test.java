@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
  *
  * TODO:
  *      - добавить источников в методе getFillDataRows()
+ *      - тесты для спецочета
  */
 public class App_4_2Test extends ScriptTestBase {
     private static final int TYPE_ID = 803;
@@ -133,7 +134,7 @@ public class App_4_2Test extends ScriptTestBase {
         templatesPathMap.put(836, "..//src/main//resources//form_template//deal//app_6_25//v2015//");
     }
 
-    private static List<RefBookDataProvider> providers = new ArrayList<RefBookDataProvider>();
+    private static Map<Long, RefBookDataProvider> providers = new HashMap<Long, RefBookDataProvider>();
 
     @Override
     protected FormData getFormData() {
@@ -163,7 +164,7 @@ public class App_4_2Test extends ScriptTestBase {
 
     @After
     public void resetMock() {
-        for (RefBookDataProvider provider : providers) {
+        for (RefBookDataProvider provider : providers.values()) {
             reset(provider);
         }
         reset(testHelper.getRefBookDataProvider());
@@ -370,7 +371,7 @@ public class App_4_2Test extends ScriptTestBase {
                     anyInt(), anyInt(), anyInt(), anyBoolean())).thenReturn(sourceFormData);
 
             // строки и хелпер источника
-            List<DataRow<Cell>> dataRows = getFillDataRows(sourceTemplateId, sourceFormData, 1L);
+            List<DataRow<Cell>> dataRows = getFillDataRows(sourceTemplateId, sourceFormData);
             DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
             sourceDataRowHelper.save(dataRows);
             when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
@@ -441,9 +442,8 @@ public class App_4_2Test extends ScriptTestBase {
      *
      * @param sourceTemplateId идентификатор макета источника
      * @param sourceFormData форма источника
-     * @param refbook9Id идентификатор для графы организации (юр лица), влияющая на группировку
      */
-    private List<DataRow<Cell>> getFillDataRows(int sourceTemplateId, FormData sourceFormData, long refbook9Id) {
+    private List<DataRow<Cell>> getFillDataRows(int sourceTemplateId, FormData sourceFormData) {
         List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
         String testString = "test_" + sourceTemplateId;
         Date testDate = new Date();
@@ -465,63 +465,59 @@ public class App_4_2Test extends ScriptTestBase {
                 row.getCell("sum44").setValue(testLong, null);
                 dataRows.add(row);
                 break;
-            case 818 : // 6.1
+            case 818 : // РНУ-101
                 row = sourceFormData.createDataRow();
                 row.setAlias("testAlias");
                 row.getCell("name").setValue(testRefbookId, null);
                 row.getCell("sum3").setValue(testLong, null);
                 dataRows.add(row);
                 break;
-            case 820 : // 6.2
-            case 821 : // 6.3
-            case 822 : // 6.4
-            case 808 : // 6.5
-            case 824 : // 6.6
-            case 829 : // 6.7
-            case 842 : // 6.8
-            case 844 : // 6.9
-            case 809 : // 6.10-1
-            case 840 : // 6.10-2
-            case 841 : // 6.11
-            case 843 : // 6.12
-            case 816 : // 6.13
-            case 804 : // 6.14
-            case 812 : // 6.15
-            case 813 : // 6.16
-            case 814 : // 6.17
-            case 806 : // 6.18
-            case 805 : // 6.19
-            case 815 : // 6.20
-            case 817 : // 6.21
-            case 823 : // 6.22
-            case 825 : // 6.23
-            case 827 : // 6.24
-            case 819 : // 6.25
+            case 820 : // РНУ-102
+            case 821 : // РНУ-107
+            case 822 : // РНУ-110
+            case 808 : // РНУ-111
+            case 824 : // РНУ-112
+            case 829 : // РНУ-114
+            case 842 : // РНУ-115
+            case 844 : // РНУ-116
+            case 809 : // РНУ-117
+            case 840 : // РНУ-122
+            case 841 : // РНУ-123
+            case 843 : // РНУ-171
                 // TODO (Ramil Timerbaev) дополнить
                 break;
-            case 826 : // РНУ-101
+            case 816 : // 6.1
                 row = sourceFormData.createDataRow();
                 row.getCell("name").setValue(testRefbookId, null);
-                row.getCell("outcomeSum").setValue(testLong, null);
+                row.getCell("sum").setValue(testLong, null);
                 dataRows.add(row);
                 break;
-            case 835 : // РНУ-102
-            case 837 : // РНУ-107
-            case 839 : // РНУ-110
-            case 811 : // РНУ-111
-            case 838 : // РНУ-112
-            case 828 : // РНУ-114
-            case 831 : // РНУ-115
-            case 830 : // РНУ-116
-            case 834 : // РНУ-117
-            case 832 : // РНУ-122
-            case 833 : // РНУ-123
+            case 804 : // 6.2
+            case 812 : // 6.3
+            case 813 : // 6.4
+            case 814 : // 6.5
+            case 806 : // 6.6
+            case 805 : // 6.7
+            case 815 : // 6.8
+            case 817 : // 6.9
+            case 823 : // 6.10-1
+            case 825 : // 6.10-2
+            case 827 : // 6.11
+            case 819 : // 6.12
+            case 826 : // 6.13
+            case 835 : // 6.14
+            case 837 : // 6.15
+            case 839 : // 6.16
+            case 811 : // 6.17
+            case 838 : // 6.18
+            case 828 : // 6.19
+            case 831 : // 6.20
+            case 830 : // 6.21
+            case 834 : // 6.22
+            case 832 : // 6.23
+            case 833 : // 6.24
+            case 836 : // 6.25
                 // TODO (Ramil Timerbaev) дополнить
-                break;
-            case 836 : // РНУ-171
-                row = sourceFormData.createDataRow();
-                row.getCell("name").setValue(testRefbookId, null);
-                dataRows.add(row);
                 break;
         }
         return dataRows;
@@ -546,7 +542,7 @@ public class App_4_2Test extends ScriptTestBase {
         // графа 8  (5.4)
         Assert.assertEquals(100100L, row.getCell("sum54").getNumericValue().longValue());
         // графа 9  (5.5)
-        Assert.assertEquals(0L, row.getCell("sum55").getNumericValue().longValue());
+        Assert.assertEquals(100L, row.getCell("sum55").getNumericValue().longValue());
         // графа 10 (5.6)
         Assert.assertEquals(100L, row.getCell("sum56").getNumericValue().longValue());
         // графа 11 (6.1)
@@ -558,17 +554,17 @@ public class App_4_2Test extends ScriptTestBase {
         // графа 14 (6.4)
         Assert.assertEquals(0L, row.getCell("sum64").getNumericValue().longValue());
         // графа 15 (6.5)
-        Assert.assertEquals(100L, row.getCell("sum65").getNumericValue().longValue());
+        Assert.assertEquals(0L, row.getCell("sum65").getNumericValue().longValue());
         // графа 16 (6.6)
         Assert.assertEquals(0L, row.getCell("sum66").getNumericValue().longValue());
 
         // графа 17 (7)
         String [] calc17Aliases = { "sum51", "sum52", "sum53", "sum54", "sum55", "sum56", "sum61", "sum62", "sum63", "sum64", "sum65", "sum66" };
-        long tmp17 = 0L;
+        long expected17 = 0L;
         for (String alias : calc17Aliases) {
-            tmp17 += row.getCell(alias).getNumericValue().longValue();
+            expected17 += row.getCell(alias).getNumericValue().longValue();
         }
-        Assert.assertEquals(tmp17, row.getCell("sum7").getNumericValue().longValue());
+        Assert.assertEquals(expected17, row.getCell("sum7").getNumericValue().longValue());
 
         // графа 18 (8)
         Assert.assertEquals(1L, row.getCell("thresholdValue").getNumericValue().longValue());
@@ -588,7 +584,8 @@ public class App_4_2Test extends ScriptTestBase {
     private void mockProvider(final Long refBookId) {
         // провайдер для справочника
         RefBookUniversal provider = mock(RefBookUniversal.class);
-        providers.add(provider);
+        providers.put(refBookId, provider);
+        provider.setRefBookId(refBookId);
         when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(refBookId),
                 anyMapOf(Long.class, RefBookDataProvider.class))).thenReturn(provider);
 
