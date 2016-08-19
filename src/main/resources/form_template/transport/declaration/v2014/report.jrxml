@@ -1296,7 +1296,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[по месту нахождения (учета)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="9edc8461-48ca-4dbe-83c9-f6b74909470e" x="47" y="66" width="593" height="30">
+				<reportElement uuid="9edc8461-48ca-4dbe-83c9-f6b74909470e" x="1" y="66" width="593" height="30">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.1"/>
 					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.241f"/>
 				</reportElement>
@@ -9057,7 +9057,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement uuid="e136de8d-2c77-41cc-9c27-e7285c232744" x="600" y="829" width="13" height="13" backcolor="#000000"/>
+				<reportElement uuid="e136de8d-2c77-41cc-9c27-e7285c232744" x="583" y="829" width="13" height="13" backcolor="#000000"/>
 			</rectangle>
 			<rectangle>
 				<reportElement uuid="a3969783-7511-4649-a9da-00aae5310960" key="1233456" x="0" y="829" width="13" height="13" backcolor="#000000"/>
@@ -9073,7 +9073,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[(код)]]></text>
 			</staticText>
 			<image hAlign="Center">
-				<reportElement uuid="d2ae7efc-c968-49bb-85b2-2fb6fb519287" x="16" y="1" width="115" height="48"/>
+				<reportElement uuid="d2ae7efc-c968-49bb-85b2-2fb6fb519287" x="16" y="0" width="115" height="48"/>
 				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage}).processString() )]]></imageExpression>
 			</image>
 		</band>
@@ -9833,10 +9833,10 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[Показатели]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement uuid="26fddf09-95d1-4027-bee8-66454289bdc2" x="600" y="829" width="13" height="13" backcolor="#000000"/>
+				<reportElement uuid="26fddf09-95d1-4027-bee8-66454289bdc2" x="583" y="829" width="13" height="13" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
 			</rectangle>
 			<rectangle>
-				<reportElement uuid="6b015266-8a45-4b8d-a8ae-04432f902e23" x="0" y="829" width="13" height="13" backcolor="#000000"/>
+				<reportElement uuid="6b015266-8a45-4b8d-a8ae-04432f902e23" x="0" y="829" width="13" height="13" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
 			</rectangle>
 			<line>
 				<reportElement uuid="8e1308a7-9331-45fd-bb36-b17d41c21081" x="130" y="833" width="100" height="1" isPrintWhenDetailOverflows="true"/>
@@ -9851,7 +9851,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				</graphicElement>
 			</line>
 			<image hAlign="Center">
-				<reportElement uuid="6fd667b8-d4e1-435e-b632-bfae6e5e5974" x="14" y="2" width="115" height="48" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="6fd667b8-d4e1-435e-b632-bfae6e5e5974" x="14" y="0" width="115" height="48" isPrintWhenDetailOverflows="true"/>
 				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage2}).processString() )]]></imageExpression>
 			</image>
 			<componentElement>
@@ -15346,7 +15346,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement uuid="09b6bd0d-ee9d-4d76-9ac6-22aa2615ab2a" mode="Opaque" x="371" y="204" width="13" height="20"/>
-							<textElement textAlignment="Center" verticalAlignment="Middle">
+							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="Courier New" size="14" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 							</textElement>
 							<text><![CDATA[.]]></text>
@@ -15647,21 +15647,21 @@ $F{ЭкологКл}]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement uuid="54d9d334-c595-4a12-b7c8-24071f33613f" mode="Opaque" x="176" y="382" width="13" height="20"/>
-							<textElement textAlignment="Center" verticalAlignment="Middle">
+							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="Courier New" size="14" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 							</textElement>
 							<text><![CDATA[.]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="cec38222-6b7a-4b8e-873f-8d69565a7568" mode="Opaque" x="250" y="410" width="13" height="20"/>
-							<textElement textAlignment="Center" verticalAlignment="Middle">
+							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="Courier New" size="14" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 							</textElement>
 							<text><![CDATA[.]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="17317ef4-f22c-4d13-81f0-7f4672b89523" mode="Opaque" x="174" y="519" width="15" height="20"/>
-							<textElement textAlignment="Center" verticalAlignment="Middle">
+							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="Courier New" size="14" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 							</textElement>
 							<text><![CDATA[.]]></text>
@@ -16004,14 +16004,14 @@ $F{ЭкологКл}]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement uuid="4f9866e8-cec9-4dc7-bc99-29260bd2e958" mode="Opaque" x="235" y="550" width="13" height="20"/>
-							<textElement textAlignment="Center" verticalAlignment="Middle">
+							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="Courier New" size="14" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 							</textElement>
 							<text><![CDATA[/]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="6bebf2a3-78e3-4330-9c75-517fbe1a5487" mode="Opaque" x="235" y="605" width="13" height="20"/>
-							<textElement textAlignment="Center" verticalAlignment="Middle">
+							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="Courier New" size="14" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 							</textElement>
 							<text><![CDATA[/]]></text>
@@ -16256,7 +16256,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement uuid="eb325dc9-661e-413a-bd26-3afa054785c3" mode="Opaque" x="235" y="660" width="13" height="20"/>
-							<textElement textAlignment="Center" verticalAlignment="Middle">
+							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="Courier New" size="14" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 							</textElement>
 							<text><![CDATA[/]]></text>
@@ -17557,14 +17557,14 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<text><![CDATA[050]]></text>
 						</staticText>
 						<rectangle>
-							<reportElement uuid="f9e1a46d-c070-4bac-8ad2-147082924db4" mode="Opaque" x="600" y="778" width="13" height="13" backcolor="#000000"/>
+							<reportElement uuid="f9e1a46d-c070-4bac-8ad2-147082924db4" mode="Opaque" x="600" y="778" width="13" height="13" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
 						</rectangle>
 						<rectangle>
-							<reportElement uuid="e7e81156-8ffc-4a9d-89dc-b7dfbe60b214" mode="Opaque" x="0" y="778" width="13" height="13" backcolor="#000000"/>
+							<reportElement uuid="e7e81156-8ffc-4a9d-89dc-b7dfbe60b214" mode="Opaque" x="0" y="778" width="13" height="13" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
 						</rectangle>
 						<staticText>
 							<reportElement uuid="7894df21-07ff-4826-95fa-17dbf5fbf815" mode="Opaque" x="176" y="436" width="13" height="20"/>
-							<textElement textAlignment="Center" verticalAlignment="Middle">
+							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="Courier New" size="14" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 							</textElement>
 							<text><![CDATA[.]]></text>
@@ -17795,7 +17795,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement uuid="90796c6d-8dc7-47ff-90e2-856d108e26d6" mode="Opaque" x="311" y="352" width="13" height="20"/>
-							<textElement textAlignment="Center" verticalAlignment="Middle">
+							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="Courier New" size="14" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 							</textElement>
 							<text><![CDATA[/]]></text>
@@ -17921,7 +17921,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 				<reportElement uuid="ffe3ea14-916d-4a02-ad16-bebd0e558158" x="0" y="841" width="100" height="1"/>
 			</break>
 			<image hAlign="Center">
-				<reportElement uuid="f5f0bac3-f673-4b93-8a7f-e4fb120ac900" x="16" y="1" width="115" height="48" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="f5f0bac3-f673-4b93-8a7f-e4fb120ac900" x="16" y="0" width="115" height="48" isPrintWhenDetailOverflows="true"/>
 				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage3}).processString() )]]></imageExpression>
 			</image>
 		</band>
