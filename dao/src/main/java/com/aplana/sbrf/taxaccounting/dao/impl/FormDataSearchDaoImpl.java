@@ -62,6 +62,12 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
                 .append(transformToSqlInStatement("rp.id", filter.getReportPeriodIds()));
 		}
 
+		if (filter.getComparativePeriodId() != null && !filter.getComparativePeriodId().isEmpty()) {
+			sql
+				.append(" AND ")
+				.append(transformToSqlInStatement("crp.id", filter.getComparativePeriodId()));
+		}
+
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
 			sql
                 .append(" AND ")

@@ -14,6 +14,8 @@ public class FormDataDaoFilter implements Serializable {
 
 	private List<Integer> reportPeriodIds;
 
+	private List<Integer> comparativePeriodId;
+
 	private List<Integer> departmentIds;
 
 	private List<Long> formTypeIds;
@@ -36,6 +38,14 @@ public class FormDataDaoFilter implements Serializable {
 
 	public void setReportPeriodIds(List<Integer> reportPeriodIds) {
 		this.reportPeriodIds = reportPeriodIds;
+	}
+
+	public List<Integer> getComparativePeriodId() {
+		return comparativePeriodId;
+	}
+
+	public void setComparativePeriodId(List<Integer> comparativePeriodId) {
+		this.comparativePeriodId = comparativePeriodId;
 	}
 
 	public List<Integer> getDepartmentIds() {
