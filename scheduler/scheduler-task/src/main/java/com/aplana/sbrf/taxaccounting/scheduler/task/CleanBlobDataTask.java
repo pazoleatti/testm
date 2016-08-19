@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import com.aplana.sbrf.taxaccounting.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.service.SchedulerInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +32,13 @@ public class CleanBlobDataTask extends AbstractUserTask {
     @Autowired
     BlobDataService blobDataService;
 
+    @Autowired
+    DataRowService dataRowService;
+
     @Override
     public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
         blobDataService.clean();
+        dataRowService.clearSearchResults();
     }
 
     @Override

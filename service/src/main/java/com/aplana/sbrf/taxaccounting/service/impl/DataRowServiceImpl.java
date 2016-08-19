@@ -86,7 +86,7 @@ public class DataRowServiceImpl implements DataRowService {
     public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, int sessionId, boolean isCaseSensitive, boolean manual, boolean correctionDiff) {
         PagingResult<FormDataSearchResult> results;
         // если уже производился поиск, то берем данные из временной таблицы
-        results = dataRowDao.getSearchResult(key, sessionId, range);
+        results = dataRowDao.getSearchResult(sessionId, formDataId, key, range);
         if (results != null) {
             return results;
         }
@@ -108,18 +108,34 @@ public class DataRowServiceImpl implements DataRowService {
             resultsList = new ArrayList<FormDataSearchResult>();
         }
         // очищаем таблицу
-        dataRowDao.initSearchResult(key, sessionId);
-        // сохраняем результаты поиска (dataRowDao.searchByKey также сохраняет)
-        dataRowDao.saveSearchResult(resultsList);
+        int searchId = dataRowDao.initSearchResult(sessionId, formDataId, key);
+        // сохраняем результаты поиска
+        if (!resultsList.isEmpty()) {
+            dataRowDao.saveSearchResult(searchId, resultsList);
+        }
         if (existCommonColumn) {
+            // поиск в БД по нессылочным столбцам
             Pair<String, Map<String, Object>> sql = dataRowDao.getSearchQuery(formDataId, formData.getFormTemplateId(), key, isCaseSensitive, manual, correctionDiff);
-            dataRowDao.saveSearchResult(sql.getFirst(), sql.getSecond());
+            dataRowDao.saveSearchResult(searchId, sql.getFirst(), sql.getSecond());
         } else {
             // если нет *обычных*(числовых, строковых, автонумеруемых) граф, то нет смысла проводить поиск
         }
 
-        results = dataRowDao.getSearchResult(key, sessionId, range);
-        return results;
+        results = dataRowDao.getSearchResult(sessionId, formDataId, key, range);
+
+        return results == null ? new PagingResult<FormDataSearchResult>(new ArrayList<FormDataSearchResult>(), 0) : results;
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void deleteSearchResults(int sessionId, long formDataId) {
+        dataRowDao.deleteSearchResults(sessionId, formDataId);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void clearSearchResults() {
+        dataRowDao.clearSearchResults();
     }
 
     public List<FormDataSearchResult> searchByKeyInRefColumns(FormData formData, DataRowRange range, String key, boolean isCaseSensitive, boolean correctionDiff){

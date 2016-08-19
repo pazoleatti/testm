@@ -19,6 +19,7 @@ public class SearchAction extends UnsecuredActionImpl<SearchResult> implements A
     private Integer formTemplateId;
     private boolean correctionDiff;
     private int sessionId;
+    private boolean isJustDelete;
 
     public Integer getFormTemplateId() {
         return formTemplateId;
@@ -95,5 +96,13 @@ public class SearchAction extends UnsecuredActionImpl<SearchResult> implements A
 
     public int getSessionId() {
         return sessionId;
+    }
+
+    public boolean isJustDelete() {
+        return isJustDelete;
+    }
+
+    public void setJustDelete(boolean isJustDelete) {
+        this.isJustDelete = isJustDelete;
     }
 }

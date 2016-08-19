@@ -96,6 +96,18 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         }, this));
     }
 
+    public void clearSearchResults() {
+        SearchAction action = new SearchAction();
+        action.setFormDataId(formDataId);
+        action.setSessionId(sessionId);
+        action.setJustDelete(true);
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SearchResult>() {
+            @Override
+            public void onSuccess(SearchResult result) {
+            }
+        }, this));
+    }
+
     @Override
     public void onClickFoundItem(Long rowIndex) {
         SetFocus.fire(this, rowIndex);

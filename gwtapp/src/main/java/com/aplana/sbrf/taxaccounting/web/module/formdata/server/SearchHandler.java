@@ -32,12 +32,16 @@ public class SearchHandler extends AbstractActionHandler<SearchAction, SearchRes
         DataRowRange range = new DataRowRange();
         range.setCount(searchAction.getTo());
         range.setOffset(searchAction.getFrom());
-
         SearchResult searchResult = new SearchResult();
-        PagingResult<FormDataSearchResult> result = dataRowService.searchByKey(searchAction.getFormDataId(),
-                range, searchAction.getKey(), searchAction.getSessionId(), searchAction.isCaseSensitive(), searchAction.isManual(), searchAction.isCorrectionDiff());
-        searchResult.setResults(result);
-        searchResult.setSize(result.getTotalCount());
+
+        if (searchAction.isJustDelete()) {
+            dataRowService.deleteSearchResults(searchAction.getSessionId(), searchAction.getFormDataId());
+        } else {
+            PagingResult<FormDataSearchResult> result = dataRowService.searchByKey(searchAction.getFormDataId(),
+                    range, searchAction.getKey(), searchAction.getSessionId(), searchAction.isCaseSensitive(), searchAction.isManual(), searchAction.isCorrectionDiff());
+            searchResult.setResults(result);
+            searchResult.setSize(result.getTotalCount());
+        }
 
         return searchResult;
     }

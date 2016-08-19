@@ -27,7 +27,11 @@ public interface DataRowDao {
 	 */
 	void removeCheckPoint(FormData formData);
 
-	void initSearchResult(String key, int sessionId);
+	void clearSearchResults();
+
+	void deleteSearchResults(int sessionId, long formDataId);
+
+	int initSearchResult(int sessionId, long formDataId, String key);
 
 	/**
 	 * Если поиск уже производился по ключу key, то возвращает результат поиска
@@ -35,19 +39,19 @@ public interface DataRowDao {
 	 * @param range диапазон строк
 	 * @return результат поиска
      */
-	PagingResult<FormDataSearchResult> getSearchResult(String key, int sessionId, DataRowRange range);
+	PagingResult<FormDataSearchResult> getSearchResult(int sessionId, long formDataId, String key, DataRowRange range);
 
 	/**
 	 * сохраняет результат поиска по ключу key, чтобы потом не производить поиск занова при переходе со стр. на стр.
 	 * @param resultList результат поиска
      */
-	void saveSearchResult(List<FormDataSearchResult> resultList);
+	void saveSearchResult(int id, List<FormDataSearchResult> resultList);
 
 	/**
 	 * сохраняет результат поиска по ключу key, чтобы потом не производить поиск занова при переходе со стр. на стр.
 	 * @param query запрос поиска
 	 */
-	void saveSearchResult(String query, Map<String, Object> params);
+	void saveSearchResult(int id, String query, Map<String, Object> params);
 
 	/**
 	 * Копирование строк из НФ-источника в НФ-приемник.

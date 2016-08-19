@@ -48,6 +48,10 @@ public interface DataRowService {
 
 	List<FormDataSearchResult> searchByKeyInRefColumns(FormData formData, DataRowRange range, String key, boolean isCaseSensitive, boolean correctionDiff);
 
+	void deleteSearchResults(int sessionId, long formDataId);
+
+	void clearSearchResults();
+
     /**
      * Копирование строк из сохраненного среза НФ-источника в срез НФ-приемника.
      * Временный срез приемника предварительно очищается.
