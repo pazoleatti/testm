@@ -29,7 +29,7 @@ public interface DataRowDao {
 
 	void clearSearchResults();
 
-	void deleteSearchResults(int sessionId, long formDataId);
+	void deleteSearchResults(Integer sessionId, Long formDataId);
 
 	int initSearchResult(int sessionId, long formDataId, String key);
 

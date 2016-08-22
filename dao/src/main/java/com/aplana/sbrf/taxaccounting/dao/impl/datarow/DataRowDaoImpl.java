@@ -192,13 +192,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void deleteSearchResults(int sessionId, long formDataId) {
+	public void deleteSearchResults(Integer sessionId, Long formDataId) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("session_id", sessionId);
 		params.put("form_data_id", formDataId);
 		getNamedParameterJdbcTemplate().update(
 				"DELETE FROM " + SEARCH_FORM_RESULTS +
-						" WHERE session_id = :session_id AND " +
+						" WHERE" + (sessionId != null ? " session_id = :session_id AND " : "") +
 						" form_data_id = :form_data_id", params);
 	}
 

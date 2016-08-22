@@ -1103,7 +1103,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     getView().updateData();
                     getView().setSelectedRow(result.getCurrentRow(), true);
-                    formSearchPresenter.open(readOnlyMode, formData.isManual(), absoluteView, getView().generateNewSessionId());
+                    formSearchPresenter.open(readOnlyMode, formData.isManual(), absoluteView, sessionId);
                     addToPopupSlot(formSearchPresenter);
                 }
 

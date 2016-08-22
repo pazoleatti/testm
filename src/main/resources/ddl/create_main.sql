@@ -1060,3 +1060,22 @@ comment on column ref_book_vzl_history.state is 'Код состояния';
 
 create sequence seq_ref_book_vzl_history start with 1;
 --------------------------------------------------------------------------------------------------------
+CREATE TABLE SEARCH_FORM_RESULTS
+(
+  "ID"           NUMBER(9, 0),
+  "SESSION_ID"   NUMBER(10, 0),
+  "FORM_DATA_ID" NUMBER(18, 0),
+  "DATE"         DATE,
+  "KEY"          VARCHAR2(4000 BYTE),
+  PRIMARY KEY ("ID")
+);
+CREATE TABLE SEARCH_FORM_DATA_RESULT
+(	"ID" NUMBER(9,0),
+   "ROW_INDEX" NUMBER(9,0),
+   "COLUMN_INDEX" NUMBER(9,0),
+   "RAW_VALUE" VARCHAR2(4000 BYTE),
+  CONSTRAINT FK_SEARCH_FORM_RESULT_ID FOREIGN KEY ("ID")
+  REFERENCES SEARCH_FORM_RESULTS ("ID") ON DELETE CASCADE
+);
+CREATE SEQUENCE SEQ_SEARCH_FORM;
+--------------------------------------------------------------------------------------------------------
