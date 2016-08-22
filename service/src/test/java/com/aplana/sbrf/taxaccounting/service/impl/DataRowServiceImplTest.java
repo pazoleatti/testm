@@ -101,10 +101,7 @@ public class DataRowServiceImplTest {
     @Test
     public void test(){
         String key = "keeyyy";
-        DataRowRange range = new DataRowRange();
-        range.setOffset(1);
-        range.setCount(5);
-        List<FormDataSearchResult> results = dataRowService.searchByKeyInRefColumns(formData, range, key, true, false);
+        List<FormDataSearchResult> results = dataRowService.searchByKeyInRefColumns(formData, key, true, false);
         Assert.assertEquals(2, results.size());
 
         Assert.assertEquals(new Long(1), results.get(0).getIndex());

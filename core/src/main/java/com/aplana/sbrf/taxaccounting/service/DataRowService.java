@@ -46,7 +46,7 @@ public interface DataRowService {
      */
     PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, int sessionId, boolean isCaseSensitive, boolean manual, boolean correctionDiff);
 
-	List<FormDataSearchResult> searchByKeyInRefColumns(FormData formData, DataRowRange range, String key, boolean isCaseSensitive, boolean correctionDiff);
+	List<FormDataSearchResult> searchByKeyInRefColumns(FormData formData, String key, boolean isCaseSensitive, boolean correctionDiff);
 
 	void deleteSearchResults(int sessionId, long formDataId);
 

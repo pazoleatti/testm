@@ -103,7 +103,7 @@ public class DataRowServiceImpl implements DataRowService {
         }
         // поиск по ссылочным столбцам
         if (existRefBookColumn) {
-            resultsList = searchByKeyInRefColumns(formData, range, key, isCaseSensitive, correctionDiff);
+            resultsList = searchByKeyInRefColumns(formData, key, isCaseSensitive, correctionDiff);
         } else {
             resultsList = new ArrayList<FormDataSearchResult>();
         }
@@ -138,27 +138,25 @@ public class DataRowServiceImpl implements DataRowService {
         dataRowDao.clearSearchResults();
     }
 
-    public List<FormDataSearchResult> searchByKeyInRefColumns(FormData formData, DataRowRange range, String key, boolean isCaseSensitive, boolean correctionDiff){
+    public List<FormDataSearchResult> searchByKeyInRefColumns(FormData formData, String key, boolean isCaseSensitive, boolean correctionDiff){
         List<FormDataSearchResult> resultsList = new ArrayList<FormDataSearchResult>();
         List<DataRow<Cell>> rows = dataRowDao.getRowsRefColumnsOnly(formData, null, correctionDiff);
         refBookHelper.dataRowsDereference(new Logger(), rows, formData.getFormColumns());
         String searchKey = key;
         if (!isCaseSensitive) searchKey = searchKey.toUpperCase();
-        Long index = 0L;
+        Long index = 1L;
         for (DataRow<Cell> row : rows) {
             for (Column column : formData.getFormColumns()) {
                 if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
                     Cell valueCell = row.getCell(column.getAlias());
                     if (valueCell != null && valueCell.getRefBookDereference() != null && (isCaseSensitive && valueCell.getRefBookDereference().indexOf(searchKey) >= 0
                             || !isCaseSensitive && valueCell.getRefBookDereference().toUpperCase().indexOf(searchKey) >= 0)) {
-                        if ((index++) < range.getCount()) {
-                            FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
-                            formDataSearchResult.setIndex(index);
-                            formDataSearchResult.setColumnIndex((long) column.getOrder());
-                            formDataSearchResult.setRowIndex(row.getIndex().longValue());
-                            formDataSearchResult.setStringFound(valueCell.getRefBookDereference());
-                            resultsList.add(formDataSearchResult);
-                        }
+                        FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
+                        formDataSearchResult.setIndex(index++);
+                        formDataSearchResult.setColumnIndex((long) column.getOrder());
+                        formDataSearchResult.setRowIndex(row.getIndex().longValue());
+                        formDataSearchResult.setStringFound(valueCell.getRefBookDereference());
+                        resultsList.add(formDataSearchResult);
                     }
                 } else if (ColumnType.DATE.equals(column.getColumnType())) {
                     Cell valueCell = row.getCell(column.getAlias());
@@ -173,14 +171,12 @@ public class DataRowServiceImpl implements DataRowService {
                         String valueStr = df.format(valueCell.getDateValue());
                         if (isCaseSensitive && valueStr.indexOf(searchKey) >= 0
                                 || !isCaseSensitive && valueStr.toUpperCase().indexOf(searchKey) >= 0) {
-                            if ((index++) < range.getCount()) {
-                                FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
-                                formDataSearchResult.setIndex(index);
-                                formDataSearchResult.setColumnIndex((long) column.getOrder());
-                                formDataSearchResult.setRowIndex(row.getIndex().longValue());
-                                formDataSearchResult.setStringFound(valueStr);
-                                resultsList.add(formDataSearchResult);
-                            }
+                            FormDataSearchResult formDataSearchResult = new FormDataSearchResult();
+                            formDataSearchResult.setIndex(index++);
+                            formDataSearchResult.setColumnIndex((long) column.getOrder());
+                            formDataSearchResult.setRowIndex(row.getIndex().longValue());
+                            formDataSearchResult.setStringFound(valueStr);
+                            resultsList.add(formDataSearchResult);
                         }
                     }
                 }
