@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -29,8 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Реализация сервиса для выполнения скриптов над формой.
@@ -184,11 +181,11 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         String lockUser = canImportScript(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId, userInfo.getUser());
                         if (lockUser == null){
                             formTemplate.setScript(script);
-                            try {
-                                formTemplateService.updateScript(formTemplate, logger, userInfo);
-                            } catch (ServiceLoggerException e) {
-                                logger.error("Макет налоговой формы \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен ", formTemplate.getName(), scriptFileName);
-                                continue;
+                            Logger localLogger = new Logger();
+                            formTemplateService.updateScript(formTemplate, localLogger, userInfo);
+                            if (localLogger.containsLevel(LogLevel.ERROR)) {
+                                logger.getEntries().addAll(localLogger.getEntries());
+                                logger.error("Макет налоговой формы \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен ", formTemplate.getName(), scriptFileName);                                continue;
                             }
                             logger.info("Выполнен импорт скрипта для макета налоговой формы \"%s\" из файла \"%s\"", formTemplate.getName(), scriptFileName);
                         } else {
@@ -217,9 +214,10 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         String lockUser = canImportScript(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId, userInfo.getUser());
                         if (lockUser == null) {
                             declarationTemplate.setCreateScript(script);
-                            try {
-                                declarationTemplateService.updateScript(declarationTemplate, logger, userInfo);
-                            } catch (ServiceLoggerException e) {
+                            Logger localLogger = new Logger();
+                            declarationTemplateService.updateScript(declarationTemplate, localLogger, userInfo);
+                            if (localLogger.containsLevel(LogLevel.ERROR)) {
+                                logger.getEntries().addAll(localLogger.getEntries());
                                 logger.error("%s \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен.",
                                         declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "Макет декларации" : "Макет уведомления",
                                         declarationTemplate.getName(), scriptName);
@@ -252,9 +250,10 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         RefBook refBook = SerializationUtils.clone(refBookDao.get(refBookId));
                         String lockUser = canImportScript(LockData.LockObjects.REF_BOOK.name() + "_" + refBookId, userInfo.getUser());
                         if (lockUser == null) {
-                            try {
-                                refBookScriptingService.importScript(refBookId, script, logger, userInfo);
-                            } catch (ServiceLoggerException e) {
+                            Logger localLogger = new Logger();
+                            refBookScriptingService.importScript(refBookId, script, localLogger, userInfo);
+                            if (localLogger.containsLevel(LogLevel.ERROR)) {
+                                logger.getEntries().addAll(localLogger.getEntries());
                                 logger.error("Справочник \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен.", refBook.getName(), scriptFileName);
                                 continue;
                             }
