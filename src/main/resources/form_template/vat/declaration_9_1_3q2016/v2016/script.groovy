@@ -249,7 +249,7 @@ void generateXML() {
                         }
                         hasPage = true
                         def code080 = row.rowNumber
-                        def code090 = row.opTypeCode
+                        def code090 = getRefBookValue(650L, row.opTypeCode)?.CODE?.value
                         def code180 = row.buyerInnKpp
                         def code190 = row.mediatorInnKpp
                         def code100 = getNumber(row.invoiceNumDate)

@@ -13,16 +13,15 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
-import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -46,6 +45,7 @@ import java.util.Properties;
 @Transactional
 public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl implements RefBookScriptingService {
 
+    private static final Log LOG = LogFactory.getLog(RefBookScriptingServiceImpl.class);
     private static final String DUPLICATING_ARGUMENTS_ERROR = "The key \"%s\" already exists in map. Can't override of them.";
     public static final String ERROR_MSG = "Ошибка при записи данных";
 
@@ -64,6 +64,8 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     private Properties versionInfoProperties;
     @Autowired
     private TransactionHelper tx;
+    @Autowired
+    private AuditService auditService;
 
     @Override
     public boolean executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
@@ -87,23 +89,35 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         if (!canExecuteScript(script, event)) {
             return false;
         }
-        return executeScript(userInfo, refBook, script, event, logger, additionalParameters);
+
+        boolean result = executeScript(userInfo, refBook, script, event, logger, additionalParameters);
+        // Откат при возникновении фатальных ошибок в скрипте
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException("Проверка не пройдена (присутствуют фатальные ошибки)", logEntryService.save(logger.getEntries()));
+        }
+        return result;
+
     }
 
     @Override
     public boolean executeScriptInNewReadOnlyTransaction(final TAUserInfo userInfo, final RefBook refBook, final String script, final FormDataEvent event, final Logger logger, final Map<String, Object> additionalParameters) {
-        return tx.executeInNewReadOnlyTransaction(new TransactionLogic<Boolean>() {
+        boolean result = tx.executeInNewReadOnlyTransaction(new TransactionLogic<Boolean>() {
             @Override
             public Boolean execute() {
                 return executeScript(userInfo, refBook, script, event, logger, additionalParameters);
             }
         });
+        return result;
     }
 
     private void checkScript(RefBook refBook, String script, final Logger logger) {
         Logger tempLogger = new Logger();
         try {
             executeScriptInNewReadOnlyTransaction(null, refBook, script, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
+            if (tempLogger.containsLevel(LogLevel.ERROR)) {
+                logger.getEntries().addAll(tempLogger.getEntries());
+                throw new ServiceException("Обнаружены ошибки в скрипте!");
+            }
         } catch (Exception ex) {
             tempLogger.error(ex);
             logger.getEntries().addAll(tempLogger.getEntries());
@@ -164,10 +178,6 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         // Перенос записей из локального лога в глобальный
         logger.getEntries().addAll(scriptLogger.getEntries());
 
-        // Откат при возникновении фатальных ошибок в скрипте
-        if (scriptLogger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException("Проверка не пройдена (присутствуют фатальные ошибки)", logEntryService.save(logger.getEntries()));
-        }
         return true;
     }
 
@@ -189,11 +199,20 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     @Override
     public void saveScript(long refBookId, String script, Logger log, TAUserInfo userInfo) {
         saveScript(refBookId, script, FormDataEvent.TEMPLATE_MODIFIED, log, userInfo);
+        auditService.add(FormDataEvent.TEMPLATE_MODIFIED, userInfo, null, null,
+                null, null, null, "Обнорвлен скрипт справочника \""+refBookFactory.get(refBookId).getName()+"\"", null);
     }
 
     @Override
     public void importScript(long refBookId, String script, Logger log, TAUserInfo userInfo) {
-        saveScript(refBookId, script, FormDataEvent.SCRIPTS_IMPORT, log, userInfo);
+        try {
+            saveScript(refBookId, script, FormDataEvent.SCRIPTS_IMPORT, log, userInfo);
+        } catch (ServiceLoggerException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            return;
+        }
+        auditService.add(FormDataEvent.SCRIPTS_IMPORT, userInfo, null, null,
+                null, null, null, "Обнорвлен скрипт справочника \""+refBookFactory.get(refBookId).getName()+"\"", null);
     }
 
     private void saveScript(long refBookId, String script, FormDataEvent formDataEvent, Logger log, TAUserInfo userInfo) {

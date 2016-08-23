@@ -445,7 +445,12 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
     public void updateScript(DeclarationTemplate declarationTemplate, Logger log, TAUserInfo userInfo) {
-        checkScript(declarationTemplate, log);
+        try {
+            checkScript(declarationTemplate, log);
+        } catch (ServiceLoggerException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            return;
+        }
         declarationTemplateDao.updateScript(declarationTemplate.getId(), declarationTemplate.getCreateScript());
         mainOperatingService.logging(declarationTemplate.getId(), FormDataEvent.SCRIPTS_IMPORT, userInfo.getUser());
     }

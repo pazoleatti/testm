@@ -420,7 +420,12 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
     public void updateScript(FormTemplate formTemplate, Logger logger, TAUserInfo userInfo) {
-        checkScript(formTemplate, logger);
+        try {
+            checkScript(formTemplate, logger);
+        } catch (ServiceLoggerException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            return;
+        }
         formTemplateDao.updateScript(formTemplate.getId(), formTemplate.getScript());
         mainOperatingService.logging(formTemplate.getId(), FormDataEvent.SCRIPTS_IMPORT, userInfo.getUser());
     }

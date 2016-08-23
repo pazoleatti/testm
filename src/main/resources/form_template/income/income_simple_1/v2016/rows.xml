@@ -105,7 +105,7 @@
     <row alias="R7">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10050"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Вознаграждение за расчётное и кассовое  обслуживание счетов юридических лиц и юридических лиц-нерезидентов, кроме кредитных организаций и банков-нерезидентов"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Вознаграждение за расчётное и кассовое обслуживание счетов юридических лиц и юридических лиц-нерезидентов, кроме кредитных организаций и банков-нерезидентов"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27202"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -343,7 +343,7 @@
     <row alias="R21">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10190"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за обслуживание бюджетных счетов, пенсионных и иных выплат по договорам (Соглашениям), заключенным филиалами  Сбербанка России"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за обслуживание бюджетных счетов, пенсионных и иных выплат по договорам (Соглашениям), заключенным филиалами Сбербанка России"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27602.09"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -411,7 +411,7 @@
     <row alias="R25">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10230"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг  предприятиям, с которыми заключён договор эквайринга с использованием банковских карт международных платёжных систем"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг предприятиям, с которыми заключён договор эквайринга с использованием банковских карт международных платёжных систем"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27902.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -428,7 +428,7 @@
     <row alias="R26">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10240"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за предоставление услуги юридическим лицам по продуктам линейки Cash Management по счетам  третьих лиц"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за предоставление услуги юридическим лицам по продуктам линейки Cash Management по счетам третьих лиц"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27902.03"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -496,7 +496,7 @@
     <row alias="R30">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10280"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от юридических  лиц по операциям  кредитования"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от юридических лиц по операциям кредитования"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27902.08"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -530,7 +530,7 @@
     <row alias="R32">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10300"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг  индивидуальным предпринимателям, с которыми заключён договор эквайринга с использованием банковских карт международных платёжных систем"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг индивидуальным предпринимателям, с которыми заключён договор эквайринга с использованием банковских карт международных платёжных систем"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27903.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -547,7 +547,7 @@
     <row alias="R33">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10310"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за предоставление услуги индивидуальным предпринимателям по продуктам линейки Cash Management по счетам  третьих лиц"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за предоставление услуги индивидуальным предпринимателям по продуктам линейки Cash Management по счетам третьих лиц"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27903.03"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -581,7 +581,7 @@
     <row alias="R35">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10330"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от индивидуальных предпринимателей по операциям  кредитования"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от индивидуальных предпринимателей по операциям кредитования"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27903.06"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -1499,7 +1499,7 @@
     <row alias="R89">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10880"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления комиссии от выдачи банковских гарантий и поручительств,  в т.ч. плата за вынужденное отвлечение банком денежных средств в погашение обязательств принципала перед бенефициаром,  платы за неполное исполнение условий Договора о предоставлении банковской Гарантии в части требований, предъявляемых к его обеспечению."/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Сумма доначисления комиссии от выдачи банковских гарантий и поручительств, в т.ч. плата за вынужденное отвлечение банком денежных средств в погашение обязательств принципала перед бенефициаром, платы за неполное исполнение условий Договора о предоставлении банковской Гарантии в части требований, предъявляемых к его обеспечению."/>
         <cell alias="accountNo" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -1550,7 +1550,7 @@
     <row alias="R92">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10990"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="5" stringValue="Выручка от реализации ценных бумаг обращающихся и не обращающихся на организованном рынке"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по брокерским  операциям  с ценными бумагами на фондовом рынке по поручению юридических лиц"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по брокерским операциям с ценными бумагами на фондовом рынке по поручению юридических лиц"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27602.04"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -1567,7 +1567,7 @@
     <row alias="R93">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11000"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по брокерским  операциям  с ценными бумагами на фондовом рынке по поручению индивидуальных предпринимателей"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по брокерским операциям с ценными бумагами на фондовом рынке по поручению индивидуальных предпринимателей"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27603.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -1601,7 +1601,7 @@
     <row alias="R95">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11020"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за работу по размещению  ценных бумаг и выполнение функций агента по поручению эмитента"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за работу по размещению ценных бумаг и выполнение функций агента по поручению эмитента"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27602.05"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -1652,7 +1652,7 @@
     <row alias="R98">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11170"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям  юридических лиц с векселями Сбербанка России, депозитными сертификатами и другим операциям  юридических лиц с ценными бумагами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям юридических лиц с векселями Сбербанка России, депозитными сертификатами и другим операциям юридических лиц с ценными бумагами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27902.05"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -1669,7 +1669,7 @@
     <row alias="R99">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11180"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям  индивидуальных предпринимателей с векселями Сбербанка России, депозитными сертификатами и другим операциям  юридических лиц с ценными бумагами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям индивидуальных предпринимателей с векселями Сбербанка России, депозитными сертификатами и другим операциям юридических лиц с ценными бумагами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27903.05"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -1958,7 +1958,7 @@
     <row alias="R116">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14010"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от операций купли-продажи в наличной форме  (евро)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от операций купли-продажи в наличной форме (евро)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.26102"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -2009,7 +2009,7 @@
     <row alias="R119">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14040"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от операций купли-продажи в наличной форме  (Японская иена)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от операций купли-продажи в наличной форме (Японская иена)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.26105"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -2043,7 +2043,7 @@
     <row alias="R121">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14060"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от операций купли-продажи в безналичной форме  (доллар США)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от операций купли-продажи в безналичной форме (доллар США)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.26201"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -2060,7 +2060,7 @@
     <row alias="R122">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14070"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от операций купли-продажи в безналичной форме  (евро)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от операций купли-продажи в безналичной форме (евро)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.26202"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -2094,7 +2094,7 @@
     <row alias="R124">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14090"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от операций купли-продажи в безналичной форме  (Швейцарский франк)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от операций купли-продажи в безналичной форме (Швейцарский франк)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.26204"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4627,7 +4627,7 @@
     <row alias="R273">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15660"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="45" stringValue="Доходы в виде сумм восстановленных резервов, расходы на формирование которых были учтены в составе расходов, учитываемых при определении налоговой базы"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам Минфину России"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам Минфину России"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15101.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4644,7 +4644,7 @@
     <row alias="R274">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15670"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам финансовым органам субъектов Российской Федерации и органов местного самоуправления"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам финансовым органам субъектов Российской Федерации и органов местного самоуправления"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15102.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4661,7 +4661,7 @@
     <row alias="R275">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15680"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам государственным внебюджетным фондам Российской Федерации"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам государственным внебюджетным фондам Российской Федерации"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15103.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4678,7 +4678,7 @@
     <row alias="R276">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15690"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам внебюджетным фондам субъектов Российской Федерации и органов местного самоуправления"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам внебюджетным фондам субъектов Российской Федерации и органов местного самоуправления"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15104.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4695,7 +4695,7 @@
     <row alias="R277">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15700"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам финансовым организациям, находящимся в федеральной собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам финансовым организациям, находящимся в федеральной собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15105.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4712,7 +4712,7 @@
     <row alias="R278">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15710"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам коммерческим организациям, находящимся в федеральной собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам коммерческим организациям, находящимся в федеральной собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15106.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4729,7 +4729,7 @@
     <row alias="R279">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15720"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам некоммерческим организациям, находящимся в федеральной собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам некоммерческим организациям, находящимся в федеральной собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15107.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4746,7 +4746,7 @@
     <row alias="R280">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15730"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам финансовым организациям, находящимся в государственной (кроме федеральной) собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам финансовым организациям, находящимся в государственной (кроме федеральной) собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15108.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4763,7 +4763,7 @@
     <row alias="R281">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15740"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам коммерческим организациям, находящимся в государственной (кроме федеральной) собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам коммерческим организациям, находящимся в государственной (кроме федеральной) собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15109.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4780,7 +4780,7 @@
     <row alias="R282">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15750"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам некоммерческим организациям, находящимся в государственной (кроме федеральной) собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам некоммерческим организациям, находящимся в государственной (кроме федеральной) собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15110.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4797,7 +4797,7 @@
     <row alias="R283">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15760"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам негосударственным финансовым организациям"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам негосударственным финансовым организациям"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15111.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4814,7 +4814,7 @@
     <row alias="R284">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15770"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам негосударственным коммерческим организациям"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам негосударственным коммерческим организациям"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15112.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4831,7 +4831,7 @@
     <row alias="R285">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15780"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам негосударственным некоммерческим организациям"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам негосударственным некоммерческим организациям"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15113.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4848,7 +4848,7 @@
     <row alias="R286">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15790"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам индивидуальным предпринимателям"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам индивидуальным предпринимателям"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15114.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4865,7 +4865,7 @@
     <row alias="R287">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15800"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам гражданам (физическим лицам)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам гражданам (физическим лицам)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15115.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4882,7 +4882,7 @@
     <row alias="R288">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15810"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам юридическим лицам - нерезидентам"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам юридическим лицам - нерезидентам"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15116.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4899,7 +4899,7 @@
     <row alias="R289">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15820"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам физическим лицам - нерезидентам"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам физическим лицам - нерезидентам"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15117.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4916,7 +4916,7 @@
     <row alias="R290">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15830"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам кредитным организациям"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам кредитным организациям"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15118.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4933,7 +4933,7 @@
     <row alias="R291">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15840"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам банкам-нерезидентам"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам банкам-нерезидентам"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15119.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4950,7 +4950,7 @@
     <row alias="R292">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15850"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по кредитам иностранным государствам"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по кредитам иностранным государствам"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15120.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4967,7 +4967,7 @@
     <row alias="R293">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15860"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в Минфине России"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в Минфине России"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15201.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -4984,7 +4984,7 @@
     <row alias="R294">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15870"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в финансовых органах субъектов Российской Федерации и органов местного самоуправления"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в финансовых органах субъектов Российской Федерации и органов местного самоуправления"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15202.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5001,7 +5001,7 @@
     <row alias="R295">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15880"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в государственных внебюджетных фондах Российской Федерации"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в государственных внебюджетных фондах Российской Федерации"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15203.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5018,7 +5018,7 @@
     <row alias="R296">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15890"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям во внебюджетных фондах субъектов Российской Федерации и органов местного самоуправления"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям во внебюджетных фондах субъектов Российской Федерации и органов местного самоуправления"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15204.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5035,7 +5035,7 @@
     <row alias="R297">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15900"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в финансовых организациях, находящихся в федеральной собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в финансовых организациях, находящихся в федеральной собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15205.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5052,7 +5052,7 @@
     <row alias="R298">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15910"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в коммерческих организациях, находящихся в федеральной собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в коммерческих организациях, находящихся в федеральной собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15206.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5069,7 +5069,7 @@
     <row alias="R299">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15920"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в некоммерческих организациях, находящихся в федеральной собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в некоммерческих организациях, находящихся в федеральной собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15207.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5086,7 +5086,7 @@
     <row alias="R300">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15930"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в финансовых организациях, находящихся в государственной (кроме федеральной) собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в финансовых организациях, находящихся в государственной (кроме федеральной) собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15208.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5103,7 +5103,7 @@
     <row alias="R301">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15940"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в коммерческих организациях, находящихся в государственной (кроме федеральной) собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в коммерческих организациях, находящихся в государственной (кроме федеральной) собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15209.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5120,7 +5120,7 @@
     <row alias="R302">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15950"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в некоммерческих организациях, находящихся в государственной (кроме федеральной) собственности"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в некоммерческих организациях, находящихся в государственной (кроме федеральной) собственности"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15210.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5137,7 +5137,7 @@
     <row alias="R303">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15960"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в негосударственных финансовых организациях"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в негосударственных финансовых организациях"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15211.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5154,7 +5154,7 @@
     <row alias="R304">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15970"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в негосударственных коммерческих организациях"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в негосударственных коммерческих организациях"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15212.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5171,7 +5171,7 @@
     <row alias="R305">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15980"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в негосударственных некоммерческих организациях"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в негосударственных некоммерческих организациях"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15213.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5188,7 +5188,7 @@
     <row alias="R306">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="15990"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в юридических лицах - нерезидентах"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в юридических лицах - нерезидентах"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15214.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5205,7 +5205,7 @@
     <row alias="R307">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16000"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в кредитных организациях"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в кредитных организациях"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15215.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5222,7 +5222,7 @@
     <row alias="R308">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16010"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в банках-нерезидентах"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в банках-нерезидентах"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15216.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5239,7 +5239,7 @@
     <row alias="R309">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16020"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям в Банке России"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям в Банке России"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15217.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5256,7 +5256,7 @@
     <row alias="R310">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16030"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям индивидуальным предпринимателям"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям индивидуальным предпринимателям"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15218.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5273,7 +5273,7 @@
     <row alias="R311">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16040"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям гражданам (физическим лицам)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям гражданам (физическим лицам)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15219.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5290,7 +5290,7 @@
     <row alias="R312">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16050"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по прочим размещённым средствам и требованиям физическим лицам - нерезидентам"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по прочим размещённым средствам и требованиям физическим лицам - нерезидентам"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15220.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5307,7 +5307,7 @@
     <row alias="R313">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16060"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по депозитам в Банке России"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по депозитам в Банке России"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15401.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5324,7 +5324,7 @@
     <row alias="R314">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16070"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по депозитам в кредитных организациях"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по депозитам в кредитных организациях"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15402.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5341,7 +5341,7 @@
     <row alias="R315">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16080"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль  по депозитам в банках-нерезидентах"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы в виде восстановленного резерва на возможные потери по ссудам, учтённого при определении налогооблагаемой базы по налогу на прибыль по депозитам в банках-нерезидентах"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.15403.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5426,7 +5426,7 @@
     <row alias="R320">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16170"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в долларах США (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте,  счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте  и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по  сделкам РЕПО)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в долларах США (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте, счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по сделкам РЕПО)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70603.26301.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5443,7 +5443,7 @@
     <row alias="R321">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16180"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в евро (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте,  счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте  и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по  сделкам РЕПО)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в евро (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте, счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по сделкам РЕПО)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70603.26302.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5460,7 +5460,7 @@
     <row alias="R322">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16190"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в Фунтах стерлингов Соединенного королевства (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте,  счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте  и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по  сделкам РЕПО)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в Фунтах стерлингов Соединенного королевства (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте, счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по сделкам РЕПО)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70603.26303.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5477,7 +5477,7 @@
     <row alias="R323">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16200"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в Швейцарских франках  (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте,  счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте  и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по  сделкам РЕПО)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в Швейцарских франках (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте, счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по сделкам РЕПО)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70603.26304.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5494,7 +5494,7 @@
     <row alias="R324">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16210"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в японских иенах  (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте,  счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте  и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по  сделкам РЕПО)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в японских иенах (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте, счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по сделкам РЕПО)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70603.26305.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5511,7 +5511,7 @@
     <row alias="R325">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16220"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в других валют (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте,  счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте  и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по  сделкам РЕПО)"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Положительная переоценка средств в других валют (за исключением счетов по учёту ценных бумаг, номинированных в иностранной валюте, счетов по учёту выданных (полученных) авансов, учитываемых в иностранной валюте и счетов прочих привлечённых (размещённых) средств по учёту требований (обязательств) по поставке ценных бумаг, номинированных в иностранной валюте, по сделкам РЕПО)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70603.26306.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5613,7 +5613,7 @@
     <row alias="R331">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16320"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="7" stringValue="Доходы в виде сумм, убытки от списания которых были ранее учтены в составе расходов, уменьшивших налоговую базу, либо списанных за счёт созданных резервов, отчисления на создание которых ранее уменьшали налоговую базу (в т.ч. полученных по возвращённым кредитам (ссудам))"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы, полученные в отчетном году  по кредитным операциям прошлых лет (по основному долгу) с кредитными организациями"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы, полученные в отчетном году по кредитным операциям прошлых лет (по основному долгу) с кредитными организациями"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.28802.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5630,7 +5630,7 @@
     <row alias="R332">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16330"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы, полученные в отчётном году  по кредитным операциям прошлых лет (по основному долгу) с другими клиентами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы, полученные в отчётном году по кредитным операциям прошлых лет (по основному долгу) с другими клиентами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.28802.02"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5664,7 +5664,7 @@
     <row alias="R334">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16350"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Проценты по кредитным операциям прошлых лет, полученные в отчётном году по операциям  с другими клиентами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Проценты по кредитным операциям прошлых лет, полученные в отчётном году по операциям с другими клиентами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.28802.04"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5681,7 +5681,7 @@
     <row alias="R335">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16360"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Госпошлина по кредитным операциям прошлых лет, полученная в отчётном году по операциям  с другими клиентами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Госпошлина по кредитным операциям прошлых лет, полученная в отчётном году по операциям с другими клиентами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.28802.19"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5698,7 +5698,7 @@
     <row alias="R336">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16370"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Неустойки и комиссия по кредитным операциям прошлых лет, полученные в отчётном году по операциям  с другими клиентами"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Неустойки и комиссия по кредитным операциям прошлых лет, полученные в отчётном году по операциям с другими клиентами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.28802.98"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5885,7 +5885,7 @@
     <row alias="R347">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16690"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям с производными финансовыми инструментами, обращающихся на организованном рынке, базисным (базовым) активом которых являются иностранная валюта (вариационная маржа)-  форварды"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям с производными финансовыми инструментами, обращающихся на организованном рынке, базисным (базовым) активом которых являются иностранная валюта (вариационная маржа)- форварды"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.25102.51"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5919,7 +5919,7 @@
     <row alias="R349">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16710"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям с производными финансовыми инструментами, обращающихся на организованном рынке, базисным (базовым) активом которых являются иностранная валюта (вариационная маржа) -  свопы"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям с производными финансовыми инструментами, обращающихся на организованном рынке, базисным (базовым) активом которых являются иностранная валюта (вариационная маржа) - свопы"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.25104.51"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -5987,7 +5987,7 @@
     <row alias="R353">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16750"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям с производными финансовыми инструментами, обращающихся на организованном рынке, базисным (базовым) активом которых являются процентные ставки (вариационная маржа)-  - опционы"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям с производными финансовыми инструментами, обращающихся на организованном рынке, базисным (базовым) активом которых являются процентные ставки (вариационная маржа)- - опционы"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.25203.52"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -6004,7 +6004,7 @@
     <row alias="R354">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16760"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям с производными финансовыми инструментами, обращающихся на организованном рынке, базисным (базовым) активом которых являются процентные ставки (вариационная маржа)-  - свопы"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям с производными финансовыми инструментами, обращающихся на организованном рынке, базисным (базовым) активом которых являются процентные ставки (вариационная маржа)- - свопы"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.25204.52"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
@@ -6021,7 +6021,7 @@
     <row alias="R355">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="16770"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям с производными финансовыми инструментами, обращающихся на организованном рынке, базисным (базовым) активом которых являются процентные ставки (вариационная маржа)-  - прочие производные финансовые инструменты"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы по операциям с производными финансовыми инструментами, обращающихся на организованном рынке, базисным (базовым) активом которых являются процентные ставки (вариационная маржа)- - прочие производные финансовые инструменты"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.25205.52"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>

@@ -48,7 +48,7 @@ import groovy.transform.Field
 // графа 22 - benefitEndDate
 // графа 23 - taxBenefitCode    - атрибут 19 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 7 «Параметры налоговых льгот транспортного налога»
 // графа 24 - base
-// графа 25 - version           - атрибут 2082 - MODEL - «Модель (версия)», справочник 208 «Средняя стоимость транспортных средств»
+// графа 25 - version           - атрибут 2183 - MODEL - «Модель (версия)», справочник 218 «Средняя стоимость транспортных средств»
 // графа 26 - averageCost       - атрибут 2111 - NAME - «Наименование», справочник 211 «Категории средней стоимости транспортных средств»
 
 switch (formDataEvent) {
@@ -456,7 +456,7 @@ def logicCheck() {
 
         // 17. Проверка наличия повышающего коэффициента для ТС дороже 3 млн. руб.
         if (row.version != null) {
-            def averageCost = getRefBookValue(208L, row.version)?.AVG_COST?.value
+            def averageCost = getRefBookValue(218L, row.version)?.AVG_COST?.value
             def filter = "AVG_COST = $averageCost"
             // справочник «Повышающие коэффициенты транспортного налога»
             def records = getProvider(209L).getRecords(dTo, null, filter, null)
@@ -1082,8 +1082,8 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     newRow.base = pure(rowCells[colIndex])
     colIndex++
 
-    // графа 25 - атрибут 2082 - MODEL - «Модель (версия)», справочник 208 «Средняя стоимость транспортных средств»
-    newRow.version = getRecordIdImport(208L, 'MODEL', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    // графа 25 - атрибут 2183 - MODEL - «Модель (версия)», справочник 218 «Средняя стоимость транспортных средств»
+    newRow.version = getRecordIdImport(218L, 'MODEL', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
 
     return newRow
 }
@@ -1502,9 +1502,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     newRow.base = values[colIndex]
 
-    // графа 25 - атрибут 2082 - MODEL - «Модель (версия)», справочник 208 «Средняя стоимость транспортных средств»
+    // графа 25 - атрибут 2183 - MODEL - «Модель (версия)», справочник 218 «Средняя стоимость транспортных средств»
     colIndex++
-    newRow.version = getRecordIdImport(208L, 'MODEL', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.version = getRecordIdImport(218L, 'MODEL', values[colIndex], fileRowIndex, colIndex + colOffset)
 
     return newRow
 }

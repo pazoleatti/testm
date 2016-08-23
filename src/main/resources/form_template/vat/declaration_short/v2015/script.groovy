@@ -134,21 +134,21 @@ boolean isCurrentNode(List<String> nodeNames, Map<String, Boolean> elements) {
 
 // Мапа соответсвтия id и наименований типов деклараций 8-11
 def declarations() {
-    [
-            declaration8  : [12, 'Декларация по НДС (раздел 8)', '8'],
-            declaration8n : [18, 'Декларация по НДС (раздел 8 без консолид. формы)', '8'],
-            declaration8q : [28, 'Декларация по НДС (раздел 8 с 3 квартала 2016)', '8'],
-            declaration81 : [13, 'Декларация по НДС (раздел 8.1)', '8.1'],
-            declaration81q: [29, 'Декларация по НДС (раздел 8.1 с 3 квартала 2016)', '8.1'],
-            declaration9  : [14, 'Декларация по НДС (раздел 9)', '9'],
-            declaration9n : [21, 'Декларация по НДС (раздел 9 без консолид. формы)', '9'],
-            declaration9q : [24, 'Декларация по НДС (раздел 9 с 3 квартала 2016)', '9'],
-            declaration91 : [15, 'Декларация по НДС (раздел 9.1)', '9.1'],
-            declaration91q: [27, 'Декларация по НДС (раздел 9.1 с 3 квартала 2016)', '9.1'],
-            declaration10 : [16, 'Декларация по НДС (раздел 10)', '10'],
-            declaration10q: [26, 'Декларация по НДС (раздел 10 с 3 квартала 2016)', '10'],
-            declaration11 : [17, 'Декларация по НДС (раздел 11)', '11'],
-            declaration11q: [25, 'Декларация по НДС (раздел 11 с 3 квартала 2016)', '11']
+    [       // key : declarationTypeId, название раздела декларации, номер раздела, флаг проверки наличия принятой декларации
+            declaration8  : [12, 'Декларация по НДС (раздел 8)', '8', true],
+            declaration8n : [18, 'Декларация по НДС (раздел 8 без консолид. формы)', '8', true],
+            declaration8q : [28, 'Декларация по НДС (раздел 8 с 3 квартала 2016)', '8', true],
+            declaration81 : [13, 'Декларация по НДС (раздел 8.1)', '8.1', false],
+            declaration81q: [29, 'Декларация по НДС (раздел 8.1 с 3 квартала 2016)', '8.1', false],
+            declaration9  : [14, 'Декларация по НДС (раздел 9)', '9', true],
+            declaration9n : [21, 'Декларация по НДС (раздел 9 без консолид. формы)', '9', true],
+            declaration9q : [24, 'Декларация по НДС (раздел 9 с 3 квартала 2016)', '9', true],
+            declaration91 : [15, 'Декларация по НДС (раздел 9.1)', '9.1', false],
+            declaration91q: [27, 'Декларация по НДС (раздел 9.1 с 3 квартала 2016)', '9.1', false],
+            declaration10 : [16, 'Декларация по НДС (раздел 10)', '10', true],
+            declaration10q: [26, 'Декларация по НДС (раздел 10 с 3 квартала 2016)', '10', true],
+            declaration11 : [17, 'Декларация по НДС (раздел 11)', '11', true],
+            declaration11q: [25, 'Декларация по НДС (раздел 11 с 3 квартала 2016)', '11', true]
     ]
 }
 
@@ -1111,10 +1111,12 @@ void logicCheck2() {
 
     // 2. Существующие экземпляры декларации по НДС (раздел 8/раздел 8 без консолид. формы/8.1/9/раздел 9 без консолид. формы/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
     declarationMap.each { declaration ->
-        def declarationData = declarationService.getLast(declaration.value[0], declarationData.departmentId, reportPeriod.id)
-        if (declarationData != null && !declarationData.accepted) {
-            logger.error("Экземпляр декларации вида «%s», периода «%s %s» и подразделения «%s» не находится в состоянии «Принята»!",
-                    declaration.value[1], reportPeriod.name, reportPeriod.taxPeriod.year, department.name)
+        if (declaration.value[3]) {
+            def declarationData = declarationService.getLast(declaration.value[0], declarationData.departmentId, reportPeriod.id)
+            if (declarationData != null && !declarationData.accepted) {
+                logger.error("Экземпляр декларации вида «%s», периода «%s %s» и подразделения «%s» не находится в состоянии «Принята»!",
+                        declaration.value[1], reportPeriod.name, reportPeriod.taxPeriod.year, department.name)
+            }
         }
     }
 
