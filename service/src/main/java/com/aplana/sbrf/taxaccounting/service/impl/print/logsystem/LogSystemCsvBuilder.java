@@ -3,9 +3,8 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.logsystem;
 import au.com.bytecode.opencsv.CSVWriter;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -18,8 +17,6 @@ import java.util.zip.ZipOutputStream;
  * User: avanteev
  */
 public class LogSystemCsvBuilder extends AbstractReportBuilder {
-
-	private static final Log LOG = LogFactory.getLog(LogSystemCsvBuilder.class);
 
     private static final ThreadLocal<SimpleDateFormat> SDF_LOG_NAME = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -69,12 +66,17 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
     }
 
     @Override
-    protected String flush() throws IOException {
+    protected File createTempFile() {
         String fileName = String.format(PATTER_LOG_FILE_NAME,
                 SDF_LOG_NAME.get().format(items.get(items.size() - 1).getLogDate()),
                 SDF_LOG_NAME.get().format(items.get(0).getLogDate()));
         String tmpDir = System.getProperty("java.io.tmpdir");
-        File file = new File(tmpDir + File.separator + fileName + ".csv");
+        return new File(tmpDir + File.separator + fileName + POSTFIX);
+    }
+
+    @Override
+    protected void flush(File zipFile) throws IOException {
+        File file = new File(FilenameUtils.removeExtension(zipFile.getAbsolutePath()) + ".csv");
         FileWriter fileWriter = new FileWriter(file);
         FileReader fileReader = new FileReader(file);
         FileOutputStream fileOutputStream = null;
@@ -87,15 +89,12 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
             }
             csvWriter.close();
 
-            File zipFile = new File(tmpDir + File.separator + fileName + POSTFIX);
             fileOutputStream = new FileOutputStream(zipFile);
             ZipOutputStream zout = new ZipOutputStream(fileOutputStream);
             ZipEntry zipEntry = new ZipEntry(file.getName());
             zout.putNextEntry(zipEntry);
             zout.write(IOUtils.toByteArray(fileReader, ENCODING));
             zout.close();
-
-            return zipFile.getAbsolutePath();
         } catch (IOException e) {
             throw new IOException(e);
         } finally {

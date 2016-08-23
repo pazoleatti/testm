@@ -57,8 +57,12 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
 	}
 
     @Override
-    protected String flush() throws IOException {
-        File file = File.createTempFile("messages", ".csv");
+    protected File createTempFile() throws IOException {
+        return File.createTempFile("messages", ".csv");
+    }
+
+    @Override
+    protected void flush(File file) throws IOException {
         FileOutputStream fileOutputStream = new FileOutputStream(file);
         try {
             CSVWriter csvWriter = new CSVWriter(new BufferedWriter(new OutputStreamWriter(fileOutputStream, ENCODING)), ';');
@@ -68,8 +72,6 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
                 csvWriter.writeNext(assemble(list.get(i), i));
             }
             csvWriter.close();
-
-            return file.getAbsolutePath();
         } catch (IOException e) {
             throw new IOException(e);
         } finally {

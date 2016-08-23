@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemCsvBuilder;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -13,6 +17,8 @@ import java.util.Map;
  * Date: 20.05.13
  */
 public abstract class AbstractReportBuilder {
+
+    protected static final Log LOG = LogFactory.getLog(LogSystemCsvBuilder.class);
 
     protected Workbook workBook;
     protected Sheet sheet;
@@ -86,15 +92,29 @@ public abstract class AbstractReportBuilder {
         //Nothing
     }
 
-    protected String flush() throws IOException {
-        File file = File.createTempFile(prefix, postfix);
+    private String flush() throws IOException {
+        File file = createTempFile();
+        try {
+            flush(file);
+        } catch (Exception e) {
+            if (!file.delete())
+                LOG.warn(String.format("Временнный файл %s не был удален.", file.getName()));
+            throw new ServiceException("Ошибка при создании печатной формы." + this.getClass(), e);
+        }
+        return file.getAbsolutePath();
+    }
+
+    protected File createTempFile() throws IOException {
+        return File.createTempFile(prefix, postfix);
+    }
+
+    protected void flush(File file) throws IOException {
         OutputStream out = new FileOutputStream(file);
         try {
             workBook.write(out);
         } finally {
             IOUtils.closeQuietly(out);
         }
-        return file.getAbsolutePath();
     }
 
     /**

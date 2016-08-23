@@ -47,50 +47,54 @@ public class FormDataCSVReportBuilder extends AbstractReportBuilder {
     protected void fillFooter() {}
 
     @Override
-    protected String flush() throws IOException {
-        File file = File.createTempFile(FILE_NAME, ".csv");
+    protected File createTempFile() throws IOException {
+        return File.createTempFile(FILE_NAME, ".csv");
+    }
+
+    @Override
+    protected void flush(File file) throws IOException {
         FileWriter fileWriter = new FileWriter(file);
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
         CSVWriter csvWriter = new CSVWriter(bufferedWriter, ';');
 
-        List<String> headersNames = new ArrayList<String>();
-        for (Column column : data.getFormColumns()) {
-            headersNames.add(column.getAlias());
-        }
-
-        csvWriter.writeNext(headersNames.toArray(new String[headersNames.size()]));
-        for (DataRow<Cell> row : dataRows) {
-            List<String> oneRow = new ArrayList<String>();
-            for (Column column : formTemplate.getColumns()) {
-                String alias = column.getAlias();
-                if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
-                    oneRow.add(row.getCell(alias).getRefBookDereference());
-                } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
-                    oneRow.add(row.getCell(alias).getValue() == null ? "" : row.getCell(alias).getNumericValue().toPlainString());
-                } else if (ColumnType.DATE.equals(column.getColumnType())) {
-                    String valueStr = "";
-                    if (row.getCell(alias).getValue() != null) {
-                        Formats formats = Formats.getById(((DateColumn) column).getFormatId());
-                        SimpleDateFormat sdf;
-                        if (formats.getId() == 0) {
-                            sdf = new SimpleDateFormat(Formats.DD_MM_YYYY.getFormat());
-                        } else {
-                            sdf = new SimpleDateFormat(formats.getFormat());
-                        }
-                        valueStr = sdf.format(row.getCell(alias).getDateValue());
-                    }
-                    oneRow.add(valueStr);
-                } else {
-                    oneRow.add(row.getCell(alias).getValue() == null ? "" : row.getCell(alias).getValue().toString());
-                }
+        try {
+            List<String> headersNames = new ArrayList<String>();
+            for (Column column : data.getFormColumns()) {
+                headersNames.add(column.getAlias());
             }
-            csvWriter.writeNext(oneRow.toArray(new String[oneRow.size()]));
+
+            csvWriter.writeNext(headersNames.toArray(new String[headersNames.size()]));
+            for (DataRow<Cell> row : dataRows) {
+                List<String> oneRow = new ArrayList<String>();
+                for (Column column : formTemplate.getColumns()) {
+                    String alias = column.getAlias();
+                    if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
+                        oneRow.add(row.getCell(alias).getRefBookDereference());
+                    } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
+                        oneRow.add(row.getCell(alias).getValue() == null ? "" : row.getCell(alias).getNumericValue().toPlainString());
+                    } else if (ColumnType.DATE.equals(column.getColumnType())) {
+                        String valueStr = "";
+                        if (row.getCell(alias).getValue() != null) {
+                            Formats formats = Formats.getById(((DateColumn) column).getFormatId());
+                            SimpleDateFormat sdf;
+                            if (formats.getId() == 0) {
+                                sdf = new SimpleDateFormat(Formats.DD_MM_YYYY.getFormat());
+                            } else {
+                                sdf = new SimpleDateFormat(formats.getFormat());
+                            }
+                            valueStr = sdf.format(row.getCell(alias).getDateValue());
+                        }
+                        oneRow.add(valueStr);
+                    } else {
+                        oneRow.add(row.getCell(alias).getValue() == null ? "" : row.getCell(alias).getValue().toString());
+                    }
+                }
+                csvWriter.writeNext(oneRow.toArray(new String[oneRow.size()]));
+            }
+        } finally {
+            csvWriter.close();
+            IOUtils.closeQuietly(bufferedWriter);
+            IOUtils.closeQuietly(fileWriter);
         }
-
-        csvWriter.close();
-        IOUtils.closeQuietly(bufferedWriter);
-        IOUtils.closeQuietly(fileWriter);
-
-        return file.getAbsolutePath();
     }
 }

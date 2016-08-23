@@ -94,8 +94,12 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
     protected void fillFooter() {}
 
     @Override
-    protected String flush() throws IOException {
-        File file = File.createTempFile(FILE_NAME, ".csv");
+    protected File createTempFile() throws IOException {
+        return File.createTempFile(FILE_NAME, ".csv");
+    }
+
+    @Override
+    protected void flush(File file) throws IOException {
         FileWriter fileWriter = new FileWriter(file);
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
         csvWriter = new CSVWriter(bufferedWriter, ';');
@@ -117,8 +121,6 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
             IOUtils.closeQuietly(bufferedWriter);
             IOUtils.closeQuietly(fileWriter);
         }
-
-        return file.getAbsolutePath();
     }
 
     private void printNode(Long parent_id, int level) {
