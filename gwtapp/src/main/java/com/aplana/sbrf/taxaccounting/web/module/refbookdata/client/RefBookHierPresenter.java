@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -142,6 +143,35 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
 
     @Override
     public void onBackToRefBookAnchorClicked() {
+        if (commonEditPresenter.isFormModified()) {
+            Dialog.confirmMessage(AbstractEditPresenter.DIALOG_MESSAGE, new DialogHandler() {
+                @Override
+                public void yes() {
+                    commonEditPresenter.setIsFormModified(false);
+                    backToRefBook();
+                }
+
+                @Override
+                public void no() {
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void cancel() {
+                    no();
+                }
+
+                @Override
+                public void close() {
+                    no();
+                }
+            });
+        } else {
+            backToRefBook();
+        }
+    }
+
+    private void backToRefBook() {
         clearSlot(TYPE_mainFormPresenter);
         setInSlot(TYPE_mainFormPresenter, refBookHierDataPresenter);
         getView().setVersionView(false);
