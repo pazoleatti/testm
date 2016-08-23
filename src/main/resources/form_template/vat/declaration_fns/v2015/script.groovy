@@ -1206,11 +1206,10 @@ def getXmlValue(def value) {
 def Map<Long, Expando> getParts() {
     if (declarationParts == null) {
         declarationParts = new HashedMap<Long, Expando>()
-        def reportPeriod = getReportPeriod()
         declarations().each { declaration ->
             id = declaration.value[0]
             name = declaration.value[1]
-            def declarationData = declarationService.getLast(id, declarationData.departmentId, reportPeriod.id)
+            def declarationData = declarationService.find(id, declarationData.departmentReportPeriodId, null, null)
 
             def result = new Expando()
             result.id = (declarationData?.id)
