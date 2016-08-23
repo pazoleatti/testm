@@ -593,15 +593,7 @@ public class PeriodServiceImpl implements PeriodService {
 		}
 	}
 
-	private enum Operation {
-		FIND, // Поиск периода
-		OPEN, // Открытие периода
-		CLOSE, // Закрытие периода
-		DELETE, // Удаление периода
-		EDIT_DEADLINE, // Изменение срока сдачи отчетности в периоде
-		EDIT // Редактирование периода
-	}
-	private List<Integer> getAvailableDepartments(TaxType taxType, TAUser user, Operation operation, int departmentId) {
+	public List<Integer> getAvailableDepartments(TaxType taxType, TAUser user, Operation operation, int departmentId) {
 		if (user.hasRole("ROLE_CONTROL_UNP")) {
 			switch (taxType) {
 				case INCOME:

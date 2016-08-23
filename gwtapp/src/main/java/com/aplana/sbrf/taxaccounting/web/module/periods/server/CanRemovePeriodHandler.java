@@ -40,19 +40,14 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
     private DeclarationTemplateService declarationService;
     @Autowired
     private DeclarationDataService declarationDataService;
+    @Autowired
+    private PeriodService periodService;
 
 	@Override
 	public CanRemovePeriodResult execute(CanRemovePeriodAction action, ExecutionContext executionContext) throws ActionException {
 		CanRemovePeriodResult result = new CanRemovePeriodResult();
         TAUserInfo user = securityService.currentUserInfo();
-        List<Integer> departmentIds;
-        //Условие из http://conf.aplana.com/pages/viewpage.action?pageId=9570811#id-Ведениепериодов-Требованиякправамдоступа
-        if (user.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                && (action.getTaxType() == TaxType.PROPERTY || action.getTaxType() == TaxType.TRANSPORT || action.getTaxType() == TaxType.LAND)) {
-            departmentIds = departmentService.getAllChildrenIds(user.getUser().getDepartmentId());
-        } else {
-            departmentIds = departmentService.getBADepartmentIds(user.getUser());
-        }
+        List<Integer> departmentIds = periodService.getAvailableDepartments(action.getTaxType(), user.getUser(), PeriodService.Operation.EDIT, action.getDepartmentId());
         List<LogEntry> logs = new ArrayList<LogEntry>();
 
         //Check forms

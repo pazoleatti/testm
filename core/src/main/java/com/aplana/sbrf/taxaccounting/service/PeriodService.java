@@ -158,6 +158,25 @@ public interface PeriodService {
 	 */
 	void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user);
 
+	enum Operation {
+		FIND, // Поиск периода
+		OPEN, // Открытие периода
+		CLOSE, // Закрытие периода
+		DELETE, // Удаление периода
+		EDIT_DEADLINE, // Изменение срока сдачи отчетности в периоде
+		EDIT // Редактирование периода
+	}
+
+	/**
+	 * Условие из http://conf.aplana.com/pages/viewpage.action?pageId=9570811#id-Ведениепериодов-Требованиякправамдоступа
+	 * @param taxType
+	 * @param user
+	 * @param operation
+	 * @param departmentId
+     * @return список ид подразделений
+     */
+	List<Integer> getAvailableDepartments(TaxType taxType, TAUser user, Operation operation, int departmentId);
+
     /**
      * Список отчетных периодов для указанного вида налога и для указанных подразделений
      *

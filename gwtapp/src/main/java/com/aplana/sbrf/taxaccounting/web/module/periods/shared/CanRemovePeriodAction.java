@@ -7,6 +7,7 @@ public class CanRemovePeriodAction extends UnsecuredActionImpl<CanRemovePeriodRe
     TaxType taxType;
 	int reportPeriodId;
     String operationName = "удаляемом";
+    int departmentId;
 
     public TaxType getTaxType() {
         return taxType;
@@ -30,5 +31,13 @@ public class CanRemovePeriodAction extends UnsecuredActionImpl<CanRemovePeriodRe
 
     public void setOperationName(String operationName) {
         this.operationName = operationName;
+    }
+
+    public int getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(int departmentId) {
+        this.departmentId = departmentId;
     }
 }
