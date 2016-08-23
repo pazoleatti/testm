@@ -521,8 +521,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     break;
                 case APPROVED:
                     // Повысить и понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                    if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
                             || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
                         result.add(WorkflowMove.APPROVED_TO_PREPARED);
                         result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
@@ -531,8 +530,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 case ACCEPTED:
                     // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
                     // Форма "Согласование организации" не распринимается
-                    if ((userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                    if ((isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
                             || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))) {
                         result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
                     }
@@ -570,8 +568,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     result.add(WorkflowMove.APPROVED_TO_PREPARED);
                     break;
                 case ACCEPTED:
-                    // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                    if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                    // Понизить статус могут все контролеры, которые имеют доступ для чтения
+                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
                             || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
                         result.add(WorkflowMove.ACCEPTED_TO_PREPARED);
                     }
