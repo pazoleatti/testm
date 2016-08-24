@@ -131,6 +131,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         void setReportTypes(List<FormDataReportType> reportTypes);
 
         int generateNewSessionId();
+
+        void redrawTable();
     }
 
 	public static final String NAME_TOKEN = "!formData";

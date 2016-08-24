@@ -614,6 +614,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     }
                     timerType = reportType;
                     timer.run();
+                    getView().redrawTable();
                     getView().setSelectedRow(null, true);
                 }
             }
