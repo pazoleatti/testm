@@ -663,7 +663,7 @@ void createSpecificReport() {
     FileInputStream fileInputStream = null;
     try {
         fileInputStream = new FileInputStream(file);
-        IOUtils.copy(new FileInputStream(file), scriptSpecificReportHolder.getFileOutputStream())
+        IOUtils.copy(fileInputStream, scriptSpecificReportHolder.getFileOutputStream())
     } finally {
         fileInputStream.close()
         file.delete()
