@@ -939,4 +939,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             printAnchor.addItem(reportType.getReportName(), linkButton);
         }
     }
+
+    @Override
+    public void redrawTable() {
+        formDataTable.redraw();
+    }
 }
