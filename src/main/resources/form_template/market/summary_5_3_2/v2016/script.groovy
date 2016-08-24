@@ -660,9 +660,12 @@ void createSpecificReport() {
     };
     String filePath = builder.createReport()
     def file = new File(filePath)
+    FileInputStream fileInputStream = null;
     try {
+        fileInputStream = new FileInputStream(file);
         IOUtils.copy(new FileInputStream(file), scriptSpecificReportHolder.getFileOutputStream())
     } finally {
+        fileInputStream.close()
         file.delete()
     }
 
