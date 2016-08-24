@@ -1053,11 +1053,9 @@ void logicCheck2() {
     }
 
     // 2. Существующие экземпляры декларации по НДС (раздел 8/раздел 8 без консолид. формы/8.1/9/раздел 9 без консолид. формы/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
-    def reportPeriod = getReportPeriod()
-    declarations().each { declaration ->
-        def declarationData = declarationService.getLast(declaration.value[0], declarationData.departmentId, reportPeriod.id)
-        if (declarationData != null && !declarationData.accepted) {
-            logger.error("Экземпляр декларации вида «${declaration.value[1]}» текущего периода и подразделения не находится в состоянии «Принята»!")
+    getParts().each { id, declaration ->
+        if (declaration.exist && !declaration.accepted) {
+            logger.error("Экземпляр декларации вида «%s» текущего периода и подразделения не находится в состоянии «Принята»!", declaration.name)
         }
     }
 
