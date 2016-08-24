@@ -23,7 +23,7 @@ def REF_BOOK_ID = 27
 def provider
 
 void save() {
-    refbook = refBookFactory.get(REF_BOOK_ID)
+    def refbook = refBookFactory.get(REF_BOOK_ID)
     provider = refBookFactory.getDataProvider(REF_BOOK_ID)
     def Date start = Date.parse('dd.MM.yyyy', '01.01.2016')
 
