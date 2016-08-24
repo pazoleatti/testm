@@ -349,7 +349,10 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                             codeMap[codeKey][balanceKey].add(row)
                         }
                         def strangeCodes = []
-                        ['15170', '15180', '15190', '15200', '15210', '15220'].each { knu ->
+                        for (def knu: codeMap.keySet()) {
+                            if (!(knu in ['15170', '15180', '15190', '15200', '15210', '15220'])) {
+                                continue
+                            }
                             // графа 9 = разность сумм граф 6 и 5 строк источника где КНУ и балансовый счет совпадают с текущей строкой
                             def row = getRow(dataRows, knu)
                             def balanceKey = row.incomeBuhSumAccountNumber.replace('.', "")
