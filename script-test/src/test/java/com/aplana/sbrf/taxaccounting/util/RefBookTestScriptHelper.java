@@ -61,6 +61,7 @@ public class RefBookTestScriptHelper {
     private boolean isNewRecords;
     private ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
     private InputStream importFileInputStream;
+    private String fileName;
     private final ScriptTestMockHelper mockHelper;
 
     /**
@@ -125,9 +126,9 @@ public class RefBookTestScriptHelper {
             bindings.put("fileName", "test-file-name.rnu");
         }
 
-        if (formDataEvent == FormDataEvent.IMPORT) {
+        if (formDataEvent == FormDataEvent.IMPORT || formDataEvent == FormDataEvent.PRE_CALCULATION_CHECK) {
             bindings.put("inputStream", importFileInputStream);
-            bindings.put("fileName", "test-file-name.xml");
+            bindings.put("fileName", fileName!=null?fileName:"test-file-name.xml");
             try {
                 bindings.put("dateFrom", new SimpleDateFormat("dd.MM.yyyy").parse("01.01.2016"));
                 bindings.put("dateTo", new SimpleDateFormat("dd.MM.yyyy").parse("01.07.2016"));
@@ -286,5 +287,9 @@ public class RefBookTestScriptHelper {
 
     public void setSaveRecords(List<Map<String, RefBookValue>> saveRecords) {
         this.saveRecords = saveRecords;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }
