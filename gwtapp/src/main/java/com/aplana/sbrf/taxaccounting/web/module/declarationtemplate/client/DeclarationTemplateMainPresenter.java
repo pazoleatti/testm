@@ -384,7 +384,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                 LockInteractionEvent.fire(DeclarationTemplateMainPresenter.this, false);
                 if (event.isHasError()){
                     Dialog.errorMessage(ERROR_MSG);
-                } else if (event.getUuid() == null || event.getUuid().isEmpty()){// TODO проверить условие
+                } else {
                     reset();
                     Dialog.infoMessage("Макет успешно обновлен");
                 }
