@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionException;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -159,73 +160,96 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         final Logger logger = new Logger();
         LOG.info(String.format("Запущена асинхронная задача с ключом %s и датой начала %s (%s)", lock, sdf.get().format(lockDate), lockDate.getTime()));
         lockService.updateState(lock, lockDate, LockData.State.STARTED.getText());
-        final TaskStatus taskStatus = transactionHelper.executeInNewTransaction(new TransactionLogic<TaskStatus>() {
-            @Override
-            public TaskStatus execute() {
-                try {
-                    if (lockService.isLockExists(lock, lockDate)) {
-                        LOG.info(String.format("Для задачи с ключом %s запущено выполнение бизнес-логики", lock));
-                        lockService.updateState(lock, lockDate, getBusinessLogicTitle());
-                        //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-                        TaskStatus taskStatus = executeBusinessLogic(params, logger);
-                        if (!lockService.isLockExists(lock, lockDate)) {
-                            //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
-                            //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
-                            throw new RuntimeException(String.format("Результат выполнения задачи %s больше не актуален. Выполняется переход к следующей задаче в очереди", lock));
+        final TaskStatus taskStatus;
+        try {
+            taskStatus = transactionHelper.executeInNewTransaction(new TransactionLogic<TaskStatus>() {
+                @Override
+                public TaskStatus execute() {
+                    try {
+                        if (lockService.isLockExists(lock, lockDate)) {
+                            LOG.info(String.format("Для задачи с ключом %s запущено выполнение бизнес-логики", lock));
+                            lockService.updateState(lock, lockDate, getBusinessLogicTitle());
+                            //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
+                            TaskStatus taskStatus = executeBusinessLogic(params, logger);
+                            if (!lockService.isLockExists(lock, lockDate)) {
+                                //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
+                                //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
+                                throw new RuntimeException(String.format("Результат выполнения задачи %s больше не актуален. Выполняется переход к следующей задаче в очереди", lock));
+                            }
+                            return taskStatus;
+                        } else {
+                            throw new RuntimeException(String.format("Задача %s больше не актуальна.", lock));
                         }
-                        return taskStatus;
-                    } else {
-                        throw new RuntimeException(String.format("Задача %s больше не актуальна.", lock));
+                    } catch (final Throwable e) {
+                        LOG.error(String.format("Произошла ошибка при выполнении асинхронной задачи с ключом %s и датой начала %s (%s)",
+                                lock, sdf.get().format(lockDate), lockDate.getTime()), e);
+                        if (lockService.isLockExists(lock, lockDate)) {
+                            try {
+                                transactionHelper.executeInNewTransaction(new TransactionLogic() {
+                                    @Override
+                                    public Object execute() {
+                                        LOG.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений об ошибке", lock));
+                                        if (ReportType.CHECK_DEC.equals(getReportType())
+                                                || ReportType.CHECK_FD.equals(getReportType())) {
+                                            lockService.updateState(lock, lockDate, LockData.State.SENDING_MSGS.getText());
+                                        } else {
+                                            lockService.updateState(lock, lockDate, LockData.State.SENDING_ERROR_MSGS.getText());
+                                        }
+                                        if (e instanceof ServiceLoggerException && ((ServiceLoggerException) e).getUuid() != null) {
+                                            String msg = getErrorMsg(params, true);
+                                            Logger logger1 = new Logger();
+                                            logger1.error(msg);
+                                            if (e.getMessage() != null && !e.getMessage().isEmpty()) logger1.error(e);
+                                            sendNotifications(lock, msg, logEntryService.addFirst(logger1.getEntries(), ((ServiceLoggerException) e).getUuid()), NotificationType.DEFAULT, null);
+                                        } else if (e instanceof ScriptServiceException) {
+                                            String msg = getErrorMsg(params, false);
+                                            logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
+                                            if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
+                                            sendNotifications(lock, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
+                                        } else {
+                                            String msg = getErrorMsg(params, true);
+                                            logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
+                                            if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
+                                            sendNotifications(lock, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
+                                        }
+                                        return null;
+                                    }
+                                });
+                            } finally {
+                                LOG.info(String.format("Для задачи с ключом %s выполняется снятие блокировки", lock));
+                                lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
+                            }
+                        }
+                        LOG.info(String.format("Для задачи с ключом %s выполняется откат транзакции", lock));
+                        if (e instanceof ServiceLoggerException) {
+                            throw new ServiceLoggerException("Не удалось выполнить асинхронную задачу", ((ServiceLoggerException) e).getUuid());
+                        } else {
+                            throw new RuntimeException("Не удалось выполнить асинхронную задачу", e);
+                        }
                     }
-                } catch (final Throwable e) {
-                    LOG.error(String.format("Произошла ошибка при выполнении асинхронной задачи с ключом %s и датой начала %s (%s)",
-							lock, sdf.get().format(lockDate), lockDate.getTime()), e);
+                }
+            });
+        } catch (final TransactionException e) {
+            transactionHelper.executeInNewTransaction(new TransactionLogic() {
+                @Override
+                public Object execute() {
                     if (lockService.isLockExists(lock, lockDate)) {
                         try {
-                            transactionHelper.executeInNewTransaction(new TransactionLogic() {
-                                @Override
-                                public Object execute() {
-                                    LOG.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений об ошибке", lock));
-                                    if (ReportType.CHECK_DEC.equals(getReportType())
-                                            || ReportType.CHECK_FD.equals(getReportType())) {
-                                        lockService.updateState(lock, lockDate, LockData.State.SENDING_MSGS.getText());
-                                    } else {
-                                        lockService.updateState(lock, lockDate, LockData.State.SENDING_ERROR_MSGS.getText());
-                                    }
-                                    if (e instanceof ServiceLoggerException && ((ServiceLoggerException) e).getUuid() != null) {
-                                        String msg = getErrorMsg(params, true);
-                                        Logger logger1 = new Logger();
-                                        logger1.error(msg);
-                                        if (e.getMessage() != null && !e.getMessage().isEmpty()) logger1.error(e);
-                                        sendNotifications(lock, msg, logEntryService.addFirst(logger1.getEntries(), ((ServiceLoggerException) e).getUuid()), NotificationType.DEFAULT, null);
-                                    } else if (e instanceof ScriptServiceException) {
-                                        String msg = getErrorMsg(params, false);
-                                        logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
-                                        if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
-                                        sendNotifications(lock, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
-                                    } else {
-                                        String msg = getErrorMsg(params, true);
-                                        logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
-                                        if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
-                                        sendNotifications(lock, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
-                                    }
-									return null;
-                                }
-                            });
+                            String msg = getErrorMsg(params, true);
+                            logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
+                            if (e.getMessage() != null && !e.getMessage().isEmpty())
+                            logger.error(e);
+                            sendNotifications(lock, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
                         } finally {
-                            LOG.info(String.format("Для задачи с ключом %s выполняется снятие блокировки", lock));
                             lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
                         }
                     }
-                    LOG.info(String.format("Для задачи с ключом %s выполняется откат транзакции", lock));
-                    if (e instanceof ServiceLoggerException) {
-                        throw new ServiceLoggerException("Не удалось выполнить асинхронную задачу", ((ServiceLoggerException) e).getUuid());
-                    } else {
-                        throw new RuntimeException("Не удалось выполнить асинхронную задачу", e);
-                    }
+                    return null;
                 }
-            }
-        });
+            });
+            LOG.info(String.format("Для задачи с ключом %s выполняется откат транзакции", lock));
+            throw new RuntimeException("Не удалось выполнить асинхронную задачу", e);
+        }
 
         transactionHelper.executeInNewTransaction(new TransactionLogic() {
             @Override
@@ -233,8 +257,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 try {
                     LOG.info(String.format("Для задачи с ключом %s выполняется сохранение сообщений", lock));
                     lockService.updateState(lock, lockDate, LockData.State.SAVING_MSGS.getText());
-                    String msg = taskStatus.isSuccess()?getNotificationMsg(params):getErrorMsg(params, taskStatus.isUnexpected());
-                    logger.getEntries().add(0, new LogEntry(taskStatus.isSuccess()?LogLevel.INFO:LogLevel.ERROR, msg));
+                    String msg = taskStatus.isSuccess() ? getNotificationMsg(params) : getErrorMsg(params, taskStatus.isUnexpected());
+                    logger.getEntries().add(0, new LogEntry(taskStatus.isSuccess() ? LogLevel.INFO : LogLevel.ERROR, msg));
                     String uuid = logEntryService.save(logger.getEntries());
                     LOG.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
                     lockService.updateState(lock, lockDate, LockData.State.SENDING_MSGS.getText());
