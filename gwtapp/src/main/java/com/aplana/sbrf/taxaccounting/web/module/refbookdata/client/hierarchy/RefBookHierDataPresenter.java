@@ -345,7 +345,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
 
     public void initPickerState(Date relevanceDate, String searchPattern, boolean exactSearch) {
         this.relevanceDate = relevanceDate;
-        getView().setPickerState(relevanceDate, searchPattern, exactSearch);
+        initPickerState(relevanceDate, searchPattern, exactSearch);
     }
 
     @Override
