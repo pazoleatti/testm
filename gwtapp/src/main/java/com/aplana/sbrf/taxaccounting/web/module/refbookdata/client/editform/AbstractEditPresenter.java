@@ -35,7 +35,7 @@ import java.util.*;
 public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyView> extends PresenterWidget<V>
         implements EditFormUiHandlers, ShowItemEvent.ShowItemHandler {
 
-    static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны. Продолжить?";
+    public static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны. Продолжить?";
 
     /** Идентификатор справочника */
     Long currentRefBookId;
