@@ -68,7 +68,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     @ProxyEvent
     @Override
     public void onSearch(SearchButtonEvent event) {
-        getView().setPickerState(event.getRelevanceDate(), event.getSearchPattern(), event.isExactSearch());
+        initPickerState(event.getRelevanceDate(), event.getSearchPattern(), event.isExactSearch());
         searchButtonClicked(event.getRelevanceDate());
     }
 
