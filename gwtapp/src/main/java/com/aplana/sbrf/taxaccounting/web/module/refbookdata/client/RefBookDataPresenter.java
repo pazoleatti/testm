@@ -144,6 +144,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     protected void onHide() {
         super.onHide();
+        refBookId = null;
+        refBookLinearPresenter.reset();
+        editFormPresenter.setIsFormModified(false);
+        editFormPresenter.setMode(FormMode.READ);
+        editFormPresenter.show(null);
         clearSlot(TYPE_editFormPresenter);
         clearSlot(TYPE_mainFormPresenter);
         for (HandlerRegistration han : registrations){
@@ -192,10 +197,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
     @Override
     public void onBackClicked() {
-        refBookId = null;
         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(RefBookListTokens.REFBOOK_LIST).build());
-        refBookLinearPresenter.reset();
-        editFormPresenter.show(null);
     }
 
     @Override
@@ -350,6 +352,35 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
     @Override
     public void onBackToRefBookAnchorClicked() {
+        if (editFormPresenter.isFormModified()) {
+            Dialog.confirmMessage(AbstractEditPresenter.DIALOG_MESSAGE, new DialogHandler() {
+                @Override
+                public void yes() {
+                    editFormPresenter.setIsFormModified(false);
+                    backToRefBook();
+                }
+
+                @Override
+                public void no() {
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void cancel() {
+                    no();
+                }
+
+                @Override
+                public void close() {
+                    no();
+                }
+            });
+        } else {
+            backToRefBook();
+        }
+    }
+
+    private void backToRefBook() {
         clearSlot(TYPE_mainFormPresenter);
         setInSlot(TYPE_mainFormPresenter, refBookLinearPresenter);
         getView().setVersionView(false);

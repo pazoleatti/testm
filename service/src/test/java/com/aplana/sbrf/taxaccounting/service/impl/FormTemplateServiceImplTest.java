@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
@@ -310,7 +310,7 @@ public class FormTemplateServiceImplTest extends Assert {
         formTemplateService.updateScript(formTemplate, log, new TAUserInfo());
     }
 
-    @Test(expected = ServiceLoggerException.class)
+    @Test
     public void updateScript2() throws IOException {
         FormTemplate formTemplate = new FormTemplate();
         formTemplate.setId(1);
@@ -323,6 +323,7 @@ public class FormTemplateServiceImplTest extends Assert {
         formTemplate.setScript(script);
         Logger log = new Logger();
         formTemplateService.updateScript(formTemplate, log, new TAUserInfo());
+        assertTrue(log.containsLevel(LogLevel.ERROR));
     }
 
 //    @Test(expected = ValidationException.class)

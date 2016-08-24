@@ -172,6 +172,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
     private boolean isForm = true;
     private boolean isTaxTypeDeal = false;
+    private boolean isTaxTypeLand = false;
     private boolean isTaxTypeETRorMarket = false;
 
     private SingleSelectionModel<DepartmentAssign> leftSM;
@@ -727,6 +728,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                      boolean isForm, boolean isControlUNP) {
         this.isForm = isForm;
         this.isTaxTypeDeal = taxType.equals(TaxType.DEAL);
+        this.isTaxTypeLand = taxType.equals(TaxType.LAND);
         this.isTaxTypeETRorMarket = taxType.equals(TaxType.ETR) || taxType.equals(TaxType.MARKET);
 
         taxTypeLabel.setText(taxType.getName());
@@ -762,7 +764,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         cancelButton.setEnabled(false);
         editButton.setEnabled(false);
 
-        setupView(isForm, isTaxTypeDeal, isTaxTypeETRorMarket, AppointmentType.SOURCES.equals(type));
+        setupView(isForm, isTaxTypeDeal, isTaxTypeETRorMarket, AppointmentType.SOURCES.equals(type), isTaxTypeLand);
     }
 
     /**
@@ -772,13 +774,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
      * @param isTaxTypeDeal true - тип налога "Учет КС", иначе все остальные
      * @param isSources     true - назанчение источников, иначе назанчение приемников
      */
-    private void setupView(boolean isForm, boolean isTaxTypeDeal, boolean isTaxTypeETRorMarket, boolean isSources) {
+    private void setupView(boolean isForm, boolean isTaxTypeDeal, boolean isTaxTypeETRorMarket, boolean isSources, boolean isTaxTypeLand) {
 
         leftLabel.setText(isSources ? "Приемник" : "Источник");
         rightLabel.setText(isSources ? "Источники" : "Приемники");
         downLabel.setText("Указанные " + (isSources ? "источники" : "приемники"));
 
-        if (isTaxTypeETRorMarket) {
+        if (isTaxTypeETRorMarket || isTaxTypeLand) { // до версии 1.2 деклараций по ЗемНалогу не будет
             verSep.setVisible(false);
             formDecAnchor.setVisible(false);
         } else {
@@ -1007,7 +1009,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             leftDepPicker.setValue(null);
         }
         rightDepPicker.setValue(null);
-        setupView(isForm, isTaxTypeDeal, isTaxTypeETRorMarket, isSource());
+        setupView(isForm, isTaxTypeDeal, isTaxTypeETRorMarket, isSource(), isTaxTypeLand);
     }
 
     @UiHandler("assignButton")
@@ -1063,7 +1065,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
     @UiHandler("appointmentTypePicker")
     public void change(ValueChangeEvent<AppointmentType> event) {
-        setupView(isForm, isTaxTypeDeal, isTaxTypeETRorMarket, isSource());
+        setupView(isForm, isTaxTypeDeal, isTaxTypeETRorMarket, isSource(), isTaxTypeLand);
     }
 
     /**

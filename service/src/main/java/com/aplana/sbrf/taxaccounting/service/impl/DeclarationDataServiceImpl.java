@@ -320,7 +320,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             lockStateLogger.updateState("Проверка форм-источников");
             checkSources(declarationData, logger, userInfo);
             lockStateLogger.updateState("Проверка данных декларации/уведомления");
-            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CHECK, scriptLogger, null);
+            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED , scriptLogger, null);
         } finally {
             logger.getEntries().addAll(scriptLogger.getEntries());
         }
@@ -328,7 +328,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceException();
         }
         try {
-            validateDeclaration(userInfo, declarationData, validateLogger, true, FormDataEvent.CHECK, lockStateLogger);
+            validateDeclaration(userInfo, declarationData, validateLogger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED , lockStateLogger);
         } finally {
             logger.getEntries().addAll(validateLogger.getEntries());
         }
