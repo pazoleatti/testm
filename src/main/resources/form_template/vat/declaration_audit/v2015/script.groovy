@@ -803,6 +803,9 @@ void logicCheck2() {
     declaration81 = declarations().declaration81[0]
     declaration91 = declarations().declaration91[0]
 
+    def declarationTypeIds = [declaration8, declaration9, declaration81, declaration91]
+    def declarationSourceMap = getDeclarationSourcesMap(declarationTypeIds)
+
     def elements = [:]
 
     def exist8_12, exist8, exist81, exist9, exist91, exist10, exist11, exist12, existFound = false
@@ -829,7 +832,7 @@ void logicCheck2() {
     def r9str260, r9str270, r9str250
     def r9str200sum = 0, r9str210sum = 0, r9str190sum = 0
     // Приложение 1 к Разделу 9
-    def r91str340, r91str350, r91str050, r91str060, r91str020, r91str310, r91str320, r91str330
+    def r91str340, r91str350, r91str050, r91str060, r91str020, r91str030, r91str040, r91str310, r91str320, r91str330
     def r91str280sum = 0, r91str290sum = 0, r91str280sumAll = 0, r91str290sumAll = 0, r91str250sum = 0, r91str260sum = 0, r91str270sum = 0
 
     try { // ищем пока есть элементы и есть что искать
@@ -888,155 +891,150 @@ void logicCheck2() {
         reader.close()
     }
 
-    def reader8
-    if (has8) {
-        reader8 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration8[0]).id)
-    } else if (has8n) {
-        reader8 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration8n[0]).id)
-    }
-    def reader81
-    if (isDeclarationExist(declaration81) == 1) {
-        reader81 = declarationService.getXmlStreamReader(getParts().get(declaration81).id)
-    }
-    def reader9
-    if (has9) {
-        reader9 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration9[0]).id)
-    } else if (has9n) {
-        reader9 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration9n[0]).id)
-    }
-    def reader91
-    if (isDeclarationExist(declaration91) == 1) {
-        reader91 = declarationService.getXmlStreamReader(getParts().get(declaration91).id)
-    }
-
-    if (reader8 != null) {
+    // значения из декларации 8
+    if (declarationSourceMap[declaration8].isCalc) {
         //elements = [:]
+        def readerTmp = declarationService.getXmlStreamReader(declarationSourceMap[declaration8].declarationDataId)
         try {
-            while (reader8.hasNext()) {
-                if (reader8.startElement) {
-                    //elements[reader8.name.localPart] = true
-                    if ("КодВидОпер".equals(reader8.name.localPart)) {
-                        if ('06'.equals(reader8.getElementText())) {
+            def r8str180sumTmp = 0
+            while (readerTmp.hasNext()) {
+                if (readerTmp.startElement) {
+                    //elements[readerTmp.name.localPart] = true
+                    if ("КодВидОпер".equals(readerTmp.name.localPart)) {
+                        if ('06'.equals(readerTmp.getElementText())) {
                             r8str180sum += r8str180sumTmp
                         }
                     }
-                    if (!r8str190 && "КнигаПокуп".equals(reader8.name.localPart)) {
-                        r8str190 = getXmlDecimal(reader8, "СумНДСВсКПк") ?: 0
-                    } else if ("КнПокСтр".equals(reader8.name.localPart)) {
-                        r8str180sumTmp = getXmlDecimal(reader8, "СумНДСВыч") ?: 0
+                    if (!r8str190 && "КнигаПокуп".equals(readerTmp.name.localPart)) {
+                        r8str190 = getXmlDecimal(readerTmp, "СумНДСВсКПк") ?: 0
+                    } else if ("КнПокСтр".equals(readerTmp.name.localPart)) {
+                        r8str180sumTmp = getXmlDecimal(readerTmp, "СумНДСВыч") ?: 0
                     }
                 }
-                /*if (reader8.endElement) {
-                    elements[reader8.name.localPart] = false
+                /*if (readerTmp.endElement) {
+                    elements[readerTmp.name.localPart] = false
                 } */
-                reader8.next()
+                readerTmp.next()
             }
         } finally {
-            reader8.close()
+            readerTmp.close()
         }
     }
 
-    if (reader81 != null) {
+    // значения из декларации 8.1
+    if (declarationSourceMap[declaration81].isCalc) {
         elements = [:]
+        def readerTmp = declarationService.getXmlStreamReader(declarationSourceMap[declaration81].declarationDataId)
         try {
-            while (reader81.hasNext()) {
-                if (reader81.startElement) {
-                    elements[reader81.name.localPart] = true
-                    if ("КодВидОпер".equals(reader81.name.localPart)) {
-                        if ('06'.equals(reader81.getElementText())) {
+            def r81str180sumTmp = 0
+            while (readerTmp.hasNext()) {
+                if (readerTmp.startElement) {
+                    elements[readerTmp.name.localPart] = true
+                    if ("КодВидОпер".equals(readerTmp.name.localPart)) {
+                        if ('06'.equals(readerTmp.getElementText())) {
                             r81str180sum += r81str180sumTmp
                         }
                     }
                     if (!r81str190 && isCurrentNode(['Документ', 'КнигаПокупДЛ'], elements)) {
-                        r81str190 = getXmlDecimal(reader81, "СумНДСИтП1Р8") ?: 0
-                        r81str005 = getXmlDecimal(reader81, "СумНДСИтКПк") ?: 0
+                        r81str190 = getXmlDecimal(readerTmp, "СумНДСИтП1Р8") ?: 0
+                        r81str005 = getXmlDecimal(readerTmp, "СумНДСИтКПк") ?: 0
                     }
                     if (isCurrentNode(['Документ', 'КнигаПокупДЛ', 'КнПокДЛСтр'], elements)) {
-                        r81str180sumTmp = getXmlDecimal(reader81, "СумНДС") ?: 0
+                        r81str180sumTmp = getXmlDecimal(readerTmp, "СумНДС") ?: 0
                     }
                 }
-                if (reader81.endElement) {
-                    elements[reader81.name.localPart] = false
+                if (readerTmp.endElement) {
+                    elements[readerTmp.name.localPart] = false
                 }
-                reader81.next()
+                readerTmp.next()
             }
         } finally {
-            reader81.close()
+            readerTmp.close()
         }
     }
 
-    if (reader9 != null) {
+    // значения из декларации 9
+    if (declarationSourceMap[declaration9].isCalc) {
         //elements = [:]
+        def readerTmp = declarationService.getXmlStreamReader(declarationSourceMap[declaration9].declarationDataId)
         try {
-            while (reader9.hasNext()) {
-                if (reader9.startElement) {
-                    //elements[reader9.name.localPart] = true
-                    if ("КодВидОпер".equals(reader9.name.localPart)) {
-                        if ('06'.equals(reader9.getElementText())) {
+            def r9str200sumTmp = 0
+            def r9str210sumTmp = 0
+            while (readerTmp.hasNext()) {
+                if (readerTmp.startElement) {
+                    //elements[readerTmp.name.localPart] = true
+                    if ("КодВидОпер".equals(readerTmp.name.localPart)) {
+                        if ('06'.equals(readerTmp.getElementText())) {
                             r9str200sum += r9str200sumTmp
                             r9str210sum += r9str210sumTmp
                         }
                     }
-                    if (!r9str260 && "КнигаПрод".equals(reader9.name.localPart)) {
-                        r9str260 = getXmlDecimal(reader9, "СумНДСВсКПр18") ?: 0
-                        r9str270 = getXmlDecimal(reader9, "СумНДСВсКПр10") ?: 0
-                        r9str250 = getXmlDecimal(reader9, "СтПродБезНДС0") ?: 0
+                    if (!r9str260 && "КнигаПрод".equals(readerTmp.name.localPart)) {
+                        r9str260 = getXmlDecimal(readerTmp, "СумНДСВсКПр18") ?: 0
+                        r9str270 = getXmlDecimal(readerTmp, "СумНДСВсКПр10") ?: 0
+                        r9str250 = getXmlDecimal(readerTmp, "СтПродБезНДС0") ?: 0
                     }
-                    if ("КнПродСтр".equals(reader9.name.localPart)) {
-                        r9str200sumTmp = getXmlDecimal(reader9, "СумНДССФ18") ?: 0
-                        r9str210sumTmp = getXmlDecimal(reader9, "СумНДССФ10") ?: 0
-                        r9str190sum += getXmlDecimal(reader9, "СтоимПродСФ0") ?: 0
+                    if ("КнПродСтр".equals(readerTmp.name.localPart)) {
+                        r9str200sumTmp = getXmlDecimal(readerTmp, "СумНДССФ18") ?: 0
+                        r9str210sumTmp = getXmlDecimal(readerTmp, "СумНДССФ10") ?: 0
+                        r9str190sum += getXmlDecimal(readerTmp, "СтоимПродСФ0") ?: 0
                     }
                 }
-                /*if (reader9.endElement) {
-                    elements[reader9.name.localPart] = false
+                /*if (readerTmp.endElement) {
+                    elements[readerTmp.name.localPart] = false
                 }*/
-                reader9.next()
+                readerTmp.next()
             }
         } finally {
-            reader9.close()
+            readerTmp.close()
         }
     }
 
-    if (reader91 != null) {
+    // значения из декларации 9.1
+    if (declarationSourceMap[declaration91].isCalc) {
         elements = [:]
+        def readerTmp = declarationService.getXmlStreamReader(declarationSourceMap[declaration91].declarationDataId)
         try {
-            while (reader91.hasNext()) {
-                if (reader91.startElement) {
-                    elements[reader91.name.localPart] = true
-                    if ("КодВидОпер".equals(reader91.name.localPart)) {
-                        if ('06'.equals(reader91.getElementText())) {
+            def r91str280sumTmp = 0
+            def r91str290sumTmp = 0
+            while (readerTmp.hasNext()) {
+                if (readerTmp.startElement) {
+                    elements[readerTmp.name.localPart] = true
+                    if ("КодВидОпер".equals(readerTmp.name.localPart)) {
+                        if ('06'.equals(readerTmp.getElementText())) {
                             r91str280sum += r91str280sumTmp
                             r91str290sum += r91str290sumTmp
                         }
                     }
                     if (!r91str340 && isCurrentNode(['Документ', 'КнигаПродДЛ'], elements)) {
-                        r91str340 = getXmlDecimal(reader91, "СумНДСВсП1Р9_18") ?: 0
-                        r91str350 = getXmlDecimal(reader91, "СумНДСВсП1Р9_10") ?: 0
-                        r91str050 = getXmlDecimal(reader91, "СумНДСИтКПр18") ?: 0
-                        r91str060 = getXmlDecimal(reader91, "СумНДСИтКПр10") ?: 0
-                        r91str020 = getXmlDecimal(reader91, "ИтСтПродКПр18") ?: 0
-                        r91str310 = getXmlDecimal(reader91, "СтПродВсП1Р9_18") ?: 0
-                        r91str320 = getXmlDecimal(reader91, "СтПродВсП1Р9_10") ?: 0
-                        r91str330 = getXmlDecimal(reader91, "СтПродВсП1Р9_0") ?: 0
+                        r91str340 = getXmlDecimal(readerTmp, "СумНДСВсП1Р9_18") ?: 0
+                        r91str350 = getXmlDecimal(readerTmp, "СумНДСВсП1Р9_10") ?: 0
+                        r91str050 = getXmlDecimal(readerTmp, "СумНДСИтКПр18") ?: 0
+                        r91str060 = getXmlDecimal(readerTmp, "СумНДСИтКПр10") ?: 0
+                        r91str020 = getXmlDecimal(readerTmp, "ИтСтПродКПр18") ?: 0
+                        r91str030 = getXmlDecimal(readerTmp, "ИтСтПродКПр10") ?: 0
+                        r91str040 = getXmlDecimal(readerTmp, "ИтСтПродКПр0") ?: 0
+                        r91str310 = getXmlDecimal(readerTmp, "СтПродВсП1Р9_18") ?: 0
+                        r91str320 = getXmlDecimal(readerTmp, "СтПродВсП1Р9_10") ?: 0
+                        r91str330 = getXmlDecimal(readerTmp, "СтПродВсП1Р9_0") ?: 0
                     }
                     if (isCurrentNode(['Документ', 'КнигаПродДЛ', 'КнПродДЛСтр'], elements)) {
-                        r91str280sumTmp = getXmlDecimal(reader91, "СумНДССФ18") ?: 0
-                        r91str290sumTmp = getXmlDecimal(reader91, "СумНДССФ10") ?: 0
-                        r91str250sum += getXmlDecimal(reader91, "СтоимПродСФ18") ?: 0
-                        r91str260sum += getXmlDecimal(reader91, "СтоимПродСФ10") ?: 0
-                        r91str270sum += getXmlDecimal(reader91, "СтоимПродСФ0") ?: 0
+                        r91str280sumTmp = getXmlDecimal(readerTmp, "СумНДССФ18") ?: 0
+                        r91str290sumTmp = getXmlDecimal(readerTmp, "СумНДССФ10") ?: 0
+                        r91str250sum += getXmlDecimal(readerTmp, "СтоимПродСФ18") ?: 0
+                        r91str260sum += getXmlDecimal(readerTmp, "СтоимПродСФ10") ?: 0
+                        r91str270sum += getXmlDecimal(readerTmp, "СтоимПродСФ0") ?: 0
                         r91str280sumAll += r91str280sumTmp
                         r91str290sumAll += r91str290sumTmp
                     }
                 }
-                if (reader91.endElement) {
-                    elements[reader91.name.localPart] = false
+                if (readerTmp.endElement) {
+                    elements[readerTmp.name.localPart] = false
                 }
-                reader91.next()
+                readerTmp.next()
             }
         } finally {
-            reader91.close()
+            readerTmp.close()
         }
     }
 
@@ -1055,11 +1053,9 @@ void logicCheck2() {
     }
 
     // 2. Существующие экземпляры декларации по НДС (раздел 8/раздел 8 без консолид. формы/8.1/9/раздел 9 без консолид. формы/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
-    def reportPeriod = getReportPeriod()
-    declarations().each { declaration ->
-        def declarationData = declarationService.getLast(declaration.value[0], declarationData.departmentId, reportPeriod.id)
-        if (declarationData != null && !declarationData.accepted) {
-            logger.error("Экземпляр декларации вида «${declaration.value[1]}» текущего периода и подразделения не находится в состоянии «Принята»!")
+    getParts().each { id, declaration ->
+        if (declaration.exist && !declaration.accepted) {
+            logger.error("Экземпляр декларации вида «%s» текущего периода и подразделения не находится в состоянии «Принята»!", declaration.name)
         }
     }
 
@@ -1096,97 +1092,102 @@ void logicCheck2() {
     def sum120_160 = r3g3str120 ?: 0 + r3g3str150 ?: 0 + r3g3str160 ?: 0
     def denom1 = sum010_040 + r7g2sum
     def denom2 = sum120_160 + r7g4sum
-    //logger.info("(" + r3g3str010 + "+" + r3g3str020 + "+" + r3g3str030  + "+" + r3g3str040 + ")/(" + sum010_040 + "+" + r7g2sum + ") == (" + r3g3str120 + "+" +r3g3str150 + "+" + r3g3str160  + ")/(" + sum120_160+ "+" + r7g4sum  + ")")
     if (denom1 == 0 || denom2 == 0) {
-        logger.warn("КС 1.4. Выполнение проверки невозможно, так как в результате расчета получен нулевой знаменатель (деление на ноль невозможно). " +
-                "Алгоритм проверки: Раздел 3, гр. 3: («Строка 010» + «Строка 020» + «Строка 030» + «Строка 040») / Раздел 3, гр. 3: («Строка 010» + «Строка 020» + «Строка 030» + «Строка 040») + (Раздел 7: «Сумма по гр. 2»)) = (Раздел 3, гр. 3: «Строка 120» + «Строка 150» + «Строка 160») / ((Раздел 3, гр. 3: «Строка 120» + «Строка 150» + «Строка 160») + (Раздел 7: «Сумма по гр. 4»))")
+        logger.warn("КС 1.4. Проверка невозможно, так как в результате проверки получен нулевой знаменатель " +
+                "(деление на ноль невозможно). Алгоритм проверки: " +
+                "(Раздел 3, гр. 3: «Строка 010» + «Строка 020» + «Строка 030» + «Строка 040») / " +
+                "[(Раздел 3, гр. 3: («Строка 010» + «Строка 020» + «Строка 030» + «Строка 040») + " +
+                "(Раздел 7: сумма значения гр. 2 по блокам, в которых значение гр.1 в диапазоне: 1010800 - 1010821)] = " +
+                "(Раздел 3, гр. 3: «Строка 120» + «Строка 150» + «Строка 160») / " +
+                "[(Раздел 3, гр. 3: «Строка 120» + «Строка 150» + «Строка 160») + " +
+                "(Раздел 7: сумма значения гр. 4 по блокам, в которых значение гр.1 в диапазоне: 1010800 - 1010821)]")
     } else if (sum010_040 / denom1 != sum120_160 / denom2) {
-        logger.warn("КС 1.4. Возможно нарушение ст. 149, 170 п.4 возможно необоснованное применение налоговых вычетов.")
+        logger.warn("КС 1.4. Возможно необоснованное применение налоговых вычетов. НК РФ ст. 149, 170 п. 4")
     }
     // 1.11
-    //logger.info("" + r3g3str170 ?: 0 + " > " + r3g5str010 ?: 0 + " + " + r3g5str020 ?: 0 + " + " + r3g5str030 ?: 0 + " + " + r3g5str040 ?: 0)
     if (r3g3str170 ?: 0 > r3g5str010 ?: 0 + r3g5str020 ?: 0 + r3g5str030 ?: 0 + r3g5str040 ?: 0) {
-        logger.warn("КС 1.11. Возможно нарушение ст. 171, п. 8, НК РФ ст. 172, п. 6, либо НК РФ ст. 146, п. 1 налоговые " +
-                "вычеты не обоснованы, либо налоговая база занижена, так как суммы отработанных авансов не включены в реализацию.")
+        logger.warn("КС 1.11. Налоговые вычеты не обоснованы, либо налоговая база занижена, " +
+                "так как суммы отработанных авансов не включены в реализацию. " +
+                "НК РФ ст. 171, п. 8, НК РФ ст. 172, п. 6, либо НК РФ ст. 146, п. 1 ")
     }
     // 1.25 (8, 8.1, 9, 9.1)
-    if (checkReader('1.25', [(declaration8): reader8, (declaration81): reader81, (declaration9): reader9, (declaration91): reader91])) {
+    if (checkSources('1.25', declarationSourceMap, [declaration8, declaration81, declaration9, declaration91])) {
         def sum25 = r8str190 + (r81str190 - r81str005) - (r9str260 + r9str270) - (r9str200sum + r9str210sum) + (r91str340 + r91str350 - r91str050 - r91str060) - (r91str280sum + r91str290sum)
         if (r1str050 > 0 && sum25 <= 0) {
-            logger.warn("КС 1.25. Возможно нарушение ст. 173 завышение суммы НДС, подлежащей возмещению за онп.")
+            logger.warn("КС 1.25. Завышение суммы НДС, подлежащей возмещению за онп. НК РФ ст. 173")
         }
     }
     // 1.26 (9, 9.1)
-    if (checkReader('1.26', [(declaration9): reader9, (declaration91): reader91])) {
+    if (checkSources('1.26', declarationSourceMap, [declaration9, declaration91])) {
         if (r2str060sum < r9str200sum + r9str210sum + r91str280sum + r91str290sum) {
-            logger.warn("КС 1.26. Возможно нарушение ст. 161, п. 4 ст. 173 занижение суммы НДС, подлежащей уплате в бюджет.")
+            logger.warn("КС 1.26. Занижение суммы НДС, подлежащей уплате в бюджет. НК РФ ст. 161, п. 4 ст. 173")
         }
     }
     // 1.27 (9, 9.1)
-    if (checkReader('1.27', [(declaration9): reader9, (declaration91): reader91])) {
+    if (checkSources('1.27', declarationSourceMap, [declaration9, declaration91])) {
         if (r3g5str110 + r2str060sum < r9str260 + r9str270 + r91str340 + r91str350 - r91str050 - r91str060) {
-            logger.warn("КС 1.27. Возможно нарушение РФ ст. 153, 161, 164, 165, 166, 167, 173 занижение суммы НДС, исчисленного к уплате в бюджет.")
+            logger.warn("КС 1.27. Занижение суммы НДС, исчисленного к уплате в бюджет. НК РФ ст. 153, 161, 164, 165, 166, 167, 173")
         }
     }
     // 1.28 (8, 8.1)
-    if (checkReader('1.28', [(declaration8): reader8, (declaration81): reader81])) {
+    if (checkSources('1.28', declarationSourceMap, [declaration8, declaration81])) {
         if (r3g3str190 > r8str190 + r81str190 - r81str005) {
-            logger.warn("КС 1.28. Возможно нарушение ст. 171, 172 завышение суммы НДС, подлежащей вычету.")
+            logger.warn("КС 1.28. Завышение суммы НДС, подлежащей вычету. НК РФ ст. 171, 172")
         }
     }
     // 1.31 (8, 8.1)
-    if (checkReader('1.31', [(declaration8): reader8, (declaration81): reader81])) {
+    if (checkSources('1.31', declarationSourceMap, [declaration8, declaration81])) {
         if (r3g3str180 > r8str180sum + r81str180sum) {
-            logger.warn("КС 1.31. Возможно нарушение ст. 161, 171, 172 завышение суммы НДС, подлежащей вычету.")
+            logger.warn("КС 1.31. Завышение суммы НДС, подлежащей вычету. НК РФ ст. 161, 171, 172")
         }
     }
     // 1.33 (8.1)
-    if (checkReader('1.33', [(declaration81): reader81])) {
+    if (checkSources('1.33', declarationSourceMap, [declaration81])) {
         if (r81str005 + r81str180sum < r81str190) {
-            logger.warn("КС 1.33. Возможно нарушение ст. 171, 172 возможно завышение суммы НДС, подлежащей вычету.")
+            logger.warn("КС 1.33. Возможно завышение суммы НДС, подлежащей вычету. НК РФ ст. 171, 172")
         }
     }
     // 1.36 (9)
-    if (checkReader('1.36', [(declaration9): reader9])) {
-        //logger.info(""+r9str190sum + " >= " +r9str250)
+    if (checkSources('1.36', declarationSourceMap, [declaration9])) {
         if (r9str250 > r9str190sum) {
-            logger.warn("КС 1.36. Возможно нарушение ст. 164, 165, 167, 173 возможно занижение исчисленной суммы НДС вследствие " +
-                    "неполного отражения НБ либо неверное применение ставки по НДС (при условии, что соотношение 1.37 выполняется).")
+            logger.warn("КС 1.36. Возможно занижение исчисленной суммы НДС вследствие неполного отражения НБ " +
+                    "либо неверное применение ставки по НДС (при условии, что соотношение 1.37 выполняется). " +
+                    "НК РФ ст. 164, 165, 167, 173")
         }
     }
     // 1.39 (9.1)
-    if (checkReader('1.39', [(declaration91): reader91])) {
+    if (checkSources('1.39', declarationSourceMap, [declaration91])) {
         if (r91str020 + r91str250sum > r91str310) {
-            logger.warn("КС 1.39. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 возможно " +
-                    "занижение суммы НДС, исчисленного к уплате в бюджет (при условии, что соотношение 1.32 и 1.49 выполняются)")
+            logger.warn("КС 1.39. Возможно занижение суммы НДС, исчисленного к уплате в бюджет (при условии, что соотношение 1.32 и 1.49 выполняются). " +
+                    "НК РФ ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137")
         }
     }
     // 1.40 (9.1)
-    if (checkReader('1.40', [(declaration91): reader91])) {
-        if (r91str020 + r91str260sum > r91str320) {
-            logger.warn("КС 1.40. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
-                    "возможно занижение суммы НДС, исчисленного к уплате в бюджет")
+    if (checkSources('1.40', declarationSourceMap, [declaration91])) {
+        if (r91str030 + r91str260sum > r91str320) {
+            logger.warn("КС 1.40. Возможно занижение суммы НДС, исчисленного к уплате в бюджет. " +
+                    "НК РФ ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137")
         }
     }
     // 1.41  (9.1)
-    if (checkReader('1.41', [(declaration91): reader91])) {
-        if (r91str020 + r91str270sum > r91str330) {
-            logger.warn("КС 1.41. Возможно нарушение ст. 164, 165, 167, 173 возможно занижение исчисленной суммы НДС, " +
-                    "вследствие неполного отражения НБ либо неверное применение ставки по НДС")
+    if (checkSources('1.41', declarationSourceMap, [declaration91])) {
+        if (r91str040 + r91str270sum > r91str330) {
+            logger.warn("КС 1.41. Возможно занижение исчисленной суммы НДС, вследствие неполного отражения НБ " +
+                    "либо неверное применение ставки по НДС. НК РФ ст. 164, 165, 167, 173")
         }
     }
     // 1.42 (9.1)
-    if (checkReader('1.42', [(declaration91): reader91])) {
-        if (r91str020 + r91str280sumAll > r91str340) {
-            logger.warn("КС 1.42. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
-                    "возможно занижение суммы НДС, исчисленного к уплате в бюджет (при условии, что соотношение 1.32 выполняется)")
+    if (checkSources('1.42', declarationSourceMap, [declaration91])) {
+        if (r91str050 + r91str280sumAll > r91str340) {
+            logger.warn("КС 1.42. Возможно занижение суммы НДС, исчисленного к уплате в бюджет (при условии, что соотношение 1.32 выполняется). " +
+                    "НК РФ ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137")
         }
     }
     // 1.43 (9.1)
-    if (checkReader('1.43', [(declaration91): reader91])) {
-        if (r91str020 + r91str290sumAll > r91str350) {
-            logger.warn("КС 1.43. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
-                    "возможно занижение суммы НДС, исчисленного к уплате в бюджет")
+    if (checkSources('1.43', declarationSourceMap, [declaration91])) {
+        if (r91str060 + r91str290sumAll > r91str350) {
+            logger.warn("КС 1.43. Возможно занижение суммы НДС, исчисленного к уплате в бюджет. " +
+                    "НК РФ ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137")
         }
     }
 }
@@ -1203,11 +1204,10 @@ def getXmlValue(def value) {
 def Map<Long, Expando> getParts() {
     if (declarationParts == null) {
         declarationParts = new HashedMap<Long, Expando>()
-        def reportPeriod = getReportPeriod()
         declarations().each { declaration ->
             id = declaration.value[0]
             name = declaration.value[1]
-            def declarationData = declarationService.getLast(id, declarationData.departmentId, reportPeriod.id)
+            def declarationData = declarationService.find(id, declarationData.departmentReportPeriodId, null, null)
 
             def result = new Expando()
             result.id = (declarationData?.id)
@@ -1230,20 +1230,6 @@ def String getDeclarationFileName(def declarationTypeId) {
 
 def BigDecimal isDeclarationExist(def declarationTypeId) {
     return getParts().get(declarationTypeId)?.exist ? 1 : 0
-}
-
-def boolean checkReader(String number, Map<Integer, XMLStreamReader> map) {
-    boolean exist = true
-    map.each { id, reader ->
-        if (!isDeclarationExist(id)) {
-            logger.warn("%s. Экземпляр декларации вида «%s» не создан. Проверка контрольного соотношения невозможна.", number, getParts().get(id).name)
-            exist = false
-        } else if (!reader) {
-            logger.warn("%s. Экземпляр декларации вида «%s» создан, но не рассчитан. Проверка контрольного соотношения невозможна.", number, getParts().get(id).name)
-            exist = false
-        }
-    }
-    return exist
 }
 
 def BigDecimal hasOneOrMoreDeclaration() {
@@ -1793,4 +1779,217 @@ def getFormData724_1_1() {
         }
     }
     return formData724_1_1
+}
+
+/**
+ * Получить мапу с информацией о источниках.
+ * Мапа содержит мапу с иформацией о каждом источнике.
+ * Возможные значения в мапе с иформацией:
+ *   - declarationTypeId		- id типа декларации
+ *   - declarationDataId		- id экземляра декларации
+ *   - departmentReportPeriod
+ *   - code001					- true - значение строки 001 равно 0
+ *   - reader					- для чтения xml, используется только в этом методе
+ *   - isExist					- для вывода сообщения о несуществовании источника
+ *   - isCalc					- для вывода сообщения о нерасчитанности источника
+ *   - isHasNotPrevCode001		- для вывода сообщения о том что нет подходящих источников со значением строки 001 равной 0
+ *
+ * @param declarationTypeIds список id типов декларации источников
+ */
+def getDeclarationSourcesMap(def declarationTypeIds) {
+    def declarationInfoMap = [:]
+    // найти все источники находящиеся в одном периоде (в том же корректирующем) что и текущая декларация
+    for (def declarationTypeId : declarationTypeIds) {
+        def declarationInfo = [:]
+        declarationInfo.declarationTypeId = declarationTypeId
+        declarationInfo.departmentReportPeriod = getDepartmentReportPeriod(declarationData.departmentReportPeriodId)
+
+        DeclarationData declarationDataTmp = declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId, null, null)
+        declarationInfo.declarationDataId = declarationDataTmp?.id
+        if (declarationDataTmp?.id) {
+            XMLStreamReader reader = declarationService.getXmlStreamReader(declarationDataTmp?.id)
+            declarationInfo.reader = reader
+        }
+        declarationInfo.isExist = (declarationDataTmp != null)
+        declarationInfo.isCalc = (declarationInfo.reader != null)
+        declarationInfoMap[declarationTypeId] = declarationInfo
+    }
+
+    // проверить у источников строку 001 (должны иметь значение 0)
+    def hasAllCode001 = true
+    for (def declarationTypeId : declarationTypeIds) {
+        def declarationInfo = declarationInfoMap[declarationTypeId]
+        // пропускать не созданные и не расчитанные декларации
+        if (declarationInfo.declarationDataId == null || declarationInfo.reader == null) {
+            hasAllCode001 = false
+            continue
+        }
+        def declarationDataId = declarationInfo.declarationDataId
+        def reader = declarationInfo.reader
+        def code001 = getCode001FromXML(declarationDataId, declarationTypeId, reader)
+        if (code001 != 0) {
+            hasAllCode001 = false
+            // break не нужен, чтобы для всех reader вызвался метод close() в getCode001FromXML()
+        }
+        declarationInfo.code001 = (code001 == 0)
+    }
+    if (hasAllCode001) {
+        return declarationInfoMap
+    }
+    // поиск в декларациях предыдущих периодов (налоговых/корректирующих) в которых строку 001 имеет значение 0
+    def needDepartmentReportPeriods = getPrevDepartmentReportPeriods()
+    for (def declarationTypeId : declarationTypeIds) {
+        def declarationInfo = declarationInfoMap[declarationTypeId]
+        // пропускать не созданные, не расчитанные декларации и у которых строка 001 имеет значение равное 0
+        if (declarationInfo.declarationDataId == null || declarationInfo.reader == null || declarationInfo.code001) {
+            continue
+        }
+        declarationInfo.clear()
+        for (def needDepartmentReportPeriod : needDepartmentReportPeriods) {
+            DeclarationData declarationDataTmp = declarationService.find(declarationTypeId, needDepartmentReportPeriod.id, null, null)
+            if (declarationDataTmp) {
+                def code001 = getCode001FromXML(declarationDataTmp.id, declarationTypeId)
+                if (code001 == 0) {
+                    declarationInfo.declarationTypeId = declarationTypeId
+                    declarationInfo.declarationDataId = declarationDataTmp.id
+                    declarationInfo.departmentReportPeriod = needDepartmentReportPeriod
+                    declarationInfo.isExist = true
+                    declarationInfo.isCalc = true
+                    declarationInfo.code001 = true
+                    break
+                }
+            }
+        }
+        // если не найдена ни одна декларация в предыдущих периодах (налоговых/корректирующих)
+        if (declarationInfo.isEmpty()) {
+            declarationInfo.isHasNotPrevCode001 = true
+        }
+    }
+    return declarationInfoMap
+}
+
+/** Получить предыдущие периоды (корректирующие/налоговые). */
+def getPrevDepartmentReportPeriods() {
+    DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter()
+    filter.reportPeriodIdList = [getReportPeriod()?.id]
+    filter.departmentIdList = [declarationData.departmentId]
+    List<DepartmentReportPeriod> departmentReportPeriods = departmentReportPeriodService.getListByFilter(filter)
+    def find = false
+    for (int i = departmentReportPeriods.size() - 1; i >= 0; i--) {
+        DepartmentReportPeriod dpr = departmentReportPeriods[i]
+        if (!find && dpr.id == declarationData.departmentReportPeriodId) {
+            find = true
+            continue
+        }
+        if (find) {
+            departmentReportPeriods.add(dpr)
+        }
+    }
+    return departmentReportPeriods
+}
+
+/** Мапа с названиями атрибутов для строки 001 декларации (ключ: id типа декларации -> значение: название атрибута строки 001). */
+@Field
+def declarationCode001Map = [
+        12 : 'ПризнСвед8',  // 8
+        18 : 'ПризнСвед8',  // 8 без конс
+        13 : 'ПризнСвед81', // 8.1
+        14 : 'ПризнСвед9',  // 9
+        21 : 'ПризнСвед9',  // 9 без конс
+        15 : 'ПризнСвед91', // 9.1
+        16 : 'ПризнСвед10', // 10
+        17 : 'ПризнСвед11', // 11
+]
+
+/**
+ * Получить значение строки 001 декларации истчоника.
+ *
+ * @param declarationDataId id экземпляра декларации
+ * @param declarationTypeId id типа делкларации для определения названия атрибута строка 001
+ * @param xmlReader для чтения xml (может быть не задан)
+ */
+def getCode001FromXML(def declarationDataId, def declarationTypeId, def xmlReader = null) {
+    XMLStreamReader reader = xmlReader
+    if (reader == null) {
+        reader = declarationService.getXmlStreamReader(declarationDataId)
+    }
+    def code001AttributeName = declarationCode001Map[declarationTypeId]
+    def code001 = null
+    try {
+        def elements = [:]
+        while (reader.hasNext()) {
+            if (reader.startElement) {
+                elements[reader.name.localPart] = true
+                if (isCurrentNode(['Документ'], elements)) {
+                    code001 = getXmlDecimal(reader, code001AttributeName) ?: 0
+                    break
+                }
+            }
+            if (reader.endElement){
+                elements[reader.name.localPart] = false
+            }
+            reader.next()
+        }
+    } finally {
+        reader.close()
+    }
+    return code001
+}
+
+/**
+ * Проверка источников: сущестование, расчитанность. Если проверки не проходят, то не выполняются проверки КС.
+ *
+ * @param checkName имя проверки (1.25, 1.26...)
+ * @param declatationSourcesMap мапа с информациями о декларациях-источниках
+ * @param declarationTypeIds список id типов декларации для текущей проверки КС
+ */
+def checkSources(def checkName, def declatationSourcesMap, def declarationTypeIds) {
+    def correctionDate = getDepartmentReportPeriod(declarationData.departmentReportPeriodId)?.correctionDate
+
+    // если декларации-источники принадлежат другим периодам (налоговым/корректирующи) отличным от периода текущей декларации,
+    // и если текущая декларация имеет налоговый период, то не выполнять КС (для случая п. 8.3.2.3. шаг 2.3.1. из чтз)
+    for (def declarationTypeId : declarationTypeIds) {
+        def declarationInfo = declatationSourcesMap[declarationTypeId]
+        if (declarationInfo?.departmentReportPeriod?.id != declarationData.departmentReportPeriodId && correctionDate == null) {
+            return false
+        }
+    }
+
+    def periodName = getReportPeriod()?.taxPeriod?.year + ', ' + getReportPeriod()?.name
+    def correctionDateStr = (correctionDate ? " с датой сдачи корректировки " + correctionDate?.format('dd.MM.yyyy') : '')
+    def departmentName = departmentService.get(declarationData.departmentId)?.name
+    def result = true
+
+    for (def declarationTypeId : declarationTypeIds) {
+        def declarationName = getDeclarationName(declarationTypeId)
+
+        def declarationInfo = declatationSourcesMap[declarationTypeId]
+        if (declarationInfo.isHasNotPrevCode001) {
+            // нет ни одной декларации в предыдущих периодах (налоговых/корректирующих) которая имела бы строку 001 раной 0
+            logger.warn("КС %s. Проверка невозможна, т.к. отсутствует экземпляр декларации со строкой 001 равной «0»: Период: «%s» (налоговый/корректирующий), Подразделение: «%s», Вид: «%s",
+                    checkName, periodName, departmentName, declarationName)
+            result = false
+        } else if (!declarationInfo.isExist) {
+            // декларация источник не создана
+            logger.warn("КС %s. Проверка невозможна, т.к. не создан экземпляр декларации: Период: «%s%s», Подразделение: «%s», Вид: «%s»",
+                    checkName, periodName, correctionDateStr, departmentName, declarationName)
+            result = false
+        } else if (!declarationInfo.isCalc) {
+            // декларация источник не расчитана
+            logger.warn("КС %s. Проверка невозможна, т.к. не рассчитан экземпляр декларации: Период: «%s%s», Подразделение: «%s», Вид: «%s»",
+                    checkName, periodName, correctionDateStr, departmentName, declarationName)
+            result = false
+        }
+    }
+    return result
+}
+
+@Field
+def declarationNameMap = [:]
+
+def getDeclarationName(def typeId) {
+    if (declarationNameMap[typeId] == null) {
+        declarationNameMap[typeId] = declarationService.getType(typeId)?.name
+    }
+    return declarationNameMap[typeId]
 }
