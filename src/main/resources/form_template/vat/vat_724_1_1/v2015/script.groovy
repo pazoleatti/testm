@@ -574,7 +574,7 @@ void calcMegaTotal(def megaTotal, def dataRows) {
 
 // Считаем супер-итоги для "Всего за налоговый период по доп. листу книги покупок/продаж"
 def calcSuperTotals(def dataRows) {
-    def sectionsSuper = ['sale_18' : ['1', '7'], 'sale_10' : ['2'], 'purchase' : ['8', '9']]
+    def sectionsSuper = ['sale_18' : ['1', '3', '5', '6', '7'], 'sale_10' : ['2', '4'], 'purchase' : ['8', '9']]
     def totalColumnsSuper = ['sale_18' : totalColumns1_7_Sale, 'sale_10' : totalColumns1_7_Sale, 'purchase' : totalColumns8_9_Purchase]
 
     def superRows = []
@@ -599,7 +599,15 @@ def calcSuperTotals(def dataRows) {
             def superRow = getSuperTotalRow(key, periodTypeId as Long)
             columns.each { alias ->
                 superRow[alias] = BigDecimal.ZERO
-                sectionRows.each { row ->
+                for (def row : sectionRows) {
+                    // для итогов sale_18 по графе 4(5) надо суммировать только 1 и 7 раздел
+                    if (key == 'sale_18' && alias == 'sumPlus' && row.getAlias() ==~ /total_[^17]_.*/) {
+                        continue
+                    }
+                    // для итогов sale_10 по графе 4(5) надо суммировать только 2 раздел
+                    if (key == 'sale_10' && alias == 'sumPlus' && row.getAlias() ==~ /total_[^2]_.*/) {
+                        continue
+                    }
                     superRow[alias] += (row[alias] ?: BigDecimal.ZERO)
                 }
                 if (alias in declarationColumns) {
