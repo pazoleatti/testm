@@ -538,8 +538,7 @@ void fillRow(def newRow, def row2_6, def rowChd, def rowMis, def rowAmrlirt) {
     // графа 28 - economyRate          - Целевые источники финансирования. Совокупная процентная ставка с учетом корректировки на показатель Экономии по стоимости ресурсов, % годовых
     // skip
     // графа 29 - groupExclude         - Исключить из группировки (Да / Нет)
-    newRow.groupExclude = (newRow.relatedPerson == getRecYesId() && newRow.offshore == getRecYesId()) ? getRecYesId() : getRecNoId()
-
+    newRow.groupExclude = (newRow.relatedPerson == getRecYesId() || newRow.offshore == getRecYesId()) ? getRecYesId() : getRecNoId()
 }
 
 @Field
