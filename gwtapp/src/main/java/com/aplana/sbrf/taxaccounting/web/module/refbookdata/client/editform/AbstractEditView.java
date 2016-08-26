@@ -315,7 +315,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
                 number = new BigDecimal(valStr);
                 valStr = (number).toPlainString();
                 if (valStr.contains(".")) {
-                    number = new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"));
+                    number = (new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"))).setScale(key.getPrecision(), BigDecimal.ROUND_HALF_UP);
                 }
             } else {
                 number = null;
