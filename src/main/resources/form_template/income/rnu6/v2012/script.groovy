@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
@@ -542,6 +541,7 @@ void importTransportData() {
     }
 
     // Добавление подитогов
+    refBookService.dataRowsDereference(logger, newRows, formData.getFormColumns().findAll { (groupColumns + "code").contains(it.getAlias())})
     addAllAliased(newRows, new ScriptUtils.CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
@@ -922,6 +922,7 @@ def String getFilter(def String code, def String number){
 def calcSubTotalRowsMap(def dataRows) {
     def tmpRows = dataRows.findAll { !it.getAlias() }
     // Добавление подитогов
+    refBookService.dataRowsDereference(logger, tmpRows, formData.getFormColumns().findAll { (groupColumns + "code").contains(it.getAlias())})
     addAllAliased(tmpRows, new ScriptUtils.CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
