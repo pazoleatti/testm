@@ -226,7 +226,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     @Override
     public List<DepartmentDeclarationType> getDDTByDeclarationType(Integer declarationTypeId) {
         try {
-            return getJdbcTemplate().query("select id, department_id, DECLARATION_TYPE_ID, tax_type from DEPARTMENT_DECLARATION_TYPE ddt "+
+            return getJdbcTemplate().query("select ddt.id, ddt.department_id, ddt.DECLARATION_TYPE_ID, dt.tax_type from DEPARTMENT_DECLARATION_TYPE ddt "+
                     "join declaration_type dt on dt.id = ddt.declaration_type_id \n" +
                     "where ddt.DECLARATION_TYPE_ID = ?",
                     new Object[]{declarationTypeId},
