@@ -701,7 +701,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         values.put("formDataId", formDataId);
         values.put("edited", edited);
         getNamedParameterJdbcTemplate().update("UPDATE form_data SET edited = :edited WHERE id = :formDataId", values);
-        dataRowDao.deleteSearchResults(null, formDataId);
     }
 
     @Override

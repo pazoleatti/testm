@@ -50,6 +50,7 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         super(eventBus, view);
         this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
+        generateNewSessionId();
     }
 
     @Override
@@ -63,9 +64,14 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     }
 
     @Override
-    public void open(boolean readOnlyMode, boolean manual, boolean absoluteView, int sessionId) {
+    public int generateNewSessionId() {
+        sessionId = Math.abs((int) System.currentTimeMillis());
+        return sessionId;
+    }
+
+    @Override
+    public void open(boolean readOnlyMode, boolean manual, boolean absoluteView) {
         this.absoluteView = absoluteView;
-        this.sessionId = sessionId;
         String searchKey = getView().getSearchKey();
         if (searchKey == null || searchKey.isEmpty()) {
             getView().setSearchKey(Cookies.getCookie(formDataId.toString()));
@@ -96,16 +102,16 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         }, this));
     }
 
+    @Override
+    public void onHide() {
+        clearSearchResults();
+    }
+
     public void clearSearchResults() {
         SearchAction action = new SearchAction();
-        action.setFormDataId(formDataId);
         action.setSessionId(sessionId);
         action.setJustDelete(true);
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SearchResult>() {
-            @Override
-            public void onSuccess(SearchResult result) {
-            }
-        }, this));
+        dispatcher.execute(action, CallbackUtils.emptyCallback());
     }
 
     @Override

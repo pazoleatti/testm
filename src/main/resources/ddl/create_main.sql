@@ -1060,7 +1060,7 @@ comment on column ref_book_vzl_history.state is 'Код состояния';
 
 create sequence seq_ref_book_vzl_history start with 1;
 --------------------------------------------------------------------------------------------------------
-CREATE TABLE SEARCH_FORM_RESULTS
+CREATE TABLE FORM_SEARCH_RESULT
 (
   "ID"           NUMBER(9, 0),
   "SESSION_ID"   NUMBER(10, 0),
@@ -1069,13 +1069,20 @@ CREATE TABLE SEARCH_FORM_RESULTS
   "KEY"          VARCHAR2(4000 BYTE),
   PRIMARY KEY ("ID")
 );
-CREATE TABLE SEARCH_FORM_DATA_RESULT
+CREATE TABLE FORM_SEARCH_DATA_RESULT
 (	"ID" NUMBER(9,0),
+  "SESSION_ID" NUMBER(9,0),
    "ROW_INDEX" NUMBER(9,0),
    "COLUMN_INDEX" NUMBER(9,0),
    "RAW_VALUE" VARCHAR2(4000 BYTE),
-  CONSTRAINT FK_SEARCH_FORM_RESULT_ID FOREIGN KEY ("ID")
-  REFERENCES SEARCH_FORM_RESULTS ("ID") ON DELETE CASCADE
+  "ORD" NUMBER(9,0),
+  CONSTRAINT FK_FORM_SEARCH_RESULT_ID FOREIGN KEY ("ID")
+  REFERENCES FORM_SEARCH_RESULT ("ID") ON DELETE CASCADE
 );
+CREATE GLOBAL TEMPORARY TABLE FORM_SEARCH_DATA_RESULT_TMP
+(	"ROW_INDEX" NUMBER(9,0),
+   "COLUMN_INDEX" NUMBER(9,0),
+   "RAW_VALUE" VARCHAR2(4000 BYTE)
+) ON COMMIT DELETE ROWS ;
 CREATE SEQUENCE SEQ_SEARCH_FORM;
 --------------------------------------------------------------------------------------------------------

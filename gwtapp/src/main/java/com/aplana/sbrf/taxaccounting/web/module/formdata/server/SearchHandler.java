@@ -35,7 +35,7 @@ public class SearchHandler extends AbstractActionHandler<SearchAction, SearchRes
         SearchResult searchResult = new SearchResult();
 
         if (searchAction.isJustDelete()) {
-            dataRowService.deleteSearchResults(searchAction.getSessionId(), searchAction.getFormDataId());
+            dataRowService.deleteSearchResults(searchAction.getSessionId(), null);
         } else {
             PagingResult<FormDataSearchResult> result = dataRowService.searchByKey(searchAction.getFormDataId(),
                     range, searchAction.getKey(), searchAction.getSessionId(), searchAction.isCaseSensitive(), searchAction.isManual(), searchAction.isCorrectionDiff());

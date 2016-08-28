@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.search;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResult;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.NotificationTableRow;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.cell.client.Cell;
@@ -16,6 +15,7 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -61,6 +61,7 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     private SingleSelectionModel<FormDataSearchResult> selectionModel;
     private boolean readOnlyMode;
     private boolean manual;
+    private String oldSearchKey;
 
     @UiField
     DataGrid<FormDataSearchResult> searchResultTable;
@@ -79,6 +80,8 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     @UiField
     CheckBox caseSensitive;
 
+    HandlerRegistration handlerRegistration;
+
     @Inject
     public FormSearchView(Binder uiBinder, EventBus eventBus) {
         super(eventBus);
@@ -91,10 +94,14 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
             }
         });
         init();
-    }
 
-    private void clearSearchResults() {
-        getUiHandlers().clearSearchResults();
+        handlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
+            @Override
+            public void onWindowClosing(Window.ClosingEvent event) {
+                handlerRegistration.removeHandler();
+                getUiHandlers().clearSearchResults();
+            }
+        });
     }
 
     private void init(){
@@ -190,6 +197,18 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
 
     @UiHandler("search")
     public void onSearchClicked(ClickEvent event){
+        onSearch();
+    }
+
+    @SuppressWarnings("GwtUiHandlerErrors")
+    @UiHandler("filterText")
+    void onFilterPressClicked(KeyPressEvent event) {
+        if (KeyCodes.KEY_ENTER == event.getNativeEvent().getKeyCode()) {
+            onSearch();
+        }
+    }
+
+    private void onSearch() {
         if (!filterText.getText().isEmpty()){
             if (filterText.getText().length()>=3) {
                 if (pager.getPage() != 0) {
@@ -202,26 +221,6 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
             }
         } else {
             clearTableData();
-        }
-    }
-
-    @SuppressWarnings("GwtUiHandlerErrors")
-    @UiHandler("filterText")
-    void onFilterPressClicked(KeyPressEvent event) {
-        if (KeyCodes.KEY_ENTER == event.getNativeEvent().getKeyCode()) {
-            if (!filterText.getText().isEmpty()){
-                if (filterText.getText().length()>=3) {
-                    if (pager.getPage() != 0) {
-                        pager.firstPage();
-                    } else {
-                        getUiHandlers().onRangeChange(0, pager.getPageSize());
-                    }
-                } else {
-                    Dialog.warningMessage("Слишком короткая строка запроса. Для поиска наберите не менее 3-х символов.");
-                }
-            } else {
-                clearTableData();
-            }
         }
     }
 

@@ -19,6 +19,8 @@ import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -142,52 +144,88 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		return new Pair<String, Map<String, Object>>(sql, params);
 	}
 
-	private String SEARCH_FORM_DATA_RESULT = "SEARCH_FORM_DATA_RESULT";
-	private String SEARCH_FORM_RESULTS = "SEARCH_FORM_RESULTS";
+	private String FORM_SEARCH_DATA_RESULT = "FORM_SEARCH_DATA_RESULT";
+	private String FORM_SEARCH_RESULT = "FORM_SEARCH_RESULT";
+	private String FORM_SEARCH_DATA_RESULT_TMP = "FORM_SEARCH_DATA_RESULT_TMP";
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public PagingResult<FormDataSearchResult> getSearchResult(int sessionId, long formDataId, String key, DataRowRange range) {
-		String dataQuery =
-				"WITH t AS (" +
-						"SELECT row_number() over (order by row_index, column_index) idx, " +
-							"column_index, row_index, raw_value \n" +
-						"FROM " + SEARCH_FORM_DATA_RESULT +
-						" WHERE id = (SELECT id FROM " + SEARCH_FORM_RESULTS +
-									 " WHERE session_id = :session_id AND " +
-											"form_data_id = :form_data_id AND " +
-											"key = :key)" +
-				")\n" +
-				"SELECT 0 as idx,0 as row_index,0 as column_index,to_char(COUNT(*)) as raw_value FROM t\n" +
-				"UNION ALL\n" +
-				"SELECT idx, row_index, column_index, raw_value FROM t\n" +
-				"WHERE idx BETWEEN :from AND :to";
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("session_id", sessionId);
 		params.put("form_data_id", formDataId);
 		params.put("key", key);
-		params.put("from", range.getOffset());
-		params.put("to", range.getOffset() + range.getCount() - 1);
 
-		List<FormDataSearchResult> dataRows = getNamedParameterJdbcTemplate().query(dataQuery, params, formDataSearchMapper);
-		int count = 0;
-		if (dataRows.size() > 0) {
-			try {
-				count = Integer.parseInt(dataRows.remove(0).getStringFound());
-			} catch (NumberFormatException ignored) {
-			}
+		Integer id = null;
+		try {
+			id = getNamedParameterJdbcTemplate().queryForObject(
+					"SELECT id FROM " + FORM_SEARCH_RESULT +
+					" WHERE session_id = :session_id AND " +
+					" form_data_id = :form_data_id AND " +
+					" key = :key", params, Integer.class);
+		} catch (IncorrectResultSizeDataAccessException ignored) {
 		}
 
-		if (count > 0) {
+		if (id != null && partitionExists(sessionId)) {
+			String dataQuery =
+					"SELECT \"ORD\" idx, column_index, row_index, raw_value \n" +
+					" FROM " + FORM_SEARCH_DATA_RESULT + " PARTITION(P" + sessionId + ")" +
+					" WHERE id = :id";
+			params.clear();
+			params.put("id", id);
+			int count = getNamedParameterJdbcTemplate().queryForObject("SELECT COUNT(*) FROM (" + dataQuery + ")", params, Integer.class);
+
+			params.put("from", range.getOffset());
+			params.put("to", range.getOffset() + range.getCount() - 1);
+			dataQuery += " AND \"ORD\" BETWEEN :from AND :to";
+			List<FormDataSearchResult> dataRows = getNamedParameterJdbcTemplate().query(dataQuery, params, formDataSearchMapper);
+
 			return new PagingResult<FormDataSearchResult>(dataRows, count);
 		}
 		return null;
 	}
 
+	private boolean partitionExists(int sessionId) {
+		int exists = getJdbcTemplate().queryForObject(
+				"SELECT COUNT(*) FROM ALL_TAB_PARTITIONS" +
+						" WHERE TABLE_NAME = '" + FORM_SEARCH_DATA_RESULT + "' AND PARTITION_NAME = 'P" + sessionId + "'", Integer.class);
+		return exists != 0;
+	}
+
+	@Override
+	public void createOrTruncSearchDataTable(int sessionId) {
+		try {
+			if (!partitionExists(sessionId)) {
+				getJdbcTemplate().update("ALTER TABLE " + FORM_SEARCH_DATA_RESULT + " ADD PARTITION P" + sessionId + " VALUES(" + sessionId + ")");
+			} else {
+				getJdbcTemplate().update("ALTER TABLE " + FORM_SEARCH_DATA_RESULT + " TRUNCATE PARTITION P" + sessionId + " UPDATE GLOBAL INDEXES");
+			}
+		} catch (DataAccessException ignored) {}
+	}
+
+	@Override
+	public  void dropSearchDataResult(Integer sessionId) {
+		try {
+			if (partitionExists(sessionId)) {
+				getJdbcTemplate().update("ALTER TABLE " + FORM_SEARCH_DATA_RESULT + " DROP PARTITION P" + sessionId + " UPDATE GLOBAL INDEXES");
+			}
+		} catch (DataAccessException ignored) {}
+	}
+
+	@Override
+	public  void dropSearchDataResultByFormDataId(Long formDataId) {
+		List<Integer> sessionIds = getJdbcTemplate().queryForList(
+				"SELECT session_id FROM " + FORM_SEARCH_RESULT +
+						" WHERE form_data_id = " + formDataId, Integer.class);
+		for (Integer session_id : sessionIds) {
+			dropSearchDataResult(session_id);
+		}
+	}
+
 	@Override
 	public void clearSearchResults() {
 		getJdbcTemplate().update(
-				"DELETE FROM " + SEARCH_FORM_RESULTS +
+				"DELETE FROM " + FORM_SEARCH_RESULT +
 						" WHERE \"DATE\" + 1 < SYSDATE ");
 	}
 
@@ -197,15 +235,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("session_id", sessionId);
 		params.put("form_data_id", formDataId);
 		getNamedParameterJdbcTemplate().update(
-				"DELETE FROM " + SEARCH_FORM_RESULTS +
-						" WHERE" + (sessionId != null ? " session_id = :session_id AND " : "") +
-						" form_data_id = :form_data_id", params);
+				"DELETE FROM " + FORM_SEARCH_RESULT +
+						" WHERE 1=1 " +
+						(sessionId != null ? " AND session_id = :session_id " : "") +
+						(formDataId != null ? " AND form_data_id = :form_data_id" : ""), params);
 	}
 
-	@Override
-	public int initSearchResult(int sessionId, long formDataId, String key) {
-		deleteSearchResults(sessionId, formDataId);
-
+	private int addSearchResult(int sessionId, long formDataId, String key) {
 		Integer id = generateId("SEQ_SEARCH_FORM", Integer.class);
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("session_id", sessionId);
@@ -213,21 +249,25 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("id", id);
 		params.put("key", key);
 		getNamedParameterJdbcTemplate().update(
-				"INSERT INTO " + SEARCH_FORM_RESULTS + "(id, session_id, form_data_id, \"KEY\", \"DATE\")" +
+				"INSERT INTO " + FORM_SEARCH_RESULT + "(id, session_id, form_data_id, \"KEY\", \"DATE\")" +
 						" VALUES(:id, :session_id, :form_data_id, :key, SYSDATE)",
 				params);
 		return id;
 	}
 
+	public int saveSearchResult(int sessionId, long formDataId, String key) {
+		deleteSearchResults(sessionId, formDataId);
+		return addSearchResult(sessionId, formDataId, key);
+	}
+
 	@Override
-	public void saveSearchResult(final int id, final List<FormDataSearchResult> resultList) {
-		getJdbcTemplate().batchUpdate("INSERT INTO " + SEARCH_FORM_DATA_RESULT + "(id, row_index, column_index, raw_value) VALUES(?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+	public void saveSearchDataResult(final int id, final List<FormDataSearchResult> resultList) {
+		getJdbcTemplate().batchUpdate("INSERT INTO " + FORM_SEARCH_DATA_RESULT_TMP + "(row_index, column_index, raw_value) VALUES(?, ?, ?)", new BatchPreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				ps.setInt(1, id);
-				ps.setInt(2, resultList.get(i).getRowIndex().intValue());
-				ps.setInt(3, resultList.get(i).getColumnIndex().intValue());
-				ps.setString(4, resultList.get(i).getStringFound());
+				ps.setInt(1, resultList.get(i).getRowIndex().intValue());
+				ps.setInt(2, resultList.get(i).getColumnIndex().intValue());
+				ps.setString(3, resultList.get(i).getStringFound());
 			}
 
 			@Override
@@ -238,11 +278,15 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void saveSearchResult(int id, String query, Map<String, Object> params) {
+	public void saveSearchDataResult(int id, int sessionId, String query, Map<String, Object> params) {
 		params.put("id", id);
+		params.put("sessionId", sessionId);
 		getNamedParameterJdbcTemplate().update(
-				"INSERT INTO " + SEARCH_FORM_DATA_RESULT + "(id, row_index, column_index, raw_value) " +
-				"SELECT :id, row_index, column_index, raw_value FROM (" + query + ")", params);
+				"INSERT INTO " + FORM_SEARCH_DATA_RESULT + "(id, session_id, row_index, column_index, raw_value, \"ORD\") " +
+				"SELECT :id, :sessionId, row_index, column_index, raw_value, row_number() over(ORDER BY row_index, column_index) ord FROM (" +
+				"SELECT to_number(row_index) row_index, to_number(column_index) column_index, raw_value FROM (" + query + ")" +
+				" UNION ALL " +
+				"SELECT row_index, column_index, raw_value FROM " + FORM_SEARCH_DATA_RESULT_TMP + ")", params);
 	}
 
 	@Override

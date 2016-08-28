@@ -29,9 +29,15 @@ public interface DataRowDao {
 
 	void clearSearchResults();
 
+	void createOrTruncSearchDataTable(int sessionId);
+
+	void dropSearchDataResult(Integer sessionId);
+
+	void dropSearchDataResultByFormDataId(Long formDataId);
+
 	void deleteSearchResults(Integer sessionId, Long formDataId);
 
-	int initSearchResult(int sessionId, long formDataId, String key);
+	int saveSearchResult(int sessionId, long formDataId, String key);
 
 	/**
 	 * Если поиск уже производился по ключу key, то возвращает результат поиска
@@ -45,13 +51,13 @@ public interface DataRowDao {
 	 * сохраняет результат поиска по ключу key, чтобы потом не производить поиск занова при переходе со стр. на стр.
 	 * @param resultList результат поиска
      */
-	void saveSearchResult(int id, List<FormDataSearchResult> resultList);
+	void saveSearchDataResult(int id, List<FormDataSearchResult> resultList);
 
 	/**
 	 * сохраняет результат поиска по ключу key, чтобы потом не производить поиск занова при переходе со стр. на стр.
 	 * @param query запрос поиска
 	 */
-	void saveSearchResult(int id, String query, Map<String, Object> params);
+	void saveSearchDataResult(int id, int sessionId, String query, Map<String, Object> params);
 
 	/**
 	 * Копирование строк из НФ-источника в НФ-приемник.

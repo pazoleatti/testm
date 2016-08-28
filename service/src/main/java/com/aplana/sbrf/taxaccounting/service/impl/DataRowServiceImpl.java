@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
@@ -107,16 +108,17 @@ public class DataRowServiceImpl implements DataRowService {
         } else {
             resultsList = new ArrayList<FormDataSearchResult>();
         }
-        // очищаем таблицу
-        int searchId = dataRowDao.initSearchResult(sessionId, formDataId, key);
+        createOrTruncSearchDataTable(sessionId);
+        // сохраняем информацию о поиске
+        int searchId = dataRowDao.saveSearchResult(sessionId, formDataId, key);
         // сохраняем результаты поиска
         if (!resultsList.isEmpty()) {
-            dataRowDao.saveSearchResult(searchId, resultsList);
+            dataRowDao.saveSearchDataResult(searchId, resultsList);
         }
         if (existCommonColumn) {
             // поиск в БД по нессылочным столбцам
             Pair<String, Map<String, Object>> sql = dataRowDao.getSearchQuery(formDataId, formData.getFormTemplateId(), key, isCaseSensitive, manual, correctionDiff);
-            dataRowDao.saveSearchResult(searchId, sql.getFirst(), sql.getSecond());
+            dataRowDao.saveSearchDataResult(searchId, sessionId, sql.getFirst(), sql.getSecond());
         } else {
             // если нет *обычных*(числовых, строковых, автонумеруемых) граф, то нет смысла проводить поиск
         }
@@ -126,10 +128,26 @@ public class DataRowServiceImpl implements DataRowService {
         return results == null ? new PagingResult<FormDataSearchResult>(new ArrayList<FormDataSearchResult>(), 0) : results;
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    private void createOrTruncSearchDataTable(int id) {
+        dataRowDao.createOrTruncSearchDataTable(id);
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    private void dropSearchDataResult(int sessionId) {
+        dataRowDao.dropSearchDataResult(sessionId);
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    private void dropSearchDataResultByFormDataId(long formDataId) {
+        dataRowDao.dropSearchDataResultByFormDataId(formDataId);
+    }
+
     @Override
     @Transactional(readOnly = false)
-    public void deleteSearchResults(int sessionId, long formDataId) {
-        dataRowDao.deleteSearchResults(sessionId, formDataId);
+    public void deleteSearchResults(Integer sessionId, Long formDataId) {
+        dropSearchDataResult(sessionId);
+        dataRowDao.deleteSearchResults(sessionId, null);
     }
 
     @Override

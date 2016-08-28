@@ -130,8 +130,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void setReportTypes(List<FormDataReportType> reportTypes);
 
-        int generateNewSessionId();
-
         void redrawTable();
     }
 
@@ -242,7 +240,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		super.onHide();
         setOnLeaveConfirmation(null);
         unlockForm(formData.getId());
-        formSearchPresenter.clearSearchResults();
+        formSearchPresenter.onHide();
 	}
 
     /**
@@ -475,7 +473,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
             closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
                 @Override
                 public void onClose(CloseEvent<Window> event) {
-                    formSearchPresenter.clearSearchResults();
                     closeFormDataHandlerRegistration.removeHandler();
                     unlockForm(formData.getId());
                 }
