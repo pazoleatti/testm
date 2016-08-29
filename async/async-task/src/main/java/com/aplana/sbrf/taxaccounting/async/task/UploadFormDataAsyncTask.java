@@ -118,7 +118,7 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
                 String.format("Выполнен импорт данных из XLSM файла в экземпляр %s", MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
                 formData,
                 department.getName(),
-                false, reportPeriod, rpCompare);
+                manual, reportPeriod, rpCompare);
     }
 
     @Override
