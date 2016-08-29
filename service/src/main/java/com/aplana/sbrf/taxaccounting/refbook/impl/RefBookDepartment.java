@@ -489,11 +489,14 @@ public class RefBookDepartment implements RefBookDataProvider {
                             null);
                 }
                 isInUsed(department, logger);
-                if (logger.containsLevel(LogLevel.ERROR) || logger.containsLevel(LogLevel.WARNING) && !force)
+                if (logger.containsLevel(LogLevel.ERROR))
                     throw new ServiceLoggerException(
                             "Подразделение не может быть удалено, так как обнаружены ссылки на подразделение!",
                             logEntryService.save(logger.getEntries())
                     );
+                else if (logger.containsLevel(LogLevel.WARNING) && !force){
+                    return;
+                }
 
                 //Удаление назначений НФ, у которых совпадает исполнитель с подразделением
                 List<Long> dftIds = departmentFormTypeService.getIdsByPerformerId(depId);
