@@ -272,8 +272,11 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
             rbStringField.setAttributeType(RefBookAttributeType.STRING);
             rbStringField.setStringValue("Новая запись");
             HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(2);
+            RefBookValueSerializable activeValue = new RefBookValueSerializable();
+            activeValue.setNumberValue(1);
             field.put("PARENT_ID", refBookParent);
             field.put(MyView.NEW_RECORD_ALIAS, rbStringField);
+            field.put("IS_ACTIVE", activeValue);
             getView().fillInputFields(field);
         }
     }
