@@ -16,13 +16,13 @@ public class TaRootPresenter extends RootPresenter {
 
     static {
         // Перехват ошибок, которые не были отловлены в клиентском коде
-        /*GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
+        GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
             @Override
             public void onUncaughtException(Throwable e) {
                 Dialog.errorMessage(e.toString());
                 e.printStackTrace();
             }
-        });*/
+        });
     }
 
 	public static class OurView extends RootPresenter.RootView {
