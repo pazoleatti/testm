@@ -21,6 +21,9 @@ public class GetDepartmentTreeDataResult implements Result {
     // Список отчетных периодов
     private List<ReportPeriod> reportPeriods;
 
+    // Подразделение установленое по умолчанию
+    private Department department;
+
     public List<Department> getDepartments() {
         return departments;
     }
@@ -43,5 +46,13 @@ public class GetDepartmentTreeDataResult implements Result {
 
     public void setReportPeriods(List<ReportPeriod> reportPeriods) {
         this.reportPeriods = reportPeriods;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
     }
 }

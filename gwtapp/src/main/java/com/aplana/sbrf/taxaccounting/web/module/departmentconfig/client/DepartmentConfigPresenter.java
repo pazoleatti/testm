@@ -64,13 +64,13 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * Установка выбранного подразделения
          * @param department
          */
-        void setDepartment(Department department);
+        void setDepartment(Department department, boolean fireEvents);
 
         /**
          * Установка доступных отчетных периодов
          * @param reportPeriods
          */
-        void setReportPeriods(List<ReportPeriod> reportPeriods);
+        void setReportPeriods(List<ReportPeriod> reportPeriods, boolean fireEvents);
 
         /**
          * Установка выбранного отчетного периода
@@ -157,6 +157,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void setRefBookPeriod(Date startDate, Date endDate);
 
         void setConfigPeriod(Date configStartDate, Date configEndDate);
+
+        void onFind(boolean showError);
     }
 
     @Inject
@@ -319,6 +321,26 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
+    public void reloadPeriods(TaxType taxType) {
+        GetDepartmentTreeDataAction action = new GetDepartmentTreeDataAction();
+        action.setTaxType(taxType);
+        action.setDepartmentId(getView().getCurrentDepartmentId());
+        action.setOnlyPeriods(true);
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetDepartmentTreeDataResult>() {
+                            @Override
+                            public void onSuccess(GetDepartmentTreeDataResult result) {
+                                // Список отчетных периодов
+                                getView().setReportPeriods(result.getReportPeriods() == null
+                                        ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods(), true);
+                                //   createTableColumns();
+                                getView().onFind(false);
+                            }
+                        }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
+    }
+
+    @Override
     public void reloadDepartmentParams(Integer departmentId, TaxType taxType, Integer reportPeriodId, final String uuid) {
         LogCleanEvent.fire(DepartmentConfigPresenter.this);
 
@@ -376,17 +398,17 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                     // Выбирается подразделение выбранное ранее
                                     for (Department dep : result.getDepartments()) {
                                         if (dep.getId() == currentDepartmentId) {
-                                            getView().setDepartment(dep);
+                                            getView().setDepartment(dep, true);
                                             break;
                                         }
                                     }
                                 } else {
                                     // Выбирается подразделение пользователя
-                                    getView().setDepartment(userDepartment);
+                                    getView().setDepartment(userDepartment, false);
+                                    // Список отчетных периодов
+                                    getView().setReportPeriods(result.getReportPeriods() == null
+                                            ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods(), true);
                                 }
-                                // Список отчетных периодов
-                                getView().setReportPeriods(result.getReportPeriods() == null
-                                        ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods());
 
                                 reloadDepartmentParams(getView().getCurrentDepartmentId(), getView().getTaxType(), getView().getCurrentReportPeriodId(), null);
                             }
