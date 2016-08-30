@@ -280,7 +280,7 @@ public interface PeriodService {
      * @param isBalance признак ввода остатков
      * @param logs логер, при необходимости
      */
-    void edit(int reportPeriodId, long newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
+    void edit(int reportPeriodId, int oldDepartmentId, long newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
                      int departmentId, boolean isBalance,  List<LogEntry> logs);
 
     /**

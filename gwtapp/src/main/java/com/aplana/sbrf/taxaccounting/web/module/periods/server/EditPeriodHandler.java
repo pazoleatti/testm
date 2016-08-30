@@ -35,7 +35,7 @@ public class EditPeriodHandler extends AbstractActionHandler<EditPeriodAction, E
     public EditPeriodResult execute(EditPeriodAction action, ExecutionContext executionContext) throws ActionException {
         List<LogEntry> logs = new ArrayList<LogEntry>();
         if (action.getCorrectionDate() == null) {
-            periodService.edit(action.getReportPeriodId(), action.getNewDictTaxPeriodId(), action.getYear(),
+            periodService.edit(action.getReportPeriodId(), action.getOldDepartmentId(), action.getNewDictTaxPeriodId(), action.getYear(),
                     action.getTaxType(), securityService.currentUserInfo(), action.getNewDepartmentId(), action.isBalance(), logs);
         } else {
             periodService.editCorrectionPeriod(action.getReportPeriodId(), action.getNewReportPeriodId(), action.getOldDepartmentId(),
