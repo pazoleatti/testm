@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -90,8 +91,10 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
         RefBook refBook = refBookFactory.get(action.getRefBookId());
         TAUser currentUser = securityService.currentUserInfo().getUser();
 
-        LockData lockData = lockDataService.getLock(LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId());
-        if (lockData == null) {
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(refBook.getId());
+        LockData lockData = null;
+        if (lockType == null &&
+                (lockData = lockDataService.getLock(refBookFactory.generateTaskKey(refBook.getId(), ReportType.EDIT_REF_BOOK))) == null) {
             String filter = null;
             if (refBook.getRegionAttribute() != null && !currentUser.hasRole("ROLE_CONTROL_UNP")) {
                 List<Department> deps = departmentService.getBADepartments(currentUser);
@@ -173,10 +176,15 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
                 }
             });
         } else {
+            ReportType rType = ReportType.EDIT_REF_BOOK;
+            if (lockData == null) {
+                lockData = lockType.getSecond();
+                rType = lockType.getFirst();
+            }
             logger.info(LockData.LOCK_CURRENT,
                     sdf.get().format(lockData.getDateLock()),
                     userService.getUser(lockData.getUserId()).getName(),
-                    refBookFactory.getTaskName(reportType, action.getRefBookId(), action.getReportName()));
+                    refBookFactory.getTaskName(rType, action.getRefBookId(), null));
             result.setErrorMsg("Для текущего справочника запущена операция, при которой формирование отчета невозможно");
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -56,6 +57,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     // ЦАС НСИ
     private static final long REF_BOOK_OKATO = 3L; // Коды ОКАТО
@@ -275,7 +278,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
                             //Устанавливаем блокировку на справочник
                             List<String> lockedObjects = new ArrayList<String>();
-                            String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBookId;
+                            String lockKey = refBookFactory.generateTaskKey(refBookId, ReportType.EDIT_REF_BOOK);
                             int userId = userInfo.getUser().getId();
 
                             RefBook refBook = refBookDao.get(refBookId);
@@ -290,11 +293,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                     for (RefBookAttribute attribute : attributes) {
                                         if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                                             RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                                            String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                                            String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
                                             if (!lockedObjects.contains(referenceLockKey)) {
-                                                LockData referenceLockData = lockService.lock(referenceLockKey, userId,
-                                                        String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()));
-                                                if (referenceLockData == null) {
+                                                if (refBookFactory.getLockTaskType(attribute.getRefBookId()) == null &&
+                                                        lockService.lock(referenceLockKey, userId, String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName())) == null) {
                                                     //Блокировка установлена
                                                     lockedObjects.add(referenceLockKey);
                                                 } else {
@@ -688,11 +690,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             for (RefBookAttribute attribute : attributes) {
                 if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                     RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                    String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                    String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
                     if (!lockedObjects.contains(referenceLockKey)) {
-                        LockData referenceLockData = lockService.lock(referenceLockKey, userId,
-                                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()));
-                        if (referenceLockData == null) {
+                        if (refBookFactory.getLockTaskType(attribute.getRefBookId()) == null &&
+                                lockService.lock(referenceLockKey, userId, String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName())) == null) {
                             //Блокировка установлена
                             lockedObjects.add(referenceLockKey);
                         } else {

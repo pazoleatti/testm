@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -52,6 +53,9 @@ public class RefBookUniversalTest {
         values.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "test"));
         refBookRecord.setRecordId(1L);
         refBookRecord.setValues(values);
+
+        RefBookFactory refBookFactory = mock(RefBookFactoryImpl.class);
+        ReflectionTestUtils.setField(provider, "refBookFactory", refBookFactory);
 
         refBookDao = mock(RefBookDao.class);
         ReflectionTestUtils.setField(provider, "refBookDao", refBookDao);

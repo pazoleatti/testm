@@ -23,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -83,6 +84,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     private boolean importScriptStatus;
     private boolean isVersioned;
 
+    private String lockId;
+
+    private boolean timerEnabled;
+    private Timer timer;
+
     AbstractEditPresenter editFormPresenter;
     RefBookVersionPresenter versionPresenter;
     DialogPresenter dialogPresenter;
@@ -123,6 +129,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void setSpecificReportTypes(List<String> specificReportTypes);
 
         void setUploadAvailable(boolean uploadAvailable);
+
+        void setLockInformation(String title);
     }
 
     @Inject
@@ -139,6 +147,12 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         this.refBookLinearPresenter = refBookLinearPresenter;
         this.uploadDialogPresenter = uploadDialogPresenter;
         getView().setUiHandlers(this);
+        this.timer = new Timer() {
+            @Override
+            public void run() {
+                onTimer(true);
+            }
+        };
     }
 
     @Override
@@ -258,6 +272,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                                     //т.к. не срабатывает событие onSelectionChange приповторном переходе
 //                                                            editFormPresenter.show(recordId);
                                                                     getProxy().manualReveal(RefBookDataPresenter.this);
+                                                                    startTimer();
                                                                 }
                                                             }, RefBookDataPresenter.this));
 
@@ -547,5 +562,39 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 }
                             }
                         }, RefBookDataPresenter.this));
+    }
+
+
+    protected void startTimer() {
+        timerEnabled = true;
+        timer.scheduleRepeating(5000);
+    }
+
+    protected void stopTimer() {
+        timerEnabled = false;
+        timer.cancel();
+    }
+
+    private void onTimer(final boolean isTimer) {
+        TimerAction action = new TimerAction();
+        action.setRefBookId(refBookId);
+        dispatcher.execute(
+                action,
+                CallbackUtils.simpleCallback(
+                        new AbstractCallback<TimerResult>() {
+                            @Override
+                            public void onSuccess(TimerResult result) {
+                                if (result.getLockId() != lockId || !isTimer) {
+                                    lockId = result.getLockId();
+                                    if (result.isLock()) {
+                                        getView().setLockInformation(result.getText());
+                                        editFormPresenter.setLock(true);
+                                    } else {
+                                        getView().setLockInformation(null);
+                                        editFormPresenter.setLock(false);
+                                    }
+                                }
+                            }
+                        }));
     }
 }

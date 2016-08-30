@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -8,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookAuditFieldList;
@@ -44,6 +46,9 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     @Autowired
     private RefBookScriptingService refBookScriptingService;
+
+    @Autowired
+    private LockDataService lockDataService;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -353,6 +358,22 @@ public class RefBookFactoryImpl implements RefBookFactory {
             }
         }
         return specificReportTypes;
+    }
+
+    @Override
+    public Pair<ReportType, LockData> getLockTaskType(long refBookId) {
+        ReportType[] reportTypes = {ReportType.IMPORT_REF_BOOK, ReportType.EDIT_REF_BOOK};
+        for (ReportType reportType : reportTypes) {
+            LockData lockData = lockDataService.getLock(generateTaskKey(refBookId, reportType));
+            if (lockData != null)
+                return new Pair<ReportType, LockData>(reportType, lockData);
+        }
+        return null;
+    }
+
+    @Override
+    public String generateTaskKey(long refBookId, ReportType reportType) {
+        return LockData.LockObjects.REF_BOOK.name() + "_" + refBookId + "_" + reportType.getName();
     }
 
     @Override

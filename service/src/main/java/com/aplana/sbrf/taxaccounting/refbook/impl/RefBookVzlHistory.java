@@ -2,11 +2,9 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookVzlHistoryDao;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -14,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +40,8 @@ public class RefBookVzlHistory implements RefBookDataProvider {
     private LockDataService lockService;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
@@ -140,11 +141,11 @@ public class RefBookVzlHistory implements RefBookDataProvider {
         //Устанавливаем блокировку на текущий справочник
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
+        String lockKey = refBookFactory.generateTaskKey(REF_BOOK_ID, ReportType.EDIT_REF_BOOK);
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        LockData lockData = lockService.lock(lockKey, userId,
-                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()));
-        if (lockData == null) {
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(REF_BOOK_ID);
+        if (lockType == null && lockService.lock(lockKey, userId,
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName())) == null) {
             try {
                 //Блокировка установлена
                 lockedObjects.add(lockKey);
@@ -153,11 +154,10 @@ public class RefBookVzlHistory implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
                         if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
-                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()));
-                            if (referenceLockData == null) {
+                            if (refBookFactory.getLockTaskType(attribute.getRefBookId()) == null &&
+                                    lockService.lock(referenceLockKey, userId, String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);
                             } else {
@@ -196,11 +196,11 @@ public class RefBookVzlHistory implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
+        String lockKey = refBookFactory.generateTaskKey(REF_BOOK_ID, ReportType.EDIT_REF_BOOK);
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        LockData lockData = lockService.lock(lockKey, userId,
-                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()));
-        if (lockData == null) {
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(REF_BOOK_ID);
+        if (lockType == null && lockService.lock(lockKey, userId,
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName())) == null) {
             try {
                 //Блокировка установлена
                 lockedObjects.add(lockKey);
@@ -209,11 +209,10 @@ public class RefBookVzlHistory implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
                         if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
-                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()));
-                            if (referenceLockData == null) {
+                            if (refBookFactory.getLockTaskType(attribute.getRefBookId()) == null &&
+                                    lockService.lock(referenceLockKey, userId, String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);
                             } else {
@@ -244,11 +243,13 @@ public class RefBookVzlHistory implements RefBookDataProvider {
     public void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
         //Тут все так же как и в RefBookUniversal
         List<String> lockedObjects = new ArrayList<String>();
-        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
+        String lockKey = refBookFactory.generateTaskKey(REF_BOOK_ID, ReportType.EDIT_REF_BOOK);
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         LockData lockData = lockService.lock(lockKey, taUserInfo.getUser().getId(),
                 String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()));
-        if (lockData == null) {
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(REF_BOOK_ID);
+        if (lockType == null && lockService.lock(lockKey, taUserInfo.getUser().getId(),
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName())) == null) {
             try {
                 //Блокировка установлена
                 lockedObjects.add(lockKey);
@@ -257,11 +258,10 @@ public class RefBookVzlHistory implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
                         if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, taUserInfo.getUser().getId(),
-                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()));
-                            if (referenceLockData == null) {
+                            if (refBookFactory.getLockTaskType(attribute.getRefBookId()) == null &&
+                                    lockService.lock(referenceLockKey, taUserInfo.getUser().getId(), String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);
                             } else {

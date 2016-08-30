@@ -53,7 +53,22 @@
             padding-right: 6px;
         }
     </ui:style>
+    <ui:style field="lock">
+        .lockInformation {
+            height: 25px;   /*@see com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataView.LOCK_INFO_BLOCK_HEIGHT*/
+            line-height: 24px;
+            background: #FFDC82;
+            padding-left: 15px;
+            margin: 2px;
+            font-size: 14px;
+            border: 1px solid #DBDBDB;
 
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
+        }
+    </ui:style>
 
     <fm:MainContainer>
         <fm:header>
@@ -125,9 +140,11 @@
 
                 </g:HorizontalPanel>
 
+                <g:Label ui:field="lockInformation" visible="false"  addStyleNames="{lock.lockInformation}"/>
+
                 <!--<g:Label addStyleNames="{style.horSep}"/>-->
 
-                <g:SplitLayoutPanel addStyleNames="{style.splitter}">
+                <g:SplitLayoutPanel  ui:field="tablePanel" addStyleNames="{style.splitter}">
                     <g:center>
                         <g:SimplePanel ui:field="mainPanel"/>
                     </g:center>

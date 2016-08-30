@@ -224,4 +224,10 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
             getUiHandlers().onCancelClicked();
         }
     }
+
+    @Override
+    public void lock(boolean isLock) {
+        save.setEnabled(!isLock);
+        cancel.setEnabled(!isLock);
+    }
 }

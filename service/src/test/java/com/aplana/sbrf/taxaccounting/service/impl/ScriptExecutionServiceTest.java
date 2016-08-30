@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookFactoryImpl;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,6 +49,9 @@ public class ScriptExecutionServiceTest {
     @Before
 	public void init(){
         scriptExecutionService = new ScriptExecutionServiceImpl();
+        RefBookFactory refBookFactory = mock(RefBookFactoryImpl.class);
+        ReflectionTestUtils.setField(scriptExecutionService, "refBookFactory", refBookFactory);
+
         LogEntryService logEntryService = mock(LogEntryService.class);
         ReflectionTestUtils.setField(scriptExecutionService, "logEntryService", logEntryService);
 

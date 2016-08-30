@@ -218,4 +218,10 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
 			getUiHandlers().onCancelClicked();
 		}
     }
+
+    @Override
+    public void lock(boolean isLock) {
+        save.setEnabled(!isLock);
+        cancel.setEnabled(!isLock);
+    }
 }

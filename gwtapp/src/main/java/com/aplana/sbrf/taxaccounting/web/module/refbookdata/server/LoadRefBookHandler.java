@@ -2,12 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.LoadRefBookAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.LoadRefBookResult;
@@ -20,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,9 +46,19 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private TAUserService userService;
+
     public LoadRefBookHandler() {
         super(LoadRefBookAction.class);
     }
+
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd/MM/yyyy HH:mm z");
+        }
+    };
 
     @Override
     public LoadRefBookResult execute(final LoadRefBookAction action, ExecutionContext arg1) throws ActionException {
@@ -65,41 +78,53 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
                 params.put("dateTo", action.getDateTo());
             }
         }
-        String keyTask = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
-        Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, refBookFactory.getTaskName(reportType, action.getRefBookId(), null), userInfo, action.isForce(), logger);
-        if (restartStatus != null && restartStatus.getFirst()) {
-            result.setStatus(LoadRefBookResult.CreateAsyncTaskStatus.LOCKED);
-            result.setRestartMsg(restartStatus.getSecond());
-        } else if (restartStatus != null && !restartStatus.getFirst()) {
-            result.setStatus(LoadRefBookResult.CreateAsyncTaskStatus.CREATE);
+
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(refBook.getId());
+        if (lockType == null || lockType.getFirst().equals(reportType)) {
+            String keyTask = refBookFactory.generateTaskKey(refBook.getId(), reportType);
+            Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, refBookFactory.getTaskName(reportType, action.getRefBookId(), null), userInfo, action.isForce(), logger);
+            if (restartStatus != null && restartStatus.getFirst()) {
+                result.setStatus(LoadRefBookResult.CreateAsyncTaskStatus.LOCKED);
+                result.setRestartMsg(restartStatus.getSecond());
+            } else if (restartStatus != null && !restartStatus.getFirst()) {
+                result.setStatus(LoadRefBookResult.CreateAsyncTaskStatus.CREATE);
+            } else {
+                result.setStatus(LoadRefBookResult.CreateAsyncTaskStatus.CREATE);
+                asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                    @Override
+                    public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                        return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                refBookFactory.getTaskFullName(reportType, action.getRefBookId(), null, null, null),
+                                LockData.State.IN_QUEUE.getText());
+                    }
+
+                    @Override
+                    public void executePostCheck() {
+                    }
+
+                    @Override
+                    public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                        return false;
+                    }
+
+                    @Override
+                    public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                    }
+
+                    @Override
+                    public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                        return refBookFactory.getTaskName(reportType, action.getRefBookId(), null);
+                    }
+                });
+            }
         } else {
-            result.setStatus(LoadRefBookResult.CreateAsyncTaskStatus.CREATE);
-            asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
-                @Override
-                public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
-                    return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                            refBookFactory.getTaskFullName(reportType, action.getRefBookId(), null, null, null),
-                            LockData.State.IN_QUEUE.getText());
-                }
-
-                @Override
-                public void executePostCheck() {
-                }
-
-                @Override
-                public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                    return false;
-                }
-
-                @Override
-                public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                }
-
-                @Override
-                public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                    return refBookFactory.getTaskName(reportType, action.getRefBookId(), null);
-                }
-            });
+            logger.error(LockData.LOCK_CURRENT,
+                    sdf.get().format(lockType.getSecond().getDateLock()),
+                    userService.getUser(lockType.getSecond().getUserId()).getName(),
+                    refBookFactory.getTaskName(lockType.getFirst(), action.getRefBookId(), null));
+            throw new ServiceLoggerException("Выполнение операции \"%s\" невозможно",
+                    logEntryService.save(logger.getEntries()),
+                    refBookFactory.getTaskName(ReportType.IMPORT_REF_BOOK, action.getRefBookId(), null));
         }
 
         result.setUuid(logEntryService.save(logger.getEntries()));

@@ -23,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.e
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -69,6 +70,11 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     private boolean importScriptStatus;
     private boolean isVersioned;
 
+    private String lockId;
+
+    private boolean timerEnabled;
+    private Timer timer;
+
     @Inject
     public RefBookHierPresenter(EventBus eventBus, MyView view, MyProxy proxy,
                                 DispatchAsync dispatcher, PlaceManager placeManager,
@@ -84,6 +90,12 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         this.departmentEditPresenter = departmentEditPresenter;
         this.uploadDialogPresenter = uploadDialogPresenter;
         getView().setUiHandlers(this);
+        this.timer = new Timer() {
+            @Override
+            public void run() {
+                onTimer(true);
+            }
+        };
     }
 
     @Override
@@ -238,6 +250,8 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         void setSpecificReportTypes(List<String> specificReportTypes);
 
         void setUploadAvailable(boolean uploadAvailable);
+
+        void setLockInformation(String title);
     }
 
     @Override
@@ -256,6 +270,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
             if (han != null)
                 han.removeHandler();
         }
+        stopTimer();
     }
 
     @Override
@@ -337,6 +352,13 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                     /*getProxy().manualReveal(RefBookHierPresenter.this);*/
                                     Dialog.errorMessage("Доступ к справочнику запрещен!");
                                 }
+                                startTimer();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                super.onFailure(caught);
+                                stopTimer();
                             }
                         }, RefBookHierPresenter.this));
             }
@@ -345,6 +367,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
             public void onFailure(Throwable caught) {
                 placeManager.unlock();
                 placeManager.revealErrorPlace("");
+                stopTimer();
             }
         }, RefBookHierPresenter.this));
     }
@@ -505,4 +528,36 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
 
     }
 
+    protected void startTimer() {
+        timerEnabled = true;
+        timer.scheduleRepeating(5000);
+    }
+
+    protected void stopTimer() {
+        timerEnabled = false;
+        timer.cancel();
+    }
+
+    private void onTimer(final boolean isTimer) {
+        TimerAction action = new TimerAction();
+        action.setRefBookId(refBookId);
+        dispatcher.execute(
+                action,
+                CallbackUtils.simpleCallback(
+                        new AbstractCallback<TimerResult>() {
+                            @Override
+                            public void onSuccess(TimerResult result) {
+                                if (result.getLockId() != lockId || !isTimer) {
+                                    lockId = result.getLockId();
+                                    if (result.isLock()) {
+                                        getView().setLockInformation(result.getText());
+                                        commonEditPresenter.setLock(true);
+                                    } else {
+                                        getView().setLockInformation(null);
+                                        commonEditPresenter.setLock(false);
+                                    }
+                                }
+                            }
+                        }));
+    }
 }

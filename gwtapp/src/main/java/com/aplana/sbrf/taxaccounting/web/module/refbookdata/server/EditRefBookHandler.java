@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -56,21 +57,13 @@ public class EditRefBookHandler extends AbstractActionHandler<EditRefBookAction,
         RefBook refBook = refBookFactory.get(action.getRefBookId());
         Logger logger = new Logger();
 
-        String key = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
-        LockData lockData = lockDataService.getLock(key);
-        if (lockData != null) {
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(refBook.getId());
+        if (lockType != null) {
             result.setLock(true);
-            if (lockData.isAsync()) {
-                logger.info(LockData.LOCK_CURRENT,
-                        sdf.get().format(lockData.getDateLock()),
-                        userService.getUser(lockData.getUserId()).getName(),
-                        refBookFactory.getTaskName(ReportType.IMPORT_REF_BOOK, action.getRefBookId(), null));
-            } else {
-                logger.info(LockData.LOCK_CURRENT,
-                        sdf.get().format(lockData.getDateLock()),
-                        userService.getUser(lockData.getUserId()).getName(),
-                        refBookFactory.getTaskName(ReportType.EDIT_REF_BOOK, action.getRefBookId(), null));
-            }
+            logger.info(LockData.LOCK_CURRENT,
+                    sdf.get().format(lockType.getSecond().getDateLock()),
+                    userService.getUser(lockType.getSecond().getUserId()).getName(),
+                    refBookFactory.getTaskName(lockType.getFirst(), action.getRefBookId(), null));
             result.setLockMsg("Для текущего справочника запущена операция, при которой редактирование невозможно");
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

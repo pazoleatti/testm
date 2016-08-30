@@ -93,4 +93,10 @@ public class DepartmentEditView extends AbstractEditView implements DepartmentEd
             getUiHandlers().onCancelClicked();
         }
     }
+
+    @Override
+    public void lock(boolean isLock) {
+        save.setEnabled(!isLock);
+        cancel.setEnabled(!isLock);
+    }
 }

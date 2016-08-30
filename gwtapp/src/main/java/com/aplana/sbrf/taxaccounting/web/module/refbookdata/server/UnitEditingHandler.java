@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -12,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -25,6 +28,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +41,7 @@ import java.util.Map;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@Transactional
 public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction, UnitEditingResult> {
 
     @Autowired
@@ -53,8 +58,10 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
     private LockDataService lockService;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private RefBookFactory refBookFactory;
 
-	private static final String LOCK_MESSAGE = "Справочник «%s» заблокирован, попробуйте выполнить операцию позже!";
+	private static final String LOCK_MESSAGE = "Справочник \"%s\" заблокирован, попробуйте выполнить операцию позже!";
 
 
     public UnitEditingHandler() {
@@ -66,11 +73,11 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
         List<String> lockedObjects = new ArrayList<String>();
         Logger logger = new Logger();
         int userId = securityService.currentUserInfo().getUser().getId();
-        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + RefBookDepartmentDao.REF_BOOK_ID;
+        String lockKey = refBookFactory.generateTaskKey(RefBookDepartmentDao.REF_BOOK_ID, ReportType.EDIT_REF_BOOK);
         RefBook refBook = refBookDao.get(RefBookDepartmentDao.REF_BOOK_ID);
-        LockData lockData = lockService.lock(lockKey, userId,
-                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()));
-        if (lockData == null) {
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(RefBookDepartmentDao.REF_BOOK_ID);
+        if (lockType == null && lockService.lock(lockKey, userId,
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName())) == null) {
             try {
                 //Блокировка установлена
                 lockedObjects.add(lockKey);
@@ -79,7 +86,7 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
+                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId,
                                     String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()));

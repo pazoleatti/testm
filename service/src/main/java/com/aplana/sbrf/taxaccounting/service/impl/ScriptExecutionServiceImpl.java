@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -60,6 +62,8 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
     private LockDataService lockDataService;
     @Autowired
     private TAUserService userService;
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     @Override
     public void executeScript(TAUserInfo userInfo, String script, Logger logger) {
@@ -248,7 +252,8 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
                         //Проверяем не заблокирован ли справочник
                         RefBook refBook = SerializationUtils.clone(refBookDao.get(refBookId));
-                        String lockUser = canImportScript(LockData.LockObjects.REF_BOOK.name() + "_" + refBookId, userInfo.getUser());
+                        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(refBookId);
+                        String lockUser = canImportScript(lockType != null ? lockType.getSecond().getKey() : null, userInfo.getUser());
                         if (lockUser == null) {
                             Logger localLogger = new Logger();
                             refBookScriptingService.importScript(refBookId, script, localLogger, userInfo);

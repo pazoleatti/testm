@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookFactoryImpl;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
@@ -65,6 +67,8 @@ public class LoadRefBookDataServiceTest {
     @Before
     public void init() throws IOException {
         service = new LoadRefBookDataServiceImpl();
+        RefBookFactory refBookFactory = mock(RefBookFactoryImpl.class);
+        ReflectionTestUtils.setField(service, "refBookFactory", refBookFactory);
         mockAuditService();
         temporaryFolder.create();
         uploadFolder = temporaryFolder.newFolder("UPLOAD_DIRECTORY");

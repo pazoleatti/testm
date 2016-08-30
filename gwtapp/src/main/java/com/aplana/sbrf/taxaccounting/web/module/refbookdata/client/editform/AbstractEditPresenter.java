@@ -91,6 +91,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         void updateInputFields();
         void setVersionMode(boolean versionMode);
         void showVersioned(boolean versioned);
+        void lock(boolean isLock);
     }
 
 
@@ -456,5 +457,9 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     protected void onBind() {
         super.onBind();
         addVisibleHandler(ShowItemEvent.getType(), this);
+    }
+
+    public void setLock(boolean isLock) {
+        getView().lock(isLock);
     }
 }

@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.Date;
@@ -93,4 +95,19 @@ public interface RefBookFactory {
     List<String> getSpecificReportTypes(long refBookId, TAUserInfo userInfo, Logger logger);
 
     boolean getEventScriptStatus(long refBookId, FormDataEvent event);
+
+    /**
+     * Получение блокировки и её типа для справочника, null если для справочника нет блокировок
+     * @param refBookId
+     * @return
+     */
+    Pair<ReportType, LockData> getLockTaskType(long refBookId);
+
+    /**
+     * Формирует ключ блокировки для задачи
+     * @param refBookId
+     * @param reportType
+     * @return
+     */
+    String generateTaskKey(long refBookId, ReportType reportType);
 }

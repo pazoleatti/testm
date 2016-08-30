@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,6 +40,8 @@ public class RefBookDepartmentTest {
         ReflectionTestUtils.setField(refBookDepartment, "departmentService", departmentService);
         ReflectionTestUtils.setField(refBookDepartment, "refBookDao", refBookDao);
         ReflectionTestUtils.setField(refBookDepartment, "lockService", lockService);
+        RefBookFactory refBookFactory = mock(RefBookFactoryImpl.class);
+        ReflectionTestUtils.setField(refBookDepartment, "refBookFactory", refBookFactory);
 
         RefBook refBook = mock(RefBook.class);
         when(refBookDao.get(anyLong())).thenReturn(refBook);

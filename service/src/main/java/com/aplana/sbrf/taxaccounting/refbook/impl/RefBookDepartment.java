@@ -107,6 +107,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     private DepartmentFormTypeService departmentFormTypeService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
@@ -249,10 +251,10 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
-        LockData lockData = lockService.lock(lockKey, userId,
-                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()));
-        if (lockData == null) {
+        String lockKey = refBookFactory.generateTaskKey(REF_BOOK_ID, ReportType.EDIT_REF_BOOK);
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(REF_BOOK_ID);
+        if (lockType == null && lockService.lock(lockKey, userId,
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName())) == null) {
             try {
                 //Блокировка установлена
                 lockedObjects.add(lockKey);
@@ -261,11 +263,10 @@ public class RefBookDepartment implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
+                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
                         if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
-                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()));
-                            if (referenceLockData == null) {
+                            if (refBookFactory.getLockTaskType(attribute.getRefBookId()) == null &&
+                                    lockService.lock(referenceLockKey, userId, String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);
                             } else {
@@ -332,11 +333,10 @@ public class RefBookDepartment implements RefBookDataProvider {
             throw new ServiceException("Текущий пользователь не установлен!");
         }
 
-        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        LockData lockData = lockService.getLock(lockKey);
 
-        if (lockData == null) {
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(RefBookDepartmentDao.REF_BOOK_ID);
+        if (lockType == null) {
             List<RefBookAttribute> attributes = refBook.getAttributes();
             final Department dep = departmentService.getDepartment(uniqueRecordId.intValue());
             // проверка использования подразделения в модуле гарантий
@@ -439,11 +439,11 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
+        String lockKey = refBookFactory.generateTaskKey(REF_BOOK_ID, ReportType.EDIT_REF_BOOK);
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        LockData lockData = lockService.lock(lockKey, userId,
-                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()));
-        if (lockData == null) {
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(REF_BOOK_ID);
+        if (lockType == null && lockService.lock(lockKey, userId,
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName())) == null) {
             try {
                 //Блокировка установлена
                 lockedObjects.add(lockKey);
@@ -452,11 +452,10 @@ public class RefBookDepartment implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
                         if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
-                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()));
-                            if (referenceLockData == null) {
+                            if (refBookFactory.getLockTaskType(attribute.getRefBookId()) == null &&
+                                    lockService.lock(referenceLockKey, userId, String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName())) == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);
                             } else {

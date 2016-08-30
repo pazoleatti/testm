@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -76,6 +77,13 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
     DropdownButton printAnchor;
     @UiField
     LinkButton upload;
+    @UiField
+    Label lockInformation;
+    @UiField
+    SplitLayoutPanel hierarchyPanel;
+
+    public static final int DEFAULT_HIERARCHY_PANEL_TOP_POSITION = 34;
+    private static final int LOCK_INFO_BLOCK_HEIGHT = 25;
 
     private boolean isVersion, isVersioned;
     private LinkButton printToExcel, printToCSV;
@@ -375,5 +383,37 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
     @Override
     public void setUploadAvailable(boolean uploadAvailable) {
         this.uploadAvailable = uploadAvailable;
+    }
+
+    @Override
+    public void setLockInformation(String title) {
+        if (title != null && !title.isEmpty()) {
+            changeHierarchyPanelTopPosition(true);
+            lockInformation.setVisible(true);
+            lockInformation.setText(title);
+            lockInformation.setTitle(title);
+            addRow.setEnabled(false);
+            deleteRow.setEnabled(false);
+        } else {
+            changeHierarchyPanelTopPosition(false);
+            lockInformation.setVisible(false);
+            lockInformation.setText("");
+            lockInformation.setTitle("");
+            addRow.setEnabled(true);
+            deleteRow.setEnabled(true);
+        }
+    }
+
+    /**
+     * Увеличивает верхний отступ у панели с иерархией, когда показывается сообщение о блокировки
+     * @param isLockInfoVisible показано ли сообщение
+     */
+    private void changeHierarchyPanelTopPosition(Boolean isLockInfoVisible){
+        Style hierarchyPanelStyle = hierarchyPanel.getElement().getStyle();
+        int downShift = 0;
+        if (isLockInfoVisible){
+            downShift = LOCK_INFO_BLOCK_HEIGHT;
+        }
+        hierarchyPanelStyle.setProperty("top", DEFAULT_HIERARCHY_PANEL_TOP_POSITION + downShift, Style.Unit.PX);
     }
 }

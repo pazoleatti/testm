@@ -29,7 +29,7 @@
             bottom: 0;
             right: 0;
             left: 0;
-            top: 34px;
+            top: 34px; /*@see com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookHierView.DEFAULT_HIERARCHY_PANEL_TOP_POSITION*/
             border-top: 1px solid #aeaeac;
         }
 
@@ -50,6 +50,23 @@
         .printAnchor {
             padding-left: 14px;
             padding-right: 6px;
+        }
+    </ui:style>
+
+    <ui:style field="lock">
+        .lockInformation {
+            height: 25px;   /*@see com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookHierView.LOCK_INFO_BLOCK_HEIGHT*/
+            line-height: 24px;
+            background: #FFDC82;
+            padding-left: 15px;
+            margin: 2px;
+            font-size: 14px;
+            border: 1px solid #DBDBDB;
+
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
         }
     </ui:style>
 
@@ -121,7 +138,9 @@
 
                 </g:HorizontalPanel>
 
-                <g:SplitLayoutPanel addStyleNames="{style.splitter}">
+                <g:Label ui:field="lockInformation" visible="false"  addStyleNames="{lock.lockInformation}"/>
+
+                <g:SplitLayoutPanel ui:field="hierarchyPanel" addStyleNames="{style.splitter}">
                     <g:center>
                         <g:SimplePanel ui:field="mainPanel"/>
                     </g:center>
