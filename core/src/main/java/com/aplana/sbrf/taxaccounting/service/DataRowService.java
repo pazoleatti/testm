@@ -50,6 +50,9 @@ public interface DataRowService {
 
 	void deleteSearchResults(Integer sessionId, Long formDataId);
 
+	/**
+	 * Очистка старых результатов поиска не удалившихся по каким-то причинам
+	 */
 	void clearSearchResults();
 
     /**
