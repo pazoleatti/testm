@@ -89,9 +89,9 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
         void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
 
-        void setDepartment(final Department department, boolean fireEvents);
+        void setDepartment(final Department department);
 
-        void setReportPeriods(List<ReportPeriod> reportPeriods, boolean fireEvents);
+        void setReportPeriods(List<ReportPeriod> reportPeriods);
 
         Integer getDepartmentId();
 
@@ -134,8 +134,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         void updateVisibleEditButton();
 
         void setRefBookPeriod(Date startDate, Date endDate);
-
-        void onFind(boolean showError);
     }
 
     @Inject
@@ -506,25 +504,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         }
         return true;
     }
-    @Override
-    public void reloadPeriods(TaxType taxType) {
-        GetDepartmentTreeDataAction action = new GetDepartmentTreeDataAction();
-        action.setTaxType(taxType);
-        action.setDepartmentId(getView().getDepartmentId());
-        action.setOnlyPeriods(true);
-        dispatcher.execute(action,
-                CallbackUtils.defaultCallback(
-                        new AbstractCallback<GetDepartmentTreeDataResult>() {
-                            @Override
-                            public void onSuccess(GetDepartmentTreeDataResult result) {
-                                // Список отчетных периодов
-                                getView().setReportPeriods(result.getReportPeriods() == null
-                                        ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods(), true);
-                                //   createTableColumns();
-                                getView().onFind(false);
-                            }
-                        }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
-    }
+
 
     @Override
     public void reloadDepartments(TaxType taxType, final Integer currentDepartmentId) {
@@ -549,19 +529,22 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                     // Выбирается подразделение выбранное ранее
                                     for (Department dep : result.getDepartments()) {
                                         if (dep.getId() == currentDepartmentId) {
-                                            getView().setDepartment(dep, true);
+                                            getView().setDepartment(dep);
                                             break;
                                         }
                                     }
                                 } else {
                                     // Выбирается подразделение пользователя
-                                    getView().setDepartment(userDepartment, false);
-                                    // Список отчетных периодов
-                                    getView().setReportPeriods(result.getReportPeriods() == null
-                                            ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods(), true);
+                                    getView().setDepartment(userDepartment);
                                 }
-                                //   createTableColumns();
+                                // Список отчетных периодов
+                                getView().setReportPeriods(result.getReportPeriods() == null
+                                        ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods());
+                             //   createTableColumns();
                                 getData(null);
+                                if (getView().getReportPeriodId() != null && getView().getDepartmentId() != null) {
+                                    getRefBookPeriod(getView().getReportPeriodId(), getView().getDepartmentId());
+                                }
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
     }

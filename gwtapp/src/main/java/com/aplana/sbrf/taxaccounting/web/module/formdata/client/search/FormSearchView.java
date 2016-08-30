@@ -61,6 +61,7 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     private SingleSelectionModel<FormDataSearchResult> selectionModel;
     private boolean readOnlyMode;
     private boolean manual;
+    private String oldSearchKey;
 
     @UiField
     DataGrid<FormDataSearchResult> searchResultTable;

@@ -48,36 +48,32 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
         // Текущий пользователь
         TAUser currUser = securityService.currentUserInfo().getUser();
 
-        if (!action.isOnlyPeriods()) {
-            if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)
-                    && !currUser.hasRole(TARole.ROLE_CONTROL)
-                    && !currUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-                // Не контролер, далее не загружаем
-                return result;
-            }
-
-            // Подразделения доступные пользователю
-            Set<Integer> avSet = new HashSet<Integer>();
-            if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                // Все подразделения
-                result.setDepartments(departmentService.listAll());
-
-                for (Department dep : result.getDepartments()) {
-                    avSet.add(dep.getId());
-                }
-            } else {
-                // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-                avSet.addAll(departmentService.getTaxFormDepartments(currUser, asList(action.getTaxType()), null, null));
-
-                // Необходимые для дерева подразделения
-                result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
-            }
-
-            result.setAvailableDepartments(avSet);
-            result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(currUser.getDepartmentId())));
-        } else {
-            result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(action.getDepartmentId())));
+        if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)
+                && !currUser.hasRole(TARole.ROLE_CONTROL)
+                && !currUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            // Не контролер, далее не загружаем
+            return result;
         }
+
+        // Подразделения доступные пользователю
+        Set<Integer> avSet = new HashSet<Integer>();
+        if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+            // Все подразделения
+            result.setDepartments(departmentService.listAll());
+
+            for (Department dep : result.getDepartments()) {
+                avSet.add(dep.getId());
+            }
+        } else {
+            // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+            avSet.addAll(departmentService.getTaxFormDepartments(currUser, asList(action.getTaxType()), null, null));
+
+            // Необходимые для дерева подразделения
+            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
+        }
+
+        result.setAvailableDepartments(avSet);
+        result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), new ArrayList<Integer>(avSet)));
 
         return result;
     }

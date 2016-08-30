@@ -279,7 +279,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 }
                 DepartmentConfigPropertyView.this.currentReportPeriodId = selPeriodId;
                 editButton.setEnabled(false);
-                onFind(false);
                 if (currentReportPeriodId != null && currentDepartmentId != null) {
                     getUiHandlers().getRefBookPeriod(currentReportPeriodId, currentDepartmentId);
                 }
@@ -300,7 +299,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 }
                 DepartmentConfigPropertyView.this.currentDepartmentId = selDepartmentId;
                 editButton.setEnabled(false);
-                getUiHandlers().reloadPeriods(taxType);
                 if (currentReportPeriodId != null && currentDepartmentId != null) {
                     getUiHandlers().getRefBookPeriod(currentReportPeriodId, currentDepartmentId);
                 }
@@ -753,26 +751,21 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @UiHandler("findButton")
     public void onFind(ClickEvent event) {
-        onFind(true);
-    }
-
-    @Override
-    public void onFind(boolean showError) {
         if (getUiHandlers() != null) {
 
             if (departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty() &&
                     periodPickerPopup.getValue() != null && !periodPickerPopup.getValue().isEmpty()) {
                 getUiHandlers().onFind();
-            } else if (showError) {
+            } else {
                 Dialog.errorMessage("Не заполнены обязательные поля", "Для поиска должно быть заполнено поле \"Подразделение\" и \"Период\"");
             }
         }
     }
 
     @Override
-    public void setDepartment(final Department department, boolean fireEvents) {
+    public void setDepartment(final Department department) {
         if (department != null) {
-            departmentPicker.setValue(Arrays.asList(department.getId()), fireEvents);
+            departmentPicker.setValue(Arrays.asList(department.getId()), true);
         }
 
         this.currentDepartmentId = department != null ? department.getId() : null;
@@ -785,12 +778,10 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     }
 
     @Override
-    public void setReportPeriods(List<ReportPeriod> reportPeriods, boolean fireEvents) {
+    public void setReportPeriods(List<ReportPeriod> reportPeriods) {
         periodPickerPopup.setPeriods(reportPeriods);
         periodPickerPopup.setPeriods(reportPeriods);
         if (reportPeriods == null || reportPeriods.isEmpty()) {
-            this.currentReportPeriodId = null;
-            periodPickerPopup.setValue(null, fireEvents);
             return;
         }
         Integer defaultReportPeriodId = periodPickerPopup.getDefaultReportPeriod();
@@ -799,7 +790,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         for (ReportPeriod reportPeriod : reportPeriods) {
             if (defaultReportPeriodId != null && reportPeriod.getId().equals(defaultReportPeriodId)) {
                 this.currentReportPeriodId = defaultReportPeriodId;
-                periodPickerPopup.setValue(Arrays.asList(defaultReportPeriodId), fireEvents);
+                periodPickerPopup.setValue(Arrays.asList(defaultReportPeriodId));
                 maxPeriod = null;
                 break;
             }
@@ -808,8 +799,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             }
         }
         if (maxPeriod != null) {
-            this.currentReportPeriodId = null;
-            periodPickerPopup.setValue(null, fireEvents);
+            this.currentReportPeriodId = maxPeriod.getId();
+            periodPickerPopup.setValue(Arrays.asList(maxPeriod.getId()));
         }
     }
 

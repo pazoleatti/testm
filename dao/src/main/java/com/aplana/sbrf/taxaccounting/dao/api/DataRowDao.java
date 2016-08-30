@@ -27,15 +27,13 @@ public interface DataRowDao {
 	 */
 	void removeCheckPoint(FormData formData);
 
-	void clearSearchDataResult();
+	void clearSearchResults();
 
-	void clearSearchResult();
+	void createOrTruncSearchDataTable(int sessionId);
 
-	void prepareSearchDataResult(int sessionId);
+	void dropSearchDataResult(Integer sessionId);
 
-	void deleteSearchDataResult(Integer sessionId);
-
-	void deleteSearchDataResultByFormDataId(Long formDataId);
+	void dropSearchDataResultByFormDataId(Long formDataId);
 
 	void deleteSearchResults(Integer sessionId, Long formDataId);
 

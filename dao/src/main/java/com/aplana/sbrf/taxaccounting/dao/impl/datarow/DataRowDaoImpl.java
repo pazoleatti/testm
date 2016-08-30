@@ -166,15 +166,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		} catch (IncorrectResultSizeDataAccessException ignored) {
 		}
 
-		if (id != null && searchDataResultExists(sessionId)) {
+		if (id != null && partitionExists(sessionId)) {
 			String dataQuery =
-					"SELECT /*+INDEX(t I_SEARCH_DATA_RESULT)*/\"ORD\" idx, column_index, row_index, raw_value \n" +
-					" FROM " + FORM_SEARCH_DATA_RESULT + " PARTITION(P" + sessionId + ") t" +
-					" WHERE session_id = :session_id AND id = :id";
+					"SELECT \"ORD\" idx, column_index, row_index, raw_value \n" +
+					" FROM " + FORM_SEARCH_DATA_RESULT + " PARTITION(P" + sessionId + ")" +
+					" WHERE id = :id";
 			params.clear();
 			params.put("id", id);
-			params.put("session_id", sessionId);
-			int count = getNamedParameterJdbcTemplate().queryForObject("SELECT COUNT(*) FROM " + FORM_SEARCH_DATA_RESULT + " PARTITION(P" + sessionId + ")", params, Integer.class);
+			int count = getNamedParameterJdbcTemplate().queryForObject("SELECT COUNT(*) FROM (" + dataQuery + ")", params, Integer.class);
 
 			params.put("from", range.getOffset());
 			params.put("to", range.getOffset() + range.getCount() - 1);
@@ -186,7 +185,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		return null;
 	}
 
-	private boolean searchDataResultExists(int sessionId) {
+	private boolean partitionExists(int sessionId) {
 		int exists = getJdbcTemplate().queryForObject(
 				"SELECT COUNT(*) FROM ALL_TAB_PARTITIONS" +
 						" WHERE TABLE_NAME = '" + FORM_SEARCH_DATA_RESULT + "' AND PARTITION_NAME = 'P" + sessionId + "'", Integer.class);
@@ -194,9 +193,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void prepareSearchDataResult(int sessionId) {
+	public void createOrTruncSearchDataTable(int sessionId) {
 		try {
-			if (!searchDataResultExists(sessionId)) {
+			if (!partitionExists(sessionId)) {
 				getJdbcTemplate().update("ALTER TABLE " + FORM_SEARCH_DATA_RESULT + " ADD PARTITION P" + sessionId + " VALUES(" + sessionId + ")");
 			} else {
 				getJdbcTemplate().update("ALTER TABLE " + FORM_SEARCH_DATA_RESULT + " TRUNCATE PARTITION P" + sessionId + " UPDATE GLOBAL INDEXES");
@@ -205,22 +204,29 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public  void deleteSearchDataResult(Integer sessionId) {
+	public  void dropSearchDataResult(Integer sessionId) {
 		try {
-			if (searchDataResultExists(sessionId)) {
+			if (partitionExists(sessionId)) {
 				getJdbcTemplate().update("ALTER TABLE " + FORM_SEARCH_DATA_RESULT + " DROP PARTITION P" + sessionId + " UPDATE GLOBAL INDEXES");
 			}
 		} catch (DataAccessException ignored) {}
 	}
 
 	@Override
-	public  void deleteSearchDataResultByFormDataId(Long formDataId) {
+	public  void dropSearchDataResultByFormDataId(Long formDataId) {
 		List<Integer> sessionIds = getJdbcTemplate().queryForList(
 				"SELECT session_id FROM " + FORM_SEARCH_RESULT +
 						" WHERE form_data_id = " + formDataId, Integer.class);
 		for (Integer session_id : sessionIds) {
-			deleteSearchDataResult(session_id);
+			dropSearchDataResult(session_id);
 		}
+	}
+
+	@Override
+	public void clearSearchResults() {
+		getJdbcTemplate().update(
+				"DELETE FROM " + FORM_SEARCH_RESULT +
+						" WHERE \"DATE\" + 1 < SYSDATE ");
 	}
 
 	@Override
@@ -233,28 +239,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						" WHERE 1=1 " +
 						(sessionId != null ? " AND session_id = :session_id " : "") +
 						(formDataId != null ? " AND form_data_id = :form_data_id" : ""), params);
-	}
-
-	@Override
-	public void clearSearchDataResult() {
-		List<Integer> sessionIds = getJdbcTemplate().queryForList(
-				"SELECT DISTINCT session_id FROM " + FORM_SEARCH_RESULT +
-						" WHERE \"DATE\" + 1 < SYSDATE ", Integer.class);
-		sessionIds.addAll(getJdbcTemplate().queryForList(
-				"SELECT session_id from (" +
-						"SELECT substr(PARTITION_NAME, 2) AS session_id FROM ALL_TAB_PARTITIONS" +
-						" WHERE TABLE_NAME = '" + FORM_SEARCH_DATA_RESULT + "' AND PARTITION_NAME <> 'P0') t " +
-				" WHERE NOT EXISTS(SELECT * FROM " + FORM_SEARCH_RESULT + " WHERE session_id = t.session_id) ", Integer.class));
-		for (Integer session_id : sessionIds) {
-			deleteSearchDataResult(session_id);
-		}
-	}
-
-	@Override
-	public void clearSearchResult() {
-		getJdbcTemplate().update(
-				"DELETE FROM " + FORM_SEARCH_RESULT +
-						" WHERE \"DATE\" + 1 < SYSDATE ");
 	}
 
 	private int addSearchResult(int sessionId, long formDataId, String key) {
