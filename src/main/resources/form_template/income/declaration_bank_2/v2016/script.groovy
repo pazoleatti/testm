@@ -1362,7 +1362,10 @@ void generateXML(def xml, boolean showApp2) {
                                 // Лист 03 В
                                 if (dataRowsTaxAgent != null && dataRowsDividend.indexOf(row) == 0) {
                                     isAgentUsed = true
-                                    dataRowsTaxAgent.each { rowAgent ->
+                                    for (def rowAgent : dataRowsTaxAgent) {
+                                        if (rowAgent.getAlias() != null) {
+                                            continue
+                                        }
                                         // 0..n
                                         РеестрСумДив(
                                                 ПрПринадл : 'А',
