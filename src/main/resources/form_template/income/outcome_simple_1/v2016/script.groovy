@@ -280,7 +280,7 @@ void consolidation() {
     }
     def isFromSummary = isFromSummary(formSources)
     isFromSummary ? consolidationFromSummary(dataRows, formSources) : consolidationFromPrimary(dataRows, formSources)
-    calcExplanation(dataRows, formSources, isFromSummary)
+    calcExplanation(dataRows, formSources)
     addExplanationPrev(dataRows, 'consumptionTypeId')
 }
 
@@ -589,7 +589,7 @@ void fillFromRnu5(def dataRows, def dataRowsChild, def strangeCodes) {
     }
 }
 
-void calcExplanation(def dataRows, def formSources, def isFromSummary) {
+void calcExplanation(def dataRows, def formSources) {
     def sourcesTab = formSources.findAll { it.formTypeId == formTypeId_Tab2 }
     def rowNumbers = []
     def formDataTab
@@ -597,7 +597,7 @@ void calcExplanation(def dataRows, def formSources, def isFromSummary) {
         for (sourceTab in sourcesTab) {
             def tempFormData = formDataService.getLast(sourceTab.formTypeId, sourceTab.kind, sourceTab.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             // один принятый(для ТБ) источник
-            if (tempFormData != null && (isFromSummary || tempFormData.state == WorkflowState.ACCEPTED)) {
+            if (tempFormData != null && tempFormData.state == WorkflowState.ACCEPTED) {
                 formDataTab = tempFormData
                 break
             }

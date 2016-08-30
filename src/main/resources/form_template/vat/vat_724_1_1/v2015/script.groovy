@@ -599,7 +599,15 @@ def calcSuperTotals(def dataRows) {
             def superRow = getSuperTotalRow(key, periodTypeId as Long)
             columns.each { alias ->
                 superRow[alias] = BigDecimal.ZERO
-                sectionRows.each { row ->
+                for (def row : sectionRows) {
+                    // для итогов sale_18 по графе 4(5) надо суммировать только 1 и 7 раздел
+                    if (key == 'sale_18' && alias == 'sumPlus' && row.getAlias() ==~ /total_[^17]_.*/) {
+                        continue
+                    }
+                    // для итогов sale_10 по графе 4(5) надо суммировать только 2 раздел
+                    if (key == 'sale_10' && alias == 'sumPlus' && row.getAlias() ==~ /total_[^2]_.*/) {
+                        continue
+                    }
                     superRow[alias] += (row[alias] ?: BigDecimal.ZERO)
                 }
                 if (alias in declarationColumns) {

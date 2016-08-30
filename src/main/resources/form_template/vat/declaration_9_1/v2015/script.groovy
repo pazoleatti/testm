@@ -15,9 +15,6 @@ import groovy.xml.MarkupBuilder
 
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLStreamReader
-import java.sql.Connection
-import java.sql.ResultSet
-import java.sql.Statement
 
 /**
  * Декларация по НДС (раздел 9.1)
@@ -209,11 +206,8 @@ void generateXML() {
     def rowsMap = getTotals724_1_1Map(formData724_1_1)
     def row18 = rowsMap?.row18
     def row10 = rowsMap?.row10
-    def total1 = rowsMap?.total1 // итог по секции 1
-    def total2 = rowsMap?.total2 // итог по секции 2
-    def total7 = rowsMap?.total7 // итог по секции 7
-    code310 = ((total1 || total7) ? ((total1?.sumPlus ?: BigDecimal.ZERO) + (total7?.sumPlus ?: BigDecimal.ZERO)) : code020)
-    code320 = (total2 ? total2.sumPlus : code030)
+    code310 = (row18 ? row18.sumPlus : code020)
+    code320 = (row10 ? row10.sumPlus : code030)
     code330 = code040
     code340 = (row18 ? row18.sumNdsPlus : code050)
     code350 = (row10 ? row10.sumNdsPlus : code060)
@@ -710,11 +704,8 @@ void preCalcCheck() {
         def rowsMap = getTotals724_1_1Map(formData)
         def row18 = rowsMap?.row18
         def row10 = rowsMap?.row10
-        def total1 = rowsMap?.total1 // итог по секции 1
-        def total2 = rowsMap?.total2 // итог по секции 2
-        def total7 = rowsMap?.total7 // итог по секции 7
 
-        def used724_1_1Map = ['310' : (total1 != null || total7 != null), '320' : (total2 != null), '340' : (row18 != null), '350' : (row10 != null)]
+        def used724_1_1Map = ['310' : (row18 != null), '320' : (row10 != null), '340' : (row18 != null), '350' : (row10 != null)]
         def codes724_1_1 = []
         def codesDeclaration = []
         used724_1_1Map.each { def code, use724_1_1 ->
@@ -827,11 +818,5 @@ def getTotals724_1_1Map(def formData) {
     def row10 = rows.find { it.getAlias() == rowAlias }
     rowAlias = 'super_sale_18_' + code
     def row18 = rows.find { it.getAlias() == rowAlias }
-    def map = [ 'row10' : row10, 'row18' : row18 ]
-    [1, 2, 7].each { section ->
-        rowAlias = 'total_' + section + '_' + code
-        def totalSection = rows.find { it.getAlias() == rowAlias }
-        map.put(((String) ("total" + section)), totalSection)
-    }
-    return map
+    return [ 'row10' : row10, 'row18' : row18 ]
 }
