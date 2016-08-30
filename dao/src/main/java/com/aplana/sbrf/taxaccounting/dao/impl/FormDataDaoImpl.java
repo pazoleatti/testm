@@ -21,6 +21,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
@@ -694,6 +695,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         getNamedParameterJdbcTemplate().update("UPDATE form_data SET sorted = sorted_backup WHERE id = :formDataId and not (sorted = sorted_backup) ", values);
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    private void deleteSearchDataResultByFormDataId(long formDataId) {
+        dataRowDao.deleteSearchDataResultByFormDataId(formDataId);
+    }
+
     @Override
     public void updateEdited(long formDataId, boolean isEdited) {
         int edited = (isEdited ? 1 : 0);
@@ -701,6 +707,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         values.put("formDataId", formDataId);
         values.put("edited", edited);
         getNamedParameterJdbcTemplate().update("UPDATE form_data SET edited = :edited WHERE id = :formDataId", values);
+
+        deleteSearchDataResultByFormDataId(formDataId);
+        dataRowDao.deleteSearchResults(null, formDataId);
     }
 
     @Override

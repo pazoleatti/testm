@@ -108,7 +108,8 @@ public class DataRowServiceImpl implements DataRowService {
         } else {
             resultsList = new ArrayList<FormDataSearchResult>();
         }
-        createOrTruncSearchDataTable(sessionId);
+        // создаём или очищаем таблицу для хранения результатов поиска
+        prepareSearchDataResult(sessionId);
         // сохраняем информацию о поиске
         int searchId = dataRowDao.saveSearchResult(sessionId, formDataId, key);
         // сохраняем результаты поиска
@@ -129,31 +130,41 @@ public class DataRowServiceImpl implements DataRowService {
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    private void createOrTruncSearchDataTable(int id) {
-        dataRowDao.createOrTruncSearchDataTable(id);
+    private void prepareSearchDataResult(int session_id) {
+        dataRowDao.prepareSearchDataResult(session_id);
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    private void dropSearchDataResult(int sessionId) {
-        dataRowDao.dropSearchDataResult(sessionId);
+    private void deleteSearchDataResult(int sessionId) {
+        dataRowDao.deleteSearchDataResult(sessionId);
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    private void dropSearchDataResultByFormDataId(long formDataId) {
-        dataRowDao.dropSearchDataResultByFormDataId(formDataId);
+    private void deleteSearchDataResultByFormDataId(long formDataId) {
+        dataRowDao.deleteSearchDataResultByFormDataId(formDataId);
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    private void clearSearchDataResult() {
+        dataRowDao.clearSearchDataResult();
     }
 
     @Override
     @Transactional(readOnly = false)
     public void deleteSearchResults(Integer sessionId, Long formDataId) {
-        dropSearchDataResult(sessionId);
-        dataRowDao.deleteSearchResults(sessionId, null);
+        clearSearchResults();
+        /*if (sessionId != null)
+            deleteSearchDataResult(sessionId);
+        else
+            deleteSearchDataResultByFormDataId(formDataId);
+        dataRowDao.deleteSearchResults(sessionId, formDataId);*/
     }
 
     @Override
     @Transactional(readOnly = false)
     public void clearSearchResults() {
-        dataRowDao.clearSearchResults();
+        clearSearchDataResult();
+        dataRowDao.clearSearchResult();
     }
 
     public List<FormDataSearchResult> searchByKeyInRefColumns(FormData formData, String key, boolean isCaseSensitive, boolean correctionDiff){
