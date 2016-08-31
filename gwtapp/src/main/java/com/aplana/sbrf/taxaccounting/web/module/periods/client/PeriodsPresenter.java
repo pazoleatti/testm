@@ -378,6 +378,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 					@Override
 					public void onSuccess(GetPeriodDataResult result) {
 						getView().setTableData(result.getRows());
+                        getView().clearSelection();
 					}
 				}, PeriodsPresenter.this));
 	}
