@@ -783,7 +783,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @Override
     public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
         departmentPicker.setAvalibleValues(departments, availableDepartments);
-        departmentPicker.setValue(Arrays.asList(departments.get(0).getId()), true);
     }
 
     @Override
