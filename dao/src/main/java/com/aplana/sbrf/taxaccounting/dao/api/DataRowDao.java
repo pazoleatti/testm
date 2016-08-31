@@ -27,18 +27,34 @@ public interface DataRowDao {
 	 */
 	void removeCheckPoint(FormData formData);
 
+	/**
+	 * Очистка старых результатов поиска (данные) не удалившихся по каким-то причинам
+	 */
 	void clearSearchDataResult();
 
+	/**
+	 * Очистка старых результатов поиска (инфо) не удалившихся по каким-то причинам
+	 */
 	void clearSearchResult();
 
 	void prepareSearchDataResult(int sessionId);
 
+	/**
+	 * Удаление результата поиска (данные)
+     */
 	void deleteSearchDataResult(Integer sessionId);
 
 	void deleteSearchDataResultByFormDataId(Long formDataId);
 
+	/**
+	 * Удаление результатов поиска (инфу)
+     */
 	void deleteSearchResults(Integer sessionId, Long formDataId);
 
+	/**
+	 * Добавляет инфу о результатах поиска
+     * @return
+     */
 	int saveSearchResult(int sessionId, long formDataId, String key);
 
 	/**

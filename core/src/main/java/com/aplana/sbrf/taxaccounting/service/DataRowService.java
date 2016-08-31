@@ -48,6 +48,11 @@ public interface DataRowService {
 
 	List<FormDataSearchResult> searchByKeyInRefColumns(FormData formData, String key, boolean isCaseSensitive, boolean correctionDiff);
 
+	/**
+	 * Удаление результатов поиска
+	 * @param sessionId сессия в которой выполняется поиск (не обязательный)
+	 * @param formDataId идентификатор формы (не обязательный)
+     */
 	void deleteSearchResults(Integer sessionId, Long formDataId);
 
 	/**

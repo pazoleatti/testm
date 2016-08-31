@@ -30,7 +30,7 @@ public class SearchHandler extends AbstractActionHandler<SearchAction, SearchRes
     @Override
     public SearchResult execute(SearchAction searchAction, ExecutionContext executionContext) throws ActionException {
         DataRowRange range = new DataRowRange();
-        range.setCount(searchAction.getTo());
+        range.setCount(searchAction.getTo() - searchAction.getFrom() + 1);
         range.setOffset(searchAction.getFrom());
         SearchResult searchResult = new SearchResult();
 

@@ -156,26 +156,39 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("form_data_id", formDataId);
 		params.put("key", key);
 
-		Integer id = null;
+		Pair<Integer, Integer> pair = null;
+		Integer id;
+		Integer count;
 		try {
-			id = getNamedParameterJdbcTemplate().queryForObject(
-					"SELECT id FROM " + FORM_SEARCH_RESULT +
-					" WHERE session_id = :session_id AND " +
-					" form_data_id = :form_data_id AND " +
-					" key = :key", params, Integer.class);
+			pair = (Pair<Integer, Integer>) getNamedParameterJdbcTemplate().queryForObject(
+					"SELECT id, rows_count FROM " + FORM_SEARCH_RESULT +
+							" WHERE session_id = :session_id AND " +
+							" form_data_id = :form_data_id AND " +
+							" key = :key", params, new RowMapper<Object>() {
+						@Override
+						public Pair<Integer, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
+							return (Pair<Integer, Integer>) new Pair(SqlUtils.getInteger(rs, "id"), SqlUtils.getInteger(rs, "rows_count"));
+						}
+					});
 		} catch (IncorrectResultSizeDataAccessException ignored) {
 		}
 
-		if (id != null && searchDataResultExists(sessionId)) {
+		if (pair != null && searchDataResultExists(sessionId)) {
+			id = pair.getFirst();
+			count = pair.getSecond();
 			String dataQuery =
-					"SELECT /*+INDEX(t I_SEARCH_DATA_RESULT)*/\"ORD\" idx, column_index, row_index, raw_value \n" +
+					"SELECT \"ORD\" idx, column_index, row_index, raw_value \n" +
 					" FROM " + FORM_SEARCH_DATA_RESULT + " PARTITION(P" + sessionId + ") t" +
 					" WHERE session_id = :session_id AND id = :id";
+			if (count == null) {
+				count = getNamedParameterJdbcTemplate().queryForObject("SELECT COUNT(*) FROM " + FORM_SEARCH_DATA_RESULT + " PARTITION(P" + sessionId + ")", params, Integer.class);
+				params.put("count", count);
+				getNamedParameterJdbcTemplate().update("UPDATE " + FORM_SEARCH_RESULT + " SET ROWS_COUNT = :count " +
+						"WHERE session_id = :session_id AND form_data_id = :form_data_id AND key = :key", params);
+			}
 			params.clear();
 			params.put("id", id);
 			params.put("session_id", sessionId);
-			int count = getNamedParameterJdbcTemplate().queryForObject("SELECT COUNT(*) FROM " + FORM_SEARCH_DATA_RESULT + " PARTITION(P" + sessionId + ")", params, Integer.class);
-
 			params.put("from", range.getOffset());
 			params.put("to", range.getOffset() + range.getCount() - 1);
 			dataQuery += " AND \"ORD\" BETWEEN :from AND :to";
@@ -298,7 +311,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("id", id);
 		params.put("sessionId", sessionId);
 		getNamedParameterJdbcTemplate().update(
-				"INSERT INTO " + FORM_SEARCH_DATA_RESULT + "(id, session_id, row_index, column_index, raw_value, \"ORD\") " +
+				"INSERT INTO " + FORM_SEARCH_DATA_RESULT + " PARTITION(P" + sessionId + ") (id, session_id, row_index, column_index, raw_value, \"ORD\") " +
 				"SELECT :id, :sessionId, row_index, column_index, raw_value, row_number() over(ORDER BY row_index, column_index) ord FROM (" +
 				"SELECT to_number(row_index) row_index, to_number(column_index) column_index, raw_value FROM (" + query + ")" +
 				" UNION ALL " +
