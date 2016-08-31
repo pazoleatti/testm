@@ -295,12 +295,9 @@ def checkDeclarationFNS() {
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
     def found = []
     [4: '«Декларация по НДС (раздел 1-7)»', 7: '«Декларация по НДС (аудит, раздел 1-7)»', 20: '«Декларация по НДС (короткая, раздел 1-7)»'].each { id, name ->
-        def declarationData17 = declarationService.getLast(id, declarationData.departmentId, reportPeriod.id)
-        if (declarationData17 != null && declarationData17.accepted) {
-            def sourceCorrNumber = reportPeriodService.getCorrectionNumber(declarationData17.departmentReportPeriodId) ?: 0
-            if (sourceCorrNumber == corrNumber) {
-                found.add(name)
-            }
+        def declarationData17 = declarationService.find(id, declarationData.departmentReportPeriodId)
+        if (declarationData17 != null && declarationData17.size()==1 && declarationData17[0].accepted) {
+            found.add(name)
         }
     }
     if (!found.isEmpty()) {
