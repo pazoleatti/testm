@@ -261,7 +261,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 editButton.setEnabled(false);
                 clear();
                 updateVisibility();
-                getUiHandlers().reloadPeriods(currentTaxType);
+                if (currentDepartmentId != null)
+                    getUiHandlers().reloadPeriods(currentTaxType);
                 if (currentReportPeriodId != null && currentDepartmentId != null) {
                     getUiHandlers().getRefBookPeriod(currentReportPeriodId, currentDepartmentId);
                 }
