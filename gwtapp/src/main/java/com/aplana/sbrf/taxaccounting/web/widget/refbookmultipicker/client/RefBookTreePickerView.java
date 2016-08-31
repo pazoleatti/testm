@@ -373,10 +373,13 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         return null;
     }
 
-    public void selectFirstItenOnLoad(){
+    public void selectFirstItemOnLoad(){
         getUiHandlers().selectFirstItenOnLoad();
     }
 
+    public void openRootItemOnLoad(){
+        getUiHandlers().openRootItemOnLoad();
+    }
     /**
      * Удаление загруженной записи из дерева
      *

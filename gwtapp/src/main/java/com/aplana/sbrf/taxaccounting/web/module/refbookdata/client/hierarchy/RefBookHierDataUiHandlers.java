@@ -8,4 +8,5 @@ public interface RefBookHierDataUiHandlers extends UiHandlers {
 	void onRelevanceDateChanged();
     void setMode(FormMode mode);
     void onCleanEditForm();
+    Long getRefBookId();
 }

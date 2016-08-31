@@ -408,4 +408,8 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     public boolean isExactSearch() {
         return getView().getPickerState().isExactSearch();
     }
+
+    public Long getRefBookId() {
+        return refBookId;
+    }
 }

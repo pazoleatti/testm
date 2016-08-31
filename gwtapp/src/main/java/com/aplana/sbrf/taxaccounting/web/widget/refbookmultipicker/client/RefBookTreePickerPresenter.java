@@ -31,6 +31,8 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     private PickerState ps;
     private boolean isNeedSelectFirstItem = false;
+    /**  Раскрытие иерархие для корневых элементов дерева*/
+    private boolean isOpenRootItem = false;
     private DispatchRequest dispatchRequest;
 
     public interface MyView extends View, HasUiHandlers<RefBookTreePickerUiHandlers> {
@@ -108,7 +110,9 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
             @Override
             public void onSuccess(GetRefBookTreeValuesResult result) {
                 getView().setRefBookId(result.getRefBookId());
-                getView().loadRoot(result.getPage(), false);
+                getView().loadRoot(result.getPage(), isOpenRootItem);
+                if (isOpenRootItem)
+                    isOpenRootItem = false;
                 if (isNeedSelectFirstItem && !result.getPage().isEmpty()) {
                     isNeedSelectFirstItem = false;
                     ps.getSetIds().clear();
@@ -190,6 +194,11 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     @Override
     public void selectFirstItenOnLoad() {
         isNeedSelectFirstItem = true;
+    }
+
+    @Override
+    public void openRootItemOnLoad() {
+        isOpenRootItem = true;
     }
 
     @Override

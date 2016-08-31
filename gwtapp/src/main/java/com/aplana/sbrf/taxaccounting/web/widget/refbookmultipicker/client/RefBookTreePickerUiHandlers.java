@@ -59,6 +59,8 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
 
     void selectFirstItenOnLoad();
 
+    void openRootItemOnLoad();
+
     void highLightItem(RefBookUiTreeItem uiTreeItem);
 
     void getValuesCount(String text, Date versionDate, boolean exactSearch, CheckValuesCountHandler checkValuesCountHandler);

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookTreePickerView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
@@ -61,7 +62,10 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
 
     @Override
     public void loadAndSelect(){
-        refbookDataTree.selectFirstItenOnLoad();
+        refbookDataTree.selectFirstItemOnLoad();
+        if (Department.REF_BOOK_ID.equals(getUiHandlers().getRefBookId())) {
+            refbookDataTree.openRootItemOnLoad();
+        }
         load();
     }
 
