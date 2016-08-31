@@ -15,7 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.Hier
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.OTimerEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.OnTimerEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.upload.UploadDialogPresenter;
@@ -47,7 +47,7 @@ import java.util.List;
  * User: avanteev
  */
 public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView, RefBookHierPresenter.MyProxy>
-        implements RefBookHierUIHandlers, SetFormMode.SetFormModeHandler, BackEvent.BackHandler, OTimerEvent.OnTimerHandler {
+        implements RefBookHierUIHandlers, SetFormMode.SetFormModeHandler, BackEvent.BackHandler, OnTimerEvent.OnTimerHandler {
 
     private final DispatchAsync dispatcher;
     private PlaceManager placeManager;
@@ -260,7 +260,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         super.onBind();
         addVisibleHandler(SetFormMode.getType(), this);
         addVisibleHandler(BackEvent.getType(), this);
-        addVisibleHandler(OTimerEvent.getType(), this);
+        addVisibleHandler(OnTimerEvent.getType(), this);
     }
 
     @Override
@@ -541,7 +541,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     }
 
     @Override
-    public void onTimer(OTimerEvent event) {
+    public void onTimer(OnTimerEvent event) {
         onTimer(false);
     }
 

@@ -8,8 +8,8 @@ import com.google.gwt.event.shared.HasHandlers;
  * Обновление информации о блокировках
  * User: lhaziev
  */
-public class OTimerEvent extends
-        GwtEvent<OTimerEvent.OnTimerHandler> {
+public class OnTimerEvent extends
+        GwtEvent<OnTimerEvent.OnTimerHandler> {
 
 
     private static final Type<OnTimerHandler> TYPE = new Type<OnTimerHandler>();
@@ -32,11 +32,11 @@ public class OTimerEvent extends
         /**
          * @param event
          */
-        void onTimer(OTimerEvent event);
+        void onTimer(OnTimerEvent event);
     }
 
     public static void fire(HasHandlers source) {
-        source.fireEvent(new OTimerEvent());
+        source.fireEvent(new OnTimerEvent());
     }
 
 }

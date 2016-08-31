@@ -13,7 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.Chec
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.OTimerEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.OnTimerEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.linear.RefBookLinearPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
@@ -45,7 +45,7 @@ import java.util.List;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
-        SetFormMode.SetFormModeHandler, BackEvent.BackHandler, OTimerEvent.OnTimerHandler {
+        SetFormMode.SetFormModeHandler, BackEvent.BackHandler, OnTimerEvent.OnTimerHandler {
 
     @Override
     public void onSetFormMode(SetFormMode event) {
@@ -323,7 +323,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         super.onBind();
         addVisibleHandler(SetFormMode.getType(), this);
         addVisibleHandler(BackEvent.getType(), this);
-        addVisibleHandler(OTimerEvent.getType(), this);
+        addVisibleHandler(OnTimerEvent.getType(), this);
     }
 
     @Override
@@ -579,7 +579,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     }
 
     @Override
-    public void onTimer(OTimerEvent event) {
+    public void onTimer(OnTimerEvent event) {
         onTimer(false);
     }
 
