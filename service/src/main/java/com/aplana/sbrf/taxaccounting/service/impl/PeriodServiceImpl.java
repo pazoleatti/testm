@@ -464,6 +464,9 @@ public class PeriodServiceImpl implements PeriodService {
         //Проверка форм не относится к этой постановке
         List<Integer> departmentIds = new ArrayList<Integer>();
         DepartmentReportPeriod drp = departmentReportPeriodService.get(drpId);
+        if (drp == null) {
+            throw new ServiceException("Период не найден. Возможно он был уже удалён. Попробуйте обновить страницу.");
+        }
 
         switch (taxType) {
             case PROPERTY:
