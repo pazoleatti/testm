@@ -300,12 +300,24 @@ void generateXML() {
 }
 
 def checkDeclarationFNS() {
-    def declarationFnsId = 4
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-    def declarationData = declarationService.getLast(declarationFnsId, declarationData.departmentId, reportPeriod.id)
-    if (declarationData != null && declarationData.accepted) {
-        def String event = (formDataEvent == FormDataEvent.MOVE_CREATED_TO_ACCEPTED) ? "Принять данную декларацию" : "Отменить принятие данной декларации"
-        throw new ServiceException('%s невозможно, так как в текущем периоде и подразделении принята "Декларация по НДС (раздел 1-7)"', event)
+    def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
+    def found = []
+    [4: '«Декларация по НДС (раздел 1-7)»', 7: '«Декларация по НДС (аудит, раздел 1-7)»', 20: '«Декларация по НДС (короткая, раздел 1-7)»'].each { id, name ->
+        def declarationData17 = declarationService.find(id, declarationData.departmentReportPeriodId)
+        if (declarationData17 != null && declarationData17.size()==1 && declarationData17[0].accepted) {
+            found.add(name)
+        }
+    }
+    if (!found.isEmpty()) {
+        def String event = (formDataEvent == FormDataEvent.MOVE_CREATED_TO_ACCEPTED) ? "Данный экземпляр декларации невозможно принять" : "Отменить принятие данного экземпляра декларации невозможно"
+        throw new ServiceException('%s, т.к. в подразделении «%s» в периоде «%s, %s%s» приняты экземпляры декларации вида: %s!',
+                event,
+                departmentService.get(declarationData.departmentId)?.name,
+                reportPeriod.taxPeriod?.year,
+                reportPeriod.name,
+                corrNumber != 0 ? ' с датой сдачи корректировки ' + departmentReportPeriodService.get(declarationData.departmentReportPeriodId)?.correctionDate?.format('dd.MM.yyyy') + '' : '',
+                found.join(', '))
     }
 }
 
