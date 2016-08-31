@@ -323,6 +323,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         super.onBind();
         addVisibleHandler(SetFormMode.getType(), this);
         addVisibleHandler(BackEvent.getType(), this);
+        addVisibleHandler(OnTimerEvent.getType(), this);
     }
 
     @Override
