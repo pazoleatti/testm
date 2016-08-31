@@ -423,11 +423,11 @@ boolean checkGetRow_2_6(def row) {
         // -	графа 9 «Признак СМП» принимает значение «0» или «3»
     return [0, 3].contains(((BigDecimal) row.sign)?.intValue()) &&
         // -	значение графы 11 «Номер Регламента, в рамках которого предоставлен кредит» не начинается на «1221» или «1948»
-        !(['1221', '1948'].contains(row.law)) &&
+        !(row.law?.startsWith('1221') || row.law?.startsWith('1948')) &&
         // -	не существует такой строки в справочнике «Исключаемые типы кредитов», у которой значение поля «Код» или «Наименование» совпадает со значением графы 12 «Тип кредита»
         !existExcludedCreditType(row.creditType) &&
         // -	значение графы 6 «Организационно-правовая форма» не равна значениям «91» и «98»
-        !(['91', '98'].contains(getRefBookValue(605L, row.opf)?.CODE?.value)) &&
+        !(['91', '98'].contains(getRefBookValue(605L, row.opf)?.CODE?.value?.toString())) &&
         // -	длина строки, указанной в графе 8 «ИНН заемщика», равно 10
         (row.inn?.length() == 10) &&
         // -	значение графы 14 «Дата кредитного договора» больше либо равно дате начала отчетного периода формы-источника «2.6 (Сводный) Отчет о состоянии кредитного портфеля»
@@ -538,8 +538,7 @@ void fillRow(def newRow, def row2_6, def rowChd, def rowMis, def rowAmrlirt) {
     // графа 28 - economyRate          - Целевые источники финансирования. Совокупная процентная ставка с учетом корректировки на показатель Экономии по стоимости ресурсов, % годовых
     // skip
     // графа 29 - groupExclude         - Исключить из группировки (Да / Нет)
-    newRow.groupExclude = (newRow.relatedPerson == getRecYesId() && newRow.offshore == getRecYesId()) ? getRecYesId() : getRecNoId()
-
+    newRow.groupExclude = (newRow.relatedPerson == getRecYesId() || newRow.offshore == getRecYesId()) ? getRecYesId() : getRecNoId()
 }
 
 @Field

@@ -1378,7 +1378,7 @@ end;
 COMMIT;
 ---------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-16552: 1.1. Создать справочники для формы настроек подразделений ЗемНалога
-declare l_task_name varchar2(128) := 'RefBook Block #1 (SBRFACCTAX-16552 - Department settings (L)))';
+declare l_task_name varchar2(128) := 'RefBook Block #16 (SBRFACCTAX-16552 - Department settings (L)))';
 begin
 		
 	INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (700, 'Параметры подразделения по земельному налогу',0,0,0,null);

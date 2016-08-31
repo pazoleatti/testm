@@ -223,7 +223,7 @@ def consolidation() {
     }
     def isFromSummary = isFromSummary(formSources)
     isFromSummary ? consolidationFromSummary(dataRows, formSources) : consolidationFromPrimary(dataRows, formSources)
-    calcExplanation(dataRows, formSources, isFromSummary)
+    calcExplanation(dataRows, formSources)
     addExplanationPrev(dataRows, 'incomeTypeId')
 }
 
@@ -349,7 +349,10 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                             codeMap[codeKey][balanceKey].add(row)
                         }
                         def strangeCodes = []
-                        ['15170', '15180', '15190', '15200', '15210', '15220'].each { knu ->
+                        for (def knu: codeMap.keySet()) {
+                            if (!(knu in ['15170', '15180', '15190', '15200', '15210', '15220'])) {
+                                continue
+                            }
                             // графа 9 = разность сумм граф 6 и 5 строк источника где КНУ и балансовый счет совпадают с текущей строкой
                             def row = getRow(dataRows, knu)
                             def balanceKey = row.incomeBuhSumAccountNumber.replace('.', "")
@@ -398,7 +401,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
     }
 }
 
-void calcExplanation(def dataRows, def formSources, def isFromSummary) {
+void calcExplanation(def dataRows, def formSources) {
     def sourcesTab1 = formSources.findAll { it.formTypeId == formTypeId_Tab1 }
     def rowNumbers = []
     def formDataTab1
@@ -406,7 +409,7 @@ void calcExplanation(def dataRows, def formSources, def isFromSummary) {
         for (sourceTab1 in sourcesTab1) {
             def tempFormData = formDataService.getLast(sourceTab1.formTypeId, sourceTab1.kind, sourceTab1.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             // один принятый(для ТБ) источник
-            if (tempFormData != null && (isFromSummary || tempFormData.state == WorkflowState.ACCEPTED)) {
+            if (tempFormData != null && tempFormData.state == WorkflowState.ACCEPTED) {
                 formDataTab1 = tempFormData
                 break
             }

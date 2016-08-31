@@ -85,7 +85,15 @@ public class VehiclesAverageCost2015Test extends RefBookScriptTestBase {
     //@Test
     public void import2Test() {
         testHelper.setImportFileInputStream(getCustomInputStream("import_2.xml"));
+        testHelper.setFileName("import_2.xml");
         testHelper.execute(FormDataEvent.IMPORT);
+        checkLogger();
+    }
+
+    @Test
+    public void preLoadCheck() {
+        testHelper.setImportFileInputStream(getCustomInputStream("import.xml"));
+        testHelper.execute(FormDataEvent.PRE_CALCULATION_CHECK);
         checkLogger();
     }
 }

@@ -152,12 +152,11 @@ public class DataRowServiceImpl implements DataRowService {
     @Override
     @Transactional(readOnly = false)
     public void deleteSearchResults(Integer sessionId, Long formDataId) {
-        clearSearchResults();
-        /*if (sessionId != null)
+        if (sessionId != null)
             deleteSearchDataResult(sessionId);
         else
             deleteSearchDataResultByFormDataId(formDataId);
-        dataRowDao.deleteSearchResults(sessionId, formDataId);*/
+        dataRowDao.deleteSearchResults(sessionId, formDataId);
     }
 
     @Override
