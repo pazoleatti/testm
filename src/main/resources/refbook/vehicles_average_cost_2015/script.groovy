@@ -2,7 +2,6 @@ package refbook.vehicles_average_cost_2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormLink
-import com.aplana.sbrf.taxaccounting.model.RefBookTableRef
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
@@ -732,8 +731,8 @@ Logger checkUsages(List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
 
     //Проверка использования в справочниках
     List<String> refBooks = refBookService.isVersionUsedInRefBooks(REFBOOK_ID, uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
-            RefBookTableRef.getTablesIdByRefBook(REFBOOK_ID) != null ?
-                    Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(REFBOOK_ID))) : null);
+            RefBook.WithTable.getTablesIdByRefBook(REFBOOK_ID) != null ?
+                    Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(REFBOOK_ID)) : null);
     for (String refBookMsg : refBooks) {
         localLogger.error(refBookMsg);
     }
@@ -746,8 +745,8 @@ Logger checkUsages(List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
 
     //Проверка использования в настройках подразделений
     List<String> configs = refBookService.isVersionUsedInDepartmentConfigs(REFBOOK_ID, uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
-            RefBookTableRef.getTablesIdByRefBook(REFBOOK_ID) != null ?
-                    Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(REFBOOK_ID))) : null);
+            RefBook.WithTable.getTablesIdByRefBook(REFBOOK_ID) != null ?
+                    Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(REFBOOK_ID)) : null);
     for (String configMsg : configs) {
         localLogger.error(configMsg);
     }
