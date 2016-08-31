@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.Chec
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.OnTimerEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.linear.RefBookLinearPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
@@ -44,7 +45,7 @@ import java.util.List;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
-        SetFormMode.SetFormModeHandler, BackEvent.BackHandler {
+        SetFormMode.SetFormModeHandler, BackEvent.BackHandler, OnTimerEvent.OnTimerHandler {
 
     @Override
     public void onSetFormMode(SetFormMode event) {
@@ -169,6 +170,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
             if (han != null)
                 han.removeHandler();
         }
+        stopTimer();
     }
 
     @Override
@@ -573,6 +575,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     protected void stopTimer() {
         timerEnabled = false;
         timer.cancel();
+    }
+
+    @Override
+    public void onTimer(OnTimerEvent event) {
+        onTimer(false);
     }
 
     private void onTimer(final boolean isTimer) {

@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
+/*
 @RunWith(JukitoRunner.class)
 public class RefBookLinearPresenterTest {
     @Inject
@@ -40,3 +40,4 @@ public class RefBookLinearPresenterTest {
         verify(editView, times(0)).getClickAllVersion();
     }
 }
+*/
