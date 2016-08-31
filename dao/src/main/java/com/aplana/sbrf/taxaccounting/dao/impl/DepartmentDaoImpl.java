@@ -165,7 +165,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     department.setRegionId(null);
                 }
                 department.setActive(rs.getBoolean("is_active"));
-                department.setCode(rs.getInt("code"));
+                department.setCode(rs.getLong("code"));
                 department.setGarantUse(rs.getBoolean("garant_use"));
                 return department;
             } catch (EmptyResultDataAccessException e) {

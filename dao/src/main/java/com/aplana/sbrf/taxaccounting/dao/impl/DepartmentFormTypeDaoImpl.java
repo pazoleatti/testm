@@ -480,7 +480,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 department.setRegionId(null);
             }
             department.setActive(rs.getBoolean("department_is_active"));
-            department.setCode(rs.getInt("department_code"));
+            department.setCode(rs.getLong("department_code"));
             department.setGarantUse(rs.getBoolean("department_garant_use"));
 
             // Исполнитель
@@ -511,7 +511,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     performer.setRegionId(null);
                 }
                 performer.setActive(rs.getBoolean("performer_is_active"));
-                performer.setCode(rs.getInt("performer_code"));
+                performer.setCode(rs.getLong("performer_code"));
                 department.setGarantUse(rs.getBoolean("department_garant_use"));
                 fillPerformers(map, result, performer, formTypeKind);
             } else {

@@ -24,7 +24,7 @@ public class Department implements Serializable {
 	private String sbrfCode;
     private Long regionId;
     private boolean isActive;
-    private Integer code;
+    private Long code;
     /* Поле признак указывающее что подразделение используется в модуле гарантий */
     private boolean garantUse;
 
@@ -39,11 +39,11 @@ public class Department implements Serializable {
      */
     private String fullName;
 
-    public Integer getCode() {
+    public Long getCode() {
         return code;
     }
 
-    public void setCode(Integer code) {
+    public void setCode(Long code) {
         this.code = code;
     }
 

@@ -258,7 +258,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                 department.setRegionId(null);
             }
             department.setActive(rs.getBoolean("department_is_active"));
-            department.setCode(rs.getInt("department_code"));
+            department.setCode(rs.getLong("department_code"));
             department.setGarantUse(rs.getBoolean("department_garant_use"));
 
             FormTypeKind formTypeKind = new FormTypeKind();
