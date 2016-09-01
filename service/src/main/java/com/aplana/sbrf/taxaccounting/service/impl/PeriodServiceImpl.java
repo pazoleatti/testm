@@ -176,6 +176,9 @@ public class PeriodServiceImpl implements PeriodService {
 	@Override
 	public void close(TaxType taxType, int departmentReportPeriodId, List<LogEntry> logs, TAUserInfo user) {
         DepartmentReportPeriod drp = departmentReportPeriodService.get(departmentReportPeriodId);
+        if (drp == null) {
+            throw new ServiceException("Период не найден. Возможно он был удалён. Попробуйте обновить страницу.");
+        }
 		List<Integer> departments = departmentService.getAllChildrenIds(drp.getDepartmentId());
 
         int reportPeriodId = drp.getReportPeriod().getId();

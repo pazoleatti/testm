@@ -41,6 +41,8 @@ public class IsPeriodOpenHandler extends AbstractActionHandler<IsPeriodOpenActio
             IsPeriodOpenResult result = new IsPeriodOpenResult();
             result.setPeriodOpen(departmentReportPeriodList.get(0).isActive());
             return result;
+        } else if (departmentReportPeriodList.size() == 0){
+            throw new ServiceException("Период не найден. Возможно он был удалён. Попробуйте обновить страницу.");
         }
         throw new ServiceException("Найдено слишком много периодов");
     }
