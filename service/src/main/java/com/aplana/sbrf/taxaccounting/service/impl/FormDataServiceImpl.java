@@ -872,7 +872,7 @@ public class FormDataServiceImpl implements FormDataService {
                 Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
                 if (attributeId != null) {
                     RefBook refBook = refBookDao.getByAttribute(attributeId);
-                    if (refBookFactory.getLockTaskType(refBook.getId()) == null) {
+                    if (refBookFactory.getLockTaskType(refBook.getId()) != null) {
                         throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
                                 logEntryService.save(logger.getEntries()));
                     }
