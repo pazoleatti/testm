@@ -277,19 +277,23 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
 
         ps.appendQuery("WITH t AS ");
         ps.appendQuery("(SELECT ");
-        ps.appendQuery("CONNECT_BY_ROOT frb.id as \"RECORD_ID\"");
+        if (uniqueRecordId != null) {
+            ps.appendQuery("CONNECT_BY_ROOT frb.id as \"RECORD_ID\"");
 
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            ps.appendQuery(", CONNECT_BY_ROOT frb.");
-            ps.appendQuery(attribute.getAlias());
-            ps.appendQuery(" as \"");
-            ps.appendQuery(attribute.getAlias());
-            ps.appendQuery("\"");
+            for (RefBookAttribute attribute : refBook.getAttributes()) {
+                ps.appendQuery(", CONNECT_BY_ROOT frb.");
+                ps.appendQuery(attribute.getAlias());
+                ps.appendQuery(" as \"");
+                ps.appendQuery(attribute.getAlias());
+                ps.appendQuery("\"");
+            }
+            if (version == null) {
+                ps.appendQuery(", CONNECT_BY_ROOT frb.version AS \"record_version_from\"");
+            }
+            ps.appendQuery(", level as lvl ");
+        } else {
+            ps.appendQuery("frb.id");
         }
-        if (version == null) {
-            ps.appendQuery(", CONNECT_BY_ROOT frb.version AS \"record_version_from\"");
-        }
-        ps.appendQuery(", level as lvl ");
 
         ps.appendQuery(" FROM ");
         ps.appendQuery(tableName);
@@ -315,8 +319,11 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             }
             ps.appendQuery(") ");
         }
-        ps.appendQuery("START WITH frb." + (uniqueRecordId == null ? "PARENT_ID is null" : "PARENT_ID = " + uniqueRecordId));
-        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR frb.ID = frb.PARENT_ID)");
+        if (uniqueRecordId != null) {
+            ps.appendQuery("START WITH frb." + (uniqueRecordId == null ? "PARENT_ID is null" : "PARENT_ID = " + uniqueRecordId));
+            ps.appendQuery(" CONNECT BY NOCYCLE PRIOR frb.ID = frb.PARENT_ID");
+        }
+        ps.appendQuery(")");
 
         ps.appendQuery("SELECT * FROM (");
         ps.appendQuery("SELECT ");
@@ -330,7 +337,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             fields.append(", \"record_version_from\", (SELECT MIN(VERSION) FROM " + tableName + " rbo1 where rbo.record_id=rbo1.record_id and rbo1.VERSION>\"record_version_from\") \"record_version_to\" ");
         }
         ps.appendQuery(fields.toString());
-        ps.appendQuery(",has_child");
+        ps.appendQuery(", " + RefBook.RECORD_HAS_CHILD_ALIAS);
         if (isSupportOver() && sortAttribute != null) {
             ps.appendQuery(",");
             ps.appendQuery(" row_number()");
@@ -347,9 +354,33 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         ps.appendQuery(" FROM \n");
 
         ps.appendQuery("(SELECT DISTINCT ");
-        ps.appendQuery(fields.toString());
-        ps.appendQuery(", CASE WHEN EXISTS(SELECT 1 FROM t WHERE t.record_id = rbo.record_id AND lvl > 1) THEN 1 ELSE 0 END AS \"" + RefBook.RECORD_HAS_CHILD_ALIAS + "\" ");
-        ps.appendQuery(" FROM t rbo) ");
+        if (uniqueRecordId != null) {
+            ps.appendQuery(fields.toString());
+            ps.appendQuery(", CASE WHEN EXISTS(SELECT 1 FROM t WHERE t.record_id = rbo.record_id AND lvl > 1) THEN 1 ELSE 0 END AS \"" + RefBook.RECORD_HAS_CHILD_ALIAS + "\" ");
+            ps.appendQuery(" FROM t rbo) ");
+        } else {
+            ps.appendQuery(" frb.id as \"RECORD_ID\"");
+
+            for (RefBookAttribute attribute : refBook.getAttributes()) {
+                ps.appendQuery(", frb.");
+                ps.appendQuery(attribute.getAlias());
+                ps.appendQuery(" as \"");
+                ps.appendQuery(attribute.getAlias());
+                ps.appendQuery("\"");
+            }
+            if (version == null) {
+                ps.appendQuery(", frb.version AS \"record_version_from\"");
+            }
+            ps.appendQuery(", 1 as " + RefBook.RECORD_HAS_CHILD_ALIAS);
+            ps.appendQuery(" FROM ");
+            ps.appendQuery(tableName);
+            ps.appendQuery(" frb ");
+
+            ps.appendQuery("START WITH frb.id IN (SELECT id FROM t) \n");
+            ps.appendQuery(" CONNECT BY PRIOR PARENT_ID = ID) rbo \n");
+            ps.appendQuery("WHERE ");
+            ps.appendQuery("PARENT_ID is null");
+        }
 
         ps.appendQuery(")");
         if (pagingParams != null) {
