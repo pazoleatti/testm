@@ -26,6 +26,7 @@ public class GetRefBookMultiValuesAction extends UnsecuredActionImpl<GetRefMulti
     private boolean isSortAscending;
     private PickerContext context;
     private boolean exactSearch;
+    private boolean isDistinct;
 
     // идентификаторы которые нужно выделить
     // может быть пустой
@@ -106,6 +107,14 @@ public class GetRefBookMultiValuesAction extends UnsecuredActionImpl<GetRefMulti
 
     public void setExactSearch(boolean exactSearch) {
         this.exactSearch = exactSearch;
+    }
+
+    public boolean isDistinct() {
+        return isDistinct;
+    }
+
+    public void setDistinct(boolean distinct) {
+        isDistinct = distinct;
     }
 
     @Override

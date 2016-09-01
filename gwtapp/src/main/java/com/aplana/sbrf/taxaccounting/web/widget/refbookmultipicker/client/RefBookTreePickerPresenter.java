@@ -188,7 +188,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     @Override
     public void reloadForDate(Date relevanceDate) {
-        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect(), ps.isExactSearch()), false);
+        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect(), ps.isExactSearch(), ps.isDistinct()), false);
     }
 
     @Override
@@ -233,7 +233,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     @Override
     public void find(String searchPattern, boolean exactSearch) {
-        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), searchPattern, ps.getVersionDate(), ps.isMultiSelect(), exactSearch), false);
+        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), searchPattern, ps.getVersionDate(), ps.isMultiSelect(), exactSearch, ps.isDistinct()), false);
     }
 
     @Override

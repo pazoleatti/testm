@@ -108,6 +108,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public void initRefBooks(Date version, String filter, TaxType taxType) {
         taxOrganCode.setMultiSelect(false);
         taxOrganKpp.setMultiSelect(false);
+        taxOrganCode.setDistinct(true);
         if (taxType == TaxType.TRANSPORT) {
             taxOrganCode.setAttributeId(3102L);
             taxOrganKpp.setAttributeId(3103L);

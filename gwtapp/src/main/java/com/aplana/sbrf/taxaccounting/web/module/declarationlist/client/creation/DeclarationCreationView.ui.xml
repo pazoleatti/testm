@@ -69,7 +69,7 @@
                     <g:Label width="140px" wordWrap="false" text="КПП:" height="16px"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <r:RefBookPickerWidget ui:field="taxOrganKpp" title="КПП" width="100%" attributeIdInt="952" isHierarchical="false" multiSelect="false" searchEnabled="true" versionEnabled="false"/>
+                    <r:RefBookPickerWidget ui:field="taxOrganKpp" title="КПП" width="100%" attributeIdInt="952" distinct="true" isHierarchical="false" multiSelect="false" searchEnabled="true" versionEnabled="false"/>
                 </g:cell>
             </g:HorizontalPanel>
 

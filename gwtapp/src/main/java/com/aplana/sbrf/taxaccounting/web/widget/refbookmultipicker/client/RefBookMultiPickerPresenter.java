@@ -108,7 +108,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
 
     @Override
     public void reload(Date relevanceDate) {
-        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect(), ps.isExactSearch()));
+        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect(), ps.isExactSearch(), ps.isDistinct()));
     }
 
     @Override
@@ -177,6 +177,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         action.setSortAttributeIndex(sortColumnIndex);
         action.setPagingParams(pagingParams);
         action.setRefBookAttrId(ps.getRefBookAttrId());
+        action.setDistinct(ps.isDistinct());
         action.setVersion(ps.getVersionDate());
         action.setIdsTofind(idToFinds);
         action.setContext(ps.getPickerContext());
