@@ -87,20 +87,28 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		stringBuilder.append("select ord as row_index ");
 
+		boolean isNumber = false;
+		try {
+			Integer.parseInt(key);
+			isNumber = true;
+		} catch (NumberFormatException ignored) {}
+
 		for(Column column: formData.getFormColumns()) {
 			String colIndex = "\"" + column.getOrder() + "\"";
 			switch (column.getColumnType()) {
 				case NUMBER:
-					if (firstEntry) listColumnIndex.append(",");
-					listColumnIndex.append(colIndex);
-					stringBuilder.append(", ltrim(to_char(to_number(c").append(column.getId()).append("),'99999999999999990");
-					if (((NumericColumn)column).getPrecision()>0) {
-						stringBuilder.append(".");
-						for(int i=0; i<((NumericColumn)column).getPrecision(); i++)
-							stringBuilder.append("0");
+					if (isNumber) {
+						if (firstEntry) listColumnIndex.append(",");
+						listColumnIndex.append(colIndex);
+						stringBuilder.append(", ltrim(to_char(to_number(c").append(column.getId()).append("),'99999999999999990");
+						if (((NumericColumn) column).getPrecision() > 0) {
+							stringBuilder.append(".");
+							for (int i = 0; i < ((NumericColumn) column).getPrecision(); i++)
+								stringBuilder.append("0");
+						}
+						stringBuilder.append("')) as ").append(colIndex);
+						firstEntry = true;
 					}
-					stringBuilder.append("')) as ").append(colIndex);
-					firstEntry = true;
 					break;
 				case STRING:
 					if (firstEntry) listColumnIndex.append(",");
@@ -109,11 +117,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 					firstEntry = true;
 					break;
 				case AUTO:
-					if (firstEntry) listColumnIndex.append(",");
-					listColumnIndex.append(colIndex);
-					stringBuilder.append(", (case when (alias IS NULL OR alias LIKE '%{wan}%') then to_char((row_number() over(PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%{wan}%') THEN 1 ELSE 0 END ORDER BY ord)) + ").append(formData.getPreviousRowNumber()).append(") else null end)")
-							.append(" as ").append(colIndex);
-					firstEntry = true;
+					if (isNumber) {
+						if (firstEntry) listColumnIndex.append(",");
+						listColumnIndex.append(colIndex);
+						stringBuilder.append(", (case when (alias IS NULL OR alias LIKE '%{wan}%') then to_char((row_number() over(PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%{wan}%') THEN 1 ELSE 0 END ORDER BY ord)) + ").append(formData.getPreviousRowNumber()).append(") else null end)")
+								.append(" as ").append(colIndex);
+						firstEntry = true;
+					}
 					break;
 			}
 		}
