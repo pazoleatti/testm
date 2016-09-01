@@ -63,6 +63,7 @@ public class RefBookTestScriptHelper {
     private InputStream importFileInputStream;
     private String fileName;
     private final ScriptTestMockHelper mockHelper;
+    private Integer accountPeriodId; // необходим для БО: форма 101 и 102
 
     /**
      * Сервис работы со скриптами справочников в тестовом режиме
@@ -120,15 +121,22 @@ public class RefBookTestScriptHelper {
         bindings.put("isNewRecords", isNewRecords);
         bindings.put("scriptStatusHolder", scriptStatusHolder);
         bindings.put("logger", logger);
+        bindings.put("accountPeriodId", accountPeriodId);
 
-        if (formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE) {
+        if (formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE ||
+                formDataEvent == FormDataEvent.IMPORT ||
+                formDataEvent == FormDataEvent.PRE_CALCULATION_CHECK) {
             bindings.put("inputStream", importFileInputStream);
-            bindings.put("fileName", "test-file-name.rnu");
+            String name;
+            if (fileName == null || fileName.isEmpty()) {
+                name = "test-file-name." + (formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE ? "rnu" : "xml");
+            } else {
+                name = fileName;
+            }
+            bindings.put("fileName", name);
         }
 
         if (formDataEvent == FormDataEvent.IMPORT || formDataEvent == FormDataEvent.PRE_CALCULATION_CHECK) {
-            bindings.put("inputStream", importFileInputStream);
-            bindings.put("fileName", fileName!=null?fileName:"test-file-name.xml");
             try {
                 bindings.put("dateFrom", new SimpleDateFormat("dd.MM.yyyy").parse("01.01.2016"));
                 bindings.put("dateTo", new SimpleDateFormat("dd.MM.yyyy").parse("01.07.2016"));
@@ -291,5 +299,9 @@ public class RefBookTestScriptHelper {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public void setAccountPeriodId(Integer accountPeriodId) {
+        this.accountPeriodId = accountPeriodId;
     }
 }

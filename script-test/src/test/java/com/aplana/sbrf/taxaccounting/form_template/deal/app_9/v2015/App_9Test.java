@@ -226,41 +226,6 @@ public class App_9Test extends ScriptTestBase {
 
     // Проверка с данными
     @Test
-    public void check1TestOld() throws ParseException {
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getFormTemplate());
-        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
-
-        // Проверка заполнения граф
-        DataRow<Cell> row = formData.createDataRow();
-        row.setIndex(1);
-        dataRows.add(row);
-
-        testHelper.execute(FormDataEvent.CHECK);
-        List<LogEntry> entries = testHelper.getLogger().getEntries();
-        int i = 0;
-
-        Assert.assertEquals("Строка 1: Графа «Полное наименование и ОПФ юридического лица» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки с ценными бумагами» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки купли-продажи иностранной валюты» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки купли-продажи драгоценных металлов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки, отраженные в Журнале взаиморасчетов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма дополнительно начисленных налогооблагаемых доходов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки с ценными бумагами» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки купли-продажи иностранной валюты» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки купли-продажи драгоценных металлов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки, отраженные в Журнале взаиморасчетов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма дополнительно начисленных налогооблагаемых расходов» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Итого, руб.» не заполнена!", entries.get(i++).getMessage());
-
-        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
-        testHelper.getLogger().clear();
-    }
-
-    // Проверка с данными
-    @Test
     public void check1Test() throws ParseException {
         // провайдеры и получения записей для справочников
         mockProviders();
