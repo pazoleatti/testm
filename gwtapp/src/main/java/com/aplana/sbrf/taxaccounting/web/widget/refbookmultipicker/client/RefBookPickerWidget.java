@@ -448,6 +448,10 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         state.setRefBookAttrId((long) attributeId);
     }
 
+    public void setDistinct(boolean isDistinct) {
+        state.setDistinct(isDistinct);
+    }
+
     @Override
     public String getFilter() {
         return state.getFilter();

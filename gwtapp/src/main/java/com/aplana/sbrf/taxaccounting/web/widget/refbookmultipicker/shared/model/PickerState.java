@@ -19,28 +19,31 @@ public class PickerState{
     private List<Long> setIds = new LinkedList<Long>();
     private boolean needReload;
     private boolean exactSearch;
+    private boolean isDistinct;
 
     private PickerContext pickerContext;
 
     public PickerState() {
     }
 
-    public PickerState(Long refBookAttrId, String filter, String searchPattern, Date versionDate, Boolean multiSelect, boolean exactSearch) {
+    public PickerState(Long refBookAttrId, String filter, String searchPattern, Date versionDate, Boolean multiSelect, boolean exactSearch, boolean isDistinct) {
         this.refBookAttrId = refBookAttrId;
         this.filter = filter;
         this.searchPattern = searchPattern;
         this.versionDate = versionDate;
         this.multiSelect = multiSelect;
         this.exactSearch = exactSearch;
+        this.isDistinct = isDistinct;
     }
 
-    public PickerState(Long refBookAttrId, String filter, String searchPattern, Date versionDate, Boolean multiSelect, boolean exactSearch, List<Long> longList) {
+    public PickerState(Long refBookAttrId, String filter, String searchPattern, Date versionDate, Boolean multiSelect, boolean exactSearch, boolean isDistinct, List<Long> longList) {
         this.refBookAttrId = refBookAttrId;
         this.filter = filter;
         this.searchPattern = searchPattern;
         this.versionDate = versionDate;
         this.multiSelect = multiSelect;
         this.exactSearch = exactSearch;
+        this.isDistinct = isDistinct;
         this.setIds = new LinkedList<Long>(longList);
     }
 
@@ -52,6 +55,7 @@ public class PickerState{
         this.multiSelect = newState.isMultiSelect();
         this.pickerContext = newState.getPickerContext();
         this.exactSearch = newState.isExactSearch();
+        this.isDistinct = newState.isDistinct();
 
         this.setIds = newState.getSetIds() != null ? new LinkedList<Long>(newState.getSetIds()) : null;
     }
@@ -110,6 +114,14 @@ public class PickerState{
 
     public void setNeedReload(boolean needReload) {
         this.needReload = needReload;
+    }
+
+    public boolean isDistinct() {
+        return isDistinct;
+    }
+
+    public void setDistinct(boolean distinct) {
+        isDistinct = distinct;
     }
 
     @Override

@@ -29,6 +29,8 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
 
     void setAttributeId(long attributeId);
 
+    void setDistinct(boolean isDistinct);
+
     String getFilter();
 
     void setFilter(String filter);

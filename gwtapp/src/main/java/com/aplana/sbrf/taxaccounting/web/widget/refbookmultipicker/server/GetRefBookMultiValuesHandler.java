@@ -207,7 +207,10 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                 }
             }
             item.setRefBookRecordDereferenceValues(refBookDereferenceValues);
-            items.add(item);
+
+            if (!action.isDistinct() || !items.contains(item)) {
+                items.add(item);
+            }
         }
         return new PagingResult<RefBookItem>(items, refBookPage.getTotalCount());
     }

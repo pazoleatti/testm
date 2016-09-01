@@ -73,4 +73,13 @@ public class RefBookItem implements Serializable {
         sb.append('}');
         return sb.toString();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RefBookItem item = (RefBookItem) o;
+        return this.getDereferenceValue().equals(item.getDereferenceValue());
+    }
 }
