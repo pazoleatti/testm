@@ -713,13 +713,13 @@ boolean isEqualNum(String accNum, def balance) {
 // Возвращает данные из Оборотной Ведомости за период, для которого сформирована текущая форма
 def getIncome101Data(def row) {
     // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
-    return bookerStatementService.getRecords(50L, formData.departmentId, getReportPeriodEndDate(), "ACCOUNT = '${row.accountingRecords}'")
+    return getRecordsByValue(true, row.accountingRecords, ['ACCOUNT'])
 }
 
 // Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
 def getIncome102Data(def row) {
     // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-    return bookerStatementService.getRecords(52L, formData.departmentId, getReportPeriodEndDate(), "OPU_CODE = '${row.accountingRecords}'")
+    return getRecordsByValue(false, row.accountingRecords, ['OPU_CODE'])
 }
 
 void checkTotalSum(totalRow, needRow){
@@ -949,4 +949,67 @@ def preConsolidationCheck(def formSources, checkedFormTypeId) {
         return false
     }
     return true
+}
+
+// мапа хранящая мапы с записями справочника (ключ "id справочника" -> мапа с записями, ключ "значение атрибута" -> список записией)
+// например:
+// [ id 520 : мапа с записям ]
+//      мапа с записями = [ инн 1234567890 : список подходящих записей ]
+@Field
+def recordsMap = [:]
+
+/**
+ * Получить список записей из справочника атрибуты которых равны заданному значению.
+ *
+ * @param isIncome101 признак определяющий справочник true - 50 или false - 52
+ * @param value значение для поиска
+ * @param attributesForSearch список атрибутов справочника по которым искать совпадения
+ */
+def getRecordsByValue(def isIncome101, def value, def attributesForSearch) {
+    def refBookId = (isIncome101 ? 50L : 52L)
+    if (recordsMap[refBookId] == null) {
+        recordsMap[refBookId] = [:]
+        // получить все записи справочника и засунуть в мапу
+        def allRecords = getAllRecords(refBookId)?.values()
+        allRecords.each { record ->
+            attributesForSearch.each { attribute ->
+                def tmpKey = getKeyValue(record[attribute]?.value)
+                if (tmpKey) {
+                    if (recordsMap[refBookId][tmpKey] == null) {
+                        recordsMap[refBookId][tmpKey] = []
+                    }
+                    if (!recordsMap[refBookId][tmpKey].contains(record)) {
+                        recordsMap[refBookId][tmpKey].add(record)
+                    }
+                }
+            }
+        }
+    }
+    def key = getKeyValue(value)
+    return recordsMap[refBookId][key]
+}
+
+def getKeyValue(def value) {
+    return value?.trim()?.toLowerCase()
+}
+
+@Field
+def allRecordsMap = [:]
+
+/**
+ * Получить все записи справочника.
+ *
+ * @param refBookId id справочника
+ * @return мапа с записями справочника (ключ "id записи" -> запись)
+ */
+def getAllRecords(def refBookId) {
+    if (allRecordsMap[refBookId] == null) {
+        def records = bookerStatementService.getRecords(refBookId, formData.departmentId, getReportPeriodEndDate(), null)
+        def map = [:]
+        records.each { record ->
+            map[record?.record_id?.value] = record
+        }
+        allRecordsMap[refBookId] = map
+    }
+    return allRecordsMap[refBookId]
 }
