@@ -3,22 +3,30 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.internal.matchers.Any;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.swing.text.StyledEditorKit;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
@@ -38,13 +46,21 @@ public class PeriodServiceImplTest {
     RefBookDataProvider provider;
     @Autowired
     RefBookFactory rbFactory;
+    @Autowired
+    DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    DepartmentService departmentService;
 
     private static final Long PERIOD_CODE_REFBOOK = 8L;
     private final static String LOCAL_IP = "127.0.0.1";
     private static final int CONTROL_USER_ID = 2;
+    private TAUserInfo userInfo = new TAUserInfo();
 
     @Before
     public void init(){
+        userInfo.setIp(LOCAL_IP);
+        userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL));
+
         /**
          * Налоговые периоды 1,2 - транспорт.
          * 3 - по прибыли
@@ -186,6 +202,18 @@ public class PeriodServiceImplTest {
         when(reportPeriodDao.listByTaxPeriod(2)).thenReturn(reportPeriodListBy2Period);
         when(reportPeriodDao.listByTaxPeriod(3)).thenReturn(reportPeriodListBy3Period);
 
+        /**
+         * Подготовим отчетные периоды подразделений
+         */
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        departmentReportPeriod.setId(1);
+        departmentReportPeriod.setActive(true);
+        departmentReportPeriod.setBalance(false);
+        departmentReportPeriod.setCorrectionDate(null);
+        departmentReportPeriod.setDepartmentId(1);
+        departmentReportPeriod.setReportPeriod(reportPeriod11);
+        when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
+
         RefBook refBook = new RefBook(){{
             setId(PERIOD_CODE_REFBOOK);
             setName("REFBOOK_NAME");
@@ -285,9 +313,6 @@ public class PeriodServiceImplTest {
 
     @Test
     public void open() {
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setIp(LOCAL_IP);
-        userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL));
         periodService.open(2012, 1, TaxType.TRANSPORT, userInfo, 1, new ArrayList<LogEntry>(), false, new Date());
 
         ArgumentCaptor<ReportPeriod> argument = ArgumentCaptor.forClass(ReportPeriod.class);
@@ -302,5 +327,29 @@ public class PeriodServiceImplTest {
     public void isFirstPeriod() {
         Assert.assertTrue(periodService.isFirstPeriod(7));
         Assert.assertFalse(periodService.isFirstPeriod(8));
+    }
+
+    @Test
+    public void close() {
+        when(departmentService.getAllChildrenIds(1)).thenReturn(Arrays.asList(1,2,3));
+
+        periodService.close(TaxType.TRANSPORT, 1, new ArrayList<LogEntry>(), userInfo);
+
+        ArgumentCaptor<Integer> repPeriodId = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Boolean> isActive = ArgumentCaptor.forClass(Boolean.class);
+        verify(departmentReportPeriodService, times(1)).updateActive(anyListOf(Integer.class), repPeriodId.capture(), isActive.capture());
+
+        assertEquals(1, repPeriodId.getValue().intValue());
+        assertEquals(false, isActive.getValue());
+    }
+
+    @Test(expected = ServiceException.class)
+    public void closeNonExistentPeriod() {
+        periodService.close(TaxType.TRANSPORT, 999, new ArrayList<LogEntry>(), userInfo);
+    }
+
+    @Test(expected = ServiceException.class)
+    public void removeNonExistentPeriod() {
+        periodService.removeReportPeriod(TaxType.TRANSPORT, 999, new Logger(), userInfo);
     }
 }
