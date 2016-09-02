@@ -89,7 +89,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		boolean isNumber = false;
 		try {
-			Integer.parseInt(key);
+			Double.parseDouble(key);
 			isNumber = true;
 		} catch (NumberFormatException ignored) {}
 
