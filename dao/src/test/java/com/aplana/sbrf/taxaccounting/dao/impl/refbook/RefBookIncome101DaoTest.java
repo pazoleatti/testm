@@ -126,6 +126,6 @@ public class RefBookIncome101DaoTest {
     
     @Test
     public void testGetSeparatedValue(){
-        Assert.assertTrue(dao.getPeriodNameFromRefBook(1l).isEmpty());
+        Assert.assertEquals("2015.0000000000000000000 Период1", dao.getPeriodNameFromRefBook(1l));
     }
 }

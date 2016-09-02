@@ -65,7 +65,26 @@ insert into ref_book_record(id, record_id, ref_book_id, version, status) values 
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values (2, 2, 107, to_date('01.01.2013', 'DD.MM.YY'), 0);
 
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (1, 1061, null, 1, null, null);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (1, 1062, 'Период1', null, null, null);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (2, 1061, null, 1, null, null);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (2, 1062, 'Период2', null, null, null);
+
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
   (1, 1073, null, null, null, 1);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (1, 1072, null, null, null, 1);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (1, 1071, null, 2015, null, null);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (2, 1073, null, null, null, 2);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (2, 1072, null, null, null, 2);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (2, 1071, null, 2015, null, null);
 
 -- income101 data
 INSERT INTO income_101 (id, account, income_debet_remains, income_credit_remains, debet_rate, credit_rate,
