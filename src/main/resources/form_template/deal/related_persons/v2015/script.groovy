@@ -1800,8 +1800,8 @@ def getJurPersonChangeList(def dateFrom, def dateTo) {
                 item.type = ChangeType.DELETE
                 item.values = values
                 changeList.add(item)
+                equalsResult = equalsResult - 'endData'
             }
-            equalsResult = equalsResult - 'endData'
             if (equalsResult) {
                 // добавить изменение - «Изменение существующего ВЗЛ»
                 def record520 = version

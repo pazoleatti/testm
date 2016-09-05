@@ -778,19 +778,17 @@ void importData() {
         }
         // Пропуск итоговых строк
         def str = rowValues[INDEX_FOR_SKIP]
-        if (str != null && str != '' && str != 'Всего' && str != 'Итого') {
-            sectionIndex = str[0]
-            mapRows.put(sectionIndex, [])
-            isSection7 = (str == rowHead7.fix)
-
-            allValues.remove(rowValues)
-            rowValues.clear()
-            continue
-        } else if (str == 'Всего' || str == 'Итого') {
-            rowIndex++
-            def alias = (str == 'Всего' ? 'total' : getLastRowAlias(sectionIndex))
-            totalRowFromFileMap[alias] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, isSection7)
-
+        if (str != null && str != '') {
+            if (str ==~ /\d\. .*/) { // если начинается с числа, то считаем что новый раздел
+                sectionIndex = str[0]
+                mapRows.put(sectionIndex, [])
+                isSection7 = (str == rowHead7.fix)
+            } else if (str == 'Всего' || str == 'Итого') {
+                rowIndex++
+                def alias = (str == 'Всего' ? 'total' : getLastRowAlias(sectionIndex))
+                totalRowFromFileMap[alias] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, isSection7)
+            }
+            // пропускаем подитоги подразделений.
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -851,10 +849,12 @@ void importData() {
         totalRowTmpMap.keySet().toArray().each { rowAlias ->
             def totalRow = getDataRow(rows, rowAlias)
             def totalRowFromFile = totalRowFromFileMap[rowAlias]
-            def columns = (rowAlias == 'total_7' ? (totalColumns + 'ndsDealSum') : totalColumns)
-            columns.each { alias ->
-                totalRow[alias] = totalRowFromFile[alias]
-                totalRow.setImportIndex(totalRowFromFile.getImportIndex())
+            if (totalRowFromFile) {
+                def columns = (rowAlias == 'total_7' ? (totalColumns + 'ndsDealSum') : totalColumns)
+                columns.each { alias ->
+                    totalRow[alias] = totalRowFromFile[alias]
+                    totalRow.setImportIndex(totalRowFromFile.getImportIndex())
+                }
             }
         }
         // сравнение
