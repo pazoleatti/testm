@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.RefBookAsyncConfigDao;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -28,6 +30,9 @@ import static org.junit.Assert.assertEquals;
 public class RefBookAsyncConfigDaoTest {
     @Autowired
     RefBookAsyncConfigDao refBookAsyncConfigDao;
+
+    @Autowired
+    AsyncTaskTypeDao asyncTaskTypeDao;
 
     @Test
     public void getRecords() {
@@ -59,5 +64,21 @@ public class RefBookAsyncConfigDaoTest {
         assertEquals(1111, result.get(0).get(ConfigurationParamModel.ASYNC_LIMIT).getNumberValue());
         assertEquals(222, result.get(1).get(ConfigurationParamModel.ASYNC_SHORT_LIMIT).getNumberValue());
         assertEquals(2222, result.get(1).get(ConfigurationParamModel.ASYNC_LIMIT).getNumberValue());
+    }
+
+    @Test
+    public void get() {
+        AsyncTaskTypeData asyncTaskTypeData1 = asyncTaskTypeDao.get(1L);
+        AsyncTaskTypeData asyncTaskTypeData2 = asyncTaskTypeDao.get(2L);
+
+        assertEquals(1, asyncTaskTypeData1.getId());
+        assertEquals("task1", asyncTaskTypeData1.getName());
+        assertEquals(100, asyncTaskTypeData1.getShortQueueLimit());
+        assertEquals(1000, asyncTaskTypeData1.getTaskLimit());
+
+        assertEquals(2, asyncTaskTypeData2.getId());
+        assertEquals("task2", asyncTaskTypeData2.getName());
+        assertEquals(200, asyncTaskTypeData2.getShortQueueLimit());
+        assertEquals(2000, asyncTaskTypeData2.getTaskLimit());
     }
 }
