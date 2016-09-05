@@ -245,8 +245,6 @@ public class RefBookVzlHistory implements RefBookDataProvider {
         List<String> lockedObjects = new ArrayList<String>();
         String lockKey = refBookFactory.generateTaskKey(REF_BOOK_ID, ReportType.EDIT_REF_BOOK);
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        LockData lockData = lockService.lock(lockKey, taUserInfo.getUser().getId(),
-                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()));
         Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(REF_BOOK_ID);
         if (lockType == null && lockService.lock(lockKey, taUserInfo.getUser().getId(),
                 String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName())) == null) {
