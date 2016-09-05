@@ -168,7 +168,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (710, 'Параметры подразделения по земельному налогу (таблица)',0,0,0,null);
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (701,'Периоды строительства',1,0,0,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (702,'Категории земли',1,1,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (702,'Категории земли',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (703,'Коды бюджетной классификации земельного налога',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (704,'Коды налоговых льгот земельного налога',1,0,0,null);
 	
@@ -837,8 +837,7 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7012, 701, 'Наименование','NAME',1,2,null,null,1,null,25,1,0,null,null,0,255);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7021, 702, 'Код', 'CODE',1,1,null,null,1,null,10,1,1,null,null,0,12);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7022, 702, 'Наименование категории земли', 'NAME',1,2,null,null,1,null,10,1,0,null,null,0,1000);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7023, 702, 'Код родительской записи', 'PARENT_ID',4,3,702,7021,1,null,10,0,0,null,null,0,null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7022, 702, 'Наименование категории земли', 'NAME',1,2,null,null,1,null,50,1,0,null,null,0,1000);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7031, 703, 'Код', 'CODE',1,1,null,null,1,null,5,1,1,null,null,0,20);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7032, 703, 'Наименование', 'NAME',1,2,null,null,1,null,20,1,0,null,null,0,256);	

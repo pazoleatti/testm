@@ -17,7 +17,7 @@ begin
 		dbms_output.put_line(l_task_name||'[INFO]:'||' changes to the ref_book had already been made');
 	end if;
 	
-	dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	dbms_output.put_line(l_task_name||'[INFO]: SUCCESS');	
 	
 EXCEPTION
 	when OTHERS then
@@ -26,6 +26,33 @@ EXCEPTION
 end;
 /
 COMMIT;
+---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16815: 1.2 ЗемНалог. Изменить справочник "Категории земли"
+declare 
+	l_task_name varchar2(128) := 'RefBook Block #2 (SBRFACCTAX-16815 - Land types(L): hierarchical to lineal)';
+	l_rerun_condition decimal(1) := 0;
+begin
+	select type into l_rerun_condition from ref_book where id=702;
+	
+	if l_rerun_condition = 1 then --still hierarchical
+			delete from ref_book_value where attribute_id = 7023;
+			delete from ref_book_attribute where id = 7023;
+			update ref_book_attribute set width=50 where id=7022;
+			update ref_book set type=0 where id = 702;		
+	else
+		dbms_output.put_line(l_task_name||'[INFO]:'||' changes to the ref_book had already been made');
+	end if;
+	
+	dbms_output.put_line(l_task_name||'[INFO]: SUCCESS');	
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+
 ---------------------------------------------------------------------------
 COMMIT;
 EXIT;
