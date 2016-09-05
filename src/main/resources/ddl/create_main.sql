@@ -280,7 +280,7 @@ create table department (
   sbrf_code   varchar2(255),
   region_id number(18),
   is_active number(1,0) default 1 not null,
-  code number(9,0) not null,
+  code number(15,0) not null,
   garant_use number(1) default 0 not null
 );
 comment on table department is 'Подразделения банка';
