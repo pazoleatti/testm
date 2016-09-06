@@ -346,6 +346,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
         relevanceDateLabel.setVisible(!isVersion&&isVersioned);
         separator.setVisible(!isVersion);
         search.setVisible(!isVersion);
+        exactSearch.setVisible(!isVersion);
         separatorVersion.setVisible(!isVersion&&isVersioned);
         cancelEdit.setVisible(!isVersion);
         printAnchor.setVisible(!isVersion);

@@ -484,29 +484,29 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
 
     @Override
     public void showUploadDialogClicked() {
-        if (!commonEditPresenter.isFormModified()) {
-            if (importScriptStatus) {
+        if (importScriptStatus) {
+            if (!commonEditPresenter.isFormModified()) {
                 uploadDialogPresenter.open(refBookId, isVersioned);
             } else {
-                Dialog.infoMessage(NOT_EXIST_EVENT_MSG + "\"" + refBookName + "\"");
+                commonEditPresenter.checkModified(new CheckModifiedHandler() {
+                    @Override
+                    public void openLoadDialog() {
+                        uploadDialogPresenter.open(refBookId, isVersioned);
+                    }
+
+                    @Override
+                    public String getTitle() {
+                        return "Подтверждение изменений";
+                    }
+
+                    @Override
+                    public String getText() {
+                        return "Выбранная запись была изменена. Сохранить изменения и загрузить файл? \"Да\" - загрузить с сохранением. \"Нет\" - загрузить без сохранения.";
+                    }
+                });
             }
         } else {
-            commonEditPresenter.checkModified(new CheckModifiedHandler() {
-                @Override
-                public void openLoadDialog() {
-                    uploadDialogPresenter.open(refBookId, isVersioned);
-                }
-
-                @Override
-                public String getTitle() {
-                    return "Подтверждение изменений";
-                }
-
-                @Override
-                public String getText() {
-                    return "Выбранная запись была изменена. Сохранить изменения и загрузить файл? \"Да\" - загрузить с сохранением. \"Нет\" - загрузить без сохранения.";
-                }
-            });
+            Dialog.infoMessage(NOT_EXIST_EVENT_MSG + "\"" + refBookName + "\"");
         }
     }
 
