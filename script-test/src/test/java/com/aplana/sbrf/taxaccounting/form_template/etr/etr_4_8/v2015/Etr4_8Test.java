@@ -119,6 +119,7 @@ public class Etr4_8Test extends ScriptTestBase {
                     @Override
                     public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocationOnMock) throws Throwable {
                         Map<String, RefBookValue> valueMap = new HashMap<String, RefBookValue>();
+                        valueMap.put("OPU_CODE", new RefBookValue(RefBookAttributeType.STRING, "26307.02"));
                         valueMap.put("TOTAL_SUM", new RefBookValue(RefBookAttributeType.NUMBER, 2220));
                         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
                         result.add(valueMap);
