@@ -45,6 +45,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private static final byte COL_COLSPAN_IDX = 3;
 	private static final byte COL_ROWSPAN_IDX = 4;
 
+    private static final String FORM_SEARCH_DATA_RESULT = "FORM_SEARCH_DATA_RESULT";
+    private static final String FORM_SEARCH_RESULT = "FORM_SEARCH_RESULT";
+    private static final String FORM_SEARCH_DATA_RESULT_TMP = "FORM_SEARCH_DATA_RESULT_TMP";
+
 	@Autowired
 	private BDUtils bdUtils;
 
@@ -153,10 +157,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		return new Pair<String, Map<String, Object>>(sql, params);
 	}
-
-	private String FORM_SEARCH_DATA_RESULT = "FORM_SEARCH_DATA_RESULT";
-	private String FORM_SEARCH_RESULT = "FORM_SEARCH_RESULT";
-	private String FORM_SEARCH_DATA_RESULT_TMP = "FORM_SEARCH_DATA_RESULT_TMP";
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -320,12 +320,17 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	public void saveSearchDataResult(int id, int sessionId, String query, Map<String, Object> params) {
 		params.put("id", id);
 		params.put("sessionId", sessionId);
-		getNamedParameterJdbcTemplate().update(
-				"INSERT INTO " + FORM_SEARCH_DATA_RESULT + " PARTITION(P" + sessionId + ") (id, session_id, row_index, column_index, raw_value, \"ORD\") " +
-				"SELECT :id, :sessionId, row_index, column_index, raw_value, row_number() over(ORDER BY row_index, column_index) ord FROM (" +
-				"SELECT to_number(row_index) row_index, to_number(column_index) column_index, raw_value FROM (" + query + ")" +
-				" UNION ALL " +
-				"SELECT row_index, column_index, raw_value FROM " + FORM_SEARCH_DATA_RESULT_TMP + ")", params);
+        StringBuilder sql = new StringBuilder(
+                "INSERT INTO " + FORM_SEARCH_DATA_RESULT + " PARTITION(P" + sessionId + ") (id, session_id, row_index, column_index, raw_value, \"ORD\") " +
+                "SELECT :id, :sessionId, row_index, column_index, raw_value, row_number() over(ORDER BY row_index, column_index) ord FROM ("
+        );
+        if (query != null && !query.isEmpty()) {
+            sql.append(
+                    "SELECT to_number(row_index) row_index, to_number(column_index) column_index, raw_value FROM (" + query + ")" +
+                    " UNION ALL ");
+        }
+        sql.append("SELECT row_index, column_index, raw_value FROM " + FORM_SEARCH_DATA_RESULT_TMP + ")");
+		getNamedParameterJdbcTemplate().update(sql.toString(), params);
 	}
 
 	@Override

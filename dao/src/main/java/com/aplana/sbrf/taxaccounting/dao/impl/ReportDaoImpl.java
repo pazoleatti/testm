@@ -223,7 +223,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     public void deleteAudit(int userId, ReportType reportType) {
         try{
             getJdbcTemplate().update("delete from log_system_report where type=? and sec_user_id=?",
-                    userId, reportType.getId());
+                    reportType.getId(), userId);
         } catch (DataAccessException e){
             throw new DaoException(String.format("Не удалось удалить записи ЖА пользователя с идентификатором %d ", userId), e);
         }

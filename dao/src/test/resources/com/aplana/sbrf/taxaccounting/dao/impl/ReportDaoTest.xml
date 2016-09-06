@@ -24,6 +24,7 @@
         <jdbc:script location="classpath:data/BlobData.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationSubreport.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationReport.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/Report.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 
 </beans>

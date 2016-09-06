@@ -1091,36 +1091,33 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     @Override
     public void onOpenSearchDialog() {
         LogCleanEvent.fire(FormDataPresenter.this);
-        if (!modifiedRows.isEmpty()) {
-            PreSearchAction preSearchAction = new PreSearchAction();
-            preSearchAction.setFormData(formData);
-            preSearchAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-            dispatcher.execute(preSearchAction, CallbackUtils.defaultCallback(new AbstractCallback<DataRowResult>() {
-                @Override
-                public void onSuccess(DataRowResult result) {
-                    edited = true;
-                    modifiedRows.clear();
-                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                    getView().updateData();
-                    getView().setSelectedRow(result.getCurrentRow(), true);
-                    formSearchPresenter.open(readOnlyMode, formData.isManual(), absoluteView);
-                    addToPopupSlot(formSearchPresenter);
-                }
+        final int sessionId = Math.abs((int) System.currentTimeMillis());
+        PreSearchAction preSearchAction = new PreSearchAction();
+        preSearchAction.setFormData(formData);
+        preSearchAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
+        preSearchAction.setSessionId(sessionId);
+        dispatcher.execute(preSearchAction, CallbackUtils.defaultCallback(new AbstractCallback<DataRowResult>() {
+            @Override
+            public void onSuccess(DataRowResult result) {
+                edited = true;
+                modifiedRows.clear();
+                LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                getView().updateData();
+                getView().setSelectedRow(result.getCurrentRow(), true);
+                formSearchPresenter.open(readOnlyMode, formData.isManual(), absoluteView, sessionId);
+                addToPopupSlot(formSearchPresenter);
+            }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    if (caught instanceof TaActionException) {
-                        LogAddEvent.fire(FormDataPresenter.this, ((TaActionException) caught).getUuid());
-                    }
-                    modifiedRows.clear();
-                    getView().updateData();
+            @Override
+            public void onFailure(Throwable caught) {
+                if (caught instanceof TaActionException) {
+                    LogAddEvent.fire(FormDataPresenter.this, ((TaActionException) caught).getUuid());
                 }
+                modifiedRows.clear();
+                getView().updateData();
+            }
 
-            }, FormDataPresenter.this));
-        } else {
-            formSearchPresenter.open(readOnlyMode, formData.isManual(), absoluteView);
-            addToPopupSlot(formSearchPresenter);
-        }
+        }, FormDataPresenter.this));
     }
 
     @Override

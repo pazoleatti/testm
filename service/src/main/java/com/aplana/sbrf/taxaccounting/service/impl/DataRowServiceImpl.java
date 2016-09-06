@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,6 +43,9 @@ public class DataRowServiceImpl implements DataRowService {
 
     @Autowired
     FormTemplateService formTemplateService;
+
+    @Autowired
+    TransactionHelper transactionHelper;
 
     public static final String DEFAULT_DATE_FORMAT = "dd.MM.yyyy";
 
@@ -122,6 +127,7 @@ public class DataRowServiceImpl implements DataRowService {
             dataRowDao.saveSearchDataResult(searchId, sessionId, sql.getFirst(), sql.getSecond());
         } else {
             // если нет *обычных*(числовых, строковых, автонумеруемых) граф, то нет смысла проводить поиск
+            dataRowDao.saveSearchDataResult(searchId, sessionId, null, new HashMap<String, Object>());
         }
 
         results = dataRowDao.getSearchResult(sessionId, formDataId, key, range);
@@ -244,5 +250,17 @@ public class DataRowServiceImpl implements DataRowService {
         if (lockData == null || lockData.getUserId() != user.getId()) {
             throw new ServiceException("Объект не заблокирован текущим пользователем");
         }
+    }
+
+    @Override
+    public void createSearchPartition(final int sessionId, final long formDataId) {
+        transactionHelper.executeInNewTransaction(new TransactionLogic<Object>() {
+            @Override
+            public Object execute() {
+                dataRowDao.saveSearchResult(sessionId, formDataId, null);
+                return null;
+            }
+        });
+        prepareSearchDataResult(sessionId);
     }
 }

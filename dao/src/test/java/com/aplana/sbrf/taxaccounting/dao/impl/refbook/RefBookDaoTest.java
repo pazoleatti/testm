@@ -670,6 +670,24 @@ public class RefBookDaoTest {
 		assertEquals(0, result.size());
 	}
 
+    @Test
+    public void testDereferenceOKTMO() {
+        Map<Long, RefBookValue> result;
+        List<Long> recordIds = new ArrayList<Long>();
+        result = refBookDao.dereferenceValues("REF_BOOK_OKTMO", 4L, recordIds);
+        assertTrue(result.isEmpty());
+        recordIds.add(2L);
+        recordIds.add(3L);
+        recordIds.add(5L);
+        recordIds.add(6L);
+        recordIds.add(7L);
+        result = refBookDao.dereferenceValues("REF_BOOK_OKTMO", 4L, recordIds);
+        assertEquals(5, result.size());
+        assertEquals("Ароматненское", result.get(2L).getStringValue());
+        assertEquals("Верхореченское", result.get(3L).getStringValue());
+        assertEquals("Голубинское", result.get(5L).getStringValue());
+    }
+
 	@Test(expected = DaoException.class)
 	public void testDereferenceFail() {
 		List<Long> recordIds = new ArrayList<Long>();

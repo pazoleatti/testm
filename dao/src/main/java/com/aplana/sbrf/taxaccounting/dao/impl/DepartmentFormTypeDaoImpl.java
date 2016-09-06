@@ -677,7 +677,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     public List<Long> getByPerformerId(int performerDepId, List<TaxType> taxTypes, List<FormDataKind> kinds) {
         try {
             return getJdbcTemplate().queryForList(
-                    "select dft.form_type_id from department_form_type dft " +
+                    "select distinct dft.form_type_id from department_form_type dft " +
                             "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = dft.id \n" +
                             "where dftp.performer_dep_id = ? " +
                             (kinds.isEmpty() ? "" : " and dft.kind in " + SqlUtils.transformFormKindsToSqlInStatement(kinds))+

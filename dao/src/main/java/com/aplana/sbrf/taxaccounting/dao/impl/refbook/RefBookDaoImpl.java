@@ -3130,22 +3130,33 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		return mapper.getResult();
 	}
 
+    private static int IN_CLAUSE_LIMIT = 10000;
+
 	@Override
 	public Map<Long, RefBookValue> dereferenceValues(String tableName, Long attributeId, Collection<Long> recordIds) {
 		if (recordIds.isEmpty()) {
 			return new HashMap<Long, RefBookValue>();
 		}
+
+        List<Long> recordList = new ArrayList<Long>(recordIds);
+        Map<Long, RefBookValue> result = new HashMap<Long, RefBookValue>();
 		RefBook refBook = getByAttribute(attributeId);
 		final RefBookAttribute attribute = refBook.getAttribute(attributeId);
-		String sql = String.format(
-				"SELECT id record_id, %s value FROM %s WHERE %s",
-				attribute.getAlias(),
-				tableName,
-				transformToSqlInStatement("id", recordIds));
+        int n =  ((int) Math.floor(recordList.size() / (double) IN_CLAUSE_LIMIT) + 1);
+        for (int i = 0; i < n; i++) {
+            List<Long> ids = new ArrayList<Long>();
+            ids.addAll(recordList.subList(i * IN_CLAUSE_LIMIT, Math.min((i + 1) * IN_CLAUSE_LIMIT, recordList.size())));
+            String sql = String.format(
+                    "SELECT id record_id, %s value FROM %s WHERE %s",
+                    attribute.getAlias(),
+                    tableName,
+                    transformToSqlInStatement("id", ids));
 
-		DereferenceMapper mapper = new DereferenceMapper(attribute);
-		getJdbcTemplate().query(sql, mapper);
-		return mapper.getResult();
+            DereferenceMapper mapper = new DereferenceMapper(attribute);
+            getJdbcTemplate().query(sql, mapper);
+            result.putAll(mapper.getResult());
+        }
+		return result;
 	}
 
     @Override

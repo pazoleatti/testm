@@ -45,7 +45,6 @@ INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES 
 INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES (5, 1, 11, 3);
 INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES (6, 1, 12, 3);
 INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES (7, 1, 21, 3);
-insert into department_form_type_performer (DEPARTMENT_FORM_TYPE_ID, PERFORMER_DEP_ID) values (7, 1);
 
 -- В подразделении 2 есть формы 1 и 2
 INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES (11, 2, 1, 3);
@@ -60,6 +59,14 @@ INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES 
 
 -- В подразделении 6 форма 2
 INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES (24, 6, 2, 2);
+
+insert into department_form_type_performer (DEPARTMENT_FORM_TYPE_ID, PERFORMER_DEP_ID) values (7, 1);
+
+insert into department_form_type_performer (DEPARTMENT_FORM_TYPE_ID, PERFORMER_DEP_ID) values (1, 2);
+insert into department_form_type_performer (DEPARTMENT_FORM_TYPE_ID, PERFORMER_DEP_ID) values (2, 2);
+insert into department_form_type_performer (DEPARTMENT_FORM_TYPE_ID, PERFORMER_DEP_ID) values (5, 2);
+insert into department_form_type_performer (DEPARTMENT_FORM_TYPE_ID, PERFORMER_DEP_ID) values (21, 2);
+insert into department_form_type_performer (DEPARTMENT_FORM_TYPE_ID, PERFORMER_DEP_ID) values (22, 2);
 
 -- Для Формы 1 в подразделении 2 источниками являются формы 1, 2, 3, 4 из подразделения 1  и форма 2 из подразделения 3
 INSERT INTO form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) VALUES (11, 1, date '2013-01-01', date '2014-01-01');

@@ -16,6 +16,7 @@ import java.util.List;
 public class PreSearchAction extends UnsecuredActionImpl<DataRowResult> implements ActionName {
     private List<DataRow<Cell>> modifiedRows;
     private FormData formData;
+    private int sessionId;
 
     public List<DataRow<Cell>> getModifiedRows() {
         return modifiedRows;
@@ -31,6 +32,14 @@ public class PreSearchAction extends UnsecuredActionImpl<DataRowResult> implemen
 
     public void setFormData(FormData formData) {
         this.formData = formData;
+    }
+
+    public int getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(int sessionId) {
+        this.sessionId = sessionId;
     }
 
     @Override
