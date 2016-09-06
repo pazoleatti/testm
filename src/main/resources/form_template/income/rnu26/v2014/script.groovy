@@ -841,7 +841,7 @@ void importData() {
             def key = !rows.isEmpty() ? getKey(rows[-1]) : null
             def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
 
-            // наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
+            // наш ключ - row.getAlias()
             if (totalRowFromFileMap[subTotalRow.getAlias()] == null) {
                 totalRowFromFileMap[subTotalRow.getAlias()] = []
             }
