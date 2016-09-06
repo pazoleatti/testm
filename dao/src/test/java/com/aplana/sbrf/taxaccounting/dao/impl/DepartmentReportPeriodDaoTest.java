@@ -195,9 +195,16 @@ public class DepartmentReportPeriodDaoTest {
     }
 
     @Test
-    public void batchUpdateActiveTest() {
+    public void batchUpdateActiveTest1() {
         departmentReportPeriodDao.updateActive(Arrays.asList(101, 201, 401), 1, true);
         Assert.assertTrue(departmentReportPeriodDao.get(101).isActive());
+    }
+
+    @Test
+    public void batchUpdateActiveTest2() {
+        departmentReportPeriodDao.updateActive(Arrays.asList(101, 201, 401), 1, true, true);
+        Assert.assertTrue(departmentReportPeriodDao.get(101).isActive());
+        Assert.assertTrue(departmentReportPeriodDao.get(101).isBalance());
     }
 
     @Test
@@ -234,6 +241,14 @@ public class DepartmentReportPeriodDaoTest {
     }
 
     @Test
+    public void getFirstTest() {
+        Assert.assertEquals(301, departmentReportPeriodDao.getFirst(1, 20).getId().intValue());
+        Assert.assertEquals(601, departmentReportPeriodDao.getFirst(6, 1).getId().intValue());
+        Assert.assertEquals(101, departmentReportPeriodDao.getFirst(1, 1).getId().intValue());
+        Assert.assertNull(departmentReportPeriodDao.getLast(-1, -1));
+    }
+
+    @Test
     public void getLastTest() {
         Assert.assertEquals(303, departmentReportPeriodDao.getLast(1, 20).getId().intValue());
         Assert.assertEquals(603, departmentReportPeriodDao.getLast(6, 1).getId().intValue());
@@ -247,7 +262,13 @@ public class DepartmentReportPeriodDaoTest {
     }
 
     @Test
-    public void deleteTest() throws ParseException {
+    public void deleteTest1() {
+        departmentReportPeriodDao.delete(102);
+        Assert.assertNull(departmentReportPeriodDao.get(102));
+    }
+
+    @Test
+    public void deleteTest2() {
         departmentReportPeriodDao.delete(Arrays.asList(102));
         Assert.assertNull(departmentReportPeriodDao.get(102));
     }
