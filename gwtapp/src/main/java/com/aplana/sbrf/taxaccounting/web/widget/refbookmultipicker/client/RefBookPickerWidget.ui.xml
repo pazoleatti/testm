@@ -117,7 +117,7 @@
                     <g:HorizontalPanel ui:field="versionPanel" spacing="0" width="100%"
                                        verticalAlignment="middle" horizontalAlignment="right">
                         <g:cell horizontalAlignment="left" width="50%">
-                            <g:CheckBox ui:field="exactSearch" wordWrap="false" text="Искать по точному совпадению" visible="false" enabled="false"/>
+                            <g:CheckBox ui:field="exactSearch" wordWrap="false" text="Искать по точному совпадению" enabled="false"/>
                         </g:cell>
                         <g:cell horizontalAlignment="left" width="50%">
                             <g:CheckBox ui:field="pickAll" wordWrap="false" text="Выделить все" checked="false"/>

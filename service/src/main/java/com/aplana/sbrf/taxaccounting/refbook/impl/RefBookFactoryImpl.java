@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookAuditFieldList;
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.RECORD_PARENT_ID_ALIAS;
 
 /**
  * Реализация фабрики провайдеров данных для справочников
@@ -173,10 +176,15 @@ public class RefBookFactoryImpl implements RefBookFactory {
             return null;
         }
 
-        String q = query.trim().toLowerCase().replaceAll("\'", "\\\\\'");
+        String q = StringUtils.cleanString(query);
+        q = q.toLowerCase().replaceAll("\'", "\\\\\'");
         StringBuilder resultSearch = new StringBuilder();
         RefBook refBook = get(refBookId);
         for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (attribute.getAlias().equals(RECORD_PARENT_ID_ALIAS) || attribute.getAlias().equals("IS_ACTIVE")) {
+                continue;
+            }
+
             if (resultSearch.length() > 0){
                 resultSearch.append(" or ");
             }

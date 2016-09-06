@@ -292,6 +292,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         relevanceDateLabel.setVisible(!isVersion&&isVersioned);
         separator.setVisible(!isVersion);
         search.setVisible(!isVersion);
+        exactSearch.setVisible(!isVersion);
         separator1.setVisible(!isVersion&&isVersioned);
         cancelEdit.setVisible(!isVersion);
         printAnchor.setVisible(!isVersion);
