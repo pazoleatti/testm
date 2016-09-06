@@ -226,8 +226,7 @@ void checkOpuCodes(def department, def date) {
     } else {
         // 4. Проверка наличия значений в ф.102 «Отчет о финансовых результатах» по символам (предрасчетные проверки)
         // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-        def filter = "OPU_CODE = '${opuCodes.join("' OR OPU_CODE = '")}'"
-        def records = bookerStatementService.getRecords(52L, department.id, date, filter)
+        def records = getBookerRecords(department.id, date, opuCodes)
         def recordOpuCodes = records?.collect { it.OPU_CODE.stringValue }?.unique() ?: []
         def missedCodes = opuCodes.findAll { !recordOpuCodes.contains(it) }
         if (!missedCodes.isEmpty()) {
@@ -276,9 +275,8 @@ void preCalcCheck() {
 
 // Возвращает данные из Формы 102 БО за период + флаг корректности
 def get102(def departmentId, def date) {
-    def filter = "OPU_CODE = '${opuMap.values().join("' OR OPU_CODE = '")}'"
     // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-    def records = bookerStatementService.getRecords(52L, departmentId, date, filter)
+    def records = getBookerRecords(departmentId, date, opuMap.values())
     if (records == null || records.isEmpty()) {
         return [[:], false]
     }
@@ -677,4 +675,21 @@ def getNewRowFromXls(def values, def newRow, def colOffset, def fileRowIndex, de
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
     return newRow
+}
+
+@Field
+def bookerRecordsMap = [:]
+
+// заполняет мапу со всеми записями БО для подразделения/периода [ключ : записи БО], потом ищет среди них нужные по ОПУ
+def getBookerRecords(def departmentId, def date, def opuCodes) {
+    def key  = getBookerKey(departmentId, date)
+    if (bookerRecordsMap[key] == null) {
+        bookerRecordsMap.put(key, bookerStatementService.getRecords(52L, departmentId, date, null))
+    }
+    def allRecords = bookerRecordsMap[key]
+    return allRecords.findAll { opuCodes.contains(it.OPU_CODE.stringValue) }
+}
+
+String getBookerKey(def departmentId, def date) {
+    return departmentId + '#' + date?.format('dd.MM.yyyy')
 }

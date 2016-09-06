@@ -209,8 +209,7 @@ void checkOpuCodes(def alias, def date, def opuCodes, def tmpRow) {
     } else {
         // 3. Проверка наличия значений в ф.102 «Отчет о финансовых результатах» по символам (предрасчетные проверки)
         // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-        def filter = "OPU_CODE = '${opuCodes.join("' OR OPU_CODE = '")}'"
-        def records = bookerStatementService.getRecords(52L, formData.departmentId, date, filter)
+        def records = getBookerRecords(formData.departmentId, date, opuCodes)
         def recordOpuCodes = records?.collect { it.OPU_CODE.stringValue }?.unique() ?: []
         def missedCodes = opuCodes.findAll { !recordOpuCodes.contains(it) }
         if (!missedCodes.isEmpty()) {
@@ -310,9 +309,8 @@ def calcBO(def rowSource, def periodId) {
 // Возвращает данные из Формы 102 БО за период + флаг корректности
 def get102Sum(def row, def date) {
     if (opuMap[row.getAlias()] != null) {
-        def opuCodes = opuMap[row.getAlias()].join("' OR OPU_CODE = '")
         // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-        def records = bookerStatementService.getRecords(52L, formData.departmentId, date, "OPU_CODE = '${opuCodes}'")
+        def records = getBookerRecords(formData.departmentId, date, opuMap[row.getAlias()])
         if (records == null || records.isEmpty()) {
             return [0, false]
         }
@@ -533,4 +531,21 @@ def getPeriodNameBO(def date) {
         periodNameBOMap[date] = bookerStatementService.getPeriodValue(date)?.NAME?.value
     }
     return periodNameBOMap[date]
+}
+
+@Field
+def bookerRecordsMap = [:]
+
+// заполняет мапу со всеми записями БО для подразделения/периода [ключ : записи БО], потом ищет среди них нужные по ОПУ
+def getBookerRecords(def departmentId, def date, def opuCodes) {
+    def key  = getBookerKey(departmentId, date)
+    if (bookerRecordsMap[key] == null) {
+        bookerRecordsMap.put(key, bookerStatementService.getRecords(52L, departmentId, date, null))
+    }
+    def allRecords = bookerRecordsMap[key]
+    return allRecords.findAll { opuCodes.contains(it.OPU_CODE.stringValue) }
+}
+
+String getBookerKey(def departmentId, def date) {
+    return departmentId + '#' + date?.format('dd.MM.yyyy')
 }
