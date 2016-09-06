@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.junit.Test;
@@ -98,6 +96,30 @@ public class DepartmentFormTypeDaoImplTest {
 	}
 
     @Test
+    public void getFormAssigned() {
+        List<FormTypeKind> result = departmentFormTypeDao.getFormAssigned(1L, 'T');
+        assertEquals(3, result.size());
+        assertEquals(1, result.get(0).getId().intValue());
+        assertEquals(5, result.get(1).getId().intValue());
+        assertEquals(6, result.get(2).getId().intValue());
+    }
+
+    @Test
+    public void getDeclarationAssigned() {
+        List<FormTypeKind> result = departmentFormTypeDao.getDeclarationAssigned(2L, 'T');
+        assertEquals(1, result.size());
+        assertEquals(1, result.get(0).getId().intValue());
+    }
+
+    @Test
+    public void getByPerformerId() {
+        List<Long> result = departmentFormTypeDao.getByPerformerId(2, Arrays.asList(TaxType.TRANSPORT), Arrays.asList(FormDataKind.SUMMARY));
+        assertEquals(2, result.size());
+        assertEquals(1, result.get(0).intValue());
+        assertEquals(11, result.get(1).intValue());
+    }
+
+    @Test
     public void testGetFormTypeBySource() {
         ArrayList<FormDataKind> formDataKinds = new ArrayList<FormDataKind>(3);
         formDataKinds.add(FormDataKind.ADDITIONAL);
@@ -152,13 +174,30 @@ public class DepartmentFormTypeDaoImplTest {
         assertEquals(3, departmentFormTypeDao.getByListIds(Arrays.asList(1l, 2l, 3l)).size());
     }
 
+    @Test
+    public void deleteIdsTest1(){
+        List<DepartmentFormType> deps= departmentFormTypeDao.getByListIds(Arrays.asList(1L));
+        assertEquals(1, deps.size());
+
+        departmentFormTypeDao.delete(1l);
+
+        deps= departmentFormTypeDao.getByListIds(Arrays.asList(1L));
+        assertEquals(0, deps.size());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void deleteEmptyIdsTest(){
         departmentFormTypeDao.delete(new ArrayList<Long>(0));
     }
 
     @Test
-    public void deleteIdsTest(){
+    public void deleteIdsTest2(){
         departmentFormTypeDao.delete(Arrays.asList(1l));
+    }
+
+    @Test
+    public void savePerformers(){
+        departmentFormTypeDao.savePerformers(6, Arrays.asList(1, 2));
+        departmentFormTypeDao.deletePerformers(6);
     }
 }
