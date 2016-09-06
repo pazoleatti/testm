@@ -50,7 +50,6 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         super(eventBus, view);
         this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
-        generateNewSessionId();
     }
 
     @Override
@@ -64,14 +63,9 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     }
 
     @Override
-    public int generateNewSessionId() {
-        sessionId = Math.abs((int) System.currentTimeMillis());
-        return sessionId;
-    }
-
-    @Override
-    public void open(boolean readOnlyMode, boolean manual, boolean absoluteView) {
+    public void open(boolean readOnlyMode, boolean manual, boolean absoluteView, int sessionId) {
         this.absoluteView = absoluteView;
+        this.sessionId = sessionId;
         String searchKey = getView().getSearchKey();
         if (searchKey == null || searchKey.isEmpty()) {
             getView().setSearchKey(Cookies.getCookie(formDataId.toString()));

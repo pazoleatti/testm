@@ -41,6 +41,7 @@ public class PreSearchHandler extends AbstractActionHandler<PreSearchAction, Dat
             refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
             dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());
         }
+        dataRowService.createSearchPartition(action.getSessionId(), action.getFormData().getId());
         return new DataRowResult();
 	}
 

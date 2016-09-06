@@ -48,6 +48,11 @@ public interface DataRowService {
 
 	List<FormDataSearchResult> searchByKeyInRefColumns(FormData formData, String key, boolean isCaseSensitive, boolean correctionDiff);
 
+    /**
+     * Добавляет инфу о результатах поиска, создает партицию для хранения результатов поиска
+     */
+    void createSearchPartition(int sessionId, long formDataId);
+
 	/**
 	 * Удаление результатов поиска
 	 * @param sessionId сессия в которой выполняется поиск (не обязательный)
