@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -56,6 +53,18 @@ public class DeclarationTypeDaoTest {
 			assertEquals(TaxType.TRANSPORT, dt.getTaxType());
 		}
 	}
+
+    @Test
+    public void save() {
+        DeclarationType type = new DeclarationType();
+        type.setName("testName");
+        type.setTaxType(TaxType.PROPERTY);
+        type.setStatus(VersionedObjectStatus.NORMAL);
+
+        int id = declarationTypeDao.save(type);
+
+        assertEquals("testName", declarationTypeDao.get(id).getName());
+    }
 
     @Test
     public void testGetByFilter(){
