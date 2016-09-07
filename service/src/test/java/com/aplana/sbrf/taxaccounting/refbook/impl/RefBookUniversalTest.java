@@ -266,6 +266,7 @@ public class RefBookUniversalTest {
         provider.createRecordVersion(logger, dateFrom, dateTo, Arrays.asList(refBookRecord));
         verify(refBookDao).createRecordVersion(any(Long.class), eq(dateFrom), eq(VersionedObjectStatus.NORMAL), any(List.class));
         verify(refBookDao, never()).createFakeRecordVersion(any(Long.class), any(Long.class), any(Date.class));
+        verify(refBookDao).checkCrossVersions(any(Long.class), any(Long.class), eq(dateFrom), eq(realDateTo), any(Long.class));
     }
 
     @Test
@@ -283,6 +284,7 @@ public class RefBookUniversalTest {
         provider.createRecordVersion(logger, dateFrom, null, Arrays.asList(refBookRecord));
         verify(refBookDao).createRecordVersion(any(Long.class), eq(dateFrom), eq(VersionedObjectStatus.NORMAL), any(List.class));
         verify(refBookDao, never()).createFakeRecordVersion(any(Long.class), any(Long.class), any(Date.class));
+        verify(refBookDao).checkCrossVersions(any(Long.class), any(Long.class), eq(dateFrom), eq(realDateTo), any(Long.class));
     }
 
     /**************** Обновление версии **************************/

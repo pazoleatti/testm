@@ -250,12 +250,29 @@ public class RefBookUniversal implements RefBookDataProvider {
                 versionFrom = new Date(0L);
             }
 
-            for (RefBookRecord record : records){
-                record.setVersionTo(versionTo);
+            long countIds = 0;
+            for (RefBookRecord record : records) {
+                if (record.getRecordId() == null) {
+                    countIds++;
+                    record.setVersionTo(versionTo);
+                } else {
+                    //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
+                    RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, record.getRecordId(), versionFrom);
+                    if (nextVersion != null) {
+                        Date versionEnd = SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1);
+                        if (versionEnd != null && versionFrom.after(versionEnd)) {
+                            throw new ServiceException("Дата окончания получена некорректно");
+                        }
+                        record.setVersionTo(versionEnd);
+                        dateToChangedForChecks = true;
+                    } else {
+                        record.setVersionTo(versionTo);
+                    }
+                }
             }
 
             //Проверка корректности
-            checkCorrectness(logger, refBook, null, versionFrom, attributes, records, false);
+            checkCorrectness(logger, refBook, null, versionFrom, attributes, records);
 
             if (!refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
                     !refBookId.equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
@@ -284,27 +301,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
             }
 
-            long countIds = 0;
-            for (RefBookRecord record : records) {
-                if (record.getRecordId() == null) {
-                    countIds++;
-                    record.setVersionTo(versionTo);
-                } else {
-                    //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
-                    RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, record.getRecordId(), versionFrom);
-                    if (nextVersion != null) {
-                        Date versionEnd = SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1);
-                        if (versionEnd != null && versionFrom.after(versionEnd)) {
-                            throw new ServiceException("Дата окончания получена некорректно");
-                        }
-                        record.setVersionTo(versionEnd);
-                        dateToChangedForChecks = true;
-                    } else {
-                        record.setVersionTo(versionTo);
-                    }
-                }
-            }
-
             //Создание настоящей и фиктивной версии
             for (RefBookRecord record : records) {
                 if (dateToChangedForChecks) {
@@ -323,7 +319,7 @@ public class RefBookUniversal implements RefBookDataProvider {
      * Проверка корректности
      */
     // TODO использую в скрипте
-    void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records, boolean skipCheckConflict) {
+    void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         //Проверка обязательности заполнения записей справочника
         List<String> errors = RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
         if (!errors.isEmpty()){
@@ -358,17 +354,15 @@ public class RefBookUniversal implements RefBookDataProvider {
                 checkParentConflict(logger, versionFrom, records);
             }
 
-            if (!skipCheckConflict) {
-                for (RefBookRecord record : records) {
-                    //Получаем записи у которых совпали значения уникальных атрибутов
-                    List<Pair<Long, String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, Arrays.asList(record));
-                    if (matchedRecords != null && !matchedRecords.isEmpty()) {
-                        //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
-                        List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, record.getVersionTo());
+            for (RefBookRecord record : records) {
+                //Получаем записи у которых совпали значения уникальных атрибутов
+                List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, Arrays.asList(record));
+                if (matchedRecords != null && !matchedRecords.isEmpty()) {
+                    //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
+                    List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, record.getVersionTo());
 
-                        if (!conflictedIds.isEmpty()) {
-                            throw new ServiceException(String.format(UNIQ_ERROR_MSG, makeAttrNames(matchedRecords, conflictedIds)));
-                        }
+                    if (!conflictedIds.isEmpty()) {
+                        throw new ServiceException(String.format(UNIQ_ERROR_MSG, makeAttrNames(matchedRecords, conflictedIds)));
                     }
                 }
             }
@@ -714,7 +708,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
 
             //Проверка корректности
-            checkCorrectness(logger, refBook, uniqueRecordId, versionFrom, attributes, Arrays.asList(refBookRecord), true);
+            checkCorrectness(logger, refBook, uniqueRecordId, versionFrom, attributes, Arrays.asList(refBookRecord));
 
             if (refBook.isHierarchic()) {
                 RefBookValue oldParent = refBookDao.getValue(uniqueRecordId, refBook.getAttribute(RefBook.RECORD_PARENT_ID_ALIAS).getId());
