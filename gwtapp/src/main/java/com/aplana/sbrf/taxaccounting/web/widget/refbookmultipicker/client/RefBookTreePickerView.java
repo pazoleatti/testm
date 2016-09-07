@@ -468,6 +468,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
                         if (newParentUiTreeItem.isChildLoaded()) {
                             // Чилды были уже загружены, значит нужно перезагрузить, удаляем старые
                             tree.removeChildItems(newParentUiTreeItem);
+                            newParentUiTreeItem.getRefBookTreeItem().setHasChild(true);
                         }
                         trySelectValues(Arrays.asList(pseudoTreeItem));
                         newParentUiTreeItem.setState(true, true);       // и снова открываем, чилды загужаются
