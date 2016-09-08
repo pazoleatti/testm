@@ -741,7 +741,8 @@ public class RefBookUniversal implements RefBookDataProvider {
                     //Проверка пересечения версий
                     //Проверяем следующую версию после даты окочания
                     RefBookRecordVersion oldNextVersion = refBookDao.getNextVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
-                    if (versionTo != null && oldNextVersion != null && (versionTo.equals(oldNextVersion.getVersionStart()) || versionTo.after(oldNextVersion.getVersionStart()))) {
+                    if (versionTo != null && oldNextVersion != null && (versionTo.equals(oldNextVersion.getVersionStart()) || versionTo.after(oldNextVersion.getVersionStart())) ||
+                            versionTo == null && oldNextVersion != null) {
                         //TODO: поведение отличается от поведения при создании записи, там исключения нет, просто изменяется дата окончания на дату начала след. версии
                         throw new ServiceException(CROSS_ERROR_MSG);
                     }
