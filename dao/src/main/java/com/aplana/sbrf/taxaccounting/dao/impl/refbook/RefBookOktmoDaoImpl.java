@@ -937,7 +937,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         refBookClone.addAttribute(RefBook.getVersionFromAttribute());
         refBookClone.addAttribute(RefBook.getVersionToAttribute());
 
-        List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
+        List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBookClone);
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         result.setTotalCount(recordsCount);
         return result;
