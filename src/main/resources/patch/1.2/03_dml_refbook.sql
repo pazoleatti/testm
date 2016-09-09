@@ -117,5 +117,22 @@ end;
 /
 COMMIT;
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-16895: 1.2 ТН. Справочник "Параметры налоговых льгот транспортного налога" в поле "Код" должен отображаться код льготы
+declare 
+	l_task_name varchar2(128) := 'RefBook Block #5 (SBRFACCTAX-16895 - TAX deductions'' params(T))';
+begin	
+	
+	update ref_book_attribute set attribute_id = 15 where id = 19;	
+	dbms_output.put_line(l_task_name||'[INFO]: Success');		
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
