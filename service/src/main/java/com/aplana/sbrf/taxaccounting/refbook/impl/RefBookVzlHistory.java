@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookVzlHistoryDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -308,6 +307,11 @@ public class RefBookVzlHistory implements RefBookDataProvider {
 
     @Override
     public Date getNextVersion(Date version, @NotNull String filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Date getEndVersion(Long recordId, Date versionFrom) {
         throw new UnsupportedOperationException();
     }
 

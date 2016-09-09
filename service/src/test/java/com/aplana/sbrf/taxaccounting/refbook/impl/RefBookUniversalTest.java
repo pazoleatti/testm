@@ -250,41 +250,37 @@ public class RefBookUniversalTest {
         verify(refBookDao).createFakeRecordVersion(any(Long.class), any(Long.class), eq(SimpleDateUtils.addDayToDate(dateTo, 1)));
     }
 
-    @Test
+    @Test(expected = TestException.class)
     public void createRecordVersionTest12() {
-        //Дата окончания указана и изменилась на 28.02.2015
+        //Дата окончания указана, фатальная ошибка из-за пересечения
         Date dateFrom = getDate(1, 1, 2015);
         Date dateTo = getDate(1, 1, 2016);
-        Date realDateTo = getDate(28, 2, 2015);
+        List<CheckCrossVersionsResult> results = new ArrayList<CheckCrossVersionsResult>();
+        results.add(new CheckCrossVersionsResult(1, 1L, new Date(), VersionedObjectStatus.NORMAL, null, null, CrossResult.FATAL_ERROR));
+        when(refBookDao.checkCrossVersions(any(Long.class), any(Long.class), any(Date.class), any(Date.class), any(Long.class))).thenReturn(results);
 
-        RefBookRecordVersion nextVersion = new RefBookRecordVersion();
-        nextVersion.setVersionStart(getDate(1, 3, 2015));
-        nextVersion.setVersionEnd(getDate(1, 3, 2016));
-        nextVersion.setVersionEndFake(true);
-        when(refBookDao.getNextVersion(any(Long.class), any(Long.class), any(Date.class))).thenReturn(nextVersion);
-
-        provider.createRecordVersion(logger, dateFrom, dateTo, Arrays.asList(refBookRecord));
-        verify(refBookDao).createRecordVersion(any(Long.class), eq(dateFrom), eq(VersionedObjectStatus.NORMAL), any(List.class));
-        verify(refBookDao, never()).createFakeRecordVersion(any(Long.class), any(Long.class), any(Date.class));
-        verify(refBookDao).checkCrossVersions(any(Long.class), any(Long.class), eq(dateFrom), eq(realDateTo), any(Long.class));
+        try {
+            provider.createRecordVersion(logger, dateFrom, dateTo, Arrays.asList(refBookRecord));
+        } catch (ServiceException e) {
+            assertTrue(e.getMessage().contains("Обнаружено пересечение указанного срока актуальности с существующей версией!"));
+            throw new TestException();
+        }
     }
 
-    @Test
+    @Test(expected = TestException.class)
     public void createRecordVersionTest13() {
-        //Дата окончания не указана и изменилась на 28.02.2015
+        //Дата окончания не указана, фатальная ошибка из-за пересечения
         Date dateFrom = getDate(1, 1, 2015);
-        Date realDateTo = getDate(28, 2, 2015);
+        List<CheckCrossVersionsResult> results = new ArrayList<CheckCrossVersionsResult>();
+        results.add(new CheckCrossVersionsResult(1, 1L, new Date(), VersionedObjectStatus.NORMAL, null, null, CrossResult.FATAL_ERROR));
+        when(refBookDao.checkCrossVersions(any(Long.class), any(Long.class), any(Date.class), any(Date.class), any(Long.class))).thenReturn(results);
 
-        RefBookRecordVersion nextVersion = new RefBookRecordVersion();
-        nextVersion.setVersionStart(getDate(1, 3, 2015));
-        nextVersion.setVersionEnd(getDate(1, 3, 2016));
-        nextVersion.setVersionEndFake(true);
-        when(refBookDao.getNextVersion(any(Long.class), any(Long.class), any(Date.class))).thenReturn(nextVersion);
-
-        provider.createRecordVersion(logger, dateFrom, null, Arrays.asList(refBookRecord));
-        verify(refBookDao).createRecordVersion(any(Long.class), eq(dateFrom), eq(VersionedObjectStatus.NORMAL), any(List.class));
-        verify(refBookDao, never()).createFakeRecordVersion(any(Long.class), any(Long.class), any(Date.class));
-        verify(refBookDao).checkCrossVersions(any(Long.class), any(Long.class), eq(dateFrom), eq(realDateTo), any(Long.class));
+        try {
+            provider.createRecordVersion(logger, dateFrom, null, Arrays.asList(refBookRecord));
+        } catch (ServiceException e) {
+            assertTrue(e.getMessage().contains("Обнаружено пересечение указанного срока актуальности с существующей версией!"));
+            throw new TestException();
+        }
     }
 
     /**************** Обновление версии **************************/

@@ -54,6 +54,11 @@ public class RefBookUser implements RefBookDataProvider {
     }
 
     @Override
+    public Date getEndVersion(Long recordId, Date versionFrom) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
         return refBookUserDao.getUniqueRecordIds(version, filter);
     }

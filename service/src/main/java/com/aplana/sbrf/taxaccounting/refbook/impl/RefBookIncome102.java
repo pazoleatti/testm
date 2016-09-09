@@ -64,6 +64,11 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
+    public Date getEndVersion(Long recordId, Date versionFrom) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
             return dao.getUniqueRecordIds(filter);
     }

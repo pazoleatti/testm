@@ -46,6 +46,11 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
+    public Date getEndVersion(Long recordId, Date versionFrom) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         List<Date> list = new ArrayList<Date>();
         list.add(new Date(0));

@@ -50,6 +50,11 @@ public class RefBookEmailConfigProvider implements RefBookDataProvider {
     }
 
     @Override
+    public Date getEndVersion(Long recordId, Date versionFrom) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
         throw new UnsupportedOperationException();
     }

@@ -467,11 +467,12 @@ public class RefBookHelperImpl implements RefBookHelper {
         mainConfig.put(departmentAlias, new RefBookValue(RefBookAttributeType.REFERENCE, departmentId));
 
         RefBookRecordVersion recordVersion;
+        Date versionTo = provider.getEndVersion(record.getRecordId(), rp.getCalendarStartDate());
         if (!needEdit) {
             record.setValues(mainConfig);
-            uniqueRecordId = provider.createRecordVersion(logger, rp.getCalendarStartDate(), null, Arrays.asList(record)).get(0);
+            uniqueRecordId = provider.createRecordVersion(logger, rp.getCalendarStartDate(), versionTo, Arrays.asList(record)).get(0);
         } else {
-            provider.updateRecordVersion(logger, uniqueRecordId, rp.getCalendarStartDate(), null, mainConfig);
+            provider.updateRecordVersion(logger, uniqueRecordId, rp.getCalendarStartDate(), versionTo, mainConfig);
         }
         recordVersion = provider.getRecordVersionInfo(uniqueRecordId);
 

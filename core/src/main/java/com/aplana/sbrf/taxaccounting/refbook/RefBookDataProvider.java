@@ -72,6 +72,14 @@ public interface RefBookDataProvider {
     Date getNextVersion(Date version, @NotNull String filter);
 
     /**
+     * Возвращает версию следующей за указанной датой
+     * @param recordId идентификатор записи
+     * @param versionFrom дата актуальности
+     * @return дата начала следующей версии
+     */
+    Date getEndVersion(Long recordId, Date versionFrom);
+
+    /**
      * Получает уникальные идентификаторы записей, удовлетворяющих условиям фильтра
      * @param version дата актуальности
      * @param filter условие фильтрации строк. Может быть не задано

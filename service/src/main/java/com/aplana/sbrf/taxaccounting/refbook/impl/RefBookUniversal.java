@@ -16,10 +16,8 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -254,21 +252,8 @@ public class RefBookUniversal implements RefBookDataProvider {
             for (RefBookRecord record : records) {
                 if (record.getRecordId() == null) {
                     countIds++;
-                    record.setVersionTo(versionTo);
-                } else {
-                    //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
-                    RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, record.getRecordId(), versionFrom);
-                    if (nextVersion != null) {
-                        Date versionEnd = SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1);
-                        if (versionEnd != null && versionFrom.after(versionEnd)) {
-                            throw new ServiceException("Дата окончания получена некорректно");
-                        }
-                        record.setVersionTo(versionEnd);
-                        dateToChangedForChecks = true;
-                    } else {
-                        record.setVersionTo(versionTo);
-                    }
                 }
+                record.setVersionTo(versionTo);
             }
 
             //Проверка корректности
@@ -690,22 +675,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             RefBookRecord refBookRecord = new RefBookRecord();
             refBookRecord.setUniqueRecordId(uniqueRecordId);
             refBookRecord.setValues(records);
-            if (versionTo == null) {
-                //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
-                RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, recordId, versionFrom);
-                if (nextVersion != null) {
-                    Date versionEnd = SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1);
-                    assert versionFrom != null;
-                    if (versionEnd != null && versionFrom.after(versionEnd)) {
-                        throw new ServiceException("Дата окончания получена некорректно");
-                    }
-                    refBookRecord.setVersionTo(versionEnd);
-                } else {
-                    refBookRecord.setVersionTo(versionTo);
-                }
-            } else {
-                refBookRecord.setVersionTo(versionTo);
-            }
+            refBookRecord.setVersionTo(versionTo);
 
             //Проверка корректности
             checkCorrectness(logger, refBook, uniqueRecordId, versionFrom, attributes, Arrays.asList(refBookRecord));
@@ -1306,5 +1276,19 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public Date getNextVersion(Date version, String filter) {
         return refBookDao.getNextVersion(refBookId, version, filter);
+    }
+
+    @Override
+    public Date getEndVersion(Long recordId, Date versionFrom) {
+        //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
+        RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, recordId, versionFrom);
+        if (nextVersion != null) {
+            Date versionEnd = SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1);
+            if (versionEnd != null && versionFrom.after(versionEnd)) {
+                throw new ServiceException("Дата окончания получена некорректно");
+            }
+            return versionEnd;
+        }
+        return null;
     }
 }
