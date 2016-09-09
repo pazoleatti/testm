@@ -60,6 +60,7 @@ public class EditFormPresenterTest {
                 .when(dispatchAsync)
                 .execute((AddRefBookRowVersionAction) any(), (AsyncCallback<AddRefBookRowVersionResult>) any());
 
+        when(myView.checkCorrectnessForSave()).thenReturn(true);
         presenter.onSaveClicked(false);
         verify(dispatchAsync, atLeastOnce()).execute((AddRefBookRowVersionAction) any(), (AsyncCallback<AddRefBookRowVersionResult>) any());
         //verify(myView).updateMode(FormMode.EDIT);
@@ -88,6 +89,7 @@ public class EditFormPresenterTest {
                 .when(dispatchAsync)
                 .execute((AddRefBookRowVersionAction) any(), (AsyncCallback<AddRefBookRowVersionResult>) any());
 
+        when(myView.checkCorrectnessForSave()).thenReturn(true);
         presenter.onSaveClicked(false);
         verify(dispatchAsync, atLeastOnce()).execute((AddRefBookRowVersionAction) any(), (AsyncCallback<AddRefBookRowVersionResult>) any());
         verify(myView, never()).updateMode(FormMode.EDIT);
@@ -102,8 +104,9 @@ public class EditFormPresenterTest {
      */
     @Test
     @SuppressWarnings("unchecked")
-    public void testOnSaveClickedWhenUpdate(DispatchAsync dispatchAsync) {
+    public void testOnSaveClickedWhenUpdate(DispatchAsync dispatchAsync, EditFormPresenter.MyView myView) {
         presenter.init(REF_BOOK_SOME_ID, false);
+        when(myView.checkCorrectnessForSave()).thenReturn(true);
         presenter.onSaveClicked(false);
         verify(dispatchAsync, atLeastOnce()).execute((SaveRefBookRowVersionAction) any(), (AsyncCallback<SaveRefBookRowVersionResult>) any());
     }
