@@ -125,35 +125,6 @@ public class Summary_2_1Test extends ScriptTestBase {
         checkLogger();
     }
 
-    @Test
-    public void addDelRowTest() {
-        int expected = testHelper.getDataRowHelper().getAll().size() + 1;
-
-        // Добавление
-        testHelper.execute(FormDataEvent.ADD_ROW);
-        // ошибок быть не должно
-        checkLogger();
-        // Количество строк должно увеличиться на 1
-        Assert.assertEquals("Add new row", expected, testHelper.getDataRowHelper().getAll().size());
-
-        // Удаление
-        DataRow<Cell> addDataRow = null;
-        for (DataRow<Cell> dataRow : testHelper.getDataRowHelper().getAll()) {
-            if (dataRow.getAlias() == null) {
-                addDataRow = dataRow;
-                break;
-            }
-        }
-        // Количество строк должно уменьшиться на 1
-        Assert.assertNotNull(addDataRow);
-        testHelper.setCurrentDataRow(addDataRow);
-        testHelper.execute(FormDataEvent.DELETE_ROW);
-        expected--;
-        // Количество строк должно уменьшиться на 1
-        Assert.assertEquals("Delete row", expected, testHelper.getDataRowHelper().getAll().size());
-        checkLogger();
-    }
-
     private void setDefaultValues(DataRow<Cell> row) {
         int index = row.getIndex();
         long refbookRecordId = 1L;

@@ -71,19 +71,6 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE:
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
-    case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
-        break
-    case FormDataEvent.DELETE_ROW:
-        if (currentDataRow != null) {
-            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
-        }
-        break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -94,7 +81,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
-        calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
         break
@@ -148,100 +134,6 @@ void logicCheck() {
 /** Группировка по графе 11, 19, 20. */
 String getKey(def row) {
     return (row.taxpayerInn?.trim() + "#" + row.number?.trim() + "#" + row.issuanceDate?.format('dd.MM.yyyy')).toLowerCase()
-}
-
-@Field
-def providerCache = [:]
-
-/**
- * Получить список записей из справочника "Участники ТЦО" (id = 520) по ИНН или КИО.
- *
- * @param value значение для поиска по совпадению
- */
-def getRecords520(def value) {
-    return getRecordsByValue(520L, value, ['INN', 'KIO'])
-}
-
-// мапа хранящая мапы с записями справочника (ключ "id справочника" -> мапа с записями, ключ "значение атрибута" -> список записией)
-// например:
-// [ id 520 : мапа с записям ]
-//      мапа с записями = [ инн 1234567890 : список подходящих записей ]
-@Field
-def recordsMap = [:]
-
-/**
- * Получить список записей из справочника атрибуты которых равны заданному значению.
- *
- * @param refBookId id справочника
- * @param value значение для поиска
- * @param attributesForSearch список атрибутов справочника по которым искать совпадения
- */
-def getRecordsByValue(def refBookId, def value, def attributesForSearch) {
-    if (recordsMap[refBookId] == null) {
-        recordsMap[refBookId] = [:]
-        // получить все записи справочника и засунуть в мапу
-        def allRecords = getAllRecords(refBookId)?.values()
-        allRecords.each { record ->
-            attributesForSearch.each { attribute ->
-                def tmpKey = getKeyValue(record[attribute]?.value)
-                if (tmpKey) {
-                    if (recordsMap[refBookId][tmpKey] == null) {
-                        recordsMap[refBookId][tmpKey] = []
-                    }
-                    if (!recordsMap[refBookId][tmpKey].contains(record)) {
-                        recordsMap[refBookId][tmpKey].add(record)
-                    }
-                }
-            }
-        }
-    }
-    def key = getKeyValue(value)
-    return recordsMap[refBookId][key]
-}
-
-def getKeyValue(def value) {
-    return value?.trim()?.toLowerCase()
-}
-
-@Field
-def allRecordsMap = [:]
-
-/**
- * Получить все записи справочника.
- *
- * @param refBookId id справочника
- * @return мапа с записями справочника (ключ "id записи" -> запись)
- */
-def getAllRecords(def refBookId) {
-    if (allRecordsMap[refBookId] == null) {
-        def date = getReportPeriodEndDate()
-        def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
-        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
-        allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
-    }
-    return allRecordsMap[refBookId]
-}
-
-void calc() {
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
-    for (def row : dataRows) {
-        row.taxpayerName = calc10(row)
-    }
-}
-
-@Field
-def exclusiveInns = ['9999999999', '9999999998']
-
-// аналогичный алгоритм в форме 2.6 (Ежемесячный) метод calc7()
-def calc10(def row) {
-    def tmp = row.taxpayerName
-    if (!exclusiveInns.contains(row.taxpayerInn)) {
-        def records = getRecords520(row.taxpayerInn)
-        if (records != null && records.size() == 1) {
-            tmp = records.get(0)?.NAME?.value
-        }
-    }
-    return tmp
 }
 
 void consolidation() {
