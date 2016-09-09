@@ -674,6 +674,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
             RefBookRecord refBookRecord = new RefBookRecord();
             refBookRecord.setUniqueRecordId(uniqueRecordId);
+            refBookRecord.setRecordId(refBookDao.getRecordId(uniqueRecordId));
             refBookRecord.setValues(records);
             refBookRecord.setVersionTo(versionTo);
 
