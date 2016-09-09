@@ -92,6 +92,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         void setVersionMode(boolean versionMode);
         void showVersioned(boolean versioned);
         void lock(boolean isLock);
+        boolean checkCorrectnessForSave();
     }
 
 
@@ -349,6 +350,9 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
 
     @Override
     public void onSaveClicked(boolean isEditButtonClicked) {
+        if (!getView().checkCorrectnessForSave()) {
+            return;
+        }
         final String title = (currentUniqueRecordId != null ? "Запись не сохранена" : "Запись не создана");
         try {
             LogCleanEvent.fire(AbstractEditPresenter.this);

@@ -80,6 +80,11 @@ public class DepartmentEditView extends AbstractEditView implements DepartmentEd
         initWidget(uiBinder.createAndBindUi(this));
     }
 
+    @Override
+    public boolean checkCorrectnessForSave() {
+        return true;
+    }
+
     @UiHandler("save")
     void saveButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {

@@ -201,13 +201,18 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
         }
     }
 
+    @Override
+    public boolean checkCorrectnessForSave() {
+        if (versioned && versionStart.getValue() == null) {
+            Dialog.warningMessage(getUiHandlers().getTitle(), "Не указана дата начала актуальности");
+            return false;
+        }
+        return true;
+    }
+
     @UiHandler("save")
 	void saveButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-            if (versioned && versionStart.getValue() == null) {
-                Dialog.warningMessage(getUiHandlers().getTitle(), "Не указана дата начала актуальности");
-                return;
-            }
 			getUiHandlers().onSaveClicked(false);
 		}
 	}
