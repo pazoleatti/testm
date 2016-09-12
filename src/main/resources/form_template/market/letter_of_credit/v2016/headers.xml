@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="productType" colSpan="1" rowSpan="1" value="Вид Продукта (гарантия / непокрытый аккредитив)"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименование контрагента и ОПФ"/>
+        <cell alias="country" colSpan="1" rowSpan="1" value="Страна регистрации (местоположения)"/>
+        <cell alias="innKio" colSpan="1" rowSpan="1" value="ИНН / КИО клиента"/>
+        <cell alias="docDate" colSpan="1" rowSpan="1" value="Дата подписания Договора / ГенСоглашения"/>
+        <cell alias="docNumber" colSpan="1" rowSpan="1" value="Номер обязательства (референс)"/>
+        <cell alias="creditDate" colSpan="1" rowSpan="1" value="Дата выдачи обязательства"/>
+        <cell alias="creditEndDate" colSpan="1" rowSpan="1" value="Дата окончания действия обязательства"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" value="Сумма обязательства (в ед. валюты)"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="Валюта выдачи"/>
+        <cell alias="period" colSpan="1" rowSpan="1" value="Срок в днях"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1" value="Кредитный рейтинг контрагента / класс кредитоспособности"/>
+        <cell alias="faceValueStr" colSpan="1" rowSpan="1" value="Номинальная ставка (в % или в абсолютном выражении) платы за выданный аккредитив / гарантию"/>
+        <cell alias="faceValueNum" colSpan="1" rowSpan="1" value="Номинальная ставка (в % годовых или в абсолютном выражении) плата за подтверждение платежа по аккредитиву"/>
+        <cell alias="paymentSchedule" colSpan="1" rowSpan="1" value="График платежей по уплате комиссий"/>
+        <cell alias="sign" colSpan="1" rowSpan="1" value="Наличие обеспечения / поручительства (Да / Нет)"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="productType" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="country" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="innKio" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="docDate" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="docNumber" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="creditDate" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="creditEndDate" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="period" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1" value="13"/>
+        <cell alias="faceValueStr" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="faceValueNum" colSpan="1" rowSpan="1" value="15"/>
+        <cell alias="paymentSchedule" colSpan="1" rowSpan="1" value="16"/>
+        <cell alias="sign" colSpan="1" rowSpan="1" value="17"/>
+    </row>
+</rows>

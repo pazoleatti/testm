@@ -1210,7 +1210,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 long cellCountSource = 0;
                 DeclarationData declarationData = get(declarationDataId, userInfo);
                 for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, null, userInfo, new Logger())){
-                    System.out.println("getFormDataId: "+relation.getFormDataId());
                     if (relation.isCreated() && relation.getState() == WorkflowState.ACCEPTED) {
                         FormData formData = formDataDao.getWithoutRows(relation.getFormDataId());
                         int rowCountSource = dataRowDao.getRowCount(formData);
