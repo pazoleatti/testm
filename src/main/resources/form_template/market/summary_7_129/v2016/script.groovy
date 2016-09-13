@@ -31,11 +31,6 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE:
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -46,7 +41,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
-        calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
         break
@@ -57,14 +51,6 @@ switch (formDataEvent) {
 
 @Field
 def allColumns = ['rowNum', 'depName', 'inn', 'debtorName', 'docNum', 'docDate', 'creditDate', 'productId', 'clientId']
-
-// Редактируемые атрибуты
-@Field
-def editableColumns = ['depName', 'inn', 'debtorName', 'docNum', 'docDate', 'creditDate', 'productId', 'clientId']
-
-// Автозаполняемые атрибуты
-@Field
-def autoFillColumns = []
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -90,23 +76,6 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-@Field
-def refBookCache = [:]
-
-def getRefBookValue(def long refBookId, def recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = true) {
-    if (value == null || value.trim().isEmpty()) {
-        return null
-    }
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
-}
-
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (row in dataRows) {
@@ -117,103 +86,6 @@ void logicCheck() {
 
 String getKey(def row) {
     return (row.inn?.trim() + "#" + row.docNum?.trim() + "#" + row.docDate?.format('dd.MM.yyyy')).toLowerCase()
-}
-
-@Field
-def recordCache = [:]
-
-@Field
-def providerCache = [:]
-
-/**
- * Получить список записей из справочника "Участники ТЦО" (id = 520) по ИНН или КИО.
- *
- * @param value значение для поиска по совпадению
- */
-def getRecords520(def value) {
-    return getRecordsByValue(520L, value, ['INN', 'KIO'])
-}
-
-// мапа хранящая мапы с записями справочника (ключ "id справочника" -> мапа с записями, ключ "значение атрибута" -> список записией)
-// например:
-// [ id 520 : мапа с записям ]
-//      мапа с записями = [ инн 1234567890 : список подходящих записей ]
-@Field
-def recordsMap = [:]
-
-/**
- * Получить список записей из справочника атрибуты которых равны заданному значению.
- *
- * @param refBookId id справочника
- * @param value значение для поиска
- * @param attributesForSearch список атрибутов справочника по которым искать совпадения
- */
-def getRecordsByValue(def refBookId, def value, def attributesForSearch) {
-    if (recordsMap[refBookId] == null) {
-        recordsMap[refBookId] = [:]
-        // получить все записи справочника и засунуть в мапу
-        def allRecords = getAllRecords(refBookId)?.values()
-        allRecords.each { record ->
-            attributesForSearch.each { attribute ->
-                def tmpKey = getKeyValue(record[attribute]?.value)
-                if (tmpKey) {
-                    if (recordsMap[refBookId][tmpKey] == null) {
-                        recordsMap[refBookId][tmpKey] = []
-                    }
-                    if (!recordsMap[refBookId][tmpKey].contains(record)) {
-                        recordsMap[refBookId][tmpKey].add(record)
-                    }
-                }
-            }
-        }
-    }
-    def key = getKeyValue(value)
-    return recordsMap[refBookId][key]
-}
-
-def getKeyValue(def value) {
-    return value?.trim()?.toLowerCase()
-}
-
-@Field
-def allRecordsMap = [:]
-
-/**
- * Получить все записи справочника.
- *
- * @param refBookId id справочника
- * @return мапа с записями справочника (ключ "id записи" -> запись)
- */
-def getAllRecords(def refBookId) {
-    if (allRecordsMap[refBookId] == null) {
-        def date = getReportPeriodEndDate()
-        def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
-        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
-        allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
-    }
-    return allRecordsMap[refBookId]
-}
-
-void calc() {
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
-    for (row in dataRows) {
-        // графа 4
-        row.debtorName = calc4(row)
-    }
-}
-
-@Field
-def exclusiveInns = ['9999999999', '9999999998']
-
-def calc4(def row) {
-    def tmp = row.debtorName
-    if (!exclusiveInns.contains(row.inn)) {
-        def records = getRecords520(row.inn)
-        if (records != null && records.size() == 1) {
-            tmp = records.get(0).NAME.value
-        }
-    }
-    return tmp
 }
 
 // Сортировка групп и строк
