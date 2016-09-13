@@ -31,11 +31,6 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE:
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
@@ -174,92 +169,6 @@ def recordCache = [:]
 @Field
 def providerCache = [:]
 
-void calc() {
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
-    for (row in dataRows) {
-        // графа 2
-        row.nameBank = calc2(row)
-        // графа 3
-        row.country = calc3(row)
-    }
-}
-
-def calc2(def row) {
-    return calc2or3(row, 'nameBank', 'NAME')
-}
-
-def calc3(def row) {
-    return calc2or3(row, 'country', 'COUNTRY_CODE')
-}
-
-def calc2or3(def row, def calcAlias, def recordAlias) {
-    def tmp = row[calcAlias]
-    def records = getRecords520(row.swift)
-    if (records != null && records.size() == 1) {
-        tmp = records.get(0)[recordAlias].value
-    }
-    return tmp
-}
-
-/**
- * Получить список записей из справочника "Участники ТЦО" (id = 520) по ИНН или КИО.
- *
- * @param value значение для поиска по совпадению
- */
-def getRecords520(def value) {
-    return getRecordsByValue(520L, value, ['SWIFT', 'INN', 'KIO'])
-}
-
-/**
- * Получить список записей из справочника "ОК 025-2001 (Общероссийский классификатор стран мира)" (id = 10) по краткому и полному наименованию.
- *
- * @param value значение для поиска по совпадению
- */
-def getRecords10(def value) {
-    return getRecordsByValue(10L, value, ['FULLNAME', 'NAME'])
-}
-
-// мапа хранящая мапы с записями справочника (ключ "id справочника" -> мапа с записями, ключ "значение атрибута" -> список записией)
-// например:
-// [ id 520 : мапа с записям ]
-//      мапа с записями = [ инн 1234567890 : список подходящих записей ]
-@Field
-def recordsMap = [:]
-
-/**
- * Получить список записей из справочника атрибуты которых равны заданному значению.
- *
- * @param refBookId id справочника
- * @param value значение для поиска
- * @param attributesForSearch список атрибутов справочника по которым искать совпадения
- */
-def getRecordsByValue(def refBookId, def value, def attributesForSearch) {
-    if (recordsMap[refBookId] == null) {
-        recordsMap[refBookId] = [:]
-        // получить все записи справочника и засунуть в мапу
-        def allRecords = getAllRecords(refBookId)?.values()
-        allRecords.each { record ->
-            attributesForSearch.each { attribute ->
-                def tmpKey = getKeyValue(record[attribute]?.value)
-                if (tmpKey) {
-                    if (recordsMap[refBookId][tmpKey] == null) {
-                        recordsMap[refBookId][tmpKey] = []
-                    }
-                    if (!recordsMap[refBookId][tmpKey].contains(record)) {
-                        recordsMap[refBookId][tmpKey].add(record)
-                    }
-                }
-            }
-        }
-    }
-    def key = getKeyValue(value)
-    return recordsMap[refBookId][key]
-}
-
-def getKeyValue(def value) {
-    return value?.trim()?.toLowerCase()
-}
-
 void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 12
@@ -354,19 +263,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
     def required = true
-    def countryString
-    def countryColIndex
-    def debtorColIndex
 
     // графа 2
     def colIndex = 1
     newRow.nameBank = values[colIndex]
-    debtorColIndex = colIndex + colOffset
     // графа 3
     colIndex++
-    // заполняем в fillDebtorInfo
-    countryString = values[colIndex]
-    countryColIndex = colIndex + colOffset
+    newRow.country = getRecordIdImport(10, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     // графа 4
     colIndex++
     newRow.swift = values[colIndex]
@@ -395,8 +298,6 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     newRow.payRate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
 
-    // Заполнение общей информации о заемщике при загрузке из Excel
-    fillDebtorInfo(newRow, 'swift', 'nameBank', 'country', countryString, rowIndex, debtorColIndex, countryColIndex)
     return newRow
 }
 
@@ -410,101 +311,6 @@ def getNewRow() {
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return newRow
-}
-
-@Field
-def allRecordsMap = [:]
-
-/**
- * Получить все записи справочника.
- *
- * @param refBookId id справочника
- * @return мапа с записями справочника (ключ "id записи" -> запись)
- */
-def getAllRecords(def refBookId) {
-    if (allRecordsMap[refBookId] == null) {
-        def date = getReportPeriodEndDate()
-        def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
-        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
-        allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
-    }
-    return allRecordsMap[refBookId]
-}
-
-void fillDebtorInfo(def newRow, def numberAlias, def debtorAlias, def countryAlias, def countryString, def rowIndex, def debtorIndex, def countryIndex) {
-    String debtorNumber = newRow[numberAlias]
-    String fileDebtorName = newRow[debtorAlias]
-    if (debtorNumber == null || debtorNumber.isEmpty()) {
-        return
-    }
-    // ищем по ИНН, КИО и SWIFT
-    def debtorRecords = getRecords520(debtorNumber)
-    if (debtorRecords?.size() > 1) {
-        logger.warn("Строка %s: Найдено больше одной записи соотвествующей данным ИНН/КИО/SWIFT = %s", rowIndex, debtorNumber)
-        return
-    }
-
-    // определение страны
-    def countryRecord = null
-    if (countryString) {
-        def countryId = (debtorRecords?.size() == 1 ? debtorRecords?.get(0)?.COUNTRY_CODE?.value : null)
-        if (countryId) {
-            // страна определена по записи справочнкиа "Участники ТЦО"
-            countryRecord = getAllRecords(10L).get(countryId)
-            def shortName = countryRecord?.NAME?.value
-            def fullName = countryRecord?.FULLNAME?.value
-            if (!shortName.equalsIgnoreCase(countryString) && !fullName.equalsIgnoreCase(countryString)) {
-                logger.warn("Строка %s, столбец %s содержит значение «%s», которое не соответствует справочному значению «%s», «%s» " +
-                        "графы «Страна регистрации (местоположения заемщика)», найденному для «%s»!",
-                        rowIndex, getXLSColumnName(countryIndex), countryString, shortName, fullName, newRow[debtorAlias])
-            }
-        } else {
-            // поиск страны по справочнику стран мира
-            def countryRecords = getRecords10(countryString)
-            if (countryRecords != null && !countryRecords.isEmpty() && countryRecords.size() == 1) {
-                countryRecord = countryRecords[0]
-            }
-            if (countryRecord == null) {
-                logger.warn("Строка %s, столбец %s: Страна с названием «%s» не найдена в справочнике «ОК 025-2001 (Общероссийский классификатор стран мира)»",
-                        rowIndex, getXLSColumnName(countryIndex), countryString)
-            }
-        }
-        newRow[countryAlias] = countryRecord?.record_id?.value
-    }
-
-    if (debtorRecords == null || debtorRecords?.size() == 0) { // если в справочнике ТЦО записей нет
-        return
-    }
-    // else
-    // запись в справочнике ТЦО найдена, то берем данные из нее
-    newRow[debtorAlias] = debtorRecords[0].NAME?.stringValue ?: ""
-    newRow[countryAlias] = debtorRecords[0].COUNTRY_CODE?.value
-    if (! newRow[debtorAlias].equalsIgnoreCase(fileDebtorName)) {
-        def refBook = refBookFactory.get(520)
-        def inn = debtorRecords[0].INN?.stringValue
-        def kio = debtorRecords[0].KIO?.stringValue
-        def swift = debtorRecords[0].SWIFT?.stringValue
-        def attrCode
-        if (debtorNumber.equalsIgnoreCase(inn)) {
-            attrCode = 'INN'
-        } else if (debtorNumber.equalsIgnoreCase(kio)) {
-            attrCode = 'KIO'
-        } else if (debtorNumber.equalsIgnoreCase(swift)) {
-            attrCode = 'SWIFT'
-        }
-        def refBookAttrName = refBook.getAttribute(attrCode).name
-        if (fileDebtorName) {
-            logger.warn("Строка %s, столбец %s: На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
-                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
-                    "В файле указано другое наименование заемщика - «%s»!",
-                    rowIndex, getXLSColumnName(debtorIndex), newRow[debtorAlias], refBookAttrName, newRow[numberAlias], fileDebtorName)
-        } else {
-            logger.warn("Строка %s, столбец %s: На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
-                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
-                    "Наименование заемщика в файле не заполнено!",
-                    rowIndex, getXLSColumnName(debtorIndex), newRow[debtorAlias], refBookAttrName, newRow[numberAlias])
-        }
-    }
 }
 
 // Сортировка групп и строк

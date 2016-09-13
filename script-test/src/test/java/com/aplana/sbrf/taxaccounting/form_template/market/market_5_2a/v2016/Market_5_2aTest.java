@@ -141,7 +141,7 @@ public class Market_5_2aTest extends ScriptTestBase {
         row.getCell("expireDate").setValue(sdf.parse("03.01.2014"), null);
         dataRows.add(row);
 
-        testHelper.execute(FormDataEvent.CALCULATE);
+        testHelper.execute(FormDataEvent.CHECK);
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
@@ -151,8 +151,8 @@ public class Market_5_2aTest extends ScriptTestBase {
 
         // для успешного прохождения всех ЛП:
         dataRows.remove(1);
-        testHelper.execute(FormDataEvent.CALCULATE);
-        Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
+        testHelper.execute(FormDataEvent.CHECK);
+        checkLogger();
     }
 
     // Расчет пустой
