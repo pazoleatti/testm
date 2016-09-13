@@ -118,33 +118,6 @@ public class AmrlirtTest extends ScriptTestBase {
     }
 
     @Test
-    public void calc1Test() {
-        // для справочника 520
-        RefBookUniversal provider = mock(RefBookUniversal.class);
-        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(520L), anyMap())).thenReturn(provider);
-        List<Long> ids = Arrays.asList(1L, 2L, 3L);
-        when(provider.getUniqueRecordIds(any(Date.class), (String) eq(null))).thenReturn(ids);
-        when(provider.getRecordData(eq(ids))).thenReturn(testHelper.getRefBookAllRecords(520L));
-
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getFormTemplate());
-        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
-        // строка
-        DataRow<Cell> row = formData.createDataRow();
-        row.setIndex(1);
-        dataRows.add(row);
-        setDefaultValue(row);
-
-        testHelper.execute(FormDataEvent.CALCULATE);
-
-        String value2 = (String) row.getCell("name").getValue();
-        String expected = "name";
-        Assert.assertEquals(expected, value2);
-
-        checkLogger();
-    }
-
-    @Test
     public void chec1kTest() {
         FormData formData = getFormData();
         formData.initFormTemplateParams(testHelper.getFormTemplate());

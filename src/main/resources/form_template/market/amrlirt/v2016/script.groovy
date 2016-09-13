@@ -24,11 +24,6 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE:
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
@@ -137,73 +132,6 @@ def recordCache = [:]
 @Field
 def providerCache = [:]
 
-/**
- * Получить список записей из справочника "Участники ТЦО" (id = 520) по ИНН или КИО.
- *
- * @param value значение для поиска по совпадению
- */
-def getRecords520(def value) {
-    return getRecordsByValue(520L, value, ['INN', 'KIO'])
-}
-
-// мапа хранящая мапы с записями справочника (ключ "id справочника" -> мапа с записями, ключ "значение атрибута" -> список записией)
-// например:
-// [ id 520 : мапа с записям ]
-//      мапа с записями = [ инн 1234567890 : список подходящих записей ]
-@Field
-def recordsMap = [:]
-
-/**
- * Получить список записей из справочника атрибуты которых равны заданному значению.
- *
- * @param refBookId id справочника
- * @param value значение для поиска
- * @param attributesForSearch список атрибутов справочника по которым искать совпадения
- */
-def getRecordsByValue(def refBookId, def value, def attributesForSearch) {
-    if (recordsMap[refBookId] == null) {
-        recordsMap[refBookId] = [:]
-        // получить все записи справочника и засунуть в мапу
-        def allRecords = getAllRecords(refBookId)?.values()
-        allRecords.each { record ->
-            attributesForSearch.each { attribute ->
-                def tmpKey = getKeyValue(record[attribute]?.value)
-                if (tmpKey) {
-                    if (recordsMap[refBookId][tmpKey] == null) {
-                        recordsMap[refBookId][tmpKey] = []
-                    }
-                    if (!recordsMap[refBookId][tmpKey].contains(record)) {
-                        recordsMap[refBookId][tmpKey].add(record)
-                    }
-                }
-            }
-        }
-    }
-    def key = getKeyValue(value)
-    return recordsMap[refBookId][key]
-}
-
-def getKeyValue(def value) {
-    return value?.trim()?.toLowerCase()
-}
-
-void calc() {
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
-    for (def row : dataRows) {
-        // графа 2
-        row.name = calc2(row)
-    }
-}
-
-def calc2(def row) {
-    def tmp = row.name
-    def records = getRecords520(row.inn)
-    if (records?.size() == 1) {
-        tmp = records.get(0).NAME.value
-    }
-    return tmp
-}
-
 void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 5
@@ -294,24 +222,17 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     def newRow = getNewRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
-    def debtorColIndex
     def colIndex = -1
 
     // графа 1..4
     ['crmId', 'name', 'inn', 'code'].each { alias ->
         colIndex++
         newRow[alias] = values[colIndex]
-        if (alias == 'name') {
-            debtorColIndex = colIndex + colOffset
-        }
     }
 
     // графа 5
     colIndex++
     newRow.lgd = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-
-    // Заполнение общей информации о заемщике при загрузке из Excel
-    fillDebtorInfo(newRow, 'inn', 'name', rowIndex, debtorColIndex)
 
     return newRow
 }
@@ -326,66 +247,4 @@ def getNewRow() {
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return newRow
-}
-
-@Field
-def allRecordsMap = [:]
-
-/**
- * Получить все записи справочника.
- *
- * @param refBookId id справочника
- * @return мапа с записями справочника (ключ "id записи" -> запись)
- */
-def getAllRecords(def refBookId) {
-    if (allRecordsMap[refBookId] == null) {
-        def date = getReportPeriodEndDate()
-        def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
-        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
-        allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
-    }
-    return allRecordsMap[refBookId]
-}
-
-void fillDebtorInfo(def newRow, def numberAlias, def debtorAlias, def rowIndex, def debtorIndex) {
-    String debtorNumber = newRow[numberAlias]
-    String fileDebtorName = newRow[debtorAlias]
-    if (debtorNumber == null || debtorNumber.isEmpty()) {
-        return
-    }
-    // ищем по ИНН и КИО
-    def debtorRecords = getRecords520(debtorNumber)
-    if (debtorRecords?.size() > 1) {
-        logger.warn("Строка %s: Найдено больше одной записи соотвествующей данным ИНН/КИО = %s", rowIndex, debtorNumber)
-        return
-    }
-    if (debtorRecords == null || debtorRecords.size() == 0) { // если в справочнике ТЦО записей нет
-        return
-    }
-    // else
-    // запись в справочнике ТЦО найдена, то берем данные из нее
-    newRow.put(debtorAlias, debtorRecords[0].NAME?.stringValue ?: "")
-    if (! newRow[debtorAlias].equalsIgnoreCase(fileDebtorName)) {
-        def refBook = refBookFactory.get(520)
-        def inn = debtorRecords[0].INN?.stringValue
-        def kio = debtorRecords[0].KIO?.stringValue
-        def attrCode
-        if (debtorNumber.equalsIgnoreCase(inn)) {
-            attrCode = 'INN'
-        } else if (debtorNumber.equalsIgnoreCase(kio)) {
-            attrCode = 'KIO'
-        }
-        def refBookAttrName = refBook.getAttribute(attrCode).name
-        if (fileDebtorName) {
-            logger.warn("Строка %s, столбец %s: На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
-                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
-                    "В файле указано другое наименование заемщика - «%s»!",
-                    rowIndex, getXLSColumnName(debtorIndex), newRow[debtorAlias], refBookAttrName, newRow[numberAlias], fileDebtorName)
-        } else {
-            logger.warn("Строка %s, столбец %s: На форме графы с общей информацией о заемщике заполнены данными записи справочника «Участники ТЦО», " +
-                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». " +
-                    "Наименование заемщика в файле не заполнено!",
-                    rowIndex, getXLSColumnName(debtorIndex), newRow[debtorAlias], refBookAttrName, newRow[numberAlias])
-        }
-    }
 }
