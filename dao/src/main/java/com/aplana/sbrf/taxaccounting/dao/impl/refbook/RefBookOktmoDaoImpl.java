@@ -277,6 +277,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
 
         ps.appendQuery("WITH t AS ");
         ps.appendQuery("(SELECT ");
+        // использую два запроса для случаев uniqueRecordId равен null и не равен null (из-за разницы во времени выполнения)
         if (uniqueRecordId != null) {
             ps.appendQuery("CONNECT_BY_ROOT frb.id as \"RECORD_ID\"");
 
@@ -325,8 +326,8 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         }
         ps.appendQuery(")");
 
-        ps.appendQuery("SELECT * FROM (");
-        ps.appendQuery("SELECT ");
+        ps.appendQuery(", res AS ");
+        ps.appendQuery("(SELECT DISTINCT ");
         StringBuilder fields = new StringBuilder();
         fields.append("record_id");
         for (RefBookAttribute attribute : refBook.getAttributes()) {
@@ -336,28 +337,10 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         if (version == null) {
             fields.append(", \"record_version_from\", (SELECT MIN(VERSION) FROM " + tableName + " rbo1 where rbo.record_id=rbo1.record_id and rbo1.VERSION>\"record_version_from\") \"record_version_to\" ");
         }
-        ps.appendQuery(fields.toString());
-        ps.appendQuery(", " + RefBook.RECORD_HAS_CHILD_ALIAS);
-        if (isSupportOver() && sortAttribute != null) {
-            ps.appendQuery(",");
-            ps.appendQuery(" row_number()");
-            // Надо делать сортировку
-            ps.appendQuery(" over (order by ");
-            ps.appendQuery(sortAttribute.getAlias());
-            ps.appendQuery(isSortAscending ? " ASC" : " DESC");
-            ps.appendQuery(")");
-            ps.appendQuery(" as row_number_over\n");
-        } else {
-            // База тестовая и не поддерживает row_number() значит сортировка работать не будет
-            ps.appendQuery(", rownum row_number_over\n");
-        }
-        ps.appendQuery(" FROM \n");
-
-        ps.appendQuery("(SELECT DISTINCT ");
         if (uniqueRecordId != null) {
             ps.appendQuery(fields.toString());
             ps.appendQuery(", CASE WHEN EXISTS(SELECT 1 FROM t WHERE t.record_id = rbo.record_id AND lvl > 1) THEN 1 ELSE 0 END AS \"" + RefBook.RECORD_HAS_CHILD_ALIAS + "\" ");
-            ps.appendQuery(" FROM t rbo) ");
+            ps.appendQuery(" FROM t rbo ");
         } else {
             ps.appendQuery(" frb.id as \"RECORD_ID\"");
 
@@ -371,18 +354,43 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             if (version == null) {
                 ps.appendQuery(", frb.version AS \"record_version_from\"");
             }
-            ps.appendQuery(", 1 as " + RefBook.RECORD_HAS_CHILD_ALIAS);
             ps.appendQuery(" FROM ");
             ps.appendQuery(tableName);
             ps.appendQuery(" frb ");
 
             ps.appendQuery("START WITH frb.id IN (SELECT id FROM t) \n");
-            ps.appendQuery(" CONNECT BY PRIOR PARENT_ID = ID) rbo \n");
+            ps.appendQuery(" CONNECT BY PRIOR PARENT_ID = ID\n");
+        }
+        ps.appendQuery(")");
+
+        ps.appendQuery("SELECT * FROM (");
+        ps.appendQuery("SELECT ");
+        ps.appendQuery(fields.toString());
+        if (uniqueRecordId != null) {
+            ps.appendQuery(", " + RefBook.RECORD_HAS_CHILD_ALIAS);
+        } else {
+            ps.appendQuery(", CASE WHEN EXISTS(SELECT 1 FROM res res1 WHERE res.record_id = res1.parent_id) THEN 1 ELSE 0 END as " + RefBook.RECORD_HAS_CHILD_ALIAS);
+        }
+        if (isSupportOver() && sortAttribute != null) {
+            ps.appendQuery(",");
+            ps.appendQuery(" row_number()");
+            // Надо делать сортировку
+            ps.appendQuery(" over (order by ");
+            ps.appendQuery(sortAttribute.getAlias());
+            ps.appendQuery(isSortAscending ? " ASC" : " DESC");
+            ps.appendQuery(")");
+            ps.appendQuery(" as row_number_over\n");
+        } else {
+            // База тестовая и не поддерживает row_number() значит сортировка работать не будет
+            ps.appendQuery(", rownum row_number_over\n");
+        }
+        ps.appendQuery(" FROM res\n");
+        if (uniqueRecordId == null) {
             ps.appendQuery("WHERE ");
             ps.appendQuery("PARENT_ID is null");
         }
-
         ps.appendQuery(")");
+
         if (pagingParams != null) {
             ps.appendQuery(" WHERE row_number_over BETWEEN ? AND ?");
             ps.addParam(pagingParams.getStartIndex());

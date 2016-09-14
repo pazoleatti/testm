@@ -49,7 +49,7 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
         versionStart.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                if (versionEnd.getValue() != null && event.getValue().after(versionEnd.getValue())) {
+                if (versionEnd.getValue() != null && event.getValue() != null && event.getValue().after(versionEnd.getValue())) {
                     Dialog.errorMessage("Неправильно указан диапазон дат!");
                     save.setEnabled(false);
                     cancel.setEnabled(false);
