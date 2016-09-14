@@ -306,6 +306,8 @@ alter table log_system_report add constraint log_system_report_fk_sec_user forei
 alter table log_system_report add constraint log_system_report_chk_type check (type in (0, 1));
 alter table log_system_report add constraint log_system_report_unq_sec_user unique(sec_user_id);
 
+alter table form_search_result add constraint form_search_result_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
+
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);

@@ -43,6 +43,11 @@ drop table form_data_consolidation;
 drop table declaration_data_consolidation;
 drop table form_data_ref_book;
 
+drop sequence seq_form_search_result;
+drop form_search_result;
+drop form_search_data_result_tmp;
+drop form_search_data_result;
+
 begin
  for x in (select * from user_tables where regexp_like (table_name, '^FORM_DATA_[0-9]+$')) loop
      execute immediate 'DROP TABLE '||x.table_name;

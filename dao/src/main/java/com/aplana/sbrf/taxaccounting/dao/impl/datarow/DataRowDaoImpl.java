@@ -281,7 +281,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	private int addSearchResult(int sessionId, long formDataId, String key) {
-		Integer id = generateId("SEQ_SEARCH_FORM", Integer.class);
+		Integer id = generateId("seq_form_search_result", Integer.class);
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("session_id", sessionId);
 		params.put("form_data_id", formDataId);

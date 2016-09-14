@@ -265,11 +265,6 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     }
 
     @Override
-    public void updatePageSize() {
-        searchResultTable.setPageSize(pager.getPageSize());
-    }
-
-    @Override
     public void updateData() {
         searchResultTable.setVisibleRangeAndClearData(searchResultTable.getVisibleRange(), true);
     }

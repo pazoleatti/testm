@@ -1060,15 +1060,24 @@ comment on column ref_book_vzl_history.state is 'Код состояния';
 
 create sequence seq_ref_book_vzl_history start with 1;
 --------------------------------------------------------------------------------------------------------
-CREATE TABLE FORM_SEARCH_RESULT
-(
-  "ID"           NUMBER(9, 0),
-  "SESSION_ID"   NUMBER(10, 0),
-  "FORM_DATA_ID" NUMBER(18, 0),
-  "DATE"         DATE,
-  "KEY"          VARCHAR2(4000 BYTE),
-  PRIMARY KEY ("ID")
-);
+create table form_search_result
+  (
+    "ID"           number(9,0) primary key,
+    "SESSION_ID"   number(10,0),
+    "FORM_DATA_ID" number(18,0),
+    "DATE"         date,
+    "KEY"          varchar2(4000 byte),
+    "ROWS_COUNT"   number(9,0)
+  );
+
+comment on column form_search_result."ID" is 'Идентификатор результата поиска';
+comment on column form_search_result."SESSION_ID" is 'Идентификатор сессии в которой выполнялся поиск';
+comment on column form_search_result."FORM_DATA_ID" is 'Идентификатор формы в которой выполнялся поиск';
+comment on column form_search_result."DATE" is 'Дата выполнения поиска';
+comment on column form_search_result."KEY" is 'Строка поиска';
+
+create sequence seq_form_search_result start with 1;
+--------------------------------------------------------------------------------------------------------
 CREATE TABLE FORM_SEARCH_DATA_RESULT
 (	"ID" NUMBER(9,0),
   "SESSION_ID" NUMBER(9,0),
@@ -1079,10 +1088,18 @@ CREATE TABLE FORM_SEARCH_DATA_RESULT
   CONSTRAINT FK_FORM_SEARCH_RESULT_ID FOREIGN KEY ("ID")
   REFERENCES FORM_SEARCH_RESULT ("ID") ON DELETE CASCADE
 );
-CREATE GLOBAL TEMPORARY TABLE FORM_SEARCH_DATA_RESULT_TMP
-(	"ROW_INDEX" NUMBER(9,0),
-   "COLUMN_INDEX" NUMBER(9,0),
-   "RAW_VALUE" VARCHAR2(4000 BYTE)
-) ON COMMIT DELETE ROWS ;
-CREATE SEQUENCE SEQ_SEARCH_FORM;
+
+comment on column form_search_data_result."ID" is 'Идентификатор результата поиска';
+comment on column form_search_data_result."SESSION_ID" is 'Идентификатор сессии в которой выполнялся поиск';
+comment on column form_search_data_result."ROW_INDEX" is 'Номер строки в форме';
+comment on column form_search_data_result."COLUMN_INDEX" is 'Номер столбца в форме';
+comment on column form_search_data_result."RAW_VALUE" is 'Значение в ячейке формы';
+comment on column form_search_data_result."ORD" is 'Порядковый номер';
+--------------------------------------------------------------------------------------------------------
+create global temporary table form_search_data_result_tmp
+  (
+    "ROW_INDEX"     number(9,0),
+    "COLUMN_INDEX"  number(9,0),
+    "RAW_VALUE"     varchar2(4000 byte)
+  ) on commit delete rows ;
 --------------------------------------------------------------------------------------------------------

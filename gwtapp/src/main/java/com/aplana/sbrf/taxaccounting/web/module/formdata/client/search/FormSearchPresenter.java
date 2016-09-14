@@ -27,7 +27,6 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         void setManual(boolean manual);
         void setTableData(int start, List<FormDataSearchResult> resultList, int size);
         void updateData();
-        void updatePageSize();
         void updateData(int pageNumber);
         void clearTableData();
         void clearSearchInput();
