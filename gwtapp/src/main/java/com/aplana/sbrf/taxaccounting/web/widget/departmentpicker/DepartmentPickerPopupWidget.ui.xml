@@ -128,7 +128,7 @@
                     <g:HorizontalPanel spacing="0" width="100%" addStyleNames="{modal.datePanel}"
                                        verticalAlignment="middle" horizontalAlignment="right">
                         <g:cell horizontalAlignment="left" width="50%">
-                            <g:CheckBox ui:field="exactSearch" wordWrap="false" text="Искать по точному совпадению" enabled="false"/>
+                            <g:CheckBox ui:field="exactSearch" wordWrap="false" text="Искать по точному совпадению"/>
                         </g:cell>
                         <g:cell horizontalAlignment="right" width="50%">
                             <g:CheckBox ui:field="showDisabled" wordWrap="false" text="Отображать *недействующие подразделения" />
