@@ -389,4 +389,8 @@ public class DataRowDaoImplTest extends Assert {
         assertEquals("new value", rows.get(1).getCell("stringColumn").getStringValue());
     }
 
+    @Test
+    public void saveSearchResult() {
+        dataRowDao.saveSearchResult(1, 329, "key");
+    }
 }

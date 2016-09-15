@@ -294,6 +294,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		return id;
 	}
 
+    @Override
 	public int saveSearchResult(int sessionId, long formDataId, String key) {
 		deleteSearchResults(sessionId, formDataId);
 		return addSearchResult(sessionId, formDataId, key);
