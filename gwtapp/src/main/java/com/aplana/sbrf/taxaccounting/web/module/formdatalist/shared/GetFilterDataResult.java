@@ -14,6 +14,8 @@ public class GetFilterDataResult implements Result {
 	private FormDataFilter defaultFilter;
     private Integer userDepartmentId;
 
+	private List<FormDataKind> dataKinds;
+
     public GetFilterDataResult(){
 
     }
@@ -57,4 +59,12 @@ public class GetFilterDataResult implements Result {
     public void setUserDepartmentId(Integer userDepartmentId) {
         this.userDepartmentId = userDepartmentId;
     }
+
+	public List<FormDataKind> getDataKinds() {
+		return dataKinds;
+	}
+
+	public void setDataKinds(List<FormDataKind> dataKinds) {
+		this.dataKinds = dataKinds;
+	}
 }

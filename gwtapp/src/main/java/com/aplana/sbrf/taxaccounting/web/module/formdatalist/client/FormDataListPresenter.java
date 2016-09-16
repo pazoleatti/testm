@@ -111,16 +111,7 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
                 selectedItemId = null;
             }
         }
-        // Передаем типы налоговых форм
-        GetKindListAction kindListAction = new GetKindListAction();
-        kindListAction.setTaxType(taxType);
-                dispatcher.execute(kindListAction, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetKindListResult>() {
-                    @Override
-                    public void onSuccess(GetKindListResult kindListResult) {
-                        filterPresenter.initFilter(taxType, filterState, kindListResult);
-                    }
-                }, this));
+		filterPresenter.initFilter(taxType, filterState);
         super.prepareFromRequest(request);
 	}
 

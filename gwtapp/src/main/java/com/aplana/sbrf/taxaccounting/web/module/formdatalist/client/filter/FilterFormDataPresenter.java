@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FieldsNamesService;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -64,7 +65,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 		return getView().getDataFilter();
 	}
 
-	public void initFilter(final TaxType taxType, final FormDataFilter filter, final GetKindListResult kindListResult) {
+	public void initFilter(final TaxType taxType, final FormDataFilter filter) {
         getView().setReportPeriodType(taxType.name());
 		GetFilterData action = new GetFilterData();
 		action.setTaxType(taxType);
@@ -73,7 +74,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 					@Override
 					public void onSuccess(GetFilterDataResult result) {
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
-                        getView().setKindFilter(kindListResult.getDataKinds());
+                        getView().setKindFilter(result.getDataKinds());
 						getView().setDepartments(result.getDepartments(), filterValues.getDepartmentIds());
                         getView().setFilter("TAX_TYPE='" + taxType.getCode() + "'");
 						getView().setReportPeriods(result.getReportPeriods());
@@ -101,16 +102,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 	}
 
 	public void changeFilterElementNames(TaxType taxType) {
-		GetFieldsNames action = new GetFieldsNames();
-		action.setTaxType(taxType);
-		dispatchAsync.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetFieldsNamesResult>() {
-					@Override
-					public void onSuccess(GetFieldsNamesResult result) {
-						getView().setElementNames(result.getFieldNames());
-					}
-				}, this)
-		);
+		getView().setElementNames(FieldsNamesService.get(taxType));
 	}
 
 	@Override

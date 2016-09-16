@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -18,7 +16,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
+
+import static java.util.Arrays.asList;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -36,31 +36,38 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 	@Autowired
 	private PeriodService periodService;
 
+	@Autowired
+	FormDataAccessService dataAccessService;
+
     public GetFilterDataHandler() {
         super(GetFilterData.class);
     }
 
     @Override
     public GetFilterDataResult execute(GetFilterData action, ExecutionContext executionContext) throws ActionException {
-	    GetFilterDataResult res = new GetFilterDataResult();
+	    GetFilterDataResult result = new GetFilterDataResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
+
+		List<FormDataKind> kinds = new ArrayList<FormDataKind>(FormDataKind.values().length);
+		kinds.addAll(dataAccessService.getAvailableFormDataKind(securityService.currentUserInfo(), asList(action.getTaxType())));
+		result.setDataKinds(kinds);
 	    
 	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(userInfo, action.getTaxType());
         // Доступные подразделения
-		res.setDepartments(new ArrayList<Department>(
+		result.setDepartments(new ArrayList<Department>(
 				departmentService.getRequiredForTreeDepartments(filterValues.getDepartmentIds()).values()));
 
-	    res.setFilterValues(filterValues);
+	    result.setFilterValues(filterValues);
         // Периоды, связанные с доступными подразделениями
-        res.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
+        result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
                 new ArrayList<Integer>(filterValues.getDepartmentIds())));
 
 	    FormDataFilter filter = new FormDataFilter();
 	    filter.setTaxType(action.getTaxType());
-	    res.setDefaultFilter(filter);
-        res.setUserDepartmentId(userInfo.getUser().getDepartmentId());
+	    result.setDefaultFilter(filter);
+        result.setUserDepartmentId(userInfo.getUser().getDepartmentId());
 
-        return res;
+        return result;
     }
 
     @Override

@@ -9,9 +9,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FieldsNamesService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FormDataElementName;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFieldsNames;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFieldsNamesResult;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
 import com.google.inject.Inject;
@@ -165,16 +164,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
     }
 
     public void changeFilterElementNames(TaxType taxType) {
-        GetFieldsNames action = new GetFieldsNames();
-        action.setTaxType(taxType);
-        dispatchAsync.execute(action, CallbackUtils
-                        .defaultCallback(new AbstractCallback<GetFieldsNamesResult>() {
-                            @Override
-                            public void onSuccess(GetFieldsNamesResult result) {
-                                getView().setElementNames(result.getFieldNames());
-                            }
-                        }, this)
-        );
+        getView().setElementNames(FieldsNamesService.get(taxType));
     }
 
 }

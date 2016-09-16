@@ -211,16 +211,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
     }
 
     public void changeFilterElementNames(TaxType taxType) {
-        GetFieldsNames action = new GetFieldsNames();
-        action.setTaxType(taxType);
-        dispatchAsync.execute(action, CallbackUtils
-                        .defaultCallback(new AbstractCallback<GetFieldsNamesResult>() {
-                            @Override
-                            public void onSuccess(GetFieldsNamesResult result) {
-                                getView().setElementNames(result.getFieldNames());
-                            }
-                        }, this)
-        );
+        getView().setElementNames(FieldsNamesService.get(taxType));
     }
 
     @Override

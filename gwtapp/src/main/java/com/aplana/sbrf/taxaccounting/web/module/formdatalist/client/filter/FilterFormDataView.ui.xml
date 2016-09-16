@@ -50,10 +50,10 @@
                 <g:cell width="50%">
                     <g:VerticalPanel width="100%">
                         <r:RefBookPickerWidget ui:field="formDataKind" width="100%" searchEnabled="false"
-                                               versionEnabled="false"
+                                               versionEnabled="false" manualUpdate="true"
                                                attributeIdInt="837" isHierarchical="false" multiSelect="true"
                                                title="Выбор типа налоговой формы"/>
-                        <r:RefBookPickerWidget ui:field="formTypeId" width="100%" versionEnabled="false"
+                        <r:RefBookPickerWidget ui:field="formTypeId" width="100%" versionEnabled="false" manualUpdate="true"
                                                attributeIdInt="835" isHierarchical="false" multiSelect="true"
                                                title="Выбор вида налоговой формы"/>
                     </g:VerticalPanel>
