@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>true</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>5.5 Внутренние интервалы плат по гарантиям и непокрытым аккредитивам, ИТФ</name>
+    <fullName>5.5 Внутренние интервалы плат по гарантиям и непокрытым аккредитивам, ИТФ</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name> </name>
+        <order>1</order>
+        <width>0</width>
+        <maxLength>100</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>№ пп</name>
+        <order>2</order>
+        <width>3</width>
+        <maxLength>10</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>creditRating</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Международный кредитный рейтинг клиента</name>
+        <order>3</order>
+        <width>7</width>
+        <maxLength>20</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>category</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наличие обеспечения обязательства</name>
+        <order>4</order>
+        <width>9</width>
+        <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>creditPeriod</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Срок обязательства / Объём обязательства в рублях / Границы процентного интервала</name>
+        <order>5</order>
+        <width>14</width>
+        <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>count05year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Количество сопоставимых обязательств</name>
+        <order>6</order>
+        <width>0</width>
+        <maxLength>7</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>min05year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / min</name>
+        <order>7</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>max05year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / max</name>
+        <order>8</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>count05_1year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Количество сопоставимых обязательств</name>
+        <order>9</order>
+        <width>0</width>
+        <maxLength>7</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>min05_1year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / min</name>
+        <order>10</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>max05_1year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / max</name>
+        <order>11</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>count1_3year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Количество сопоставимых обязательств</name>
+        <order>12</order>
+        <width>0</width>
+        <maxLength>7</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>min1_3year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / min</name>
+        <order>13</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>max1_3year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / max</name>
+        <order>14</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>count3year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Количество сопоставимых обязательств</name>
+        <order>15</order>
+        <width>0</width>
+        <maxLength>7</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>min3year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / min</name>
+        <order>16</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>max3year100</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / max</name>
+        <order>17</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>count05year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Количество сопоставимых обязательств</name>
+        <order>18</order>
+        <width>0</width>
+        <maxLength>7</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>min05year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / min</name>
+        <order>19</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>max05year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / max</name>
+        <order>20</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>count05_1year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Количество сопоставимых обязательств</name>
+        <order>21</order>
+        <width>0</width>
+        <maxLength>7</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>min05_1year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / min</name>
+        <order>22</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>max05_1year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / max</name>
+        <order>23</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>count1_3year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Количество сопоставимых обязательств</name>
+        <order>24</order>
+        <width>0</width>
+        <maxLength>7</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>min1_3year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / min</name>
+        <order>25</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>max1_3year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / max</name>
+        <order>26</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>count3year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Количество сопоставимых обязательств</name>
+        <order>27</order>
+        <width>0</width>
+        <maxLength>7</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>min3year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / min</name>
+        <order>28</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>max3year101</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Интервал процентных ставок (% годовых) / max</name>
+        <order>29</order>
+        <width>5</width>
+        <maxLength>14</maxLength>
+        <precision>2</precision>
+    </columns>
+    <styles>
+        <alias>Жирный</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Голубой</alias>
+        <backColor>BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

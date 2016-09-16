@@ -1,0 +1,1989 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="header1">
+        <cell alias="fix" colSpan="29" rowSpan="1"
+              stringValue="Гарантия (поручительство) в пользу таможенного органа / налогового органа"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="category" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="1_AAA_yesNo_count">
+        <cell alias="fix" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="rowNum" colSpan="1" numericValue="1" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="2" stringValue="ААА" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да / нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_AAA_yesNo_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="2" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_AA_yesNo_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="3" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="2" stringValue="АА" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да / нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_AA_yesNo_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="4" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_A_yesNo_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="5" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="2" stringValue="А" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да / нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_A_yesNo_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="6" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_BBB_yesNo_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="7" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="2" stringValue="ВВВ" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да / нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_BBB_yesNo_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="8" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_BB_yesNo_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="9" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="2" stringValue="ВВ" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да / нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_BB_yesNo_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="10" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_B_yes_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="11" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="4" stringValue="В" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_B_yes_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="12" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_B_no_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="13" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_B_no_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="14" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_CCC_yes_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="15" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="4" stringValue="ССС" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_CCC_yes_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="16" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_CCC_no_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="17" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_CCC_no_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="18" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_CC_yes_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="19" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="4" stringValue="СС" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_CC_yes_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="20" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_CC_no_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="21" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_CC_no_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="22" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_C_yes_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="23" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="4" stringValue="С" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_C_yes_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="24" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_C_no_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="25" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_C_no_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="26" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_D_yes_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="27" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="4" stringValue="D" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_D_yes_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="28" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="1_D_no_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="29" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="1_D_no_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="30" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="header2">
+        <cell alias="fix" colSpan="29" rowSpan="1"
+              stringValue="Иные гарантии (поручительства) / аккредитивы / инструменты торгового финансирования"
+              styleAlias="Контрольные суммы"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="category" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+    <row alias="2_AAA_yesNo_count">
+        <cell alias="fix" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="rowNum" colSpan="1" numericValue="31" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="2" stringValue="ААА" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да / нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_AAA_yesNo_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="32" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_AA_yesNo_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="33" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="2" stringValue="АА" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да / нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_AA_yesNo_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="34" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_A_yesNo_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="35" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="2" stringValue="А" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да / нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_A_yesNo_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="36" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_BBB_yesNo_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="37" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="2" stringValue="ВВВ" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да / нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_BBB_yesNo_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="38" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_BB_yesNo_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="39" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="2" stringValue="ВВ" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да / нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_BB_yesNo_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="40" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_B_yes_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="41" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="4" stringValue="В" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_B_yes_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="42" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_B_no_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="43" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_B_no_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="44" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_CCC_yes_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="45" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="4" stringValue="ССС" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_CCC_yes_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="45" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_CCC_no_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="47" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_CCC_no_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="48" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_CC_yes_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="49" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="4" stringValue="СС" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_CC_yes_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="50" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_CC_no_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="51" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_CC_no_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="52" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_C_yes_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="53" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="4" stringValue="С" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_C_yes_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="54" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_C_no_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="55" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_C_no_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="56" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_D_yes_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="57" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="4" stringValue="D" styleAlias="Жирный"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="да" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_D_yes_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="58" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+    <row alias="2_D_no_count">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="59" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="2" stringValue="нет" styleAlias="Жирный"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Количество сопоставимых обязательств"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year100" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1"/>
+        <cell alias="count05year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count05_1year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count1_3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="count3year101" colSpan="3" rowSpan="1"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="2_D_no_minmax">
+        <cell alias="fix" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNum" colSpan="1" numericValue="60" rowSpan="1"/>
+        <cell alias="creditRating" colSpan="1" rowSpan="1"/>
+        <cell alias="category" colSpan="1" rowSpan="1"/>
+        <cell alias="creditPeriod" colSpan="1" rowSpan="1" stringValue="Интервал процентных ставок (% годовых)"
+              styleAlias="Жирный"/>
+        <cell alias="count05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year100" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max05_1year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max1_3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="count3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="min3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+        <cell alias="max3year101" colSpan="1" rowSpan="1" styleAlias="Голубой"/>
+    </row>
+</rows>
