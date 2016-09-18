@@ -1,0 +1,25 @@
+import java.sql.Connection
+import java.sql.Statement
+
+/**
+ * https://jira.aplana.com/browse/SBRFACCTAX-16934 1.1 ПСИ РнРнтб 2.6 Ежемесячный / Медленное проведение формы по ЖЦ.
+ *
+ * Скрипт задает значение table_name в таблице ref_book дл¤ справочников:
+ * 542 - Коды валют и драгоценных металлов
+ * 604 - Кредитные рейтинги и классы кредитоспособности
+ */
+
+Connection connection = null
+Statement stmt = null
+
+try {
+    connection = dataSource.getConnection()
+    stmt = connection.createStatement()
+    String sql = "UPDATE ref_book SET table_name = 'fake_value' WHERE id in (542, 604)"
+    stmt.executeQuery(sql)
+} catch (Exception ex) {
+    logger.error("Error: ${ex.getLocalizedMessage()}")
+} finally {
+    stmt.close()
+    connection.close()
+}

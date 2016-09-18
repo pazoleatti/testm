@@ -77,9 +77,6 @@ switch (formDataEvent) {
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.SORT_ROWS:
-        sortFormDataRows()
-        break
 }
 
 @Field
@@ -108,18 +105,6 @@ String getKey(def row) {
     return (row.inn?.trim() + "#" + row.docNum?.trim() + "#" + row.docDate?.format('dd.MM.yyyy')).toLowerCase()
 }
 
-// Сортировка групп и строк
-void sortFormDataRows(def saveInDB = true) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, null, null)
-    if (saveInDB) {
-        dataRowHelper.saveSort()
-    } else {
-        updateIndexes(dataRows)
-    }
-}
-
 void consolidation() {
     def rowsMap = [:]
     def sourcesInfo = formDataService.getSourcesInfo(formData, false, true, WorkflowState.ACCEPTED, userInfo, logger)
@@ -141,8 +126,8 @@ void consolidation() {
         }
         dataRows.add(newRow)
     }
-    sortRows(refBookService, logger, dataRows, null, null, null)
-    updateIndexes(dataRows)
+    //sortRows(refBookService, logger, dataRows, null, null, null)
+    //updateIndexes(dataRows)
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.allCached = dataRows
 }

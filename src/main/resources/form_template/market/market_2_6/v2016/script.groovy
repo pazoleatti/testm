@@ -80,9 +80,6 @@ switch (formDataEvent) {
         importData()
         formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.SORT_ROWS:
-        sortFormDataRows()
-        break
 }
 
 @Field
@@ -447,16 +444,4 @@ def getNewRow() {
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return newRow
-}
-
-// Сортировка групп и строк
-void sortFormDataRows(def saveInDB = true) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, null, null)
-    if (saveInDB) {
-        dataRowHelper.saveSort()
-    } else {
-        updateIndexes(dataRows)
-    }
 }
