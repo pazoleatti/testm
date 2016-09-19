@@ -973,8 +973,13 @@ public class FormDataServiceImpl implements FormDataService {
                                 // провайдер отсутствует в мапе по наименованию
                                 if (!providers.containsKey(refBook.getTableName())) {
                                     provider = refBookFactory.getDataProvider(refBook.getId());
-                                    providers.put(refBook.getTableName(), provider);
-                                    references.put(provider, new HashSet<Long>());
+                                    if (refBook.getTableName() != null || provider instanceof RefBookUniversal) {
+                                        providers.put(refBook.getTableName(), provider);
+                                        references.put(provider, new HashSet<Long>());
+                                    } else if (comboProviders.get(refBook.getId()) == null) {
+                                        comboProviders.put(refBook.getId(), provider);
+                                        references.put(provider, new HashSet<Long>());
+                                    }
                                 } else {
                                     if (refBook.getTableName() != null) {
                                         provider = providers.get(refBook.getTableName());
