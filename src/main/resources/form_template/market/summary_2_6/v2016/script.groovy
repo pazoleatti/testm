@@ -270,7 +270,7 @@ void consolidation() {
         dataRows.add(newRow)
     }
     //sortRows(refBookService, logger, dataRows, null, null, null)
-    //updateIndexes(dataRows)
+    updateIndexes(dataRows)
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.allCached = dataRows
 }
