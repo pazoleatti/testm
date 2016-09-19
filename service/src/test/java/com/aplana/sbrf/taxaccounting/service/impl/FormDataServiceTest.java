@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.SystemType;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataCompositionServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
@@ -594,8 +595,9 @@ public class FormDataServiceTest extends Assert{
         when(formData.getPeriodOrder()).thenReturn(1);
         when(formData.getDepartmentReportPeriodId()).thenReturn(1);
         when(formData.getReportPeriodId()).thenReturn(1);
+        when(formData.isSorted()).thenReturn(false);
 
-        Logger logger = mock(Logger.class);
+        Logger logger = new Logger();
         Department department = new Department();
         DepartmentReportPeriod drp = new DepartmentReportPeriod();
         ReportPeriod rp = new ReportPeriod();
@@ -623,7 +625,24 @@ public class FormDataServiceTest extends Assert{
         formTemplate1.setFixedRows(false);
         when(formTemplateService.get(any(Integer.class))).thenReturn(formTemplate1);
 
-        formDataService.doMove(formData.getId(), false, userInfo, WorkflowMove.APPROVED_TO_ACCEPTED, "", logger, false, new LockStateLogger() {
+        FormDataScriptingService scriptingService = mock(FormDataScriptingService.class);
+        // в скриптах реализована сортировка
+        when(scriptingService.executeScript(any(TAUserInfo.class), any(FormData.class), any(FormDataEvent.class), any(Logger.class), any(Map.class))).thenReturn(true);
+        ReflectionTestUtils.setField(formDataService, "formDataScriptingService", scriptingService);
+
+        formDataService.doMove(formData.getId(), false, userInfo, WorkflowMove.APPROVED_TO_ACCEPTED, "", logger, true, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+            }
+        });
+
+        assertEquals(1, logger.getEntries().size());
+        assertEquals("Выполнена сортировка строк налоговой формы.", logger.getEntries().get(0).getMessage());
+
+        logger = new Logger();
+        // в скриптах не реализована сортировка
+        when(scriptingService.executeScript(any(TAUserInfo.class), any(FormData.class), any(FormDataEvent.class), any(Logger.class), any(Map.class))).thenReturn(false);
+        formDataService.doMove(formData.getId(), false, userInfo, WorkflowMove.APPROVED_TO_ACCEPTED, "", logger, true, new LockStateLogger() {
             @Override
             public void updateState(String state) {
             }

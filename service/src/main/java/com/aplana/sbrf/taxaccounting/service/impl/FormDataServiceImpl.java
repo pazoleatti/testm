@@ -840,13 +840,16 @@ public class FormDataServiceImpl implements FormDataService {
                     FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
                     if (!formTemplate.isFixedRows()) {
                         // Отработка скриптом события сортировки
-                        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SORT_ROWS, logger, null);
+                        if (formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SORT_ROWS, logger, null)) {
+                            // Сортировка актуальна (событие сортировки отработало)
+                            formDataDao.updateSorted(formData.getId(), true);
+                            logger.info("Выполнена сортировка строк налоговой формы.");
+
+                        }
+
                         if (logger.containsLevel(LogLevel.ERROR)) {
                             throw new ServiceLoggerException(isAsync?"":SORT_ERROR, logEntryService.save(logger.getEntries()));
                         }
-                        // сортировка актуальна (событие сортировки отработало)
-                        formDataDao.updateSorted(formData.getId(), true);
-                        logger.info("Выполнена сортировка строк налоговой формы.");
                     }
                 }
                 break;
@@ -952,9 +955,10 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void checkValues(Logger logger, FormData formData, boolean needCheckTemp) {
-        Map<RefBookDataProvider, List<Long>> references = new HashMap<RefBookDataProvider, List<Long>>();
+        Map<RefBookDataProvider, Set<Long>> references = new HashMap<RefBookDataProvider, Set<Long>>();
         Map<Long, List<ReferenceInfo>> referenceInfoMap = new HashMap<Long, List<ReferenceInfo>>();
         Map<String, RefBookDataProvider> providers = new HashMap<String, RefBookDataProvider>();
+        Map<Long, RefBookDataProvider> comboProviders = new HashMap<Long, RefBookDataProvider>();
         List<DataRow<Cell>> rows;
         rows = dataRowDao.getRows(formData, null);
         if (!rows.isEmpty()) {
@@ -970,27 +974,33 @@ public class FormDataServiceImpl implements FormDataService {
                                 if (!providers.containsKey(refBook.getTableName())) {
                                     provider = refBookFactory.getDataProvider(refBook.getId());
                                     providers.put(refBook.getTableName(), provider);
-                                    references.put(provider, new ArrayList<Long>());
+                                    references.put(provider, new HashSet<Long>());
                                 } else {
                                     if (refBook.getTableName() != null) {
                                         provider = providers.get(refBook.getTableName());
                                     } else {
-                                        RefBookDataProvider tempProvider = refBookFactory.getDataProvider(refBook.getId());
-                                        // Для универсального справочника используем ключ null
-                                        if (tempProvider instanceof RefBookUniversal) {
-                                            provider = providers.get(refBook.getTableName());
+                                        RefBookDataProvider tempProvider = comboProviders.get(refBook.getId());
+                                        if (tempProvider == null) {
+                                            tempProvider = refBookFactory.getDataProvider(refBook.getId());
+                                            // Для универсального справочника используем ключ null
+                                            if (tempProvider instanceof RefBookUniversal) {
+                                                provider = providers.get(refBook.getTableName());
+                                            } else {
+                                                // Комбо-справочник (коды валют и металлов) кладем в comboProviders
+                                                provider = tempProvider;
+                                                comboProviders.put(refBook.getId(), provider);
+                                                references.put(provider, new HashSet<Long>());
+                                            }
                                         } else {
-                                            // Комбо-справочник (коды валют и металлов) не кладем к остальным в providers
                                             provider = tempProvider;
-                                            references.put(provider, new ArrayList<Long>());
                                         }
                                     }
                                 }
+                                long uniqueRecordId = row.getCell(column.getAlias()).getNumericValue().longValue();
                                 //Раскладываем значения ссылок по справочникам, на которые они ссылаются
-                                references.get(provider).add(row.getCell(column.getAlias()).getNumericValue().longValue());
+                                references.get(provider).add(uniqueRecordId);
 
                                 //Сохраняем информацию о местоположении ссылки
-                                long uniqueRecordId = row.getCell(column.getAlias()).getNumericValue().longValue();
                                 if (!referenceInfoMap.containsKey(uniqueRecordId)) {
                                     referenceInfoMap.put(uniqueRecordId, new ArrayList<ReferenceInfo>());
                                 }
@@ -1058,9 +1068,9 @@ public class FormDataServiceImpl implements FormDataService {
 
             ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
             boolean error = false;
-            for (Map.Entry<RefBookDataProvider, List<Long>> referencesToCheck : references.entrySet()) {
+            for (Map.Entry<RefBookDataProvider, Set<Long>> referencesToCheck : references.entrySet()) {
                 RefBookDataProvider provider = referencesToCheck.getKey();
-                List<ReferenceCheckResult> inactiveRecords = provider.getInactiveRecordsInPeriod(referencesToCheck.getValue(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+                List<ReferenceCheckResult> inactiveRecords = provider.getInactiveRecordsInPeriod(new ArrayList<Long>(referencesToCheck.getValue()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
                 if (!inactiveRecords.isEmpty()) {
                     for (ReferenceCheckResult inactiveRecord : inactiveRecords) {
                         for (ReferenceInfo referenceInfo : referenceInfoMap.get(inactiveRecord.getRecordId())) {
