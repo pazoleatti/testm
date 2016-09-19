@@ -836,13 +836,16 @@ public class FormDataServiceImpl implements FormDataService {
                     FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
                     if (!formTemplate.isFixedRows()) {
                         // Отработка скриптом события сортировки
-                        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SORT_ROWS, logger, null);
+                        if (formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SORT_ROWS, logger, null)) {
+                            // Сортировка актуальна (событие сортировки отработало)
+                            formDataDao.updateSorted(formData.getId(), true);
+                            logger.info("Выполнена сортировка строк налоговой формы.");
+
+                        }
+
                         if (logger.containsLevel(LogLevel.ERROR)) {
                             throw new ServiceLoggerException(isAsync?"":SORT_ERROR, logEntryService.save(logger.getEntries()));
                         }
-                        // сортировка актуальна (событие сортировки отработало)
-                        formDataDao.updateSorted(formData.getId(), true);
-                        logger.info("Выполнена сортировка строк налоговой формы.");
                     }
                 }
                 break;
