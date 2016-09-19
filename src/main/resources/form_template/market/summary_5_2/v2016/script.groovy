@@ -75,9 +75,6 @@ switch (formDataEvent) {
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.SORT_ROWS:
-        sortFormDataRows()
-        break
 }
 
 @Field
@@ -256,32 +253,22 @@ def calc22(def row) {
     return round(row.rate + row.creditRate, 6)
 }
 
-// Графа 27 = графа 26 – графа 25
+// Графа 27 = |графа 26| – |графа 25|
 def calc27(def row) {
     if (row.purposeFond == null || row.purposeSum == null) {
         return null
     }
-    return round(row.purposeFond - row.purposeSum, 6)
+    return round(row.purposeFond?.abs() - row.purposeSum?.abs(), 6)
 }
 
-// Графа 28 = графа 22 + графа 27
 def calc28(def row) {
-    if (row.totalRate == null || row.economySum == null) {
-        return null
+    if (row.economySum > 0) {
+        if (row.totalRate == null || row.economySum == null) {
+            return null
+        }
+        return round(row.totalRate + row.economySum, 6)
     }
-    return round(row.totalRate + row.economySum, 6)
-}
-
-// Сортировка групп и строк
-void sortFormDataRows(def saveInDB = true) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, null, null)
-    if (saveInDB) {
-        dataRowHelper.saveSort()
-    } else {
-        updateIndexes(dataRows);
-    }
+    return row.totalRate
 }
 
 @Field
@@ -328,6 +315,7 @@ void consolidation() {
         }
     }
     List<DataRow> dataRows = []
+    def index = 0
     rows_2_6Map.each { def formDataId, rows2_6 ->
         FormData formData2_6 = getFormData(formDataId)
         def depName = getDepartment(formData2_6.departmentId).name
@@ -354,12 +342,13 @@ void consolidation() {
                         getFormTypeName(formType_2_6), depName, periodName, row2_6.getIndex(), formNames)
             } else {
                 def newRow = getNewRow()
+                ++index
+                newRow.setIndex(index)
                 fillRow(newRow, row2_6, rowChd, rowMis, rowAmrlirt)
                 dataRows.add(newRow)
             }
         }
     }
-    sortRows(refBookService, logger, dataRows, null, null, null)
     updateIndexes(dataRows)
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.allCached = dataRows
@@ -486,13 +475,13 @@ void fillRow(def newRow, def row2_6, def rowChd, def rowMis, def rowAmrlirt) {
     // графа 2  - dealNum              - Номер сделки
     newRow.dealNum = rowAmrlirt ? rowAmrlirt.crmId : row2_6.codeBank
     // графа 3  - debtorName           - Заёмщик. Наименование заёмщика и ОПФ
-    newRow.debtorName = row2_6.debtorName
+    newRow.debtorName = calc3(newRow, row2_6)
     // графа 4  - country              - Заёмщик. Страна регистрации (местоположения заемщика)
-    newRow.country = rowChd.country
+    newRow.country = calc4(newRow, row2_6, rowChd)
     // графа 5  - relatedPerson        - Заёмщик. Взаимозависимое лицо Банка (Да / Нет)
     newRow.relatedPerson = isRelatedPerson(row2_6.inn, row2_6.docDate) ? getRecYesId() : getRecNoId()
     // графа 6  - offshore             - Заёмщик. Резидент оффшорной зоны (Да / Нет)
-    newRow.offshore = isOffshore(rowChd.country, row2_6.docDate) ? getRecYesId() : getRecNoId()
+    newRow.offshore = isOffshore(newRow.country, row2_6.docDate) ? getRecYesId() : getRecNoId()
     // графа 7  - innKio               - Заёмщик. ИНН / КИО заёмщика
     newRow.innKio = row2_6.inn
     // графа 8  - creditRating         - Кредитный договор. Кредитный рейтинг / класс кредитоспособности
@@ -530,9 +519,9 @@ void fillRow(def newRow, def row2_6, def rowChd, def rowMis, def rowAmrlirt) {
     // графа 24 - specialPurpose       - Целевые источники финансирования. Использование целевого финансирования (Да / Нет)
     newRow.specialPurpose = rowMis.specialPurpose
     // графа 25 - purposeSum           - Целевые источники финансирования. Стоимость Целевого финансирования, % годовых
-    newRow.purposeSum = rowMis.fondRate
+    newRow.purposeSum = (rowMis.specialPurpose == getRecNoId() ? BigDecimal.ZERO : rowMis.fondRate)
     // графа 26 - purposeFond          - Целевые источники финансирования. Стоимость фондирования Целевого привлечения, % годовых
-    newRow.purposeFond = rowMis.etsRate
+    newRow.purposeFond = (rowMis.specialPurpose == getRecNoId() ? BigDecimal.ZERO : rowMis.etsRate)
     // графа 27 - economySum           - Целевые источники финансирования. Экономия по стоимости ресурсов, % годовых
     // skip
     // графа 28 - economyRate          - Целевые источники финансирования. Совокупная процентная ставка с учетом корректировки на показатель Экономии по стоимости ресурсов, % годовых
@@ -599,4 +588,152 @@ def getProvideCategory(def rowAmrLirt, def row2_6) {
 
 def getProvideCategoryId(String name) {
     return getRecords(606, "LOWER(NAME)=LOWER('$name')", getReportPeriodEndDate())?.get(0)?.record_id?.value
+}
+
+def calc3(def row, def row2_6) {
+    def tmpValue = row2_6.debtorName
+    return calc3or4(row, row2_6, tmpValue, false)
+}
+
+def calc4(def row, def row2_6, def rowChd) {
+    def tmpValue = rowChd.country
+    return calc3or4(row, row2_6, tmpValue, true)
+}
+
+/**
+ * Получить значение для графы 3 или 4.
+ *
+ * @param row строка приемника
+ * @param row2_6 строка источника
+ * @param tmpValue значение по умолчанию, в случае если запись не найдена
+ * @param isCalcCountry признак определения расчет для графы 3 (false) или 4 (true)
+ */
+def calc3or4(def row, def row2_6, def tmpValue, def isCalcCountry) {
+    def result = tmpValue
+    if (!exclusiveInns.contains(row2_6.inn)) {
+        def records = getRecords520(row2_6.inn)
+        if (records != null && records.size() == 1) {
+            def alias = (isCalcCountry ? 'COUNTRY_CODE' : 'NAME')
+            result = records.get(0).get(alias)?.value
+
+            // сообщение об ошибках при консолидации 2 и 3
+            if (result != tmpValue) {
+                def msg = 'Строка %s: Графа «%s» заполнена данными записи из справочника «Участники ТЦО», ' +
+                        'в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», ' +
+                        'атрибут «%s» = «%s». В форме-источнике «%s» указано другое наименование %s - «%s»!'
+                def columnName = getColumnName(row, (isCalcCountry ? 'country' : 'debtorName'))
+                def name = records.get(0)?.NAME?.value
+                def attributeAlias = (records.get(0)?.INN?.value == row2_6.inn ? 'INN' : 'KIO')
+                def attributeName = getRefBookAttributeName(520L, attributeAlias)
+                def attributeValue = row2_6.inn
+                def formTypeName = getFormType(isCalcCountry ?formTypeChd : formType_2_6 )?.name
+                def subMsg = (isCalcCountry ? 'страны' : 'клиента')
+                def tmp = (isCalcCountry ? getRefBookValue(10L, tmpValue)?.NAME?.value : tmpValue)
+                logger.warn(msg, row.getIndex(), columnName, name, attributeName, attributeValue, formTypeName, subMsg, tmp)
+            }
+        }
+    }
+    return result
+}
+
+/**
+ * Получить список записей из справочника "Участники ТЦО" (id = 520) по ИНН или КИО.
+ *
+ * @param value значение для поиска по совпадению
+ */
+def getRecords520(def value) {
+    return getRecordsByValue(520L, value, ['INN', 'KIO'])
+}
+
+// мапа хранящая мапы с записями справочника (ключ "id справочника" -> мапа с записями, ключ "значение атрибута" -> список записией)
+// например:
+// [ id 520 : мапа с записям ]
+//      мапа с записями = [ инн 1234567890 : список подходящих записей ]
+@Field
+def recordsMap = [:]
+
+/**
+ * Получить список записей из справочника атрибуты которых равны заданному значению.
+ *
+ * @param refBookId id справочника
+ * @param value значение для поиска
+ * @param attributesForSearch список атрибутов справочника по которым искать совпадения
+ */
+def getRecordsByValue(def refBookId, def value, def attributesForSearch) {
+    if (recordsMap[refBookId] == null) {
+        recordsMap[refBookId] = [:]
+        // получить все записи справочника и засунуть в мапу
+        def allRecords = getAllRecords(refBookId)?.values()
+        allRecords.each { record ->
+            attributesForSearch.each { attribute ->
+                def tmpKey = getKeyValue(record[attribute]?.value)
+                if (tmpKey) {
+                    if (recordsMap[refBookId][tmpKey] == null) {
+                        recordsMap[refBookId][tmpKey] = []
+                    }
+                    if (!recordsMap[refBookId][tmpKey].contains(record)) {
+                        recordsMap[refBookId][tmpKey].add(record)
+                    }
+                }
+            }
+        }
+    }
+    def key = getKeyValue(value)
+    return recordsMap[refBookId][key]
+}
+
+def getKeyValue(def value) {
+    return value?.trim()?.toLowerCase()
+}
+
+@Field
+def allRecordsMap = [:]
+
+/**
+ * Получить все записи справочника.
+ *
+ * @param refBookId id справочника
+ * @return мапа с записями справочника (ключ "id записи" -> запись)
+ */
+def getAllRecords(def refBookId) {
+    if (allRecordsMap[refBookId] == null) {
+        def date = getReportPeriodEndDate()
+        def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
+        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
+        allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
+    }
+    return allRecordsMap[refBookId]
+}
+
+@Field
+def refBookAttributeMap = [:]
+
+def getRefBookAttributeName(def refbookId, def attributAlias) {
+    if (refBookAttributeMap[refbookId] == null) {
+        refBookAttributeMap[refbookId] = [:]
+    }
+    if (refBookAttributeMap[refbookId][attributAlias] == null) {
+        refBookAttributeMap[refbookId][attributAlias] = getRefBook(refbookId)?.getAttribute(attributAlias)?.getName()
+    }
+    return refBookAttributeMap[refbookId][attributAlias]
+}
+
+@Field
+def refBookMap = [:]
+
+def getRefBook(def refbookId) {
+    if (refBookMap[refbookId] == null) {
+        refBookMap[refbookId] = refBookFactory.get(refbookId)
+    }
+    return refBookMap[refbookId]
+}
+
+@Field
+def formTypeMap = [:]
+
+def getFormType(def formTypeId) {
+    if (formTypeMap[formTypeId] == null) {
+        formTypeMap[formTypeId] = formTypeService.get(formTypeId)
+    }
+    return formTypeMap[formTypeId]
 }
