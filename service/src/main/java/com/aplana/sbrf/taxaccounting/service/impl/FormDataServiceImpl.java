@@ -979,15 +979,19 @@ public class FormDataServiceImpl implements FormDataService {
                                     } else if (comboProviders.get(refBook.getId()) == null) {
                                         comboProviders.put(refBook.getId(), provider);
                                         references.put(provider, new HashSet<Long>());
+                                    } else { // берем провайдер из мапы (он есть)
+                                        provider = comboProviders.get(refBook.getId());
                                     }
-                                } else {
+                                } else { // провайдер есть в мапе по наименованию (хотя он может быть без имени, тогда надо уточнить)
                                     if (refBook.getTableName() != null) {
                                         provider = providers.get(refBook.getTableName());
                                     } else {
+                                        // ищем провайдер в мапе сложных справочников
                                         RefBookDataProvider tempProvider = comboProviders.get(refBook.getId());
+                                        // если не нашли, то заполняем заново для сложного справочника (универсальный уже есть в мапе)
                                         if (tempProvider == null) {
                                             tempProvider = refBookFactory.getDataProvider(refBook.getId());
-                                            // Для универсального справочника используем ключ null
+                                            // Для универсального справочника просто забираем
                                             if (tempProvider instanceof RefBookUniversal) {
                                                 provider = providers.get(refBook.getTableName());
                                             } else {
@@ -996,7 +1000,7 @@ public class FormDataServiceImpl implements FormDataService {
                                                 comboProviders.put(refBook.getId(), provider);
                                                 references.put(provider, new HashSet<Long>());
                                             }
-                                        } else {
+                                        } else { // если нашли, то используем
                                             provider = tempProvider;
                                         }
                                     }
