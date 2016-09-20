@@ -453,6 +453,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 826: // 6.13 (5)
         case 813: // 6.4 (7)
         case 828: // 6.19 (20)
+        case 832: // 6.23 (21)
         case 833: // 6.24 (22)
             row.similarDealGroup = recYesId
             break
@@ -460,7 +461,6 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 819: // 6.12 (6)
         case 817: // 6.9 (10)
         case 816: // 6.1 (12)
-        case 832: // 6.23 (21)
         case 836: // 6.25 (26)
             row.similarDealGroup = recNoId
             break
@@ -1033,6 +1033,7 @@ def getReportClass(def formTypeId) {
         case 814 : // 6.5 (2)
         case 826 : // 6.13 (5)
         case 828 : // 6.19 (20)
+        case 832 : // 6.23 (21)
         case 833 : // 6.24 (22)
             return 1
         case 804 : // 6.2 (14)
@@ -1055,7 +1056,6 @@ def getReportClass(def formTypeId) {
         case 805 : // 6.7 (4)
         case 817 : // 6.9 (10)
         case 819 : // 6.12 (6)
-        case 832 : // 6.23 (21)
         case 836 : // 6.25 (26)
         default:
             return 4
@@ -1113,6 +1113,7 @@ def String getGroupId(def matrixRow, def srcRow, def typeMap) {
             group.append(srcRow.dealFocus).append("#")
             group.append((srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0) > 0)
             break
+        case 832: // 6.23 (21)
         case 833: // 6.24 (22)
             group.append(srcRow.serviceType)
             break
