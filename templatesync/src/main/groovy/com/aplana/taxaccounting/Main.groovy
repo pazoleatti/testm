@@ -415,6 +415,7 @@ class Main {
             'problem_zones'                : 504,
             'raising_rates_transport'      : 209,
             'region'                       : 4,
+            'tax_benefits_land'            : 705,
             'tax_benefits_property'        : 203,
             'tax_benefits_transport'       : 7,
             'vehicles_average_cost'        : 208,
