@@ -58,7 +58,9 @@ public enum FormDataEvent implements Serializable {
 
 	ADD_ROW(301, "Добавить строку"),
 	DELETE_ROW(303, "Удалить строку"),
-	AFTER_LOAD(302, "Загрузка"),	/* Вызывается после того как форма была получена из БД. */
+	AFTER_LOAD(302, "Загрузка"),	/* Вызывается после того как форма была получена из БД.
+									Если изменяются данные формы в справочных ячейках,
+									то нужно вызвать scriptFormDataHolder.setDataChanged(true) */
 
 	IMPORT_TRANSPORT_FILE(401, "Импорт из транспортных файлов"),
     UPLOAD_TRANSPORT_FILE(402, "Загрузка транспортных файлов в каталог загрузки"),
