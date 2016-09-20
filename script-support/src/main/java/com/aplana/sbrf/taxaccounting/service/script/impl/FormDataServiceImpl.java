@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -83,7 +82,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Autowired
     private SourceService sourceService;
 
-    private Map<Number, WeakReference<DataRowHelper>> helperHashMap = new HashMap<Number, WeakReference<DataRowHelper>>();
+    private Map<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
     private static ApplicationContext applicationContext;
 
@@ -131,13 +130,13 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         if (formData.getId() == null) {
             throw new ServiceException(FIND_ERROR);
         }
-        if (helperHashMap.containsKey(formData.getId()) && helperHashMap.get(formData.getId()).get() != null) {
-            return helperHashMap.get(formData.getId()).get();
+        if (helperHashMap.containsKey(formData.getId())) {
+            return helperHashMap.get(formData.getId());
         }
         DataRowHelperImpl dataRowHelperImpl = applicationContext.getBean(DataRowHelperImpl.class);
         dataRowHelperImpl.setFormData(formData);
         dataRowHelperImpl.setScriptComponentContext(scriptComponentContext);
-        helperHashMap.put(formData.getId(), new WeakReference(dataRowHelperImpl));
+        helperHashMap.put(formData.getId(), dataRowHelperImpl);
         return dataRowHelperImpl;
     }
 
