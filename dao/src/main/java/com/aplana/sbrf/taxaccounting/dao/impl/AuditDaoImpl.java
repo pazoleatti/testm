@@ -34,7 +34,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     private static final String LOG_SYSTEM_DATA_BY_FILTER = "select ordDat.* from (select dat.*, count(*) over() cnt, rownum as rn from ( select DISTINCT " +
             "ls.id, ls.log_date, ls.ip, ls.event_id, ev.name event, ls.user_login user_login, ls.roles, ls.department_name, " +
             "ls.report_period_name, ls.declaration_type_name, ls.form_type_name, ls.form_kind_id, ls.form_type_id, " +
-            "fk.name form_kind_name, ls.note, audit_form_type_id, ls.user_department_name, ls.blob_data_id, ls.server " +
+            "fk.name form_kind_name, ls.note, audit_form_type_id, aft.name audit_form_type_name, ls.user_department_name, ls.blob_data_id, ls.server " +
             "from log_system ls " +
             "left join event ev on ls.event_id=ev.\"ID\" " +
             "left join form_kind fk on ls.form_kind_id=fk.\"ID\" " +
@@ -124,6 +124,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "              ls.user_department_name,\n" +
                     "              ls.blob_data_id," +
                     "              audit_form_type_id,\n" +
+                    "              aft.name audit_form_type_name,\n" +
                     "              ls.server\n" +
                     "            FROM log_system ls\n" +
                     "              LEFT JOIN event ev ON ls.event_id = ev.\"ID\"\n" +
@@ -300,6 +301,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "              ls.user_department_name,\n" +
                     "              ls.blob_data_id,\n" +
                     "              audit_form_type_id,\n" +
+                    "              aft.name audit_form_type_name,\n" +
                     "              ls.server\n" +
                     "            FROM log_system ls LEFT JOIN event ev ON ls.event_id = ev.\"ID\"\n" +
                     "              LEFT JOIN form_kind fk ON ls.form_kind_id = fk.\"ID\"\n" +
@@ -702,13 +704,13 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 column = "ls.department_name";
                 break;
             case TYPE:
-                column = "CASE WHEN ls.declaration_type_name != NULL THEN ls.declaration_type_name ELSE ls.form_type_name END";
+                column = "audit_form_type_name";
                 break;
             case FORM_DATA_KIND:
                 column = "ls.form_kind_id";
                 break;
             case FORM_TYPE:
-                column = "type_name";
+                column = "form_type_name";
                 break;
             case USER:
                 column = "ls.user_login";
