@@ -1475,7 +1475,7 @@ public class FormDataServiceTest extends Assert{
         assertEquals(formDataService.getTaskName(ReportType.CSV, 101, null), "Формирование отчета налоговой формы в CSV-формате");
         assertEquals(formDataService.getTaskName(ReportType.IMPORT_FD, 101, null), "Загрузка XLSM-файла с формы экземпляра налоговой формы");
         assertEquals(formDataService.getTaskName(ReportType.IMPORT_TF_FD, 101, null), "Импорт ТФ из каталога загрузки");
-        assertEquals(formDataService.getTaskName(ReportType.EDIT_FILE_COMMENT, 101, null), "Прикрепление файлов формы и редактирование комментариев");
+        assertEquals(formDataService.getTaskName(ReportType.EDIT_FILE_COMMENT, 101, null), "Добавление файлов и комментариев");
         assertEquals(formDataService.getTaskName(ReportType.SPECIFIC_REPORT, 101, null, "Report"), "Формирование специфического отчета \"Report\" налоговой формы");
 
         FormData formData102 = new FormData();
@@ -1494,7 +1494,7 @@ public class FormDataServiceTest extends Assert{
         assertEquals(formDataService.getTaskName(ReportType.CSV, 102, null), "Формирование отчета формы в CSV-формате");
         assertEquals(formDataService.getTaskName(ReportType.IMPORT_FD, 102, null), "Загрузка XLSM-файла с формы экземпляра налоговой формы");
         assertEquals(formDataService.getTaskName(ReportType.IMPORT_TF_FD, 102, null), "Импорт ТФ из каталога загрузки");
-        assertEquals(formDataService.getTaskName(ReportType.EDIT_FILE_COMMENT, 102, null), "Прикрепление файлов формы и редактирование комментариев");
+        assertEquals(formDataService.getTaskName(ReportType.EDIT_FILE_COMMENT, 102, null), "Добавление файлов и комментариев");
         assertEquals(formDataService.getTaskName(ReportType.SPECIFIC_REPORT, 102, null, "Report"), "Формирование специфического отчета \"Report\" формы");
     }
 
