@@ -295,7 +295,7 @@ void fillNewRow(def newRow, def sourceRow, SourceType sourceType, def sourceForm
     // графа 8  - creditRating        - Информация о Продукте / ИТФ. Кредитный рейтинг
     newRow.creditRating = sourceRow.creditRating // alias совпал
     // графа 9  - internationalRating - Информация о Продукте / ИТФ. Международный кредитный рейтинг
-    newRow.internationalRating = calc9(newRow)
+    newRow.internationalRating = newRow.creditRating
     // графа 10 - number              - Информация о Продукте / ИТФ. Номер обязательства
     newRow.number = calc10(sourceRow, sourceType)
     // графа 11 - issuanceDate        - Информация о Продукте / ИТФ. Дата выдачи обязательства
@@ -458,16 +458,6 @@ def calc3(def row, def rowSource, SourceType sourceType) {
 def calc4(def row, def rowSource, SourceType sourceType) {
     def tmpValue = (sourceType != SourceType.TYPE_2_1) ? rowSource.country : null
     return calc3or4(row, rowSource, tmpValue, sourceType, true)
-}
-
-def getRatingRecord(def rating) {
-    def ratingString = getRefBookValue(604, rating)?.NAME?.value
-    def record = getRefBookRecord(603L, 'CREDIT_RATING', ratingString, null, getReportPeriodEndDate(), -1, null, new Logger(), false)
-    return record
-}
-
-def calc9(def row) {
-    return getRatingRecord(row.creditRating)?.record_id?.value
 }
 
 def calc10(def rowSource, SourceType sourceType) {
