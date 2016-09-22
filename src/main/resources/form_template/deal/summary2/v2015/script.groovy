@@ -267,6 +267,36 @@ void calc() {
     sortFormDataRows(false)
 }
 
+@Field
+def sourceTypeIds = [
+        816, // 6.1 (12)
+        804, // 6.2 (14)
+        812, // 6.3 (1)
+        813, // 6.4 (7)
+        814, // 6.5 (2)
+        806, // 6.6 (8)
+        805, // 6.7 (4)
+        815, // 6.8 (3)
+        817, // 6.9 (10)
+        823, // 6.10.1 (13)
+        825, // 6.10.2 (11)
+        827, // 6.11 (9)
+        819, // 6.12 (6)
+        826, // 6.13 (5)
+        835, // 6.14 (17)
+        837, // 6.15 (18)
+        839, // 6.16 (16)
+        811, // 6.17 (15)
+        838, // 6.18 (19)
+        828, // 6.19 (20)
+        831, // 6.20 (23)
+        830, // 6.21 (25)
+        834, // 6.22 (24)
+        832, // 6.23 (21)
+        833, // 6.24 (22)
+        836, // 6.25 (26)
+]
+
 /** Логические проверки перед консолидацией. */
 def preConsolidationCheck() {
     // 1. Проверка на наличие формы «Приложение 4.2»
@@ -324,9 +354,10 @@ void consolidation() {
     // консолидация из шестерок
     def departmentFormTypes = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id,
             formData.kind, getReportPeriodStartDate(), getReportPeriodEndDate())
+    departmentFormTypes = departmentFormTypes.findAll { it.formTypeId in sourceTypeIds }
     departmentFormTypes.each {
         def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
-        if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.DEAL) {
+        if (source != null && source.state == WorkflowState.ACCEPTED) {
             formDataService.getDataRowHelper(source).allSaved.each { srcRow ->
                 if (srcRow.getAlias() == null && controlledTransactions.contains(srcRow.name)) {
                     def matrixRow = getPreRow(srcRow, source.formType.id, typeMap, classMap)

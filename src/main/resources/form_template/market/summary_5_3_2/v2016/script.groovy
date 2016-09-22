@@ -288,7 +288,7 @@ String getKey(def row, Relation source) {
             credit = (record22?.RATE?.value ? round(credit * record22?.RATE?.value, 2) : null)
         } else {
             // 1. В справочнике «Курсы валют» не найден курс для заданной валюты на заданную дату
-            def msg = "Форма-источника: «%s», Подразделение: «%s», Период: «%s», строка %d: Не найден курс валюты для «%s» на дату %s!"
+            def msg = "Форма-источник: «%s», Подразделение: «%s», Период: «%s», строка %d: Не найден курс валюты для «%s» на дату %s!"
             def formName = source?.formType?.name
             def departmentName = source?.department?.name
             def periodName = source?.departmentReportPeriod?.reportPeriod?.name + ' ' + source?.departmentReportPeriod?.reportPeriod?.taxPeriod?.year
