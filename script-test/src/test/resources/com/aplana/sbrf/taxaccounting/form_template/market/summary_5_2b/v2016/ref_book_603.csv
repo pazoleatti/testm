@@ -1,0 +1,4 @@
+record_id(N);CREDIT_QUALITY_CLASS(R);CREDIT_RATING(S)
+1;1;рейтинг 1
+2;2;рейтинг 2
+3;3;рейтинг 3

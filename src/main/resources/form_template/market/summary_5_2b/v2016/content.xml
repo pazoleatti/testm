@@ -46,6 +46,7 @@
         <hierarchical>false</hierarchical>
         <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>53</refBookAttributeId>
+        <refBookId>10</refBookId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -58,6 +59,7 @@
         <hierarchical>false</hierarchical>
         <nameAttributeId>250</nameAttributeId>
         <refBookAttributeId>250</refBookAttributeId>
+        <refBookId>38</refBookId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -70,6 +72,7 @@
         <hierarchical>false</hierarchical>
         <nameAttributeId>250</nameAttributeId>
         <refBookAttributeId>250</refBookAttributeId>
+        <refBookId>38</refBookId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -90,8 +93,9 @@
         <order>8</order>
         <width>6</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>6041</nameAttributeId>
-        <refBookAttributeId>6041</refBookAttributeId>
+        <nameAttributeId>6034</nameAttributeId>
+        <refBookAttributeId>6034</refBookAttributeId>
+        <refBookId>603</refBookId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -105,6 +109,7 @@
         <nameAttributeId>6033</nameAttributeId>
         <refBookAttributeId>6033</refBookAttributeId>
         <refBookAttributeId2>6021</refBookAttributeId2>
+        <refBookId>603</refBookId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -184,6 +189,7 @@
         <hierarchical>false</hierarchical>
         <nameAttributeId>6082</nameAttributeId>
         <refBookAttributeId>6082</refBookAttributeId>
+        <refBookId>608</refBookId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -196,6 +202,7 @@
         <hierarchical>false</hierarchical>
         <nameAttributeId>66</nameAttributeId>
         <refBookAttributeId>65</refBookAttributeId>
+        <refBookId>15</refBookId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -228,19 +235,18 @@
         <hierarchical>false</hierarchical>
         <nameAttributeId>250</nameAttributeId>
         <refBookAttributeId>250</refBookAttributeId>
+        <refBookId>38</refBookId>
         <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>currencyRate</alias>
         <checking>false</checking>
-        <columnType>REFBOOK</columnType>
+        <columnType>NUMBER</columnType>
         <name>Информация о Продукте / ИТФ. Курс на дату выдачи обязательства</name>
         <order>22</order>
-        <width>6</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>81</nameAttributeId>
-        <refBookAttributeId>81</refBookAttributeId>
-        <searchEnabled>true</searchEnabled>
+        <width>10</width>
+        <maxLength>19</maxLength>
+        <precision>4</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>endSum</alias>
@@ -262,6 +268,7 @@
         <hierarchical>false</hierarchical>
         <nameAttributeId>250</nameAttributeId>
         <refBookAttributeId>250</refBookAttributeId>
+        <refBookId>38</refBookId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <styles>
