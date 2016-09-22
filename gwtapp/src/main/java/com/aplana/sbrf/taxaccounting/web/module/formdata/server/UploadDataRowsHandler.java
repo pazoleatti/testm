@@ -107,7 +107,7 @@ public class UploadDataRowsHandler extends
 
                     @Override
                     public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                        formDataService.interruptTask(action.getFormData().getId(), false, userInfo.getUser().getId(), reportType, "Выполнена загрузка XLSM-файла с формы экземпляра НФ");
+                        formDataService.interruptTask(action.getFormData().getId(), false, userInfo, reportType, LockDeleteCause.FORM_IMPORT);
                     }
 
                     @Override

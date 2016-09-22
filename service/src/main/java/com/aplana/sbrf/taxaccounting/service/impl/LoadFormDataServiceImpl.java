@@ -566,7 +566,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
             // 17А.4.А.1 Система снимает обнаруженные блокировки с задачи на формирование XLSM/CSV отчета и/или проверки НФ
             // 17А.5 Система инициирует выполнение сценария Удаление отчета НФ для экземпляра НФ, данные которой были перезаполнены.
-            formDataService.interruptTask(formData.getId(), null, userInfo.getUser().getId(), ReportType.IMPORT_TF_FD, "Изменены данные налоговой формы путем загрузки транспортного файла");
+            formDataService.interruptTask(formData.getId(), null, userInfo, ReportType.IMPORT_TF_FD, LockDeleteCause.FORM_IMPORT_TF);
 
             formData.initFormTemplateParams(formTemplate);
         }

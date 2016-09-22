@@ -108,7 +108,7 @@ public class RefreshFormDataHandler extends AbstractActionHandler<RefreshDataRow
 
                     @Override
                     public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                        formDataService.interruptTask(action.getFormData().getId(), false, userInfo.getUser().getId(), reportType, "Выполнено обновление формы");
+                        formDataService.interruptTask(action.getFormData().getId(), false, userInfo, reportType, LockDeleteCause.FORM_REFRESH);
                     }
 
                     @Override

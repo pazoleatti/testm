@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -70,7 +67,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
                         FormDataEvent.COMPOSE.getTitle(), "Переформирована", departmentName, kindName, formName);
             }
 			// Удаляем ранее сформированные отчеты - стали неактуальными
-            formDataService.deleteReport(formData.getId(), formData.isManual(), scriptComponentContext.getUserInfo().getUser().getId(), "Выполнена Подготовка/Утверждение/Принятие налоговой формы");
+            formDataService.deleteReport(formData.getId(), formData.isManual(), scriptComponentContext.getUserInfo(), LockDeleteCause.FORM_MOVE);
 			//TODO Точно ли инициировано системой? Сейчас консолидируем по кнопке "Консолидировать". Аналогично в начале этого метода
             logBusinessService.add(formData.getId(), null, scriptComponentContext.getUserInfo(), FormDataEvent.COMPOSE, "Событие инициировано Системой");
 		}

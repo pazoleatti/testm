@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.LockDeleteCause;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -46,8 +46,8 @@ public class DeleteJrxmlHandler extends AbstractActionHandler<DeleteJrxmlAction,
             String keyEXCEL = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.EXCEL_DEC);
             LockData pdfLock = lockDataService.getLock(keyPDF);
             LockData excelLock = lockDataService.getLock(keyEXCEL);
-            lockDataService.interruptTask(pdfLock, securityService.currentUserInfo().getUser().getId(), false, "Выполнена замена jrxml файла макета декларации");
-            lockDataService.interruptTask(excelLock, securityService.currentUserInfo().getUser().getId(), false, "Выполнена замена jrxml файла макета декларации");
+            lockDataService.interruptTask(pdfLock, securityService.currentUserInfo(), false, LockDeleteCause.DECLARATION_TEMPLATE_JRXML_CHANGE);
+            lockDataService.interruptTask(excelLock, securityService.currentUserInfo(), false, LockDeleteCause.DECLARATION_TEMPLATE_JRXML_CHANGE);
         }
         declarationTemplateService.deleteJrxml(action.getDtId());
         return new DeleteJrxmlResult();

@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -47,6 +48,8 @@ public class LockDataServiceImpl implements LockDataService {
     private TransactionHelper tx;
     @Autowired
     private ServerInfo serverInfo;
+    @Autowired
+    AuditService auditService;
 
 	@Override
 	public LockData lock(final String key, final int userId, final String description) {
@@ -262,20 +265,20 @@ public class LockDataServiceImpl implements LockDataService {
 	}
 
     @Override
-    public void interruptTask(final LockData lockData, final int userId, final boolean force, final String cause) {
+    public void interruptTask(final LockData lockData, final TAUserInfo userInfo, final boolean force, final LockDeleteCause cause) {
         if (lockData != null) {
             LOG.info(String.format("Останавливается асинхронная задача с ключом %s", lockData.getKey()));
             tx.executeInNewTransaction(new TransactionLogic() {
 				   @Override
 				   public Object execute() {
 					   try {
-						   TAUser user = userDao.getUser(userId);
+						   TAUser user = userInfo.getUser();
 						   List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
-                           if (!waitingUsers.contains(userId))
-                               waitingUsers.add(userId);
-						   unlock(lockData.getKey(), userId, force);
+                           if (!waitingUsers.contains(user.getId()))
+                               waitingUsers.add(user.getId());
+						   unlock(lockData.getKey(), user.getId(), force);
 						   //asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
-						   String msg = String.format(LockData.CANCEL_TASK, user.getName(), lockData.getDescription(), cause);
+						   String msg = String.format(LockData.CANCEL_TASK, user.getName(), lockData.getDescription(), cause.toString());
 						   List<Notification> notifications = new ArrayList<Notification>();
 						   //Создаем оповещение для каждого пользователя из списка
 						   if (!waitingUsers.isEmpty()) {
@@ -291,6 +294,12 @@ public class LockDataServiceImpl implements LockDataService {
 					   } catch (Exception e) {
 						   throw new ServiceException("Не удалось прервать задачу", e);
 					   }
+                       try {
+                           String note = cause.getEventDescrition(lockData.getDateLock(), userDao.getUser(lockData.getUserId()), lockData.getDescription());
+                           auditService.add(FormDataEvent.DELETE_LOCK, userInfo, null, null, null, null, null, note, null);
+                       } catch (Exception e) {
+                           LOG.error("Ошибка при логировании", e);
+                       }
 					   return null;
 				   }
 			   }
@@ -299,9 +308,9 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public void interruptAllTasks(List<String> lockKeys, int userId, String cause) {
+    public void interruptAllTasks(List<String> lockKeys, TAUserInfo userInfo, LockDeleteCause cause) {
         for (String key : lockKeys) {
-            interruptTask(getLock(key), userId, true, cause);
+            interruptTask(getLock(key), userInfo, true, cause);
         }
     }
 

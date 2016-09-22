@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
@@ -58,7 +55,7 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
             result.setLock(true);
             return result;
         } else {
-            formDataService.interruptTask(formData.getId(), formData.isManual(), userInfo.getUser().getId(), reportType, "Выполняется редактирование НФ");
+            formDataService.interruptTask(formData.getId(), formData.isManual(), userInfo, reportType, LockDeleteCause.FORM_EDIT);
         }
 
         return result;

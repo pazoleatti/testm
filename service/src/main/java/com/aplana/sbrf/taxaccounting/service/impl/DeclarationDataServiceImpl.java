@@ -293,7 +293,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
             DeclarationData declarationData = declarationDataDao.get(id);
 
-            deleteReport(id, userInfo.getUser().getId(), false, "Удалена декларация");
+            deleteReport(id, userInfo, false, LockDeleteCause.DECLARATION_DELETE);
             declarationDataDao.delete(id);
 
             auditService.add(FormDataEvent.DELETE , userInfo, declarationData, null, "Декларация удалена", null);
@@ -978,7 +978,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
      */
     @Override
-    public void deleteReport(long declarationDataId, int userId, boolean isCalc, String cause) {
+    public void deleteReport(long declarationDataId, TAUserInfo userInfo, boolean isCalc, LockDeleteCause cause) {
         DeclarationDataReportType[] ddReportTypes = {DeclarationDataReportType.XML_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.ACCEPT_DEC};
         for (DeclarationDataReportType ddReportType : ddReportTypes) {
             if (ddReportType.isSubreport()) {
@@ -988,12 +988,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     ddReportType.setSubreport(subreport);
                     LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
                     if (lock != null)
-                        lockDataService.interruptTask(lock, userId, true, cause);
+                        lockDataService.interruptTask(lock, userInfo, true, cause);
                 }
             } else if (!isCalc || !DeclarationDataReportType.XML_DEC.equals(ddReportType)) {
                 LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
                 if (lock != null)
-                    lockDataService.interruptTask(lock, userId, true, cause);
+                    lockDataService.interruptTask(lock, userInfo, true, cause);
             }
         }
         reportService.deleteDec(declarationDataId);
@@ -1058,12 +1058,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void interruptTask(long declarationDataId, int userId, ReportType reportType, String cause) {
+    public void interruptTask(long declarationDataId, TAUserInfo userInfo, ReportType reportType, LockDeleteCause cause) {
         DeclarationDataReportType[] ddReportTypes = getCheckTaskList(reportType);
         if (ddReportTypes == null) return;
-        TAUserInfo taUserInfo = new TAUserInfo();
-        taUserInfo.setUser(taUserService.getUser(userId));
-        DeclarationData declarationData = get(declarationDataId, taUserInfo);
+        DeclarationData declarationData = get(declarationDataId, userInfo);
         for (DeclarationDataReportType ddReportType : ddReportTypes) {
             List<String> taskKeyList = new ArrayList<String>();
             if (ddReportType.isSubreport()) {
@@ -1079,7 +1077,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             for (String key : taskKeyList) {
                 LockData lock = lockDataService.getLock(key);
                 if (lock != null) {
-                    lockDataService.interruptTask(lock, userId, true, cause);
+                    lockDataService.interruptTask(lock, userInfo, true, cause);
                 }
             }
         }

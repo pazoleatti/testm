@@ -105,7 +105,9 @@ public enum FormDataEvent implements Serializable {
     SCRIPTS_IMPORT(904, "Импорт скриптов"),
     CHECK_SCRIPT(905, "Проверка скриптов"),
 
-    EDIT_CONFIG_PARAMS(951, "Редактирование конфигурационного параметра");
+    EDIT_CONFIG_PARAMS(951, "Редактирование конфигурационного параметра"),
+
+	DELETE_LOCK(960, "Удаление блокировки");
 
 	private String title;
 	private int code;

@@ -278,7 +278,10 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         TextColumn<LogSearchResultItem> noteColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                return object.getNote();
+                if (object.getNote() == null) {
+                    return null;
+                }
+                return object.getNote().length() <= 200 ? object.getNote() : (object.getNote().substring(0, 200) + "...");
             }
         };
 
@@ -364,25 +367,27 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         };
 
         table.addColumn(dateColumn, DATE_COLUMN_HEADER);
-        table.setColumnWidth(dateColumn, 8.5, Style.Unit.EM);
+        table.setColumnWidth(dateColumn, 5, Style.Unit.EM);
         table.addColumn(eventColumn, EVENT_COLUMN_HEADER);
         table.addColumn(noteColumn, NOTE_COLUMN_HEADER);
+        table.setColumnWidth(noteColumn, 9, Style.Unit.EM);
         table.addColumn(reportPeriodColumn, REPORT_PERIOD_COLUMN_HEADER);
-        table.setColumnWidth(reportPeriodColumn, 9, Style.Unit.EM);
+        table.setColumnWidth(reportPeriodColumn, 5, Style.Unit.EM);
         table.addColumn(departmentColumn, DEPARTMENT_COLUMN_HEADER);
         table.addColumn(typeColumn, TYPE_COLUMN_HEADER);
-        table.setColumnWidth(typeColumn, 8, Style.Unit.EM);
+        table.setColumnWidth(typeColumn, 5, Style.Unit.EM);
         table.addColumn(formDataKindColumn, FORM_DATA_KIND_COLUMN_HEADER);
-        table.setColumnWidth(formDataKindColumn, 9, Style.Unit.EM);
+        table.setColumnWidth(formDataKindColumn, 6, Style.Unit.EM);
         table.addColumn(formDeclTypeColumn, FORM_TYPE_COLUMN_HEADER);
         table.addColumn(userLoginColumn, USER_LOGIN_COLUMN_HEADER);
-        table.setColumnWidth(userLoginColumn, 9, Style.Unit.EM);
+        table.setColumnWidth(userLoginColumn, 8, Style.Unit.EM);
         table.addColumn(userRolesColumn, USER_ROLES_COLUMN_HEADER);
         table.setColumnWidth(userRolesColumn, 7, Style.Unit.EM);
         table.addColumn(userDepartmentColumn, USER_DEPARTMENT_COLUMN_HEADER);
         table.addColumn(userIpColumn, USER_IP_COLUMN_HEADER);
+        table.setColumnWidth(userIpColumn, 6.5, Style.Unit.EM);
         table.addColumn(serverColumn, SERVER);
-        table.setColumnWidth(userIpColumn, 7.5, Style.Unit.EM);
+        table.setColumnWidth(serverColumn, 5, Style.Unit.EM);
         table.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
             @Override
             public void onCellPreview(CellPreviewEvent<LogSearchResultItem> event) {
@@ -392,7 +397,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
                     if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
                         cellElement.removeAttribute("title");
                     } else {
-                        cellElement.setTitle(cellElement.getInnerText());
+                        cellElement.setTitle(event.getValue().getNote());
                     }
                 }
             }

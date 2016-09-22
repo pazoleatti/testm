@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
@@ -74,6 +75,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Autowired
     @Qualifier("formTemplateMainOperatingService")
     MainOperatingService mainOperatingService;
+    @Autowired
+    private TAUserDao userDao;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -105,12 +108,14 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	@Override
 	public int save(FormTemplate formTemplate) {
         Logger log = new Logger();
+        TAUserInfo systemUserInfo = new TAUserInfo();
+        systemUserInfo.setUser(userDao.getUser(0));
         checkScript(formTemplate, log);
         if (formTemplate.getId() != null) {
             int formTemplateId = formTemplateDao.save(formTemplate);
             List<Long> formDataIds = formDataService.getFormDataListInActualPeriodByTemplate(formTemplateId, formTemplate.getVersion());
             for (Long formDataId : formDataIds)
-                formDataService.deleteReport(formDataId, null, 0, "Изменен макет НФ");
+                formDataService.deleteReport(formDataId, null, systemUserInfo, LockDeleteCause.FORM_TEMPLATE_UPDATE);
             return formTemplateId;
         } else
             return formTemplateDao.saveNew(formTemplate);

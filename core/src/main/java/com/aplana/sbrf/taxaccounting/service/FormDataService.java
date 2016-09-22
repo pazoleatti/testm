@@ -377,8 +377,10 @@ public interface FormDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с НФ
      * @param formDataId идентификатор налоговой формы
      * @param manual признак версии ручного ввода. Если null - то удаляются отчеты для обеих версий
+     * @param userInfo
+     * @param cause
      */
-    void deleteReport(long formDataId, Boolean manual, int userId, String cause);
+    void deleteReport(long formDataId, Boolean manual, TAUserInfo userInfo, LockDeleteCause cause);
 
     void findFormDataIdsByRangeInReportPeriod(int formTemplateId, Date startDate, Date endDate, Logger logger);
 
@@ -437,8 +439,9 @@ public interface FormDataService {
      * @param formDataId
      * @param userInfo
      * @param reportTypes
+     * @param cause
      */
-    void interruptTask(long formDataId, TAUserInfo userInfo, List<ReportType> reportTypes, String cause);
+    void interruptTask(long formDataId, TAUserInfo userInfo, List<ReportType> reportTypes, LockDeleteCause cause);
 
     /**
      * Вывод сообщения, что форма заблокирована
@@ -495,10 +498,11 @@ public interface FormDataService {
     /**
      * Отмена операции, по которым требуется удалить блокировку(+удаление отчетов)
      * @param formDataId
+     * @param userInfo
      * @param reportType
-     * @param userId
+     * @param cause
      */
-    void interruptTask(long formDataId, Boolean manual, int userId, ReportType reportType, String cause);
+    void interruptTask(long formDataId, Boolean manual, TAUserInfo userInfo, ReportType reportType, LockDeleteCause cause);
 
     /**
      * Откатывает все изменения, отменяет асинх задачи, снимает блокирови и восстанавливает данные из контрольной точки

@@ -107,7 +107,7 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
 
                     @Override
                     public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                        formDataService.interruptTask(action.getFormData().getId(), false, userInfo.getUser().getId(), reportType, "Выполнен пересчет данных НФ");
+                        formDataService.interruptTask(action.getFormData().getId(), false, userInfo, reportType, LockDeleteCause.FORM_RECALCULATION);
                     }
 
                     @Override

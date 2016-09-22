@@ -99,7 +99,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
 
                             @Override
                             public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                                formDataService.interruptTask(action.getFormDataId(), false, userInfo.getUser().getId(), reportType, "Выполнена Подготовка/Утверждение/Принятие налоговой формы");
+                                formDataService.interruptTask(action.getFormDataId(), false, userInfo, reportType, LockDeleteCause.FORM_MOVE);
                             }
 
                             @Override

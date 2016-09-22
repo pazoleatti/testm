@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -50,7 +47,9 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
         if (action.isManual()) {
             formDataService.deleteFormData(logger, securityService.currentUserInfo(), action.getFormDataId(), true);
             formDataService.unlock(action.getFormDataId(), userInfo);
-            formDataService.interruptTask(action.getFormDataId(), userInfo, Arrays.asList(ReportType.REFRESH_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD), "Удалена налоговая форма");
+            formDataService.interruptTask(action.getFormDataId(), userInfo,
+                    Arrays.asList(ReportType.REFRESH_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD),
+                    LockDeleteCause.FORM_DELETE);
             return result;
         }
 
