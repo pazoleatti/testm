@@ -130,6 +130,130 @@ public class Summary_5_2bTest extends ScriptTestBase {
                     }
                 });
     }
+    private void mockGetRefBookRecordId() {
+        // для поиска значения ВЗЛ и да/нет
+        when(testHelper.getFormDataService().getRefBookRecordId(anyLong(), anyMap(), anyMap(), anyString(),
+                anyString(), anyString(), any(Date.class), anyInt(), anyString(), any(Logger.class), anyBoolean())).thenAnswer(
+                new Answer<Long>() {
+                    @Override
+                    public Long answer(InvocationOnMock invocation) throws Throwable {
+                        Long refBookId = (Long) invocation.getArguments()[0];
+                        String alias = (String) invocation.getArguments()[3];
+                        String value = (String) invocation.getArguments()[4];
+                        if (value == null || "".equals(value.trim())) {
+                            return null;
+                        }
+                        Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
+                        for (Long id : records.keySet()) {
+                            Map<String, RefBookValue> record = records.get(id);
+                            RefBookAttributeType type = record.get(alias).getAttributeType();
+                            String recordValue = null;
+                            if (type == RefBookAttributeType.STRING){
+                                recordValue = record.get(alias).getStringValue();
+                            } else if (type == RefBookAttributeType.NUMBER) {
+                                recordValue = record.get(alias).getNumberValue().toString();
+                            }
+                            if (value.equals(recordValue)) {
+                                return (Long) record.get(RefBook.RECORD_ID_ALIAS).getNumberValue();
+                            }
+
+                        }
+                        return null;
+                    }
+                });
+    }
+
+    private void mockRefBook520() {
+        // 520-й провайдер
+        final Long refBookId = 520L;
+        RefBookUniversal provider = mock(RefBookUniversal.class);
+        provider.setRefBookId(refBookId);
+        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(refBookId),
+                anyMapOf(Long.class, RefBookDataProvider.class))).thenReturn(provider);
+        Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
+        List<Long> recordIds = new ArrayList<Long>();
+        for (Long recordId : records.keySet()) {
+            recordIds.add(recordId);
+        }
+        when(provider.getUniqueRecordIds(any(Date.class), isNull(String.class))).thenReturn(recordIds);
+        when(provider.getRecordData(eq(recordIds))).thenReturn(records);
+        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+                        String value = ((String) invocation.getArguments()[2]).split("\'")[1];
+                        if (value == null || "".equals(value.trim())) {
+                            return null;
+                        }
+                        Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
+                        for (Long id : records.keySet()) {
+                            Map<String, RefBookValue> record = records.get(id);
+                            if (record.get("INN").getStringValue().equals(value)) {
+                                result.add(record);
+                            }
+                        }
+                        return result;
+                    }
+                });
+        // для текстов сообщений
+        when(testHelper.getRefBookFactory().get(refBookId)).thenAnswer(
+                new Answer<RefBook>() {
+
+                    @Override
+                    public RefBook answer(InvocationOnMock invocation) throws Throwable {
+                        RefBook refBook = new RefBook();
+                        ArrayList<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();
+                        RefBookAttribute e = new RefBookAttribute();
+                        e.setAlias("INN");
+                        e.setName("ИНН/ КИО");
+                        attributes.add(e);
+                        e = new RefBookAttribute();
+                        e.setAlias("NAME");
+                        e.setName("Наименование");
+                        attributes.add(e);
+                        refBook.setAttributes(attributes);
+                        return refBook;
+                    }
+                }
+        );    }
+
+    private void mockRefBook604() {
+        // 604-й провайдер
+        final Long refBookId = 604L;
+        RefBookUniversal provider = mock(RefBookUniversal.class);
+        provider.setRefBookId(refBookId);
+        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(refBookId),
+                anyMapOf(Long.class, RefBookDataProvider.class))).thenReturn(provider);
+        Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
+        List<Long> recordIds = new ArrayList<Long>();
+        for (Long recordId : records.keySet()) {
+            recordIds.add(recordId);
+        }
+        when(provider.getUniqueRecordIds(any(Date.class), isNull(String.class))).thenReturn(recordIds);
+        when(provider.getRecordData(eq(recordIds))).thenReturn(records);
+        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+                        String value = ((String) invocation.getArguments()[2]).split("\'")[1];
+                        if (value == null || "".equals(value.trim())) {
+                            return null;
+                        }
+                        Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
+                        for (Long id : records.keySet()) {
+                            Map<String, RefBookValue> record = records.get(id);
+                            if (record.get("NAME").getStringValue().equals(value)) {
+                                result.add(record);
+                            }
+                        }
+                        return result;
+                    }
+                });
+    }
 
     @Test
     public void calc1Test() throws ParseException {
@@ -241,102 +365,20 @@ public class Summary_5_2bTest extends ScriptTestBase {
 
     /**
      * Строки из каждого источника собираются по-отдельности так что можно тестировать тоже раздельно
+     * Консолидация из 2.1
      * @throws ParseException
      */
     @Test
-    public void compose1SourceTest() throws ParseException {
+    public void compose1Test() throws ParseException {
         mockGetRefBookRecord();
+        mockGetRefBookRecordId();
+        mockRefBook520();
         // для текста сообщения и источников
         FormType formType2_1 = new FormType() {{
             setId(FORM_TYPE_2_1);
             setName("2.1 (Сводный) Реестр выданных Банком гарантий (контргарантий, поручительств)");
         }};
         when(testHelper.getFormTypeService().get(FORM_TYPE_2_1)).thenReturn(formType2_1);
-
-        // для поиска значения ВЗЛ и да/нет
-        when(testHelper.getFormDataService().getRefBookRecordId(anyLong(), anyMap(), anyMap(), anyString(),
-                anyString(), anyString(), any(Date.class), anyInt(), anyString(), any(Logger.class), anyBoolean())).thenAnswer(
-                new Answer<Long>() {
-                    @Override
-                    public Long answer(InvocationOnMock invocation) throws Throwable {
-                        Long refBookId = (Long) invocation.getArguments()[0];
-                        String alias = (String) invocation.getArguments()[3];
-                        String value = (String) invocation.getArguments()[4];
-                        if (value == null || "".equals(value.trim())) {
-                            return null;
-                        }
-                        Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
-                        for (Long id : records.keySet()) {
-                            Map<String, RefBookValue> record = records.get(id);
-                            RefBookAttributeType type = record.get(alias).getAttributeType();
-                            String recordValue = null;
-                            if (type == RefBookAttributeType.STRING){
-                                recordValue = record.get(alias).getStringValue();
-                            } else if (type == RefBookAttributeType.NUMBER) {
-                                recordValue = record.get(alias).getNumberValue().toString();
-                            }
-                            if (value.equals(recordValue)) {
-                                return (Long) record.get(RefBook.RECORD_ID_ALIAS).getNumberValue();
-                            }
-
-                        }
-                        return null;
-                    }
-                });
-        // 520-й провайдер
-        final Long refBookId = 520L;
-        RefBookUniversal provider = mock(RefBookUniversal.class);
-        provider.setRefBookId(refBookId);
-        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(refBookId),
-                anyMapOf(Long.class, RefBookDataProvider.class))).thenReturn(provider);
-        Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
-        List<Long> recordIds = new ArrayList<Long>();
-        for (Long recordId : records.keySet()) {
-            recordIds.add(recordId);
-        }
-        when(provider.getUniqueRecordIds(any(Date.class), isNull(String.class))).thenReturn(recordIds);
-        when(provider.getRecordData(eq(recordIds))).thenReturn(records);
-        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
-                any(RefBookAttribute.class))).thenAnswer(
-                new Answer<PagingResult<Map<String, RefBookValue>>>() {
-                    @Override
-                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
-                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-                        String value = ((String) invocation.getArguments()[2]).split("\'")[1];
-                        if (value == null || "".equals(value.trim())) {
-                            return null;
-                        }
-                        Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
-                        for (Long id : records.keySet()) {
-                            Map<String, RefBookValue> record = records.get(id);
-                            if (record.get("INN").getStringValue().equals(value)) {
-                                result.add(record);
-                            }
-                        }
-                        return result;
-                    }
-                });
-        // для текстов сообщений
-        when(testHelper.getRefBookFactory().get(refBookId)).thenAnswer(
-                new Answer<RefBook>() {
-
-                    @Override
-                    public RefBook answer(InvocationOnMock invocation) throws Throwable {
-                        RefBook refBook = new RefBook();
-                        ArrayList<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();
-                        RefBookAttribute e = new RefBookAttribute();
-                        e.setAlias("INN");
-                        e.setName("ИНН/ КИО");
-                        attributes.add(e);
-                        e = new RefBookAttribute();
-                        e.setAlias("NAME");
-                        e.setName("Наименование");
-                        attributes.add(e);
-                        refBook.setAttributes(attributes);
-                        return refBook;
-                    }
-                }
-        );
 
         // задать источники
         List<Relation> sourcesInfo = new ArrayList<Relation>();
@@ -408,7 +450,7 @@ public class Summary_5_2bTest extends ScriptTestBase {
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         // проверка значении
         DataRow<Cell> expectedRow = testHelper.getFormData().createDataRow();
-        setComposeRow(expectedRow);
+        setComposeRow1(expectedRow);
         DataRow<Cell> resultRow = testHelper.getDataRowHelper().getAllCached().get(0);
         printLog();
         for (String column : resultRow.keySet()) {
@@ -416,6 +458,12 @@ public class Summary_5_2bTest extends ScriptTestBase {
         }
 
         checkLogger();
+
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        Assert.assertEquals(1, entries.size());
+        int i = 0;
+        Assert.assertEquals("Строка 1: Графа «Информация о Клиенте. Наименование Клиента и ОПФ» заполнена данными записи из справочника «Участники ТЦО», в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «A», атрибут «ИНН/ КИО» = «1111111111». В форме-источнике «2.1 (Сводный) Реестр выданных Банком гарантий (контргарантий, поручительств)» указано другое наименование клиента - «test»!", entries.get(i++).getMessage());
+        entries.clear();
     }
 
     private void setDefaultValuesSource2_1(DataRow<Cell> sourceDataRow) throws ParseException {
@@ -454,10 +502,10 @@ public class Summary_5_2bTest extends ScriptTestBase {
         sourceDataRow.getCell("numberGuarantee").setValue("test", sourceDataRow.getIndex());
     }
 
-    private void setComposeRow(DataRow<Cell> dataRow) throws ParseException {
+    private void setComposeRow1(DataRow<Cell> dataRow) throws ParseException {
         dataRow.getCell("code").setValue("test", dataRow.getIndex());
         dataRow.getCell("name").setValue("A", dataRow.getIndex());
-        //dataRow.getCell("country").setValue(1L, dataRow.getIndex());
+        dataRow.getCell("country").setValue(1L, dataRow.getIndex());
         dataRow.getCell("relatedPerson").setValue(2L, dataRow.getIndex()); // да
         dataRow.getCell("offshore").setValue(1L, dataRow.getIndex()); // нет
         dataRow.getCell("innKio").setValue("1111111111", dataRow.getIndex());
@@ -471,6 +519,237 @@ public class Summary_5_2bTest extends ScriptTestBase {
         dataRow.getCell("beneficiaryInn").setValue("test", dataRow.getIndex());
         dataRow.getCell("period").setValue(new BigDecimal("1.00"), dataRow.getIndex());
         dataRow.getCell("obligationType").setValue(1L, dataRow.getIndex());
+        dataRow.getCell("currencyCode").setValue(1L, dataRow.getIndex());
+        dataRow.getCell("sum").setValue(new BigDecimal("1.00"), dataRow.getIndex());
+        dataRow.getCell("rate").setValue(new BigDecimal("1.00"), dataRow.getIndex());
+        dataRow.getCell("provisionPresence").setValue(1L, dataRow.getIndex()); // нет
+        dataRow.getCell("currencyRate").setValue(new BigDecimal("30.0000"), dataRow.getIndex());
+        dataRow.getCell("endSum").setValue(new BigDecimal("30.00"), dataRow.getIndex());
+        dataRow.getCell("groupExclude").setValue(2L, dataRow.getIndex()); // да
+    }
+
+    /**
+     * Строки из каждого источника собираются по-отдельности так что можно тестировать тоже раздельно
+     * Консолидация из 5.2а
+     * @throws ParseException
+     */
+    @Test
+    public void compose2Test() throws ParseException {
+        mockGetRefBookRecord();
+        mockGetRefBookRecordId();
+        mockRefBook520();
+        mockRefBook604();
+        // для текста сообщения и источников
+        FormType formType5_2a = new FormType() {{
+            setId(FORM_TYPE_5_2A);
+            setName("5.2(а) Отчет о выданных Банком инструментах торгового финансирования");
+        }};
+        when(testHelper.getFormTypeService().get(FORM_TYPE_5_2A)).thenReturn(formType5_2a);
+
+        // задать источники
+        List<Relation> sourcesInfo = new ArrayList<Relation>();
+        Relation relation = new Relation();
+        relation.setFormDataId(1L);
+        relation.setFormType(formType5_2a);
+        sourcesInfo.add(relation);
+        when(testHelper.getFormDataService().getSourcesInfo(any(FormData.class), anyBoolean(), anyBoolean(),
+                any(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(sourcesInfo);
+
+        // получение одного источника
+        FormData sourceFormData = new FormData();
+        sourceFormData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//market//market_5_2a//v2016//"));
+        when(testHelper.getFormDataService().get(eq(1L), isNull(Boolean.class))).thenReturn(sourceFormData);
+
+        // получение строк источника
+        List<DataRow<Cell>> sourceDataRows = new ArrayList<DataRow<Cell>>();
+        DataRow<Cell> sourceDataRow = sourceFormData.createDataRow();
+        sourceDataRow.setIndex(1);
+        setDefaultValuesSource5_2a(sourceDataRow);
+        sourceDataRows.add(sourceDataRow);
+
+        DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
+        sourceDataRowHelper.setAllCached(sourceDataRows);
+        when(testHelper.getFormDataService().getDataRowHelper(eq(sourceFormData))).thenReturn(sourceDataRowHelper);
+
+        // консолидация должна пройти нормально
+        int expected = 1;
+        testHelper.execute(FormDataEvent.COMPOSE);
+        // проверка количества строк
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        // проверка значении
+        DataRow<Cell> expectedRow = testHelper.getFormData().createDataRow();
+        setComposeRow2(expectedRow);
+        DataRow<Cell> resultRow = testHelper.getDataRowHelper().getAllCached().get(0);
+        printLog();
+        for (String column : resultRow.keySet()) {
+            Assert.assertEquals(column, expectedRow.getCell(column).getValue(), resultRow.getCell(column).getValue());
+        }
+
+        checkLogger();
+
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        Assert.assertEquals(2, entries.size());
+        int i = 0;
+        Assert.assertEquals("Строка 1: Графа «Информация о Клиенте. Наименование Клиента и ОПФ» заполнена данными записи из справочника «Участники ТЦО», в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «A», атрибут «ИНН/ КИО» = «1111111111». В форме-источнике «5.2(а) Отчет о выданных Банком инструментах торгового финансирования» указано другое наименование клиента - «test»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Информация о Клиенте. Страна регистрации (местоположения Клиента)» заполнена данными записи из справочника «Участники ТЦО», в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «A», атрибут «ИНН/ КИО» = «1111111111». В форме-источнике «5.2(а) Отчет о выданных Банком инструментах торгового финансирования» указано другое наименование страны - «B»!", entries.get(i++).getMessage());
+        entries.clear();
+    }
+
+    private void setDefaultValuesSource5_2a(DataRow<Cell> sourceDataRow) throws ParseException {
+        Long testRecordId = 1L;
+        sourceDataRow.getCell("nameBank").setValue("test", sourceDataRow.getIndex());
+        sourceDataRow.getCell("country").setValue(2L, sourceDataRow.getIndex()); // некорректная страна
+        sourceDataRow.getCell("swift").setValue("1111111111", sourceDataRow.getIndex());
+        sourceDataRow.getCell("creditRating").setValue(testRecordId, sourceDataRow.getIndex());
+        sourceDataRow.getCell("tool").setValue("test", sourceDataRow.getIndex());
+        sourceDataRow.getCell("issueDate").setValue(format.parse("01.01.2014"), sourceDataRow.getIndex());
+        sourceDataRow.getCell("expireDate").setValue(format.parse("01.01.2015"), sourceDataRow.getIndex());
+        sourceDataRow.getCell("period").setValue(new BigDecimal("1.00"), sourceDataRow.getIndex());
+        sourceDataRow.getCell("currency").setValue(testRecordId, sourceDataRow.getIndex());
+        sourceDataRow.getCell("sum").setValue(new BigDecimal("1.00"), sourceDataRow.getIndex());
+        sourceDataRow.getCell("payRate").setValue(new BigDecimal("1.00"), sourceDataRow.getIndex());
+    }
+
+    private void setComposeRow2(DataRow<Cell> dataRow) throws ParseException {
+        dataRow.getCell("code").setValue(null, dataRow.getIndex());
+        dataRow.getCell("name").setValue("A", dataRow.getIndex());
+        dataRow.getCell("country").setValue(1L, dataRow.getIndex());
+        dataRow.getCell("relatedPerson").setValue(2L, dataRow.getIndex()); // да
+        dataRow.getCell("offshore").setValue(1L, dataRow.getIndex()); // нет
+        dataRow.getCell("innKio").setValue("1111111111", dataRow.getIndex());
+        dataRow.getCell("creditRating").setValue(1L, dataRow.getIndex());
+        dataRow.getCell("internationalRating").setValue(1L, dataRow.getIndex());
+        dataRow.getCell("number").setValue("test", dataRow.getIndex());
+        dataRow.getCell("issuanceDate").setValue(format.parse("01.01.2014"), dataRow.getIndex());
+        dataRow.getCell("docDate").setValue(null, dataRow.getIndex());
+        dataRow.getCell("endDate").setValue(format.parse("01.01.2015"), dataRow.getIndex());
+        dataRow.getCell("beneficiaryName").setValue(null, dataRow.getIndex());
+        dataRow.getCell("beneficiaryInn").setValue(null, dataRow.getIndex());
+        dataRow.getCell("period").setValue(new BigDecimal("1.00"), dataRow.getIndex());
+        dataRow.getCell("obligationType").setValue(2L, dataRow.getIndex()); // Иные гарантии и аккредитивы
+        dataRow.getCell("currencyCode").setValue(1L, dataRow.getIndex());
+        dataRow.getCell("sum").setValue(new BigDecimal("1000.00"), dataRow.getIndex());
+        dataRow.getCell("rate").setValue(new BigDecimal("1.00"), dataRow.getIndex());
+        dataRow.getCell("provisionPresence").setValue(2L, dataRow.getIndex()); // да
+        dataRow.getCell("currencyRate").setValue(new BigDecimal("30.0000"), dataRow.getIndex());
+        dataRow.getCell("endSum").setValue(new BigDecimal("30000.00"), dataRow.getIndex());
+        dataRow.getCell("groupExclude").setValue(2L, dataRow.getIndex()); // да
+    }
+
+    /**
+     * Строки из каждого источника собираются по-отдельности так что можно тестировать тоже раздельно
+     * Консолидация из "Данные по непокрытым аккредитивам"
+     * @throws ParseException
+     */
+    @Test
+    public void compose3Test() throws ParseException {
+        mockGetRefBookRecord();
+        mockGetRefBookRecordId();
+        mockRefBook520();
+        // для текста сообщения и источников
+        FormType formTypeLetter = new FormType() {{
+            setId(FORM_TYPE_LETTER);
+            setName("Данные по непокрытым аккредитивам");
+        }};
+        when(testHelper.getFormTypeService().get(FORM_TYPE_LETTER)).thenReturn(formTypeLetter);
+
+        // задать источники
+        List<Relation> sourcesInfo = new ArrayList<Relation>();
+        Relation relation = new Relation();
+        relation.setFormDataId(1L);
+        relation.setFormType(formTypeLetter);
+        sourcesInfo.add(relation);
+        when(testHelper.getFormDataService().getSourcesInfo(any(FormData.class), anyBoolean(), anyBoolean(),
+                any(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(sourcesInfo);
+
+        // получение одного источника
+        FormData sourceFormData = new FormData();
+        sourceFormData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//market//letter_of_credit//v2016//"));
+        when(testHelper.getFormDataService().get(eq(1L), isNull(Boolean.class))).thenReturn(sourceFormData);
+
+        // получение строк источника
+        List<DataRow<Cell>> sourceDataRows = new ArrayList<DataRow<Cell>>();
+        DataRow<Cell> sourceDataRow = sourceFormData.createDataRow();
+        sourceDataRow.setIndex(1);
+        setDefaultValuesSourceLetter(sourceDataRow);
+        sourceDataRows.add(sourceDataRow);
+
+        //// добавляем строки которые не пройдут условия выборки
+        sourceDataRow = sourceFormData.createDataRow();
+        sourceDataRow.setIndex(2);
+        setDefaultValuesSourceLetter(sourceDataRow);
+        // -	длина строки, указанной в графе 5 равна 10
+        sourceDataRow.getCell("innKio").setValue("11111111111", sourceDataRow.getIndex());
+        sourceDataRows.add(sourceDataRow);
+
+        DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
+        sourceDataRowHelper.setAllCached(sourceDataRows);
+        when(testHelper.getFormDataService().getDataRowHelper(eq(sourceFormData))).thenReturn(sourceDataRowHelper);
+
+        // консолидация должна пройти нормально
+        // из 2 строк источника только первая должна пройти выборку
+        int expected = 1;
+        testHelper.execute(FormDataEvent.COMPOSE);
+        // проверка количества строк
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        // проверка значении
+        DataRow<Cell> expectedRow = testHelper.getFormData().createDataRow();
+        setComposeRow3(expectedRow);
+        DataRow<Cell> resultRow = testHelper.getDataRowHelper().getAllCached().get(0);
+        printLog();
+        for (String column : resultRow.keySet()) {
+            Assert.assertEquals(column, expectedRow.getCell(column).getValue(), resultRow.getCell(column).getValue());
+        }
+
+        checkLogger();
+
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        Assert.assertEquals(2, entries.size());
+        int i = 0;
+        Assert.assertEquals("Строка 1: Графа «Информация о Клиенте. Наименование Клиента и ОПФ» заполнена данными записи из справочника «Участники ТЦО», в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «A», атрибут «ИНН/ КИО» = «1111111111». В форме-источнике «Данные по непокрытым аккредитивам» указано другое наименование клиента - «test»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Информация о Клиенте. Страна регистрации (местоположения Клиента)» заполнена данными записи из справочника «Участники ТЦО», в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «A», атрибут «ИНН/ КИО» = «1111111111». В форме-источнике «Данные по непокрытым аккредитивам» указано другое наименование страны - «B»!", entries.get(i++).getMessage());
+        entries.clear();
+    }
+
+    private void setDefaultValuesSourceLetter(DataRow<Cell> sourceDataRow) throws ParseException {
+        Long testRecordId = 1L;
+        // -	длина строки, указанной в графе 5 равна 10
+        sourceDataRow.getCell("innKio").setValue("1111111111", sourceDataRow.getIndex());
+
+        sourceDataRow.getCell("productType").setValue("test", sourceDataRow.getIndex());
+        sourceDataRow.getCell("name").setValue("test", sourceDataRow.getIndex());
+        sourceDataRow.getCell("country").setValue(2L, sourceDataRow.getIndex()); // другая страна
+        sourceDataRow.getCell("docDate").setValue(format.parse("01.01.2014"), sourceDataRow.getIndex());
+        sourceDataRow.getCell("docNumber").setValue("test", sourceDataRow.getIndex());
+        sourceDataRow.getCell("creditDate").setValue(format.parse("01.01.2014"), sourceDataRow.getIndex());
+        sourceDataRow.getCell("creditEndDate").setValue(format.parse("01.01.2015"), sourceDataRow.getIndex());
+        sourceDataRow.getCell("sum").setValue(new BigDecimal("1.00"), sourceDataRow.getIndex());
+        sourceDataRow.getCell("currency").setValue(testRecordId, sourceDataRow.getIndex());
+        sourceDataRow.getCell("period").setValue(new BigDecimal("1.00"), sourceDataRow.getIndex());
+        sourceDataRow.getCell("creditRating").setValue(testRecordId, sourceDataRow.getIndex());
+        sourceDataRow.getCell("faceValueStr").setValue("test", sourceDataRow.getIndex());
+        sourceDataRow.getCell("faceValueNum").setValue(new BigDecimal("1.00"), sourceDataRow.getIndex());
+        sourceDataRow.getCell("paymentSchedule").setValue("test", sourceDataRow.getIndex());
+        sourceDataRow.getCell("sign").setValue(testRecordId, sourceDataRow.getIndex());
+    }
+
+    private void setComposeRow3(DataRow<Cell> dataRow) throws ParseException {
+        dataRow.getCell("code").setValue(null, dataRow.getIndex());
+        dataRow.getCell("name").setValue("A", dataRow.getIndex());
+        dataRow.getCell("country").setValue(1L, dataRow.getIndex());
+        dataRow.getCell("relatedPerson").setValue(2L, dataRow.getIndex()); // да
+        dataRow.getCell("offshore").setValue(1L, dataRow.getIndex()); // нет
+        dataRow.getCell("innKio").setValue("1111111111", dataRow.getIndex());
+        dataRow.getCell("creditRating").setValue(1L, dataRow.getIndex());
+        dataRow.getCell("internationalRating").setValue(1L, dataRow.getIndex());
+        dataRow.getCell("number").setValue("test", dataRow.getIndex());
+        dataRow.getCell("issuanceDate").setValue(format.parse("01.01.2014"), dataRow.getIndex());
+        dataRow.getCell("docDate").setValue(format.parse("01.01.2014"), dataRow.getIndex());
+        dataRow.getCell("endDate").setValue(format.parse("01.01.2015"), dataRow.getIndex());
+        dataRow.getCell("beneficiaryName").setValue(null, dataRow.getIndex());
+        dataRow.getCell("beneficiaryInn").setValue(null, dataRow.getIndex());
+        dataRow.getCell("period").setValue(new BigDecimal("1.00"), dataRow.getIndex());
+        dataRow.getCell("obligationType").setValue(2L, dataRow.getIndex()); // Иные гарантии и аккредитивы
         dataRow.getCell("currencyCode").setValue(1L, dataRow.getIndex());
         dataRow.getCell("sum").setValue(new BigDecimal("1.00"), dataRow.getIndex());
         dataRow.getCell("rate").setValue(new BigDecimal("1.00"), dataRow.getIndex());

@@ -580,7 +580,7 @@ def spRatingIds = []
 def getSpRatingIds() {
     if (spRatingIds.isEmpty()) {
         def ratings = ["AAA", "A", "A-", "A+", "AA", "AA+", "AA-", "BBB+", "BBB", "BBB-", "BB", "BB+", "BB-"]
-        def filter = ratings.collect { "INTERNATIONAL_CREDIT_RATING = '" + it + "'" }.join(" OR ")
+        def filter = ratings.collect { "NAME = '" + it + "'" }.join(" OR ")
         def records = getRecords(604L, filter, getReportPeriodEndDate())
         if (!records.isEmpty()) {
             spRatingIds = records.collect { it.record_id.value }
@@ -654,8 +654,8 @@ def calc3or4(def row, def rowSource, def tmpValue, SourceType sourceType, def is
             def alias = (isCalcCountry ? 'COUNTRY_CODE' : 'NAME')
             result = records.get(0).get(alias)?.value
 
-            // сообщение об ошибках при консолидации 2 и 3
-            if (result != tmpValue) {
+            // сообщение об ошибках при консолидации 2 и 3 (в источнике 2.1 страны нет)
+            if (result != tmpValue && !(isCalcCountry && sourceType == SourceType.TYPE_2_1)) {
                 def msg = 'Строка %s: Графа «%s» заполнена данными записи из справочника «Участники ТЦО», ' +
                         'в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», ' +
                         'атрибут «%s» = «%s». В форме-источнике «%s» указано другое наименование %s - «%s»!'
