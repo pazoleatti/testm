@@ -839,6 +839,7 @@ public class FormDataServiceImpl implements FormDataService {
                 if (!formData.isSorted() && WorkflowState.ACCEPTED.equals(workflowMove.getToState())) {
                     FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
                     if (!formTemplate.isFixedRows()) {
+                        stateLogger.updateState("Выполняется сортировка строк налоговой формы");
                         // Отработка скриптом события сортировки
                         if (formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SORT_ROWS, logger, null)) {
                             // Сортировка актуальна (событие сортировки отработало)
