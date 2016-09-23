@@ -51,4 +51,30 @@
     <cell alias="endSum" colSpan="1" rowSpan="1" value="Сумма обязательства в рублях на дату выдачи"/>
     <cell alias="groupExclude" colSpan="1" rowSpan="1" value="Исключить из группировки (Да / Нет)"/>
   </row>
+  <row alias="">
+    <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
+    <cell alias="code" colSpan="1" rowSpan="1" value="1.1"/>
+    <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
+    <cell alias="country" colSpan="1" rowSpan="1" value="3"/>
+    <cell alias="relatedPerson" colSpan="1" rowSpan="1" value="4"/>
+    <cell alias="offshore" colSpan="1" rowSpan="1" value="5"/>
+    <cell alias="innKio" colSpan="1" rowSpan="1" value="6"/>
+    <cell alias="creditRating" colSpan="1" rowSpan="1" value="7"/>
+    <cell alias="internationalRating" colSpan="1" rowSpan="1" value="8"/>
+    <cell alias="number" colSpan="1" rowSpan="1" value="9"/>
+    <cell alias="issuanceDate" colSpan="1" rowSpan="1" value="10.1"/>
+    <cell alias="docDate" colSpan="1" rowSpan="1" value="10.2"/>
+    <cell alias="endDate" colSpan="1" rowSpan="1" value="11"/>
+    <cell alias="beneficiaryName" colSpan="1" rowSpan="1" value="12"/>
+    <cell alias="beneficiaryInn" colSpan="1" rowSpan="1" value="13"/>
+    <cell alias="period" colSpan="1" rowSpan="1" value="14"/>
+    <cell alias="obligationType" colSpan="1" rowSpan="1" value="15"/>
+    <cell alias="currencyCode" colSpan="1" rowSpan="1" value="16"/>
+    <cell alias="sum" colSpan="1" rowSpan="1" value="17"/>
+    <cell alias="rate" colSpan="1" rowSpan="1" value="18"/>
+    <cell alias="provisionPresence" colSpan="1" rowSpan="1" value="19"/>
+    <cell alias="currencyRate" colSpan="1" rowSpan="1" value="20"/>
+    <cell alias="endSum" colSpan="1" rowSpan="1" value="21"/>
+    <cell alias="groupExclude" colSpan="1" rowSpan="1" value="22"/>
+  </row>
 </rows>
