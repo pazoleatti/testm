@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.SystemType;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataCompositionServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
@@ -22,7 +21,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -513,7 +511,7 @@ public class FormDataServiceTest extends Assert{
         doReturn(false).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
 
         dataService.updateAutoNumeration(formData, eq(any(Logger.class)), any(TAUserInfo.class));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true), anyBoolean());
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true), anyBoolean(), any(LockStateLogger.class));
     }
 
     /**
@@ -531,7 +529,7 @@ public class FormDataServiceTest extends Assert{
         doReturn(1L).when(formData).getId();
 
         dataService.updateAutoNumeration(formData, eq(any(Logger.class)), any(TAUserInfo.class));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true), anyBoolean());
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true), anyBoolean(), any(LockStateLogger.class));
     }
 
     /**
@@ -549,7 +547,7 @@ public class FormDataServiceTest extends Assert{
         doReturn(WorkflowState.CREATED).when(formData).getState();
 
         dataService.updateAutoNumeration(formData, eq(any(Logger.class)), any(TAUserInfo.class));
-        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true), anyBoolean());
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true), anyBoolean(), any(LockStateLogger.class));
     }
 
     /**
@@ -562,8 +560,8 @@ public class FormDataServiceTest extends Assert{
 
         doReturn(false).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
 
-        dataService.updatePreviousRowNumberAttr(any(FormData.class), any(WorkflowMove.class), any(Logger.class), any(TAUserInfo.class));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(false), anyBoolean());
+        dataService.updatePreviousRowNumberAttr(any(FormData.class), any(WorkflowMove.class), any(Logger.class), any(TAUserInfo.class), any(LockStateLogger.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(false), anyBoolean(), any(LockStateLogger.class));
     }
 
     /**
@@ -578,8 +576,8 @@ public class FormDataServiceTest extends Assert{
 
         doReturn(true).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
 
-        dataService.updatePreviousRowNumberAttr(formData, WorkflowMove.ACCEPTED_TO_APPROVED, logger, userInfo);
-        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(false), anyBoolean());
+        dataService.updatePreviousRowNumberAttr(formData, WorkflowMove.ACCEPTED_TO_APPROVED, logger, userInfo, null);
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(false), anyBoolean(), any(LockStateLogger.class));
     }
 
     @Test

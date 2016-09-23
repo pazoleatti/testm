@@ -1166,8 +1166,7 @@ public class FormDataServiceImpl implements FormDataService {
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
         auditService.add(workflowMove.getEvent(), userInfo, null, formData, workflowMove.getEvent().getTitle(), null);
 
-        stateLogger.updateState("Обновление сквозной нумерации");
-        updatePreviousRowNumberAttr(formData, workflowMove, logger, userInfo);
+        updatePreviousRowNumberAttr(formData, workflowMove, logger, userInfo, stateLogger);
     }
 
     private static final String CORRECTION_PATTERN = ", «%s»";
@@ -1249,11 +1248,7 @@ public class FormDataServiceImpl implements FormDataService {
         stateLogger.updateState("Удаление отчетов формы");
         reportService.delete(formData.getId(), null);
         //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией
-        FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
-        if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
-            stateLogger.updateState("Обновление сквозной нумерации");
-            doUpdatePreviousRowNumber(formData, logger, userInfo, false, formData.getState() == WorkflowState.CREATED);
-        }
+        updatePreviousRowNumber(formData, logger, userInfo, false, formData.getState() == WorkflowState.CREATED, stateLogger);
         //Обновление записей о консолидации
         sourceService.deleteFDConsolidationInfo(Arrays.asList(formData.getId()));
         sourceService.addFormDataConsolidationInfo(formData.getId(), srcAcceptedIds);
@@ -1598,7 +1593,7 @@ public class FormDataServiceImpl implements FormDataService {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         if (!formData.isManual() && beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
                 && dataRowDao.isDataRowsCountChanged(formData)) {
-            updatePreviousRowNumber(formData, logger, user, true, false);
+            updatePreviousRowNumber(formData, logger, user, true, false, null);
         }
         // Пересчет текущего кол-ва нумеруемых граф
         FormTemplate template = formTemplateService.get(formData.getFormTemplateId());
@@ -1610,67 +1605,68 @@ public class FormDataServiceImpl implements FormDataService {
     /**
      * Обновление значений атрибута "Номер последней строки предыдущей НФ" при переходе между ЖЦ
      *
+     * @param formData     редактируемый экземпляр НФ
      * @param workflowMove переход по ЖЦ
      * @param logger       логгер для регистрации ошибок
-     * @param formData     редактируемый экземпляр НФ
+     * @param stateLogger
      */
-    public void updatePreviousRowNumberAttr(FormData formData, WorkflowMove workflowMove, Logger logger, TAUserInfo user) {
+    public void updatePreviousRowNumberAttr(FormData formData, WorkflowMove workflowMove, Logger logger, TAUserInfo user, LockStateLogger stateLogger) {
         if (canUpdatePreviousRowNumberWhenDoMove(workflowMove)) {
-            updatePreviousRowNumber(formData, logger, user, false, workflowMove.getToState() == WorkflowState.CREATED);
+            updatePreviousRowNumber(formData, logger, user, false, workflowMove.getToState() == WorkflowState.CREATED, stateLogger);
         }
     }
 
     @Override
     public void updatePreviousRowNumber(FormData formData, TAUserInfo user) {
-        updatePreviousRowNumber(formData, null, user, false, formData.getState() == WorkflowState.CREATED);
+        updatePreviousRowNumber(formData, null, user, false, formData.getState() == WorkflowState.CREATED, null);
     }
 
     @Override
-    public void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user, boolean isSave, boolean useZero) {
+    public void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user, boolean isSave, boolean useZero, LockStateLogger stateLogger) {
         FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
-        updatePreviousRowNumber(formData, formTemplate, logger, user, isSave, useZero);
+        updatePreviousRowNumber(formData, formTemplate, logger, user, isSave, useZero, stateLogger);
     }
 
     @Override
-    public void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user, boolean isSave, boolean useZero) {
+    public void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user, boolean isSave, boolean useZero, LockStateLogger stateLogger) {
         if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
-            doUpdatePreviousRowNumber(formData, logger, user, isSave, useZero);
-        }
-    }
-
-    private void doUpdatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user, boolean isSave, boolean useZero) {
-        String msg = null;
-        // Получить налоговый период
-        TaxPeriod taxPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod();
-        // Получить тип налога
-        TaxType taxType = formData.getFormType().getTaxType();
-        // Получить список экземпляров НФ следующих периодов
-        List<FormData> formDataList = formDataDao.getNextFormDataList(formData, taxPeriod);
-
-        // Устанавливаем значение для текущего экземпляра НФ
-        Integer previousRowNumber = (useZero ? 0 : getPreviousRowNumber(formData, null));
-        formDataDao.updatePreviousRowNumber(formData, previousRowNumber);
-
-        StringBuilder stringBuilder = new StringBuilder();
-        // Обновляем последующие периоды
-        int size = formDataList.size();
-
-        for (FormData data : formDataList) {
-            formDataDao.updatePreviousRowNumber(data, getPreviousRowNumber(data, isSave ? formData : null));
-            deleteReport(data.getId(), null, user, LockDeleteCause.FORM_AUTO_NUMERATION_UPDATE);
-            ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
-            stringBuilder.append(reportPeriod.getName()).append(" ").append(reportPeriod.getTaxPeriod().getYear());
-            if (--size > 0) {
-                stringBuilder.append(", ");
+            if (stateLogger != null) {
+                stateLogger.updateState("Обновление сквозной нумерации");
             }
-            msg = "Сквозная нумерация обновлена в " +
-                    (taxType.isTax() ? "налоговых формах" : "формах") +
-                    " следующих периодов текущей сквозной нумерации: " +
-                    stringBuilder.toString();
-        }
 
-        if (logger != null && msg != null) {
-            logger.info(msg);
+            String msg = null;
+            // Получить налоговый период
+            TaxPeriod taxPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod();
+            // Получить тип налога
+            TaxType taxType = formData.getFormType().getTaxType();
+            // Получить список экземпляров НФ следующих периодов
+            List<FormData> formDataList = formDataDao.getNextFormDataList(formData, taxPeriod);
+
+            // Устанавливаем значение для текущего экземпляра НФ
+            Integer previousRowNumber = (useZero ? 0 : getPreviousRowNumber(formData, null));
+            formDataDao.updatePreviousRowNumber(formData, previousRowNumber);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            // Обновляем последующие периоды
+            int size = formDataList.size();
+
+            for (FormData data : formDataList) {
+                formDataDao.updatePreviousRowNumber(data, getPreviousRowNumber(data, isSave ? formData : null));
+                deleteReport(data.getId(), null, user, LockDeleteCause.FORM_AUTO_NUMERATION_UPDATE);
+                ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
+                stringBuilder.append(reportPeriod.getName()).append(" ").append(reportPeriod.getTaxPeriod().getYear());
+                if (--size > 0) {
+                    stringBuilder.append(", ");
+                }
+                msg = "Сквозная нумерация обновлена в " +
+                        (taxType.isTax() ? "налоговых формах" : "формах") +
+                        " следующих периодов текущей сквозной нумерации: " +
+                        stringBuilder.toString();
+            }
+
+            if (logger != null && msg != null) {
+                logger.info(msg);
+            }
         }
     }
 
@@ -1684,7 +1680,7 @@ public class FormDataServiceImpl implements FormDataService {
     public void batchUpdatePreviousNumberRow(FormTemplate formTemplate, TAUserInfo user) {
         List<FormData> formDataList = formDataDao.getFormDataListByTemplateId(formTemplate.getId());
         for (FormData formData : formDataList) {
-            updatePreviousRowNumber(formData, formTemplate, null, user, false, false);
+            updatePreviousRowNumber(formData, formTemplate, null, user, false, false, null);
         }
     }
 

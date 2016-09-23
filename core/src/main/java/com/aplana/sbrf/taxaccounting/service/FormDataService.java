@@ -292,22 +292,22 @@ public interface FormDataService {
 
     /**
      * Обновить Номер последней строки предыдущей НФ
-     *  @param formData экземпляр НФ, для которой необходимо обновить
+     * @param formData экземпляр НФ, для которой необходимо обновить
      * @param logger   логгер для регистрации ошибок
-     * @param save
      * @param useZero признак того, что при пересчете начать с 0
+     * @param stateLogger для обновления статуса асинхронных задач
      */
-    void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user, boolean isSave, boolean useZero);
+    void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user, boolean isSave, boolean useZero, LockStateLogger stateLogger);
 
     /**
      * Обновить Номер последней строки предыдущей НФ
-     *  @param formData     экземпляр НФ, для которой необходимо обновить
+     * @param formData     экземпляр НФ, для которой необходимо обновить
      * @param formTemplate макет НФ
      * @param logger       логгер для регистрации ошибок
-     * @param save
      * @param useZero признак того, что при пересчете начать с 0
+     * @param stateLogger для обновления статуса асинхронных задач
      */
-    void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user, boolean isSave, boolean useZero);
+    void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user, boolean isSave, boolean useZero, LockStateLogger stateLogger);
 
     /**
      * Получить налоговые формы которые имеют признак ручного ввода
