@@ -46,6 +46,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.text.RuleBasedCollator;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -78,6 +79,8 @@ public final class ScriptUtils {
     public static final String KPP_MEANING = RefBookUtils.KPP_MEANING;
     public static final String TAX_ORGAN_PATTERN = RefBookUtils.TAX_ORGAN_PATTERN;
     public static final String TAX_ORGAN_MEANING = RefBookUtils.TAX_ORGAN_MEANING;
+    public static final String COLLATOR_RULES_RUSSIAN = "< 0 < 1 < 2 < 3 < 4 < 5 < 6 < 7 < 8 < 9 < a,A < b,B < c,C < d,D < e,E < f,F < g,G < h,H < i,I < j,J < k,K < l,L < m,M < n,N < o,O < p,P < q,Q < r,R < s,S < t,T < u,U < v,V < w,W < x,X < y,Y < z,Z < " +
+            "а,А < б,Б < в,В < г,Г < д,Д < е,Е < ё,Ё < ж,Ж < з,З < и,И < й,Й < к,К < л,Л < м,М < н,Н < о,О < п,П < р,Р < с,С < т,Т < у,У < ф,Ф < х,Х < ц,Ц < ч,Ч < ш,Ш < щ,Щ < ъ,Ъ < ы,Ы < ь,Ь < э,Э < ю,Ю < я,Я";
     public static final String WRONG_COLUMN_TYPE = "В указанном диапазоне граф «%s» - «%s» должны " +
             "быть только графы численного типа. Графа «%s» имеет неверный тип.";
     public static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
@@ -796,6 +799,60 @@ public final class ScriptUtils {
                     }
                     if (v1 instanceof String) {
                         int result = ((String) v1).compareToIgnoreCase((String) v2);
+                        if (result != 0) {
+                            return result;
+                        } else {
+                            continue;
+                        }
+                    }
+                    if (v1 instanceof Comparable) {
+                        int result = ((Comparable) v1).compareTo(v2);
+                        if (result != 0) {
+                            return result;
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+                return 0;
+            }
+        });
+    }
+
+    /**
+     * Сортировка строк по алфавиту
+     */
+    @SuppressWarnings("unused")
+    public static void sortRowsRussian(List<DataRow<Cell>> dataRows, final List<String> groupColumns) throws ParseException {
+        final RuleBasedCollator russianCollator = new RuleBasedCollator(COLLATOR_RULES_RUSSIAN);
+        Collections.sort(dataRows, new Comparator<DataRow<Cell>>() {
+            @Override
+            public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+                if (o1.getAlias() != null && o2.getAlias() == null) {
+                    return 1;
+                }
+                if (o1.getAlias() == null && o2.getAlias() != null) {
+                    return -1;
+                }
+                if (o1.getAlias() != null && o2.getAlias() != null) {
+                    return 0;
+                }
+
+                for (String alias : groupColumns) {
+                    boolean isRefBook = Arrays.asList(ColumnType.REFBOOK, ColumnType.REFERENCE).contains(o1.getCell(alias).getColumn().getColumnType());
+                    Object v1 = isRefBook ? o1.getCell(alias).getRefBookDereference() : o1.getCell(alias).getValue();
+                    Object v2 = isRefBook ? o2.getCell(alias).getRefBookDereference() : o2.getCell(alias).getValue();
+                    if (v1 == null && v2 == null) {
+                        continue;
+                    }
+                    if (v1 == null && v2 != null) {
+                        return 1;
+                    }
+                    if (v1 != null && v2 == null) {
+                        return -1;
+                    }
+                    if (v1 instanceof String) {
+                        int result = russianCollator.compare((String) v1,(String) v2);
                         if (result != 0) {
                             return result;
                         } else {
