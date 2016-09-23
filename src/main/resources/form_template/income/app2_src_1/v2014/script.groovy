@@ -164,6 +164,9 @@ def autoFillColumns = ['income', 'deduction', 'taxBase']
 @Field
 def editableColumns = allColumns - autoFillColumns
 
+@Field
+def sortColumns = ['surname', 'name', 'patronymic']
+
 // Проверяемые на пустые значения атрибуты (графа 3, 4, 6-10, 22, 23, 25, 26)
 @Field
 def nonEmptyColumns = ['surname', 'name', 'status', 'birthday', 'citizenship', 'code', 'series', 'taxRate', 'income', 'taxBase', 'calculated']
@@ -523,15 +526,14 @@ def getNewRow() {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows(def saveInDB = true) {
+void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, null, null)
-    if (saveInDB) {
-        dataRowHelper.saveSort()
-    } else {
-        updateIndexes(dataRows);
-    }
+    def columns = sortColumns + (allColumns - sortColumns)
+    // Сортировка (без подитогов)
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
+    sortRows(dataRows, columns)
+    dataRowHelper.saveSort();
 }
 
 // Округляет число до требуемой точности

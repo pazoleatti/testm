@@ -151,7 +151,7 @@ public class LetterOfCreditTest extends ScriptTestBase {
         row.getCell("currency").setValue(2L, null);
         dataRows.add(row);
 
-        testHelper.execute(FormDataEvent.CALCULATE);
+        testHelper.execute(FormDataEvent.CHECK);
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
@@ -162,7 +162,7 @@ public class LetterOfCreditTest extends ScriptTestBase {
 
         // для успешного прохождения всех ЛП:
         dataRows.remove(1);
-        testHelper.execute(FormDataEvent.CALCULATE);
+        testHelper.execute(FormDataEvent.CHECK);
         Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
     }
 
