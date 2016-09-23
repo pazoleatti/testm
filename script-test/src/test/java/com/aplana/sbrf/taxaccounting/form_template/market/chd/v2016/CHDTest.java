@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
  * Отчет о кредитах (ЦХД)
  */
 public class CHDTest extends ScriptTestBase {
-    private static final int TYPE_ID = 900;
+    private static final int TYPE_ID = 903;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
