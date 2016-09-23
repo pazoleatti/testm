@@ -37,12 +37,6 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE:
-        // Расчетные поля на форме отсутствуют.
-        calc()
-        logicCheck()
-        // formDataService.saveCachedDataRows(formData, logger)
-        break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
@@ -178,10 +172,6 @@ void logicCheck() {
 /** Группировка по графе 5, 7, 8. */
 String getKey(def row) {
     return (row.innKio?.trim() + "#" + row.docNumber?.trim() + "#" + row.creditDate?.format('dd.MM.yyyy')).toLowerCase()
-}
-
-void calc() {
-    // Расчетные поля на форме отсутствуют.
 }
 
 void importData() {
