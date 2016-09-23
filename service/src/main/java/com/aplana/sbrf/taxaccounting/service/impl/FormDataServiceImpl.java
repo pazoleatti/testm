@@ -300,8 +300,6 @@ public class FormDataServiceImpl implements FormDataService {
                     String uuid = logEntryService.save(logger.getEntries());
                     throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
                 }
-            } else if (isInner) {
-                logger.info("Данные загружены");
             }
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
