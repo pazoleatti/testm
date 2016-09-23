@@ -94,7 +94,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
 
                 @Override
                 public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                    declarationDataService.interruptTask(action.getDeclarationId(), userInfo, reportType, LockDeleteCause.DECLARATION_RECALCULATION);
+                    declarationDataService.interruptTask(action.getDeclarationId(), userInfo, reportType, TaskInterruptCause.DECLARATION_RECALCULATION);
                 }
 
                 @Override

@@ -67,7 +67,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
                         FormDataEvent.COMPOSE.getTitle(), "Переформирована", departmentName, kindName, formName);
             }
 			// Удаляем ранее сформированные отчеты - стали неактуальными
-            formDataService.deleteReport(formData.getId(), formData.isManual(), scriptComponentContext.getUserInfo(), LockDeleteCause.FORM_MOVE);
+            formDataService.deleteReport(formData.getId(), formData.isManual(), scriptComponentContext.getUserInfo(), TaskInterruptCause.FORM_MOVE);
 			//TODO Точно ли инициировано системой? Сейчас консолидируем по кнопке "Консолидировать". Аналогично в начале этого метода
             logBusinessService.add(formData.getId(), null, scriptComponentContext.getUserInfo(), FormDataEvent.COMPOSE, "Событие инициировано Системой");
 		}

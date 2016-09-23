@@ -666,7 +666,7 @@ public class FormDataServiceImpl implements FormDataService {
         formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
         formDataDao.savePerformerSigner(formData);
 
-        deleteReport(formData.getId(), null, userInfo, LockDeleteCause.FORM_PERFORMER_UPDATE);
+        deleteReport(formData.getId(), null, userInfo, TaskInterruptCause.FORM_PERFORMER_UPDATE);
     }
 
     /**
@@ -718,7 +718,7 @@ public class FormDataServiceImpl implements FormDataService {
         // Обновление
         formDataDao.save(formData);
         dataRowDao.refreshRefBookLinks(formData);
-        deleteReport(formData.getId(), formData.isManual(), userInfo, LockDeleteCause.FORM_DATA_UPDATE);
+        deleteReport(formData.getId(), formData.isManual(), userInfo, TaskInterruptCause.FORM_DATA_UPDATE);
         // ЖА и история изменений
         if (!editMode) {
             logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
@@ -780,12 +780,12 @@ public class FormDataServiceImpl implements FormDataService {
                 if (manual) {
                     formDataAccessService.canDeleteManual(logger, userInfo, formDataId);
                     formDataDao.deleteManual(formData);
-                    deleteReport(formDataId, true, userInfo, LockDeleteCause.FORM_MANUAL_DELETE);
+                    deleteReport(formDataId, true, userInfo, TaskInterruptCause.FORM_MANUAL_DELETE);
                 } else {
                     formDataAccessService.canDelete(userInfo, formDataId);
                     sourceService.deleteFDConsolidationInfo(Arrays.asList(formDataId));
                     formDataDao.delete(formData.getFormTemplateId(), formDataId);
-                    interruptTask(formDataId, false, userInfo, reportType, LockDeleteCause.FORM_DELETE);
+                    interruptTask(formDataId, false, userInfo, reportType, TaskInterruptCause.FORM_DELETE);
                     auditService.add(FormDataEvent.DELETE, userInfo, null, formData, "Форма удалена", null);
                 }
             } finally {
@@ -1159,7 +1159,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         //Считаем что при наличие версии ручного ввода движение о жц невозможно
         stateLogger.updateState("Удаление отчетов формы");
-        deleteReport(formData.getId(), null, userInfo, LockDeleteCause.FORM_MOVE);
+        deleteReport(formData.getId(), null, userInfo, TaskInterruptCause.FORM_MOVE);
         dataRowDao.removeCheckPoint(formData);
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
@@ -1535,7 +1535,7 @@ public class FormDataServiceImpl implements FormDataService {
         try {
             List<Long> formDataIds = formPerformerDao.getFormDataId(depTBId, dateFrom, dateTo);
             for (Long formDataId : formDataIds)
-                deleteReport(formDataId, null, user, LockDeleteCause.FD_TB_NAME_UPDATE);
+                deleteReport(formDataId, null, user, TaskInterruptCause.FD_TB_NAME_UPDATE);
             formDataDao.updateFDPerformerTBDepartmentNames(depTBId, depName, dateFrom, dateTo, isChangeTB);
         } catch (ServiceException e) {
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
@@ -1549,7 +1549,7 @@ public class FormDataServiceImpl implements FormDataService {
         try {
             List<Long> formDataIds = formPerformerDao.getFormDataId(depTBId, dateFrom, dateTo);
             for (Long formDataId : formDataIds)
-                deleteReport(formDataId, null, user, LockDeleteCause.FD_DEPARTMENT_NAME_UPDATE);
+                deleteReport(formDataId, null, user, TaskInterruptCause.FD_DEPARTMENT_NAME_UPDATE);
             formDataDao.updateFDPerformerDepartmentNames(depTBId, depName, dateFrom, dateTo);
         } catch (ServiceException e) {
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
@@ -1651,7 +1651,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             for (FormData data : formDataList) {
                 formDataDao.updatePreviousRowNumber(data, getPreviousRowNumber(data, isSave ? formData : null));
-                deleteReport(data.getId(), null, user, LockDeleteCause.FORM_AUTO_NUMERATION_UPDATE);
+                deleteReport(data.getId(), null, user, TaskInterruptCause.FORM_AUTO_NUMERATION_UPDATE);
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
                 stringBuilder.append(reportPeriod.getName()).append(" ").append(reportPeriod.getTaxPeriod().getYear());
                 if (--size > 0) {
@@ -1820,7 +1820,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void deleteReport(long formDataId, Boolean manual, TAUserInfo userInfo, LockDeleteCause cause) {
+    public void deleteReport(long formDataId, Boolean manual, TAUserInfo userInfo, TaskInterruptCause cause) {
         interruptTask(formDataId, manual, userInfo, ReportType.DELETE_REPORT_FD, cause);
     }
 
@@ -1851,7 +1851,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void interruptTask(long formDataId, TAUserInfo userInfo, List<ReportType> reportTypes, LockDeleteCause cause) {
+    public void interruptTask(long formDataId, TAUserInfo userInfo, List<ReportType> reportTypes, TaskInterruptCause cause) {
         List<String> lockKeys = new ArrayList<String>();
         for (ReportType reportType : reportTypes)
             lockKeys.add(generateTaskKey(formDataId, reportType));
@@ -2100,7 +2100,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void interruptTask(long formDataId, Boolean manual, TAUserInfo userInfo, ReportType reportType, LockDeleteCause cause) {
+    public void interruptTask(long formDataId, Boolean manual, TAUserInfo userInfo, ReportType reportType, TaskInterruptCause cause) {
         ReportType[] reportTypes = getCheckTaskList(reportType);
         if (reportTypes == null) return;
         Boolean manualReport;
@@ -2147,7 +2147,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void restoreCheckPoint(long formDataId, boolean manual, TAUserInfo userInfo) {
-        interruptTask(formDataId, userInfo, Arrays.asList(ReportType.REFRESH_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD), LockDeleteCause.FORM_DATA_CHANGE_CANCEL);
+        interruptTask(formDataId, userInfo, Arrays.asList(ReportType.REFRESH_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD), TaskInterruptCause.FORM_DATA_CHANGE_CANCEL);
         if (formDataDao.isEdited(formDataId)) {
             dataRowDao.restoreCheckPoint(getFormData(userInfo, formDataId, manual, new Logger()));
             formDataDao.restoreSorted(formDataId);

@@ -851,7 +851,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (refBookId == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
                 //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
                 formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo(),
-                        LockDeleteCause.REFBOOK_RECORD_MODIFY.setArgs(refBook.getName()));
+                        TaskInterruptCause.REFBOOK_RECORD_MODIFY.setArgs(refBook.getName()));
                 /*
                 reportService.delete(form.getFormDataId(), null);
                 List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);

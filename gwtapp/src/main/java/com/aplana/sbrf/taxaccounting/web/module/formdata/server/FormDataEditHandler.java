@@ -55,7 +55,7 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
             result.setLock(true);
             return result;
         } else {
-            formDataService.interruptTask(formData.getId(), formData.isManual(), userInfo, reportType, LockDeleteCause.FORM_EDIT);
+            formDataService.interruptTask(formData.getId(), formData.isManual(), userInfo, reportType, TaskInterruptCause.FORM_EDIT);
         }
 
         return result;

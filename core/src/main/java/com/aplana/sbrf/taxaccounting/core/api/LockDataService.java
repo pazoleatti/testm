@@ -183,18 +183,18 @@ public interface LockDataService {
 	 * @param lockData блокировка
      * @param userInfo идентификатор пользователя, отменяющего блокировку
 	 * @param force признак принудительного снятия блокировки
-	 * @param cause
+	 * @param cause причина остановки задачи
 	 */
-    void interruptTask(LockData lockData, TAUserInfo userInfo, boolean force, LockDeleteCause cause);
+    void interruptTask(LockData lockData, TAUserInfo userInfo, boolean force, TaskInterruptCause cause);
 
     /**
      * Останавливает выполнение задач с указанными ключами блокировки, удаляет блокировку и
      * отправляет оповещения ожидающим блокировку пользователям
 	 * @param lockKeys ключи блокировок на удаление
      * @param userInfo идентификатор пользователя, отменяющего блокировку
-	 * @param cause
+	 * @param cause причина остановки задачи
 	 */
-    void interruptAllTasks(List<String> lockKeys, TAUserInfo userInfo, LockDeleteCause cause);
+    void interruptAllTasks(List<String> lockKeys, TAUserInfo userInfo, TaskInterruptCause cause);
 
     /**
      * Выводит в logger информации о блокировке

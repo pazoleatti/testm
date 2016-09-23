@@ -370,7 +370,6 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         table.setColumnWidth(dateColumn, 5, Style.Unit.EM);
         table.addColumn(eventColumn, EVENT_COLUMN_HEADER);
         table.addColumn(noteColumn, NOTE_COLUMN_HEADER);
-        table.setColumnWidth(noteColumn, 9, Style.Unit.EM);
         table.addColumn(reportPeriodColumn, REPORT_PERIOD_COLUMN_HEADER);
         table.setColumnWidth(reportPeriodColumn, 5, Style.Unit.EM);
         table.addColumn(departmentColumn, DEPARTMENT_COLUMN_HEADER);

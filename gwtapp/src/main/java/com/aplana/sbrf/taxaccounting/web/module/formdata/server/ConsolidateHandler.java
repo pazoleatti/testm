@@ -79,7 +79,7 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
 
                     @Override
                     public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                        formDataService.interruptTask(action.getFormDataId(), false, userInfo, reportType, LockDeleteCause.FORM_CONSOLIDATION);
+                        formDataService.interruptTask(action.getFormDataId(), false, userInfo, reportType, TaskInterruptCause.FORM_CONSOLIDATION);
                     }
 
                     @Override

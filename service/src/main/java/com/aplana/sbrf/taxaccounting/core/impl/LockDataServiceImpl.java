@@ -252,7 +252,7 @@ public class LockDataServiceImpl implements LockDataService {
         });
     }
 
-    private void auditLockDeletion(TAUserInfo userInfo, LockData lockData, LockDeleteCause cause) {
+    private void auditLockDeletion(TAUserInfo userInfo, LockData lockData, TaskInterruptCause cause) {
         try {
             String note = cause.getEventDescrition(lockData.getDateLock(), userDao.getUser(lockData.getUserId()), lockData.getDescription());
             auditService.add(FormDataEvent.DELETE_LOCK, userInfo, null, null, null, null, null, note, null);
@@ -263,7 +263,7 @@ public class LockDataServiceImpl implements LockDataService {
 
 	@Override
 	public int unlockIfOlderThan(long seconds) {
-        LockDeleteCause cause = LockDeleteCause.SCHEDULER_OLD_LOCK_DELETE;
+        TaskInterruptCause cause = TaskInterruptCause.SCHEDULER_OLD_LOCK_DELETE;
         List<String> keyList = dao.getLockIfOlderThan(seconds);
 
         if (keyList.size() > 0) {
@@ -288,7 +288,7 @@ public class LockDataServiceImpl implements LockDataService {
 	}
 
     @Override
-    public void interruptTask(final LockData lockData, final TAUserInfo userInfo, final boolean force, final LockDeleteCause cause) {
+    public void interruptTask(final LockData lockData, final TAUserInfo userInfo, final boolean force, final TaskInterruptCause cause) {
         if (lockData != null) {
             LOG.info(String.format("Останавливается асинхронная задача с ключом %s", lockData.getKey()));
             tx.executeInNewTransaction(new TransactionLogic() {
@@ -326,7 +326,7 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public void interruptAllTasks(List<String> lockKeys, TAUserInfo userInfo, LockDeleteCause cause) {
+    public void interruptAllTasks(List<String> lockKeys, TAUserInfo userInfo, TaskInterruptCause cause) {
         for (String key : lockKeys) {
             interruptTask(getLock(key), userInfo, true, cause);
         }

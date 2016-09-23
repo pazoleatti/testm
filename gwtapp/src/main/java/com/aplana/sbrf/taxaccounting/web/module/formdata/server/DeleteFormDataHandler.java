@@ -49,7 +49,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
             formDataService.unlock(action.getFormDataId(), userInfo);
             formDataService.interruptTask(action.getFormDataId(), userInfo,
                     Arrays.asList(ReportType.REFRESH_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD),
-                    LockDeleteCause.FORM_DELETE);
+                    TaskInterruptCause.FORM_DELETE);
             return result;
         }
 

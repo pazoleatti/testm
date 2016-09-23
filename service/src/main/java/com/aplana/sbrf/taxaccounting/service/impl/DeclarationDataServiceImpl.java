@@ -293,7 +293,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
             DeclarationData declarationData = declarationDataDao.get(id);
 
-            deleteReport(id, userInfo, false, LockDeleteCause.DECLARATION_DELETE);
+            deleteReport(id, userInfo, false, TaskInterruptCause.DECLARATION_DELETE);
             declarationDataDao.delete(id);
 
             auditService.add(FormDataEvent.DELETE , userInfo, declarationData, null, "Декларация удалена", null);
@@ -978,7 +978,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
      */
     @Override
-    public void deleteReport(long declarationDataId, TAUserInfo userInfo, boolean isCalc, LockDeleteCause cause) {
+    public void deleteReport(long declarationDataId, TAUserInfo userInfo, boolean isCalc, TaskInterruptCause cause) {
         DeclarationDataReportType[] ddReportTypes = {DeclarationDataReportType.XML_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.ACCEPT_DEC};
         for (DeclarationDataReportType ddReportType : ddReportTypes) {
             if (ddReportType.isSubreport()) {
@@ -1058,7 +1058,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void interruptTask(long declarationDataId, TAUserInfo userInfo, ReportType reportType, LockDeleteCause cause) {
+    public void interruptTask(long declarationDataId, TAUserInfo userInfo, ReportType reportType, TaskInterruptCause cause) {
         DeclarationDataReportType[] ddReportTypes = getCheckTaskList(reportType);
         if (ddReportTypes == null) return;
         DeclarationData declarationData = get(declarationDataId, userInfo);

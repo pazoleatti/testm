@@ -4,19 +4,15 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static com.aplana.sbrf.taxaccounting.model.LockDeleteCause.EventType.SCHEDULER;
-import static com.aplana.sbrf.taxaccounting.model.LockDeleteCause.EventType.TASK_CANCEL;
+import static com.aplana.sbrf.taxaccounting.model.TaskInterruptCause.EventType.SCHEDULER;
+import static com.aplana.sbrf.taxaccounting.model.TaskInterruptCause.EventType.TASK_CANCEL;
 
-public enum LockDeleteCause {
+public enum TaskInterruptCause {
 
     LOCK_DELETE("Удалена блокировка задачи (форма \"Список блокировок\")", EventType.LOCK_DELETE),
-    FORM_DATA_CHANGE_CANCEL("Отмена изменений", TASK_CANCEL),
-    DECLARATION_TEMPLATE_JRXML_CHANGE("Выполнена замена jrxml файла макета декларации", TASK_CANCEL),
+    SCHEDULER_OLD_LOCK_DELETE("Удаление истекших блокировок", SCHEDULER),
     RESTART_TASK("Выполнен перезапуск задачи", TASK_CANCEL),
-    DECLARATION_DELETE("Удалена декларация", TASK_CANCEL),
-    DECLARATION_ACCEPT("Выполнено принятие экземпляра декларации", TASK_CANCEL),
-    DECLARATION_RECALCULATION("Выполнен пересчет данных декларации", TASK_CANCEL),
-    DECLARATION_TEMPLATE_UPDATE("Обновление макета", TASK_CANCEL),
+    FORM_DATA_CHANGE_CANCEL("Отмена изменений", TASK_CANCEL),
     FORM_CONSOLIDATION("Выполнена консолидация в НФ", TASK_CANCEL),
     FORM_EDIT("Выполняется редактирование НФ", TASK_CANCEL),
     FORM_MOVE("Выполнена Подготовка/Утверждение/Принятие налоговой формы", TASK_CANCEL),
@@ -25,15 +21,19 @@ public enum LockDeleteCause {
     FORM_IMPORT("Выполнена загрузка XLSM-файла с формы экземпляра НФ", TASK_CANCEL),
     FORM_DELETE("Удалена налоговая форма", TASK_CANCEL),
     FORM_IMPORT_TF("Изменены данные налоговой формы путем загрузки транспортного файла", TASK_CANCEL),
-    REFBOOK_RECORD_MODIFY("Модифицирована запись справочника %s, которая используется в данной форме", TASK_CANCEL),
     FORM_MANUAL_DELETE("Удалена версия ручного ввода для налоговой формы", TASK_CANCEL),
     FORM_AUTO_NUMERATION_UPDATE("Обновление автонумерации", TASK_CANCEL),
     FORM_DATA_UPDATE("Изменены данные налоговой формы", TASK_CANCEL),
     FORM_PERFORMER_UPDATE("Изменены параметры печатной формы", TASK_CANCEL),
-    FD_DEPARTMENT_NAME_UPDATE("Обновлении имени подразделения", TASK_CANCEL),
-    FD_TB_NAME_UPDATE("Обновлении имени ТБ", TASK_CANCEL),
     FORM_TEMPLATE_UPDATE("Изменен макет НФ", TASK_CANCEL),
-    SCHEDULER_OLD_LOCK_DELETE("Удаление истекших блокировок", SCHEDULER);
+    DECLARATION_TEMPLATE_JRXML_CHANGE("Выполнена замена jrxml файла макета декларации", TASK_CANCEL),
+    DECLARATION_DELETE("Удалена декларация", TASK_CANCEL),
+    DECLARATION_ACCEPT("Выполнено принятие экземпляра декларации", TASK_CANCEL),
+    DECLARATION_RECALCULATION("Выполнен пересчет данных декларации", TASK_CANCEL),
+    DECLARATION_TEMPLATE_UPDATE("Обновление макета", TASK_CANCEL),
+    REFBOOK_RECORD_MODIFY("Модифицирована запись справочника %s, которая используется в данной форме", TASK_CANCEL),
+    FD_DEPARTMENT_NAME_UPDATE("Обновлении имени подразделения", TASK_CANCEL),
+    FD_TB_NAME_UPDATE("Обновлении имени ТБ", TASK_CANCEL);
 
     private String text;
     private EventType eventType;
@@ -58,12 +58,12 @@ public enum LockDeleteCause {
         }
     }
 
-    LockDeleteCause(String text, EventType type) {
+    TaskInterruptCause(String text, EventType type) {
         this.text = text;
         this.eventType = type;
     }
 
-    public LockDeleteCause setArgs(Object ... args) {
+    public TaskInterruptCause setArgs(Object ... args) {
         this.args = args;
         return this;
     }

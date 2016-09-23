@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.lock.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.LockDeleteCause;
+import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.lock.shared.DeleteLockAction;
@@ -32,7 +32,7 @@ public class DeleteLockHandler extends AbstractActionHandler<DeleteLockAction, D
     @Override
     public DeleteLockResult execute(DeleteLockAction action, ExecutionContext context) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        lockService.interruptAllTasks(action.getKeys(), userInfo, LockDeleteCause.LOCK_DELETE);
+        lockService.interruptAllTasks(action.getKeys(), userInfo, TaskInterruptCause.LOCK_DELETE);
         return new DeleteLockResult();
     }
 

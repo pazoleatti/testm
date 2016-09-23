@@ -88,7 +88,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
 
                             @Override
                             public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                                declarationDataService.interruptTask(action.getDeclarationId(), userInfo, reportType, LockDeleteCause.DECLARATION_ACCEPT);
+                                declarationDataService.interruptTask(action.getDeclarationId(), userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
                             }
 
                             @Override
