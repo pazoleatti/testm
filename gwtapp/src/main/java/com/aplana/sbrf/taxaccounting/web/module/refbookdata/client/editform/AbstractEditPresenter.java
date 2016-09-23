@@ -140,6 +140,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         return recordChanges;
     }
 
+    @Override
     public void setIsFormModified(boolean isFormModified) {
         this.isFormModified = isFormModified;
         if (isFormModified) {

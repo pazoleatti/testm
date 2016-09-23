@@ -45,6 +45,9 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
     @UiField
     Label endVersionDateLabel;
 
+    protected Date versionStartDate;
+    protected Date versionEndDate;
+
     @Override
     public Date getVersionFrom() {
         return versionStart.getValue();
@@ -58,17 +61,19 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
     @Override
     public void setVersionFrom(Date value) {
         versionStart.setValue(value);
+        versionStartDate = value;
     }
 
     @Override
     public void setVersionTo(Date value) {
         versionEnd.setValue(value);
+        versionEndDate = value;
     }
 
     @Override
     public void fillVersionData(RefBookRecordVersionData versionData) {
-        versionStart.setValue(versionData.getVersionStart());
-        versionEnd.setValue(versionData.getVersionEnd());
+        setVersionFrom(versionData.getVersionStart());
+        setVersionTo(versionData.getVersionEnd());
         allVersion.setVisible(!isVersionMode && getUiHandlers().isVersioned());
         allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
     }
@@ -170,7 +175,8 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
         versionStart.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                if (versionEnd.getValue() != null && event.getValue().after(versionEnd.getValue())) {
+                getUiHandlers().setIsFormModified(isVersionDatesChanged());
+                if (versionEnd.getValue() != null && event.getValue() != null  && event.getValue().after(versionEnd.getValue())) {
                     Dialog.errorMessage("Неправильно указан диапазон дат!");
                     save.setEnabled(false);
                     cancel.setEnabled(false);
@@ -189,6 +195,7 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
         versionEnd.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
+                getUiHandlers().setIsFormModified(isVersionDatesChanged());
                 if (versionStart.getValue() != null && event.getValue() != null && event.getValue().before(versionStart.getValue())) {
                     Dialog.errorMessage("Неправильно указан диапазон дат!");
                     save.setEnabled(false);
@@ -234,5 +241,24 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
     public void lock(boolean isLock) {
         save.setEnabled(!isLock);
         cancel.setEnabled(!isLock);
+    }
+
+    private boolean isStartVersionChanged() {
+        if (versionStart.getValue() == null) {
+            return versionStartDate != null;
+        }
+        return !versionStart.getValue().equals(versionStartDate);
+    }
+
+    private boolean isEndVersionChanged() {
+        if (versionEnd.getValue() == null) {
+            return versionEndDate != null;
+        }
+        return !versionEnd.getValue().equals(versionEndDate);
+    }
+
+    @Override
+    protected boolean isVersionDatesChanged() {
+        return isStartVersionChanged() || isEndVersionChanged();
     }
 }

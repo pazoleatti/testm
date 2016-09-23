@@ -39,6 +39,9 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
     @UiField
     Label startVersionDateLabel, endVersionDateLabel, separator;
 
+    protected Date versionStartDate;
+    protected Date versionEndDate;
+
 	@Inject
 	@UiConstructor
 	public EditFormView(final Binder uiBinder) {
@@ -49,6 +52,7 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
         versionStart.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
+                getUiHandlers().setIsFormModified(isVersionDatesChanged());
                 if (versionEnd.getValue() != null && event.getValue() != null && event.getValue().after(versionEnd.getValue())) {
                     Dialog.errorMessage("Неправильно указан диапазон дат!");
                     save.setEnabled(false);
@@ -69,6 +73,7 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
         versionEnd.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
+                getUiHandlers().setIsFormModified(isVersionDatesChanged());
                 if (versionStart.getValue() != null && event.getValue() != null && event.getValue().before(versionStart.getValue())) {
                     Dialog.errorMessage("Неправильно указан диапазон дат!");
                     save.setEnabled(false);
@@ -115,8 +120,8 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
 
     @Override
     public void fillVersionData(RefBookRecordVersionData versionData) {
-        versionStart.setValue(versionData.getVersionStart());
-        versionEnd.setValue(versionData.getVersionEnd());
+        setVersionFrom(versionData.getVersionStart());
+        setVersionTo(versionData.getVersionEnd());
         allVersion.setVisible(!isVersionMode && getUiHandlers().isVersioned());
         allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
         /*allVersion.setHref("#"
@@ -155,11 +160,13 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
     @Override
     public void setVersionFrom(Date value) {
         versionStart.setValue(value);
+        versionStartDate = value;
     }
 
     @Override
     public void setVersionTo(Date value) {
         versionEnd.setValue(value);
+        versionEndDate = value;
     }
 
     @Override
@@ -228,5 +235,24 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
     public void lock(boolean isLock) {
         save.setEnabled(!isLock);
         cancel.setEnabled(!isLock);
+    }
+
+    private boolean isStartVersionChanged() {
+        if (versionStart.getValue() == null) {
+            return versionStartDate != null;
+        }
+        return !versionStart.getValue().equals(versionStartDate);
+    }
+
+    private boolean isEndVersionChanged() {
+        if (versionEnd.getValue() == null) {
+            return versionEndDate != null;
+        }
+        return !versionEnd.getValue().equals(versionEndDate);
+    }
+
+    @Override
+    protected boolean isVersionDatesChanged() {
+        return isStartVersionChanged() || isEndVersionChanged();
     }
 }

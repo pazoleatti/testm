@@ -276,7 +276,14 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
             }
 
         }
+        if (isVersionDatesChanged()) {
+            return true;
+        }
 
+        return false;
+    }
+
+    protected boolean isVersionDatesChanged() {
         return false;
     }
 
