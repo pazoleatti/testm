@@ -260,15 +260,15 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
         }
     }
 
-	@Override
-	public int unlockIfOlderThan(long seconds) {
-		try {
-			return getJdbcTemplate().update(
-					"DELETE FROM lock_data WHERE date_lock < (SYSDATE - INTERVAL '" + seconds + "' SECOND)");
-		} catch (DataAccessException e){
-			LOG.error(String.format(LOCK_DATA_DELETE_ERROR, e.getMessage()), e);
-			throw new LockException(LOCK_DATA_DELETE_ERROR, e.getMessage());
-		}
-	}
+    @Override
+    public List<String> getLockIfOlderThan(long seconds) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "SELECT key FROM lock_data WHERE date_lock < (SYSDATE - INTERVAL '" + seconds + "' SECOND)", String.class);
+        } catch (DataAccessException e){
+            LOG.error(String.format(LOCK_DATA_DELETE_ERROR, e.getMessage()), e);
+            throw new LockException(LOCK_DATA_DELETE_ERROR, e.getMessage());
+        }
+    }
 
 }

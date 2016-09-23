@@ -108,10 +108,10 @@ public interface LockDataDao {
      */
     void updateQueue(String key, Date lockDate, LockData.LockQueues queue);
 
-	/**
-	 * Удаляет блокировки, созданные ранее "seconds" секунд назад
-	 * @param seconds "срок годности" блокировки в секундах
-	 * @return количество удаленных блокировок
-	 */
-	int unlockIfOlderThan(long seconds);
+    /**
+     * Возвращяет список истекших блокировок
+     * @param seconds "срок годности" блокировки в секундах
+     * @return список истекший блокировок
+     */
+    List<String> getLockIfOlderThan(long seconds);
 }

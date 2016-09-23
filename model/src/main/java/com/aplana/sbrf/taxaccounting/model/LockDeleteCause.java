@@ -4,6 +4,7 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static com.aplana.sbrf.taxaccounting.model.LockDeleteCause.EventType.SCHEDULER;
 import static com.aplana.sbrf.taxaccounting.model.LockDeleteCause.EventType.TASK_CANCEL;
 
 public enum LockDeleteCause {
@@ -31,7 +32,8 @@ public enum LockDeleteCause {
     FORM_PERFORMER_UPDATE("Изменены параметры печатной формы", TASK_CANCEL),
     FD_DEPARTMENT_NAME_UPDATE("Обновлении имени подразделения", TASK_CANCEL),
     FD_TB_NAME_UPDATE("Обновлении имени ТБ", TASK_CANCEL),
-    FORM_TEMPLATE_UPDATE("Изменен макет НФ", TASK_CANCEL);
+    FORM_TEMPLATE_UPDATE("Изменен макет НФ", TASK_CANCEL),
+    SCHEDULER_OLD_LOCK_DELETE("Удаление истекших блокировок", SCHEDULER);
 
     private String text;
     private EventType eventType;

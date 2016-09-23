@@ -252,9 +252,32 @@ public class LockDataServiceImpl implements LockDataService {
         });
     }
 
+    private void auditLockDeletion(TAUserInfo userInfo, LockData lockData, LockDeleteCause cause) {
+        try {
+            String note = cause.getEventDescrition(lockData.getDateLock(), userDao.getUser(lockData.getUserId()), lockData.getDescription());
+            auditService.add(FormDataEvent.DELETE_LOCK, userInfo, null, null, null, null, null, note, null);
+        } catch (Exception e) {
+            LOG.error("Ошибка при логировании", e);
+        }
+    }
+
 	@Override
 	public int unlockIfOlderThan(long seconds) {
-		return dao.unlockIfOlderThan(seconds);
+        LockDeleteCause cause = LockDeleteCause.SCHEDULER_OLD_LOCK_DELETE;
+        List<String> keyList = dao.getLockIfOlderThan(seconds);
+
+        if (keyList.size() > 0) {
+            dao.unlockAll(keyList);
+
+            TAUserInfo systemUserInfo = new TAUserInfo();
+            systemUserInfo.setUser(userDao.getUser(0));
+            for (String key : keyList) {
+                LockData lockData = dao.get(key, false);
+                auditLockDeletion(systemUserInfo, lockData, cause);
+            }
+        }
+
+        return keyList.size();
 	}
 
 	/**
@@ -294,12 +317,7 @@ public class LockDataServiceImpl implements LockDataService {
 					   } catch (Exception e) {
 						   throw new ServiceException("Не удалось прервать задачу", e);
 					   }
-                       try {
-                           String note = cause.getEventDescrition(lockData.getDateLock(), userDao.getUser(lockData.getUserId()), lockData.getDescription());
-                           auditService.add(FormDataEvent.DELETE_LOCK, userInfo, null, null, null, null, null, note, null);
-                       } catch (Exception e) {
-                           LOG.error("Ошибка при логировании", e);
-                       }
+                       auditLockDeletion(userInfo, lockData, cause);
 					   return null;
 				   }
 			   }

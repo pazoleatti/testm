@@ -171,17 +171,25 @@ public class LockDataDaoTest extends Assert {
 		assertEquals(LockData.LockQueues.NONE, lock.getQueue());
 	}
 
+	private int unlockIfOlderThan(long seconds) {
+		List<String> keyList = dao.getLockIfOlderThan(seconds);
+		if (keyList.size() > 0) {
+			dao.unlockAll(keyList);
+		}
+		return keyList.size();
+	}
+
 	@Test
 	public void unlockIfOlderThan() throws InterruptedException {
-		assertEquals(1, dao.unlockIfOlderThan(1));
+		assertEquals(1, unlockIfOlderThan(1));
 		Thread.sleep(2000);
-		assertEquals(4, dao.unlockIfOlderThan(1));
+		assertEquals(4, unlockIfOlderThan(1));
 		// создаем новую блокировку
 		dao.lock("test_key", 1, "test_description", "test_state", "test server");
 		Thread.sleep(1000);
-		assertEquals(0, dao.unlockIfOlderThan(2));
+		assertEquals(0, unlockIfOlderThan(2));
 		Thread.sleep(2000);
-		assertEquals(1, dao.unlockIfOlderThan(2));
+		assertEquals(1, unlockIfOlderThan(2));
 	}
 
 	/**
@@ -196,7 +204,7 @@ public class LockDataDaoTest extends Assert {
 	public void checkExceptions() {
 		dropTable();
 		try {
-			dao.unlockIfOlderThan(0);
+			unlockIfOlderThan(0);
 		} catch (LockException e) {
 			assertTrue(e.getMessage().startsWith("Ошибка при удалении"));
 		}
