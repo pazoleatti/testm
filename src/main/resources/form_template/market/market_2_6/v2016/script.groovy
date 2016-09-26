@@ -91,7 +91,7 @@ def allColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf',
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtorName', 'inn', 'sign', 'direction',
+def editableColumns = ['codeBank', 'nameBank', 'depNumber', 'okved', 'opf', 'debtorName', 'inn', 'sign', 'direction',
                        'law', 'creditType', 'docNum', 'docDate', 'creditDate', 'closeDate', 'extendNum', 'creditMode',
                        'currencySum', 'sumDoc', 'sumGiven', 'rate', 'payFrequency', 'currencyCredit', 'debtSum', 'inTimeDebtSum',
                        'overdueDebtSum', 'percentDebtSum', 'deptDate', 'percentDate', 'percentPeriod', 'provision', 'provisionComment',
@@ -99,7 +99,7 @@ def editableColumns = ['rowNum', 'codeBank', 'nameBank', 'depNumber', 'okved', '
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = []
+def autoFillColumns = ['rowNum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
