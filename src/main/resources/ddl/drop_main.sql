@@ -44,9 +44,9 @@ drop table declaration_data_consolidation;
 drop table form_data_ref_book;
 
 drop sequence seq_form_search_result;
-drop form_search_result;
-drop form_search_data_result_tmp;
-drop form_search_data_result;
+drop table form_search_data_result;
+drop table form_search_result;
+drop table form_search_data_result_tmp;
 
 begin
  for x in (select * from user_tables where regexp_like (table_name, '^FORM_DATA_[0-9]+$')) loop
