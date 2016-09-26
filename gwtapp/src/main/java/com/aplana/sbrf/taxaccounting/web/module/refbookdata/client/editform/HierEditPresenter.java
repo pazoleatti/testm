@@ -34,6 +34,7 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
     void showRecord(final Long refBookRecordId) {
         if (refBookRecordId == null) {
             setCurrentUniqueRecordId(null);
+            setPreviousURId(null);
 //            getView().fillInputFields(null);
             getView().updateRefBookPickerPeriod();
             getView().cleanFields();

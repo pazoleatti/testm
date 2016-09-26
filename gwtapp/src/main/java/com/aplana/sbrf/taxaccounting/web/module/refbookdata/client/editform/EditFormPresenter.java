@@ -34,6 +34,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
         Date getVersionFrom();
         Date getVersionTo();
         void fillVersionData(RefBookRecordVersionData versionData);
+        void setAllVersionVisible(boolean isVisible);
     }
 
 	@Inject
@@ -185,7 +186,9 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
     void showRecord(final Long refBookRecordId) {
         if (refBookRecordId == null) {
             setCurrentUniqueRecordId(null);
+            setPreviousURId(null);
             getView().cleanFields();
+            getView().setAllVersionVisible(false);
             //getView().fillInputFields(null);
 
             /*if (!isVersionMode && mode == FormMode.EDIT) {
@@ -199,6 +202,8 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
             getView().setVersionTo(null);*/
             getView().updateRefBookPickerPeriod();
             return;
+        } else {
+            getView().setAllVersionVisible(true);
         }
 
         /*if (isFormModified) {

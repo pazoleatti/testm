@@ -451,6 +451,11 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
     }
 
     @Override
+    public boolean isVersionMode() {
+        return isVersionMode;
+    }
+
+    @Override
     public HasClickHandlers getClickAllVersion() {
         return null;
     }

@@ -90,6 +90,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
          */
         void updateInputFields();
         void setVersionMode(boolean versionMode);
+        boolean isVersionMode();
         void showVersioned(boolean versioned);
         void lock(boolean isLock);
         boolean checkCorrectnessForSave();
