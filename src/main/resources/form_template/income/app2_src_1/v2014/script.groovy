@@ -532,7 +532,7 @@ void sortFormDataRows() {
     def columns = sortColumns + (allColumns - sortColumns)
     // Сортировка (без подитогов)
     refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { columns.contains(it.getAlias())})
-    sortRows(dataRows, columns)
+    sortRowsRussian(dataRows, columns)
     dataRowHelper.saveSort();
 }
 
