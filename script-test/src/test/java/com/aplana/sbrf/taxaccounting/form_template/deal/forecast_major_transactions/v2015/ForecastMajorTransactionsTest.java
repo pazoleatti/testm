@@ -96,12 +96,12 @@ public class ForecastMajorTransactionsTest extends ScriptTestBase {
     }
 
     // Проверить загруженные данные
-    void checkLoadData(List<DataRow<Cell>> dataRows) {
+    private void checkLoadData(List<DataRow<Cell>> dataRows) {
         compareRow(dataRows.get(0), 1L, null, "имя", 10.00);
         compareRow(dataRows.get(1), 2L, null, "имя", 20.00);
     }
 
-    void mockBeforeImport(){
+    private void mockBeforeImport(){
         Long refbookId = 520L;
 
         when(testHelper.getRefBookFactory().get(refbookId)).thenAnswer(
@@ -185,7 +185,7 @@ public class ForecastMajorTransactionsTest extends ScriptTestBase {
         });
     }
 
-    void compareRow(DataRow<Cell> row, Object... args) {
+    private void compareRow(DataRow<Cell> row, Object... args) {
         int skipColumnCount = 1;
         List<Column> columns = testHelper.getFormTemplate().getColumns();
         for (int i = 0; i < (columns.size() - skipColumnCount); i++) {
