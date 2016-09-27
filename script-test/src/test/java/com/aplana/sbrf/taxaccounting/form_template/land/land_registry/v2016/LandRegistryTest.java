@@ -2,7 +2,14 @@ package com.aplana.sbrf.taxaccounting.form_template.land.land_registry.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
+import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -10,13 +17,20 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -351,14 +365,262 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(null, row.getCell("benefitPeriod").getValue());
     }
 
-    // @Test
+    @Test
     public void importXlsmTest() {
-        // TODO (Ramil Timerbaev) доделать
+        mockProvider(705L);
+        int expected = 1; // в файле 1 строка
+        String fileName = "importFile.xlsm";
+        testHelper.setImportFileName(fileName);
+        testHelper.setImportFileInputStream(getCustomInputStream(fileName));
+        testHelper.execute(FormDataEvent.IMPORT);
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLogger();
+
+        // проверка значении
+        long refbookRecordId = 1L;
+        DataRow<Cell> row = testHelper.getDataRowHelper().getAll().get(0);
+        // графа 1
+        Assert.assertEquals(null, row.getCell("rowNumber").getValue());
+        // графа 2
+        Assert.assertEquals("test1", row.getCell("name").getValue());
+        // графа 3
+        Assert.assertEquals(refbookRecordId, row.getCell("oktmo").getValue());
+        // графа 4
+        Assert.assertEquals("тест1", row.getCell("cadastralNumber").getStringValue());
+        // графа 5
+        Assert.assertEquals(refbookRecordId, row.getCell("landCategory").getValue());
+        // графа 6
+        Assert.assertEquals(refbookRecordId, row.getCell("constructionPhase").getValue());
+        // графа 7
+        Assert.assertEquals(123456789012345L, row.getCell("cadastralCost").getNumericValue().longValue());
+        // графа 8
+        Assert.assertEquals("1234567890/1234567890", row.getCell("taxPart").getValue());
+        // графа 9
+        Assert.assertNotNull(row.getCell("ownershipDate").getValue());
+        // графа 10
+        Assert.assertNotNull(row.getCell("terminationDate").getValue());
+        // графа 11
+        Assert.assertEquals(refbookRecordId, row.getCell("benefitCode").getValue());
+        // графа 12 - зависимая графа
+        // графа 13 - зависимая графа
+        // графа 14
+        Assert.assertNotNull(row.getCell("startDate").getValue());
+        // графа 15
+        Assert.assertNotNull(row.getCell("endDate").getValue());
+        // графа 16
+        Assert.assertEquals(3L, row.getCell("benefitPeriod").getNumericValue().longValue());
     }
 
-    // @Test
-    public void afterCreateTest() {
-        // TODO (Ramil Timerbaev) доделать
+    @Test
+    public void importXlsmColumn3Test() {
+        mockProvider(705L);
+        int expected = 1; // в файле 1 строка
+        String fileName = "importFile2.xlsm";
+        testHelper.setImportFileName(fileName);
+        testHelper.setImportFileInputStream(getCustomInputStream(fileName));
+        testHelper.execute(FormDataEvent.IMPORT);
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLogger();
+
+        // проверка значении
+        long refbookRecordId = 1L;
+        DataRow<Cell> row = testHelper.getDataRowHelper().getAll().get(0);
+        // графа 1
+        Assert.assertEquals(null, row.getCell("rowNumber").getValue());
+        // графа 2
+        Assert.assertEquals("test1", row.getCell("name").getValue());
+        // графа 3
+        Assert.assertNull(row.getCell("oktmo").getValue());
+        // графа 4
+        Assert.assertEquals("тест1", row.getCell("cadastralNumber").getStringValue());
+        // графа 5
+        Assert.assertEquals(refbookRecordId, row.getCell("landCategory").getValue());
+        // графа 6
+        Assert.assertEquals(refbookRecordId, row.getCell("constructionPhase").getValue());
+        // графа 7
+        Assert.assertEquals(123456789012345L, row.getCell("cadastralCost").getNumericValue().longValue());
+        // графа 8
+        Assert.assertEquals("1234567890/1234567890", row.getCell("taxPart").getValue());
+        // графа 9
+        Assert.assertNotNull(row.getCell("ownershipDate").getValue());
+        // графа 10
+        Assert.assertNotNull(row.getCell("terminationDate").getValue());
+        // графа 11
+        Assert.assertNull(row.getCell("benefitCode").getValue());
+        // графа 12 - зависимая графа
+        // графа 13 - зависимая графа
+        // графа 14
+        Assert.assertNotNull(row.getCell("startDate").getValue());
+        // графа 15
+        Assert.assertNotNull(row.getCell("endDate").getValue());
+        // графа 16
+        Assert.assertEquals(3L, row.getCell("benefitPeriod").getNumericValue().longValue());
+
+        // проверка сообщении
+        int i = 0;
+        int fileRowIndex = 9;
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        String msg = String.format("Строка %s, столбец %s: На форме невозможно заполнить графу «%s», так как не заполнена графа «%s»",
+                fileRowIndex, ScriptUtils.getXLSColumnName(3), ScriptUtils.getColumnName(row, "benefitCode"), ScriptUtils.getColumnName(row, "oktmo"));
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+    }
+
+    @Test
+    public void importXlsmColumn11Test() {
+        mockProvider(705L);
+        int expected = 1; // в файле 1 строка
+        String fileName = "importFile3.xlsm";
+        testHelper.setImportFileName(fileName);
+        testHelper.setImportFileInputStream(getCustomInputStream(fileName));
+        testHelper.execute(FormDataEvent.IMPORT);
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLogger();
+
+        // проверка значении
+        long refbookRecordId = 1L;
+        DataRow<Cell> row = testHelper.getDataRowHelper().getAll().get(0);
+        // графа 1
+        Assert.assertEquals(null, row.getCell("rowNumber").getValue());
+        // графа 2
+        Assert.assertEquals("test1", row.getCell("name").getValue());
+        // графа 3
+        Assert.assertEquals(refbookRecordId, row.getCell("oktmo").getValue());
+        // графа 4
+        Assert.assertEquals("тест1", row.getCell("cadastralNumber").getStringValue());
+        // графа 5
+        Assert.assertEquals(refbookRecordId, row.getCell("landCategory").getValue());
+        // графа 6
+        Assert.assertEquals(refbookRecordId, row.getCell("constructionPhase").getValue());
+        // графа 7
+        Assert.assertEquals(123456789012345L, row.getCell("cadastralCost").getNumericValue().longValue());
+        // графа 8
+        Assert.assertEquals("1234567890/1234567890", row.getCell("taxPart").getValue());
+        // графа 9
+        Assert.assertNotNull(row.getCell("ownershipDate").getValue());
+        // графа 10
+        Assert.assertNotNull(row.getCell("terminationDate").getValue());
+        // графа 11
+        Assert.assertNull(row.getCell("benefitCode").getValue());
+        // графа 12 - зависимая графа
+        // графа 13 - зависимая графа
+        // графа 14
+        Assert.assertNotNull(row.getCell("startDate").getValue());
+        // графа 15
+        Assert.assertNotNull(row.getCell("endDate").getValue());
+        // графа 16
+        Assert.assertEquals(3L, row.getCell("benefitPeriod").getNumericValue().longValue());
+
+        // проверка сообщении
+        int i = 0;
+        int fileRowIndex = 9;
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        String msg = String.format("Строка %s, столбец %s: На форме невозможно заполнить графы: «%s», «%s», «%s», " +
+                "так как в справочнике «Параметры налоговых льгот земельного налога» не найдена запись, " +
+                "актуальная на дату «%s», в которой поле «Код субъекта РФ представителя декларации» = «%s», " +
+                "поле «Код» = «%s», поле «Код ОКТМО» = «%s», поле «Параметры льготы» = «%s»",
+                fileRowIndex, ScriptUtils.getXLSColumnName(11), ScriptUtils.getColumnName(row, "benefitCode"),
+                ScriptUtils.getColumnName(row, "benefitBase"), ScriptUtils.getColumnName(row, "benefitParam"),
+                "31.12.2014", "codeA4", "codeA704", "codeA96", "reductionA705test");
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+    }
+
+    // после создания - отсутствует предыдущий период, данные не копируются
+    @Test
+    public void afterCreateFailTest() {
+        // провайдер для периодов
+        mockProvider(8L);
+
+        // текущий период
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2014);
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setOrder(4);
+        reportPeriod.setTaxPeriod(taxPeriod);
+        when(testHelper.getReportPeriodService().get(anyInt())).thenReturn(reportPeriod);
+
+        // предыдущий период
+        TaxPeriod taxPeriodPrev = new TaxPeriod();
+        taxPeriodPrev.setYear(2014);
+        ReportPeriod prevReportPeriod = new ReportPeriod();
+        prevReportPeriod.setOrder(2);
+        prevReportPeriod.setTaxPeriod(taxPeriodPrev);
+        when(testHelper.getReportPeriodService().getPrevReportPeriod(anyInt())).thenReturn(prevReportPeriod);
+
+        int i = 0;
+        testHelper.execute(FormDataEvent.AFTER_CREATE);
+        int expected = 0;
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLogger();
+        // проверка сообщении
+        String msg = String.format("Данные по земельным участкам из предыдущего отчетного периода не были скопированы. " +
+                "В Системе отсутствует форма за период: %s %s для подразделения «%s»",
+                "3 квартал", "2014", "null");
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+    }
+
+    // после создания - данные копируются нормально
+    @Test
+    public void afterCreateOkTest() throws ParseException {
+        // провайдер для периодов
+        mockProvider(8L);
+
+        // текущий период
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2014);
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setOrder(1);
+        reportPeriod.setTaxPeriod(taxPeriod);
+        when(testHelper.getReportPeriodService().get(anyInt())).thenReturn(reportPeriod);
+
+        // предыдущий период
+        TaxPeriod taxPeriodPrev = new TaxPeriod();
+        taxPeriodPrev.setYear(2013);
+        ReportPeriod prevReportPeriod = new ReportPeriod();
+        prevReportPeriod.setOrder(4);
+        prevReportPeriod.setName("4 квартал");
+        prevReportPeriod.setTaxPeriod(taxPeriodPrev);
+        when(testHelper.getReportPeriodService().getPrevReportPeriod(anyInt())).thenReturn(prevReportPeriod);
+
+        // данные формы предыдущего периода
+        FormData prevFormData = new FormData();
+        prevFormData.initFormTemplateParams(testHelper.getFormTemplate());
+        prevFormData.setState(WorkflowState.ACCEPTED);
+        DataRow<Cell> prevRow = prevFormData.createDataRow();
+        prevRow.setIndex(1);
+        setDefaultValue(prevRow);
+        List<DataRow<Cell>> prevDataRows = new ArrayList<DataRow<Cell>>();
+        prevDataRows.add(prevRow);
+        DataRowHelper prevDataRowHelper = new DataRowHelperStub();
+        prevDataRowHelper.save(prevDataRows);
+        when(testHelper.getFormDataService().getFormDataPrev(any(FormData.class))).thenReturn(prevFormData);
+        when(testHelper.getFormDataService().getDataRowHelper(prevFormData)).thenReturn(prevDataRowHelper);
+
+        // все нормально
+        testHelper.execute(FormDataEvent.AFTER_CREATE);
+        int expected = 1;
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLogger();
+        String [] columns = { "name", "oktmo", "cadastralNumber", "landCategory", "constructionPhase", "cadastralCost",
+                "taxPart", "ownershipDate", "terminationDate", "benefitCode", "benefitBase", "benefitParam", "startDate", "endDate" };
+        for (String column : columns) {
+            Object expectedValue = prevRow.getCell(column).getValue();
+            Object value = testHelper.getDataRowHelper().getAll().get(0).getCell(column).getValue();
+            Assert.assertEquals(expectedValue, value);
+        }
+        testHelper.getLogger().clear();
+
+        // строки не скопируются потому что не подходятпо условиям
+        setDefaultValue(prevRow);
+        prevRow.getCell("ownershipDate").setValue(sdf.parse("01.01.2015"), prevRow.getIndex());
+        prevRow.getCell("terminationDate").setValue(null, prevRow.getIndex());
+        testHelper.execute(FormDataEvent.AFTER_CREATE);
+        expected = 0;
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLogger();
     }
 
     private void setDefaultValue(DataRow<Cell> dataRow) throws ParseException {
@@ -400,5 +662,23 @@ public class LandRegistryTest extends ScriptTestBase {
         dataRow.getCell("endDate").setValue(date, index);
         // графа 16
         dataRow.getCell("benefitPeriod").setValue(number, index);
+    }
+
+    private void mockProvider(final Long refBookId) {
+        // провайдер для справочника
+        RefBookUniversal provider = mock(RefBookUniversal.class);
+        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(refBookId),
+                anyMapOf(Long.class, RefBookDataProvider.class))).thenReturn(provider);
+
+        // вернуть все записи справочника
+        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(new Answer<PagingResult<Map<String, RefBookValue>>>() {
+            @Override
+            public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+                result.addAll(testHelper.getRefBookAllRecords(refBookId).values());
+                return result;
+            }
+        });
     }
 }

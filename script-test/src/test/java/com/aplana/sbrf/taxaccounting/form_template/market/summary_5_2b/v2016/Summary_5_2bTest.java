@@ -130,38 +130,6 @@ public class Summary_5_2bTest extends ScriptTestBase {
                     }
                 });
     }
-    private void mockGetRefBookRecordId() {
-        // для поиска значения ВЗЛ и да/нет
-        when(testHelper.getFormDataService().getRefBookRecordId(anyLong(), anyMap(), anyMap(), anyString(),
-                anyString(), anyString(), any(Date.class), anyInt(), anyString(), any(Logger.class), anyBoolean())).thenAnswer(
-                new Answer<Long>() {
-                    @Override
-                    public Long answer(InvocationOnMock invocation) throws Throwable {
-                        Long refBookId = (Long) invocation.getArguments()[0];
-                        String alias = (String) invocation.getArguments()[3];
-                        String value = (String) invocation.getArguments()[4];
-                        if (value == null || "".equals(value.trim())) {
-                            return null;
-                        }
-                        Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
-                        for (Long id : records.keySet()) {
-                            Map<String, RefBookValue> record = records.get(id);
-                            RefBookAttributeType type = record.get(alias).getAttributeType();
-                            String recordValue = null;
-                            if (type == RefBookAttributeType.STRING){
-                                recordValue = record.get(alias).getStringValue();
-                            } else if (type == RefBookAttributeType.NUMBER) {
-                                recordValue = record.get(alias).getNumberValue().toString();
-                            }
-                            if (value.equals(recordValue)) {
-                                return (Long) record.get(RefBook.RECORD_ID_ALIAS).getNumberValue();
-                            }
-
-                        }
-                        return null;
-                    }
-                });
-    }
 
     private void mockRefBook520() {
         // 520-й провайдер
@@ -371,7 +339,6 @@ public class Summary_5_2bTest extends ScriptTestBase {
     @Test
     public void compose1Test() throws ParseException {
         mockGetRefBookRecord();
-        mockGetRefBookRecordId();
         mockRefBook520();
         // для текста сообщения и источников
         FormType formType2_1 = new FormType() {{
@@ -536,7 +503,6 @@ public class Summary_5_2bTest extends ScriptTestBase {
     @Test
     public void compose2Test() throws ParseException {
         mockGetRefBookRecord();
-        mockGetRefBookRecordId();
         mockRefBook520();
         mockRefBook604();
         // для текста сообщения и источников
@@ -644,7 +610,6 @@ public class Summary_5_2bTest extends ScriptTestBase {
     @Test
     public void compose3Test() throws ParseException {
         mockGetRefBookRecord();
-        mockGetRefBookRecordId();
         mockRefBook520();
         // для текста сообщения и источников
         FormType formTypeLetter = new FormType() {{

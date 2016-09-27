@@ -1,21 +1,12 @@
 package com.aplana.sbrf.taxaccounting.form_template.deal.related_persons.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import java.util.List;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.when;
 
 /**
  * Взаимозависимые лица.
@@ -75,5 +66,5 @@ public class RelatedPersonsTest extends ScriptTestBase {
         // checkLogger();
     }
 
-    // TODO (Ramil Timerbaev) добавить тест для события update
+    // TODO (Ramil Timerbaev) добавить тест для события FormDataEvent.REFRESH или FormDataEvent.AFTER_CREATE
 }

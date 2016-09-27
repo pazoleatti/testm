@@ -497,7 +497,7 @@ def getNewRowFromXlsm(def values, def colOffset, def fileRowIndex, def rowIndex,
     if (hasRegion) {
         // графа 11 - атрибут 7053 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 705 «Параметры налоговых льгот земельного налога»
         colIndex = 10
-        def record704 = getRecordImport(704, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+        def record704 = (values[2] ? getRecordImport(704, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset) : null)
         def code = record704?.record_id?.value
         def oktmo = newRow.oktmo
         def param = values[12] ?: null
@@ -820,7 +820,7 @@ def getRecord705Import(def code, def oktmo, def param) {
     def allRecords = getAllRecords705()
     for (def record : allRecords) {
         if (code == record?.TAX_BENEFIT_ID?.value && oktmo == record?.OKTMO?.value &&
-                (param ?: null == record?.REDUCTION_PARAMS?.value ?: null || param?.equalsIgnoreCase(record?.REDUCTION_PARAMS?.value))) {
+                ((param ?: null) == (record?.REDUCTION_PARAMS?.value ?: null) || param?.equalsIgnoreCase(record?.REDUCTION_PARAMS?.value))) {
             return record
         }
     }
