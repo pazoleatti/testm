@@ -1,6 +1,7 @@
 package form_template.deal.forecast_major_transactions.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -141,11 +142,36 @@ def getFormDataPrevPeriod(boolean check) {
 }
 
 void create() {
+    def refBookId = 520
     def formDataPrev = getFormDataPrevPeriod(true);
     if (formDataPrev != null) {
         def prevDataRows = formDataService.getDataRowHelper(formDataPrev)?.allSaved
         if (prevDataRows != null) {
             def dataRows = formDataService.getDataRowHelper(formData).allCached
+            def refBook = refBookFactory.get(refBookId)
+            def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
+            // заменяем записи справочника на актуальные
+            prevDataRows.each { row ->
+                PagingResult<Map<String, RefBookValue>> versionsPage = provider.getRecordVersionsById(row.ikksr, null, null, refBook.getAttributes().get(0))
+                def record = versionsPage.find { Map<String, RefBookValue> version ->
+                    def dateFrom = version[RefBook.RECORD_VERSION_FROM_ALIAS].dateValue
+                    def dateTo = version[RefBook.RECORD_VERSION_TO_ALIAS].dateValue
+                    dateFrom <= getReportPeriodEndDate() && (dateTo == null || dateTo > getReportPeriodEndDate())
+                }
+                if (record != null) {
+                    def uniqueRecordId = record[RefBook.RECORD_ID_ALIAS].value
+                    if (row.ikksr != uniqueRecordId) {
+                        def refBookValue = getRefBookValue(refBookId, row.ikksr)
+                        row.ikksr = uniqueRecordId
+                        logger.warn("Строка %s: При копировании записи из формы за предыдущий отчетный период значения в графах «%s», «%s» были заменены на последние актуальные значения в отчетном периоде формы.",
+                            row.getIndex(), refBookValue.IKKSR.value, refBookValue.NAME.value)
+                    }
+                } else { // не по ЧТЗ
+                    def refBookValue = getRefBookValue(refBookId, row.ikksr)
+                    logger.warn("Строка %s: При копировании записи из формы за предыдущий отчетный период для значений в графах «%s», «%s» не были обнаружены последние актуальные значения в отчетном периоде формы.",
+                            row.getIndex(), refBookValue.IKKSR.value, refBookValue.NAME.value)
+                }
+            }
             dataRows.addAll(prevDataRows)
         }
     }
