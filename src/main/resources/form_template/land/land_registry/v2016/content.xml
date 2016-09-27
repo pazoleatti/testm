@@ -11,17 +11,27 @@
         <alias>rowNumber</alias>
         <checking>false</checking>
         <columnType>AUTO</columnType>
-        <name>№ пп</name>
+        <name>№ п/п</name>
         <order>1</order>
         <width>4</width>
         <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование</name>
+        <order>2</order>
+        <width>10</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>oktmo</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Код ОКТМО</name>
-        <order>2</order>
+        <order>3</order>
         <width>8</width>
         <hierarchical>true</hierarchical>
         <nameAttributeId>841</nameAttributeId>
@@ -33,8 +43,8 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Кадастровый номер земельного участка</name>
-        <order>3</order>
-        <width>8</width>
+        <order>4</order>
+        <width>10</width>
         <maxLength>100</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -43,9 +53,9 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Категория земель (код)</name>
-        <order>4</order>
+        <order>5</order>
         <width>8</width>
-        <hierarchical>true</hierarchical>
+        <hierarchical>false</hierarchical>
         <nameAttributeId>7022</nameAttributeId>
         <refBookAttributeId>7021</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
@@ -55,11 +65,11 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Период строительства</name>
-        <order>5</order>
-        <width>8</width>
+        <order>6</order>
+        <width>7</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>7012</nameAttributeId>
-        <refBookAttributeId>7012</refBookAttributeId>
+        <refBookAttributeId>7011</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -67,8 +77,8 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Кадастровая стоимость (доля стоимости) земельного участка</name>
-        <order>6</order>
-        <width>8</width>
+        <order>7</order>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -77,8 +87,8 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Доля налогоплательщика в праве на земельный участок</name>
-        <order>7</order>
-        <width>8</width>
+        <order>8</order>
+        <width>10</width>
         <maxLength>21</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -87,8 +97,8 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Дата возникновения права собственности на земельный участок</name>
-        <order>8</order>
-        <width>5</width>
+        <order>9</order>
+        <width>7</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
@@ -96,8 +106,8 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Дата прекращения права собственности на земельный участок</name>
-        <order>9</order>
-        <width>5</width>
+        <order>10</order>
+        <width>7</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -105,11 +115,12 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Информация о налоговых льготах (в случае наличия). Код</name>
-        <order>10</order>
+        <order>11</order>
         <width>8</width>
-        <hierarchical>true</hierarchical>
-        <nameAttributeId>7042</nameAttributeId>
-        <refBookAttributeId>7041</refBookAttributeId>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>7053</nameAttributeId>
+        <refBookAttributeId>7053</refBookAttributeId>
+        <refBookAttributeId2>7041</refBookAttributeId2>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
@@ -117,28 +128,47 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Информация о налоговых льготах (в случае наличия). Основание</name>
-        <order>11</order>
-        <width>7</width>
+        <order>12</order>
+        <width>10</width>
         <parentAlias>benefitCode</parentAlias>
-        <refBookAttributeId>7043</refBookAttributeId>
+        <refBookAttributeId>7053</refBookAttributeId>
+        <refBookAttributeId2>7043</refBookAttributeId2>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>benefitParam</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>REFERENCE</columnType>
         <name>Информация о налоговых льготах (в случае наличия). Параметры льготы</name>
-        <order>12</order>
+        <order>13</order>
         <width>8</width>
-        <maxLength>12</maxLength>
-        <prevLength>0</prevLength>
+        <parentAlias>benefitCode</parentAlias>
+        <refBookAttributeId>7061</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>startDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Информация о налоговых льготах (в случае наличия). Дата начала действия</name>
+        <order>14</order>
+        <width>5</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>endDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Информация о налоговых льготах (в случае наличия). Дата окончания действия</name>
+        <order>15</order>
+        <width>5</width>
+        <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>benefitPeriod</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Информация о налоговых льготах (в случае наличия). Срок использования льготы</name>
-        <order>13</order>
-        <width>8</width>
+        <order>16</order>
+        <width>6</width>
         <maxLength>2</maxLength>
         <precision>0</precision>
     </columns>
