@@ -224,6 +224,8 @@
 			<url-pattern>/GenericAccountManagementService/*</url-pattern>
 			<url-pattern>/TaxAccountingSupportingData</url-pattern>
 			<url-pattern>/TaxAccountingSupportingData/*</url-pattern>
+            <url-pattern>/DepartmentManagementService</url-pattern>
+            <url-pattern>/DepartmentManagementService/*</url-pattern>
             <url-pattern>/favicon.ico</url-pattern>
 		</web-resource-collection>
 	</security-constraint>
