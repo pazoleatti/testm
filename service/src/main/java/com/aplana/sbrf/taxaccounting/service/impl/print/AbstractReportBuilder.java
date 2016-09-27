@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.*;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,12 +50,19 @@ public abstract class AbstractReportBuilder {
      * @throws IOException
      */
     public final String createReport() throws IOException {
+        LOG.info("fillHeader" + (new Date()).toString());
         fillHeader();
+        LOG.info("createTableHeaders" + (new Date()).toString());
         createTableHeaders();
+        LOG.info("createDataForTable" + (new Date()).toString());
         createDataForTable();
+        LOG.info("cellAlignment" + (new Date()).toString());
         cellAlignment();
+        LOG.info("fillFooter" + (new Date()).toString());
         fillFooter();
+        LOG.info("setPrintSetup" + (new Date()).toString());
         setPrintSetup();
+        LOG.info("flush" + (new Date()).toString());
         return flush();
     }
 

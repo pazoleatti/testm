@@ -43,7 +43,7 @@ public class PrintingServiceImpl implements PrintingService {
 
 	private static final Log LOG = LogFactory.getLog(PrintingServiceImpl.class);
     private static final String FILE_NAME = "Налоговый_отчет_";
-    private static final String POSTFIX = ".xlsm";
+    private static final String POSTFIX = ".xlsx";
 
 	@Autowired
 	private FormDataDao formDataDao;
@@ -80,6 +80,7 @@ public class PrintingServiceImpl implements PrintingService {
         String filePath = null;
         Logger log = new Logger();
         try {
+            LOG.info("start generate Excell " + (new Date()).toString());
             formDataAccessService.canRead(userInfo, formDataId);
             FormDataReport data = new FormDataReport();
             FormData formData = formDataDao.get(formDataId, manual);
@@ -109,11 +110,13 @@ public class PrintingServiceImpl implements PrintingService {
             if (stateLogger != null) {
                 stateLogger.updateState("Формирование XLSM-файла");
             }
+            LOG.info("creating builder " + (new Date()).toString());
             FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data, isShowChecked, dataRows, periodCode, deleteHiddenColumns);
             filePath = builder.createReport();
             if (stateLogger != null) {
                 stateLogger.updateState("Сохранение XLSM-файла в базе данных");
             }
+            LOG.info("End createReport " + (new Date()).toString());
             return blobDataService.create(filePath, FILE_NAME + POSTFIX);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
