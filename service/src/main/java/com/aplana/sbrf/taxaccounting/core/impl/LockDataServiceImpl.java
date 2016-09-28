@@ -267,12 +267,11 @@ public class LockDataServiceImpl implements LockDataService {
         List<String> keyList = dao.getLockIfOlderThan(seconds);
 
         if (keyList.size() > 0) {
-            dao.unlockAll(keyList);
-
             TAUserInfo systemUserInfo = new TAUserInfo();
             systemUserInfo.setUser(userDao.getUser(0));
             for (String key : keyList) {
                 LockData lockData = dao.get(key, false);
+                dao.unlock(key);
                 auditLockDeletion(systemUserInfo, lockData, cause);
             }
         }
