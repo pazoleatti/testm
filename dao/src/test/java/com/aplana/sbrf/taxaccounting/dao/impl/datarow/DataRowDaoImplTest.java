@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DataRowType;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -392,5 +393,14 @@ public class DataRowDaoImplTest extends Assert {
     @Test
     public void saveSearchResult() {
         dataRowDao.saveSearchResult(1, 329, "key");
+    }
+
+    @Test
+    public void getSearchQuery() {
+        Pair<String, Map<String, Object>> sql = dataRowDao.getSearchQuery(329L, 329, "key", false, false, false);
+        assertNotNull(sql);
+        // нет не справочных столбцов, поэтому поиск не нужен
+        sql = dataRowDao.getSearchQuery(330L, 330, "key", false, false, false);
+        assertNull(sql);
     }
 }
