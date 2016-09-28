@@ -131,6 +131,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 					break;
 			}
 		}
+		if (listColumnIndex.toString().isEmpty()) {
+			return null;
+		}
 		stringBuilder.append(" FROM form_data_" + formTemplateId + " fd ");
 		stringBuilder.append(" WHERE fd.form_data_id = :form_data_id and fd.temporary = :temporary and fd.manual = :manual ");
 

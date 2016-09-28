@@ -124,7 +124,11 @@ public class DataRowServiceImpl implements DataRowService {
         if (existCommonColumn) {
             // поиск в БД по нессылочным столбцам
             Pair<String, Map<String, Object>> sql = dataRowDao.getSearchQuery(formDataId, formData.getFormTemplateId(), key, isCaseSensitive, manual, correctionDiff);
-            dataRowDao.saveSearchDataResult(searchId, sessionId, sql.getFirst(), sql.getSecond());
+            if (sql != null) {
+                dataRowDao.saveSearchDataResult(searchId, sessionId, sql.getFirst(), sql.getSecond());
+            } else {
+                dataRowDao.saveSearchDataResult(searchId, sessionId, null, new HashMap<String, Object>());
+            }
         } else {
             // если нет *обычных*(числовых, строковых, автонумеруемых) граф, то нет смысла проводить поиск
             dataRowDao.saveSearchDataResult(searchId, sessionId, null, new HashMap<String, Object>());
