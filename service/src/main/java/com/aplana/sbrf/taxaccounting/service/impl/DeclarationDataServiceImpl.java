@@ -781,9 +781,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (params == null) {
                 params = new HashMap<String, Object>();
             }
-            DefaultJasperReportsContext context = DefaultJasperReportsContext.getInstance();
-            JRPropertiesUtil.getInstance(context).setProperty("net.sf.jasperreports.xpath.executer.factory", "net.sf.jasperreports.engine.util.xml.JaxenXPathExecuterFactory");
-
             params.put(JRXPathQueryExecuterFactory.XML_INPUT_STREAM, xml);
             final JRSwapFileVirtualizer virtualizer = new JRSwapFileVirtualizer(100, jrSwapFile);
             Runtime.getRuntime().addShutdownHook(new Thread() {
