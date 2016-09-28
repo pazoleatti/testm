@@ -1,4 +1,4 @@
-record_id(N);NAME(S)
+record_id(N);INTERNATIONAL_CREDIT_RATING(S)
 1;рейтинг 1
 2;рейтинг 2
 3;1 КЛАСС

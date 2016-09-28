@@ -187,9 +187,9 @@ public class Summary_5_2bTest extends ScriptTestBase {
                 }
         );    }
 
-    private void mockRefBook604() {
-        // 604-й провайдер
-        final Long refBookId = 604L;
+    private void mockRefBook602() {
+        // 602-й провайдер
+        final Long refBookId = 602L;
         RefBookUniversal provider = mock(RefBookUniversal.class);
         provider.setRefBookId(refBookId);
         when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(refBookId),
@@ -214,7 +214,7 @@ public class Summary_5_2bTest extends ScriptTestBase {
                         Map<Long, Map<String, RefBookValue>> records = getMockHelper().getRefBookAllRecords(refBookId);
                         for (Long id : records.keySet()) {
                             Map<String, RefBookValue> record = records.get(id);
-                            if (record.get("NAME").getStringValue().equals(value)) {
+                            if (record.get("INTERNATIONAL_CREDIT_RATING").getStringValue().equals(value)) {
                                 result.add(record);
                             }
                         }
@@ -504,7 +504,7 @@ public class Summary_5_2bTest extends ScriptTestBase {
     public void compose2Test() throws ParseException {
         mockGetRefBookRecord();
         mockRefBook520();
-        mockRefBook604();
+        mockRefBook602();
         // для текста сообщения и источников
         FormType formType5_2a = new FormType() {{
             setId(FORM_TYPE_5_2A);
