@@ -327,12 +327,12 @@ public final class ScriptUtils {
         if (tmp.matches("-?\\d+(\\.\\d+)?")) {
             return new BigDecimal(tmp);
         } else {
-            String msg = String.format(WRONG_NUMBER, indexRow, getXLSColumnName(indexColumn), value);
             if (logger != null) {
+                String msg = String.format(WRONG_NUMBER, indexRow, getXLSColumnName(indexColumn), value);
                 if (required) {
-                    logger.error(msg);
+                    logger.error("%s", msg);
                 } else {
-                    logger.warn(msg);
+                    logger.warn("%s", msg);
                 }
             }
             return null;
@@ -386,12 +386,12 @@ public final class ScriptUtils {
             }
         }
         if (retVal == null) {
-            String msg = String.format(WRONG_DATE, indexRow, getXLSColumnName(indexColumn), value, format);
             if (logger != null) {
+                String msg = String.format(WRONG_DATE, indexRow, getXLSColumnName(indexColumn), value, format);
                 if (required) {
-                    logger.error(msg);
+                    logger.error("%s", msg);
                 } else {
-                    logger.warn(msg);
+                    logger.warn("%s", msg);
                 }
             }
             return null;
@@ -927,7 +927,7 @@ public final class ScriptUtils {
                     if (groupCols != null) {
                         String checkStr = checkGroupSum.check(testItogRow, realItogRow);
                         if (checkStr != null) {
-                            logger.error(String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr));
+                            logger.error(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr);
                         }
                     }
                 }
@@ -1957,9 +1957,9 @@ public final class ScriptUtils {
                     msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getImportIndex(), getColumnName(totalRow, alias).replace("%", "%%"), value1, value2);
                 }
                 if (required) {
-                    logger.error(msg);
+                    logger.error("%s", msg);
                 } else {
-                    logger.warn(msg);
+                    logger.warn("%s", msg);
                 }
             }
         }
