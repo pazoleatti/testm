@@ -177,15 +177,6 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
         List<Long> genKeys = bdUtils.getNextIds(BDUtils.Sequence.FORM_COLUMN, (long) newColumns.size());
         prepareColumns(formTemplate, newColumns, genKeys);
 
-        for (Column column : newColumns) {
-            if (ColumnType.REFERENCE.equals(column.getColumnType())) {
-                ReferenceColumn referenceColumn = (ReferenceColumn)column;
-                if(referenceColumn.getParentAlias()!=null){
-                    referenceColumn.setParentId(formTemplate.getColumn(referenceColumn.getParentAlias()).getId());
-                }
-            }
-        }
-
         getJdbcTemplate().batchUpdate(
                 "INSERT INTO form_column (id, name, form_template_id, alias, type, width, precision, ord, max_length, " +
                         "checking, format, attribute_id, filter, parent_column_id, attribute_id2, numeration_row, short_name) " +
@@ -207,7 +198,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 								LOG.warn("Превышена максимально допустимая точность числа в графе " + col.getName() +
                                         "\". Будет установлено максимальное значение: " + NumericColumn.MAX_PRECISION);
                             }
-                            ps.setInt(7, ((NumericColumn)col).getPrecision());
+                            ps.setInt(7, Math.min(((NumericColumn) col).getPrecision(), NumericColumn.MAX_PRECISION));
                         } else {
                             ps.setNull(7, Types.NUMERIC);
                         }
@@ -223,12 +214,14 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             ps.setInt(9, Math.min(((StringColumn) col).getMaxLength(), StringColumn.MAX_LENGTH));
                             ps.setNull(11, Types.INTEGER);
                         } else if (ColumnType.NUMBER.equals(col.getColumnType())) {
-                            if (((NumericColumn) col).getMaxLength() > NumericColumn.MAX_LENGTH ||
-                                    ((NumericColumn) col).getMaxLength() > NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION) {
-                                LOG.warn("Превышена максимально допустимая длина числа в графе " + col.getName() +
-                                        "\". Будет установлено максимальное значение: " + (NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION));
+                            int maxLength = ((NumericColumn) col).getMaxLength();
+                            int precision = ((NumericColumn) col).getPrecision();
+                            if (maxLength > NumericColumn.MAX_LENGTH ||
+                                    (maxLength - precision) > NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION) {
+                                LOG.warn("Превышена максимально допустимая длина числа в графе \"" + col.getName() +
+                                        "\". Будет установлено максимальное значение: " + Math.min(NumericColumn.MAX_LENGTH, NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION + precision));
                             }
-                            ps.setInt(9, Math.min(((NumericColumn) col).getMaxLength(), NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION));
+                            ps.setInt(9, Math.min(maxLength, Math.min(NumericColumn.MAX_LENGTH, NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION + precision)));
                             ps.setNull(11, Types.INTEGER);
                         } else if (ColumnType.DATE.equals(col.getColumnType())) {
                             ps.setInt(11, ((DateColumn)col).getFormatId());
@@ -294,18 +287,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
             Column column = columns.get(i);
             column.setId(genKeys.get(i).intValue());
         }
-
-        for (Column column : columns) {
-            if (ColumnType.REFERENCE.equals(column.getColumnType())) {
-                ReferenceColumn referenceColumn = (ReferenceColumn)column;
-                // При экспорте parentId не сериализуется, а прописывается алиас для parentId, здесь в случии импорта подставляем нужный id
-                if(referenceColumn.getParentAlias()!=null){
-                    referenceColumn.setParentId(
-                            formTemplate.getColumn(
-                                    referenceColumn.getParentAlias()).getId());
-                }
-            }
-        }
+        prepareColumns(formTemplate, columns);
     }
 
     private void prepareColumns(FormTemplate formTemplate, List<Column> columns){
@@ -379,7 +361,11 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                         ps.setInt(4, col.getWidth());
 
                         if (ColumnType.NUMBER.equals(col.getColumnType())) {
-                            ps.setInt(5, ((NumericColumn)col).getPrecision());
+                            if (((NumericColumn) col).getPrecision() > NumericColumn.MAX_PRECISION){
+                                LOG.warn("Превышена максимально допустимая точность числа в графе " + col.getName() +
+                                        "\". Будет установлено максимальное значение: " + NumericColumn.MAX_PRECISION);
+                            }
+                            ps.setInt(5, Math.min(((NumericColumn) col).getPrecision(), NumericColumn.MAX_PRECISION));
                         } else {
                             ps.setNull(5, Types.NUMERIC);
                         }
@@ -396,12 +382,14 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             ps.setNull(13, Types.NUMERIC);
                             ps.setNull(14, Types.NUMERIC);
                         } else if(ColumnType.NUMBER.equals(col.getColumnType())){
-                            if (((NumericColumn) col).getMaxLength() > NumericColumn.MAX_LENGTH ||
-                                    ((NumericColumn) col).getMaxLength() > NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION) {
-                                LOG.warn("Превышена максимально допустимая длина числа в графе " + col.getName() +
-                                        "\". Будет установлено максимальное значение: " + (NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION));
+                            int maxLength = ((NumericColumn) col).getMaxLength();
+                            int precision = ((NumericColumn) col).getPrecision();
+                            if (maxLength > NumericColumn.MAX_LENGTH ||
+                                    (maxLength - precision) > NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION) {
+                                LOG.warn("Превышена максимально допустимая длина числа в графе \"" + col.getName() +
+                                        "\". Будет установлено максимальное значение: " + Math.min(NumericColumn.MAX_LENGTH, NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION + precision));
                             }
-                            ps.setInt(7, Math.min(((NumericColumn) col).getMaxLength(), NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION));
+                            ps.setInt(7, Math.min(maxLength, Math.min(NumericColumn.MAX_LENGTH, NumericColumn.MAX_LENGTH - NumericColumn.MAX_PRECISION + precision)));
                             ps.setNull(9, Types.INTEGER);
                             ps.setNull(10, Types.NUMERIC);
                             ps.setNull(11, Types.CHAR);

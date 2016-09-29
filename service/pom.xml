@@ -57,11 +57,6 @@
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>jaxen</groupId>
-            <artifactId>jaxen</artifactId>
-            <version>1.1.6</version>
-        </dependency>
 		<dependency>
             <groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -74,10 +69,6 @@
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>ooxml-schemas</artifactId>
-        </dependency>
 		<dependency>
 			<groupId>jcifs</groupId>
 			<artifactId>jcifs</artifactId>

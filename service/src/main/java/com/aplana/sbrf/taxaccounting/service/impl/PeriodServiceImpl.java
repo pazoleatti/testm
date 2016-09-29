@@ -874,7 +874,7 @@ public class PeriodServiceImpl implements PeriodService {
                                 " был изменён на " + rp.getName() + strBalance + " для " + departmentService.getDepartment(depId).getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
             }
 
-        } else if ((oldDepartmentId == departmentId)) {
+        } else {
             DepartmentReportPeriod dRP = departmentReportPeriodService.getFirst(oldDepartmentId, reportPeriodId);
             removePeriodWithLog(reportPeriodId, null, depIds, taxType, null);
             open(newYear, newDictTaxPeriodId, taxType, user, departmentId, null, isBalance, null);
@@ -883,8 +883,6 @@ public class PeriodServiceImpl implements PeriodService {
                         "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + (dRP.isBalance() ? " \"ввод остатков\"" : "") + " был изменён на " +
                                 dictTaxPeriod.get("NAME").getStringValue() + " " + newYear + strBalance + " для " + departmentService.getDepartment(depId).getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
             }
-        } else {
-            throw new ServiceException("Отчетный период %s %s для подразделения %s не создан в Системе", dictTaxPeriod.get("NAME").getStringValue(), newYear, departmentService.getDepartment(departmentId).getName());
         }
     }
 
