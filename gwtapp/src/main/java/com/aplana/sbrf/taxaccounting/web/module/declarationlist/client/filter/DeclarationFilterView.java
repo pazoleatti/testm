@@ -74,6 +74,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         declarationTypePicker.setAttributeId(2071L);
         declarationTypePicker.setWidth("100%");
         declarationTypePicker.setPeriodDates(new Date(), new Date());
+        declarationTypePicker.setManualUpdate(true);
 
         correctionTag = new ListBoxWithTooltip<Boolean>(new AbstractRenderer<Boolean>() {
             @Override
