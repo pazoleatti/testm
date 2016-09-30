@@ -85,9 +85,7 @@ public final class ScriptUtils {
             "быть только графы численного типа. Графа «%s» имеет неверный тип.";
     public static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
     public static final String CELL_NOT_FOUND = "Ячейка («%s», «%s») не найдена";
-    public static final String WRONG_NUMBER = "Проверка файла: Строка %d, столбец %s содержит нечисловое значение «%s»!";
-    public static final String WRONG_DATE = "Проверка файла: Строка %d, столбец %s содержит значение «%s», которое не " +
-            "соответствует дате в формате «%s»!";
+    public static final String WRONG_TYPE = "Проверка файла: Строка %d, столбец %s: Тип ячейки не соответствует типу, указанному в ЧТЗ.";
     public static final String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
             "Ожидается «%s» вместо «%s»!";
     public static final String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
@@ -328,7 +326,7 @@ public final class ScriptUtils {
             return new BigDecimal(tmp);
         } else {
             if (logger != null) {
-                String msg = String.format(WRONG_NUMBER, indexRow, getXLSColumnName(indexColumn), value);
+                String msg = String.format(WRONG_TYPE, indexRow, getXLSColumnName(indexColumn));
                 if (required) {
                     logger.error("%s", msg);
                 } else {
@@ -387,7 +385,7 @@ public final class ScriptUtils {
         }
         if (retVal == null) {
             if (logger != null) {
-                String msg = String.format(WRONG_DATE, indexRow, getXLSColumnName(indexColumn), value, format);
+                String msg = String.format(WRONG_TYPE, indexRow, getXLSColumnName(indexColumn));
                 if (required) {
                     logger.error("%s", msg);
                 } else {
