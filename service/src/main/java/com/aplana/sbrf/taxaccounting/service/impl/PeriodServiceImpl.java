@@ -861,7 +861,7 @@ public class PeriodServiceImpl implements PeriodService {
         }
 
         String strBalance = isBalance ? " \"ввод остатков\"" : "";
-        List<Integer> depIds = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, departmentId);
+        List<Integer> depIds = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, oldDepartmentId);
         if ((oldDepartmentId == departmentId) && (rp.getDictTaxPeriodId() == newDictTaxPeriodId) && (rp.getTaxPeriod().getYear() == newYear)) { // Изменился только ввод остатков
             DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
             filter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
