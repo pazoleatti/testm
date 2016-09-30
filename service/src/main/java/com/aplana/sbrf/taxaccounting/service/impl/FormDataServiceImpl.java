@@ -90,8 +90,8 @@ public class FormDataServiceImpl implements FormDataService {
     final static String LOCK_MESSAGE_TASK = "Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
     final static String REF_BOOK_LINK = "Строка %s%s \"%s\"%s";
-    final static String CELL_CHECK_MSG = "Строка %s: значение графы \"%s\" %s";
-    final static String CELL_CHECK_MSG_1 = "Строки %s: значения графы \"%s\" %s";
+    final static String CELL_CHECK_MSG = "Строка %s: Значение графы \"%s\" %s";
+    final static String CELL_CHECK_MSG_1 = "Строки %s: Значения графы \"%s\" %s";
     final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
     private static final String SAVE_ERROR = "Найдены ошибки при сохранении формы!";
     private static final String SORT_ERROR = "Найдены ошибки при сортировке строк формы!";
@@ -627,7 +627,7 @@ public class FormDataServiceImpl implements FormDataService {
                 }
 
                 //Проверка справочных значений
-                checkValues(logger, formData, false);
+                checkValues(logger, formData);
 
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
@@ -819,7 +819,7 @@ public class FormDataServiceImpl implements FormDataService {
                 lockForm(logger, formData);
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
                 stateLogger.updateState("Проверка ссылок на справочники");
-                checkValues(logger, formData, false);
+                checkValues(logger, formData);
                 //Делаем переход
                 moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
                 break;
@@ -830,7 +830,7 @@ public class FormDataServiceImpl implements FormDataService {
                 lockForm(logger, formData);
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
                 stateLogger.updateState("Проверка ссылок на справочники");
-                checkValues(logger, formData, false);
+                checkValues(logger, formData);
                 checkConsolidateFromSources(formData, logger, userInfo);
                 //Делаем переход
                 moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
@@ -953,7 +953,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void checkValues(Logger logger, FormData formData, boolean needCheckTemp) {
+    public void checkValues(Logger logger, FormData formData) {
         Map<RefBookDataProvider, Set<Long>> references = new HashMap<RefBookDataProvider, Set<Long>>();
         Map<Long, List<ReferenceInfo>> referenceInfoMap = new HashMap<Long, List<ReferenceInfo>>();
         Map<String, RefBookDataProvider> providers = new HashMap<String, RefBookDataProvider>();
@@ -1084,19 +1084,19 @@ public class FormDataServiceImpl implements FormDataService {
                         for (ReferenceInfo referenceInfo : referenceInfoMap.get(inactiveRecord.getRecordId())) {
                             switch (inactiveRecord.getResult()) {
                                 case NOT_EXISTS:
-                                    logger.error(String.format(REF_BOOK_LINK, referenceInfo.getRownum(),
+                                    logger.error(REF_BOOK_LINK, referenceInfo.getRownum(),
                                             ": Значение графы", referenceInfo.getColumnName(),
-                                            " ссылается на несуществующую версию записи справочника!"));
+                                            " ссылается на несуществующую версию записи справочника!");
                                     break;
                                 case NOT_CROSS:
-                                    logger.error(String.format(REF_BOOK_LINK, referenceInfo.getRownum(),
+                                    logger.error(REF_BOOK_LINK, referenceInfo.getRownum(),
                                             ", атрибут", referenceInfo.getColumnName(),
-                                            ": период актуальности значения не пересекается с отчетным периодом формы!"));
+                                            ": период актуальности значения не пересекается с отчетным периодом формы!");
                                     break;
                                 case NOT_LAST:
-                                    logger.error(String.format(REF_BOOK_LINK, referenceInfo.getRownum(),
-                                            ": значение графы", referenceInfo.getColumnName(),
-                                            " не является последним актуальным значением в отчетном периоде формы!"));
+                                    logger.error(REF_BOOK_LINK, referenceInfo.getRownum(),
+                                            ": Значение графы", referenceInfo.getColumnName(),
+                                            " не является последним актуальным значением в отчетном периоде формы!");
                                     break;
                             }
                         }

@@ -27,8 +27,8 @@ import java.util.*;
 public class RefBookCreditRatingsClasses implements RefBookDataProvider {
 
     public static final Long REF_BOOK_ID = 604L;
-    private static final Long REF_BOOK_CREDIT_RATINGS_ID = 603L;
-    private static final Long REF_BOOK_CREDIT_CLASSES_ID = 601L;
+    public static final Long REF_BOOK_CREDIT_RATINGS_ID = 603L;
+    public static final Long REF_BOOK_CREDIT_CLASSES_ID = 601L;
 
     @Autowired
     private RefBookFactory refBookFactory;
@@ -53,7 +53,7 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
     private RefBook refBookCreditRatings;
     private RefBook refBookCreditClasses;
 
-    void init() {
+    private void init() {
         if (refBookDataProviderCreditRatings == null)
             refBookDataProviderCreditRatings = refBookFactory.getDataProvider(REF_BOOK_CREDIT_RATINGS_ID);
         if (refBookDataProviderCreditClasses == null)
@@ -413,10 +413,17 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
     public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
         init();
         List<Long> realRecordIds = new ArrayList<Long>();
+        Map<Long, Long> recordIdsMap = new HashMap<Long, Long>();
         for (Long fakeRecordId : recordIds) {
-            realRecordIds.add(fakeRecordId/10);
+            long realRecordId = fakeRecordId / 10;
+            realRecordIds.add(realRecordId);
+            recordIdsMap.put(realRecordId, fakeRecordId);
         }
-        return refBookDataProviderCreditRatings.getInactiveRecordsInPeriod(realRecordIds, periodFrom, periodTo);
+        List<ReferenceCheckResult> inactiveRecords = refBookDataProviderCreditRatings.getInactiveRecordsInPeriod(realRecordIds, periodFrom, periodTo);
+        for(ReferenceCheckResult checkResult : inactiveRecords) {
+            checkResult.setRecordId(recordIdsMap.get(checkResult.getRecordId()));
+        }
+        return inactiveRecords;
     }
 
 	@Override
