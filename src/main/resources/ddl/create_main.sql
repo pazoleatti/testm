@@ -1079,15 +1079,15 @@ comment on column form_search_result."KEY" is 'Строка поиска';
 create sequence seq_form_search_result start with 1;
 --------------------------------------------------------------------------------------------------------
 CREATE TABLE FORM_SEARCH_DATA_RESULT
-(	"ID" NUMBER(9,0),
-  "SESSION_ID" NUMBER(9,0),
-   "ROW_INDEX" NUMBER(9,0),
-   "COLUMN_INDEX" NUMBER(9,0),
-   "RAW_VALUE" VARCHAR2(4000 BYTE),
-  "ORD" NUMBER(9,0),
-  CONSTRAINT FK_FORM_SEARCH_RESULT_ID FOREIGN KEY ("ID")
-  REFERENCES FORM_SEARCH_RESULT ("ID") ON DELETE CASCADE
-);
+(	"SESSION_ID"    NUMBER(10,0),
+  "ID"            NUMBER(9,0),
+  "ROW_INDEX"     NUMBER(9,0),
+  "COLUMN_INDEX"  NUMBER(9,0),
+  "RAW_VALUE"     VARCHAR2(4000 BYTE),
+  "ORD"           NUMBER(9,0)
+)
+/*PARTITION BY LIST ("SESSION_ID")
+(PARTITION "P0"  VALUES (0))*/;
 
 comment on column form_search_data_result."ID" is 'Идентификатор результата поиска';
 comment on column form_search_data_result."SESSION_ID" is 'Идентификатор сессии в которой выполнялся поиск';
