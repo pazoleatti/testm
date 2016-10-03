@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import javax.jws.WebService;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.List;
         serviceName="DepartmentManagementService",
         portName="DepartmentManagementServicePort",
         wsdlLocation="META-INF/wsdl/DepartmentManagementService.wsdl")
-public class DepartmentManagementServicePortType implements DepartmentManagementService {
+public class DepartmentManagementServicePortType extends SpringBeanAutowiringSupport implements DepartmentManagementService{
 
     private static final Log LOG = LogFactory.getLog(DepartmentManagementServicePortType.class);
 
