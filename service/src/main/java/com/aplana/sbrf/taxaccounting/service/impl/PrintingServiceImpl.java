@@ -22,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataCSVReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataStreamingXlsmReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemCsvBuilder;
@@ -109,7 +110,7 @@ public class PrintingServiceImpl implements PrintingService {
             if (stateLogger != null) {
                 stateLogger.updateState("Формирование XLSM-файла");
             }
-            FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data, isShowChecked, dataRows, periodCode, deleteHiddenColumns);
+            FormDataStreamingXlsmReportBuilder builder = new FormDataStreamingXlsmReportBuilder(data, isShowChecked, dataRows, periodCode, deleteHiddenColumns);
             filePath = builder.createReport();
             if (stateLogger != null) {
                 stateLogger.updateState("Сохранение XLSM-файла в базе данных");

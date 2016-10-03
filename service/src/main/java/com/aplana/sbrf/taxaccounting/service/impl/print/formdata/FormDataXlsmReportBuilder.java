@@ -15,6 +15,7 @@ import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -45,7 +46,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     protected boolean isShowChecked;
 
     protected CellStyleBuilder cellStyleBuilder;
-    private static final String TEMPLATE = ClassUtils
+    protected static final String TEMPLATE = ClassUtils
             .classPackageAsResourcePath(FormDataXlsmReportBuilder.class)
             + "/acctax.xlsm";
 
@@ -202,11 +203,19 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     private Map<String, XSSFFont> fontMap = new HashMap<String, XSSFFont>();
 
+    FormDataXlsmReportBuilder(String fileName, String postfix) {
+        super(fileName, postfix);
+    }
+
     private FormDataXlsmReportBuilder() throws IOException {
-        super("report", ".xlsm");
-        InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
+        this("report", ".xlsm");
+        initWorkbook();
+    }
+
+    protected void initWorkbook() throws IOException {
+        InputStream templateInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
         try {
-            workBook = WorkbookFactory.create(templeteInputStream);
+            workBook = WorkbookFactory.create(templateInputStream);
         } catch (InvalidFormatException e) {
             LOG.error(e.getMessage(), e);
             throw new IOException("Wrong file format. Template must be in format of 2007 Excel!!!");
@@ -407,8 +416,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         //Fill subdivision
         AreaReference arSubdivision = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_SUBDIVISION).getRefersToFormula());
-        CellRangeAddress region = new CellRangeAddress(arSubdivision.getFirstCell().getRow(), arSubdivision.getFirstCell().getRow(), notNullColumn, columns.size() - 1);
-        sheet.addMergedRegion(region);
+        addMergedRegion(arSubdivision.getFirstCell().getRow(), arSubdivision.getFirstCell().getRow(), notNullColumn, columns.size() - 1);
         if (data.getPerformer() != null) {
             createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION,  data.getPerformer().getReportDepartmentName(), 0, notNullColumn);
         } else {
@@ -441,8 +449,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         createCellByRange(XlsxReportMetadata.RANGE_DATE_CREATE, sb.toString(), 0, 0);
         sb.delete(0, sb.length());
         AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_NAME).getRefersToFormula());
-        Row r = sheet.getRow(ar.getFirstCell().getRow()) != null ? sheet.getRow(ar.getFirstCell().getRow())
-                : sheet.createRow(ar.getFirstCell().getRow());
+        Row r = getRow(ar.getFirstCell().getRow());
         CellStyle cellStyle = r.getCell(0).getCellStyle();
         cellStyle.setAlignment(CellStyle.ALIGN_CENTER_SELECTION);
         cellStyle.setWrapText(true);
@@ -486,19 +493,26 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, columns.size()/2);
     }
 
+    private void addMergedRegion(int rowStart, int rowEnd, int colStart, int colEnd) {
+        if ((rowEnd - rowStart + 1) * (colEnd - colStart + 1) > 1) {
+            CellRangeAddress region = new CellRangeAddress(rowStart, rowEnd, colStart, colEnd);
+            sheet.addMergedRegion(region);
+        }
+    }
+
     @Override
     protected void createTableHeaders(){
         // Поскольку имеется шаблон с выставленными алиасами, то чтобы не записать данные в ячейку с алиасом
         // делаем проверку на то, что сумма начала записи таблицы и кол-ва строк не превышает номер строки с алиасом
         // и если превышает, то сдвигаем
         AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
-        Row r = sheet.getRow(ar.getFirstCell().getRow());
+        Row r = getRow(ar.getFirstCell().getRow());
         if (rowNumber + headers.size() >= r.getRowNum()){
             int rowBreakes = rowNumber + headers.size() - r.getRowNum();
             if(0 == rowBreakes)
-                sheet.shiftRows(r.getRowNum(), r.getRowNum() + 1, 1);
+                shiftRows(sheet, r.getRowNum(), r.getRowNum() + 1, 1);
             else
-                sheet.shiftRows(r.getRowNum(), r.getRowNum() + 1, rowBreakes);
+                shiftRows(sheet, r.getRowNum(), r.getRowNum() + 1, rowBreakes);
         }
         for (DataRow<HeaderCell> headerCellDataRow : headers){
             Row row = sheet.createRow(rowNumber);
@@ -520,14 +534,30 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         autoSizeHeaderRowsHeight();
     }
 
+    private int getLastRowNum() {
+        int result = 0;
+        for (int i = 0; i < workBook.getNumberOfNames(); i++) {
+            AreaReference ar;
+            try {
+                ar = new AreaReference(workBook.getNameAt(i).getRefersToFormula());
+            } catch (IllegalArgumentException e) {
+                continue;
+            }
+            if (result < ar.getFirstCell().getRow()) {
+                result = ar.getFirstCell().getRow();
+            }
+        }
+        return Math.max(result, sheet.getLastRowNum());
+    }
+
     @Override
     protected void createDataForTable() {
-        rowNumber = (rowNumber > sheet.getLastRowNum() ? sheet.getLastRowNum() : rowNumber);//if we have empty strings
-        sheet.shiftRows(rowNumber, sheet.getLastRowNum(), dataRows.size() + 2);
+        rowNumber = Math.min(rowNumber, getLastRowNum());//if we have empty strings
+        shiftRows(sheet, rowNumber, getLastRowNum(), dataRows.size() + 2);
         sheet.createFreezePane(0, rowNumber);
 		// перебираем строки
         for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow : dataRows) {
-            Row row = sheet.getRow(rowNumber) != null ? sheet.getRow(rowNumber++) : sheet.createRow(rowNumber++);
+            Row row = getRow(rowNumber++);
 			// перебираем столбцы
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
@@ -565,6 +595,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
                         if (bd != null){
                             cell.setCellValue(((NumericColumn)column).getPrecision() >0 ? Double.parseDouble(bd.toString()) : bd.longValue());
+                        } else {
+                            cell.setCellType(Cell.CELL_TYPE_BLANK);
                         }
                     } else if (ColumnType.AUTO.equals(column.getColumnType())) {
                         Long bd = (Long) obj;
@@ -682,7 +714,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         //Fill position and FIO
         ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
-        r = sheet.getRow(ar.getFirstCell().getRow());
+        r = getRow(ar.getFirstCell().getRow());
         rowNumber = r.getRowNum();
         c = r.getCell(ar.getFirstCell().getCol());
         CellStyle cs = c.getCellStyle();
@@ -700,8 +732,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         for (int i = 0; i < data.getSigners().size(); i++) {
             Row rs = sheet.createRow(rowNumber);
             // Объединяем ячейки должности
-            CellRangeAddress region = new CellRangeAddress(rowNumber, rowNumber, XlsxReportMetadata.CELL_POS + 1, cellSignPosition - 1);
-            sheet.addMergedRegion(region);
+            addMergedRegion(rowNumber, rowNumber, XlsxReportMetadata.CELL_POS + 1, cellSignPosition - 1);
 
             Cell crsP = createNotHiddenCell(XlsxReportMetadata.CELL_POS, rs);
 
@@ -731,10 +762,14 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 String performer = "Исполнитель: " + (data.getPerformer().getName() != null ? data.getPerformer().getName() : "") + "/" +
                         (data.getPerformer().getPhone() != null ? data.getPerformer().getPhone() : "");
                 c.setCellValue(performer);
-                sheet.shiftRows(sheet.getLastRowNum(), sheet.getLastRowNum(), 1);
+                shiftRows(sheet, sheet.getLastRowNum(), sheet.getLastRowNum(), 1);
             }
         }
 
+    }
+
+    protected void shiftRows(Sheet sheet, int startRow, int endRow, int n) {
+        sheet.shiftRows(startRow, endRow, n);
     }
 
     @Override
@@ -852,7 +887,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
             CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
             if (mergedRegion.getFirstRow() >= ROW_NUMBER && mergedRegion.getLastRow() - mergedRegion.getFirstRow() == 1) {
-                Cell firstRowCell = sheet.getRow(mergedRegion.getFirstRow()).getCell(mergedRegion.getFirstColumn());
+                Cell firstRowCell = getRow(mergedRegion.getFirstRow()).getCell(mergedRegion.getFirstColumn());
 
                 int columnWidth = (int) (columns.get(firstRowCell.getColumnIndex()).getWidth() * 1.5);
                 int firstRowCellLinesCount = getLinesCount(firstRowCell.getStringCellValue(), columnWidth) - 1;
@@ -868,9 +903,13 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
             int rowHeight = sheet.getDefaultRowHeight() * entry.getValue();
             if (rowHeight != 0) {
-                sheet.getRow(entry.getKey()).setHeight((short) (rowHeight));
+                getRow(entry.getKey()).setHeight((short) (rowHeight));
             }
         }
+    }
+
+    private Row getRow(int rowIndex) {
+        return sheet.getRow(rowIndex) != null ? sheet.getRow(rowIndex) : sheet.createRow(rowIndex);
     }
 
     private int getLinesCount(String string, int width) {

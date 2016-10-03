@@ -2295,6 +2295,7 @@ public final class ScriptUtils {
         private short formatIndex;          // идентификатор формата даты (дата хранится в виде числа)
         private String formatString;        // формат даты
         private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy"); // свой формат дат, что б исключить использование фомратов по умолчанию: н-р d/m/yyyy
+        private boolean inlineString;
 
         /**
          * Для обработки листа экселя.
@@ -2361,6 +2362,8 @@ public final class ScriptUtils {
                 }
             } else if (name.equals("row")) { // новая строка
                 rowValues = new ArrayList<String>();
+            } else if (name.equals("is")) { // inlineString
+                inlineString = true;
             }
             lastValue.setLength(0);
         }
@@ -2376,7 +2379,7 @@ public final class ScriptUtils {
                 nextIsString = false;
             }
 
-            if (name.equals("v")) { // конец значения
+            if (name.equals("v") || inlineString && name.equals("t")) { // конец значения
                 // добавить отступ: если первое значение таблицы нашлось не в первом столбце, то делается отступ - пропуск лишних столбцов слева
                 int columnIndex = getColumnIndex(position);
                 if (columnIndex < colOffset) {
@@ -2440,6 +2443,8 @@ public final class ScriptUtils {
                 // конец данных - обновить значения переданных параметов для использования в дальнейшем
                 paramsMap.put("rowOffset", rowOffset);
                 paramsMap.put("colOffset", colOffset + 1);
+            } else if (name.equals("is")) {
+                inlineString = false;
             }
         }
 
