@@ -45,7 +45,8 @@ public final class LockData {
         CONFIGURATION_PARAMS,
         SCHEDULER_TASK,
         XSD_VALIDATION,
-        LOAD_TRANSPORT_DATA     //Для задач асинх загрузки ТФ
+        LOAD_TRANSPORT_DATA,     //Для задач асинх загрузки ТФ
+        DEPARTMENT_HISTORY
     }
 
     public enum DescriptionTemplate {

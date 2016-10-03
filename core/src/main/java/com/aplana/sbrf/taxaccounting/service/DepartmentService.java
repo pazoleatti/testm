@@ -251,4 +251,6 @@ public interface DepartmentService {
      * @return строка наименования
      */
     String getReportDepartmentName(int departmentId);
+
+    int getHierarchyLevel(int departmentId);
 }

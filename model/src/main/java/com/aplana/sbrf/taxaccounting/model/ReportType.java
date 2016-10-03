@@ -44,7 +44,10 @@ public enum ReportType {
     CSV_REF_BOOK(1, "CSV", "Формирование отчета справочника \"%s\" в CSV-формате", 24L, 124L),
     SPECIFIC_REPORT_REF_BOOK(3, "SPECIFIC", "Формирование специфического отчета \"%s\" справочника \"%s\"", 25L, 125L),
     IMPORT_REF_BOOK(4, "IMPORT_REF_BOOK", "Загрузка данных из файла в справочник \"%s\"", 27L, 127L),
-    EDIT_REF_BOOK(5, "EDIT_REF_BOOK", "Редактирование справочника \"%s\"", 0L, 0L); //формально является задачей
+    EDIT_REF_BOOK(5, "EDIT_REF_BOOK", "Редактирование справочника \"%s\"", 0L, 0L), //формально является задачей
+
+    GET_ALL_DEPARTMENT_CHANGES(0, "GET_ALL_CHANGES", "Получение списка всех изменений ", 0L, 0L), //формально является задачей
+    SEND_DEPARTMENT_CHANGE(1, "SEND_CHANGE", "Отправка текущего изменения подразделения", 0L, 0L); //формально является задачей
 
     private int id;
     private String name;

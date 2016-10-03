@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.model.DepartmentChangeOperationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
@@ -19,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.ws.DepartmentWS_Service;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.UnitEditingAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.UnitEditingResult;
@@ -60,6 +62,8 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
     private LogEntryService logEntryService;
     @Autowired
     private RefBookFactory refBookFactory;
+    @Autowired
+    private DepartmentWS_Service departmentWS_service;
 
 	private static final String LOCK_MESSAGE = "Справочник \"%s\" заблокирован, попробуйте выполнить операцию позже!";
 
@@ -109,6 +113,7 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
 
                 refBookDepartmentDao.update(action.getDepId(), valueToSave, refBook.getAttributes());
                 logger.info("Подразделение сохранено");
+                departmentWS_service.sendChange(DepartmentChangeOperationType.UPDATE, action.getDepId(), logger);
 
                 auditService.add(FormDataEvent.UPDATE_DEPARTMENT, securityService.currentUserInfo(), action.getDepId(),
                         null, null, null, null,

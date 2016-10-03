@@ -27,6 +27,7 @@ public class Department implements Serializable {
     private Long code;
     /* Поле признак указывающее что подразделение используется в модуле гарантий */
     private boolean garantUse;
+    private boolean sunrUse;
 
     /**
      * Полное имя подразделения
@@ -201,7 +202,15 @@ public class Department implements Serializable {
         this.garantUse = garantUse;
     }
 
-	@Override
+    public boolean isSunrUse() {
+        return sunrUse;
+    }
+
+    public void setSunrUse(boolean sunrUse) {
+        this.sunrUse = sunrUse;
+    }
+
+    @Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;

@@ -519,4 +519,17 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             throw new DaoException("Не удалось найти подразделение банка с id = " + depId);
         }
     }
+
+    @Override
+    public int getHierarchyLevel(int departmentId) {
+        try {
+            return getJdbcTemplate().queryForObject("SELECT level " +
+                    "FROM department " +
+                    "WHERE id = " + departmentId + " " +
+                    "START WITH parent_id is null " +
+                    "CONNECT BY PRIOR id = parent_id", Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return 0;
+        }
+    }
 }

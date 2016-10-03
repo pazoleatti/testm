@@ -188,4 +188,6 @@ public interface DepartmentDao {
      * @param used true - используется, false - не используется
      */
     void setUsedByGarant(int depId, boolean used);
+
+    int getHierarchyLevel(int departmentId);
 }

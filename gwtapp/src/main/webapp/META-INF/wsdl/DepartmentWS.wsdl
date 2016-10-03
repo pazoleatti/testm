@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions name="DepartmentWS" targetNamespace="http://taxaccounting.sbrf.aplana.com/DepartmentWS/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://taxaccounting.sbrf.aplana.com/DepartmentWS/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://taxaccounting.sbrf.aplana.com/DepartmentWS/">
+			<xsd:element name="sendDepartmentChange" type="tns:sendDepartmentChange"/>
+			<xsd:element name="sendDepartmentChangeResponse" type="tns:sendDepartmentChangeResponse"/>
+
+			<xsd:complexType name="sendDepartmentChange">
+				<xsd:sequence>
+					<xsd:element name="departmentChange" type="tns:TaxDepartmentChange" minOccurs="1"/>
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:complexType name="TaxDepartmentChange">
+				<xsd:sequence>
+					<xsd:element name="operationType" type="xsd:int"/>
+					<xsd:element name="id" type="xsd:int"/>
+					<xsd:element name="level" type="xsd:int" minOccurs="0"/>
+					<xsd:element name="name" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="shortName" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="parentId" type="xsd:int" minOccurs="0"/>
+					<xsd:element name="type" type="xsd:int" minOccurs="0"/>
+					<xsd:element name="tbIndex" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="sbrfCode" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="region" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="isActive" type="xsd:boolean" minOccurs="0"/>
+					<xsd:element name="code" type="xsd:long" minOccurs="0"/>
+					<xsd:element name="garantUse" type="xsd:boolean" minOccurs="0"/>
+					<xsd:element name="sunrUse" type="xsd:boolean" minOccurs="0"/>
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:complexType name="sendDepartmentChangeResponse">
+				<xsd:sequence>
+					<xsd:element name="return" type="tns:TaxDepartmentChangeStatus" minOccurs="1"/>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="TaxDepartmentChangeStatus">
+				<xsd:sequence>
+					<xsd:element name="errorCode" type="xsd:string"/>
+					<xsd:element name="errorText" type="xsd:string" minOccurs="0"/>
+				</xsd:sequence>
+			</xsd:complexType>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="sendDepartmentChange">
+		<wsdl:part name="parameters" element="tns:sendDepartmentChange"/>
+	</wsdl:message>
+	<wsdl:message name="sendDepartmentChangeResponse">
+		<wsdl:part name="parameters" element="tns:sendDepartmentChangeResponse"/>
+	</wsdl:message>
+	<wsdl:portType name="DepartmentWS">
+		<wsdl:operation name="sendDepartmentChange">
+			<wsdl:input message="tns:sendDepartmentChange"/>
+			<wsdl:output message="tns:sendDepartmentChangeResponse"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="DepartmentWSPortBinding" type="tns:DepartmentWS">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+		<wsdl:operation name="sendDepartmentChange">
+			<soap:operation soapAction="http://taxaccounting.sbrf.aplana.com/DepartmentWS/sendDepartmentChange"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="DepartmentWS">
+		<wsdl:port name="DepartmentWSPort" binding="tns:DepartmentWSPortBinding">
+			<soap:address location="http://localhost:9000/DepartmentsManagement"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

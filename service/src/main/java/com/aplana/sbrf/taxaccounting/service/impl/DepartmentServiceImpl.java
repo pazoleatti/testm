@@ -441,4 +441,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     private List<Integer> getDepartmentIdsByExecutors(List<Integer> departments, List<TaxType> taxTypes) {
         return departmentDao.getDepartmentIdsByExecutors(departments, taxTypes);
     }
+
+    @Override
+    public int getHierarchyLevel(int departmentId) {
+        return departmentDao.getHierarchyLevel(departmentId);
+    }
 }
