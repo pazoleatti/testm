@@ -6616,7 +6616,7 @@
     <row alias="R390">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17280"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг предприятиям, с которыми заключён «зарплатный» договор с использованием банковских карт международных платёжных систем"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг предприятиям, с которыми заключён &quot;зарплатный&quot; договор с использованием банковских карт международных платёжных систем"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27902.02"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -6633,7 +6633,7 @@
     <row alias="R391">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="17290"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг индивидуальным предпринимателям, с которыми заключён «зарплатный» договор с использованием банковских карт международных платёжных систем"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за оказание дополнительных услуг индивидуальным предпринимателям, с которыми заключён &quot;зарплатный&quot; договор с использованием банковских карт международных платёжных систем"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.27903.02"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>

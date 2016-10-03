@@ -27,8 +27,8 @@ import java.util.*;
 public class RefBookCurrencyMetals implements RefBookDataProvider {
 
     public static final Long REF_BOOK_ID = 542L;
-    private static final Long REF_BOOK_CURRENCY_ID = 15L;
-    private static final Long REF_BOOK_METALS_ID = 17L;
+    public static final Long REF_BOOK_CURRENCY_ID = 15L;
+    public static final Long REF_BOOK_METALS_ID = 17L;
 
     @Autowired
     private RefBookFactory refBookFactory;
@@ -415,10 +415,17 @@ public class RefBookCurrencyMetals implements RefBookDataProvider {
     public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
         init();
         List<Long> realRecordIds = new ArrayList<Long>();
+        Map<Long, Long> recordIdsMap = new HashMap<Long, Long>();
         for (Long fakeRecordId : recordIds) {
-            realRecordIds.add(fakeRecordId/10);
+            long realRecordId = fakeRecordId / 10;
+            realRecordIds.add(realRecordId);
+            recordIdsMap.put(realRecordId, fakeRecordId);
         }
-        return refBookDataProviderCurrency.getInactiveRecordsInPeriod(realRecordIds, periodFrom, periodTo);
+        List<ReferenceCheckResult> inactiveRecords = refBookDataProviderCurrency.getInactiveRecordsInPeriod(realRecordIds, periodFrom, periodTo);
+        for(ReferenceCheckResult checkResult : inactiveRecords) {
+            checkResult.setRecordId(recordIdsMap.get(checkResult.getRecordId()));
+        }
+        return inactiveRecords;
     }
 
 	@Override

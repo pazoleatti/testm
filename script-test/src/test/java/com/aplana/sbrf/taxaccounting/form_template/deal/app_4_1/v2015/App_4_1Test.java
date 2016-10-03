@@ -64,7 +64,6 @@ public class App_4_1Test extends ScriptTestBase {
 
     private static final HashMap<Integer, String> templatesPathMap = new LinkedHashMap<Integer, String>();
     static {
-        // TODO (Ramil Timerbaev)
         templatesPathMap.put(800, "..//src/main//resources//form_template//deal//related_persons//v2015//");
         templatesPathMap.put(810, "..//src/main//resources//form_template//deal//forecast_major_transactions//v2015//");
         templatesPathMap.put(807, "..//src/main//resources//form_template//deal//journal_settlements//v2015//");

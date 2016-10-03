@@ -6,10 +6,22 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookCreditRatingsClasses;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookCurrencyMetals;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataCompositionServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
@@ -48,6 +60,10 @@ public class FormDataServiceTest extends Assert{
     private FormDataDao formDataDao;
     @Autowired
     private DataRowDao dataRowDao;
+    @Autowired
+    private RefBookDao refBookDao;
+    @Autowired
+    private RefBookFactory refBookFactory;
     @Autowired
     DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
@@ -1776,5 +1792,233 @@ public class FormDataServiceTest extends Assert{
         FormData formData = new FormData();
 
         formDataService.getValueForCheckLimit(userInfo, formData, ReportType.CSV_REF_BOOK, null, null, logger);
+    }
+
+    private void mockPeriodInactiveRecords(FormData formData, final List<Long> existedIds) throws ParseException {
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        Date calendarStartDate = format.parse("01.01.2014");
+        Date endDate = format.parse("31.12.2014");
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setCalendarStartDate(calendarStartDate);
+        reportPeriod.setEndDate(endDate);
+        when(periodService.getReportPeriod(eq(formData.getReportPeriodId()))).thenReturn(reportPeriod);
+        when(refBookDao.getInactiveRecordsInPeriod(eq(RefBook.REF_BOOK_RECORD_TABLE_NAME), anyListOf(Long.class), eq(calendarStartDate), eq(endDate), eq(false))).thenAnswer(new Answer<ArrayList<ReferenceCheckResult>>() {
+            @Override
+            public ArrayList<ReferenceCheckResult> answer(InvocationOnMock invocation) throws Throwable {
+                List<Long> recordIds = (List<Long>) invocation.getArguments()[1];
+                if (existedIds.equals(recordIds)) {
+                    return new ArrayList<ReferenceCheckResult>();
+                }
+                ArrayList<ReferenceCheckResult> checkResults = new ArrayList<ReferenceCheckResult>();
+                List<Long> newList = new ArrayList<Long>(recordIds);
+                newList.removeAll(existedIds);
+                for (Long id : newList) {
+                    ReferenceCheckResult checkResult = new ReferenceCheckResult();
+                    checkResult.setRecordId(id);
+                    checkResult.setResult(CheckResult.NOT_EXISTS);
+                    checkResults.add(checkResult);
+                }
+                return checkResults;
+            }
+        });
+    }
+
+    private FormData preCheckValues(final List<Long> existedIds) throws ParseException {
+        // форма с двумя графами
+        Long refBookUni1Id = 1L;
+        Long refBookUni2Id = 2L;
+        long refBookAttributeUni1Id = 1L;
+        long refBookAttributeUni2Id = 2L;
+        String alias1 = "column1";
+        String alias2 = "column2";
+
+        // графы формы
+        RefBookColumn column = new RefBookColumn();
+        column.setColumnType(ColumnType.REFBOOK);
+        column.setAlias(alias1);
+        column.setName("Колонка1");
+        column.setRefBookAttributeId(refBookAttributeUni1Id);
+        formTemplate.addColumn(column);
+        column = new RefBookColumn();
+        column.setColumnType(ColumnType.REFBOOK);
+        column.setAlias(alias2);
+        column.setName("Колонка2");
+        column.setRefBookAttributeId(refBookAttributeUni2Id);
+        formTemplate.addColumn(column);
+        // универсальный справочник
+        RefBook refBook = new RefBook();
+        refBook.setId(refBookUni1Id);
+        when(refBookDao.getByAttribute(eq(refBookAttributeUni1Id))).thenReturn(refBook);
+        refBook = new RefBook();
+        refBook.setId(refBookUni2Id);
+        when(refBookDao.getByAttribute(eq(refBookAttributeUni2Id))).thenReturn(refBook);
+        // провайдер
+        RefBookUniversal provider = new RefBookUniversal();
+        provider.setRefBookId(refBookUni1Id);
+        ReflectionTestUtils.setField(provider, "refBookDao", refBookDao);
+        when(refBookFactory.getDataProvider(eq(refBookUni1Id))).thenReturn(provider);
+        // должен испоьзоваться первый провайдер, во втором нужен только класс
+        provider = new RefBookUniversal();
+//        provider.setRefBookId(refBookUni2Id);
+//        ReflectionTestUtils.setField(provider, "refBookDao", refBookDao);
+        when(refBookFactory.getDataProvider(eq(refBookUni2Id))).thenReturn(provider);
+        // НФ
+        FormData formData = new FormData(formTemplate);
+        formData.setReportPeriodId(1);
+        // строки
+        List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
+        DataRow<Cell> dataRow = formData.createDataRow();
+        dataRow.getCell(alias1).setValue(1L, 1);
+        dataRow.getCell(alias2).setValue(2L, 1);
+        dataRow.setIndex(1);
+        rows.add(dataRow);
+        dataRow = formData.createDataRow();
+        dataRow.getCell(alias1).setValue(3L, 1);
+        dataRow.getCell(alias2).setValue(4L, 1);
+        dataRow.setIndex(2);
+        rows.add(dataRow);
+        when(dataRowDao.getRows(eq(formData), isNull(DataRowRange.class))).thenReturn(rows);
+        mockPeriodInactiveRecords(formData, existedIds);
+        return formData;
+    }
+
+    private FormData preCheckValues2(final List<Long> existedIds) throws ParseException {
+        // форма с двумя графами
+        Long refBookCurrencyId = RefBookCurrencyMetals.REF_BOOK_ID;
+        Long refBookCreditId = RefBookCreditRatingsClasses.REF_BOOK_ID;
+        long refBookAttributeCurrencyId = 1L;
+        long refBookAttributeCreditId = 2L;
+        String alias1 = "column1";
+        String alias2 = "column2";
+
+        // графы формы
+        RefBookColumn column = new RefBookColumn();
+        column.setColumnType(ColumnType.REFBOOK);
+        column.setAlias(alias1);
+        column.setName("Колонка1");
+        column.setRefBookAttributeId(refBookAttributeCurrencyId);
+        formTemplate.addColumn(column);
+        column = new RefBookColumn();
+        column.setColumnType(ColumnType.REFBOOK);
+        column.setAlias(alias2);
+        column.setName("Колонка2");
+        column.setRefBookAttributeId(refBookAttributeCreditId);
+        formTemplate.addColumn(column);
+        // универсальный справочник
+        RefBook refBook = new RefBook();
+        refBook.setId(refBookCurrencyId);
+        when(refBookDao.getByAttribute(eq(refBookAttributeCurrencyId))).thenReturn(refBook);
+        refBook = new RefBook();
+        refBook.setId(refBookCreditId);
+        when(refBookDao.getByAttribute(eq(refBookAttributeCreditId))).thenReturn(refBook);
+        // провайдер
+        RefBookDataProvider provider = new RefBookCurrencyMetals();
+        ReflectionTestUtils.setField(provider, "refBookFactory", refBookFactory);
+        when(refBookFactory.getDataProvider(eq(refBookCurrencyId))).thenReturn(provider);
+        provider = new RefBookUniversal();
+        ReflectionTestUtils.setField(provider, "refBookDao", refBookDao);
+        ((RefBookUniversal) provider).setRefBookId(RefBookCurrencyMetals.REF_BOOK_CURRENCY_ID);
+        when(refBookFactory.getDataProvider(eq(RefBookCurrencyMetals.REF_BOOK_CURRENCY_ID))).thenReturn(provider);
+        provider = new RefBookUniversal();
+        //ReflectionTestUtils.setField(provider, "refBookDao", refBookDao);
+        //((RefBookUniversal) provider).setRefBookId(RefBookCurrencyMetals.REF_BOOK_METALS_ID);
+        when(refBookFactory.getDataProvider(eq(RefBookCurrencyMetals.REF_BOOK_METALS_ID))).thenReturn(provider);
+        provider = new RefBookCreditRatingsClasses();
+        ReflectionTestUtils.setField(provider, "refBookFactory", refBookFactory);
+        when(refBookFactory.getDataProvider(eq(refBookCreditId))).thenReturn(provider);
+        provider = new RefBookUniversal();
+        ((RefBookUniversal) provider).setRefBookId(RefBookCreditRatingsClasses.REF_BOOK_CREDIT_CLASSES_ID);
+        //ReflectionTestUtils.setField(provider, "refBookDao", refBookDao);
+        //when(refBookFactory.getDataProvider(eq(RefBookCreditRatingsClasses.REF_BOOK_CREDIT_CLASSES_ID))).thenReturn(provider);
+        provider = new RefBookUniversal();
+        ReflectionTestUtils.setField(provider, "refBookDao", refBookDao);
+        ((RefBookUniversal) provider).setRefBookId(RefBookCreditRatingsClasses.REF_BOOK_CREDIT_RATINGS_ID);
+        when(refBookFactory.getDataProvider(eq(RefBookCreditRatingsClasses.REF_BOOK_CREDIT_RATINGS_ID))).thenReturn(provider);
+        // НФ
+        FormData formData = new FormData(formTemplate);
+        formData.setReportPeriodId(1);
+        // строки
+        List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
+        DataRow<Cell> dataRow = formData.createDataRow();
+        dataRow.getCell(alias1).setValue(10L, 1);
+        dataRow.getCell(alias2).setValue(20L, 1);
+        dataRow.setIndex(1);
+        rows.add(dataRow);
+        dataRow = formData.createDataRow();
+        dataRow.getCell(alias1).setValue(31L, 1);
+        dataRow.getCell(alias2).setValue(41L, 1);
+        dataRow.setIndex(2);
+        rows.add(dataRow);
+        when(dataRowDao.getRows(eq(formData), isNull(DataRowRange.class))).thenReturn(rows);
+        mockPeriodInactiveRecords(formData, existedIds);
+        return formData;
+    }
+
+    @Test
+    public void checkValuesTest() throws ParseException {
+        Logger logger = new Logger();
+        final List<Long> existedIds = new ArrayList<Long>() {{
+            add(1L); // первая строка, первая графа
+            add(2L); // первая строка, вторая графа
+            add(3L); // вторая строка, первая графа
+            add(4L); // вторая строка, вторая графа
+        }};
+        FormData formData = preCheckValues(existedIds);
+
+        formDataService.checkValues(logger, formData);
+        Assert.assertEquals(0, logger.getEntries().size());
+    }
+
+    @Test
+    public void checkValues2Test() throws ParseException {
+        Logger logger = new Logger();
+        final List<Long> existedIds = new ArrayList<Long>() {{
+            add(1L); // первая строка, первая графа
+            add(2L); // первая строка, вторая графа
+            add(3L); // вторая строка, первая графа
+            //add(4L); // вторая строка, вторая графа
+        }};
+        FormData formData = preCheckValues(existedIds);
+
+        try {
+            formDataService.checkValues(logger, formData);
+            Assert.fail("Should throw an exception");
+        } catch (ServiceLoggerException e) {
+            Assert.assertEquals(e.getMessage(), "Произошла ошибка при проверке справочных значений формы");
+        }
+        List<LogEntry> entries = logger.getEntries();
+        Assert.assertEquals(1, entries.size());
+        int i = 0;
+        Assert.assertEquals("Строка 2: Значение графы \"Колонка2\" ссылается на несуществующую версию записи справочника!", entries.get(i++).getMessage());
+    }
+
+    @Test
+    public void checkValues3Test() throws ParseException {
+        Logger logger = new Logger();
+        final List<Long> existedIds = new ArrayList<Long>() {{
+            add(1L); // первая строка, первая графа
+            add(2L); // первая строка, вторая графа
+            add(3L); // вторая строка, первая графа
+            add(4L); // вторая строка, вторая графа
+        }};
+        FormData formData = preCheckValues2(existedIds);
+
+        formDataService.checkValues(logger, formData);
+        Assert.assertEquals(0, logger.getEntries().size());
+    }
+
+    //@Test
+    public void checkValues4Test() throws ParseException {
+        Logger logger = new Logger();
+        final List<Long> existedIds = new ArrayList<Long>() {{
+            add(1L); // первая строка, первая графа
+            add(2L); // первая строка, вторая графа
+            add(3L); // вторая строка, первая графа
+            //add(4L); // вторая строка, вторая графа
+        }};
+        FormData formData = preCheckValues2(existedIds);
+
+        formDataService.checkValues(logger, formData);
+        Assert.assertEquals(0, logger.getEntries().size());
     }
 }

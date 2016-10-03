@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public abstract class AbstractReportBuilder {
 
-    protected static final Log LOG = LogFactory.getLog(LogSystemCsvBuilder.class);
+    protected static final Log LOG = LogFactory.getLog(AbstractReportBuilder.class);
 
     protected Workbook workBook;
     protected Sheet sheet;
