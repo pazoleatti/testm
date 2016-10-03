@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.DepartmentWS;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChange;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChangeStatus;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,8 @@ import java.util.Map;
  */
 @Component
 public class DepartmentWS_Service {
+
+    private static final Log LOG = LogFactory.getLog(DepartmentWS_Service.class);
 
     @Autowired
     private DepartmentChangeService departmentChangeService;
@@ -67,6 +71,7 @@ public class DepartmentWS_Service {
                 TaxDepartmentChangeStatus status = departmentWS.sendDepartmentChange(taxDepartmentChange);
                 logger.info("Изменение успешно передано СУНР");
             } catch (Exception e) {
+                LOG.error("Возникли ошибки при отправке изменения подразделения в СУНР", e);
                 logger.info("Возникли ошибки при отправке изменения подразделения в СУНР");
                 departmentChangeService.addChange(departmentChange);
             }
