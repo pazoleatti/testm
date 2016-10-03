@@ -701,7 +701,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     @Override
     protected void cellAlignment() {
         for (int i = 0; i < columns.size(); i++ ){
-            widthCellsMap.put(i, columns.get(i).getWidth());
+            widthCellsMap.put(i, (int)(columns.get(i).getWidth() * 1.3));
         }
         super.cellAlignment();
     }
