@@ -106,7 +106,7 @@ public class BookerStatementsServiceImplTest {
         reportPeriod.setTaxPeriod(taxPeriod);
         when(periodService.getReportPeriod(reportPeriod.getId())).thenReturn(reportPeriod);
 
-        String note = "Импорт бухгалтерской отчётности: test.xls";
+        String note = "Загрузка данных из файла \"test.xls\" в форму бухгалтерской отчетности";
 
         bookerStatementsService.importData("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, department.getId(), new TAUserInfo());
         verify(auditService, Mockito.atLeastOnce()).add(eq(FormDataEvent.IMPORT), any(TAUserInfo.class), eq("2014 год"), eq(department.getId()), isNull(String.class), isNull(String.class), isNull(Integer.class), eq(note), eq(AuditFormType.INCOME101), isNull(String.class));

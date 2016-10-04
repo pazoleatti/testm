@@ -87,7 +87,7 @@ public class AuditServiceImpl implements AuditService {
             public Object execute() {
 
                 String departmentName = departmentId == null ?
-                        departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId())
+                        null
                         :
                         (
                                 departmentId == 0 ? departmentService.getDepartment(departmentId).getName() :

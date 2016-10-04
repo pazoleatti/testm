@@ -152,9 +152,6 @@ public abstract class AbstractLoadTransportDataService {
             if (logData.isFormDepartmentId()) {
                 departmentId = formDepartmentId;
             }
-            if (departmentId == null && userInfo != null) {
-                departmentId = userInfo.getUser().getDepartmentId();
-            }
             String prefix = "";
             if (userInfo.getUser().getId() == TAUser.SYSTEM_USER_ID) {
                 prefix = "Событие инициировано Системой. ";

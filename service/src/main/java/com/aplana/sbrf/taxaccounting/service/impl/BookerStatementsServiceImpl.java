@@ -49,7 +49,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static final String NO_DATA_FILE_MSG = "Файл не содержит данных. Файл не может быть загружен.";
     private static final String ACCOUNT_PERIOD_INVALID = "Период не указан.";
     private static final String DEPARTMENTID_INVALID = "Подразделение не указано.";
-    private static final String IMPORT_BO_MSG = "Импорт бухгалтерской отчётности: %s";
+    private static final String IMPORT_BO_MSG = "Загрузка данных из файла \"%s\" в форму бухгалтерской отчетности";
 
     @Autowired
     PeriodService reportPeriodService;

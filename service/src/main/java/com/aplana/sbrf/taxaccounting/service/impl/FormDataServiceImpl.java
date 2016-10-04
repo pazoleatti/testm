@@ -276,7 +276,8 @@ public class FormDataServiceImpl implements FormDataService {
                     }
                     dataRowDao.refreshRefBookLinks(fd);
                     logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
-                    auditService.add(formDataEvent, userInfo, null, fd, fileName, null);
+                    String note = "Загрузка данных из файла \"" + fileName + "\" в форму";
+                    auditService.add(formDataEvent, userInfo, null, fd, note, null);
 				} finally {
 					IOUtils.closeQuietly(dataFileInputStream);
 				}
