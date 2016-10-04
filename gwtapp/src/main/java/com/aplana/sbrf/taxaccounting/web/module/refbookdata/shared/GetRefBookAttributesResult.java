@@ -6,6 +6,7 @@ import java.util.List;
 
 public class GetRefBookAttributesResult implements Result {
 	List<RefBookColumn> columns;
+    private String refBookName;
     private boolean readOnly;
     private Integer refBookType;
     private boolean sendQuery;
@@ -26,6 +27,14 @@ public class GetRefBookAttributesResult implements Result {
 	public void setColumns(List<RefBookColumn> columns) {
 		this.columns = columns;
 	}
+
+    public String getRefBookName() {
+        return refBookName;
+    }
+
+    public void setRefBookName(String refBookName) {
+        this.refBookName = refBookName;
+    }
 
     public Integer getRefBookType() {
         return refBookType;

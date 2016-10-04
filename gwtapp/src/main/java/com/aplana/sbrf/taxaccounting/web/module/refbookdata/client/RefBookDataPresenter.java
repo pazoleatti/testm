@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -224,98 +225,80 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         refBookLinearPresenter.setRefBookId(refBookId);
         versionPresenter.setRefBookId(refBookId);
         versionPresenter.setHierarchy(false);
-        CheckLinearAction linearAction = new CheckLinearAction();
-        linearAction.setRefBookId(refBookId);
-        dispatcher.execute(linearAction, CallbackUtils.defaultCallback(new AbstractCallback<CheckLinearResult>() {
-            @Override
-            public void onSuccess(CheckLinearResult result) {
-                CheckRefBookAction checkAction = new CheckRefBookAction();
-                checkAction.setRefBookId(refBookId);
+        CheckRefBookAction checkAction = new CheckRefBookAction();
+        checkAction.setRefBookId(refBookId);
+        checkAction.setTypeForCheck(RefBookType.LINEAR);
+        dispatcher.execute(checkAction,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<CheckRefBookResult>() {
+                            @Override
+                            public void onSuccess(CheckRefBookResult result) {
+                                editFormPresenter.init(refBookId, result.isVersioned());
+                                isVersioned = result.isVersioned();
+                                getView().setIsVersion(result.isVersioned());
+                                getView().setUploadAvailable(result.isUploadAvailable());
+                                importScriptStatus = result.isScriptStatus();
+                                registrations[0] = editFormPresenter.addClickHandlerForAllVersions(getClick());
+                                if (result.isAvailable()) {
+                                    getView().resetSearchInputBox();
+                                    editFormPresenter.setVersionMode(false);
+                                    getView().setVersionView(false);
+                            /*editFormPresenter.setRecordId(null);*/
+                                    GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 
-                dispatcher.execute(checkAction,
-                        CallbackUtils.defaultCallback(
-                                new AbstractCallback<CheckRefBookResult>() {
-                                    @Override
-                                    public void onSuccess(CheckRefBookResult result) {
-                                        editFormPresenter.init(refBookId, result.isVersioned());
-                                        isVersioned = result.isVersioned();
-                                        getView().setIsVersion(result.isVersioned());
-                                        getView().setUploadAvailable(result.isUploadAvailable());
-                                        importScriptStatus = result.isScriptStatus();
-                                        registrations[0] = editFormPresenter.addClickHandlerForAllVersions(getClick());
-                                        if (result.isAvailable()) {
-                                            getView().resetSearchInputBox();
-                                            editFormPresenter.setVersionMode(false);
-                                            getView().setVersionView(false);
-                                    /*editFormPresenter.setRecordId(null);*/
-                                            GetRefBookAttributesAction action = new GetRefBookAttributesAction();
-
-                                            action.setRefBookId(refBookId);
-                                            dispatcher.execute(action,
-                                                    CallbackUtils.defaultCallback(
-                                                            new AbstractCallback<GetRefBookAttributesResult>() {
-                                                                @Override
-                                                                public void onSuccess(GetRefBookAttributesResult result) {
-                                                                    getView().setSpecificReportTypes(result.getSpecificReportTypes());
-                                                                    refBookLinearPresenter.setTableColumns(result.getColumns());
-                                                                    getView().updateSendQuery(result.isSendQuery());
-                                                                    editFormPresenter.createFields(result.getColumns());
-                                                                    if (result.isReadOnly()) {
-                                                                        mode = FormMode.READ;
-                                                                    } else {
-                                                                        mode = FormMode.VIEW;
-                                                                    }
-                                                                    editFormPresenter.setMode(mode);
-                                                                    getView().updateMode(mode);
-                                                                    refBookLinearPresenter.setMode(mode);
-                                                            /*refBookLinearPresenter.setRange(new Range(0, 500));*/
-                                                                    refBookLinearPresenter.initState(getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
-                                                                    refBookLinearPresenter.updateTable();
-                                                                    //т.к. не срабатывает событие onSelectionChange приповторном переходе
+                                    action.setRefBookId(refBookId);
+                                    dispatcher.execute(action,
+                                            CallbackUtils.defaultCallback(
+                                                    new AbstractCallback<GetRefBookAttributesResult>() {
+                                                        @Override
+                                                        public void onSuccess(GetRefBookAttributesResult result) {
+                                                            refBookName = result.getRefBookName();
+                                                            getView().setRefBookNameDesc(result.getRefBookName());
+                                                            getView().setSpecificReportTypes(result.getSpecificReportTypes());
+                                                            refBookLinearPresenter.setTableColumns(result.getColumns());
+                                                            getView().updateSendQuery(result.isSendQuery());
+                                                            editFormPresenter.createFields(result.getColumns());
+                                                            if (result.isReadOnly()) {
+                                                                mode = FormMode.READ;
+                                                            } else {
+                                                                mode = FormMode.VIEW;
+                                                            }
+                                                            editFormPresenter.setMode(mode);
+                                                            getView().updateMode(mode);
+                                                            refBookLinearPresenter.setMode(mode);
+                                                    /*refBookLinearPresenter.setRange(new Range(0, 500));*/
+                                                            refBookLinearPresenter.initState(getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
+                                                            refBookLinearPresenter.updateTable();
+                                                            //т.к. не срабатывает событие onSelectionChange приповторном переходе
 //                                                            editFormPresenter.show(recordId);
-                                                                    getProxy().manualReveal(RefBookDataPresenter.this);
-                                                                    startTimer();
-                                                                }
-                                                            }, RefBookDataPresenter.this));
-
-                                            GetNameAction nameAction = new GetNameAction();
-                                            nameAction.setRefBookId(refBookId);
-                                            dispatcher.execute(nameAction,
-                                                    CallbackUtils.defaultCallback(
-                                                            new AbstractCallback<GetNameResult>() {
-                                                                @Override
-                                                                public void onSuccess(GetNameResult result) {
-                                                                    refBookName = result.getName();
-                                                                    getView().setRefBookNameDesc(result.getName());
-                                                                }
-                                                            }, RefBookDataPresenter.this));
-                                        } else {
-                                            placeManager.unlock();
-                                            Dialog.errorMessage("Доступ к справочнику запрещен!", new DialogHandler() {
-                                                @Override
-                                                public void close() {
-                                                    super.close();
-                                                    if (prevRefBookId != null) {
-                                                        PlaceRequest.Builder builder = new PlaceRequest.Builder().nameToken(RefBookDataTokens.REFBOOK_DATA);
-                                                        builder.with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(prevRefBookId));
-                                                        placeManager.revealPlace(builder.build());
-                                                    } else {
-                                                        placeManager.revealPlace(new PlaceRequest(HomeNameTokens.homePage));
-                                                    }
-                                                }
-                                            });
+                                                            getProxy().manualReveal(RefBookDataPresenter.this);
+                                                            startTimer();
+                                                        }
+                                                    }, RefBookDataPresenter.this));
+                                } else {
+                                    placeManager.unlock();
+                                    Dialog.errorMessage("Доступ к справочнику запрещен!", new DialogHandler() {
+                                        @Override
+                                        public void close() {
+                                            super.close();
+                                            if (prevRefBookId != null) {
+                                                PlaceRequest.Builder builder = new PlaceRequest.Builder().nameToken(RefBookDataTokens.REFBOOK_DATA);
+                                                builder.with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(prevRefBookId));
+                                                placeManager.revealPlace(builder.build());
+                                            } else {
+                                                placeManager.revealPlace(new PlaceRequest(HomeNameTokens.homePage));
+                                            }
                                         }
-                                    }
-                                }, RefBookDataPresenter.this));
-            }
+                                    });
+                                }
+                            }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                placeManager.unlock();
-                placeManager.revealErrorPlace("");
-            }
-        }, this));
-
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                placeManager.unlock();
+                                placeManager.revealErrorPlace("");
+                            }
+                        }, RefBookDataPresenter.this));
     }
 
     @Override

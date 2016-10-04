@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -283,95 +284,78 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         clearSlot(TYPE_editFormPresenter);
         setInSlot(TYPE_editFormPresenter, Department.REF_BOOK_ID.equals(refBookId) ? departmentEditPresenter : hierEditFormPresenter);
         commonEditPresenter = Department.REF_BOOK_ID.equals(refBookId) ? departmentEditPresenter : hierEditFormPresenter;
-        CheckHierAction checkHierAction = new CheckHierAction();
-        checkHierAction.setRefBookId(refBookId);
         refBookHierDataPresenter.setRefBookId(refBookId);
         versionPresenter.setRefBookId(refBookId);
         getView().clearFilterInputBox();
-        dispatcher.execute(checkHierAction, CallbackUtils.defaultCallback(new AbstractCallback<CheckHierResult>() {
-            @Override
-            public void onSuccess(CheckHierResult result) {
-                CheckRefBookAction checkAction = new CheckRefBookAction();
-                checkAction.setRefBookId(refBookId);
-                dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
-                        new AbstractCallback<CheckRefBookResult>() {
-                            @Override
-                            public void onSuccess(CheckRefBookResult result) {
-                                commonEditPresenter.init(refBookId, result.isVersioned());
-                                importScriptStatus = result.isScriptStatus();
-                                isVersioned = result.isVersioned();
-                                getView().setIsVersion(result.isVersioned());
-                                getView().setUploadAvailable(result.isUploadAvailable());
-                                registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(getClick());
-                                if (result.isAvailable()) {
-                                    commonEditPresenter.setVersionMode(false);
-                                    getView().setVersionView(false);
-                                    /*commonEditPresenter.setRecordId(null);*/
+        CheckRefBookAction checkAction = new CheckRefBookAction();
+        checkAction.setRefBookId(refBookId);
+        checkAction.setTypeForCheck(RefBookType.HIERARCHICAL);
+        dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
+                new AbstractCallback<CheckRefBookResult>() {
+                    @Override
+                    public void onSuccess(CheckRefBookResult result) {
+                        commonEditPresenter.init(refBookId, result.isVersioned());
+                        importScriptStatus = result.isScriptStatus();
+                        isVersioned = result.isVersioned();
+                        getView().setIsVersion(result.isVersioned());
+                        getView().setUploadAvailable(result.isUploadAvailable());
+                        registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(getClick());
+                        if (result.isAvailable()) {
+                            commonEditPresenter.setVersionMode(false);
+                            getView().setVersionView(false);
+                            /*commonEditPresenter.setRecordId(null);*/
 
-                                    GetRefBookAttributesAction action = new GetRefBookAttributesAction(refBookId);
-                                    dispatcher.execute(action, CallbackUtils.defaultCallback(
-                                            new AbstractCallback<GetRefBookAttributesResult>() {
-                                                @Override
-                                                public void onSuccess(GetRefBookAttributesResult result) {
-                                                    getView().setSpecificReportTypes(result.getSpecificReportTypes());
-                                                    /*if (canVersion)checkRecord();*/
-                                                    for (RefBookColumn refBookColumn : result.getColumns()) {
-                                                        if (refBookColumn.getAlias().toLowerCase().equals("name")) {
-                                                            attrId = refBookColumn.getId();
-                                                        }
-                                                    }
-                                                    /*refBookHierDataPresenter.initPickerState(attrId);
-                                                    refBookHierDataPresenter.initPickerState(getView().getRelevanceDate(), getView().getSearchPattern());*/
-                                                    if (result.isReadOnly()) {
-                                                        mode = FormMode.READ;
-                                                        //updateMode();
-                                                    } else {
-                                                        mode = FormMode.VIEW;
-                                                    }
-                                                    getView().updateView(mode);
-                                                    refBookHierDataPresenter.clearAll();
-                                                    refBookHierDataPresenter.setAttributeId(attrId);
-                                                    refBookHierDataPresenter.setMode(mode);
-                                                    refBookHierDataPresenter.initPickerState(getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
-                                                    refBookHierDataPresenter.loadAndSelect();
-                                                    commonEditPresenter.createFields(result.getColumns());
-                                                    commonEditPresenter.setMode(mode);
+                            GetRefBookAttributesAction action = new GetRefBookAttributesAction(refBookId);
+                            dispatcher.execute(action, CallbackUtils.defaultCallback(
+                                    new AbstractCallback<GetRefBookAttributesResult>() {
+                                        @Override
+                                        public void onSuccess(GetRefBookAttributesResult result) {
+                                            refBookName = result.getRefBookName();
+                                            getView().setRefBookNameDesc(refBookName);
+                                            getView().setSpecificReportTypes(result.getSpecificReportTypes());
+                                            /*if (canVersion)checkRecord();*/
+                                            for (RefBookColumn refBookColumn : result.getColumns()) {
+                                                if (refBookColumn.getAlias().toLowerCase().equals("name")) {
+                                                    attrId = refBookColumn.getId();
                                                 }
-                                            }, RefBookHierPresenter.this));
+                                            }
+                                            /*refBookHierDataPresenter.initPickerState(attrId);
+                                            refBookHierDataPresenter.initPickerState(getView().getRelevanceDate(), getView().getSearchPattern());*/
+                                            if (result.isReadOnly()) {
+                                                mode = FormMode.READ;
+                                                //updateMode();
+                                            } else {
+                                                mode = FormMode.VIEW;
+                                            }
+                                            getView().updateView(mode);
+                                            refBookHierDataPresenter.clearAll();
+                                            refBookHierDataPresenter.setAttributeId(attrId);
+                                            refBookHierDataPresenter.setMode(mode);
+                                            refBookHierDataPresenter.initPickerState(getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
+                                            refBookHierDataPresenter.loadAndSelect();
+                                            commonEditPresenter.createFields(result.getColumns());
+                                            commonEditPresenter.setMode(mode);
+                                        }
+                                    }, RefBookHierPresenter.this));
 
-                                    dispatcher.execute(new GetNameAction(refBookId), CallbackUtils.defaultCallback(
-                                            new AbstractCallback<GetNameResult>() {
-                                                @Override
-                                                public void onSuccess(GetNameResult result) {
-                                                    refBookName = result.getName();
-                                                    getView().setRefBookNameDesc(refBookName);
-                                                }
-                                            }, RefBookHierPresenter.this));
-                                    getView().setVersionedFields(result.isVersioned());
-                                    //hierEditFormPresenter.setCanVersion(canVersion);
-                                    versionPresenter.setHierarchy(true);
-                                } else {
-                                    /*getProxy().manualReveal(RefBookHierPresenter.this);*/
-                                    Dialog.errorMessage("Доступ к справочнику запрещен!");
-                                }
-                                startTimer();
-                            }
+                            getView().setVersionedFields(result.isVersioned());
+                            //hierEditFormPresenter.setCanVersion(canVersion);
+                            versionPresenter.setHierarchy(true);
+                        } else {
+                            /*getProxy().manualReveal(RefBookHierPresenter.this);*/
+                            Dialog.errorMessage("Доступ к справочнику запрещен!");
+                        }
+                        startTimer();
+                    }
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                super.onFailure(caught);
-                                stopTimer();
-                            }
-                        }, RefBookHierPresenter.this));
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                placeManager.unlock();
-                placeManager.revealErrorPlace("");
-                stopTimer();
-            }
-        }, RefBookHierPresenter.this));
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        super.onFailure(caught);
+                        placeManager.unlock();
+                        placeManager.revealErrorPlace("");
+                        stopTimer();
+                    }
+                }, RefBookHierPresenter.this));
     }
 
     @Override
