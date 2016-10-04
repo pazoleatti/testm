@@ -10,23 +10,24 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentChangeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.DepartmentWS;
+import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.DepartmentWS_Service;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChange;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChangeStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.net.MalformedURLException;
 import java.util.Map;
 
 /**
  * @author lhaziev
  */
 @Component
-public class DepartmentWS_Service {
+public class DepartmentWS_Manager {
 
-    private static final Log LOG = LogFactory.getLog(DepartmentWS_Service.class);
+    private static final Log LOG = LogFactory.getLog(DepartmentWS_Manager.class);
 
     @Autowired
     private DepartmentChangeService departmentChangeService;
@@ -37,12 +38,12 @@ public class DepartmentWS_Service {
     @Autowired
     private RefBookFactory refBookFactory;
 
-    private DepartmentWS getDepartmentWSPort(String address) {
-        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
-        factoryBean.setServiceClass(DepartmentWS.class);
-        factoryBean.setAddress(address);
-        DepartmentWS departmentWS = (DepartmentWS) factoryBean.create();
-        return departmentWS;
+    private DepartmentWS getDepartmentWSPort() throws MalformedURLException {
+        long timeout = 5000;
+        String address = "http://172.16.121.78:9080/";
+
+        DepartmentWS_Service departmentWS_Service = new DepartmentWS_Service(address+"DepartmentWS?wsdl");
+        return departmentWS_Service.getDepartmentWSPort();
     }
 
     public void sendChange(DepartmentChangeOperationType operationType, int depId, Logger logger) {
@@ -66,8 +67,7 @@ public class DepartmentWS_Service {
                     taxDepartmentChange.setGarantUse(departmentChange.getGarantUse());
                     taxDepartmentChange.setSunrUse(departmentChange.getSunrUse());
                 }
-                String address = "http://172.16.121.78:9080/";
-                DepartmentWS departmentWS = getDepartmentWSPort(address);
+                DepartmentWS departmentWS = getDepartmentWSPort();
                 TaxDepartmentChangeStatus status = departmentWS.sendDepartmentChange(taxDepartmentChange);
                 logger.info("Изменение успешно передано СУНР");
             } catch (Exception e) {

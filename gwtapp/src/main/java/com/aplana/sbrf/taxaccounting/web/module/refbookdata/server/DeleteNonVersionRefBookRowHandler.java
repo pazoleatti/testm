@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.ws.DepartmentWS_Service;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.ws.DepartmentWS_Manager;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.DeleteNonVersionRefBookRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.DeleteNonVersionRefBookRowResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -34,7 +34,7 @@ public class DeleteNonVersionRefBookRowHandler extends AbstractActionHandler<Del
     private SecurityService securityService;
 
     @Autowired
-    private DepartmentWS_Service departmentWS_service;
+    private DepartmentWS_Manager departmentWS_manager;
 
     public DeleteNonVersionRefBookRowHandler() {
         super(DeleteNonVersionRefBookRowAction.class);
@@ -55,7 +55,7 @@ public class DeleteNonVersionRefBookRowHandler extends AbstractActionHandler<Del
                 result.setWarning(true);
             }
             if (action.getRefBookId() == 30L && (!logger.containsLevel(LogLevel.WARNING) || action.isOkDelete())) {
-                departmentWS_service.sendChange(DepartmentChangeOperationType.DELETE, action.getRecordsId().get(0).intValue(), logger);
+                departmentWS_manager.sendChange(DepartmentChangeOperationType.DELETE, action.getRecordsId().get(0).intValue(), logger);
             }
             result.setUuid(logEntryService.save(logger.getEntries()));
         }
