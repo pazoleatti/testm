@@ -106,7 +106,6 @@ public class GetMainMenuActionHandler extends
                             + ";" + TYPE + "=" + menu.getMeta()));
 
                     // декларации
-                    if (!menu.getMeta().equals(TaxType.LAND.name()))// до версии 1.2 деклараций по ЗемНалогу не будет
                     if (!isETR && !isMARKET && (currentUser.hasRole(TARole.ROLE_CONTROL)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))) {
