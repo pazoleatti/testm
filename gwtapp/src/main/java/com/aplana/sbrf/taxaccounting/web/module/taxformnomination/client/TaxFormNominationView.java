@@ -334,7 +334,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		decGrid.redrawHeaders();
 
 		// леваяя ссылка
-        if (isTaxTypeETR || isTaxTypeMarket || taxType.equals(TaxType.LAND)) { // до версии 1.2 деклараций по ЗемНалогу не будет
+        if (isTaxTypeETR || isTaxTypeMarket) {
             switchMode.setVisible(false);
         } else {
             switchMode.setVisible(true);
