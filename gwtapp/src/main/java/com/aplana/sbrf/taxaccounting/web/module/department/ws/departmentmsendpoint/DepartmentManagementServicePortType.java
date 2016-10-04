@@ -106,6 +106,7 @@ public class DepartmentManagementServicePortType extends SpringBeanAutowiringSup
                 taxDepartmentChange.setGarantUse(departmentChange.getGarantUse());
                 taxDepartmentChange.setSunrUse(departmentChange.getSunrUse());
             }
+            taxDepartmentChangeList.add(taxDepartmentChange);
         }
         return taxDepartmentChangeList;
     }
