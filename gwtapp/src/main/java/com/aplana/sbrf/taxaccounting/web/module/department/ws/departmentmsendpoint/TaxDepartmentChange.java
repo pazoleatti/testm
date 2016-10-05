@@ -4,6 +4,7 @@ package com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpo
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Date;
 
 
 /**
@@ -41,6 +42,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TaxDepartmentChange", propOrder = {
     "operationType",
+    "change_datetime",
     "id",
     "level",
     "name",
@@ -58,6 +60,7 @@ import javax.xml.bind.annotation.XmlType;
 public class TaxDepartmentChange {
 
     protected int operationType;
+    protected Date change_datetime;
     protected int id;
     protected Integer level;
     protected String name;
@@ -86,6 +89,14 @@ public class TaxDepartmentChange {
      */
     public void setOperationType(int value) {
         this.operationType = value;
+    }
+
+    public Date getChange_datetime() {
+        return change_datetime;
+    }
+
+    public void setChange_datetime(Date change_datetime) {
+        this.change_datetime = change_datetime;
     }
 
     /**

@@ -326,7 +326,8 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "department_region_id, \n" +
                     "department_is_active, \n" +
                     "department_code, \n" +
-                    "department_garant_use \n" +
+                    "department_garant_use, \n" +
+                    "department_sunr_use \n" +
                     // пейджинг
                     (paging ? ", rownum as row_number_over \n":"") +
                 "FROM ("+
@@ -345,6 +346,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "  d.IS_ACTIVE  AS department_is_active,\n" +
                     "  d.CODE       AS department_code,\n" +
                     "  d.GARANT_USE AS department_garant_use,\n" +
+                    "  d.SUNR_USE   AS department_sunr_use,\n" +
                     "  -- Для сортировки\n" +
                     "  dt.NAME AS dec_type,\n" +
                     "  d.NAME  AS department,\n" +

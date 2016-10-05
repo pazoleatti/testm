@@ -492,6 +492,13 @@ public class RefBookDepartment implements RefBookDataProvider {
                             "Подразделение не может быть удалено, так как оно используется в АС \"Гарантии\"!",
                             null);
                 }
+                // проверка использования подразделения в СУНР
+                if (department.isSunrUse()) {
+                    throw new ServiceLoggerException(
+                            "Подразделение не может быть удалено, так как оно используется в АС СУНР!",
+                            null);
+                }
+
                 isInUsed(department, logger);
                 if (logger.containsLevel(LogLevel.ERROR))
                     throw new ServiceLoggerException(

@@ -1,24 +1,27 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.ws;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentChange;
-import com.aplana.sbrf.taxaccounting.model.DepartmentChangeOperationType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentChangeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.DepartmentWS;
-import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.DepartmentWS_Service;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint.*;
+import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.*;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChange;
-import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChangeStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,46 +41,53 @@ public class DepartmentWS_Manager {
     @Autowired
     private RefBookFactory refBookFactory;
 
+    @Autowired
+    private AuditService auditService;
+
+    @Autowired
+    private TAUserService userService;
+
     private DepartmentWS getDepartmentWSPort() throws MalformedURLException {
         long timeout = 5000;
         String address = "http://172.16.121.78:9080/";
-
         DepartmentWS_Service departmentWS_Service = new DepartmentWS_Service(address+"DepartmentWS?wsdl");
         return departmentWS_Service.getDepartmentWSPort();
     }
 
+    @Transactional
     public void sendChange(DepartmentChangeOperationType operationType, int depId, Logger logger) {
         DepartmentChange departmentChange = createChange(operationType, depId);
-        if (!departmentChangeService.checkDepartment(departmentChange.getId(), departmentChange.getParentId())) {
-            try {
-                TaxDepartmentChange taxDepartmentChange = new TaxDepartmentChange();
-                taxDepartmentChange.setOperationType(departmentChange.getOperationType().getCode());
-                taxDepartmentChange.setId(departmentChange.getId());
-                if (departmentChange.getOperationType() != DepartmentChangeOperationType.DELETE) {
-                    taxDepartmentChange.setLevel(departmentChange.getLevel());
-                    taxDepartmentChange.setName(departmentChange.getName());
-                    taxDepartmentChange.setShortName(departmentChange.getShortName());
-                    taxDepartmentChange.setParentId(departmentChange.getParentId());
-                    taxDepartmentChange.setType(departmentChange.getType().getCode());
-                    taxDepartmentChange.setTbIndex(departmentChange.getTbIndex());
-                    taxDepartmentChange.setSbrfCode(departmentChange.getSbrfCode());
-                    taxDepartmentChange.setRegion(departmentChange.getRegion());
-                    taxDepartmentChange.setIsActive(departmentChange.getIsActive());
-                    taxDepartmentChange.setCode(departmentChange.getCode());
-                    taxDepartmentChange.setGarantUse(departmentChange.getGarantUse());
-                    taxDepartmentChange.setSunrUse(departmentChange.getSunrUse());
-                }
+        departmentChangeService.addChange(departmentChange);
+        sendChanges(logger);
+    }
+
+    @Transactional
+    public void sendChanges(Logger logger) {
+        TAUserInfo userInfo = userService.getSystemUserInfo();
+        try {
+            List<DepartmentChange> departmentChanges = departmentChangeService.getAllChanges();
+            if (departmentChanges.size() > 0) {
                 DepartmentWS departmentWS = getDepartmentWSPort();
-                TaxDepartmentChangeStatus status = departmentWS.sendDepartmentChange(taxDepartmentChange);
-                logger.info("Изменение успешно передано СУНР");
-            } catch (Exception e) {
-                LOG.error("Возникли ошибки при отправке изменения подразделения в СУНР", e);
-                logger.info("Возникли ошибки при отправке изменения подразделения в СУНР");
-                departmentChangeService.addChange(departmentChange);
+                TaxDepartmentChangeStatus status = departmentWS.sendDepartmentChange(convert(departmentChanges));
+                if (status.getErrorCode().equalsIgnoreCase("E0")) {
+                    departmentChangeService.clear();
+                    String msg = "Изменения подразделении успешно переданы в СУНР";
+                    logger.info(msg);
+                    auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
+                            null, null, null, null, msg, null);
+                } else {
+                    String msg = String.format("Изменения подразделении не былы отпралено в СУНР. Код ошибки: %s, текст ошибки: %s.", status.getErrorCode(), status.getErrorText());
+                    logger.warn(msg);
+                    auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
+                            null, null, null, null, msg, null);
+                }
             }
-        } else {
-            logger.info("Возникли ошибки при отправке изменения подразделения в СУНР");
-            departmentChangeService.addChange(departmentChange);
+        } catch (Exception e) {
+            LOG.error("Возникли ошибки при отправке изменении подразделении в СУНР", e);
+            String msg = String.format("Возникла ошибка при отправке изменении подразделении в СУНР. Ошибка: %s.", e.getLocalizedMessage());
+            logger.warn(msg);
+            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
+                    null, null, null, null, msg, null);
         }
     }
 
@@ -110,4 +120,30 @@ public class DepartmentWS_Manager {
         }
         return departmentChange;
     }
+
+    private List<TaxDepartmentChange> convert(List<DepartmentChange> departmentChangeList) {
+        List<TaxDepartmentChange> taxDepartmentChangeList = new ArrayList<TaxDepartmentChange>();
+        for(DepartmentChange departmentChange: departmentChangeList) {
+            TaxDepartmentChange taxDepartmentChange = new TaxDepartmentChange();
+            taxDepartmentChange.setOperationType(departmentChange.getOperationType().getCode());
+            taxDepartmentChange.setId(departmentChange.getId());
+            if (departmentChange.getOperationType() != DepartmentChangeOperationType.DELETE) {
+                taxDepartmentChange.setLevel(departmentChange.getId());
+                taxDepartmentChange.setName(departmentChange.getName());
+                taxDepartmentChange.setShortName(departmentChange.getShortName());
+                taxDepartmentChange.setParentId(departmentChange.getParentId());
+                taxDepartmentChange.setType(departmentChange.getType().getCode());
+                taxDepartmentChange.setTbIndex(departmentChange.getTbIndex());
+                taxDepartmentChange.setSbrfCode(departmentChange.getSbrfCode());
+                taxDepartmentChange.setRegion(departmentChange.getRegion());
+                taxDepartmentChange.setIsActive(departmentChange.getIsActive());
+                taxDepartmentChange.setCode(departmentChange.getCode());
+                taxDepartmentChange.setGarantUse(departmentChange.getGarantUse());
+                taxDepartmentChange.setSunrUse(departmentChange.getSunrUse());
+            }
+            taxDepartmentChangeList.add(taxDepartmentChange);
+        }
+        return taxDepartmentChangeList;
+    }
+
 }

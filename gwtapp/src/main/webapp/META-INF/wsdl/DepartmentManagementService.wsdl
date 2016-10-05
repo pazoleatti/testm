@@ -22,7 +22,8 @@
 			<xsd:complexType name="TaxDepartmentChange">
 				<xsd:sequence>
 					<xsd:element name="operationType" type="xsd:int"/>
-					<xsd:element name="id" type="xsd:int"/>
+                    <xsd:element name="change_datetime" type="xsd:dateTime"/>
+                    <xsd:element name="id" type="xsd:int"/>
 					<xsd:element name="level" type="xsd:int" minOccurs="0"/>
 					<xsd:element name="name" type="xsd:string" minOccurs="0"/>
 					<xsd:element name="shortName" type="xsd:string" minOccurs="0"/>
@@ -65,7 +66,7 @@
 	</wsdl:binding>
 	<wsdl:service name="DepartmentManagementService">
 		<wsdl:port name="DepartmentManagementServicePort" binding="tns:DepartmentManagementServicePortBinding">
-			<soap:address location="http://localhost:9000/DepartmentManagementService"/>
+			<soap:address location="http://172.16.127.18/taxaccounting-unstable/gwtapp/DepartmentManagementServicee"/>
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>

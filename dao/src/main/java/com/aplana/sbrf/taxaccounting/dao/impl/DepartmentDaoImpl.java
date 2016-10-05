@@ -167,6 +167,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 department.setActive(rs.getBoolean("is_active"));
                 department.setCode(rs.getLong("code"));
                 department.setGarantUse(rs.getBoolean("garant_use"));
+                department.setSunrUse(rs.getBoolean("sunr_use"));
                 return department;
             } catch (EmptyResultDataAccessException e) {
                 return null;
@@ -467,7 +468,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        String sql = String.format("select id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, is_active, code, garant_use" +
+        String sql = String.format("select id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, is_active, code, garant_use, sunr_use" +
                 " from department where id in " +
                 "   (select distinct dft.department_id from FORM_DATA_SOURCE fds " +
                 "   join DEPARTMENT_FORM_TYPE dft on dft.id = fds.department_form_type_id " +

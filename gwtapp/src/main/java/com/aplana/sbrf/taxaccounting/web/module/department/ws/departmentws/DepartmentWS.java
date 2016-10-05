@@ -8,6 +8,7 @@ import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
+import java.util.List;
 
 
 /**
@@ -22,7 +23,7 @@ public interface DepartmentWS {
 
     /**
      * 
-     * @param departmentChange
+     * @param departmentChanges
      * @return
      *     returns com.aplana.sbrf.taxaccounting.departmentws.TaxDepartmentChangeStatus
      */
@@ -31,7 +32,7 @@ public interface DepartmentWS {
     @RequestWrapper(localName = "sendDepartmentChange", targetNamespace = "http://taxaccounting.sbrf.aplana.com/DepartmentWS/", className = "com.aplana.sbrf.taxaccounting.departmentws.SendDepartmentChange")
     @ResponseWrapper(localName = "sendDepartmentChangeResponse", targetNamespace = "http://taxaccounting.sbrf.aplana.com/DepartmentWS/", className = "com.aplana.sbrf.taxaccounting.departmentws.SendDepartmentChangeResponse")
     public TaxDepartmentChangeStatus sendDepartmentChange(
-        @WebParam(name = "departmentChange", targetNamespace = "")
-        TaxDepartmentChange departmentChange);
+        @WebParam(name = "taxDepartmentChanges", targetNamespace = "")
+        List<TaxDepartmentChange> departmentChanges);
 
 }

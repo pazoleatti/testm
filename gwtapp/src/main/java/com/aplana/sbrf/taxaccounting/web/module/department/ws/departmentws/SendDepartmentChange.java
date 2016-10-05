@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 
 /**
@@ -28,35 +29,18 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "sendDepartmentChange", propOrder = {
-    "departmentChange"
+    "taxDepartmentChanges"
 })
 public class SendDepartmentChange {
 
     @XmlElement(required = true)
-    protected TaxDepartmentChange departmentChange;
+    protected List<TaxDepartmentChange> taxDepartmentChanges;
 
-    /**
-     * Gets the value of the departmentChange property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TaxDepartmentChange }
-     *     
-     */
-    public TaxDepartmentChange getDepartmentChange() {
-        return departmentChange;
+    public List<TaxDepartmentChange> getTaxDepartmentChanges() {
+        return taxDepartmentChanges;
     }
 
-    /**
-     * Sets the value of the departmentChange property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TaxDepartmentChange }
-     *     
-     */
-    public void setDepartmentChange(TaxDepartmentChange value) {
-        this.departmentChange = value;
+    public void setTaxDepartmentChanges(List<TaxDepartmentChange> taxDepartmentChanges) {
+        this.taxDepartmentChanges = taxDepartmentChanges;
     }
-
 }
