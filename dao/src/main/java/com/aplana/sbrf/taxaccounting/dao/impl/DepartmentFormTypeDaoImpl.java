@@ -311,6 +311,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "dft.department_is_active, \n" +
                     "dft.department_code, \n" +
                     "dft.department_garant_use,\n" +
+                    "dft.department_sunr_use,\n" +
                     "-- Для исполнителя\n" +
                     "dp.ID        AS performer_id,\n" +
                     "dp.NAME      AS performer_name,\n" +
@@ -345,6 +346,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "  d.IS_ACTIVE  AS department_is_active,\n" +
                     "  d.CODE       AS department_code,\n" +
                     "  d.GARANT_USE AS department_garant_use,\n" +
+                    "  d.SUNR_USE   AS department_sunr_use,\n" +
                     "  -- Для сортировки\n" +
                     "  ft.NAME  AS form_type,\n" +
                     "  dft.KIND AS form_kind,\n" +
@@ -482,6 +484,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             department.setActive(rs.getBoolean("department_is_active"));
             department.setCode(rs.getLong("department_code"));
             department.setGarantUse(rs.getBoolean("department_garant_use"));
+            department.setSunrUse(rs.getBoolean("department_sunr_use"));
 
             // Исполнитель
             Integer performerId = SqlUtils.getInteger(rs, "performer_id");
@@ -513,6 +516,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 performer.setActive(rs.getBoolean("performer_is_active"));
                 performer.setCode(rs.getLong("performer_code"));
                 department.setGarantUse(rs.getBoolean("department_garant_use"));
+                department.setSunrUse(rs.getBoolean("department_sunr_use"));
                 fillPerformers(map, result, performer, formTypeKind);
             } else {
                 result.add(formTypeKind);
