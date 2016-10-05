@@ -25,8 +25,9 @@ import java.util.List;
 @WebService(endpointInterface="com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint.DepartmentManagementService",
         targetNamespace = "http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/",
         serviceName="DepartmentManagementService",
-        portName="DepartmentManagementServicePort",
-        wsdlLocation="META-INF/wsdl/DepartmentManagementService.wsdl")
+        portName="DepartmentManagementServicePort"//,
+        //wsdlLocation="META-INF/wsdl/DepartmentManagementService.wsdl"
+)
 public class DepartmentManagementServicePortType extends SpringBeanAutowiringSupport implements DepartmentManagementService{
 
     private static final Log LOG = LogFactory.getLog(DepartmentManagementServicePortType.class);

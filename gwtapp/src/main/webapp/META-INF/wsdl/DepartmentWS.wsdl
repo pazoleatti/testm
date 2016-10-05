@@ -7,14 +7,15 @@
 
 			<xsd:complexType name="sendDepartmentChange">
 				<xsd:sequence>
-					<xsd:element name="departmentChange" type="tns:TaxDepartmentChange" minOccurs="1"/>
+					<xsd:element name="taxDepartmentChanges" type="tns:TaxDepartmentChange" minOccurs="1" maxOccurs="unbounded"/>
 				</xsd:sequence>
 			</xsd:complexType>
 
 			<xsd:complexType name="TaxDepartmentChange">
 				<xsd:sequence>
 					<xsd:element name="operationType" type="xsd:int"/>
-					<xsd:element name="id" type="xsd:int"/>
+                    <xsd:element name="change_datetime" type="xsd:dateTime"/>
+                    <xsd:element name="id" type="xsd:int"/>
 					<xsd:element name="level" type="xsd:int" minOccurs="0"/>
 					<xsd:element name="name" type="xsd:string" minOccurs="0"/>
 					<xsd:element name="shortName" type="xsd:string" minOccurs="0"/>
@@ -69,7 +70,7 @@
 	</wsdl:binding>
 	<wsdl:service name="DepartmentWS">
 		<wsdl:port name="DepartmentWSPort" binding="tns:DepartmentWSPortBinding">
-			<soap:address location="http://localhost:9000/DepartmentsManagement"/>
+			<soap:address location="http://172.16.121.78:9080/DepartmentWS"/>
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>
