@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.ws;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -9,15 +11,19 @@ import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentChangeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.*;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChange;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.ws.BindingProvider;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,11 +51,30 @@ public class DepartmentWS_Manager {
     @Autowired
     private TAUserService userService;
 
+    @Autowired
+    private ConfigurationService configurationService;
+
     private DepartmentWS getDepartmentWSPort() throws MalformedURLException {
-        long timeout = 5000;
-        String address = "http://172.16.121.78:9080/";
-        DepartmentWS_Service departmentWS_Service = new DepartmentWS_Service(address+"DepartmentWS?wsdl");
-        return departmentWS_Service.getDepartmentWSPort();
+        int timeout = 0;
+        int rootDepartmentId = departmentService.getBankDepartment().getId();
+        ConfigurationParamModel configurationParamModel = configurationService.getAllConfig(userService.getSystemUserInfo());
+        List<String> sunrAddressParams = configurationParamModel.get(ConfigurationParam.ADDRESS_SUNR, rootDepartmentId);
+        if (sunrAddressParams == null) {
+            throw new ServiceException("Не заполнен конфигурационный параметр \"" + ConfigurationParam.ADDRESS_SUNR.getCaption() + '"');
+        }
+        List<String> sunrDepartmentWSTimeoutParams = configurationParamModel.get(ConfigurationParam.TIMEOUT_SUNR, rootDepartmentId);
+        if (sunrDepartmentWSTimeoutParams != null) {
+            try{
+                timeout = Integer.parseInt(sunrDepartmentWSTimeoutParams.get(0));
+            } catch (NumberFormatException ignored) {}
+        }
+
+        DepartmentWS_Service departmentWS_Service = new DepartmentWS_Service(sunrAddressParams.get(0)+"DepartmentWS?wsdl");
+        DepartmentWS departmentWS = departmentWS_Service.getDepartmentWSPort();
+
+        Map<String, Object> requestContext = ((BindingProvider) departmentWS).getRequestContext();
+        requestContext.put("com.sun.xml.internal.ws.request.timeout", timeout); // Timeout in millis
+        return departmentWS;
     }
 
     @Transactional
@@ -69,20 +94,25 @@ public class DepartmentWS_Manager {
                 TaxDepartmentChangeStatus status = departmentWS.sendDepartmentChange(convert(departmentChanges));
                 if (status.getErrorCode().equalsIgnoreCase("E0")) {
                     departmentChangeService.clear();
-                    String msg = "Изменения подразделении успешно переданы в СУНР";
+                    String msg = "Изменения подразделении успешно переданы в АС СУНР";
                     logger.info(msg);
                     auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                             null, null, null, null, msg, null);
                 } else {
-                    String msg = String.format("Изменения подразделении не былы отпралено в СУНР. Код ошибки: %s, текст ошибки: %s.", status.getErrorCode(), status.getErrorText());
+                    String msg = String.format("Изменения подразделении не былы отпралено в АС СУНР. Код ошибки: %s, текст ошибки: %s.", status.getErrorCode(), status.getErrorText());
                     logger.warn(msg);
                     auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                             null, null, null, null, msg, null);
                 }
             }
         } catch (Exception e) {
-            LOG.error("Возникли ошибки при отправке изменении подразделении в СУНР", e);
-            String msg = String.format("Возникла ошибка при отправке изменении подразделении в СУНР. Ошибка: %s.", e.getLocalizedMessage());
+            LOG.error("Возникли ошибки при отправке изменении подразделении в АС СУНР", e);
+            String msg;
+            if (ExceptionUtils.indexOfThrowable(e, SocketTimeoutException.class) != -1) {
+                msg = String.format("Возникла ошибка при отправке изменении подразделении в АС СУНР. Ошибка: %s.", "Время ожидания истекло.");
+            } else {
+                msg = String.format("Возникла ошибка при отправке изменении подразделении в АС СУНР. Ошибка: %s", e.getLocalizedMessage());
+            }
             logger.warn(msg);
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                     null, null, null, null, msg, null);
