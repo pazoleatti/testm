@@ -46,7 +46,7 @@ public class ConstLandHeaderBuilder extends AbstractHeaderOrFooterBuilder implem
 
         buildHeader(tr, new TextHeader("Сведения о реорганизации"), 3, 0, true);
 
-        buildHeader(tr, new TextHeader("Ответственный за декларацию"), 6, 0, true);
+        buildHeader(tr, new TextHeader("Ответственный за декларацию"), 7, 0, true);
 
         tr.endTR();
 
@@ -85,6 +85,8 @@ public class ConstLandHeaderBuilder extends AbstractHeaderOrFooterBuilder implem
         buildHeader(tr, new TextHeader("Наименование документа представителя"), 0, 0, true);
 
         buildHeader(tr, new TextHeader("Наименование организации представителя"), 0, 0, true);
+
+        buildHeader(tr, new TextHeader("Наименование соглашения о разделе продукции"), 0, 0, true);
 
         tr.endTR();
 

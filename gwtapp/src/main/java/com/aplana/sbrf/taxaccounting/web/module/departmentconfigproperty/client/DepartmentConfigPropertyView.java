@@ -146,7 +146,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             new TableHeader("SIGNATORY_FIRSTNAME"),
             new TableHeader("SIGNATORY_LASTNAME"),
             new TableHeader("APPROVE_DOC_NAME"),
-            new TableHeader("APPROVE_ORG_NAME")
+            new TableHeader("APPROVE_ORG_NAME"),
+            new TableHeader("PRODUCT_AGREEMENT_NAME")
     };
 
     public final class TableHeader {
