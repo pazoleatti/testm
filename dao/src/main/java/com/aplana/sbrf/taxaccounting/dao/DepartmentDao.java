@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 import javax.validation.constraints.NotNull;
@@ -105,6 +106,14 @@ public interface DepartmentDao {
      * @return ТБ
      */
     Department getDepartmentTB(int departmentId);
+
+    /**
+     * Получение родительского узла заданного типа (указанное подразделение м.б. результатом, если его тип соответствует искомому)
+     * @param departmentId
+     * @param type
+     * @return
+     */
+    Department getParentDepartmentByType(int departmentId, DepartmentType type);
 
     /**
      * Получение ТБ для подразделения (тип = 2) + все дочерние подразделения

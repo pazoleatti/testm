@@ -229,6 +229,11 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
+    public Department getParentDepartmentByType(int departmentId, DepartmentType type) {
+        return getParentDepartmentByType(departmentId, type.getCode());
+    }
+
+    @Override
     public List<Department> getDepartmentTBChildren(int departmentId) {
         return getParentDepartmentChildByType(departmentId, 2);
     }

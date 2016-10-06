@@ -48,7 +48,7 @@ public interface PeriodService {
 	 * - Отчетный период
 	 * - Дата корректировки
 	 */
-	void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs);
+	void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs, boolean fullLogging);
 
 	/**
 	 * Закрыть период

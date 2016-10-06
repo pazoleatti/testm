@@ -167,6 +167,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public Department getParentDepartmentByType(int departmentId, DepartmentType type) {
+        return departmentDao.getParentDepartmentByType(departmentId, type);
+    }
+
+    @Override
     public List<Department> getTBUserDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
         Department userDepartment = departmentDao.getDepartment(tAUser.getDepartmentId());

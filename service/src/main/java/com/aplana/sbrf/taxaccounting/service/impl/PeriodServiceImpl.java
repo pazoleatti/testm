@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -89,8 +88,13 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-	public void open(int year, long dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
-	                 int departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate) {
+    public void open(int year, long dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
+                     int departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate) {
+        open(year, dictionaryTaxPeriodId, taxType, user, departmentId, logs, isBalance, correctionDate, true);
+    }
+
+	private void open(int year, long dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
+	                 int departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate, boolean fullLogging) {
 		TaxPeriod taxPeriod = taxPeriodDao.getByTaxTypeAndYear(taxType, year);
 		if (taxPeriod == null) {
 			taxPeriod = new TaxPeriod();
@@ -170,7 +174,8 @@ public class PeriodServiceImpl implements PeriodService {
 		depRP.setActive(true);
 		depRP.setBalance(isBalance);
 		depRP.setCorrectionDate(correctionDate);
-		saveOrOpen(depRP, getAvailableDepartments(taxType, user.getUser(), Operation.OPEN, departmentId), logs);
+        depRP.setDepartmentId(departmentId);
+		saveOrOpen(depRP, getAvailableDepartments(taxType, user.getUser(), Operation.OPEN, departmentId), logs, fullLogging);
 	}
 
 	@Override
@@ -262,7 +267,8 @@ public class PeriodServiceImpl implements PeriodService {
 	}
 
 	@Override
-	public void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs) {
+	public void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs, boolean fullLogging) {
+        Integer departmentId = departmentReportPeriod.getDepartmentId();
 		List<Integer> reportIdsForUpdate = new ArrayList<Integer>();
 		List<Integer> departmentIdsForSave = new ArrayList<Integer>();
 		Integer reportPeriodId = departmentReportPeriod.getReportPeriod().getId();
@@ -287,19 +293,29 @@ public class PeriodServiceImpl implements PeriodService {
 		}
 
         if (logs != null) {
-            for (DepartmentReportPeriod period : departmentReportPeriodService.getListByFilter(filter)) {
-                int year = period.getReportPeriod().getTaxPeriod().getYear();
-                if (period.getCorrectionDate() == null) {
-                    logs.add(new LogEntry(LogLevel.INFO,
-                            "Период " + "\"" + period.getReportPeriod().getName() + "\" "
-                                    + period.getReportPeriod().getTaxPeriod().getYear() + " "
-                                    + (period.isBalance() ? "\"ввод остатков\"" : "") + " "
-                                    + " открыт для \"" + departmentService.getDepartment(period.getDepartmentId()).getName() + "\""
-                    ));
-                } else {
-                    logs.add(new LogEntry(LogLevel.INFO, "Корректирующий период: " + period.getReportPeriod().getName()
-                            + " " + year + " открыт для " + departmentService.getDepartment(period.getDepartmentId()).getName()));
+            if (fullLogging) {
+                for (DepartmentReportPeriod period : departmentReportPeriodService.getListByFilter(filter)) {
+                    int year = period.getReportPeriod().getTaxPeriod().getYear();
+                    if (period.getCorrectionDate() == null) {
+                        logs.add(new LogEntry(LogLevel.INFO,
+                                "Период " + "\"" + period.getReportPeriod().getName() + "\" "
+                                        + period.getReportPeriod().getTaxPeriod().getYear() + " "
+                                        + (period.isBalance() ? "\"ввод остатков\"" : "") + " "
+                                        + " открыт для \"" + departmentService.getDepartment(period.getDepartmentId()).getName() + "\""
+                        ));
+                    } else {
+                        logs.add(new LogEntry(LogLevel.INFO, "Корректирующий период: " + period.getReportPeriod().getName()
+                                + " " + year + " открыт для " + departmentService.getDepartment(period.getDepartmentId()).getName()));
+                    }
                 }
+            } else {
+                logs.add(new LogEntry(LogLevel.INFO,
+                        String.format("Открыт период \"%s, %s%s\" для подразделений \"%s\"",
+                                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                                departmentReportPeriod.getReportPeriod().getName(),
+                                departmentReportPeriod.isBalance() ? " - ввод остатков" : "",
+                                departmentService.getDepartment(departmentId).getName())
+                ));
             }
         }
 	}
@@ -462,8 +478,12 @@ public class PeriodServiceImpl implements PeriodService {
 	}
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11389882#id-Формаспискапериодов-Удалениепериода
-	@Override
-	public void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user) {
+    @Override
+    public void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo userg) {
+        removeReportPeriod(taxType, drpId, logger, userg, true);
+    }
+
+	private void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user, boolean fullLogging) {
         //Проверка форм не относится к этой постановке
         List<Integer> departmentIds = new ArrayList<Integer>();
         DepartmentReportPeriod drp = departmentReportPeriodService.get(drpId);
@@ -553,31 +573,42 @@ public class PeriodServiceImpl implements PeriodService {
             return;
         }
 		List<Integer> departments = getAvailableDepartments(taxType, user.getUser(), Operation.DELETE, drp.getDepartmentId());
-
-        removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), departments, taxType, logger.getEntries());
+        removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), drp.getDepartmentId(), departments, taxType, logger.getEntries(), fullLogging);
 	}
 
-	private void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentIds,  TaxType taxType, List<LogEntry> logs) {
+	private void removePeriodWithLog(int reportPeriodId, Date correctionDate, Integer departmentId, List<Integer> departmentIds, TaxType taxType, List<LogEntry> logs, boolean fullLogging) {
         ReportPeriod rp = reportPeriodDao.get(reportPeriodId);
+        DepartmentReportPeriod drp = departmentReportPeriodService.getFirst(departmentId, reportPeriodId);
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setCorrectionDate(correctionDate);
         filter.setDepartmentIdList(departmentIds);
         filter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
         List<Integer> drpIds = departmentReportPeriodService.getListIdsByFilter(filter);
         departmentReportPeriodService.delete(drpIds);
-		for (Integer id : departmentIds) {
+        if (fullLogging) {
+            for (Integer id : departmentIds) {
+                if (logs != null) {
+                    logs.add(new LogEntry(LogLevel.INFO,
+                            "Период удалён для " + "\"" + departmentService.getDepartment(id).getName() + "\""
+                    ));
+                }
+            }
+
             if (logs != null) {
                 logs.add(new LogEntry(LogLevel.INFO,
-                        "Период удалён для " + "\"" + departmentService.getDepartment(id).getName() + "\""
+                        "Удален период \"" + rp.getName() + "\" " + rp.getTaxPeriod().getYear() +
+                                (correctionDate == null ? "" : " с датой сдачи корректировки " + sdf.get().format(correctionDate))
                 ));
             }
-		}
-
-        if (logs != null) {
-            logs.add(new LogEntry(LogLevel.INFO,
-                    "Удален период \"" + rp.getName() + "\" " + rp.getTaxPeriod().getYear() +
-                            (correctionDate == null ? "" : " с датой сдачи корректировки " + sdf.get().format(correctionDate))
-                    ));
+        } else {
+            if (logs != null) {
+                logs.add(new LogEntry(LogLevel.INFO,
+                        String.format("Удален период \"%s, %s%s\" для подразделений \"%s\"",
+                                rp.getTaxPeriod().getYear(), rp.getName(),
+                                drp.isBalance() ? " - ввод остатков" : "",
+                                departmentService.getDepartment(departmentId).getName())
+                ));
+            }
         }
 
         notificationService.deleteByReportPeriod(reportPeriodId);
@@ -860,7 +891,6 @@ public class PeriodServiceImpl implements PeriodService {
             throw new ServiceException(ex.getMessage());
         }
 
-        String strBalance = isBalance ? " \"ввод остатков\"" : "";
         List<Integer> depIds = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, oldDepartmentId);
         if ((oldDepartmentId == departmentId) && (rp.getDictTaxPeriodId() == newDictTaxPeriodId) && (rp.getTaxPeriod().getYear() == newYear)) { // Изменился только ввод остатков
             DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
@@ -868,21 +898,17 @@ public class PeriodServiceImpl implements PeriodService {
             filter.setIsCorrection(false);
             filter.setDepartmentIdList(depIds);
             departmentReportPeriodService.updateBalance(departmentReportPeriodService.getListIdsByFilter(filter), isBalance);
-            for (Integer depId : depIds) {
-                logs.add(new LogEntry(LogLevel.INFO,
-                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + (!isBalance ? " \"ввод остатков\"" : "") +
-                                " был изменён на " + rp.getName() + strBalance + " для " + departmentService.getDepartment(depId).getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
-            }
+            logs.add(new LogEntry(LogLevel.INFO,
+                    String.format("Период \"%s, %s%s\" изменён на \"%s, %s%s\" для подразделений \"%s\"",
+                        rp.getTaxPeriod().getYear(), rp.getName(), (!isBalance ? " - ввод остатков" : ""),
+                        rp.getTaxPeriod().getYear(), rp.getName(), (isBalance ? " - ввод остатков" : ""),
+                        departmentService.getDepartment(oldDepartmentId).getName())));
 
         } else {
             DepartmentReportPeriod dRP = departmentReportPeriodService.getFirst(oldDepartmentId, reportPeriodId);
-            removePeriodWithLog(reportPeriodId, null, depIds, taxType, null);
-            open(newYear, newDictTaxPeriodId, taxType, user, departmentId, null, isBalance, null);
-            for (Integer depId : depIds) {
-                logs.add(new LogEntry(LogLevel.INFO,
-                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + (dRP.isBalance() ? " \"ввод остатков\"" : "") + " был изменён на " +
-                                dictTaxPeriod.get("NAME").getStringValue() + " " + newYear + strBalance + " для " + departmentService.getDepartment(depId).getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
-            }
+            boolean fullLogging = false;
+            removePeriodWithLog(reportPeriodId, null, oldDepartmentId, depIds, taxType, logs, fullLogging);
+            open(newYear, newDictTaxPeriodId, taxType, user, departmentId, logs, isBalance, null, fullLogging);
         }
     }
 
@@ -914,7 +940,7 @@ public class PeriodServiceImpl implements PeriodService {
             PeriodStatusBeforeOpen status = checkPeriodStatusBeforeOpen(rp, newDepartmentId, newCorrectionDate);
             if (status == PeriodStatusBeforeOpen.NOT_EXIST) {
                 List<Integer> depIds = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, oldDepartmentId);
-                removePeriodWithLog(reportPeriodId, correctionDate, depIds, taxType, null);
+                removePeriodWithLog(reportPeriodId, correctionDate, oldDepartmentId, depIds, taxType, null, true);
                 ReportPeriod newRp = getReportPeriod(newReportPeriodId);
                 openCorrectionPeriod(taxType, newRp, newDepartmentId, newCorrectionDate, user, null);
                 for (Integer depId : depIds) {

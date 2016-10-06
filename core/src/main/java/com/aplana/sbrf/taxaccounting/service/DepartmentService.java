@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.*;
 
@@ -105,6 +102,14 @@ public interface DepartmentService {
      * @return список подразделений
      */
     List<Department> getTBDepartments(TAUser tAUser);
+
+    /**
+     * Получение родительского узла заданного типа (указанное подразделение м.б. результатом, если его тип соответствует искомому)
+     * @param departmentId
+     * @param type
+     * @return
+     */
+    Department getParentDepartmentByType(int departmentId, DepartmentType type);
 
     /**
      * 25 - Получение ТБ пользователя. Может быть не более одного подразделения
