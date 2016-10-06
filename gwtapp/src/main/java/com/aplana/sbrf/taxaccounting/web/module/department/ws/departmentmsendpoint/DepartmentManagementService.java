@@ -22,12 +22,12 @@ public interface DepartmentManagementService {
     /**
      * 
      * @return
-     *     returns com.aplana.sbrf.taxaccounting.departmentmanagementservice.TaxDepartmentChanges
+     *     returns com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint.TaxDepartmentChanges
      */
-    @WebMethod(action = "http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/getAllChanges")
+    @WebMethod(action = "http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/requestAllChanges")
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getAllChanges", targetNamespace = "http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/", className = "com.aplana.sbrf.taxaccounting.departmentmanagementservice.GetAllChanges")
-    @ResponseWrapper(localName = "getAllChangesResponse", targetNamespace = "http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/", className = "com.aplana.sbrf.taxaccounting.departmentmanagementservice.GetAllChangesResponse")
-    public TaxDepartmentChanges getAllChanges();
+    @RequestWrapper(localName = "requestAllChanges", targetNamespace = "http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/", className = "com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint.RequestAllChanges")
+    @ResponseWrapper(localName = "requestAllChangesResponse", targetNamespace = "http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/", className = "com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint.RequestAllChangesResponse")
+    public TaxDepartmentChanges requestAllChanges();
 
 }

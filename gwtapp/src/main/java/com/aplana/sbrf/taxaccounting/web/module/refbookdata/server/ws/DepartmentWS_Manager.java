@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentChangeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint.*;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.*;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChange;
 import org.apache.commons.logging.Log;
@@ -20,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -127,6 +125,7 @@ public class DepartmentWS_Manager {
             TaxDepartmentChange taxDepartmentChange = new TaxDepartmentChange();
             taxDepartmentChange.setOperationType(departmentChange.getOperationType().getCode());
             taxDepartmentChange.setId(departmentChange.getId());
+            taxDepartmentChange.setChange_datetime(departmentChange.getLogDate());
             if (departmentChange.getOperationType() != DepartmentChangeOperationType.DELETE) {
                 taxDepartmentChange.setLevel(departmentChange.getId());
                 taxDepartmentChange.setName(departmentChange.getName());

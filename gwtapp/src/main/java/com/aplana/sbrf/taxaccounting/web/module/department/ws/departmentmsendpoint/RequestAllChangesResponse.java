@@ -8,12 +8,12 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for getAllChangesResponse complex type.
+ * <p>Java class for requestAllChangesResponse complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="getAllChangesResponse">
+ * &lt;complexType name="requestAllChangesResponse">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -27,10 +27,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "getAllChangesResponse", propOrder = {
+@XmlType(name = "requestAllChangesResponse", propOrder = {
     "_return"
 })
-public class GetAllChangesResponse {
+public class RequestAllChangesResponse {
 
     @XmlElement(name = "return")
     protected TaxDepartmentChanges _return;

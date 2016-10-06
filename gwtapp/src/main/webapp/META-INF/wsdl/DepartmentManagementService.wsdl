@@ -2,12 +2,12 @@
 <wsdl:definitions name="DepartmentManagementService" targetNamespace="http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<wsdl:types>
 		<xsd:schema targetNamespace="http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/">
-			<xsd:element name="getAllChanges" type="tns:getAllChanges"/>
-			<xsd:element name="getAllChangesResponse" type="tns:getAllChangesResponse"/>
-			<xsd:complexType name="getAllChanges">
+			<xsd:element name="requestAllChanges" type="tns:requestAllChanges"/>
+			<xsd:element name="requestAllChangesResponse" type="tns:requestAllChangesResponse"/>
+			<xsd:complexType name="requestAllChanges">
 				<xsd:sequence/>
 			</xsd:complexType>
-			<xsd:complexType name="getAllChangesResponse">
+			<xsd:complexType name="requestAllChangesResponse">
 				<xsd:sequence>
 					<xsd:element name="return" type="tns:TaxDepartmentChanges" minOccurs="0"/>
 				</xsd:sequence>
@@ -16,46 +16,26 @@
 				<xsd:sequence>
 					<xsd:element name="errorCode" type="xsd:string"/>
 					<xsd:element name="errorText" type="xsd:string" minOccurs="0"/>
-					<xsd:element name="taxDepartmentChanges" type="tns:TaxDepartmentChange" minOccurs="0" maxOccurs="unbounded"/>
-				</xsd:sequence>
-			</xsd:complexType>
-			<xsd:complexType name="TaxDepartmentChange">
-				<xsd:sequence>
-					<xsd:element name="operationType" type="xsd:int"/>
-                    <xsd:element name="change_datetime" type="xsd:dateTime"/>
-                    <xsd:element name="id" type="xsd:int"/>
-					<xsd:element name="level" type="xsd:int" minOccurs="0"/>
-					<xsd:element name="name" type="xsd:string" minOccurs="0"/>
-					<xsd:element name="shortName" type="xsd:string" minOccurs="0"/>
-					<xsd:element name="parentId" type="xsd:int" minOccurs="0"/>
-					<xsd:element name="type" type="xsd:int" minOccurs="0"/>
-					<xsd:element name="tbIndex" type="xsd:string" minOccurs="0"/>
-					<xsd:element name="sbrfCode" type="xsd:string" minOccurs="0"/>
-					<xsd:element name="region" type="xsd:string" minOccurs="0"/>
-					<xsd:element name="isActive" type="xsd:boolean" minOccurs="0"/>
-					<xsd:element name="code" type="xsd:long" minOccurs="0"/>
-					<xsd:element name="garantUse" type="xsd:boolean" minOccurs="0"/>
-					<xsd:element name="sunrUse" type="xsd:boolean" minOccurs="0"/>
 				</xsd:sequence>
 			</xsd:complexType>
 		</xsd:schema>
 	</wsdl:types>
-	<wsdl:message name="getAllChanges">
-		<wsdl:part name="parameters" element="tns:getAllChanges"/>
+	<wsdl:message name="requestAllChanges">
+		<wsdl:part name="parameters" element="tns:requestAllChanges"/>
 	</wsdl:message>
-	<wsdl:message name="getAllChangesResponse">
-		<wsdl:part name="parameters" element="tns:getAllChangesResponse"/>
+	<wsdl:message name="requestAllChangesResponse">
+		<wsdl:part name="parameters" element="tns:requestAllChangesResponse"/>
 	</wsdl:message>
 	<wsdl:portType name="DepartmentManagementService">
-		<wsdl:operation name="getAllChanges">
-			<wsdl:input message="tns:getAllChanges"/>
-			<wsdl:output message="tns:getAllChangesResponse"/>
+		<wsdl:operation name="requestAllChanges">
+			<wsdl:input message="tns:requestAllChanges"/>
+			<wsdl:output message="tns:requestAllChangesResponse"/>
 		</wsdl:operation>
 	</wsdl:portType>
 	<wsdl:binding name="DepartmentManagementServicePortBinding" type="tns:DepartmentManagementService">
 		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
-		<wsdl:operation name="getAllChanges">
-			<soap:operation soapAction="http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/getAllChanges"/>
+		<wsdl:operation name="requestAllChanges">
+			<soap:operation soapAction="http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/requestAllChanges"/>
 			<wsdl:input>
 				<soap:body use="literal"/>
 			</wsdl:input>
