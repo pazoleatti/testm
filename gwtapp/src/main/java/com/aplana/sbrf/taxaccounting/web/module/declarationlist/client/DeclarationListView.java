@@ -43,8 +43,8 @@ public class DeclarationListView extends
     public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
     public static final String DEPARTMENT_TITLE = "Подразделение";
-    public static final String TAX_ORGAN_CODE_TITLE = "Налоговый орган";
-    public static final String TAX_ORGAN_CODE_TITLE_F = "Налоговый орган (кон.)";
+    public static final String TAX_ORGAN_CODE_TITLE = "Код налогового органа";
+    public static final String TAX_ORGAN_CODE_TITLE_F = "Код налогового органа (кон.)";
     public static final String TAX_ORGAN_CODE_KPP_TITLE = "КПП";
     public static final String STATE_TITLE = "Состояние";
     public static final String PERIOD_TITLE = "Период";
@@ -134,7 +134,7 @@ public class DeclarationListView extends
     @Override
     public void initTable(TaxType taxType) {
         Style tableStyle = tableWrapper.getElement().getStyle();
-        tableStyle.setProperty("top", (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY || taxType == TaxType.INCOME) ?
+        tableStyle.setProperty("top", (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY || taxType == TaxType.INCOME || taxType == TaxType.LAND) ?
                 TABLE_TOP2 : TABLE_TOP1, Style.Unit.PX);
 
         clearTable();

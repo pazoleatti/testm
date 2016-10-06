@@ -279,9 +279,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         kppLabel.setVisible(isVisibleKpp);
 
         if (taxType == TaxType.TRANSPORT || taxType == TaxType.LAND) {
-            taxOrganCodeLabel.setText("Налоговый орган (кон.):");
+            taxOrganCodeLabel.setText("Код налогового органа (кон.):");
         } else {
-            taxOrganCodeLabel.setText("Налоговый орган:");
+            taxOrganCodeLabel.setText("Код налогового органа:");
         }
     }
 
