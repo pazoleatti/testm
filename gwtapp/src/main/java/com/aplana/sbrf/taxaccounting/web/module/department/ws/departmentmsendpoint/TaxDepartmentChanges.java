@@ -1,8 +1,6 @@
 
 package com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -21,7 +19,6 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="errorCode" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="errorText" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="taxDepartmentChanges" type="{http://taxaccounting.sbrf.aplana.com/DepartmentManagementService/}TaxDepartmentChange" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,15 +30,13 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TaxDepartmentChanges", propOrder = {
     "errorCode",
-    "errorText",
-    "taxDepartmentChanges"
+    "errorText"
 })
 public class TaxDepartmentChanges {
 
     @XmlElement(required = true)
     protected String errorCode;
     protected String errorText;
-    protected List<TaxDepartmentChange> taxDepartmentChanges;
 
     /**
      * Gets the value of the errorCode property.
@@ -91,36 +86,4 @@ public class TaxDepartmentChanges {
         this.errorText = value;
     }
 
-    /**
-     * Gets the value of the taxDepartmentChanges property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the taxDepartmentChanges property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getTaxDepartmentChanges().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link TaxDepartmentChange }
-     * 
-     * 
-     */
-    public List<TaxDepartmentChange> getTaxDepartmentChanges() {
-        if (taxDepartmentChanges == null) {
-            taxDepartmentChanges = new ArrayList<TaxDepartmentChange>();
-        }
-        return this.taxDepartmentChanges;
-    }
-
-    public void setTaxDepartmentChanges(List<TaxDepartmentChange> taxDepartmentChanges) {
-        this.taxDepartmentChanges = taxDepartmentChanges;
-    }
 }

@@ -26,6 +26,7 @@ public class DepartmentChangeDaoImpl extends AbstractDao implements DepartmentCh
                 DepartmentChange departmentChange = new DepartmentChange();
                 departmentChange.setOperationType(DepartmentChangeOperationType.fromCode(SqlUtils.getInteger(rs, "operationType")));
                 departmentChange.setId(SqlUtils.getInteger(rs, "id"));
+                departmentChange.setLogDate(rs.getTimestamp("log_date"));
                 departmentChange.setLevel(rs.getInt("hier_level"));
                 departmentChange.setName(rs.getString("name"));
                 Integer parentId = SqlUtils.getInteger(rs, "parent_id");
@@ -56,7 +57,7 @@ public class DepartmentChangeDaoImpl extends AbstractDao implements DepartmentCh
     public List<DepartmentChange> getAllChanges() {
         try {
             return getJdbcTemplate().query(
-                    "select operationtype, id, hier_level, name, parent_id, type, shortname, tb_index, sbrf_code, region, is_active, code, garant_use, sunr_use " +
+                    "select operationtype, id, log_date, hier_level, name, parent_id, type, shortname, tb_index, sbrf_code, region, is_active, code, garant_use, sunr_use " +
                             "from department_change " +
                             "order by log_date",
                     new DepartmentChangeJdbcMapper()

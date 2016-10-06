@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Изменение справочника "Подразделения"
@@ -12,6 +13,7 @@ public class DepartmentChange implements Serializable {
 
     private DepartmentChangeOperationType operationType;
     private int id;
+    private Date logDate;
     private Integer level;
 	private String name;
 	private String shortName;
@@ -39,6 +41,14 @@ public class DepartmentChange implements Serializable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public Date getLogDate() {
+        return logDate;
+    }
+
+    public void setLogDate(Date logDate) {
+        this.logDate = logDate;
     }
 
     public Integer getLevel() {
