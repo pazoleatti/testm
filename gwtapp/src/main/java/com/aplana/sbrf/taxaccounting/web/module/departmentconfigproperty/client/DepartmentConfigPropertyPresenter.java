@@ -393,6 +393,30 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                         }, this).addCallback(new ManualRevealCallback<GetUserDepartmentAction>(this)));
     }
 
+    private boolean isProductAgreementNameRequired(Map<String, TableCell> row) {
+        List<String> values = Arrays.asList("250", "251");
+        if (row.get("TAX_PLACE_TYPE_CODE") != null
+                && row.get("TAX_PLACE_TYPE_CODE").getDeRefValue() != null
+                && values.contains(row.get("TAX_PLACE_TYPE_CODE").getDeRefValue().trim())) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isProductAgreementNameFilled(List<Map<String, TableCell>> rows) {
+        if (TaxType.LAND.equals(getView().getTaxType())) {
+            for (Map<String, TableCell> row : rows) {
+                if (isProductAgreementNameRequired(row)) {
+                    String productAgreementName = row.get("PRODUCT_AGREEMENT_NAME").getStringValue();
+                    if (productAgreementName == null || productAgreementName.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     private boolean isKppTaxOrgCodeFiled(List<Map<String, TableCell>> rows) {
         for (Map<String, TableCell> row : rows) {
             String kpp = row.get("KPP").getStringValue();
@@ -502,6 +526,10 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private boolean checkBeforeSave(List<Map<String, TableCell>> rows) {
         if (!isKppTaxOrgCodeFiled(rows)) {
             Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнены обязательные поля \"" + getColumn("TAX_ORGAN_CODE").getName() + "\" и \"" + getColumn("KPP").getName() + "\"");
+            return false;
+        }
+        if (!isProductAgreementNameFilled(rows)) {
+            Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнено обязательное поле \"" + getColumn("PRODUCT_AGREEMENT_NAME").getName() + "\"");
             return false;
         }
         return true;
