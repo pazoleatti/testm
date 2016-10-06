@@ -409,7 +409,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
         if (refBookAttrBox.getValue().getAttributeType() == RefBookAttributeType.REFERENCE){
             RefBook refBookDereference = getUiHandlers().getRefBook(refBookAttrBox.getValue().getRefBookId());
-            refBookAttrRefBox.setValue(null);
+            refBookAttrRefBox.setValue(null, true);
             refBookAttrRefBox.setAcceptableValues(refBookDereference.getAttributes());
             refBookRefAttrPanel.setVisible(true);
             refBookAttrRefBox.setVisible(true);
@@ -417,7 +417,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         else{
             refBookRefAttrPanel.setVisible(false);
             refBookAttrRefBox.setVisible(false);
-            refBookAttrRefBox.setValue(null);
+            refBookAttrRefBox.setValue(null, true);
             if (currentColumn instanceof RefBookColumn)
                 ((RefBookColumn) currentColumn).setRefBookAttributeId2(null);
         }
@@ -428,10 +428,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
     public void onRefBookAttrRefBox(ValueChangeEvent<RefBookAttribute> event) {
         Column currentColumn = columns.get(columnIndex);
         if (ColumnType.REFERENCE.equals(currentColumn.getColumnType())) {
-            ((ReferenceColumn) currentColumn).setRefBookAttributeId2(event.getValue().getId());
+            ((ReferenceColumn) currentColumn).setRefBookAttributeId2(event.getValue() == null ? null : event.getValue().getId());
             ((ReferenceColumn) currentColumn).setRefBookAttribute(event.getValue());
         } else if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
-            ((RefBookColumn) currentColumn).setRefBookAttributeId2(event.getValue().getId());
+            ((RefBookColumn) currentColumn).setRefBookAttributeId2(event.getValue() == null ? null : event.getValue().getId());
             ((RefBookColumn) currentColumn).setRefBookAttribute(event.getValue());
         } else {
 			return;
