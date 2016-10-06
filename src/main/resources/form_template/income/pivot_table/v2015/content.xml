@@ -10,6 +10,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>№ п/п</name>
         <order>1</order>
         <width>4</width>
@@ -19,6 +20,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>rnu</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Номер РНУ</name>
         <order>2</order>
         <width>8</width>
@@ -28,6 +30,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>code</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Код КНУ</name>
         <order>3</order>
         <width>8</width>
@@ -37,28 +40,31 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>corrType</alias>
         <checking>false</checking>
+        <columnType>REFBOOK</columnType>
         <name>Вид корректировки (1, 2, 3)</name>
         <order>4</order>
         <width>8</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>5402</nameAttributeId>
         <refBookAttributeId>5401</refBookAttributeId>
+        <refBookId>540</refBookId>
         <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>base</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Основание отнесения сделки к контролируемой в соответствии со ст. 105.14 НК РФ</name>
         <order>5</order>
-        <width>8</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>5412</nameAttributeId>
-        <refBookAttributeId>5411</refBookAttributeId>
-        <searchEnabled>true</searchEnabled>
+        <width>10</width>
+        <filter>(\d{1,3}( )*;( )*){0,10}</filter>
+        <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
+        <columnType>REFERENCE</columnType>
         <name>Код страны регистрации (инкорпорации) контрагента</name>
         <order>6</order>
         <width>7</width>
@@ -69,37 +75,40 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>innKio</alias>
         <checking>false</checking>
+        <columnType>REFERENCE</columnType>
         <name>ИНН контрагента</name>
         <order>7</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5220</refBookAttributeId>
-        <refBookAttributeId2>5220</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>rsk</alias>
         <checking>false</checking>
+        <columnType>REFERENCE</columnType>
         <name>Регистрационный номер контрагента в стране регистрации (инкорпорации)</name>
         <order>8</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5221</refBookAttributeId>
-        <refBookAttributeId2>5221</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>name</alias>
         <checking>false</checking>
+        <columnType>REFBOOK</columnType>
         <name>Наименование организации (ФИО) контрагента</name>
         <order>9</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>5201</nameAttributeId>
         <refBookAttributeId>5201</refBookAttributeId>
+        <refBookId>520</refBookId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sign010</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Доходы от реализации. Код строки 010. Признак (0-уменьшение, 1- увеличение)</name>
         <order>10</order>
         <width>11</width>
@@ -109,6 +118,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum010</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Доходы от реализации. Код строки 010. Сумма в рублях</name>
         <order>11</order>
         <width>11</width>
@@ -118,6 +128,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sign020</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Внереализационные доходы. Код строки 020. Признак (0-уменьшение, 1- увеличение)</name>
         <order>12</order>
         <width>11</width>
@@ -127,6 +138,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum020</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Внереализационные доходы. Код строки 020. Сумма в рублях</name>
         <order>13</order>
         <width>11</width>
@@ -136,6 +148,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sign030</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Расходы, уменьшающие сумму доходов от реализации. Код строки 030. Признак (0-уменьшение, 1- увеличение)</name>
         <order>14</order>
         <width>11</width>
@@ -145,6 +158,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum030</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Расходы, уменьшающие сумму доходов от реализации. Код строки 030. Сумма в рублях</name>
         <order>15</order>
         <width>11</width>
@@ -154,6 +168,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sign040</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Внереализационные расходы. Код строки 040. Признак (0-уменьшение, 1- увеличение)</name>
         <order>16</order>
         <width>11</width>
@@ -163,6 +178,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum040</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Внереализационные расходы. Код строки 040. Сумма в рублях</name>
         <order>17</order>
         <width>11</width>
@@ -170,10 +186,31 @@
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sign050</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Итого сумма корректировки (сумма строк 010,020,030,040) по модулю. Код строки 050. Признак (0-уменьшение, 1- увеличение)</name>
+        <order>18</order>
+        <width>11</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum050</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Итого сумма корректировки (сумма строк 010,020,030,040) по модулю. Код строки 050. Сумма в рублях</name>
+        <order>19</order>
+        <width>11</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sign060</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Доходы от выбытия, в том числе доход от погашения. Код строки 060. Признак (0-уменьшение, 1- увеличение)</name>
-        <order>18</order>
+        <order>20</order>
         <width>11</width>
         <maxLength>1</maxLength>
         <precision>0</precision>
@@ -181,8 +218,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum060</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Доходы от выбытия, в том числе доход от погашения. Код строки 060. Сумма в рублях</name>
-        <order>19</order>
+        <order>21</order>
         <width>11</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -190,8 +228,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sign070</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Расходы, связанные с приобретением и реализацией или иным выбытием (в том числе, погашением). Код строки 070. Признак (0-уменьшение, 1- увеличение)</name>
-        <order>20</order>
+        <order>22</order>
         <width>11</width>
         <maxLength>1</maxLength>
         <precision>0</precision>
@@ -199,8 +238,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum070</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Расходы, связанные с приобретением и реализацией или иным выбытием (в том числе, погашением). Код строки 070. Сумма в рублях</name>
-        <order>21</order>
+        <order>23</order>
         <width>11</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -208,8 +248,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sign080</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Итого сумма корректировки (сумма строк 060, 070) по модулю. Код строки 080. Признак (0-уменьшение, 1- увеличение)</name>
-        <order>22</order>
+        <order>24</order>
         <width>11</width>
         <maxLength>1</maxLength>
         <precision>0</precision>
@@ -217,8 +258,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum080</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Итого сумма корректировки (сумма строк 060, 070) по модулю. Код строки 080. Сумма в рублях</name>
-        <order>23</order>
+        <order>25</order>
         <width>11</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -226,8 +268,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sign100</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Сумма налога, подлежащая исчислению, исходя из итоговой суммы корректировки по строкам 050, 080 и соответствующей налоговой ставки. Код строки 100. Признак (0-уменьшение, 1- увеличение)</name>
-        <order>24</order>
+        <order>26</order>
         <width>11</width>
         <maxLength>1</maxLength>
         <precision>0</precision>
@@ -235,8 +278,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum100</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Сумма налога, подлежащая исчислению, исходя из итоговой суммы корректировки по строкам 050, 080 и соответствующей налоговой ставки. Код строки 100. Сумма в рублях</name>
-        <order>25</order>
+        <order>27</order>
         <width>11</width>
         <maxLength>15</maxLength>
         <precision>0</precision>

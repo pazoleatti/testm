@@ -9,7 +9,7 @@
     <cell alias="innKio" colSpan="1" rowSpan="3" value="ИНН контрагента"/>
     <cell alias="rsk" colSpan="1" rowSpan="3" value="Регистрационный номер контрагента в стране регистрации (инкорпорации)"/>
     <cell alias="name" colSpan="1" rowSpan="3" value="Наименование организации (ФИО) контрагента"/>
-    <cell alias="sign010" colSpan="8" rowSpan="1" value="Раздел А. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в общеустановленном порядке"/>
+    <cell alias="sign010" colSpan="10" rowSpan="1" value="Раздел А. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в общеустановленном порядке"/>
     <cell alias="sum010" colSpan="1" rowSpan="1" value="Раздел А. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в общеустановленном порядке"/>
     <cell alias="sign020" colSpan="1" rowSpan="1" value="Раздел А. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в общеустановленном порядке"/>
     <cell alias="sum020" colSpan="1" rowSpan="1" value="Раздел А. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в общеустановленном порядке"/>
@@ -17,6 +17,8 @@
     <cell alias="sum030" colSpan="1" rowSpan="1" value="Раздел А. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в общеустановленном порядке"/>
     <cell alias="sign040" colSpan="1" rowSpan="1" value="Раздел А. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в общеустановленном порядке"/>
     <cell alias="sum040" colSpan="1" rowSpan="1" value="Раздел А. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в общеустановленном порядке"/>
+    <cell alias="sign050" colSpan="1" rowSpan="1" value="Раздел А. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в общеустановленном порядке"/>
+    <cell alias="sum050" colSpan="1" rowSpan="1" value="Раздел А. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в общеустановленном порядке"/>
     <cell alias="sign060" colSpan="8" rowSpan="1" value="Раздел Б. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в особом порядке (подлежат отражению в Листе 05)"/>
     <cell alias="sum060" colSpan="1" rowSpan="1" value="Раздел Б. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в особом порядке (подлежат отражению в Листе 05)"/>
     <cell alias="sign070" colSpan="1" rowSpan="1" value="Раздел Б. Корректировка налоговой базы по сделкам, финансовые результаты по которым учитываются в особом порядке (подлежат отражению в Листе 05)"/>
@@ -44,6 +46,8 @@
     <cell alias="sum030" colSpan="1" rowSpan="1" value="Расходы, уменьшающие сумму доходов от реализации. Код строки 030"/>
     <cell alias="sign040" colSpan="2" rowSpan="1" value="Внереализационные расходы. Код строки 040"/>
     <cell alias="sum040" colSpan="1" rowSpan="1" value="Внереализационные расходы. Код строки 040"/>
+    <cell alias="sign050" colSpan="2" rowSpan="1" value="Итого сумма корректировки (сумма строк 010,020,030,040) по модулю. Код строки 050"/>
+    <cell alias="sum050" colSpan="1" rowSpan="1" value="Итого сумма корректировки (сумма строк 010,020,030,040) по модулю. Код строки 050"/>
     <cell alias="sign060" colSpan="2" rowSpan="1" value="Доходы от выбытия, в том числе доход от погашения. Код строки 060"/>
     <cell alias="sum060" colSpan="1" rowSpan="1" value="Доходы от выбытия, в том числе доход от погашения. Код строки 060"/>
     <cell alias="sign070" colSpan="2" rowSpan="1" value="Расходы, связанные с приобретением и реализацией или иным выбытием (в том числе, погашением). Код строки 070"/>
@@ -71,6 +75,8 @@
     <cell alias="sum030" colSpan="1" rowSpan="1" value="Сумма в рублях"/>
     <cell alias="sign040" colSpan="1" rowSpan="1" value="Признак (0-уменьшение, 1- увеличение)"/>
     <cell alias="sum040" colSpan="1" rowSpan="1" value="Сумма в рублях"/>
+    <cell alias="sign050" colSpan="1" rowSpan="1" value="Признак (0-уменьшение, 1- увеличение)"/>
+    <cell alias="sum050" colSpan="1" rowSpan="1" value="Сумма в рублях"/>
     <cell alias="sign060" colSpan="1" rowSpan="1" value="Признак (0-уменьшение, 1- увеличение)"/>
     <cell alias="sum060" colSpan="1" rowSpan="1" value="Сумма в рублях"/>
     <cell alias="sign070" colSpan="1" rowSpan="1" value="Признак (0-уменьшение, 1- увеличение)"/>
@@ -98,13 +104,15 @@
     <cell alias="sum030" colSpan="1" rowSpan="1" value="15"/>
     <cell alias="sign040" colSpan="1" rowSpan="1" value="16"/>
     <cell alias="sum040" colSpan="1" rowSpan="1" value="17"/>
-    <cell alias="sign060" colSpan="1" rowSpan="1" value="18"/>
-    <cell alias="sum060" colSpan="1" rowSpan="1" value="19"/>
-    <cell alias="sign070" colSpan="1" rowSpan="1" value="20"/>
-    <cell alias="sum070" colSpan="1" rowSpan="1" value="21"/>
-    <cell alias="sign080" colSpan="1" rowSpan="1" value="22"/>
-    <cell alias="sum080" colSpan="1" rowSpan="1" value="23"/>
-    <cell alias="sign100" colSpan="1" rowSpan="1" value="24"/>
-    <cell alias="sum100" colSpan="1" rowSpan="1" value="25"/>
+    <cell alias="sign050" colSpan="1" rowSpan="1" value="18"/>
+    <cell alias="sum050" colSpan="1" rowSpan="1" value="19"/>
+    <cell alias="sign060" colSpan="1" rowSpan="1" value="20"/>
+    <cell alias="sum060" colSpan="1" rowSpan="1" value="21"/>
+    <cell alias="sign070" colSpan="1" rowSpan="1" value="22"/>
+    <cell alias="sum070" colSpan="1" rowSpan="1" value="23"/>
+    <cell alias="sign080" colSpan="1" rowSpan="1" value="24"/>
+    <cell alias="sum080" colSpan="1" rowSpan="1" value="25"/>
+    <cell alias="sign100" colSpan="1" rowSpan="1" value="26"/>
+    <cell alias="sum100" colSpan="1" rowSpan="1" value="27"/>
   </row>
 </rows>
