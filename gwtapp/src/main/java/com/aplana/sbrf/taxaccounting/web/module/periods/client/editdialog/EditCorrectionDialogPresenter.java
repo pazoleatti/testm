@@ -85,6 +85,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         action.setReportPeriodId(initData.getReportPeriodId().intValue());
         action.setOperationName("редактируемом");
         action.setTaxType(taxType);
+        action.setDepartmentId(initData.getDepartmentId());
         dispatcher.execute(action, CallbackUtils
                         .defaultCallback(new AbstractCallback<CanRemovePeriodResult>() {
                             @Override
