@@ -88,7 +88,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                 getView().clearSelected();
                 updateTree();
             }
-            /*getView().setSelected(rc.getId());*/
+            getView().setSelected(rc.getId());
         }
     }
 
