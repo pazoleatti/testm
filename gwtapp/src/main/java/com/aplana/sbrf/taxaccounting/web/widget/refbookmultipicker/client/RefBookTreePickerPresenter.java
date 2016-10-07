@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -203,7 +204,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     @Override
     public void highLightItem(RefBookUiTreeItem uiTreeItem) {
-        uiTreeItem.highLightText(ps.getSearchPattern());
+        uiTreeItem.highLightText(StringUtils.cleanString(ps.getSearchPattern()));
     }
 
     @Override
