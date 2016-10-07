@@ -46,7 +46,7 @@
 	</wsdl:binding>
 	<wsdl:service name="DepartmentManagementService">
 		<wsdl:port name="DepartmentManagementServicePort" binding="tns:DepartmentManagementServicePortBinding">
-			<soap:address location="http://172.16.127.18/taxaccounting-unstable/gwtapp/DepartmentManagementServicee"/>
+			<soap:address location="http://172.16.127.18/taxaccounting-unstable/gwtapp/DepartmentManagementService"/>
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>
