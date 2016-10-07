@@ -99,7 +99,7 @@ public class DepartmentWS_Manager {
                     auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                             null, null, null, null, msg, null);
                 } else {
-                    String msg = String.format("Изменения подразделении не былы отпралено в АС СУНР. Код ошибки: %s, текст ошибки: %s.", status.getErrorCode(), status.getErrorText());
+                    String msg = String.format("Изменения подразделении не были отпралено в АС СУНР. Код ошибки: %s, текст ошибки: %s.", status.getErrorCode(), status.getErrorText());
                     logger.warn(msg);
                     auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                             null, null, null, null, msg, null);
@@ -109,7 +109,7 @@ public class DepartmentWS_Manager {
             LOG.error("Возникли ошибки при отправке изменении подразделении в АС СУНР", e);
             String msg;
             if (ExceptionUtils.indexOfThrowable(e, SocketTimeoutException.class) != -1) {
-                msg = String.format("Возникла ошибка при отправке изменении подразделении в АС СУНР. Ошибка: %s.", "Время ожидания истекло.");
+                msg = String.format("Возникла ошибка при отправке изменении подразделении в АС СУНР. Ошибка: %s", "Время ожидания истекло.");
             } else {
                 msg = String.format("Возникла ошибка при отправке изменении подразделении в АС СУНР. Ошибка: %s", e.getLocalizedMessage());
             }
@@ -157,7 +157,7 @@ public class DepartmentWS_Manager {
             taxDepartmentChange.setId(departmentChange.getId());
             taxDepartmentChange.setChange_datetime(departmentChange.getLogDate());
             if (departmentChange.getOperationType() != DepartmentChangeOperationType.DELETE) {
-                taxDepartmentChange.setLevel(departmentChange.getId());
+                taxDepartmentChange.setLevel(departmentChange.getLevel());
                 taxDepartmentChange.setName(departmentChange.getName());
                 taxDepartmentChange.setShortName(departmentChange.getShortName());
                 taxDepartmentChange.setParentId(departmentChange.getParentId());
