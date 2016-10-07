@@ -3,6 +3,10 @@ package com.aplana.sbrf.taxaccounting.form_template.income.pivot_table.v2015;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
@@ -17,6 +21,7 @@ import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*;
 import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -86,7 +91,19 @@ public class PivotTableTest extends ScriptTestBase {
     }
 
     @Before
-    public void mockServices() {
+    public void mockProvider() {
+        long refBookId = 541L;
+        // провайдер для справочника
+        RefBookUniversal provider = mock(RefBookUniversal.class);
+        provider.setRefBookId(refBookId);
+        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), eq(refBookId),
+                anyMapOf(Long.class, RefBookDataProvider.class))).thenReturn(provider);
+
+        // вернуть все записи справочника
+        Map<Long, Map<String, RefBookValue>> refBookAllRecords = testHelper.getRefBookAllRecords(refBookId);
+        ArrayList<Long> recordIds = new ArrayList<Long>(refBookAllRecords.keySet());
+        when(provider.getUniqueRecordIds(any(Date.class), isNull(String.class))).thenReturn(recordIds);
+        when(provider.getRecordData(eq(recordIds))).thenReturn(refBookAllRecords);
     }
 
     @Test
@@ -254,6 +271,33 @@ public class PivotTableTest extends ScriptTestBase {
         testHelper.getLogger().clear();
     }
 
+    // Проверка наличия кодов в справочнике "Коды основания отнесения сделки к контролируемой"
+    @Test
+    public void checkBaseTest() {
+        FormData formData = getFormData();
+        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+
+        DataRow<Cell> row = formData.createDataRow();
+        row.setIndex(1);
+        dataRows.add(2, row);
+
+        String msg;
+        int i = 0;
+        int rowIndex = row.getIndex();
+
+        row.getCell("corrType").setValue(1L, rowIndex);
+        row.getCell("base").setValue("122;125;", rowIndex);
+        row.getCell("name").setValue(3L, rowIndex);
+        testHelper.execute(FormDataEvent.CHECK);
+
+        msg = String.format("Строка %s: Записи с кодами «125» отсутствуют в справочнике «Коды основания отнесения сделки к контролируемой»!", rowIndex);
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+    }
+
     // 6. Проверка сумм доходов и расходов
     @Test
     public void check6Test() {
@@ -270,7 +314,7 @@ public class PivotTableTest extends ScriptTestBase {
         int i = 0;
         int rowIndex = row.getIndex();
         row.getCell("corrType").setValue(1L, rowIndex);
-        row.getCell("base").setValue("123;130;", rowIndex);
+        row.getCell("base").setValue("121;123;", rowIndex);
         row.getCell("name").setValue(3L, rowIndex);
         row.getCell("sum010").setValue(0L, rowIndex);
         row.getCell("sum020").setValue(-1L, rowIndex);
@@ -304,7 +348,7 @@ public class PivotTableTest extends ScriptTestBase {
         int rowIndex = row.getIndex();
         row.getCell("code").setValue("19000", rowIndex);
         row.getCell("corrType").setValue(1L, rowIndex);
-        row.getCell("base").setValue("123;130;", rowIndex);
+        row.getCell("base").setValue("121;123;", rowIndex);
         row.getCell("name").setValue(3L, rowIndex);
         row.getCell("sum010").setValue(10L, rowIndex);
         row.getCell("sum020").setValue(11L, rowIndex);
@@ -341,7 +385,7 @@ public class PivotTableTest extends ScriptTestBase {
         int rowIndex = row.getIndex();
         row.getCell("code").setValue("19000", rowIndex);
         row.getCell("corrType").setValue(1L, rowIndex);
-        row.getCell("base").setValue("123;130;", rowIndex);
+        row.getCell("base").setValue("122;123;", rowIndex);
         row.getCell("name").setValue(3L, rowIndex);
         row.getCell("sum010").setValue(10L, rowIndex);
         row.getCell("sum020").setValue(11L, rowIndex);
