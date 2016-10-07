@@ -907,8 +907,16 @@ public class PeriodServiceImpl implements PeriodService {
         } else {
             DepartmentReportPeriod dRP = departmentReportPeriodService.getFirst(oldDepartmentId, reportPeriodId);
             boolean fullLogging = false;
-            removePeriodWithLog(reportPeriodId, null, oldDepartmentId, depIds, taxType, logs, fullLogging);
-            open(newYear, newDictTaxPeriodId, taxType, user, departmentId, logs, isBalance, null, fullLogging);
+            boolean departmentHasBeenChanged = oldDepartmentId != departmentId;
+            removePeriodWithLog(reportPeriodId, null, oldDepartmentId, depIds, taxType, departmentHasBeenChanged ? logs : null, fullLogging);
+            open(newYear, newDictTaxPeriodId, taxType, user, departmentId, departmentHasBeenChanged ? logs : null, isBalance, null, fullLogging);
+            if (!departmentHasBeenChanged) {
+                logs.add(new LogEntry(LogLevel.INFO,
+                        String.format("Период \"%s, %s%s\" изменён на \"%s, %s%s\" для подразделений \"%s\"",
+                                rp.getTaxPeriod().getYear(), rp.getName(), (dRP.isBalance() ? " - ввод остатков" : ""),
+                                newYear, dictTaxPeriod.get("NAME").getStringValue(), (isBalance ? " - ввод остатков" : ""),
+                                departmentService.getDepartment(oldDepartmentId).getName())));
+            }
         }
     }
 
