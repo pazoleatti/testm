@@ -63,7 +63,6 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE: // Консолидация
         consolidation()
         calc()
-        logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
         break
 }
@@ -245,7 +244,7 @@ void logicCheck() {
         def rowNum = row.getIndex()
 
         // 1. Проверка на заполнение граф
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, formDataEvent != FormDataEvent.COMPOSE)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
         def record520 = getRefBookValue(520L, row.name)
         // 2. Заполнение идентификационного номера для иностранной организации
         if (row.name != null && record520.ORG_CODE.value == getForeignOrgCodeId() && !record520.INNKIO.value && !record520.RSK.value) {
@@ -268,6 +267,17 @@ void logicCheck() {
             // 5. Корректное заполнение основания отнесения сделки к контролируемой
             if ((baseCodes.contains('122') || baseCodes.contains('123')) && baseCodes.find { it && ((it as Integer) in (131..135)) } != null) {
                 logger.error("Строка %s: Коды 122 и 123 не могут быть одновременно указаны с любым из кодов 131- 135!", row.getIndex())
+            }
+            // Проверка наличия кодов в справочнике "Коды основания отнесения сделки к контролируемой"
+            def allRecords = getAllRecords(541).values()
+            def absentCodes = baseCodes.findAll { code ->
+                code && (allRecords.find { record ->
+                    record.CODE.value == (code as Integer)
+                } == null)
+            }
+            if (!absentCodes.isEmpty()) {
+                logger.error("Строка %s: Записи с кодами «%s» отсутствуют в справочнике «Коды основания отнесения сделки к контролируемой»!",
+                    row.getIndex(), absentCodes.join('», «'))
             }
         }
         // 6. Проверка сумм доходов и расходов
@@ -306,6 +316,25 @@ void logicCheck() {
             }
         }
     }
+}
+
+@Field
+def allRecordsMap = [:]
+
+/**
+ * Получить все записи справочника.
+ *
+ * @param refBookId id справочника
+ * @return мапа с записями справочника (ключ "id записи" -> запись)
+ */
+def getAllRecords(def refBookId) {
+    if (allRecordsMap[refBookId] == null) {
+        def date = getReportPeriodEndDate()
+        def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
+        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
+        allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
+    }
+    return allRecordsMap[refBookId]
 }
 
 // Алгоритмы заполнения полей формы
