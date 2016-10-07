@@ -298,7 +298,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                             logEntryService.save(logger.getEntries()));
 
                 logger.info("Подразделение создано");
-                auditService.add(FormDataEvent.ADD_DEPARTMENT, logger.getTaUserInfo(), 0,
+                auditService.add(FormDataEvent.ADD_DEPARTMENT, logger.getTaUserInfo(), null,
                         null, null, null, null,
                         String.format("Создано подразделение %s, значения атрибутов: %s",
                                 refBookValueMap.get(DEPARTMENT_NAME_ATTRIBUTE).toString(),
@@ -585,7 +585,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 //удаление периодов
                 deleteDRPs(depId);
 
-                auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), 0, null, null, null, null,
+                auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), null, null, null, null, null,
                         String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)), null);
                 refBookDepartmentDao.remove(depId);
                 logger.info("Подразделение удалено!");

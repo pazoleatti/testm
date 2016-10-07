@@ -115,7 +115,7 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
                 logger.info("Подразделение сохранено");
                 departmentWS_manager.sendChange(DepartmentChangeOperationType.UPDATE, action.getDepId(), logger);
 
-                auditService.add(FormDataEvent.UPDATE_DEPARTMENT, securityService.currentUserInfo(), action.getDepId(),
+                auditService.add(FormDataEvent.UPDATE_DEPARTMENT, securityService.currentUserInfo(), null,
                         null, null, null, null,
                         String.format("Изменены значения атрибутов подразделения %s, новые значения атрибутов: %s",
                                 action.getDepName(),
