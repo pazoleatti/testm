@@ -49,8 +49,14 @@ public class DepartmentChangeDaoImpl extends AbstractDao implements DepartmentCh
     }
 
     @Override
-    public void clear() {
-        getJdbcTemplate().update("delete department_change");
+    public void clean() {
+        getJdbcTemplate().update("delete from department_change");
+    }
+
+    @Override
+    public void clean(int day) {
+        getJdbcTemplate().update("delete from department_change " +
+                "where log_date < (SYSDATE - INTERVAL '" + day + "' DAY)");
     }
 
     @Override
@@ -96,10 +102,5 @@ public class DepartmentChangeDaoImpl extends AbstractDao implements DepartmentCh
                     departmentChange.getSunrUse()
             );
         }
-    }
-
-    @Override
-    public boolean checkDepartment(int depId, Integer depParentId) {
-        return getJdbcTemplate().queryForObject("select count(*) from department_change where id = " + depId + (depParentId != null?(" or id = " + depParentId):""), Integer.class)>0;
     }
 }

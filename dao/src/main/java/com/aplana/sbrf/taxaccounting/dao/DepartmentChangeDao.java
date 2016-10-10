@@ -10,10 +10,9 @@ import java.util.List;
 public interface DepartmentChangeDao {
     List<DepartmentChange> getAllChanges();
 
-    void clear();
+    void clean();
+
+    void clean(int day);
 
     void addChange(DepartmentChange departmentChange);
-
-    boolean checkDepartment(int depId, Integer depParentId);
-
 }
