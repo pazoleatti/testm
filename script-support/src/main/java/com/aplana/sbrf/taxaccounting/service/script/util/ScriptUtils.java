@@ -1950,9 +1950,9 @@ public final class ScriptUtils {
             if (!value2.equals(value1)) {
                 String msg;
                 if (value1 == null) {
-                    msg = String.format(COMPARE_TOTAL_VALUES_NULL, totalRow.getImportIndex(), getColumnName(totalRow, alias).replace("%", "%%"), value2);
+                    msg = String.format(COMPARE_TOTAL_VALUES_NULL, totalRow.getImportIndex(), getColumnName(totalRow, alias), value2);
                 } else {
-                    msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getImportIndex(), getColumnName(totalRow, alias).replace("%", "%%"), value1, value2);
+                    msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getImportIndex(), getColumnName(totalRow, alias), value1, value2);
                 }
                 if (required) {
                     logger.error("%s", msg);

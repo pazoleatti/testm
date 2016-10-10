@@ -321,8 +321,12 @@ void calc() {
     }
 }
 
+// такой же метод используется в форме "Расчет земельного налога за отчетные периоды" (form_template.land.calc_tax_period.v2016) - там это calc20()
 def BigDecimal calc16(def row) {
-    def tmp
+    if (row.startDate == null) {
+        return null
+    }
+    BigDecimal tmp
     if (row.endDate && row.endDate < getReportPeriodStartDate() || row.startDate > getReportPeriodEndDate()) {
         tmp = BigDecimal.ZERO
     } else {
@@ -332,6 +336,7 @@ def BigDecimal calc16(def row) {
     }
     return round(tmp, 0)
 }
+
 void importData() {
     if (UploadFileName?.toLowerCase()?.endsWith('.xlsm')) {
         importDataXlsm()
