@@ -67,7 +67,6 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE: // Консолидация
         formDataService.consolidationSimple(formData, logger, userInfo)
         calc()
-        logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
@@ -102,9 +101,9 @@ def editableColumns = ['name', 'oktmo', 'cadastralNumber', 'landCategory', 'cons
 @Field
 def autoFillColumns = ['rowNumber', 'benefitPeriod']
 
-// Проверяемые на пустые значения атрибуты (графа 3, 4, 5, 7, 9, 14)
+// Проверяемые на пустые значения атрибуты (графа 3, 4, 5, 7, 9)
 @Field
-def nonEmptyColumns = ['oktmo', 'cadastralNumber', 'landCategory', 'cadastralCost', 'ownershipDate', 'startDate']
+def nonEmptyColumns = ['oktmo', 'cadastralNumber', 'landCategory', 'cadastralCost', 'ownershipDate']
 
 @Field
 def sortColumns = ['oktmo', 'cadastralNumber']
@@ -234,7 +233,7 @@ void logicCheck() {
         }
 
         // 7. Проверка корректности заполнения даты начала действия льготы
-        if (row.startDate && row.startDate < row.ownershipDate) {
+        if (row.startDate && row.ownershipDate && row.startDate < row.ownershipDate) {
             def columnName14 = getColumnName(row, 'startDate')
             def columnName9 = getColumnName(row, 'ownershipDate')
             logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»",
@@ -242,7 +241,7 @@ void logicCheck() {
         }
 
         // 8. Проверка корректности заполнения даты окончания действия льготы
-        if (row.endDate && (row.endDate < row.startDate || row.terminationDate && row.terminationDate < row.endDate)) {
+        if (row.startDate && row.endDate && (row.endDate < row.startDate || row.terminationDate && row.terminationDate < row.endDate)) {
             def columnName15 = getColumnName(row, 'endDate')
             def columnName14 = getColumnName(row, 'startDate')
             def columnName10 = getColumnName(row, 'terminationDate')
@@ -269,6 +268,13 @@ void logicCheck() {
                 logger.error("Строка %s: Код ОКТМО, в котором действует выбранная в графе «%s» льгота, должен быть равен значению графы «%s»",
                         rowIndex, columnName11, columnName3)
             }
+        }
+
+        // 11. Проверка корректности заполнения графы 16
+        if(formDataEvent != FormDataEvent.CALCULATE && row.benefitPeriod != calc16(row)){
+            def columnName16 = getColumnName(row, 'benefitPeriod')
+            logger.error("Строка %s: Графа «%s» заполнена неверно. Выполните расчет формы",
+                    rowIndex, columnName16)
         }
     }
 
@@ -315,7 +321,7 @@ void calc() {
     }
 }
 
-def calc16(def row) {
+def BigDecimal calc16(def row) {
     def tmp
     if (row.endDate && row.endDate < getReportPeriodStartDate() || row.startDate > getReportPeriodEndDate()) {
         tmp = BigDecimal.ZERO
