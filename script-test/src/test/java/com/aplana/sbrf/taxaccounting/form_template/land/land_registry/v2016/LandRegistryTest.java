@@ -405,7 +405,7 @@ public class LandRegistryTest extends ScriptTestBase {
         // графа 6
         Assert.assertEquals(refbookRecordId, row.getCell("constructionPhase").getValue());
         // графа 7
-        Assert.assertEquals(123456789012345L, row.getCell("cadastralCost").getNumericValue().longValue());
+        Assert.assertEquals(1234567890123L, row.getCell("cadastralCost").getNumericValue().longValue());
         // графа 8
         Assert.assertEquals("1234567890/1234567890", row.getCell("taxPart").getValue());
         // графа 9
@@ -451,7 +451,7 @@ public class LandRegistryTest extends ScriptTestBase {
         // графа 6
         Assert.assertEquals(refbookRecordId, row.getCell("constructionPhase").getValue());
         // графа 7
-        Assert.assertEquals(123456789012345L, row.getCell("cadastralCost").getNumericValue().longValue());
+        Assert.assertEquals(1234567890123L, row.getCell("cadastralCost").getNumericValue().longValue());
         // графа 8
         Assert.assertEquals("1234567890/1234567890", row.getCell("taxPart").getValue());
         // графа 9
@@ -506,7 +506,7 @@ public class LandRegistryTest extends ScriptTestBase {
         // графа 6
         Assert.assertEquals(refbookRecordId, row.getCell("constructionPhase").getValue());
         // графа 7
-        Assert.assertEquals(123456789012345L, row.getCell("cadastralCost").getNumericValue().longValue());
+        Assert.assertEquals(1234567890123L, row.getCell("cadastralCost").getNumericValue().longValue());
         // графа 8
         Assert.assertEquals("1234567890/1234567890", row.getCell("taxPart").getValue());
         // графа 9

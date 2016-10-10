@@ -32,7 +32,7 @@
         <columnType>REFBOOK</columnType>
         <name>Подразделение</name>
         <order>3</order>
-        <width>8</width>
+        <width>10</width>
         <hierarchical>true</hierarchical>
         <nameAttributeId>161</nameAttributeId>
         <refBookAttributeId>161</refBookAttributeId>
@@ -44,7 +44,7 @@
         <columnType>STRING</columnType>
         <name>КНО</name>
         <order>4</order>
-        <width>5</width>
+        <width>3</width>
         <maxLength>4</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -54,7 +54,7 @@
         <columnType>STRING</columnType>
         <name>КПП</name>
         <order>5</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>9</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -64,7 +64,7 @@
         <columnType>REFBOOK</columnType>
         <name>КБК</name>
         <order>6</order>
-        <width>9</width>
+        <width>11</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>7032</nameAttributeId>
         <refBookAttributeId>7031</refBookAttributeId>
@@ -122,9 +122,9 @@
         <columnType>NUMBER</columnType>
         <name>Кадастровая стоимость (доля стоимости) земельного участка</name>
         <order>11</order>
-        <width>9</width>
+        <width>10</width>
         <maxLength>15</maxLength>
-        <precision>0</precision>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>taxPart</alias>
@@ -132,7 +132,7 @@
         <columnType>STRING</columnType>
         <name>Доля налогоплательщика в праве на земельный участок</name>
         <order>12</order>
-        <width>10</width>
+        <width>12</width>
         <maxLength>21</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -204,7 +204,7 @@
         <columnType>DATE</columnType>
         <name>Информация о налоговых льготах (в случае наличия). Дата начала действия</name>
         <order>19</order>
-        <width>5</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
@@ -324,6 +324,13 @@
         <alias>Контрольные суммы</alias>
         <backColor>LIGHT_BROWN</backColor>
         <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Сравнение</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>

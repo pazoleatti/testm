@@ -80,7 +80,7 @@
         <order>7</order>
         <width>9</width>
         <maxLength>15</maxLength>
-        <precision>0</precision>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>taxPart</alias>

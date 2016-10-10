@@ -92,7 +92,7 @@ def recordCache = [:]
 def refBookCache = [:]
 
 @Field
-def allColumns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', '']
+def allColumns = ['kny', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency']
 
 // Редактируемые атрибуты
 @Field
