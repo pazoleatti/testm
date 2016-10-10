@@ -357,12 +357,13 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id is null CONNECT BY PRIOR id = parent_id) d ON d.ID = dft.DEPARTMENT_ID\n" +
                     "WHERE ft.tax_type = :taxType\n" +
                     "%s\n" +
-                    "%s\n" +
                     ") dftOrd \n" +
                     ") dft \n" +
                     "left join department_form_type_performer dftp on 0=:withoutPerformers and dftp.DEPARTMENT_FORM_TYPE_ID = dft.id \n" +
                     "LEFT OUTER JOIN department dp ON dp.ID = dftp.PERFORMER_DEP_ID\n" +
-                    "LEFT OUTER JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id is null CONNECT BY PRIOR id = parent_id) p ON p.ID = dftp.PERFORMER_DEP_ID\n";
+                    "LEFT OUTER JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id is null CONNECT BY PRIOR id = parent_id) p ON p.ID = dftp.PERFORMER_DEP_ID\n" +
+                    "%s\n" +
+                    "%s";
 
     private QueryData getAssignedFormsQueryData(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams, boolean withoutPerformers){
         boolean paging = queryParams != null && queryParams.getCount() != 0;
@@ -398,15 +399,16 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             parameters.addValue("params", departmentIds);
         }
 
-        String query = String.format(QUERY, departmentClause, order.toString());
-
+        String whereClause = "";
         // Limit
         if (paging){
-            query = query + " WHERE dft.row_number_over BETWEEN :from and :to";
+            whereClause = " WHERE dft.row_number_over BETWEEN :from and :to";
             parameters.addValue("from", queryParams.getFrom()+1);
             parameters.addValue("to", queryParams.getFrom() + queryParams.getCount());
         }
         parameters.addValue("withoutPerformers", withoutPerformers ? 1 : 0);
+
+        String query = String.format(QUERY, departmentClause, whereClause, order.toString());
 
         QueryData queryData = new QueryData();
         queryData.setQuery(query);
