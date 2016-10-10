@@ -556,7 +556,7 @@ public class LandRegistryTest extends ScriptTestBase {
         // проверка сообщении
         String msg = String.format("Данные по земельным участкам из предыдущего отчетного периода не были скопированы. " +
                 "В Системе отсутствует форма за период: %s %s для подразделения «%s»",
-                "3 квартал", "2014", "null");
+                "3 квартал", "2014", "test department name");
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         Assert.assertEquals(msg, entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());

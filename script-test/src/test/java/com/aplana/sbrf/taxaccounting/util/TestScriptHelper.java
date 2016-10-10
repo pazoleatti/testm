@@ -33,6 +33,7 @@ public class TestScriptHelper {
     // Id текущего для теста экземпляра НФ
     public final static long CURRENT_FORM_DATA_ID = 1;
     public final static long DEPARTMENT_REGION_ID = 1;
+    public final static String DEPARTMENT_NAME = "test department name";
 
     // Пкть к скрипту
     private String path;
@@ -98,6 +99,7 @@ public class TestScriptHelper {
         // Id подразделения пользователя совпадает c Id подразделения НФ
         userDepartment.setId(formData.getDepartmentId());
         userDepartment.setRegionId(DEPARTMENT_REGION_ID);
+        userDepartment.setName(DEPARTMENT_NAME);
         // Шаблон НФ из файла
         FormType formType = formData.getFormType();
         formData.initFormTemplateParams(getTemplate(SCRIPT_PATH_PREFIX + path, true));
