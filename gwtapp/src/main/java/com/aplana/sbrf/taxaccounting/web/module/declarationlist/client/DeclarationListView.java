@@ -43,8 +43,9 @@ public class DeclarationListView extends
     public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
     public static final String DEPARTMENT_TITLE = "Подразделение";
-    public static final String TAX_ORGAN_CODE_TITLE = "Код налогового органа";
-    public static final String TAX_ORGAN_CODE_TITLE_F = "Код налогового органа (кон.)";
+    public static final String TAX_ORGAN_CODE_TITLE = "Налоговый орган";
+    public static final String TAX_ORGAN_CODE_TITLE_F = "Налоговый орган (кон.)";
+    public static final String TAX_ORGAN_CODE_TITLE_FF = "Код налогового органа (кон.)";
     public static final String TAX_ORGAN_CODE_KPP_TITLE = "КПП";
     public static final String STATE_TITLE = "Состояние";
     public static final String PERIOD_TITLE = "Период";
@@ -256,7 +257,10 @@ public class DeclarationListView extends
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
             if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT || taxType == TaxType.LAND) {
                 declarationTable.addColumn(declarationTaxOrganColumn,
-                        declarationTable.createResizableHeader((taxType == TaxType.TRANSPORT || taxType == TaxType.LAND) ? TAX_ORGAN_CODE_TITLE_F : TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
+                        declarationTable.createResizableHeader(
+                                (taxType == TaxType.TRANSPORT) ? TAX_ORGAN_CODE_TITLE_F :
+                                        (taxType == TaxType.LAND) ? TAX_ORGAN_CODE_TITLE_FF :
+                                                TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
                 declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
             } else if (taxType == TaxType.INCOME){
                 declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));

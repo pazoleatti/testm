@@ -365,9 +365,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
 
         if (taxType == TaxType.TRANSPORT) {
-            label = getLabel("Код налогового органа (кон.):");
+            label = getLabel("Налоговый орган (кон.):");
         } else {
-            label = getLabel("Код налогового органа:");
+            label = getLabel("Налоговый орган:");
         }
         verticalPanel6.add(label);
 
