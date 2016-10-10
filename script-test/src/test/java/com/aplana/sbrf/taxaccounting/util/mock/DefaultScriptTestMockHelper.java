@@ -210,6 +210,7 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setId(1);
         reportPeriod.setTaxPeriod(taxPeriod);
+        reportPeriod.setName("test period name");
         when(reportPeriodService.get(anyInt())).thenReturn(reportPeriod);
         when(reportPeriodService.getCalendarStartDate(anyInt())).thenReturn(PERIOD_START_DATE);
         return reportPeriodService;

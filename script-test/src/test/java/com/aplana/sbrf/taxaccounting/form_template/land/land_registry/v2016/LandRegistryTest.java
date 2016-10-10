@@ -154,12 +154,11 @@ public class LandRegistryTest extends ScriptTestBase {
 
         // 1. Проверка обязательности заполнения граф
         i = 0;
-        // Проверяемые на пустые значения атрибуты (графа 3, 4, 5, 7, 9, 14)
-        String [] nonEmptyColumns = { "oktmo", "cadastralNumber", "landCategory", "cadastralCost", "ownershipDate", "startDate" };
+        // Проверяемые на пустые значения атрибуты (графа 3, 4, 5, 7, 9)
+        String [] nonEmptyColumns = { "oktmo", "cadastralNumber", "landCategory", "cadastralCost", "ownershipDate" };
         for (String alias : nonEmptyColumns) {
             row.getCell(alias).setValue(null, null);
         }
-        row.getCell("benefitCode").setValue(null, null);
         testHelper.execute(FormDataEvent.CHECK);
         for (String alias : nonEmptyColumns) {
             msg = String.format(ScriptUtils.WRONG_NON_EMPTY, row.getIndex(), row.getCell(alias).getColumn().getName());
@@ -186,6 +185,7 @@ public class LandRegistryTest extends ScriptTestBase {
         row.getCell("terminationDate").setValue(date, null);
         row.getCell("startDate").setValue(date, null);
         row.getCell("endDate").setValue(null, null);
+        row.getCell("benefitPeriod").setValue(0, null);
         testHelper.execute(FormDataEvent.CHECK);
         msg = String.format("Строка %s: Значение графы «%s» должно быть меньше либо равно %s", row.getIndex(), ScriptUtils.getColumnName(row, "ownershipDate"), "31.12.2014");
         Assert.assertEquals(msg, entries.get(i++).getMessage());
@@ -200,6 +200,7 @@ public class LandRegistryTest extends ScriptTestBase {
         row.getCell("terminationDate").setValue(date, null);
         row.getCell("startDate").setValue(date, null);
         row.getCell("endDate").setValue(null, null);
+        row.getCell("benefitPeriod").setValue(12, null);
         testHelper.execute(FormDataEvent.CHECK);
         msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно %s, и больше либо равно значению графы «%s»",
                 row.getIndex(), ScriptUtils.getColumnName(row, "terminationDate"), "01.01.2014", ScriptUtils.getColumnName(row, "ownershipDate"));
@@ -263,6 +264,7 @@ public class LandRegistryTest extends ScriptTestBase {
         i = 0;
         setDefaultValue(row);
         row.getCell("startDate").setValue(sdf.parse("31.12.2013"), null);
+        row.getCell("benefitPeriod").setValue(1, null);
         testHelper.execute(FormDataEvent.CHECK);
         msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»",
                 row.getIndex(), ScriptUtils.getColumnName(row, "startDate"), ScriptUtils.getColumnName(row, "ownershipDate"));
@@ -274,10 +276,21 @@ public class LandRegistryTest extends ScriptTestBase {
         i = 0;
         setDefaultValue(row);
         row.getCell("endDate").setValue(sdf.parse("31.12.2013"), null);
+        row.getCell("benefitPeriod").setValue(0, null);
         testHelper.execute(FormDataEvent.CHECK);
         msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s» и быть меньше либо равно значению графы «%s»",
                 row.getIndex(), ScriptUtils.getColumnName(row, "endDate"), ScriptUtils.getColumnName(row, "startDate"),
                 ScriptUtils.getColumnName(row, "terminationDate"));
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 11. Проверка корректности заполнения графы 16
+        i = 0;
+        setDefaultValue(row);
+        row.getCell("benefitPeriod").setValue(0, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка %s: Графа «%s» заполнена неверно. Выполните расчет формы", row.getIndex(), ScriptUtils.getColumnName(row, "benefitPeriod"));
         Assert.assertEquals(msg, entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
@@ -556,7 +569,7 @@ public class LandRegistryTest extends ScriptTestBase {
         // проверка сообщении
         String msg = String.format("Данные по земельным участкам из предыдущего отчетного периода не были скопированы. " +
                 "В Системе отсутствует форма за период: %s %s для подразделения «%s»",
-                "3 квартал", "2014", "null");
+                "3 квартал", "2014", "test department name");
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         Assert.assertEquals(msg, entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());

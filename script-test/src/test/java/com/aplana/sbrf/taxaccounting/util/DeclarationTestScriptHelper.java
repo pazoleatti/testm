@@ -26,6 +26,7 @@ public class DeclarationTestScriptHelper {
     // Id текущего для теста экземпляра декларации
     public final static long CURRENT_DECLARATION_DATA_ID = 1;
     public final static long DEPARTMENT_REGION_ID = 1;
+    public final static String DEPARTMENT_NAME = "test department name";
 
     // Пкть к скрипту
     private String path;
@@ -80,6 +81,7 @@ public class DeclarationTestScriptHelper {
         // Id подразделения пользователя совпадает c Id подразделения декларации
         userDepartment.setId(declarationData.getDepartmentId());
         userDepartment.setRegionId(DEPARTMENT_REGION_ID);
+        userDepartment.setName(DEPARTMENT_NAME);
         this.path = SCRIPT_PATH_PREFIX + path + SCRIPT_PATH_FILE_NAME;
         try {
             script = readFile(this.path, charsetName);
