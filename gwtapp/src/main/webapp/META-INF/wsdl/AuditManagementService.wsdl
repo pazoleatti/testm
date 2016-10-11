@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions name="AuditManagementService" targetNamespace="http://taxaccounting.sbrf.aplana.com/AuditManagementService/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://taxaccounting.sbrf.aplana.com/AuditManagementService/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://taxaccounting.sbrf.aplana.com/AuditManagementService/">
+            <xsd:element name="addAuditLogRequest" type="tns:AuditLog"/>
+            <xsd:element name="addAuditLogResponse" type="tns:addAuditLogResponse"/>
+            <xsd:complexType name="AuditLog">
+                <xsd:sequence>
+                    <xsd:element name="userInfo" type="tns:UserInfo"/>
+                    <xsd:element name="note" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="UserInfo">
+                <xsd:sequence>
+                    <xsd:element name="user" type="tns:User"/>
+                    <xsd:element name="ip" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="User">
+                <xsd:sequence>
+                    <xsd:element name="login" type="xsd:string"/>
+                    <xsd:element name="name" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="addAuditLogResponse">
+                <xsd:sequence/>
+            </xsd:complexType>
+        </xsd:schema>
+    </wsdl:types>
+    <wsdl:message name="addAuditLogRequest">
+        <wsdl:part name="auditLog" element="tns:addAuditLogRequest"/>
+    </wsdl:message>
+    <wsdl:message name="addAuditLogResponse">
+        <wsdl:part name="result" element="tns:addAuditLogResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="AuditManagementService">
+        <wsdl:operation name="addAuditLog">
+            <wsdl:input message="tns:addAuditLogRequest"/>
+            <wsdl:output message="tns:addAuditLogResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="AuditManagementServicePortBinding" type="tns:AuditManagementService">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="addAuditLog">
+            <soap:operation soapAction="http://taxaccounting.sbrf.aplana.com/AuditManagementService/addAuditLog"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="AuditManagementService">
+        <wsdl:port name="AuditManagementServicePort" binding="tns:AuditManagementServicePortBinding">
+            <soap:address location="http://172.16.127.18/taxaccounting-unstable/gwtapp/AuditManagementService"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
