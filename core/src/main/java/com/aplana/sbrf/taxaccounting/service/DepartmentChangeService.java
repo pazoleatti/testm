@@ -12,11 +12,11 @@ public interface DepartmentChangeService {
 
     List<DepartmentChange> getAllChanges();
 
-    void clear();
+    void clean();
+
+    void clean(int day);
 
     void addChange(DepartmentChange departmentChange);
-
-    boolean checkDepartment(int depId, Integer depParentId);
 
     /**
      * Генерация ключа блокировки для задачи c типом reportType

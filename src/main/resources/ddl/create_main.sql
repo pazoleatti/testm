@@ -1105,3 +1105,35 @@ create global temporary table form_search_data_result_tmp
     "RAW_VALUE"     varchar2(4000 byte)
   ) on commit delete rows ;
 --------------------------------------------------------------------------------------------------------
+create table department_change (
+  operationType number(9) not null,
+  log_date date not null,
+  id number(9) not null,
+  hier_level number(2),
+  name varchar2(510),
+  parent_id number(9),
+  type number(9),
+  shortname varchar2(510),
+  tb_index varchar2(3),
+  sbrf_code varchar2(255),
+  region varchar2(510),
+  is_active number(1),
+  code number(15),
+  garant_use number(1),
+  sunr_use number(1)
+);
+
+comment on table department_change is 'Подразделения банка';
+comment on column department_change.id is 'Идентификатор записи';
+comment on column department_change.hier_level is 'Уровень записи в иерархии';
+comment on column department_change.name is 'Наименование подразделения';
+comment on column department_change.parent_id is 'Идентификатор родительского подразделения';
+comment on column department_change.type is 'Тип подразделения (1 - Банк, 2- ТБ, 3- ЦСКО, ПЦП, 4- Управление, 5- Не передается в СУДИР)';
+comment on column department_change.shortname is 'Сокращенное наименование подразделения';
+comment on column department_change.tb_index is 'Индекс территориального банка';
+comment on column department_change.sbrf_code is 'Код подразделения в нотации Сбербанка';
+comment on column department_change.region is 'Регион';
+comment on column department_change.is_active is 'Действующее подразделение (0 - не действующее, 1 - действующее)';
+comment on column department_change.code is 'Код подразделения';
+comment on column department_change.garant_use is 'Признак, что используется в модуле Гарантий';
+--------------------------------------------------------------------------------------------------------
