@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.ws;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -93,7 +92,7 @@ public class DepartmentWS_Manager {
                 DepartmentWS departmentWS = getDepartmentWSPort();
                 TaxDepartmentChangeStatus status = departmentWS.sendDepartmentChange(convert(departmentChanges));
                 if (status.getErrorCode().equalsIgnoreCase("E0")) {
-                    departmentChangeService.clear();
+                    departmentChangeService.clean();
                     String msg = "Изменения подразделении успешно переданы в АС СУНР";
                     logger.info(msg);
                     auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),

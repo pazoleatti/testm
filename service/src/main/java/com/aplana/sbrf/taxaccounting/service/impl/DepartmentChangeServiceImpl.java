@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,8 +27,13 @@ public class DepartmentChangeServiceImpl implements DepartmentChangeService {
     }
 
     @Override
-    public void clear() {
-        departmentChangeDao.clear();
+    public void clean() {
+        departmentChangeDao.clean();
+    }
+
+    @Override
+    public void clean(int day) {
+        departmentChangeDao.clean(day);
     }
 
     @Override
@@ -42,8 +46,4 @@ public class DepartmentChangeServiceImpl implements DepartmentChangeService {
         return LockData.LockObjects.DEPARTMENT_HISTORY.name() + "_" + reportType.getName();
     }
 
-    @Override
-    public boolean checkDepartment(int depId, Integer depParentId) {
-        return departmentChangeDao.checkDepartment(depId, depParentId);
-    }
 }
