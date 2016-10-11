@@ -17,7 +17,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-import com.sun.org.apache.bcel.internal.generic.LAND;
 
 import java.util.*;
 
