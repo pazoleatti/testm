@@ -1,18 +1,11 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 import java.util.List;
 
 /**
  * Информация о пользователе, его ролях и принадлежности к подразделению
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name = "User", propOrder = {
-		"login",
-		"name"
-})
 public class TAUser implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -20,9 +13,7 @@ public class TAUser implements Serializable {
 	public static final int SYSTEM_USER_ID = 0;
 	
 	private int id;
-	@XmlElement(required = true)
 	private String login;
-	@XmlElement
 	private String name;
 	private List<TARole> roles;
 	private int departmentId;
@@ -81,7 +72,7 @@ public class TAUser implements Serializable {
 		if (roles == null) {
 			throw new IllegalStateException("Roles list is not initialized properly!");
 		}
-
+		
 		if (roleAlias == null) {
 			throw new IllegalArgumentException("roleAlias cannot be null");
 		}

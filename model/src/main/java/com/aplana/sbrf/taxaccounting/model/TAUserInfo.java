@@ -1,15 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
 import java.io.Serializable;
 
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "UserInfo", propOrder = {
-		"user",
-		"ip"
-})
 public class TAUserInfo implements Serializable{
 	private static final long serialVersionUID = 8435914534838847536L;
 	
