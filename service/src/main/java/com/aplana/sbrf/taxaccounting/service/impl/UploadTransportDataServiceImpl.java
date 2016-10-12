@@ -559,15 +559,13 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         // ЖА
         // TODO Указать признак ошибки в ЖА. См. logData.getLevel()
         if (logData.isLogSystem()) {
-            Integer departmentId = null;
             String prefix = "";
             if (userInfo != null) {
-                departmentId = userInfo.getUser().getDepartmentId();
                 if (userInfo.getUser().getId() == TAUser.SYSTEM_USER_ID) {
                     prefix = "Событие инициировано Системой. ";
                 }
             }
-            auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, departmentId, null,
+            auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, null, null,
                     null, formTypeName, null, prefix + String.format(logData.getText(), args), null);
         }
     }
