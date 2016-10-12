@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
+import java.math.RoundingMode
+
 /**
  * 850 - Сводная таблица - Лист 08 декларации по прибыли
  * formTemplateId=850
@@ -103,7 +105,7 @@ def sortColumns = ['innKio', 'rsk']
 def nonZeroColumns = ['sum010', 'sum020', 'sum030', 'sum040']
 
 @Field
-def totalColumns = ['sum010', 'sum020', 'sum030', 'sum040', 'sum050']
+def totalColumns = ['sum010', 'sum020', 'sum030', 'sum040', 'sum050', 'sum100']
 
 // Дата начала отчетного периода
 @Field
@@ -303,12 +305,11 @@ void logicCheck() {
             def sectionRows = dataRows.findAll { row ->
                  row.code == code
             }
-            // получаем активную графу
-            def totalColumn = codeTotalColumnMap[code]
+            // получаем итоговые графы для КНУ
+            def totalColumns = codeTotalColumnMap[code]
             def tempCodeHeaderRow =  formData.createDataRow()
-            calcTotalSum(sectionRows, tempCodeHeaderRow, [totalColumn])
-            tempCodeHeaderRow.sum050 = tempCodeHeaderRow[totalColumn]
-            [totalColumn, 'sum050'].each { column ->
+            calcTotalSum(sectionRows, tempCodeHeaderRow, totalColumns)
+            totalColumns.each { column ->
                 if ((codeHeaderRow[column] || tempCodeHeaderRow[column]) && codeHeaderRow[column] != tempCodeHeaderRow[column]) {
                     logger.error("Неверное итоговое значение в графе «%s» по группе КНУ «%s»!",
                         getColumnName(codeHeaderRow, column), code)
@@ -395,26 +396,26 @@ def formTypeIds = [formType101, formType102, formType107, formType110, formType1
                    formType117, formType122, formType123, formType171]
 
 @Field
-def codeTotalColumnMap = ['19000' : 'sum010',
-                           '19030' : 'sum020',
-                           '19360' : 'sum030',
-                           '19390' : 'sum040',
-                           '19060' : 'sum010',
-                           '19090' : 'sum020',
-                           '19120' : 'sum020',
-                           '19150' : 'sum020',
-                           '19180' : 'sum020',
-                           '19210' : 'sum020',
-                           '19240' : 'sum020',
-                           '19420' : 'sum040',
-                           '19270' : 'sum020',
-                           '19450' : 'sum040',
-                           '19480' : 'sum040',
-                           '19300' : 'sum010',
-                           '19510' : 'sum030',
-                           '19330' : 'sum010',
-                           '19540' : 'sum010',
-                           '19570' : 'sum030'
+def codeTotalColumnMap = ['19000' : ['sum010', 'sum050', 'sum100'],
+                           '19030' : ['sum020', 'sum050', 'sum100'],
+                           '19360' : ['sum030', 'sum050', 'sum100'],
+                           '19390' : ['sum040', 'sum050', 'sum100'],
+                           '19060' : ['sum010', 'sum050', 'sum100'],
+                           '19090' : ['sum020', 'sum050', 'sum100'],
+                           '19120' : ['sum020', 'sum050', 'sum100'],
+                           '19150' : ['sum020', 'sum050', 'sum100'],
+                           '19180' : ['sum020', 'sum050', 'sum100'],
+                           '19210' : ['sum020', 'sum050', 'sum100'],
+                           '19240' : ['sum020', 'sum050', 'sum100'],
+                           '19420' : ['sum040', 'sum050', 'sum100'],
+                           '19270' : ['sum020', 'sum050', 'sum100'],
+                           '19450' : ['sum040', 'sum050', 'sum100'],
+                           '19480' : ['sum040', 'sum050', 'sum100'],
+                           '19300' : ['sum010', 'sum050', 'sum100'],
+                           '19510' : ['sum030', 'sum050', 'sum100'],
+                           '19330' : ['sum010', 'sum050', 'sum100'],
+                           '19540' : ['sum010', 'sum050', 'sum100'],
+                           '19570' : ['sum030', 'sum050', 'sum100']
 ]
 
 void consolidation() {
@@ -486,11 +487,9 @@ void consolidation() {
             }
             // сортируем
             sortRows(newRows, sortColumns)
-            // получаем активную графу
-            def totalColumn = codeTotalColumnMap[code]
-            calcTotalSum(newRows, codeHeaderRow, [totalColumn])
-            // заполняем 050
-            codeHeaderRow.sum050 = codeHeaderRow[totalColumn]
+            // получаем итоговые графы для КНУ
+            def totalColumns = codeTotalColumnMap[code]
+            calcTotalSum(newRows, codeHeaderRow, totalColumns)
             // добавляем строки после строки с кодами
             dataRows.addAll(codeHeaderRow.getIndex(), newRows)
             updateIndexes(dataRows)
@@ -571,12 +570,14 @@ void fillNewRow(def newRow, def formTypeId, def code, def rows) {
             fillRow122(newRow, code, rows, 'sum6')
             break
         case formType123 :
-            fillRowIncome(newRow, rows, 'sum10') // строки уже отфильтрованы по коду из шаблона
+            fillRow123(newRow, rows, 'sum10') // строки уже отфильтрованы по коду из шаблона
             break
         case formType171 :
             fillRow171(newRow, code, rows, 'incomeCorrection')
             break
     }
+    newRow.sign100 = newRow.sign050
+    newRow.sum100 = new BigDecimal("0.2").multiply(newRow.sum050).setScale(0, RoundingMode.HALF_UP)
 }
 
 void fillRow101(def newRow, def code, def rows, def alias) {
@@ -659,6 +660,11 @@ void fillRow122(def newRow, def code, def rows, def alias) {
         newRow.sign050 = newRow.sign030 = 0
         newRow.sum050 = newRow.sum030 = rows.sum { it[alias] } ?: BigDecimal.ZERO
     }
+}
+
+void fillRow123(def newRow, def rows, def alias) {
+    newRow.sign050 = newRow.sign010 = 1
+    newRow.sum050 = newRow.sum010 = rows.sum { it[alias] } ?: BigDecimal.ZERO
 }
 
 void fillRow171(def newRow, def code, def rows, def alias) {

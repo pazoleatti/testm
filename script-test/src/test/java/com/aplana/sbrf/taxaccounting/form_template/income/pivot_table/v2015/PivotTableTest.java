@@ -391,12 +391,14 @@ public class PivotTableTest extends ScriptTestBase {
         row.getCell("sum020").setValue(11L, rowIndex);
         row.getCell("sum030").setValue(12L, rowIndex);
         row.getCell("sum040").setValue(13L, rowIndex);
-        row.getCell("sum050").setValue(14L, rowIndex);
+        row.getCell("sum050").setValue(10L, rowIndex);
+        row.getCell("sum100").setValue(2L, rowIndex);
 
         DataRow codeDataRow = getDataRow(dataRows, "code1_1");
         rowIndex = codeDataRow.getIndex();
         codeDataRow.getCell("sum010").setValue(10L, rowIndex); // правильно 10
         codeDataRow.getCell("sum050").setValue(10L, rowIndex); // правильно 10
+        codeDataRow.getCell("sum100").setValue(2L, rowIndex); // правильно 10
 
         testHelper.execute(FormDataEvent.CALCULATE);
 
@@ -407,6 +409,7 @@ public class PivotTableTest extends ScriptTestBase {
         Assert.assertEquals(BigDecimal.ZERO, totalRow.getCell("sum030").getValue());
         Assert.assertEquals(BigDecimal.ZERO, totalRow.getCell("sum040").getValue());
         Assert.assertEquals(new BigDecimal("10"), totalRow.getCell("sum050").getValue());
+        Assert.assertEquals(new BigDecimal("2"), totalRow.getCell("sum100").getValue());
         checkLogger();
     }
 
@@ -423,6 +426,7 @@ public class PivotTableTest extends ScriptTestBase {
     // консолидация - все источники сразу
     @Test
     public void composeTest() {
+        when(testHelper.getFormDataService().getFormTemplate(TYPE_ID)).thenReturn(testHelper.getFormTemplate());
         Set<Integer> sourceTemplateIds = formTypeIdByTemplateIdMap.keySet();
         List<Relation> sourcesInfo = new ArrayList<Relation>(sourceTemplateIds.size());
         FormDataKind kind = FormDataKind.PRIMARY;
@@ -587,6 +591,8 @@ public class PivotTableTest extends ScriptTestBase {
         Assert.assertEquals(new BigDecimal(testLong.toString()), row.getCell("sum010").getValue());
         Assert.assertEquals(new BigDecimal("1"), row.getCell("sign050").getValue());
         Assert.assertEquals(new BigDecimal(testLong.toString()), row.getCell("sum050").getValue());
+        Assert.assertEquals(new BigDecimal("1"), row.getCell("sign100").getValue());
+        Assert.assertEquals(new BigDecimal("20"), row.getCell("sum100").getValue());
         row = dataRows.get(4);
         Assert.assertEquals("19030", row.getCell("code").getValue());
         Assert.assertEquals(1L, row.getCell("corrType").getValue());
@@ -596,6 +602,8 @@ public class PivotTableTest extends ScriptTestBase {
         Assert.assertEquals(new BigDecimal(testLong.toString()), row.getCell("sum020").getValue());
         Assert.assertEquals(new BigDecimal("1"), row.getCell("sign050").getValue());
         Assert.assertEquals(new BigDecimal(testLong.toString()), row.getCell("sum050").getValue());
+        Assert.assertEquals(new BigDecimal("1"), row.getCell("sign100").getValue());
+        Assert.assertEquals(new BigDecimal("20"), row.getCell("sum100").getValue());
         // РНУ-102
         row = dataRows.get(7);
         Assert.assertEquals("19360", row.getCell("code").getValue());
@@ -606,6 +614,8 @@ public class PivotTableTest extends ScriptTestBase {
         Assert.assertEquals(new BigDecimal(testLong.toString()), row.getCell("sum030").getValue());
         Assert.assertEquals(new BigDecimal("0"), row.getCell("sign050").getValue());
         Assert.assertEquals(new BigDecimal(testLong.toString()), row.getCell("sum050").getValue());
+        Assert.assertEquals(new BigDecimal("0"), row.getCell("sign100").getValue());
+        Assert.assertEquals(new BigDecimal("20"), row.getCell("sum100").getValue());
         row = dataRows.get(9);
         Assert.assertEquals("19390", row.getCell("code").getValue());
         Assert.assertEquals(1L, row.getCell("corrType").getValue());
@@ -615,6 +625,8 @@ public class PivotTableTest extends ScriptTestBase {
         Assert.assertEquals(new BigDecimal(testLong.toString()), row.getCell("sum040").getValue());
         Assert.assertEquals(new BigDecimal("0"), row.getCell("sign050").getValue());
         Assert.assertEquals(new BigDecimal(testLong.toString()), row.getCell("sum050").getValue());
+        Assert.assertEquals(new BigDecimal("0"), row.getCell("sign100").getValue());
+        Assert.assertEquals(new BigDecimal("20"), row.getCell("sum100").getValue());
         // РНУ-107
         row = dataRows.get(12);
         Assert.assertEquals("19060", row.getCell("code").getValue());
@@ -625,5 +637,16 @@ public class PivotTableTest extends ScriptTestBase {
         Assert.assertEquals(new BigDecimal(String.valueOf(2 * testLong)), row.getCell("sum010").getValue());
         Assert.assertEquals(new BigDecimal("1"), row.getCell("sign050").getValue());
         Assert.assertEquals(new BigDecimal(String.valueOf(2 * testLong)), row.getCell("sum050").getValue());
+        Assert.assertEquals(new BigDecimal("1"), row.getCell("sign100").getValue());
+        Assert.assertEquals(new BigDecimal("40"), row.getCell("sum100").getValue());
+        // Итоги
+        row = dataRows.get(dataRows.size() - 1);
+        Assert.assertEquals("Итого", row.getCell("rnu").getValue());
+        Assert.assertEquals(new BigDecimal(String.valueOf(3 * testLong)), row.getCell("sum010").getValue());
+        Assert.assertEquals(new BigDecimal(testLong.toString()), row.getCell("sum020").getValue());
+        Assert.assertEquals(new BigDecimal(testLong.toString()), row.getCell("sum030").getValue());
+        Assert.assertEquals(new BigDecimal(testLong.toString()), row.getCell("sum040").getValue());
+        Assert.assertEquals(new BigDecimal(String.valueOf(6 * testLong)), row.getCell("sum050").getValue());
+        Assert.assertEquals(new BigDecimal("120"), row.getCell("sum100").getValue());
     }
 }
