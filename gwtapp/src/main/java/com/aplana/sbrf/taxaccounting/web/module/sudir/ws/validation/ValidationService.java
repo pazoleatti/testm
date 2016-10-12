@@ -29,10 +29,10 @@ public class ValidationService {
 			if(!FieldNames.containsName(ga.getName()))
 				throw new GenericAccountManagementException_Exception("Передаваемая информация содержит лишние данные " + ga.getName(),
 						errorCreator(SudirErrorCodes.SUDIR_010));
-			
-			if(FieldNames.getByName(ga.getName()) == FieldNames.DEPARTAMENT_ID){
-				if(ga.getValues().getItem().size() != 1)
-					throw new GenericAccountManagementException_Exception("Должен содержаться только один аттрибут.", errorCreator(SudirErrorCodes.SUDIR_009));
+
+			if(FieldNames.getByName(ga.getName()) != FieldNames.ROLE_CODE && FieldNames.getByName(ga.getName()) != FieldNames.NAME){
+				if(ga.getValues().getItem().size() > 1)
+					throw new GenericAccountManagementException_Exception("Передаваемые однозначные атрибуты имеют множество значений.", errorCreator(SudirErrorCodes.SUDIR_009));
 			}
 			
 			if(FieldNames.getByName(ga.getName()) == FieldNames.ROLE_CODE){
