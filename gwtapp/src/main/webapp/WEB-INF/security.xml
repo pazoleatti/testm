@@ -17,8 +17,6 @@
 	<http pattern="/TaxAccountingSupportingData/**" security="none"/>
     <http pattern="/DepartmentManagementService" security="none"/>
     <http pattern="/DepartmentManagementService/**" security="none"/>
-	<http pattern="/AuditManagementService" security="none"/>
-	<http pattern="/AuditManagementService/**" security="none"/>
     <http pattern="/download/timer/ping/" security="none"/>
 
 	<!--
