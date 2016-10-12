@@ -40,14 +40,19 @@ public class DepartmentManagementServicePortType extends SpringBeanAutowiringSup
         TaxDepartmentChanges result = new TaxDepartmentChanges();
         TAUserInfo userInfo = userService.getSystemUserInfo();
         try {
-            departmentWS_manager.sendChanges(new Logger());
-            result.setErrorCode("E0");
-            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userService.getSystemUserInfo(), userService.getSystemUserInfo().getUser().getDepartmentId(),
-                    null, null, null, null, "Успешный обмен данными с вебсервисом АС СУНР.", null);
+            departmentWS_manager.sendChanges(result, new Logger());
+            if (result.getErrorCode() == null || result.getErrorCode().isEmpty()) {
+                result.setErrorCode("E0");
+                auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userService.getSystemUserInfo(), userService.getSystemUserInfo().getUser().getDepartmentId(),
+                        null, null, null, null, "Успешный обмен данными с АС СУНР.", null);
+            } else {
+                auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userService.getSystemUserInfo(), userService.getSystemUserInfo().getUser().getDepartmentId(),
+                        null, null, null, null, result.getErrorText(), null);
+            }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            result.setErrorCode("E3");
-            result.setErrorText("Произошла непредвиденная ошибка: " + e.getMessage());
+            result.setErrorCode("E5");
+            result.setErrorText("Произошла непредвиденная ошибка при отправке сообщения в АС СУНР. Текс ошибки: " + e.getMessage());
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                     null, null, null, null, "Произошли непредвиденные ошибки при обмен данными с вебсервисом АС СУНР: " + e.getLocalizedMessage(), null);
         }
