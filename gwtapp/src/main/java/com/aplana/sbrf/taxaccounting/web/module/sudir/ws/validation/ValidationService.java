@@ -39,6 +39,14 @@ public class ValidationService {
 				if(ga.getValues().getItem().isEmpty())
 					throw new GenericAccountManagementException_Exception("Не заполнены роли пользователя. ", errorCreator(SudirErrorCodes.SUDIR_007));
 			}
+
+			if(FieldNames.getByName(ga.getName()) == FieldNames.DEPARTAMENT_ID){
+				try {
+					int tmp = Integer.parseInt(ga.getValues().getItem().get(0));
+				} catch (NumberFormatException e) {
+					throw new GenericAccountManagementException_Exception("Не удалось выполнить преобразование типов данных. ", errorCreator(SudirErrorCodes.SUDIR_006));
+				}
+			}
 				
 		}
 	}
