@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentChangeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint.TaxDepartmentChanges;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.*;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChange;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -80,11 +81,11 @@ public class DepartmentWS_Manager {
     public void sendChange(DepartmentChangeOperationType operationType, int depId, Logger logger) {
         DepartmentChange departmentChange = createChange(operationType, depId);
         departmentChangeService.addChange(departmentChange);
-        sendChanges(logger);
+        sendChanges(null, logger);
     }
 
     @Transactional
-    public void sendChanges(Logger logger) {
+    public void sendChanges(TaxDepartmentChanges taxDepartmentChanges, Logger logger) {
         TAUserInfo userInfo = userService.getSystemUserInfo();
         try {
             List<DepartmentChange> departmentChanges = departmentChangeService.getAllChanges();
@@ -102,15 +103,23 @@ public class DepartmentWS_Manager {
                     logger.warn(msg);
                     auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                             null, null, null, null, msg, null);
+                    if (taxDepartmentChanges != null) {
+                        taxDepartmentChanges.setErrorCode("E3");
+                        taxDepartmentChanges.setErrorText(String.format("Получен код ошибки \"%s\" при обработке изменении подразделении в АС СУНР.", status.getErrorCode()));
+                    }
                 }
             }
         } catch (Exception e) {
-            LOG.error("Возникли ошибки при отправке изменении подразделении в АС СУНР", e);
+            LOG.error("Произошла непредвиденная ошибка при отправке сообщения в АС СУНР", e);
             String msg;
             if (ExceptionUtils.indexOfThrowable(e, SocketTimeoutException.class) != -1) {
-                msg = String.format("Возникла ошибка при отправке изменении подразделении в АС СУНР. Ошибка: %s", "Время ожидания истекло.");
+                msg = "Возникла ошибка при отправке изменении подразделении в АС СУНР. Текст ошибки: «Время ожидания ответа истекло»";
             } else {
-                msg = String.format("Возникла ошибка при отправке изменении подразделении в АС СУНР. Ошибка: %s", e.getLocalizedMessage());
+                msg = "Произошла непредвиденная ошибка при отправке сообщения в АС СУНР. Текс ошибки: "+ e.getLocalizedMessage();
+            }
+            if (taxDepartmentChanges != null) {
+                taxDepartmentChanges.setErrorCode("E5");
+                taxDepartmentChanges.setErrorText(msg);
             }
             logger.warn(msg);
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
