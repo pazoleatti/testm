@@ -110,10 +110,10 @@ def editableColumns = ['kno', 'kpp', 'kbk', 'taxRate']
 @Field
 def autoFillColumns = allColumns - editableColumns - 'fix'
 
-// Проверяемые на пустые значения атрибуты (графа 1..8, 10, 12, 14, 21, 22, 25..28)
+// Проверяемые на пустые значения атрибуты (графа 1..8, 10, 12, 14, 21, 22, 25 (графа 26, 27, 28 обязательны для некоторых периодов))
 @Field
 def nonEmptyColumns = ['rowNumber', 'department', 'kno', 'kpp', 'kbk', 'oktmo', 'cadastralNumber',
-        'landCategory', 'cadastralCost', 'ownershipDate', 'period', 'taxRate', 'kv', 'q1', 'q2', 'q3', 'year']
+        'landCategory', 'cadastralCost', 'ownershipDate', 'period', 'taxRate', 'kv', 'q1' /*, 'q2', 'q3', 'year'*/]
 
 // графа 3, 4, 6
 @Field
@@ -195,6 +195,16 @@ void logicCheck() {
     def cadastralNumberMap = [:]
     def allRecords705 = (dataRows.size() > 0 ? getAllRecords(705L) : null)
 
+    // для логической проверки 1
+    def nonEmptyColumnsTmp = nonEmptyColumns
+    if (getReportPeriod().order == 2) {
+        nonEmptyColumnsTmp = nonEmptyColumnsTmp + 'q2'
+    } else if (getReportPeriod().order == 3) {
+        nonEmptyColumnsTmp = nonEmptyColumnsTmp + 'q2' + 'q3'
+    } else if (getReportPeriod().order == 4) {
+        nonEmptyColumnsTmp = nonEmptyColumnsTmp + 'q2' + 'q3' + 'year'
+    }
+
     // для логической проверки 13
     def needValue = [:]
     // графа 14, 20, 22..28
@@ -217,12 +227,12 @@ void logicCheck() {
         def rowIndex = row.getIndex()
 
         // 1. Проверка обязательности заполнения граф
-        checkNonEmptyColumns(row, rowIndex, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, rowIndex, nonEmptyColumnsTmp, logger, true)
 
         // 2. Проверка одновременного заполнения данных о налоговой льготе
-        def value11 = (row.benefitCode ? true : false)
-        def value14 = (row.startDate ? true : false)
-        if (value11 ^ value14) {
+        def value15 = (row.benefitCode ? true : false)
+        def value18 = (row.startDate ? true : false)
+        if (value15 ^ value18) {
             logger.error("Строка %s: Данные о налоговой льготе указаны не полностью", rowIndex)
         }
 
@@ -641,7 +651,8 @@ def calc23(def row, def periodOrder = null) {
     if (termUse == null || termUse == 0) {
         return termUse
     }
-    BigDecimal tmp = (getMonthCount(periodOrder) - termUse) / 4
+    def n = getMonthCount(periodOrder)
+    BigDecimal tmp = (n - termUse) / n
     return round(tmp, 4)
 }
 
@@ -708,6 +719,9 @@ def calc27(def row, def showMsg = false) {
 }
 
 def calc25_27(def row, def periodOrder, def showMsg = false) {
+    if (getReportPeriod()?.order < periodOrder) {
+        return null
+    }
     def h = getH(row, periodOrder, showMsg)
     if (h != null) {
         // Графа 25, 26, 27 = ОКРУГЛ(Н/4; 0);
@@ -717,6 +731,9 @@ def calc25_27(def row, def periodOrder, def showMsg = false) {
 }
 
 def calc28(def row, def showMsg = false) {
+    if (getReportPeriod()?.order < 4) {
+        return null
+    }
     if (row.q1 == null || row.q2 == null || row.q3 == null) {
         return null
     }
@@ -746,8 +763,6 @@ def getP(def code15, def record705) {
     } else if (check15 == 3) {
         tmp = record705?.REDUCTION_PERCENT?.value
     } else if (check15 == 4) {
-        tmp = record705?.REDUCTION_RATE?.value
-    } else if (check15 == 5) {
         tmp = record705?.REDUCTION_RATE?.value
     }
     return tmp
@@ -787,7 +802,7 @@ def getH(def row, def periodOrder, def showMsg = false) {
 
     def value24 = (getReportPeriod()?.order != periodOrder ? calc24(row, value22, value23) : row.sum)
     if (value24 == null) {
-        return null
+        value24 = BigDecimal.ZERO
     }
 
     def k = getK(row)
@@ -827,12 +842,15 @@ def getB(def row, def value23, def alias, def showMsg = false) {
     def check5 = getCheckValue15(code15)
     def p = getP(code15, record705)
 
-    BigDecimal tmp = row.cadastralCost * taxPart
+    BigDecimal tmp = null
+    BigDecimal defaultValue = row.cadastralCost * taxPart
     if (check5 == 1 && p != null && value23 != null) {
-        tmp = tmp - p * (1 - value23)
+        tmp = defaultValue - p * (1 - value23)
         tmp = (tmp < 0 ? 0 : tmp)
-    } else if (check5 == 2) {
-        tmp = tmp - tmp * p * (1 - value23)
+    } else if (check5 == 2 && p != null && value23 != null) {
+        tmp = defaultValue - defaultValue * p * (1 - value23)
+    } else if (check5 == 0 || check5 != 1 || check5 != 2) {
+        tmp = defaultValue
     }
 
     // Логическая проверка 16. Проверка корректности значения налоговой базы
@@ -856,7 +874,7 @@ def getCheckValue15(def code15) {
         return checkValue15Map[code15]
     }
     def tmp = 0
-    if (code15 == '3022100' || code15.startsWith('30212')) {
+    if (code15 == '3022100' || code15?.startsWith('30212')) {
         tmp = 1
     } else if (code15 == '3022300') {
         tmp = 2
@@ -864,7 +882,7 @@ def getCheckValue15(def code15) {
         tmp = 3
     } else if (code15 == '3022500') {
         tmp = 4
-    } else if (code15 == '3022400' || code15.startsWith('30211')) {
+    } else if (code15 == '3022400' || code15?.startsWith('30211')) {
         tmp = 5
     }
     checkValue15Map[code15] = tmp

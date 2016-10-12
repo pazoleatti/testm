@@ -517,6 +517,9 @@ def calc27(def row) {
 }
 
 def calc25_27(def row, def periodOrder) {
+    if (getReportPeriod()?.order < periodOrder) {
+        return null
+    }
     def h = getH(row, periodOrder)
     if (h != null) {
         // Графа 25, 26, 27 = ОКРУГЛ(Н/4; 0);
@@ -526,6 +529,9 @@ def calc25_27(def row, def periodOrder) {
 }
 
 def calc28(def row) {
+    if (getReportPeriod()?.order < 4) {
+        return null
+    }
     if (row.q1 == null || row.q2 == null || row.q3 == null) {
         return null
     }
@@ -584,7 +590,7 @@ def getH(def row, def periodOrder) {
 
     def value24 = (getReportPeriod()?.order != periodOrder ? calc24(row, value22, value23) : row.sum)
     if (value24 == null) {
-        return null
+        value24 = BigDecimal.ZERO
     }
 
     def k = getK(row)
@@ -644,7 +650,7 @@ def getCheckValue15(def code15) {
         return checkValue15Map[code15]
     }
     def tmp = 0
-    if (code15 == '3022100' || code15.startsWith('30212')) {
+    if (code15 == '3022100' || code15?.startsWith('30212')) {
         tmp = 1
     } else if (code15 == '3022300') {
         tmp = 2
@@ -652,7 +658,7 @@ def getCheckValue15(def code15) {
         tmp = 3
     } else if (code15 == '3022500') {
         tmp = 4
-    } else if (code15 == '3022400' || code15.startsWith('30211')) {
+    } else if (code15 == '3022400' || code15?.startsWith('30211')) {
         tmp = 5
     }
     checkValue15Map[code15] = tmp
