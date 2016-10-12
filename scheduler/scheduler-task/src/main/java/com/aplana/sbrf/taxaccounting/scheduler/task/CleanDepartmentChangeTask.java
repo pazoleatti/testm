@@ -57,7 +57,7 @@ public class CleanDepartmentChangeTask extends AbstractUserTask {
 
     @Override
     public String getTaskName() {
-        return "Очистка не отправленных изменений подразделений" + PropertyLoader.getVersion();
+        return "Очистка таблицы изменений справочника \"Подразделений\"" + PropertyLoader.getVersion();
     }
 
     @Override
