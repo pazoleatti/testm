@@ -74,6 +74,7 @@ public class DepartmentWS_Manager {
         DepartmentWS departmentWS = departmentWS_Service.getDepartmentWSPort();
 
         Map<String, Object> requestContext = ((BindingProvider) departmentWS).getRequestContext();
+        requestContext.put("timeout", String.valueOf(timeout/1000)); //
         requestContext.put("com.sun.xml.internal.ws.request.timeout", timeout); // Timeout in millis
         return departmentWS;
     }
