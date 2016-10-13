@@ -1,24 +1,32 @@
+
 package com.aplana.sbrf.taxaccounting.web.module.audit.ws;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+
+/**
+ * <p>Java class for anonymous complex type.
+ * 
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ * 
+ * <pre>
+ * &lt;complexType>
+ *   &lt;complexContent>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *     &lt;/restriction>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
+ * </pre>
+ * 
+ * 
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "addAuditLogResponse", propOrder = {
-        "_return"
-})
+@XmlType(name = "")
+@XmlRootElement(name = "addAuditLogResponse")
 public class AddAuditLogResponse {
 
-    @XmlElement(name = "return")
-    protected String _return;
 
-    public String getReturn() {
-        return _return;
-    }
-
-    public void setReturn(String value) {
-        this._return = value;
-    }
 }

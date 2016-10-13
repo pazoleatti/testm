@@ -8,16 +8,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for addAuditLog complex type.
+ * <p>Java class for Role complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="addAuditLog">
+ * &lt;complexType name="Role">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="auditLog" type="{http://taxaccounting.sbrf.aplana.com/AuditManagementService/}AuditLog"/>
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -27,36 +27,36 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "addAuditLog", propOrder = {
-    "auditLog"
+@XmlType(name = "Role", propOrder = {
+    "name"
 })
-public class AddAuditLog {
+public class Role {
 
     @XmlElement(required = true)
-    protected AuditLog auditLog;
+    protected String name;
 
     /**
-     * Gets the value of the auditLog property.
+     * Gets the value of the name property.
      * 
      * @return
      *     possible object is
-     *     {@link AuditLog }
+     *     {@link String }
      *     
      */
-    public AuditLog getAuditLog() {
-        return auditLog;
+    public String getName() {
+        return name;
     }
 
     /**
-     * Sets the value of the auditLog property.
+     * Sets the value of the name property.
      * 
      * @param value
      *     allowed object is
-     *     {@link AuditLog }
+     *     {@link String }
      *     
      */
-    public void setAuditLog(AuditLog value) {
-        this.auditLog = value;
+    public void setName(String value) {
+        this.name = value;
     }
 
 }

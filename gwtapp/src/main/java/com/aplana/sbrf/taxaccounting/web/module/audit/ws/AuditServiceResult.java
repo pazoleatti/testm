@@ -8,17 +8,17 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for AuditLog complex type.
+ * <p>Java class for AuditServiceResult complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="AuditLog">
+ * &lt;complexType name="AuditServiceResult">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="userInfo" type="{http://taxaccounting.sbrf.aplana.com/AuditManagementService/}UserInfo"/>
- *         &lt;element name="note" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="code" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="text" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -28,63 +28,62 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "AuditLog", propOrder = {
-    "userInfo",
-    "note"
+@XmlType(name = "AuditServiceResult", propOrder = {
+    "code",
+    "text"
 })
-public class AuditLog {
+public class AuditServiceResult {
 
     @XmlElement(required = true)
-    protected UserInfo userInfo;
-    @XmlElement(required = true)
-    protected String note;
+    protected String code;
+    protected String text;
 
     /**
-     * Gets the value of the userInfo property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link UserInfo }
-     *     
-     */
-    public UserInfo getUserInfo() {
-        return userInfo;
-    }
-
-    /**
-     * Sets the value of the userInfo property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link UserInfo }
-     *     
-     */
-    public void setUserInfo(UserInfo value) {
-        this.userInfo = value;
-    }
-
-    /**
-     * Gets the value of the note property.
+     * Gets the value of the code property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getNote() {
-        return note;
+    public String getCode() {
+        return code;
     }
 
     /**
-     * Sets the value of the note property.
+     * Sets the value of the code property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setNote(String value) {
-        this.note = value;
+    public void setCode(String value) {
+        this.code = value;
+    }
+
+    /**
+     * Gets the value of the text property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getText() {
+        return text;
+    }
+
+    /**
+     * Sets the value of the text property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setText(String value) {
+        this.text = value;
     }
 
 }
