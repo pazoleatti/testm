@@ -30,7 +30,7 @@ import java.util.*;
  */
 @Service("RefBookOktmoProvider")
 @Transactional
-public class RefBookOktmoProvider implements RefBookDataProvider {
+public class RefBookOktmoProvider extends AbstractRefBookDataProvider {
 
 	// Справочник "ОКТМО"
 	public static final Long OKTMO_REF_BOOK_ID = 96L;

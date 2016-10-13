@@ -21,7 +21,7 @@ import java.util.*;
  */
 @Service("refBookIncome101")
 @Transactional
-public class RefBookIncome101 implements RefBookDataProvider {
+public class RefBookIncome101 extends AbstractRefBookDataProvider {
 
     public static final Long REF_BOOK_ID = RefBookIncome101Dao.REF_BOOK_ID;
 	public static final String TABLE_NAME = RefBookIncome101Dao.TABLE_NAME;

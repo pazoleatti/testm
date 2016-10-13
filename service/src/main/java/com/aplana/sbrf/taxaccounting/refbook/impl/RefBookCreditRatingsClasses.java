@@ -24,7 +24,7 @@ import java.util.*;
 @Service("RefBookCreditRatingsClasses")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
-public class RefBookCreditRatingsClasses implements RefBookDataProvider {
+public class RefBookCreditRatingsClasses extends AbstractRefBookDataProvider {
 
     public static final Long REF_BOOK_ID = 604L;
     public static final Long REF_BOOK_CREDIT_RATINGS_ID = 603L;
@@ -33,7 +33,7 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
     @Autowired
     private RefBookFactory refBookFactory;
 
-    enum RefBookType {
+    private enum RefBookType {
         CREDIT_RATINGS(0),
         CREDIT_CLASSES(1);
 
@@ -45,6 +45,15 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
 
         RefBookType(long deviation) {
             this.deviation = deviation;
+        }
+
+        public static RefBookType getByRefBookId(Long refBookId) {
+            if (REF_BOOK_CREDIT_RATINGS_ID.equals(refBookId)) {
+                return CREDIT_RATINGS;
+            } else if (REF_BOOK_CREDIT_CLASSES_ID.equals(refBookId)) {
+                return CREDIT_CLASSES;
+            }
+            return null;
         }
     }
     private RefBookDataProvider refBookDataProviderCreditRatings;
@@ -66,7 +75,7 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
     private Map<String, RefBookValue> convertCreditRatings(Map<String, RefBookValue> record) {
         Map<String, RefBookValue> newRecord = new HashMap<String, RefBookValue>();
         newRecord.put("NAME", record.get("CREDIT_RATING"));
-        newRecord.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue() * 10L + RefBookType.CREDIT_RATINGS.getDeviation()));
+        newRecord.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, convertId(REF_BOOK_CREDIT_RATINGS_ID, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue())));
         if (record.containsKey(RefBook.RECORD_VERSION_FROM_ALIAS))
             newRecord.put(RefBook.RECORD_VERSION_FROM_ALIAS, record.get(RefBook.RECORD_VERSION_FROM_ALIAS));
         if (record.containsKey(RefBook.RECORD_VERSION_TO_ALIAS))
@@ -77,7 +86,7 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
     private Map<String, RefBookValue> convertCreditClasses(Map<String, RefBookValue> record) {
         Map<String, RefBookValue> newRecord = new HashMap<String, RefBookValue>();
         newRecord.put("NAME", record.get("CREDIT_QUALITY_CLASS"));
-        newRecord.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue() * 10L + RefBookType.CREDIT_CLASSES.getDeviation()));
+        newRecord.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, convertId(REF_BOOK_CREDIT_CLASSES_ID, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue())));
         if (record.containsKey(RefBook.RECORD_VERSION_FROM_ALIAS))
             newRecord.put(RefBook.RECORD_VERSION_FROM_ALIAS, record.get(RefBook.RECORD_VERSION_FROM_ALIAS));
         if (record.containsKey(RefBook.RECORD_VERSION_TO_ALIAS))
@@ -169,10 +178,10 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
         init();
         List<Long> result = new ArrayList<Long>();
         for(Long id: refBookDataProviderCreditRatings.getUniqueRecordIds(version, filter)) {
-            result.add(id * 10L + RefBookType.CREDIT_RATINGS.getDeviation());
+            result.add(convertId(REF_BOOK_CREDIT_RATINGS_ID, id));
         }
         for(Long id: refBookDataProviderCreditClasses.getUniqueRecordIds(version, filter)) {
-            result.add(id * 10L + RefBookType.CREDIT_CLASSES.getDeviation());
+            result.add(convertId(REF_BOOK_CREDIT_CLASSES_ID, id));
         }
         return result;
     }
@@ -229,10 +238,10 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
         init();
         Map<Long, Map<String, RefBookValue>> result = new HashMap<Long, Map<String, RefBookValue>>();
         for(Map.Entry<Long, Map<String, RefBookValue>> entry: refBookDataProviderCreditRatings.getRecordData(recordIds).entrySet()) {
-            result.put(entry.getKey()*10L + RefBookType.CREDIT_RATINGS.getDeviation(), convertCreditRatings(entry.getValue()));
+            result.put(convertId(REF_BOOK_CREDIT_RATINGS_ID, entry.getKey()), convertCreditRatings(entry.getValue()));
         }
         for(Map.Entry<Long, Map<String, RefBookValue>> entry: refBookDataProviderCreditClasses.getRecordData(recordIds).entrySet()) {
-            result.put(entry.getKey()*10L + RefBookType.CREDIT_CLASSES.getDeviation(), convertCreditClasses(entry.getValue()));
+            result.put(convertId(REF_BOOK_CREDIT_CLASSES_ID, entry.getKey()), convertCreditClasses(entry.getValue()));
         }
         return result;
     }
@@ -306,11 +315,11 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
         long type = uniqueRecordId % 10;
         if (RefBookType.CREDIT_RATINGS.getDeviation() == type) {
             result = refBookDataProviderCreditRatings.getRecordVersionInfo(recordIdReal);
-            result.setRecordId(result.getRecordId()*10L + RefBookType.CREDIT_RATINGS.getDeviation());
+            result.setRecordId(convertId(REF_BOOK_CREDIT_RATINGS_ID, result.getRecordId()));
             return result;
         }
         result = refBookDataProviderCreditClasses.getRecordVersionInfo(recordIdReal);
-        result.setRecordId(result.getRecordId() * 10L + RefBookType.CREDIT_CLASSES.getDeviation());
+        result.setRecordId(convertId(REF_BOOK_CREDIT_CLASSES_ID, result.getRecordId()));
         return result;
     }
 
@@ -400,8 +409,8 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
         Long recordIdReal = uniqueRecordId/10;
         long type = uniqueRecordId % 10;
         if (RefBookType.CREDIT_RATINGS.getDeviation() == type)
-            return refBookDataProviderCreditRatings.getRecordId(recordIdReal)*10L + RefBookType.CREDIT_RATINGS.getDeviation();
-        return refBookDataProviderCreditClasses.getRecordId(recordIdReal)*10L + RefBookType.CREDIT_CLASSES.getDeviation();
+            return convertId(REF_BOOK_CREDIT_RATINGS_ID, refBookDataProviderCreditRatings.getRecordId(recordIdReal));
+        return convertId(REF_BOOK_CREDIT_CLASSES_ID, refBookDataProviderCreditClasses.getRecordId(recordIdReal));
     }
 
     @Override
@@ -441,10 +450,10 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
         }
         Map<Long, RefBookValue> result = new HashMap<Long, RefBookValue>();
         for (Map.Entry<Long, RefBookValue> entry: refBookDataProviderCreditRatings.dereferenceValues(getAttribute(refBook.getAttribute(attributeId), RefBookType.CREDIT_RATINGS).getId(), currencyRecordIds).entrySet()){
-            result.put(entry.getKey()*10L + RefBookType.CREDIT_RATINGS.getDeviation(), entry.getValue());
+            result.put(convertId(REF_BOOK_CREDIT_RATINGS_ID, entry.getKey()), entry.getValue());
         }
         for (Map.Entry<Long, RefBookValue> entry: refBookDataProviderCreditClasses.dereferenceValues(getAttribute(refBook.getAttribute(attributeId), RefBookType.CREDIT_CLASSES).getId(), metalsRecordIds).entrySet()){
-            result.put(entry.getKey()*10L + RefBookType.CREDIT_CLASSES.getDeviation(), entry.getValue());
+            result.put(convertId(REF_BOOK_CREDIT_CLASSES_ID, entry.getKey()), entry.getValue());
         }
         return result;
 	}
@@ -452,5 +461,19 @@ public class RefBookCreditRatingsClasses implements RefBookDataProvider {
     @Override
     public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Long> convertIds(Long refBookId, List<Long> ids) {
+        List<Long> converted = new ArrayList<Long>(ids.size());
+        for (Long id : ids) {
+            converted.add(convertId(refBookId, id));
+        }
+        return converted;
+    }
+
+    private Long convertId(Long refBookId, Long id) {
+        RefBookType type = RefBookType.getByRefBookId(refBookId);
+        return type == null ? id : id * 10L + type.getDeviation();
     }
 }

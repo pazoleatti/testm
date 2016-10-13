@@ -38,7 +38,7 @@ import java.util.*;
 @Service("refBookUniversal")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
-public class RefBookUniversal implements RefBookDataProvider {
+public class RefBookUniversal extends AbstractRefBookDataProvider {
 
 	@Autowired
 	private RefBookDao refBookDao;
@@ -845,7 +845,8 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
 
         //Проверка использования в нф
-        List<FormLink> forms = refBookDao.isVersionUsedInForms(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
+        RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
+        List<FormLink> forms = provider.isVersionUsedInForms(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
         for (FormLink form : forms) {
             //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
             if (refBookId == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
@@ -1291,5 +1292,16 @@ public class RefBookUniversal implements RefBookDataProvider {
             return versionEnd;
         }
         return null;
+    }
+
+    @Override
+    public List<Long> usedInRefBookIds() {
+        if (refBookId == 603L || refBookId == 601L) {
+            return Arrays.asList(604L);
+        }
+        if (refBookId == 15L || refBookId == 17L) {
+            return Arrays.asList(542L);
+        }
+        return new ArrayList<Long>();
     }
 }

@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @Service("refBookRefBookEmailConfig")
 @Transactional
-public class RefBookEmailConfigProvider implements RefBookDataProvider {
+public class RefBookEmailConfigProvider extends AbstractRefBookDataProvider {
 
     @Autowired
     RefBookEmailConfigDao dao;

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.FormLink;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -372,4 +373,32 @@ public interface RefBookDataProvider {
      * @return значения уникальных атрибутов
      */
     List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId);
+
+    /**
+     * Проверка использования записи в налоговых формах
+     * @param uniqueRecordIds список уникальных идентификаторов записей справочника
+     * @param versionFrom дата начала периода
+     * @param versionTo дата конца периода
+     * @param restrictPeriod
+     *      false - возвращает ссылки-использования, период которых НЕ пересекается с указанным периодом
+     *      true - возвращает ссылки-использования, период которых пересекается с указанным периодом
+     *      null - возвращает все ссылки-использования на указанную запись справочника, без учета периода
+     * @return результаты проверки. Сообщения об ошибках
+     */
+    List<FormLink> isVersionUsedInForms(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod);
+
+    /**
+     * Получить список идентификаторов составных справочников, данные для которых грузяться из текущего справочника
+     * Например, для 603-го и 601-го справочников это будет 604-й справочник, т.к. данные для 604-го собираются из записей 603-го и 601-го
+     */
+    List<Long> usedInRefBookIds();
+
+    /**
+     * Преобразует идентификаторы записей для составных справочников (604, 542)
+     * Т.к. ссылки на записи составных справочников должны ссылатся на записи простых справочников, нужно понимать
+     * на какой именно из простых справочников указывает ссылка, поэтому в ссылку добавляется допольнительная информация.
+     * @param refBookId
+     * @param ids
+     */
+    List<Long> convertIds(Long refBookId, List<Long> ids);
 }

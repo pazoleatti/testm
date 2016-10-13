@@ -20,7 +20,7 @@ import java.util.Map;
 
 @Service("refBookAsyncConfigProvider")
 @Transactional
-public class RefBookAsyncConfigProvider implements RefBookDataProvider {
+public class RefBookAsyncConfigProvider extends AbstractRefBookDataProvider {
 
     @Autowired
     RefBookAsyncConfigDao dao;

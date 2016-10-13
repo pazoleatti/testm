@@ -38,7 +38,7 @@ import static com.aplana.sbrf.taxaccounting.model.DepartmentType.*;
  */
 @Service("refBookDepartment")
 @Transactional
-public class RefBookDepartment implements RefBookDataProvider {
+public class RefBookDepartment extends AbstractRefBookDataProvider {
 
     private static final String FILTER_BY_DEPARTMENT = "DEPARTMENT_ID = %d";
 
@@ -604,7 +604,8 @@ public class RefBookDepartment implements RefBookDataProvider {
         boolean used = false;
         //Проверка использования в нф
         RefBook refBook = refBookDao.getByAttribute(refBookAttribute.getId());
-        List<FormLink> forms = refBookDao.isVersionUsedInForms(refBook.getId(), Arrays.asList(referenceId), new Date(100, 0, 1), null, null);
+        RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
+        List<FormLink> forms = provider.isVersionUsedInForms(refBook.getId(), Arrays.asList(referenceId), new Date(100, 0, 1), null, null);
         for (FormLink form : forms) {
             logger.error(form.getMsg());
             used = true;

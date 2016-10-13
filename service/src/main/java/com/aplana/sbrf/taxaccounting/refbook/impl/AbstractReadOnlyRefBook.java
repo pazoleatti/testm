@@ -26,7 +26,7 @@ import java.util.*;
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 29.01.14 17:11
  */
-public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
+public abstract class AbstractReadOnlyRefBook extends AbstractRefBookDataProvider {
 
 	/** Код справочника */
     private Long refBookId;
