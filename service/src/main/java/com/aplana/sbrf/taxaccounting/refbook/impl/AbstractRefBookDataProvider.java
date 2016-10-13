@@ -15,10 +15,10 @@ import java.util.*;
 public abstract class AbstractRefBookDataProvider implements RefBookDataProvider{
 
     @Autowired
-    private RefBookDao refBookDao;
+    protected RefBookDao refBookDao;
 
     @Autowired
-    private RefBookFactory refBookFactory;
+    protected RefBookFactory refBookFactory;
 
     @Override
     public List<FormLink> isVersionUsedInForms(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod) {

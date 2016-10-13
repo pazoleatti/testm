@@ -57,6 +57,8 @@ public class RefBookUniversalTest {
         RefBookFactory refBookFactory = mock(RefBookFactoryImpl.class);
         ReflectionTestUtils.setField(provider, "refBookFactory", refBookFactory);
 
+        when(refBookFactory.getDataProvider(anyLong())).thenReturn(provider);
+
         refBookDao = mock(RefBookDao.class);
         ReflectionTestUtils.setField(provider, "refBookDao", refBookDao);
 

@@ -40,8 +40,6 @@ import java.util.*;
 @Transactional
 public class RefBookUniversal extends AbstractRefBookDataProvider {
 
-	@Autowired
-	private RefBookDao refBookDao;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
@@ -54,8 +52,6 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
     private RefBookHelper refBookHelper;
     @Autowired
     private RefBookFactory rbFactory;
-    @Autowired
-    private RefBookFactory refBookFactory;
 
 	protected Long refBookId;
 
@@ -845,8 +841,7 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
         }
 
         //Проверка использования в нф
-        RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
-        List<FormLink> forms = provider.isVersionUsedInForms(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
+        List<FormLink> forms = isVersionUsedInForms(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
         for (FormLink form : forms) {
             //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
             if (refBookId == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
