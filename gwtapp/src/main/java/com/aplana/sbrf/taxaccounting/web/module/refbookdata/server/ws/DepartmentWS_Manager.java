@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.ws.BindingProvider;
+import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
@@ -81,11 +82,11 @@ public class DepartmentWS_Manager {
     public void sendChange(DepartmentChangeOperationType operationType, int depId, Logger logger) {
         DepartmentChange departmentChange = createChange(operationType, depId);
         departmentChangeService.addChange(departmentChange);
-        sendChanges(null, logger);
+        sendChanges(null);
     }
 
     @Transactional
-    public void sendChanges(TaxDepartmentChanges taxDepartmentChanges, Logger logger) {
+    public void sendChanges(TaxDepartmentChanges taxDepartmentChanges) {
         TAUserInfo userInfo = userService.getSystemUserInfo();
         try {
             List<DepartmentChange> departmentChanges = departmentChangeService.getAllChanges();
@@ -95,12 +96,10 @@ public class DepartmentWS_Manager {
                 if (status.getErrorCode().equalsIgnoreCase("E0")) {
                     departmentChangeService.clean();
                     String msg = "Изменения подразделении успешно переданы в АС СУНР";
-                    logger.info(msg);
                     auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                             null, null, null, null, msg, null);
                 } else {
                     String msg = String.format("Изменения подразделении не были отпралено в АС СУНР. Код ошибки: %s, текст ошибки: %s.", status.getErrorCode(), status.getErrorText());
-                    logger.warn(msg);
                     auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                             null, null, null, null, msg, null);
                     if (taxDepartmentChanges != null) {
@@ -114,14 +113,15 @@ public class DepartmentWS_Manager {
             String msg;
             if (ExceptionUtils.indexOfThrowable(e, SocketTimeoutException.class) != -1) {
                 msg = "Возникла ошибка при отправке изменении подразделении в АС СУНР. Текст ошибки: «Время ожидания ответа истекло»";
+            } else if (ExceptionUtils.indexOfThrowable(e, ConnectException.class) != -1) {
+                msg = "Возникла ошибка при отправке изменении подразделении в АС СУНР. Текст ошибки: «Произошла ошибка при попытке соединяения с веб-сервисом»";
             } else {
-                msg = "Произошла непредвиденная ошибка при отправке сообщения в АС СУНР. Текст ошибки: "+ e.getLocalizedMessage();
+                msg = "Произошла непредвиденная ошибка при отправке сообщения в АС СУНР. Текст ошибки: «Неизвестная техническая ошибка»";
             }
             if (taxDepartmentChanges != null) {
                 taxDepartmentChanges.setErrorCode("E5");
                 taxDepartmentChanges.setErrorText(msg);
             }
-            logger.warn(msg);
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                     null, null, null, null, msg, null);
         }
