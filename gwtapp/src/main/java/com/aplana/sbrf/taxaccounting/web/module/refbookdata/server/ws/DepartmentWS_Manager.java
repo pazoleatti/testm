@@ -115,7 +115,7 @@ public class DepartmentWS_Manager {
             if (ExceptionUtils.indexOfThrowable(e, SocketTimeoutException.class) != -1) {
                 msg = "Возникла ошибка при отправке изменении подразделении в АС СУНР. Текст ошибки: «Время ожидания ответа истекло»";
             } else {
-                msg = "Произошла непредвиденная ошибка при отправке сообщения в АС СУНР. Текс ошибки: "+ e.getLocalizedMessage();
+                msg = "Произошла непредвиденная ошибка при отправке сообщения в АС СУНР. Текст ошибки: "+ e.getLocalizedMessage();
             }
             if (taxDepartmentChanges != null) {
                 taxDepartmentChanges.setErrorCode("E5");
