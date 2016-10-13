@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlType;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "AddAuditLog", propOrder = {
+@XmlType(name = "addAuditLog", propOrder = {
         "auditLog"
 })
 public class AddAuditLog {
