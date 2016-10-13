@@ -8,17 +8,17 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for AuditLog complex type.
+ * <p>Java class for UserInfo complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="AuditLog">
+ * &lt;complexType name="UserInfo">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="userInfo" type="{http://taxaccounting.sbrf.aplana.com/AuditManagementService/}UserInfo"/>
- *         &lt;element name="note" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="user" type="{http://taxaccounting.sbrf.aplana.com/AuditManagementService/}User"/>
+ *         &lt;element name="ip" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -28,63 +28,63 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "AuditLog", propOrder = {
-    "userInfo",
-    "note"
+@XmlType(name = "UserInfo", propOrder = {
+    "user",
+    "ip"
 })
-public class AuditLog {
+public class UserInfo {
 
     @XmlElement(required = true)
-    protected UserInfo userInfo;
+    protected User user;
     @XmlElement(required = true)
-    protected String note;
+    protected String ip;
 
     /**
-     * Gets the value of the userInfo property.
+     * Gets the value of the user property.
      * 
      * @return
      *     possible object is
-     *     {@link UserInfo }
+     *     {@link User }
      *     
      */
-    public UserInfo getUserInfo() {
-        return userInfo;
+    public User getUser() {
+        return user;
     }
 
     /**
-     * Sets the value of the userInfo property.
+     * Sets the value of the user property.
      * 
      * @param value
      *     allowed object is
-     *     {@link UserInfo }
+     *     {@link User }
      *     
      */
-    public void setUserInfo(UserInfo value) {
-        this.userInfo = value;
+    public void setUser(User value) {
+        this.user = value;
     }
 
     /**
-     * Gets the value of the note property.
+     * Gets the value of the ip property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getNote() {
-        return note;
+    public String getIp() {
+        return ip;
     }
 
     /**
-     * Sets the value of the note property.
+     * Sets the value of the ip property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setNote(String value) {
-        this.note = value;
+    public void setIp(String value) {
+        this.ip = value;
     }
 
 }

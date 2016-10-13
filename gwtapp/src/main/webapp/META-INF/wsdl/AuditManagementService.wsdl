@@ -1,44 +1,80 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <wsdl:definitions name="AuditManagementService" targetNamespace="http://taxaccounting.sbrf.aplana.com/AuditManagementService/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://taxaccounting.sbrf.aplana.com/AuditManagementService/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <wsdl:types>
-        <xsd:schema targetNamespace="http://taxaccounting.sbrf.aplana.com/AuditManagementService/">
-            <xsd:element name="addAuditLog" type="tns:addAuditLog"/>
-            <xsd:element name="addAuditLogResponse" type="tns:addAuditLogResponse"/>
+        <schema targetNamespace="http://taxaccounting.sbrf.aplana.com/AuditManagementService/" xmlns="http://www.w3.org/2001/XMLSchema">
+            <element name="addAuditLog" type="tns:addAuditLog"/>
+            <element name="addAuditLogResponse">
+                <complexType/>
+            </element>
+            <element name="fault" type="tns:AuditManagementServiceException"/>
 
-            <xsd:complexType name="addAuditLog">
-                <xsd:sequence>
-                    <xsd:element name="auditLog" type="tns:AuditLog" minOccurs="1" maxOccurs="unbounded"/>
-                </xsd:sequence>
-            </xsd:complexType>
+            <complexType name="addAuditLog">
+                <sequence>
+                    <element name="auditLog" type="tns:AuditLog" minOccurs="1"/>
+                </sequence>
+            </complexType>
 
-            <xsd:complexType name="AuditLog">
-                <xsd:sequence>
-                    <xsd:element name="login" type="xsd:string"/>
-                    <xsd:element name="name" type="xsd:string"/>
-                    <xsd:element name="note" type="xsd:string"/>
-                </xsd:sequence>
-            </xsd:complexType>
+            <complexType name="AuditLog">
+                <sequence>
+                    <element name="userInfo" type="tns:UserInfo"/>
+                    <element name="note" type="xsd:string"/>
+                </sequence>
+            </complexType>
 
-            <xsd:complexType name="addAuditLogResponse">
-                <xsd:sequence>
-                    <xsd:element name="return" type="xsd:string" minOccurs="0"/>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:schema>
+            <complexType name="UserInfo">
+                <sequence>
+                    <element name="user" type="tns:User"/>
+                    <element name="ip" type="xsd:string"/>
+                </sequence>
+            </complexType>
+
+            <complexType name="User">
+                <sequence>
+                    <element name="login" type="xsd:string"/>
+                    <element name="name" type="xsd:string"/>
+                    <element name="role" type="tns:Role" maxOccurs="unbounded"/>
+                    <element name="departmentId" type="xsd:int"/>
+                </sequence>
+            </complexType>
+
+            <complexType name="Role">
+                <sequence>
+                    <element name="name" type="xsd:string"/>
+                </sequence>
+            </complexType>
+
+            <complexType name="AuditManagementServiceException">
+                <sequence>
+                    <element name="code" nillable="true" type="xsd:string"/>
+                    <element name="details" nillable="true" type="xsd:string"/>
+                </sequence>
+            </complexType>
+
+            <complexType name="AuditServiceResult">
+                <sequence>
+                    <element name="code" type="xsd:string"/>
+                    <element name="text" type="xsd:string" minOccurs="0"/>
+                </sequence>
+            </complexType>
+
+        </schema>
     </wsdl:types>
 
     <wsdl:message name="addAuditLog">
         <wsdl:part name="parameters" element="tns:addAuditLog"/>
     </wsdl:message>
-
     <wsdl:message name="addAuditLogResponse">
         <wsdl:part name="parameters" element="tns:addAuditLogResponse"/>
+    </wsdl:message>
+    <wsdl:message name="AuditManagementServiceException">
+        <wsdl:part element="tns:fault" name="fault"/>
     </wsdl:message>
 
     <wsdl:portType name="AuditManagementService">
         <wsdl:operation name="addAuditLog">
             <wsdl:input message="tns:addAuditLog"/>
             <wsdl:output message="tns:addAuditLogResponse"/>
+            <wsdl:fault message="tns:AuditManagementServiceException" name="AuditManagementServiceException"/>
         </wsdl:operation>
     </wsdl:portType>
 
