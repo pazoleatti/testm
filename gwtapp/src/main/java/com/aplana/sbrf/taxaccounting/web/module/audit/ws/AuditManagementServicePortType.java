@@ -34,15 +34,46 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
             Integer departmentId = null;
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, departmentId, null, null, null, null, auditLog.getNote(), null, null);
         } catch (Exception e) {
-            AuditManagementServiceException fault = new AuditManagementServiceException();
-            fault.setCode("AUDIT-000");
-            fault.setDetails("Internal error");
-            throw new AuditManagementServiceException_Exception(e.toString(), fault);
+            throwException("AUDIT-000", "Internal error", e.getMessage());
         }
     }
 
-    private void validate(AuditLog auditLog) {
+    private void validate(AuditLog auditLog) throws AuditManagementServiceException_Exception {
+        if (auditLog == null) {
+            throwException("AUDIT-000", "Internal error", "Не удалось получить данные для логирования");
+        } else {
+            if (auditLog.getUserInfo() == null) {
+                throwException("AUDIT-001", "Invalid data format", "Не удалось получить информацию о пользователе");
+            } else {
+                if (auditLog.getUserInfo().getUser() == null) {
+                    throwException("AUDIT-001", "Invalid data format", "Не удалось получить информацию о пользователе");
+                } else {
+                    User user = auditLog.getUserInfo().getUser();
+                    if (user.getLogin() == null || user.getLogin().isEmpty()) {
+                        throwException("AUDIT-001", "Invalid data format", "Не удалось получить логин пользователя");
+                    }
+                    /*if (user.getName() == null || user.getName().isEmpty()) {
+                        throwException("AUDIT-001", "Invalid data format", "Не удалось получить имя пользователя");
+                    }*/
+                    if (user.getRole() == null || user.getRole().isEmpty()) {
+                        throwException("AUDIT-001", "Invalid data format", "Не удалось получить роли пользователе");
+                    }
+                }
+                /*if (auditLog.getUserInfo().getIp() == null) {
+                    throwException("AUDIT-001", "Invalid data format", "Не удалось получить ip пользователя");
+                }*/
+            }
+            if (auditLog.getNote() == null) {
+                throwException("AUDIT-001", "Invalid data format", "Не удалось получить текст события");
+            }
+        }
+    }
 
+    private void throwException(String code, String details, String message) throws AuditManagementServiceException_Exception {
+        AuditManagementServiceException fault = new AuditManagementServiceException();
+        fault.setCode(code);
+        fault.setDetails(details);
+        throw new AuditManagementServiceException_Exception(message, fault);
     }
 
     private TAUserInfo assembleUserInfo(AuditLog auditLog) {
