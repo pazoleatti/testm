@@ -42,7 +42,7 @@ public class DepartmentManagementServicePortType extends SpringBeanAutowiringSup
         TaxDepartmentChanges result = new TaxDepartmentChanges();
         TAUserInfo userInfo = userService.getSystemUserInfo();
         try {
-            departmentWS_manager.sendChanges(result, new Logger());
+            departmentWS_manager.sendChanges(result);
             if (result.getErrorCode() == null || result.getErrorCode().isEmpty()) {
                 result.setErrorCode("E0");
                 auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userService.getSystemUserInfo(), userService.getSystemUserInfo().getUser().getDepartmentId(),
@@ -54,9 +54,9 @@ public class DepartmentManagementServicePortType extends SpringBeanAutowiringSup
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             result.setErrorCode("E5");
-            result.setErrorText("Произошла непредвиденная ошибка при отправке сообщения в АС СУНР. Текст ошибки: " + e.getMessage());
+            result.setErrorText("Произошла непредвиденная ошибка при отправке сообщения в АС СУНР. Текст ошибки: «Неизвестная техническая ошибка»");
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
-                    null, null, null, null, REQUEST_ALL_CHANGES_MSG + "Произошли непредвиденные ошибки при обмен данными с вебсервисом АС СУНР: " + e.getLocalizedMessage(), null);
+                    null, null, null, null, REQUEST_ALL_CHANGES_MSG + "Произошли непредвиденные ошибки при обмен данными с вебсервисом АС СУНР: «Неизвестная техническая ошибка»", null);
         }
         return result;
     }
