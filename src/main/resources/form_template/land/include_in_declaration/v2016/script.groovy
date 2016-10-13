@@ -627,7 +627,7 @@ def getB(def row, def value23) {
     BigDecimal tmp = null
     BigDecimal defaultValue = row.cadastralCost * taxPart
     if (check5 == 1 && p != null && value23 != null) {
-        tmp = defaultValue - p * (1 - value23)
+        tmp = defaultValue - p
         tmp = (tmp < 0 ? 0 : tmp)
     } else if (check5 == 2 && p != null && value23 != null) {
         tmp = defaultValue - defaultValue * p * (1 - value23)

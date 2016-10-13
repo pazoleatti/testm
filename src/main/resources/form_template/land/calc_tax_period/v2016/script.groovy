@@ -403,9 +403,9 @@ void logicCheck() {
                     def findSubTotal = dataRows.find { it.getAlias()?.startsWith('total2') && it.kno == row.kno && it.kpp == row.kpp && it.oktmo == row.oktmo }
                     subTotalMap[key2] = (findSubTotal != null)
                     if (findSubTotal == null) {
-                        def subMsg = getColumnName(row, 'kno') + '=' + row.kno + ', ' +
-                                getColumnName(row, 'kpp') + '=' + row.kpp + ', ' +
-                                getColumnName(row, 'oktmo') + '=' + getRefBookValue(96L, row.oktmo)?.CODE?.value
+                        def subMsg = getColumnName(row, 'kno') + '=' + (row.kno ?: 'не задан') + ', ' +
+                                getColumnName(row, 'kpp') + '=' + (row.kpp ?: 'не задан') + ', ' +
+                                getColumnName(row, 'oktmo') + '=' + (getRefBookValue(96L, row.oktmo)?.CODE?.value ?: 'не задан')
                         logger.error(GROUP_WRONG_ITOG, subMsg)
                     }
                 }
@@ -416,8 +416,8 @@ void logicCheck() {
                     def findSubTotal = dataRows.find { it.getAlias()?.startsWith('total1') && it.kno == row.kno && it.kpp == row.kpp }
                     subTotalMap[key1] = (findSubTotal != null)
                     if (findSubTotal == null) {
-                        def subMsg = getColumnName(row, 'kno') + '=' + row.kno + ', ' +
-                                getColumnName(row, 'kpp') + '=' + row.kpp
+                        def subMsg = getColumnName(row, 'kno') + '=' + (row.kno ?: 'не задан') + ', ' +
+                                getColumnName(row, 'kpp') + '=' + (row.kpp ?: 'не задан')
                         logger.error(GROUP_WRONG_ITOG, subMsg)
                     }
                 }
@@ -692,7 +692,7 @@ def calc24(def row, def value22, def value23, def showMsg = false) {
             if (showMsg) {
                 // Логическая проверка 15. Проверка корректности значения пониженной ставки
                 def columnName21 = getColumnName(row, 'taxRate')
-                logger.error("Строка %s: Значение поля «Пониженная ставка, %» справочника «Параметры налоговых льгот земельного налога» должно быть меньше значения графы «%s»",
+                logger.error("Строка %s: Значение поля «Пониженная ставка, %%» справочника «Параметры налоговых льгот земельного налога» должно быть меньше значения графы «%s»",
                         row.getIndex(), columnName21)
             }
         } else {
@@ -845,7 +845,7 @@ def getB(def row, def value23, def alias, def showMsg = false) {
     BigDecimal tmp = null
     BigDecimal defaultValue = row.cadastralCost * taxPart
     if (check5 == 1 && p != null && value23 != null) {
-        tmp = defaultValue - p * (1 - value23)
+        tmp = defaultValue - p
         tmp = (tmp < 0 ? 0 : tmp)
     } else if (check5 == 2 && p != null && value23 != null) {
         tmp = defaultValue - defaultValue * p * (1 - value23)
@@ -1429,13 +1429,6 @@ void setDefaultStyles(def row) {
     }
 }
 
-/** Установить стиль для итоговых строк. */
-void setTotalStyle(def row) {
-    allColumns.each {
-        row.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-}
-
 /**
  * Получить запись справочника 705 "Параметры налоговых льгот земельного налога".
  *
@@ -1587,7 +1580,9 @@ def getActualRowsMap(def rows) {
 def getTotalRow() {
     def newRow = createRow()
     newRow.getCell("fix").colSpan = 3
-    setTotalStyle(newRow)
+    allColumns.each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
     for (def alias : totalColumns) {
         newRow[alias] = BigDecimal.ZERO
     }
