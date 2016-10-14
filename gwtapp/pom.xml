@@ -97,6 +97,13 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>3.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.ibm.ws</groupId>
+            <artifactId>ws-runtime</artifactId>
+            <version>7.0.0.11</version>
+            <scope>compile</scope>
+        </dependency>
+
 
         <!-- Зависимость на gwt-dev нужна для переопределения генератора прокси для удаленных сервисов. -->
 		<dependency>

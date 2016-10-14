@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint.TaxDepartmentChanges;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.*;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChange;
+import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,8 +75,11 @@ public class DepartmentWS_Manager {
         DepartmentWS departmentWS = departmentWS_Service.getDepartmentWSPort();
 
         Map<String, Object> requestContext = ((BindingProvider) departmentWS).getRequestContext();
-        requestContext.put("timeout", String.valueOf(timeout/1000)); //
-        requestContext.put("com.sun.xml.internal.ws.request.timeout", timeout); // Timeout in millis
+        if (PropertyLoader.isProductionMode()) {
+            requestContext.put(com.ibm.wsspi.webservices.Constants.RESPONSE_TIMEOUT_PROPERTY, String.valueOf(timeout)); // тайм-аут в сек
+        } else {
+            requestContext.put("com.sun.xml.internal.ws.request.timeout", timeout*1000); // тайм-аут в мсек
+        }
         return departmentWS;
     }
 

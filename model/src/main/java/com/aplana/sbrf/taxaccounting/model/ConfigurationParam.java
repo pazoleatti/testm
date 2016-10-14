@@ -26,7 +26,7 @@ public enum ConfigurationParam {
     FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", ConfigurationParamGroup.FORM, true, true, 2),
     /** СУНР */
     ADDRESS_SUNR("Адрес АС СУНР для веб-сервисов", ConfigurationParamGroup.COMMON, true, false, 0),
-    TIMEOUT_SUNR("Время ожидания ответа от АС СУНР, мсек", ConfigurationParamGroup.COMMON, true, false, 0);
+    TIMEOUT_SUNR("Время ожидания ответа от АС СУНР, сек", ConfigurationParamGroup.COMMON, true, false, 0);
 
     private String caption;
     private ConfigurationParamGroup group;
