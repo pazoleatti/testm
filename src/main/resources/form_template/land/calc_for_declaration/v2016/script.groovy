@@ -13,14 +13,6 @@ import groovy.transform.Field
  *
  * formTemplateId = 918
  * formTypeId = 918
- *
- * TODO:
- *      - тесты
- *
- *      - группировка
- *      - сортировака
- *      - расчеты итогов
- *
  */
 
 // графа    - fix
@@ -79,7 +71,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE: // Консолидация
         consolidation()
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            calcItog()
+            calc()
             formDataService.saveCachedDataRows(formData, logger)
         }
         break
@@ -96,9 +88,6 @@ def recordCache = [:]
 
 @Field
 def refBookCache = [:]
-
-@Field
-def compareStyleName = 'Корректировка-удалено'
 
 @Field
 def allColumns = ['fix', 'rowNumber', 'department', 'kno', 'kpp', 'kbk', 'oktmo', 'cadastralNumber',
@@ -122,6 +111,10 @@ def nonEmptyColumns = ['department', 'kno', 'kpp', 'kbk', 'oktmo', 'cadastralNum
 // графа 3, 4, 6
 @Field
 def groupColumns = ['kno', 'kpp', 'oktmo']
+
+// Атрибуты итоговых строк для которых вычисляются суммы (графа 25..28)
+@Field
+def totalColumns = ['q1', 'q2', 'q3', 'year']
 
 // Дата начала отчетного периода
 @Field
@@ -153,14 +146,6 @@ def getReportPeriod() {
         reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     }
     return reportPeriod
-}
-
-// Получение провайдера с использованием кеширования
-def getProvider(def long providerId) {
-    if (!providerCache.containsKey(providerId)) {
-        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
-    }
-    return providerCache.get(providerId)
 }
 
 //// Обертки методов
@@ -200,25 +185,138 @@ void logicCheck() {
             continue
         }
         def rowIndex = row.getIndex()
+
         // 1. Проверка обязательности заполнения граф
         checkNonEmptyColumns(row, rowIndex, nonEmptyColumns, logger, true)
     }
-}
 
-void calcItog(){
-    // TODO
+    // 2. Проверка корректности значений итоговых строк
+    def lastSimpleRow = null
+    def subTotalMap = [:]
+    for (def row : dataRows) {
+        if (!row.getAlias()) {
+            lastSimpleRow = row
+
+            // подитог кно/кпп/октмо - проверка отсутствия подитога
+            def key2 = row.kno + '#' + row.kpp + '#' + row.oktmo
+            if (subTotalMap[key2] == null) {
+                def findSubTotal = dataRows.find { it.getAlias()?.startsWith('total2') && it.kno == row.kno && it.kpp == row.kpp && it.oktmo == row.oktmo }
+                subTotalMap[key2] = (findSubTotal != null)
+                if (findSubTotal == null) {
+                    def subMsg = getColumnName(row, 'kno') + '=' + (row.kno ?: 'не задан') + ', ' +
+                            getColumnName(row, 'kpp') + '=' + (row.kpp ?: 'не задан') + ', ' +
+                            getColumnName(row, 'oktmo') + '=' + (getRefBookValue(96L, row.oktmo)?.CODE?.value ?: 'не задан')
+                    logger.error(GROUP_WRONG_ITOG, subMsg)
+                }
+            }
+
+            // подитог кно/кпп - проверка отсутствия подитога
+            def key1 = row.kno + '#' + row.kpp
+            if (subTotalMap[key1] == null) {
+                def findSubTotal = dataRows.find { it.getAlias()?.startsWith('total1') && it.kno == row.kno && it.kpp == row.kpp }
+                subTotalMap[key1] = (findSubTotal != null)
+                if (findSubTotal == null) {
+                    def subMsg = getColumnName(row, 'kno') + '=' + (row.kno ?: 'не задан') + ', ' +
+                            getColumnName(row, 'kpp') + '=' + (row.kpp ?: 'не задан')
+                    logger.error(GROUP_WRONG_ITOG, subMsg)
+                }
+            }
+            continue
+        }
+
+        if (row.getAlias() != null && row.getAlias().indexOf('total2') != -1) {
+            // подитог кно/кпп/октмо
+            // принадлежность подитога к последей простой строке
+            if (row.kno != lastSimpleRow.kno || row.kpp != lastSimpleRow.kpp || row.oktmo != lastSimpleRow.oktmo) {
+                logger.error(GROUP_WRONG_ITOG_ROW, row.getIndex())
+                continue
+            }
+            // проверка сумм
+            def srow = calcSubTotalRow2(dataRows.indexOf(row) - 1, dataRows, row.kno, row.kpp, row.oktmo)
+            checkTotalRow(row, srow)
+        } else if (row.getAlias() != null && row.getAlias().indexOf('total1') != -1) {
+            // подитог кно/кпп
+            // принадлежность подитога к последей простой строке
+            if (row.kno != lastSimpleRow.kno || row.kpp != lastSimpleRow.kpp) {
+                logger.error(GROUP_WRONG_ITOG_ROW, row.getIndex())
+                continue
+            }
+            // проверка сумм
+            def srow = calcSubTotalRow1(dataRows.indexOf(row) - 1, dataRows, row.kno, row.kpp)
+            checkTotalRow(row, srow)
+        }
+        lastSubTotalRow = row
+    }
+
+    // строка "ВСЕГО"
+    def totalRow = dataRows.find { 'total'.equals(it.getAlias()) }
+    if (totalRow != null) {
+        def tmpTotalRow = calcTotalRow(dataRows)
+        checkTotalRow(totalRow, tmpTotalRow)
+    } else {
+        logger.error("Итоговые значения рассчитаны неверно!")
+    }
 }
 
 // Сортировка групп и строк
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def columns = groupColumns + (allColumns - groupColumns)
-    // массовое разыменование справочных и зависимых значений
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns())
-    // TODO
-    sortRows(dataRows, columns)
+
+    def subTotalRow1Map = [:] // подитог 1ого уровня -> мапа с подитогами 2ого уровня
+    def subTotalRow2Map = [:] // подитог 2ого уровня -> строки подгруппы
+    def simpleRows = []
+    def total = null
+
+    // разложить группы по мапам
+    dataRows.each{ row ->
+        if (row.getAlias() == null) {
+            simpleRows.add(row)
+        } else if (row.getAlias().contains('total2')) {
+            subTotalRow2Map.put(row, simpleRows)
+            simpleRows = []
+        } else if (row.getAlias().contains('total1')) {
+            subTotalRow1Map.put(row, subTotalRow2Map)
+            subTotalRow2Map = [:]
+        } else {
+            total = row
+        }
+    }
+    dataRows.clear()
+
+    // отсортировать и добавить все строки
+    def tmpSorted1Rows = subTotalRow1Map.keySet().toList()?.sort { getSortValue(it) }
+    tmpSorted1Rows.each { keyRow1 ->
+        def subMap = subTotalRow1Map[keyRow1]
+        def tmpSorted2Rows = subMap.keySet().toList()?.sort { getSortValue(it) }
+        tmpSorted2Rows.each { keyRow2 ->
+            def dataRowsList = subMap[keyRow2]
+            sortAddRows(dataRowsList, dataRows)
+            dataRows.add(keyRow2)
+        }
+        dataRows.add(keyRow1)
+    }
+    // если остались данные вне иерархии, то добавить их перед итогом
+    sortAddRows(simpleRows, dataRows)
+    dataRows.add(total)
+
     dataRowHelper.saveSort()
+}
+
+// значение группируемых столбцов для сортировки подитоговых строк
+def getSortValue(def row) {
+    return row.kno + '#' + row.kpp + '#' + (row.oktmo ? getRefBookValue(96L, row.oktmo) : '')
+}
+
+void sortAddRows(def addRows, def dataRows) {
+    if (!addRows.isEmpty()) {
+        def firstRow = addRows[0]
+        // Массовое разыменовывание граф НФ
+        def columnNameList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
+        refBookService.dataRowsDereference(logger, addRows, columnNameList)
+        sortRowsSimple(addRows)
+        dataRows.addAll(addRows)
+    }
 }
 
 def getNewRow() {
@@ -268,7 +366,10 @@ void consolidation() {
         }
         FormData sourceFormData = formDataService.get(relation.formDataId, null)
         def sourceDataRows = formDataService.getDataRowHelper(sourceFormData).allSaved
-        sourceDataRows.each { sourceRow ->
+        for (def sourceRow : sourceDataRows) {
+            if (sourceRow.getAlias()) {
+                continue
+            }
             if ((relation.formType.id == sourceTypeId_916 && kppList.contains(sourceRow.kpp)) || relation.formType.id == sourceTypeId_917) {
                 def newRow = getNewRow()
                 consolidationColumns.each { alias ->
@@ -286,7 +387,8 @@ void consolidation() {
 // Получить параметры подразделения
 def getKPPList() {
     def departmentId = formData.departmentId
-    def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_LAND).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+    def provider = formDataService.getRefBookProvider(refBookFactory, RefBook.WithTable.LAND.tableRefBookId, providerCache)
+    def departmentParamList = provider.getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
     if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
     }
@@ -298,4 +400,164 @@ def getKPPList() {
         }
     }
     return kppList
+}
+
+void calc() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+
+    // отсортировать/группировать
+    sortRows(dataRows, groupColumns)
+
+    // добавить подитоги
+    addAllStatic(dataRows)
+
+    // добавить строку "всего"
+    dataRows.add(calcTotalRow(dataRows))
+    updateIndexes(dataRows)
+}
+
+/** Получить итоговую строку. */
+def getTotalRow() {
+    def newRow = formData.createDataRow()
+    newRow.getCell("fix").colSpan = 3
+    allColumns.each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    for (def alias : totalColumns) {
+        newRow[alias] = BigDecimal.ZERO
+    }
+    return newRow
+}
+
+/** Получить итоговую строку с суммами. */
+def calcTotalRow(def dataRows) {
+    def newRow = getTotalRow()
+    newRow.setAlias('total')
+    newRow.fix = 'ВСЕГО'
+    calcTotalSum(dataRows, newRow, totalColumns)
+    return newRow
+}
+
+/**
+ * Добавить промежуточные итоги.
+ * По графе 3, 4 (КНО/КПП) - 1 уровень группировки, а внутри этой группы по графе 6 (октмо) - 2 уровнь группировки.
+ */
+void addAllStatic(def dataRows) {
+    for (int i = 0; i < dataRows.size(); i++) {
+        def row = getRow(dataRows, i)
+        def nextRow = getRow(dataRows, i + 1)
+        int j = 0
+
+        // 2 уровнь группировки
+        def value2 = row?.oktmo
+        def nextValue2 = nextRow?.oktmo
+        if (row.getAlias() == null && nextRow == null || value2 != nextValue2) {
+            def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno, row.kpp, row.oktmo)
+            j++
+            dataRows.add(i + j, subTotalRow2)
+        }
+
+        // 1 уровнь группировки
+        def value1 = getGroupL1Key(row)
+        def nextValue1 = getGroupL1Key(nextRow)
+        if (row.getAlias() == null && nextRow == null || value1 != nextValue1) {
+            // если все значения пустые, то подитог по 2 уровню группировки не добавится,
+            // поэтому перед добавлением подитога по 1 уровню группировки, нужно добавить подитог с пустыми значениями по 2 уровню
+            if (j == 0) {
+                def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno, row.kpp, row.oktmo)
+                j++
+                dataRows.add(i + j, subTotalRow2)
+            }
+            def subTotalRow1 = calcSubTotalRow1(i, dataRows, row.kno, row.kpp)
+            j++
+            dataRows.add(i + j, subTotalRow1)
+        }
+        i += j  // Обязательно чтобы избежать зацикливания в простановке
+    }
+}
+
+/** Расчет итога 1 уровня группировки - по графе 3, 4 КНО/КПП. */
+def calcSubTotalRow1(int i, def dataRows, def kno, def kpp) {
+    def newRow = getTotalRow()
+    newRow.setAlias('total1#' + i)
+    newRow.fix = 'ИТОГО ПО КНО/КПП'
+
+    // значения группы
+    newRow.kno = kno
+    newRow.kpp = kpp
+
+    for (int j = i; j >= 0; j--) {
+        def srow = getRow(dataRows, j)
+        if (srow.getAlias()) {
+            continue
+        }
+        if (newRow.kno != srow.kno || newRow.kpp != srow.kpp) {
+            break
+        }
+        for (def alias : totalColumns) {
+            if (srow[alias] != null) {
+                newRow[alias] = newRow[alias] + srow[alias]
+            }
+        }
+    }
+    return newRow
+}
+
+/** Расчет итога 2 уровня группировки - по графе 6 ОКТМО (группировка внутри группы по КНО/КПП). */
+def calcSubTotalRow2(int i, def dataRows, def kno, def kpp, def oktmo) {
+    def newRow = getTotalRow()
+    newRow.setAlias("total2#" + i)
+    newRow.fix = 'ИТОГО'
+
+    // значения группы
+    newRow.kno = kno
+    newRow.kpp = kpp
+    newRow.oktmo = oktmo
+
+    // идем от текущей позиции вверх и ищем нужные строки
+    for (int j = i; j >= 0; j--) {
+        def srow = getRow(dataRows, j)
+        if (srow.getAlias() != null || srow.oktmo != newRow.oktmo) {
+            break
+        }
+        for (def alias : totalColumns) {
+            if (srow[alias] != null) {
+                newRow[alias] = newRow[alias] + srow[alias]
+            }
+        }
+    }
+    return newRow
+}
+
+/** Получение строки по номеру. */
+def getRow(def dataRows, int i) {
+    if (i < dataRows.size() && i >= 0) {
+        return dataRows.get(i)
+    } else {
+        return null
+    }
+}
+
+// Получить ключ группировки 1ого уровня (по графе 3, 4)
+def getGroupL1Key(def row) {
+    return row?.kno + '#' + row?.kpp
+}
+
+/**
+ * Проверить итоги/подитоги. Для логической проверки N.
+ *
+ * @param row итоговая строка нф
+ * @param tmpRow посчитанная итоговая строка
+ */
+void checkTotalRow(def row, def tmpRow) {
+    def errorColumns = []
+    for (def column : totalColumns) {
+        if (row[column] != tmpRow[column]) {
+            errorColumns.add(getColumnName(row, column))
+        }
+    }
+    if (!errorColumns.isEmpty()) {
+        def columnNames = errorColumns.join('», «')
+        logger.error("Строка %s: Графы «%s» заполнены неверно. Выполните расчет формы", row.getIndex(), columnNames)
+    }
 }
