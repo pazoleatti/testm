@@ -76,7 +76,7 @@ public class DepartmentWS_Manager {
 
         Map<String, Object> requestContext = ((BindingProvider) departmentWS).getRequestContext();
         if (PropertyLoader.isProductionMode()) {
-            requestContext.put(com.ibm.wsspi.webservices.Constants.RESPONSE_TIMEOUT_PROPERTY, String.valueOf(timeout)); // тайм-аут в сек
+            requestContext.put("timeout", String.valueOf(timeout)); // тайм-аут в сек
         } else {
             requestContext.put("com.sun.xml.internal.ws.request.timeout", timeout*1000); // тайм-аут в мсек
         }
@@ -100,16 +100,19 @@ public class DepartmentWS_Manager {
                 TaxDepartmentChangeStatus status = departmentWS.sendDepartmentChange(convert(departmentChanges));
                 if (status.getErrorCode().equalsIgnoreCase("E0")) {
                     departmentChangeService.clean();
-                    String msg = "Изменения подразделении успешно переданы в АС СУНР";
-                    auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
-                            null, null, null, null, msg, null);
+                    if (taxDepartmentChanges == null) {
+                        String msg = "Изменения подразделении успешно переданы в АС СУНР";
+                        auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
+                                null, null, null, null, msg, null);
+                    }
                 } else {
-                    String msg = String.format("Изменения подразделении не были отпралено в АС СУНР. Код ошибки: %s, текст ошибки: %s.", status.getErrorCode(), status.getErrorText());
-                    auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
-                            null, null, null, null, msg, null);
                     if (taxDepartmentChanges != null) {
                         taxDepartmentChanges.setErrorCode("E3");
                         taxDepartmentChanges.setErrorText(String.format("Получен код ошибки \"%s\" при обработке изменении подразделении в АС СУНР.", status.getErrorCode()));
+                    } else {
+                        String msg = String.format("Изменения подразделении не были отпралено в АС СУНР. Код ошибки: %s, текст ошибки: %s.", status.getErrorCode(), status.getErrorText());
+                        auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
+                                null, null, null, null, msg, null);
                     }
                 }
             }
@@ -126,9 +129,10 @@ public class DepartmentWS_Manager {
             if (taxDepartmentChanges != null) {
                 taxDepartmentChanges.setErrorCode("E5");
                 taxDepartmentChanges.setErrorText(msg);
+            } else {
+                auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
+                        null, null, null, null, msg, null);
             }
-            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
-                    null, null, null, null, msg, null);
         }
     }
 
