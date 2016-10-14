@@ -87,4 +87,11 @@ public class AuditLog {
         this.note = value;
     }
 
+    @Override
+    public String toString() {
+        return "AuditLog{" +
+                (userInfo != null ? userInfo.toString() : "") +
+                ", note: " + note +
+                '}';
+    }
 }

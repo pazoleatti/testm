@@ -12,6 +12,8 @@ import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,20 +29,24 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
     public void addAuditLog(AuditLog auditLog)
             throws AuditManagementServiceException_Exception {
 
-        validate(auditLog);
-
         try {
+            validate(auditLog);
+
             TAUserInfo userInfo = assembleUserInfo(auditLog);
             Integer departmentId = null;
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, departmentId, null, null, null, null, auditLog.getNote(), null, null);
+        } catch (AuditManagementServiceException_Exception e) {
+            String newMessage = e.getMessage() + "\n" + (auditLog != null ? auditLog.toString() : "") + "\n" + getStackTrace(e);
+            throw new AuditManagementServiceException_Exception(newMessage, e.getFaultInfo());
         } catch (Exception e) {
-            throwException("AUDIT-000", "Internal error", e.getMessage());
+            String newMessage = e.getMessage() + "\n" + (auditLog != null ? auditLog.toString() : "") + "\n" + getStackTrace(e);
+            throwException("AUDIT-000", "Internal error", newMessage);
         }
     }
 
     private void validate(AuditLog auditLog) throws AuditManagementServiceException_Exception {
         if (auditLog == null) {
-            throwException("AUDIT-000", "Internal error", "Не удалось получить данные для логирования");
+            throwException("AUDIT-001", "Invalid data format", "Не удалось получить данные для логирования");
         } else {
             if (auditLog.getUserInfo() == null) {
                 throwException("AUDIT-001", "Invalid data format", "Не удалось получить информацию о пользователе");
@@ -69,13 +75,6 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
         }
     }
 
-    private void throwException(String code, String details, String message) throws AuditManagementServiceException_Exception {
-        AuditManagementServiceException fault = new AuditManagementServiceException();
-        fault.setCode(code);
-        fault.setDetails(details);
-        throw new AuditManagementServiceException_Exception(message, fault);
-    }
-
     private TAUserInfo assembleUserInfo(AuditLog auditLog) {
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
@@ -90,5 +89,19 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
         }
         user.setRoles(roles);
         return userInfo;
+    }
+
+    private void throwException(String code, String details, String message) throws AuditManagementServiceException_Exception {
+        AuditManagementServiceException fault = new AuditManagementServiceException();
+        fault.setCode(code);
+        fault.setDetails(details);
+        throw new AuditManagementServiceException_Exception(message, fault);
+    }
+
+    private String getStackTrace(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        return sw.toString();
     }
 }

@@ -87,4 +87,11 @@ public class UserInfo {
         this.ip = value;
     }
 
+    @Override
+    public String toString() {
+        return "UserInfo{" +
+                (user != null ? user.toString() : "") +
+                ", ip: " + ip +
+                '}';
+    }
 }
