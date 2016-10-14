@@ -60,9 +60,9 @@ public class DepartmentWS_Manager {
         int timeout = 0;
         int rootDepartmentId = departmentService.getBankDepartment().getId();
         ConfigurationParamModel configurationParamModel = configurationService.getAllConfig(userService.getSystemUserInfo());
-        List<String> sunrAddressParams = configurationParamModel.get(ConfigurationParam.ADDRESS_SUNR, rootDepartmentId);
+        List<String> sunrAddressParams = configurationParamModel.get(ConfigurationParam.WSDL_ADDRESS_DEPARTMENT_WS_SUNR, rootDepartmentId);
         if (sunrAddressParams == null) {
-            throw new ServiceException("Не заполнен конфигурационный параметр \"" + ConfigurationParam.ADDRESS_SUNR.getCaption() + '"');
+            throw new ServiceException("Не заполнен конфигурационный параметр \"" + ConfigurationParam.WSDL_ADDRESS_DEPARTMENT_WS_SUNR.getCaption() + '"');
         }
         List<String> sunrDepartmentWSTimeoutParams = configurationParamModel.get(ConfigurationParam.TIMEOUT_SUNR, rootDepartmentId);
         if (sunrDepartmentWSTimeoutParams != null) {
@@ -71,7 +71,7 @@ public class DepartmentWS_Manager {
             } catch (NumberFormatException ignored) {}
         }
 
-        DepartmentWS_Service departmentWS_Service = new DepartmentWS_Service(sunrAddressParams.get(0)+"DepartmentWS?wsdl");
+        DepartmentWS_Service departmentWS_Service = new DepartmentWS_Service(sunrAddressParams.get(0));
         DepartmentWS departmentWS = departmentWS_Service.getDepartmentWSPort();
 
         Map<String, Object> requestContext = ((BindingProvider) departmentWS).getRequestContext();

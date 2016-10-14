@@ -25,7 +25,7 @@ public enum ConfigurationParam {
     FORM_ARCHIVE_DIRECTORY("Путь к каталогу архива", ConfigurationParamGroup.FORM, true, true, 2),
     FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", ConfigurationParamGroup.FORM, true, true, 2),
     /** СУНР */
-    ADDRESS_SUNR("Адрес АС СУНР для веб-сервисов", ConfigurationParamGroup.COMMON, true, false, 0),
+    WSDL_ADDRESS_DEPARTMENT_WS_SUNR("Адрес wsdl веб-сервиса по передаче изменений справочника \"Подразделения\" в АС СУНР", ConfigurationParamGroup.COMMON, true, false, 0),
     TIMEOUT_SUNR("Время ожидания ответа от АС СУНР, сек", ConfigurationParamGroup.COMMON, true, false, 0);
 
     private String caption;
