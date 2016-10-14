@@ -62,7 +62,13 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
                         throwException("E1", "Некорректная структура сообщения", "Не удалось получить имя пользователя");
                     }*/
                     if (user.getRole() == null || user.getRole().isEmpty()) {
-                        throwException("E1", "Некорректная структура сообщения", "Не удалось получить роли пользователе");
+                        throwException("E1", "Некорректная структура сообщения", "Не удалось получить роли пользователя");
+                    } else {
+                        for (Role role : user.getRole()) {
+                            if (role.getName() == null || role.getName().isEmpty()) {
+                                throwException("E1", "Некорректная структура сообщения", "Не удалось получить наименование роли пользователя");
+                            }
+                        }
                     }
                 }
                 /*if (auditLog.getUserInfo().getIp() == null) {
