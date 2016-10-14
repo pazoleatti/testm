@@ -522,9 +522,10 @@ def logicCheck() {
                 if (records == null || records.isEmpty()) {
                     def declarationRegionCode = getRefBookValue(4, declarationRegionId).CODE.value
                     def regionCode = region.CODE.value
+                    def codeOKATO = getRefBookValue(96L, row.codeOKATO).CODE.value
                     logger.error("Строка %s: В справочнике «Параметры представления деклараций по транспортному налогу» отсутствует запись, " +
                             "актуальная на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) справочника «Подразделения» для подразделения «%s» формы-приемника вида «%s», поле «Код субъекта РФ» = «%s», поле «Код по ОКТМО» = «%s»",
-                            index, dTo.format(dFormat), declarationRegionCode, relation.getDepartment().name, relation.formTypeName, regionCode, row.codeOKATO)
+                            index, dTo.format(dFormat), declarationRegionCode, relation.getDepartment().name, relation.formTypeName, regionCode, codeOKATO)
                 }
                 // 20. Проверка наличия ставки для ТС
                 if (checkRateTS) {
