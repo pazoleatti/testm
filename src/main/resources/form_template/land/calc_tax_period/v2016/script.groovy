@@ -511,7 +511,7 @@ def logicCheck6(def taxPart) {
     def partArray = taxPart?.split('/')
 
     // 6. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
-    if (partArray.size() == 2 && partArray[1] ==~ /\d{1,}/ && partArray[1].toBigDecimal() == 0) {
+    if (partArray.size() != 2 || partArray.size() >= 2 && partArray[1] ==~ /\d{1,}/ && partArray[1].toBigDecimal() == 0) {
         return []
     }
     return [partArray[0].toBigDecimal(), partArray[1].toBigDecimal()]
@@ -647,6 +647,9 @@ def getMonthCount(def periodOrder = null) {
 }
 
 def calc23(def row, def periodOrder = null) {
+    if (row.benefitCode == null) {
+        return null
+    }
     def termUse = calc20(row)
     if (termUse == null || termUse == 0) {
         return termUse
@@ -680,10 +683,8 @@ def calc24(def row, def value22, def value23, def showMsg = false) {
     def p = getP(code15, record705)
 
     BigDecimal tmp = null
-    if (check5 == 1) {
-        tmp = BigDecimal.ZERO
-    } else if (check5 == 2) {
-        tmp = BigDecimal.ZERO
+    if (check5 == 1 || check5 == 2) {
+        tmp = null
     } else if (check5 == 3 && p != null && value23 != null) {
         // Графа 24 = А * Р / 100 * (1 – Графа 23)
         tmp = a.multiply(p).divide(100, precision, BigDecimal.ROUND_HALF_UP).multiply(1 - value23)
@@ -796,9 +797,6 @@ def getH(def row, def periodOrder, def showMsg = false) {
     }
 
     def value23 = (getReportPeriod()?.order != periodOrder ? calc23(row, periodOrder) : row.kl)
-    if (value23 == null) {
-        return null
-    }
 
     def value24 = (getReportPeriod()?.order != periodOrder ? calc24(row, value22, value23) : row.sum)
     if (value24 == null) {
