@@ -68,6 +68,7 @@ public enum FormDataEvent implements Serializable {
     LOGIN(501, "Вход пользователя в Систему"),
     LOGOUT(502, "Выход пользователя из Системы"),
     EXTERNAL_INTERACTION(503, "Взаимодействие с внешней АС"),
+	SUNR_USER_ACTION(504, "Действия пользователя в ФП СУНР"),
 
 	LOG_SYSTEM_BACKUP(601, "Архивация журнала аудита"),
 

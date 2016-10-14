@@ -34,61 +34,71 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
 
             TAUserInfo userInfo = assembleUserInfo(auditLog);
             Integer departmentId = null;
-            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, departmentId, null, null, null, null, auditLog.getNote(), null, null);
+            auditService.add(FormDataEvent.SUNR_USER_ACTION, userInfo, departmentId, null, null, null, null, auditLog.getNote(), null, null);
         } catch (AuditManagementServiceException_Exception e) {
-            String newMessage = e.getMessage() + "\n" + (auditLog != null ? auditLog.toString() : "") + "\n" + getStackTrace(e);
+            String newMessage = e.getMessage() + "\n" + (auditLog != null ? auditLog.toString() : "");
             throw new AuditManagementServiceException_Exception(newMessage, e.getFaultInfo());
         } catch (Exception e) {
             String newMessage = e.getMessage() + "\n" + (auditLog != null ? auditLog.toString() : "") + "\n" + getStackTrace(e);
-            throwException("AUDIT-000", "Internal error", newMessage);
+            throwException("E0", "Внутренняя ошибка сервиса", newMessage);
         }
     }
 
     private void validate(AuditLog auditLog) throws AuditManagementServiceException_Exception {
         if (auditLog == null) {
-            throwException("AUDIT-001", "Invalid data format", "Не удалось получить данные для логирования");
+            throwException("E1", "Некорректная структура сообщения", "Не удалось получить данные для логирования");
         } else {
             if (auditLog.getUserInfo() == null) {
-                throwException("AUDIT-001", "Invalid data format", "Не удалось получить информацию о пользователе");
+                throwException("E1", "Некорректная структура сообщения", "Не удалось получить информацию о пользователе");
             } else {
                 if (auditLog.getUserInfo().getUser() == null) {
-                    throwException("AUDIT-001", "Invalid data format", "Не удалось получить информацию о пользователе");
+                    throwException("E1", "Некорректная структура сообщения", "Не удалось получить информацию о пользователе");
                 } else {
                     User user = auditLog.getUserInfo().getUser();
                     if (user.getLogin() == null || user.getLogin().isEmpty()) {
-                        throwException("AUDIT-001", "Invalid data format", "Не удалось получить логин пользователя");
+                        throwException("E1", "Некорректная структура сообщения", "Не удалось получить логин пользователя");
                     }
                     /*if (user.getName() == null || user.getName().isEmpty()) {
-                        throwException("AUDIT-001", "Invalid data format", "Не удалось получить имя пользователя");
+                        throwException("E1", "Некорректная структура сообщения", "Не удалось получить имя пользователя");
                     }*/
                     if (user.getRole() == null || user.getRole().isEmpty()) {
-                        throwException("AUDIT-001", "Invalid data format", "Не удалось получить роли пользователе");
+                        throwException("E1", "Некорректная структура сообщения", "Не удалось получить роли пользователе");
                     }
                 }
                 /*if (auditLog.getUserInfo().getIp() == null) {
-                    throwException("AUDIT-001", "Invalid data format", "Не удалось получить ip пользователя");
+                    throwException("E1", "Некорректная структура сообщения", "Не удалось получить ip пользователя");
                 }*/
             }
             if (auditLog.getNote() == null) {
-                throwException("AUDIT-001", "Invalid data format", "Не удалось получить текст события");
+                throwException("E1", "Некорректная структура сообщения", "Не удалось получить текст события");
             }
         }
     }
 
     private TAUserInfo assembleUserInfo(AuditLog auditLog) {
         TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(assembleUser(auditLog));
+        userInfo.setIp(auditLog.getUserInfo().getIp());
+        return userInfo;
+    }
+
+    private TAUser assembleUser(AuditLog auditLog) {
         TAUser user = new TAUser();
         user.setLogin(auditLog.getUserInfo().getUser().getLogin());
         user.setName(auditLog.getUserInfo().getUser().getName());
         user.setDepartmentId(auditLog.getUserInfo().getUser().getDepartmentId());
+        user.setRoles(assembleRoles(auditLog));
+        return user;
+    }
+
+    private List<TARole> assembleRoles(AuditLog auditLog) {
         List<TARole> roles = new ArrayList<TARole>();
         for (Role role : auditLog.getUserInfo().getUser().getRole()) {
             TARole taRole = new TARole();
             taRole.setName(role.getName());
             roles.add(taRole);
         }
-        user.setRoles(roles);
-        return userInfo;
+        return roles;
     }
 
     private void throwException(String code, String details, String message) throws AuditManagementServiceException_Exception {
