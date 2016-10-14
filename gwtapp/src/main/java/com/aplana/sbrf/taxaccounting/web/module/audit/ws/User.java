@@ -125,6 +125,10 @@ public class User {
         return this.role;
     }
 
+    public void setRole(List<Role> value) {
+        this.role = value;
+    }
+
     /**
      * Gets the value of the departmentId property.
      * 
@@ -141,4 +145,13 @@ public class User {
         this.departmentId = value;
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "login: " + login +
+                ", name: " + name +
+                ", role: " + (role != null ? role.toString() : null) +
+                ", departmentId: " + departmentId +
+                '}';
+    }
 }

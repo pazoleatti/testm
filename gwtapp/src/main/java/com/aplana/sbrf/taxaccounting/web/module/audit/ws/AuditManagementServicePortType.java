@@ -12,6 +12,8 @@ import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,22 +29,50 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
     public void addAuditLog(AuditLog auditLog)
             throws AuditManagementServiceException_Exception {
 
-        validate(auditLog);
-
         try {
+            validate(auditLog);
+
             TAUserInfo userInfo = assembleUserInfo(auditLog);
             Integer departmentId = null;
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, departmentId, null, null, null, null, auditLog.getNote(), null, null);
+        } catch (AuditManagementServiceException_Exception e) {
+            String newMessage = e.getMessage() + "\n" + (auditLog != null ? auditLog.toString() : "") + "\n" + getStackTrace(e);
+            throw new AuditManagementServiceException_Exception(newMessage, e.getFaultInfo());
         } catch (Exception e) {
-            AuditManagementServiceException fault = new AuditManagementServiceException();
-            fault.setCode("AUDIT-000");
-            fault.setDetails("Internal error");
-            throw new AuditManagementServiceException_Exception(e.toString(), fault);
+            String newMessage = e.getMessage() + "\n" + (auditLog != null ? auditLog.toString() : "") + "\n" + getStackTrace(e);
+            throwException("AUDIT-000", "Internal error", newMessage);
         }
     }
 
-    private void validate(AuditLog auditLog) {
-
+    private void validate(AuditLog auditLog) throws AuditManagementServiceException_Exception {
+        if (auditLog == null) {
+            throwException("AUDIT-001", "Invalid data format", "Не удалось получить данные для логирования");
+        } else {
+            if (auditLog.getUserInfo() == null) {
+                throwException("AUDIT-001", "Invalid data format", "Не удалось получить информацию о пользователе");
+            } else {
+                if (auditLog.getUserInfo().getUser() == null) {
+                    throwException("AUDIT-001", "Invalid data format", "Не удалось получить информацию о пользователе");
+                } else {
+                    User user = auditLog.getUserInfo().getUser();
+                    if (user.getLogin() == null || user.getLogin().isEmpty()) {
+                        throwException("AUDIT-001", "Invalid data format", "Не удалось получить логин пользователя");
+                    }
+                    /*if (user.getName() == null || user.getName().isEmpty()) {
+                        throwException("AUDIT-001", "Invalid data format", "Не удалось получить имя пользователя");
+                    }*/
+                    if (user.getRole() == null || user.getRole().isEmpty()) {
+                        throwException("AUDIT-001", "Invalid data format", "Не удалось получить роли пользователе");
+                    }
+                }
+                /*if (auditLog.getUserInfo().getIp() == null) {
+                    throwException("AUDIT-001", "Invalid data format", "Не удалось получить ip пользователя");
+                }*/
+            }
+            if (auditLog.getNote() == null) {
+                throwException("AUDIT-001", "Invalid data format", "Не удалось получить текст события");
+            }
+        }
     }
 
     private TAUserInfo assembleUserInfo(AuditLog auditLog) {
@@ -59,5 +89,19 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
         }
         user.setRoles(roles);
         return userInfo;
+    }
+
+    private void throwException(String code, String details, String message) throws AuditManagementServiceException_Exception {
+        AuditManagementServiceException fault = new AuditManagementServiceException();
+        fault.setCode(code);
+        fault.setDetails(details);
+        throw new AuditManagementServiceException_Exception(message, fault);
+    }
+
+    private String getStackTrace(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        return sw.toString();
     }
 }
