@@ -152,7 +152,7 @@ COMMIT;
 --https://jira.aplana.com/browse/SBRFACCTAX-17192: 1.2 ЗемНалог. Изменить наполнение справочника "Коды бюджетной классификации земельного налога"
 --Изначальное наполнение: https://jira.aplana.com/browse/SBRFACCTAX-16478
 declare  
-	l_task_name varchar2(128) := 'RefBook Block #7 (SBRFACCTAX-16478 - Budget classification codes(L)))';
+	l_task_name varchar2(128) := 'RefBook Block #7 (SBRFACCTAX-16478 - Budget classification codes(L))';
 	l_rerun_condition decimal(1) := 0;
 begin
     --check if one of the new codes exists
@@ -202,6 +202,30 @@ end;
 /
 COMMIT;
 
+---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17172: 1.2 БД. ЗемНалог. Добавить атрибут в форму настройки подразделений
+declare  
+	l_task_name varchar2(128) := 'RefBook Block #8 (SBRFACCTAX-17172 - Department settings(L))';
+	l_rerun_condition decimal(1) := 0;
+begin
+    --check if one of the new codes exists
+	select count(*) into l_rerun_condition from ref_book_attribute where id = 7120;
+	
+	if l_rerun_condition = 0 then 
+		INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7120, 710, 'Наименование соглашения о разделе продукции', 'PRODUCT_AGREEMENT_NAME', 1,20, null, null, 1, null, 30, 0, 0, null, null, 0, 160);
+		
+		dbms_output.put_line(l_task_name||'[INFO]: Success');
+	else
+		dbms_output.put_line(l_task_name||'[ERROR]: New attribute had already been added');
+	end if;		
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
 ---------------------------------------------------------------------------
 COMMIT;
 EXIT;
