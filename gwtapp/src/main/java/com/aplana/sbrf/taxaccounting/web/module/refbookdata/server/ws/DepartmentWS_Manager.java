@@ -199,4 +199,14 @@ public class DepartmentWS_Manager {
         return taxDepartmentChangeList;
     }
 
+    public boolean checkServiceAvailable(String address) {
+        try {
+            DepartmentWS_Service departmentWS_Service = new DepartmentWS_Service(address + "DepartmentWS?wsdl");
+            DepartmentWS departmentWS = departmentWS_Service.getDepartmentWSPort();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }
