@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.configuration.server;
 
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -13,12 +10,15 @@ import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.CheckAccessAction;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.CheckAccessResult;
+import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.DepartmentWS;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.ws.DepartmentWS_Manager;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -35,6 +35,9 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
     @Autowired
     private AuditService auditService;
 
+    @Autowired
+    private DepartmentWS_Manager departmentWS_manager;
+
     public CheckAccessHandler() {
         super(CheckAccessAction.class);
     }
@@ -48,6 +51,7 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
         ConfigurationParamGroup group = action.getGroup();
 
         if (group.equals(ConfigurationParamGroup.COMMON) || group.equals(ConfigurationParamGroup.FORM)) {
+            checkWebServiceParams(model, logger);
             configurationService.checkReadWriteAccess(securityService.currentUserInfo(), model, logger);
         } else if (group.equals(ConfigurationParamGroup.EMAIL)) {
             boolean success = emailService.testAuth(logger);
@@ -105,6 +109,27 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
         result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;
+    }
+
+    private void checkWebServiceParams(ConfigurationParamModel model, Logger logger) {
+        List<String> valuesList = model.get(ConfigurationParam.WSDL_ADDRESS_DEPARTMENT_WS_SUNR, 0);
+        if (valuesList != null) {
+            for (String value : valuesList) {
+                if (!departmentWS_manager.checkServiceAvailable(value)) {
+                    logger.error("Сервис " + DepartmentWS.class.getName() + " не доступен по адресу " + value);
+                }
+            }
+        }
+        valuesList = model.get(ConfigurationParam.TIMEOUT_SUNR, 0);
+        if (valuesList != null) {
+            for (String value : valuesList) {
+                try{
+                    int timeout = Integer.parseInt(value);
+                } catch (NumberFormatException e) {
+                    logger.error("Параметр \"" + ConfigurationParam.TIMEOUT_SUNR.getCaption() + "\" должен содержать целочисленное значение");
+                }
+            }
+        }
     }
 
     @Override
