@@ -41,7 +41,7 @@ import java.util.Date;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TaxDepartmentChange", propOrder = {
     "operationType",
-    "change_datetime",
+    "changeDatetime",
     "id",
     "level",
     "name",
