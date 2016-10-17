@@ -134,5 +134,98 @@ end;
 COMMIT;
 
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17131: 1.2 Справочник "Оффшорные зоны", изменения требований к полю "Полное наименование"
+declare 
+	l_task_name varchar2(128) := 'RefBook Block #6 (SBRFACCTAX-17131 - Off shore zones.Name)';
+begin	
+	update ref_book_attribute set required=0, is_unique=0 where id = 5195;
+	dbms_output.put_line(l_task_name||'[INFO]: Success');		
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17192: 1.2 ЗемНалог. Изменить наполнение справочника "Коды бюджетной классификации земельного налога"
+--Изначальное наполнение: https://jira.aplana.com/browse/SBRFACCTAX-16478
+declare  
+	l_task_name varchar2(128) := 'RefBook Block #7 (SBRFACCTAX-16478 - Budget classification codes(L))';
+	l_rerun_condition decimal(1) := 0;
+begin
+    --check if one of the new codes exists
+	select count(*) into l_rerun_condition from ref_book_value where attribute_id = 7031 and string_value = '18210606031031000110';
+	
+	if l_rerun_condition = 0 then 
+		update ref_book_record set status = -1 where ref_book_id = 703 and version = to_date('01.01.2016', 'DD.MM.YYYY') and status = 0;
+		
+		insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '18210606031031000110');
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах внутригородских муниципальных образований городов федерального значения (сумма платежа)');
+
+		insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '18210606032041000110');
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах городских округов (сумма платежа)');
+
+		insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '18210606032111000110');
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах городских округов с внутригородским делением (сумма платежа)');
+
+		insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 4, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '18210606032121000110');
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах внутригородских районов (сумма платежа)');
+
+		insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 5, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '18210606033051000110');
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах межселенных территорий (сумма платежа)');
+
+		insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 6, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '18210606033101000110');
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах сельских поселений (сумма платежа)');
+
+		insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 7, 703, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7031, '18210606033131000110');
+			insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 7032, 'Земельный налог с организаций, обладающих земельным участком, расположенным в границах городских поселений (сумма платежа)');
+		
+		dbms_output.put_line(l_task_name||'[INFO]: Success');
+	else
+		dbms_output.put_line(l_task_name||'[ERROR]: New elements had already been added');
+	end if;		
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+
+---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17172: 1.2 БД. ЗемНалог. Добавить атрибут в форму настройки подразделений
+declare  
+	l_task_name varchar2(128) := 'RefBook Block #8 (SBRFACCTAX-17172 - Department settings(L))';
+	l_rerun_condition decimal(1) := 0;
+begin
+    --check if one of the new codes exists
+	select count(*) into l_rerun_condition from ref_book_attribute where id = 7120;
+	
+	if l_rerun_condition = 0 then 
+		INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7120, 710, 'Наименование соглашения о разделе продукции', 'PRODUCT_AGREEMENT_NAME', 1,20, null, null, 1, null, 30, 0, 0, null, null, 0, 160);
+		
+		dbms_output.put_line(l_task_name||'[INFO]: Success');
+	else
+		dbms_output.put_line(l_task_name||'[ERROR]: New attribute had already been added');
+	end if;		
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;

@@ -169,12 +169,6 @@ public class IncludeInDeclarationTest extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev) пока нет возможности передать дополнительные параметры (https://jira.aplana.com/browse/SBRFACCTAX-17230)
-    // @Test
-    public void getSourcesTest() {
-        testHelper.execute(FormDataEvent.GET_SOURCES);
-    }
-
     // TODO (Ramil Timerbaev) добавить тест, что б выполнилась каждая логическая проверка
     // @Test
     public void check1Test() {

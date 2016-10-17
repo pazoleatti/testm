@@ -24,25 +24,57 @@ EXCEPTION
 end;
 /
 -----------------------------------------------------------------------------------------------------------------------------
---https://jira.aplana.com/browse/SBRFACCTAX-17019: 1.2 БД. Добавить событие "удаление блокировки"
+--https://jira.aplana.com/browse/SBRFACCTAX-17135: 1.2 Добавить атрибут "Используется в СУНР" в справочник подразделений
 declare 
-	l_task_name varchar2(128) := 'DDL Block #2 - New event code for locks'' deletion (SBRFACCTAX-17019)';
+	l_task_name varchar2(128) := 'DDL Block #2 - SUNR usage attributes (SBRFACCTAX-17135)';
 	l_rerun_condition decimal(1) := 0;
 begin
-	select count(*) into l_rerun_condition from event where id=960;
+	select count(*) into l_rerun_condition from user_tab_columns where table_name = 'DEPARTMENT' and column_name = 'SUNR_USE';
 	
 	if l_rerun_condition = 0 then 
-		insert into event (id, name) values(960, 'Удаление блокировки');
+		execute immediate 'alter table department add sunr_use number(1) default 0 not null';
+		execute immediate 'comment on column department.sunr_use is ''Признак, что используется в АС СУНР''';
+		execute immediate 'alter table department add constraint department_chk_sunr_use check (sunr_use in (0, 1))';
 		
-		execute immediate 'alter table log_system drop constraint log_system_chk_rp';
-		execute immediate 'alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951, 960) or report_period_name is not null) enable';
-		execute immediate 'alter table log_system drop constraint log_system_chk_dcl_form';
-		execute immediate 'alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951, 960) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null)) enable';
-		
+		insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (168,30,'Используется в АС СУНР','SUNR_USE',2,10,null,null,1,0,15,0,0,null,6,0,1);
+	
 		dbms_output.put_line(l_task_name||'[INFO]:'||' SUCCESS');
 	else
-		dbms_output.put_line(l_task_name||'[ERROR]:'||' event.id had already been added');
+		dbms_output.put_line(l_task_name||'[ERROR]:'||' column DEPARTMENT.SUNR_USE had already been modified');
 	end if;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]:'||sqlerrm);
+end;
+/
+commit;
+-----------------------------------------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17019: 1.2 БД. Добавить событие "удаление блокировки"
+--https://jira.aplana.com/browse/SBRFACCTAX-17268: 1.2 БД. Добавить событие "Действия пользователя в ФП СУНР"
+declare 
+	l_task_name varchar2(128) := 'DDL Block #3 - New event codes (SBRFACCTAX-17019 / SBRFACCTAX-17268)';
+	l_rerun_condition decimal(1) := 0;
+begin
+	select count(*) into l_rerun_condition from event where id=960;	
+	if l_rerun_condition = 0 then 
+		insert into event (id, name) values(960, 'Удаление блокировки');
+		dbms_output.put_line(l_task_name||'[INFO]:'||' Event.id = 960 added');
+	end if;	
+	
+	select count(*) into l_rerun_condition from event where id=504;	
+	if l_rerun_condition = 0 then 
+		insert into event(id, name) values(504, 'Действия пользователя в ФП СУНР');
+		dbms_output.put_line(l_task_name||'[INFO]:'||' Event.id = 504 added');
+	end if;
+		
+	--Common block for both events		
+	execute immediate 'alter table log_system drop constraint log_system_chk_rp';
+	execute immediate 'alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 504, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951, 960) or report_period_name is not null) enable';
+	execute immediate 'alter table log_system drop constraint log_system_chk_dcl_form';
+	execute immediate 'alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 504, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951, 960) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null)) enable';
+		
+	dbms_output.put_line(l_task_name||'[INFO]:'||' SUCCESS');
 	
 EXCEPTION
 	when OTHERS then
@@ -52,7 +84,7 @@ end;
 -----------------------------------------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-16521: 1.2 Хранение промежуточных результатов поиска по большим НФ
 declare 
-	l_task_name varchar2(128) := 'DDL Block #3 - FORM_DATA.SEARCH() (SBRFACCTAX-16521)';
+	l_task_name varchar2(128) := 'DDL Block #4 - FORM_DATA.SEARCH() (SBRFACCTAX-16521)';
 	l_rerun_condition decimal(1) := 0;
 begin
 	select count(*) into l_rerun_condition from user_tables where table_name = 'FORM_SEARCH_DATA_RESULT';
@@ -83,6 +115,21 @@ begin
 	else
 		dbms_output.put_line(l_task_name||'[ERROR]:'||' tables for FORM_DATA.SEARCH() had already existed');
 	end if;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]:'||sqlerrm);
+end;
+/
+-----------------------------------------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17282: 1.2 БД. Поправить Check constraint в LOG_SYSTEM
+declare 
+	l_task_name varchar2(128) := 'DDL Block #5 - Alter constraint LOG_SYSTEM_CHK_AFT (SBRFACCTAX-17282)';
+begin
+	execute immediate 'alter table log_system drop constraint log_system_chk_aft';
+	execute immediate 'alter table log_system add constraint log_system_chk_aft check (audit_form_type_id = 1 and not event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is not null or audit_form_type_id = 2 and not event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is not null or audit_form_type_id = 3 and event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is null or audit_form_type_id = 4 and event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is null or audit_form_type_id in (5,6) and event_id in (7) and form_type_name is null and declaration_type_name is null or audit_form_type_id is null or event_id in (402))';
+		
+	dbms_output.put_line(l_task_name||'[INFO]:'||' SUCCESS');
 	
 EXCEPTION
 	when OTHERS then
