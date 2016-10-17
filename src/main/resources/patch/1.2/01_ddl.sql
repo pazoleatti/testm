@@ -122,5 +122,20 @@ EXCEPTION
 end;
 /
 -----------------------------------------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17282: 1.2 БД. Поправить Check constraint в LOG_SYSTEM
+declare 
+	l_task_name varchar2(128) := 'DDL Block #5 - Alter constraint LOG_SYSTEM_CHK_AFT (SBRFACCTAX-17282)';
+begin
+	execute immediate 'alter table log_system drop constraint log_system_chk_aft';
+	execute immediate 'alter table log_system add constraint log_system_chk_aft check (audit_form_type_id = 1 and not event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is not null or audit_form_type_id = 2 and not event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is not null or audit_form_type_id = 3 and event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is null or audit_form_type_id = 4 and event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is null or audit_form_type_id in (5,6) and event_id in (7) and form_type_name is null and declaration_type_name is null or audit_form_type_id is null or event_id in (402))';
+		
+	dbms_output.put_line(l_task_name||'[INFO]:'||' SUCCESS');
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]:'||sqlerrm);
+end;
+/
+-----------------------------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
