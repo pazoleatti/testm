@@ -264,7 +264,7 @@ void logicCheck() {
 
         // 6. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
         tmp = logicCheck6(row.taxPart)
-        if (tmp != null && tmp.isEmpty()) {
+        if (tmp != null && !tmp) {
             def columnName11 = getColumnName(row, 'taxPart')
             logger.error("Строка %s: Значение знаменателя в графе «%s» не может быть равным нулю", rowIndex, columnName11)
         }
@@ -506,10 +506,10 @@ def logicCheck5(def taxPart) {
 }
 
 /**
- * Логическая проверка 5. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок.
+ * Логическая проверка 6. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок.
  *
  * @param taxPart значение графы 11
- * @return null - если значение taxPart пусто, пустой список - если ошибка, список из двух элементов (числитель и знаменатель) - все нормально
+ * @return null - если значение taxPart пусто, false если ошибка, true - все нормально
  */
 def logicCheck6(def taxPart) {
     if (!taxPart) {
@@ -518,10 +518,10 @@ def logicCheck6(def taxPart) {
     def partArray = taxPart?.split('/')
 
     // 6. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
-    if (partArray.size() != 2 || partArray.size() >= 2 && partArray[1] ==~ /\d{1,}/ && partArray[1].toBigDecimal() == 0) {
-        return []
+    if (partArray.size() == 2 && partArray[1] ==~ /\d{1,}/ && partArray[1].toBigDecimal() == 0) {
+        return false
     }
-    return [partArray[0].toBigDecimal(), partArray[1].toBigDecimal()]
+    return true
 }
 
 void calc() {
@@ -828,6 +828,12 @@ def getH(def row, def periodOrder, def showMsg = false) {
         }
         return null
     }
+
+    // TODO (Ramil Timerbaev)
+    if (showMsg) {
+        def i = 24 + periodOrder
+        logger.info("отладка расчета графы $i строка ${row.getIndex()}: H = В * Графа 21 * Графа 22 * К / 100 – Графа 24 = $b * ${row.taxRate} * $value22 * $k / 100 – $value24 = $tmp")
+    }
     return tmp
 }
 
@@ -852,10 +858,22 @@ def getB(def row, def value23, def alias, def showMsg = false) {
     if (check5 == 1 && p != null && value23 != null) {
         tmp = defaultValue - p
         tmp = (tmp < 0 ? 0 : tmp)
+        // TODO (Ramil Timerbaev)
+        if (showMsg && alias == 'q1') {
+            logger.info("отладка расчета графы 25 строка ${row.getIndex()}: В = Графа 10 * Графа 11 – Р = ${row.cadastralCost} * $taxPart – $p = $tmp")
+        }
     } else if (check5 == 2 && p != null && value23 != null) {
         tmp = defaultValue - defaultValue * p * (1 - value23)
+        // TODO (Ramil Timerbaev)
+        if (showMsg && alias == 'q1') {
+            logger.info("отладка расчета графы 25 строка ${row.getIndex()}: В = (Графа 10 * Графа 11 – Графа 10 * Графа 11 * Р * (1 – Графа 23)) = (${row.cadastralCost} * $taxPart - ${row.cadastralCost} * $taxPart * $p) * (1 - $value23) = $tmp")
+        }
     } else if (check5 == 0 || check5 != 1 || check5 != 2) {
         tmp = defaultValue
+        // TODO (Ramil Timerbaev)
+        if (showMsg && alias == 'q1') {
+            logger.info("отладка расчета графы 25 строка ${row.getIndex()}: В = Графа 10 * Графа 11 = ${row.cadastralCost} * $taxPart = $tmp")
+        }
     }
 
     // Логическая проверка 16. Проверка корректности значения налоговой базы
