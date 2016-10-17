@@ -153,15 +153,25 @@ void generateXML() {
     def index = "0000110"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
+    // Предрасчетная проверка 1.
+    def acceptedFormDataSources = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()
+    def sourceFormTypeId = 859
+    def sourceformDatas = acceptedFormDataSources?.findAll { it.formType.id == sourceFormTypeId }
+    if (sourceformDatas.size() > 1) {
+        def formName = formTypeService.get(sourceFormTypeId)?.name
+        logger.error("Для текущего экземпляра декларации источником назначено несколько форм вида «%s». " +
+                "Источником должно быть назначено не более одной формы данного вида", formName)
+        return
+    }
+
     // атрибуты, заполняемые по форме 937.3 (строка 001 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
     def code001 = null
-    def sourceCorrNumber
-    for (def formData : declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()) {
-        if (formData.formType.id == 859) {
-            sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
-            sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-        }
+    def sourceCorrNumber = null
+    if (sourceformDatas?.size() == 1) {
+        def formData = sourceformDatas.get(0)
+        sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
+        sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
     }
     if (corrNumber > 0) {
         code001 = (corrNumber == sourceCorrNumber) ? 0 : 1
