@@ -208,7 +208,7 @@ void logicCheck() {
     // для логической проверки 13
     def needValue = [:]
     // графа 14, 20, 22..28
-    def arithmeticCheckAlias = ['period', 'benefitPeriod', 'kv', 'kl', 'sum', 'q1', 'q2', 'q3', 'year']
+    def arithmeticCheckAlias = ['period', /* 'benefitPeriod', */ 'kv', 'kl', 'sum', 'q1', 'q2', 'q3', 'year']
 
     // для логической проверки 14
     def records710Map = [:]
@@ -310,7 +310,6 @@ void logicCheck() {
         // 13. Проверка корректности заполнения граф 14, 20, 22-28
         if (!isCalc) {
             needValue.period = calc14(row)
-            needValue.benefitPeriod = calc20(row)
             needValue.kv = calc22(row)
             needValue.kl = calc23(row)
             needValue.sum = calc24(row, row.kv, row.kl)
@@ -330,6 +329,14 @@ void logicCheck() {
             if (!errorColumns.isEmpty()) {
                 def columnNames = errorColumns.join('», «')
                 logger.error("Строка %s: Графы «%s» заполнены неверно. Выполните расчет формы", rowIndex, columnNames)
+            }
+
+            // проверка для графы 20 отдельная, потому что ее значение надо проверить, хотя сама графа нерасчетная
+            tmp = calc20(row)
+            if (tmp == null && row.benefitPeriod != null || tmp != null && row.benefitPeriod == null ||
+                    tmp.compareTo(row.benefitPeriod) != 0) {
+                def columnName = getColumnName(row, 'benefitPeriod')
+                logger.error("Строка %s: Графа «%s» заполнена неверно", rowIndex, columnName)
             }
         }
 
