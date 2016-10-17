@@ -134,5 +134,20 @@ end;
 COMMIT;
 
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17131: 1.2 Справочник "Оффшорные зоны", изменения требований к полю "Полное наименование"
+declare 
+	l_task_name varchar2(128) := 'RefBook Block #6 (SBRFACCTAX-17131 - Off shore zones.Name)';
+begin	
+	update ref_book_attribute set required=0, is_unique=0 where id = 5195;
+	dbms_output.put_line(l_task_name||'[INFO]: Success');		
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
