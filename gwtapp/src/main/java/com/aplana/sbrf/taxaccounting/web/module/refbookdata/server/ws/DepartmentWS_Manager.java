@@ -193,6 +193,8 @@ public class DepartmentWS_Manager {
                 taxDepartmentChange.setCode(departmentChange.getCode());
                 taxDepartmentChange.setGarantUse(departmentChange.getGarantUse());
                 taxDepartmentChange.setSunrUse(departmentChange.getSunrUse());
+            } else {
+                taxDepartmentChange.setLevel(1);
             }
             taxDepartmentChangeList.add(taxDepartmentChange);
         }
