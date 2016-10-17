@@ -249,7 +249,7 @@ void logicCheck() {
 
         // 6. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
         tmp = logicCheck6(row.taxPart)
-        if (tmp != null && tmp.isEmpty()) {
+        if (tmp != null && !tmp) {
             def columnName11 = getColumnName(row, 'taxPart')
             logger.error("Строка %s: Значение знаменателя в графе «%s» не может быть равным нулю", rowIndex, columnName11)
         }
@@ -381,10 +381,10 @@ def logicCheck5(def taxPart) {
 }
 
 /**
- * Логическая проверка 5. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок.
+ * Логическая проверка 6. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок.
  *
  * @param taxPart значение графы 11
- * @return null - если значение taxPart пусто, пустой список - если ошибка, список из двух элементов (числитель и знаменатель) - все нормально
+ * @return null - если значение taxPart пусто, false если ошибка, true - все нормально
  */
 def logicCheck6(def taxPart) {
     if (!taxPart) {
@@ -393,10 +393,10 @@ def logicCheck6(def taxPart) {
     def partArray = taxPart?.split('/')
 
     // 6. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
-    if (partArray.size() != 2 || partArray.size() == 2 && partArray[1] ==~ /\d{1,}/ && partArray[1].toBigDecimal() == 0) {
-        return []
+    if (partArray.size() == 2 && partArray[1] ==~ /\d{1,}/ && partArray[1].toBigDecimal() == 0) {
+        return false
     }
-    return [partArray[0].toBigDecimal(), partArray[1].toBigDecimal()]
+    return true
 }
 
 void calc() {
