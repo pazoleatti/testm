@@ -24,10 +24,35 @@ EXCEPTION
 end;
 /
 -----------------------------------------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17135: 1.2 Добавить атрибут "Используется в СУНР" в справочник подразделений
+declare 
+	l_task_name varchar2(128) := 'DDL Block #2 - SUNR usage attributes (SBRFACCTAX-17135)';
+	l_rerun_condition decimal(1) := 0;
+begin
+	select count(*) into l_rerun_condition from user_tab_columns where table_name = 'DEPARTMENT' and column_name = 'SUNR_USE';
+	
+	if l_rerun_condition = 0 then 
+		execute immediate 'alter table department add sunr_use number(1) default 0 not null';
+		execute immediate 'comment on column department.sunr_use is ''Признак, что используется в АС СУНР''';
+		execute immediate 'alter table department add constraint department_chk_sunr_use check (sunr_use in (0, 1))';
+		
+		insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (168,30,'Используется в АС СУНР','SUNR_USE',2,10,null,null,1,0,15,0,0,null,6,0,1);
+	
+		dbms_output.put_line(l_task_name||'[INFO]:'||' SUCCESS');
+	else
+		dbms_output.put_line(l_task_name||'[ERROR]:'||' column DEPARTMENT.SUNR_USE had already been modified');
+	end if;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]:'||sqlerrm);
+end;
+/
+-----------------------------------------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-17019: 1.2 БД. Добавить событие "удаление блокировки"
 --https://jira.aplana.com/browse/SBRFACCTAX-17268: 1.2 БД. Добавить событие "Действия пользователя в ФП СУНР"
 declare 
-	l_task_name varchar2(128) := 'DDL Block #2 - New event codes (SBRFACCTAX-17019 / SBRFACCTAX-17268)';
+	l_task_name varchar2(128) := 'DDL Block #3 - New event codes (SBRFACCTAX-17019 / SBRFACCTAX-17268)';
 	l_rerun_condition decimal(1) := 0;
 begin
 	select count(*) into l_rerun_condition from event where id=960;	
@@ -58,7 +83,7 @@ end;
 -----------------------------------------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-16521: 1.2 Хранение промежуточных результатов поиска по большим НФ
 declare 
-	l_task_name varchar2(128) := 'DDL Block #3 - FORM_DATA.SEARCH() (SBRFACCTAX-16521)';
+	l_task_name varchar2(128) := 'DDL Block #4 - FORM_DATA.SEARCH() (SBRFACCTAX-16521)';
 	l_rerun_condition decimal(1) := 0;
 begin
 	select count(*) into l_rerun_condition from user_tables where table_name = 'FORM_SEARCH_DATA_RESULT';
