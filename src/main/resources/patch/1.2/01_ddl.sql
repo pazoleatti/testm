@@ -48,6 +48,7 @@ EXCEPTION
 		dbms_output.put_line(l_task_name||'[FATAL]:'||sqlerrm);
 end;
 /
+commit;
 -----------------------------------------------------------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-17019: 1.2 БД. Добавить событие "удаление блокировки"
 --https://jira.aplana.com/browse/SBRFACCTAX-17268: 1.2 БД. Добавить событие "Действия пользователя в ФП СУНР"
