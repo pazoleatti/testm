@@ -31,7 +31,7 @@ public class DepartmentWS_Service
     public DepartmentWS_Service(String wsdlUrl)  throws MalformedURLException{
         super(
                 new URL(null, wsdlUrl),
-                new QName("http://taxaccounting.sbrf.aplana.com/DepartmentWS/", "DepartmentWSPort")
+                new QName("http://taxaccounting.sbrf.aplana.com/DepartmentWS/", "DepartmentWS")
         );
     }
 

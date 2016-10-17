@@ -93,6 +93,7 @@ switch (formDataEvent) {
         checkRegionId()
         consolidation()
         calc()
+        logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
@@ -288,7 +289,7 @@ void calc() {
         row.base = calc24(row)
     }
 
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 def calc15(def row, def currentYear) {
@@ -364,6 +365,8 @@ def logicCheck() {
 
     // получаем приемники
     List<Relation> destinationsInfo = formDataService.getDestinationsInfo(formData, false, false, null, userInfo, logger)
+
+    def isCalc = formDataEvent == FormDataEvent.CALCULATE || formDataEvent == FormDataEvent.COMPOSE
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -474,7 +477,7 @@ def logicCheck() {
 
         // ------------------------------------------------------------------------------------------------------------------------------
         // Следующие проверки не проводятся при расчёте
-        if (formDataEvent == FormDataEvent.CALCULATE) {
+        if (isCalc) {
             continue
         }
 
@@ -516,7 +519,7 @@ def logicCheck() {
                 def allRecords = getAllRecords(210L).values() // dTo
                 def records = allRecords.findAll { record ->
                     record.DECLARATION_REGION_ID.value == declarationRegionId &&
-                            record.DICT_REGION_ID.value == regionId &&
+                            record.REGION_ID.value == regionId &&
                             record.OKTMO.value == row.codeOKATO
                 }
                 if (records == null || records.isEmpty()) {

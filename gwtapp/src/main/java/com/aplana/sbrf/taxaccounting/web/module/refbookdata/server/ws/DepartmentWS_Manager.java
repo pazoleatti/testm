@@ -22,11 +22,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
@@ -166,13 +170,16 @@ public class DepartmentWS_Manager {
         return departmentChange;
     }
 
-    private List<TaxDepartmentChange> convert(List<DepartmentChange> departmentChangeList) {
+    private List<TaxDepartmentChange> convert(List<DepartmentChange> departmentChangeList) throws DatatypeConfigurationException {
         List<TaxDepartmentChange> taxDepartmentChangeList = new ArrayList<TaxDepartmentChange>();
         for(DepartmentChange departmentChange: departmentChangeList) {
             TaxDepartmentChange taxDepartmentChange = new TaxDepartmentChange();
             taxDepartmentChange.setOperationType(departmentChange.getOperationType().getCode());
             taxDepartmentChange.setId(departmentChange.getId());
-            taxDepartmentChange.setChange_datetime(departmentChange.getLogDate());
+            GregorianCalendar gregorianCalendar = new GregorianCalendar();
+            gregorianCalendar.setTime(departmentChange.getLogDate());
+            XMLGregorianCalendar changeDatetime = DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
+            taxDepartmentChange.setChangeDatetime(changeDatetime);
             if (departmentChange.getOperationType() != DepartmentChangeOperationType.DELETE) {
                 taxDepartmentChange.setLevel(departmentChange.getLevel());
                 taxDepartmentChange.setName(departmentChange.getName());
@@ -190,6 +197,16 @@ public class DepartmentWS_Manager {
             taxDepartmentChangeList.add(taxDepartmentChange);
         }
         return taxDepartmentChangeList;
+    }
+
+    public boolean checkServiceAvailable(String address) {
+        try {
+            DepartmentWS_Service departmentWS_Service = new DepartmentWS_Service(address + "DepartmentWS?wsdl");
+            DepartmentWS departmentWS = departmentWS_Service.getDepartmentWSPort();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }

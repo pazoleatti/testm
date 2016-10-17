@@ -1,9 +1,8 @@
 
 package com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.Date;
 
 
@@ -42,7 +41,7 @@ import java.util.Date;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TaxDepartmentChange", propOrder = {
     "operationType",
-    "change_datetime",
+    "changeDatetime",
     "id",
     "level",
     "name",
@@ -60,7 +59,9 @@ import java.util.Date;
 public class TaxDepartmentChange {
 
     protected int operationType;
-    protected Date change_datetime;
+    @XmlElement(name = "change_datetime", required = true)
+    @XmlSchemaType(name = "dateTime")
+    protected XMLGregorianCalendar changeDatetime;
     protected int id;
     protected Integer level;
     protected String name;
@@ -91,12 +92,12 @@ public class TaxDepartmentChange {
         this.operationType = value;
     }
 
-    public Date getChange_datetime() {
-        return change_datetime;
+    public XMLGregorianCalendar getChangeDatetime() {
+        return changeDatetime;
     }
 
-    public void setChange_datetime(Date change_datetime) {
-        this.change_datetime = change_datetime;
+    public void setChangeDatetime(XMLGregorianCalendar changeDatetime) {
+        this.changeDatetime = changeDatetime;
     }
 
     /**
