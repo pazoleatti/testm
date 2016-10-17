@@ -23,7 +23,7 @@ public interface DepartmentWS {
 
     /**
      * 
-     * @param departmentChanges
+     * @param taxDepartmentChanges
      * @return
      *     returns com.aplana.sbrf.taxaccounting.departmentws.TaxDepartmentChangeStatus
      */
@@ -33,6 +33,6 @@ public interface DepartmentWS {
     @ResponseWrapper(localName = "sendDepartmentChangeResponse", targetNamespace = "http://taxaccounting.sbrf.aplana.com/DepartmentWS/", className = "com.aplana.sbrf.taxaccounting.departmentws.SendDepartmentChangeResponse")
     public TaxDepartmentChangeStatus sendDepartmentChange(
         @WebParam(name = "taxDepartmentChanges", targetNamespace = "")
-        List<TaxDepartmentChange> departmentChanges) throws SocketTimeoutException;
+        List<TaxDepartmentChange> taxDepartmentChanges);
 
 }
