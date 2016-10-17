@@ -243,7 +243,7 @@ public class Vehicles2Test extends ScriptTestBase {
         when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
 
         // Данные НФ-источника, формируются импортом
-        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.setImportFileInputStream(getCustomInputStream("importFileCompose.xlsm"));
         testHelper.execute(FormDataEvent.IMPORT);
         sourceDataRowHelper.save(testHelper.getDataRowHelper().getAll());
         testHelper.initRowData();
