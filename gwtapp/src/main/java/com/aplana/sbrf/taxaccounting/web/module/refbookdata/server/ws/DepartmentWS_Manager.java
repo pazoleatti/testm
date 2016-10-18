@@ -123,16 +123,20 @@ public class DepartmentWS_Manager {
         } catch (Exception e) {
             LOG.error("Произошла непредвиденная ошибка при отправке сообщения в АС СУНР", e);
             String msg;
+            String errorCode;
             if (ExceptionUtils.indexOfThrowable(e, SocketTimeoutException.class) != -1) {
                 msg = "Возникла ошибка при отправке изменении подразделении в АС СУНР. Текст ошибки: «Время ожидания ответа истекло»";
+                errorCode = "E4";
             } else if (ExceptionUtils.indexOfThrowable(e, ConnectException.class) != -1) {
                 msg = "Возникла ошибка при отправке изменении подразделении в АС СУНР. Текст ошибки: «Произошла ошибка при попытке соединения с веб-сервисом»";
+                errorCode = "E5";
             } else {
                 msg = "Произошла непредвиденная ошибка при отправке сообщения в АС СУНР. Текст ошибки: «Неизвестная техническая ошибка»";
+                errorCode = "E5";
             }
             if (taxDepartmentChanges != null) {
                 taxDepartmentChanges.setErrorCode("E5");
-                taxDepartmentChanges.setErrorText(msg);
+                taxDepartmentChanges.setErrorText(errorCode);
             } else {
                 auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                         null, null, null, null, msg, null);
