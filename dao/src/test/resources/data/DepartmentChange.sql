@@ -1,2 +1,2 @@
-insert into department_change (operationtype, log_date, id) values (2, sysdate - 10, 0);
-insert into department_change (operationtype, log_date, id) values (2, sysdate - 5, 0);
+insert into department_change (department_id, log_date, operationtype) values (0, sysdate - 10, 2);
+insert into department_change (department_id, log_date, operationtype) values (0, sysdate - 5, 2);

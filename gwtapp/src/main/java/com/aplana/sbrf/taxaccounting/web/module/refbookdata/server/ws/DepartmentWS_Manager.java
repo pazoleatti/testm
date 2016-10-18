@@ -149,7 +149,7 @@ public class DepartmentWS_Manager {
 
     private DepartmentChange createChange(DepartmentChangeOperationType operationType, int depId) {
         DepartmentChange departmentChange = new DepartmentChange();
-        departmentChange.setId(depId);
+        departmentChange.setDepartmentId(depId);
         departmentChange.setOperationType(operationType);
         if (operationType != DepartmentChangeOperationType.DELETE) {
             Department department = departmentService.getDepartment(depId);
@@ -182,7 +182,7 @@ public class DepartmentWS_Manager {
         for(DepartmentChange departmentChange: departmentChangeList) {
             TaxDepartmentChange taxDepartmentChange = new TaxDepartmentChange();
             taxDepartmentChange.setOperationType(departmentChange.getOperationType().getCode());
-            taxDepartmentChange.setId(departmentChange.getId());
+            taxDepartmentChange.setId(departmentChange.getDepartmentId());
             GregorianCalendar gregorianCalendar = new GregorianCalendar();
             gregorianCalendar.setTime(departmentChange.getLogDate());
             XMLGregorianCalendar changeDatetime = DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);

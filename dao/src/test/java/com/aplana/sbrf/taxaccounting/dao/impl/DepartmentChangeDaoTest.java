@@ -28,7 +28,7 @@ public class DepartmentChangeDaoTest {
         departmentChangeDao.clean();
         DepartmentChange departmentChange = new DepartmentChange();
         departmentChange.setOperationType(DepartmentChangeOperationType.CREATE);
-        departmentChange.setId(101);
+        departmentChange.setDepartmentId(101);
         departmentChange.setLevel(1);
         departmentChange.setParentId(3);
         departmentChange.setName("Name");
@@ -48,7 +48,7 @@ public class DepartmentChangeDaoTest {
 
         DepartmentChange depChange = departmentChangeDao.getAllChanges().get(0);
         Assert.assertEquals(departmentChange.getOperationType(), depChange.getOperationType());
-        Assert.assertEquals(departmentChange.getId(), depChange.getId());
+        Assert.assertEquals(departmentChange.getDepartmentId(), depChange.getDepartmentId());
         Assert.assertEquals(departmentChange.getLevel(), depChange.getLevel());
         Assert.assertEquals(departmentChange.getParentId(), depChange.getParentId());
         Assert.assertEquals(departmentChange.getName(), depChange.getName());
@@ -67,7 +67,7 @@ public class DepartmentChangeDaoTest {
     public void addChange_1() {
         DepartmentChange departmentChange = new DepartmentChange();
         departmentChange.setOperationType(DepartmentChangeOperationType.CREATE);
-        departmentChange.setId(101);
+        departmentChange.setDepartmentId(101);
         departmentChange.setLevel(1);
         departmentChange.setParentId(3);
         //departmentChange.setName("Name");
@@ -88,7 +88,7 @@ public class DepartmentChangeDaoTest {
     public void addChange1() {
         DepartmentChange departmentChange = new DepartmentChange();
         departmentChange.setOperationType(DepartmentChangeOperationType.UPDATE);
-        departmentChange.setId(1);
+        departmentChange.setDepartmentId(1);
         departmentChange.setLevel(1);
         departmentChange.setParentId(0);
         departmentChange.setName("Name");
@@ -105,7 +105,7 @@ public class DepartmentChangeDaoTest {
     public void addChange2() {
         DepartmentChange departmentChange = new DepartmentChange();
         departmentChange.setOperationType(DepartmentChangeOperationType.DELETE);
-        departmentChange.setId(1);
+        departmentChange.setDepartmentId(1);
         departmentChangeDao.addChange(departmentChange);
     }
 
@@ -113,7 +113,7 @@ public class DepartmentChangeDaoTest {
     public void clean() {
         DepartmentChange departmentChange = new DepartmentChange();
         departmentChange.setOperationType(DepartmentChangeOperationType.DELETE);
-        departmentChange.setId(1);
+        departmentChange.setDepartmentId(1);
         Assert.assertEquals(departmentChangeDao.getAllChanges().size(), 2);
         departmentChangeDao.addChange(departmentChange);
         Assert.assertEquals(departmentChangeDao.getAllChanges().size(), 3);
@@ -125,7 +125,7 @@ public class DepartmentChangeDaoTest {
     public void clean2() {
         DepartmentChange departmentChange = new DepartmentChange();
         departmentChange.setOperationType(DepartmentChangeOperationType.DELETE);
-        departmentChange.setId(1);
+        departmentChange.setDepartmentId(1);
         departmentChangeDao.addChange(departmentChange);
         Assert.assertEquals(departmentChangeDao.getAllChanges().size(), 3);
         departmentChangeDao.clean(6);

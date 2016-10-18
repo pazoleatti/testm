@@ -12,7 +12,7 @@ public class DepartmentChange implements Serializable {
 	private static final long serialVersionUID = 1965168313168404199L;
 
     private DepartmentChangeOperationType operationType;
-    private int id;
+    private int departmentId;
     private Date logDate;
     private Integer level;
 	private String name;
@@ -35,12 +35,12 @@ public class DepartmentChange implements Serializable {
         this.operationType = operationType;
     }
 
-    public int getId() {
-        return id;
+    public int getDepartmentId() {
+        return departmentId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setDepartmentId(int departmentId) {
+        this.departmentId = departmentId;
     }
 
     public Date getLogDate() {
