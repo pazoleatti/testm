@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.ws;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 
 /**
@@ -35,7 +32,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "User", propOrder = {
     "login",
     "name",
-    "role",
+    "roles",
     "departmentId"
 })
 public class User {
@@ -44,8 +41,9 @@ public class User {
     protected String login;
     @XmlElement(required = true)
     protected String name;
+    @XmlElementWrapper(name = "roles")
     @XmlElement(required = true)
-    protected List<Role> role;
+    protected List<Role> roles;
     protected int departmentId;
 
     /**
@@ -118,15 +116,15 @@ public class User {
      * 
      * 
      */
-    public List<Role> getRole() {
-        if (role == null) {
-            role = new ArrayList<Role>();
+    public List<Role> getRoles() {
+        if (roles == null) {
+            roles = new ArrayList<Role>();
         }
-        return this.role;
+        return this.roles;
     }
 
-    public void setRole(List<Role> value) {
-        this.role = value;
+    public void setRoles(List<Role> value) {
+        this.roles = value;
     }
 
     /**
@@ -150,7 +148,7 @@ public class User {
         return "User{" +
                 "login: " + login +
                 ", name: " + name +
-                ", role: " + (role != null ? role.toString() : null) +
+                ", role: " + (roles != null ? roles.toString() : null) +
                 ", departmentId: " + departmentId +
                 '}';
     }

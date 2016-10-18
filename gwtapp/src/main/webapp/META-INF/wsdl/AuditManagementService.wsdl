@@ -6,7 +6,7 @@
             <element name="addAuditLogResponse">
                 <complexType/>
             </element>
-            <element name="fault" type="tns:AuditManagementServiceException"/>
+            <element name="fault" type="tns:FaultInfo"/>
 
             <complexType name="addAuditLog">
                 <sequence>
@@ -32,7 +32,13 @@
                 <sequence>
                     <element name="login" type="xsd:string"/>
                     <element name="name" type="xsd:string"/>
-                    <element name="role" type="tns:Role" maxOccurs="unbounded"/>
+                    <element name="roles">
+                        <complexType>
+                            <sequence>
+                                <element name="role" type="tns:Role" maxOccurs="unbounded"/>
+                            </sequence>
+                        </complexType>
+                    </element>
                     <element name="departmentId" type="xsd:int"/>
                 </sequence>
             </complexType>
@@ -43,7 +49,7 @@
                 </sequence>
             </complexType>
 
-            <complexType name="AuditManagementServiceException">
+            <complexType name="FaultInfo">
                 <sequence>
                     <element name="code" nillable="true" type="xsd:string"/>
                     <element name="details" nillable="true" type="xsd:string"/>
@@ -59,7 +65,7 @@
     <wsdl:message name="addAuditLogResponse">
         <wsdl:part name="parameters" element="tns:addAuditLogResponse"/>
     </wsdl:message>
-    <wsdl:message name="AuditManagementServiceException">
+    <wsdl:message name="ServiceException">
         <wsdl:part element="tns:fault" name="fault"/>
     </wsdl:message>
 
@@ -67,7 +73,7 @@
         <wsdl:operation name="addAuditLog">
             <wsdl:input message="tns:addAuditLog"/>
             <wsdl:output message="tns:addAuditLogResponse"/>
-            <wsdl:fault message="tns:AuditManagementServiceException" name="AuditManagementServiceException"/>
+            <wsdl:fault message="tns:ServiceException" name="ServiceException"/>
         </wsdl:operation>
     </wsdl:portType>
 

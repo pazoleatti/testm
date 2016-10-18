@@ -11,7 +11,7 @@ import javax.xml.ws.WebFault;
  * 
  */
 @WebFault(name = "fault", targetNamespace = "http://taxaccounting.sbrf.aplana.com/AuditManagementService/")
-public class AuditManagementServiceException_Exception
+public class ServiceException
     extends Exception
 {
 
@@ -19,14 +19,14 @@ public class AuditManagementServiceException_Exception
      * Java type that goes as soapenv:Fault detail element.
      * 
      */
-    private AuditManagementServiceException faultInfo;
+    private FaultInfo faultInfo;
 
     /**
      * 
      * @param message
      * @param faultInfo
      */
-    public AuditManagementServiceException_Exception(String message, AuditManagementServiceException faultInfo) {
+    public ServiceException(String message, FaultInfo faultInfo) {
         super(message);
         this.faultInfo = faultInfo;
     }
@@ -37,7 +37,7 @@ public class AuditManagementServiceException_Exception
      * @param faultInfo
      * @param cause
      */
-    public AuditManagementServiceException_Exception(String message, AuditManagementServiceException faultInfo, Throwable cause) {
+    public ServiceException(String message, FaultInfo faultInfo, Throwable cause) {
         super(message, cause);
         this.faultInfo = faultInfo;
     }
@@ -45,9 +45,9 @@ public class AuditManagementServiceException_Exception
     /**
      * 
      * @return
-     *     returns fault bean: com.aplana.sbrf.taxaccounting.web.module.audit.ws.AuditManagementServiceException
+     *     returns fault bean: com.aplana.sbrf.taxaccounting.web.module.audit.ws.FaultInfo
      */
-    public AuditManagementServiceException getFaultInfo() {
+    public FaultInfo getFaultInfo() {
         return faultInfo;
     }
 

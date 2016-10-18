@@ -4,7 +4,6 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.ws;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 
@@ -22,7 +21,7 @@ public interface AuditManagementService {
     /**
      * 
      * @param auditLog
-     * @throws AuditManagementServiceException_Exception
+     * @throws ServiceException
      */
     @WebMethod(action = "http://taxaccounting.sbrf.aplana.com/AuditManagementService/addAuditLog")
     @RequestWrapper(localName = "addAuditLog", targetNamespace = "http://taxaccounting.sbrf.aplana.com/AuditManagementService/", className = "com.aplana.sbrf.taxaccounting.web.module.audit.ws.AddAuditLog")
@@ -30,7 +29,7 @@ public interface AuditManagementService {
     public void addAuditLog(
         @WebParam(name = "auditLog", targetNamespace = "")
         AuditLog auditLog)
-        throws AuditManagementServiceException_Exception
+        throws ServiceException
     ;
 
 }

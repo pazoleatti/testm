@@ -5,12 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-import javax.jws.WebParam;
 import javax.jws.WebService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -27,7 +24,7 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
     private AuditService auditService;
 
     public void addAuditLog(AuditLog auditLog)
-            throws AuditManagementServiceException_Exception {
+            throws ServiceException {
 
         try {
             validate(auditLog);
@@ -35,16 +32,16 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
             TAUserInfo userInfo = assembleUserInfo(auditLog);
             Integer departmentId = null;
             auditService.add(FormDataEvent.SUNR_USER_ACTION, userInfo, departmentId, null, null, null, null, auditLog.getNote(), null, null);
-        } catch (AuditManagementServiceException_Exception e) {
+        } catch (ServiceException e) {
             String newMessage = e.getMessage() + "\n" + (auditLog != null ? auditLog.toString() : "");
-            throw new AuditManagementServiceException_Exception(newMessage, e.getFaultInfo());
+            throw new ServiceException(newMessage, e.getFaultInfo());
         } catch (Exception e) {
-            String newMessage = e.getMessage() + "\n" + (auditLog != null ? auditLog.toString() : "") + "\n" + getStackTrace(e);
+            String newMessage = e.getMessage();
             throwException("E0", "Внутренняя ошибка сервиса", newMessage);
         }
     }
 
-    private void validate(AuditLog auditLog) throws AuditManagementServiceException_Exception {
+    private void validate(AuditLog auditLog) throws ServiceException {
         if (auditLog == null) {
             throwException("E1", "Некорректная структура сообщения", "Не удалось получить данные для логирования");
         } else {
@@ -61,10 +58,10 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
                     /*if (user.getName() == null || user.getName().isEmpty()) {
                         throwException("E1", "Некорректная структура сообщения", "Не удалось получить имя пользователя");
                     }*/
-                    if (user.getRole() == null || user.getRole().isEmpty()) {
+                    if (user.getRoles() == null || user.getRoles().isEmpty()) {
                         throwException("E1", "Некорректная структура сообщения", "Не удалось получить роли пользователя");
                     } else {
-                        for (Role role : user.getRole()) {
+                        for (Role role : user.getRoles()) {
                             if (role.getName() == null || role.getName().isEmpty()) {
                                 throwException("E1", "Некорректная структура сообщения", "Не удалось получить наименование роли пользователя");
                             }
@@ -99,7 +96,7 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
 
     private List<TARole> assembleRoles(AuditLog auditLog) {
         List<TARole> roles = new ArrayList<TARole>();
-        for (Role role : auditLog.getUserInfo().getUser().getRole()) {
+        for (Role role : auditLog.getUserInfo().getUser().getRoles()) {
             TARole taRole = new TARole();
             taRole.setName(role.getName());
             roles.add(taRole);
@@ -107,11 +104,11 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
         return roles;
     }
 
-    private void throwException(String code, String details, String message) throws AuditManagementServiceException_Exception {
-        AuditManagementServiceException fault = new AuditManagementServiceException();
+    private void throwException(String code, String details, String message) throws ServiceException {
+        FaultInfo fault = new FaultInfo();
         fault.setCode(code);
         fault.setDetails(details);
-        throw new AuditManagementServiceException_Exception(message, fault);
+        throw new ServiceException(message, fault);
     }
 
     private String getStackTrace(Exception e) {
