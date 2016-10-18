@@ -332,9 +332,7 @@ void logicCheck() {
             }
 
             // проверка для графы 20 отдельная, потому что ее значение надо проверить, хотя сама графа нерасчетная
-            tmp = calc20(row)
-            if (tmp == null && row.benefitPeriod != null || tmp != null && row.benefitPeriod == null ||
-                    tmp.compareTo(row.benefitPeriod) != 0) {
+            if (row.benefitPeriod != calc20(row)) {
                 def columnName = getColumnName(row, 'benefitPeriod')
                 logger.error("Строка %s: Графа «%s» заполнена неверно", rowIndex, columnName)
             }
@@ -828,12 +826,6 @@ def getH(def row, def periodOrder, def showMsg = false) {
         }
         return null
     }
-
-    // TODO (Ramil Timerbaev)
-    if (showMsg) {
-        def i = 24 + periodOrder
-        logger.info("отладка расчета графы $i строка ${row.getIndex()}: H = В * Графа 21 * Графа 22 * К / 100 – Графа 24 = $b * ${row.taxRate} * $value22 * $k / 100 – $value24 = $tmp")
-    }
     return tmp
 }
 
@@ -858,22 +850,10 @@ def getB(def row, def value23, def alias, def showMsg = false) {
     if (check5 == 1 && p != null && value23 != null) {
         tmp = defaultValue - p
         tmp = (tmp < 0 ? 0 : tmp)
-        // TODO (Ramil Timerbaev)
-        if (showMsg && alias == 'q1') {
-            logger.info("отладка расчета графы 25 строка ${row.getIndex()}: В = Графа 10 * Графа 11 – Р = ${row.cadastralCost} * $taxPart – $p = $tmp")
-        }
     } else if (check5 == 2 && p != null && value23 != null) {
         tmp = defaultValue - defaultValue * p * (1 - value23)
-        // TODO (Ramil Timerbaev)
-        if (showMsg && alias == 'q1') {
-            logger.info("отладка расчета графы 25 строка ${row.getIndex()}: В = (Графа 10 * Графа 11 – Графа 10 * Графа 11 * Р * (1 – Графа 23)) = (${row.cadastralCost} * $taxPart - ${row.cadastralCost} * $taxPart * $p) * (1 - $value23) = $tmp")
-        }
     } else if (check5 == 0 || check5 != 1 || check5 != 2) {
         tmp = defaultValue
-        // TODO (Ramil Timerbaev)
-        if (showMsg && alias == 'q1') {
-            logger.info("отладка расчета графы 25 строка ${row.getIndex()}: В = Графа 10 * Графа 11 = ${row.cadastralCost} * $taxPart = $tmp")
-        }
     }
 
     // Логическая проверка 16. Проверка корректности значения налоговой базы
@@ -1177,13 +1157,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     if (hasRegion) {
         // графа 15 - атрибут 7053 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 705 «Параметры налоговых льгот земельного налога»
         colIndex = 15
-        def record704 = (values[6] ? getRecordImport(704, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset) : null)
+        def record704 = (values[6] ? getRecordImport(704, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false) : null)
         def code = record704?.record_id?.value
         def oktmo = newRow.oktmo
         def param = values[17] ?: null
         def record705 = getRecord705Import(code, oktmo, param)
         newRow.benefitCode = record705?.record_id?.value
-        if (record704 && record705 == null) {
+        if (values[2] && record705 == null) {
             def xlsColumnName15 = getXLSColumnName(colIndex + colOffset)
             def columnName15 = getColumnName(newRow, 'benefitCode')
             def columnName16 = getColumnName(newRow, 'benefitBase')

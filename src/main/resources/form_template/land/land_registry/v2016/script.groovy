@@ -508,13 +508,13 @@ def getNewRowFromXlsm(def values, def colOffset, def fileRowIndex, def rowIndex,
     if (hasRegion) {
         // графа 11 - атрибут 7053 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 705 «Параметры налоговых льгот земельного налога»
         colIndex = 10
-        def record704 = (values[2] ? getRecordImport(704, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset) : null)
+        def record704 = (values[2] ? getRecordImport(704, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false) : null)
         def code = record704?.record_id?.value
         def oktmo = newRow.oktmo
         def param = values[12] ?: null
         def record705 = getRecord705Import(code, oktmo, param)
         newRow.benefitCode = record705?.record_id?.value
-        if (record704 && record705 == null) {
+        if (values[2] && record705 == null) {
             def xlsColumnName11 = getXLSColumnName(colIndex + colOffset)
             def columnName11 = getColumnName(newRow, 'benefitCode')
             def columnName12 = getColumnName(newRow, 'benefitBase')
