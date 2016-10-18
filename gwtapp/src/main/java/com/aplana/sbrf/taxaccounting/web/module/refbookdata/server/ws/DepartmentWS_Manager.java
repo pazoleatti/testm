@@ -26,9 +26,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
-import java.net.ConnectException;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -60,7 +58,7 @@ public class DepartmentWS_Manager {
     @Autowired
     private ConfigurationService configurationService;
 
-    private DepartmentWS getDepartmentWSPort() throws MalformedURLException {
+    private DepartmentWS getDepartmentWSPort() throws Exception {
         int timeout = 0;
         int rootDepartmentId = departmentService.getBankDepartment().getId();
         ConfigurationParamModel configurationParamModel = configurationService.getAllConfig(userService.getSystemUserInfo());
@@ -74,6 +72,12 @@ public class DepartmentWS_Manager {
                 timeout = Integer.parseInt(sunrDepartmentWSTimeoutParams.get(0));
             } catch (NumberFormatException ignored) {}
         }
+
+        //проверка доступности wsdl
+        URLConnection uc = (new URL(sunrAddressParams.get(0))).openConnection();
+        uc.setConnectTimeout(10000);
+        uc.setReadTimeout(10000);
+        uc.getContent();
 
         DepartmentWS_Service departmentWS_Service = new DepartmentWS_Service(sunrAddressParams.get(0));
         DepartmentWS departmentWS = departmentWS_Service.getDepartmentWSPort();
@@ -113,11 +117,10 @@ public class DepartmentWS_Manager {
                     if (taxDepartmentChanges != null) {
                         taxDepartmentChanges.setErrorCode("E3");
                         taxDepartmentChanges.setErrorText(String.format("Получен код ошибки \"%s\" при обработке изменении подразделении в АС СУНР.", status.getErrorCode()));
-                    } else {
-                        String msg = String.format("Изменения подразделении не были отпралено в АС СУНР. Код ошибки: %s, текст ошибки: %s.", status.getErrorCode(), status.getErrorText());
-                        auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
-                                null, null, null, null, msg, null);
                     }
+                    String msg = String.format("Изменения подразделении не были отпралено в АС СУНР. Код ошибки: %s, текст ошибки: %s.", status.getErrorCode(), status.getErrorText());
+                    auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
+                            null, null, null, null, msg, null);
                 }
             }
         } catch (Exception e) {
@@ -197,8 +200,6 @@ public class DepartmentWS_Manager {
                 taxDepartmentChange.setCode(departmentChange.getCode());
                 taxDepartmentChange.setGarantUse(departmentChange.getGarantUse());
                 taxDepartmentChange.setSunrUse(departmentChange.getSunrUse());
-            } else {
-                taxDepartmentChange.setLevel(1);
             }
             taxDepartmentChangeList.add(taxDepartmentChange);
         }
