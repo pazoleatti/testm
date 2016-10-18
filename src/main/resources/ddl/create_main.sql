@@ -1106,10 +1106,10 @@ create global temporary table form_search_data_result_tmp
   ) on commit delete rows ;
 --------------------------------------------------------------------------------------------------------
 create table department_change (
-  operationType number(9) not null,
+  department_id number(9) not null,
   log_date date not null,
-  id number(9) not null,
-  hier_level number(2),
+  operationType number(9) not null,
+  hier_level number(9),
   name varchar2(510),
   parent_id number(9),
   type number(9),
@@ -1123,17 +1123,20 @@ create table department_change (
   sunr_use number(1)
 );
 
-comment on table department_change is 'Подразделения банка';
-comment on column department_change.id is 'Идентификатор записи';
+comment on table department_change is 'Изменения справочника "Подразделения"';
+comment on column department_change.department_id is 'Идентификатор подразделения';
+comment on column department_change.log_date is 'Дата/время изменения данных';
+comment on column department_change.operationType is 'Тип операции (0 - создание, 1 - изменение, 2 - удаление)';
 comment on column department_change.hier_level is 'Уровень записи в иерархии';
 comment on column department_change.name is 'Наименование подразделения';
 comment on column department_change.parent_id is 'Идентификатор родительского подразделения';
-comment on column department_change.type is 'Тип подразделения (1 - Банк, 2- ТБ, 3- ЦСКО, ПЦП, 4- Управление, 5- Не передается в СУДИР)';
+comment on column department_change.type is 'Тип подразделения (1 - Банк, 2 - ТБ, 3 - ЦСКО, ПЦП, 4 - Управление, 5 - Не передается в СУДИР)';
 comment on column department_change.shortname is 'Сокращенное наименование подразделения';
 comment on column department_change.tb_index is 'Индекс территориального банка';
 comment on column department_change.sbrf_code is 'Код подразделения в нотации Сбербанка';
 comment on column department_change.region is 'Регион';
 comment on column department_change.is_active is 'Действующее подразделение (0 - не действующее, 1 - действующее)';
 comment on column department_change.code is 'Код подразделения';
-comment on column department_change.garant_use is 'Признак, что используется в модуле Гарантий';
+comment on column department_change.garant_use is 'Признак, что используется в модуле Гарантий (0 - не используется, 1 - используется)';
+comment on column department_change.sunr_use IS 'Признак, что используется в АС СУНР (0 - не используется, 1 - используется)';
 --------------------------------------------------------------------------------------------------------

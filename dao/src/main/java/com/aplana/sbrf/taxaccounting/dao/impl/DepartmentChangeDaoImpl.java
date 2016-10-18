@@ -24,9 +24,9 @@ public class DepartmentChangeDaoImpl extends AbstractDao implements DepartmentCh
         public DepartmentChange mapRow(ResultSet rs, int rowNum) throws SQLException {
             try {
                 DepartmentChange departmentChange = new DepartmentChange();
-                departmentChange.setOperationType(DepartmentChangeOperationType.fromCode(SqlUtils.getInteger(rs, "operationType")));
-                departmentChange.setId(SqlUtils.getInteger(rs, "id"));
+                departmentChange.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
                 departmentChange.setLogDate(rs.getTimestamp("log_date"));
+                departmentChange.setOperationType(DepartmentChangeOperationType.fromCode(SqlUtils.getInteger(rs, "operationType")));
                 departmentChange.setLevel(rs.getInt("hier_level"));
                 departmentChange.setName(rs.getString("name"));
                 Integer parentId = SqlUtils.getInteger(rs, "parent_id");
@@ -63,7 +63,7 @@ public class DepartmentChangeDaoImpl extends AbstractDao implements DepartmentCh
     public List<DepartmentChange> getAllChanges() {
         try {
             return getJdbcTemplate().query(
-                    "select operationtype, id, log_date, hier_level, name, parent_id, type, shortname, tb_index, sbrf_code, region, is_active, code, garant_use, sunr_use " +
+                    "select department_id, log_date, operationtype, hier_level, name, parent_id, type, shortname, tb_index, sbrf_code, region, is_active, code, garant_use, sunr_use " +
                             "from department_change " +
                             "order by log_date",
                     new DepartmentChangeJdbcMapper()
@@ -77,17 +77,17 @@ public class DepartmentChangeDaoImpl extends AbstractDao implements DepartmentCh
     public void addChange(DepartmentChange departmentChange) {
         if (departmentChange.getOperationType() == DepartmentChangeOperationType.DELETE) {
             getJdbcTemplate().update("insert into department_change " +
-                            "(operationtype, log_date, id)" +
+                            "(department_id, log_date, operationtype)" +
                             "values (?, sysdate, ?)",
-                    departmentChange.getOperationType().getCode(),
-                    departmentChange.getId()
+                    departmentChange.getDepartmentId(),
+                    departmentChange.getOperationType().getCode()
             );
         } else {
             getJdbcTemplate().update("insert into department_change " +
-                            "(operationtype, log_date, id, hier_level, name, parent_id, type, shortname, tb_index, sbrf_code, region, is_active, code, garant_use, sunr_use)" +
+                            "(department_id, log_date, operationtype, hier_level, name, parent_id, type, shortname, tb_index, sbrf_code, region, is_active, code, garant_use, sunr_use)" +
                             "values (?, SYSDATE, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    departmentChange.getDepartmentId(),
                     departmentChange.getOperationType().getCode(),
-                    departmentChange.getId(),
                     departmentChange.getLevel(),
                     departmentChange.getName(),
                     departmentChange.getParentId(),
