@@ -276,7 +276,7 @@ public class AuditServiceImpl implements AuditService {
                 roles.append(", ");
             }
         }
-        log.setRoles(roles.toString());
+        log.setRoles(roles.toString().substring(0 , Math.min(roles.toString().length(), 200)));
 
         log.setFormDepartmentName(departmentName != null ? departmentName.substring(0, Math.min(departmentName.length(), 2000)) : null);
         log.setFormDepartmentId(departmentId);
