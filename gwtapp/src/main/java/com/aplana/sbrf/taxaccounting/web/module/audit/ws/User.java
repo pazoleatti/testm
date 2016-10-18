@@ -42,7 +42,7 @@ public class User {
     @XmlElement(required = true)
     protected String name;
     @XmlElementWrapper(name = "roles")
-    @XmlElement(required = true)
+    @XmlElement(name = "role", required = true)
     protected List<Role> roles;
     protected int departmentId;
 
