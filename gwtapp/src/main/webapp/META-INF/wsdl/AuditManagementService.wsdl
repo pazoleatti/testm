@@ -50,13 +50,6 @@
                 </sequence>
             </complexType>
 
-            <complexType name="AuditServiceResult">
-                <sequence>
-                    <element name="code" type="xsd:string"/>
-                    <element name="text" type="xsd:string" minOccurs="0"/>
-                </sequence>
-            </complexType>
-
         </schema>
     </wsdl:types>
 

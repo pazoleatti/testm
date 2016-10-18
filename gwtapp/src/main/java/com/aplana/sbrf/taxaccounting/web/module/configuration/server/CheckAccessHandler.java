@@ -116,7 +116,9 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
         if (valuesList != null) {
             for (String value : valuesList) {
                 if (!departmentWS_manager.checkServiceAvailable(value)) {
-                    logger.error("Сервис " + DepartmentWS.class.getName() + " не доступен по адресу " + value);
+                    logger.error("Сервис " + DepartmentWS.class.getSimpleName() + " не доступен по адресу " + value);
+                } else {
+                    logger.info("Сервис " + DepartmentWS.class.getSimpleName() + " доступен по адресу " + value);
                 }
             }
         }
