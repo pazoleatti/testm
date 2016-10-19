@@ -405,6 +405,7 @@ def getKPPList() {
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
     // отсортировать/группировать
     sortRows(dataRows, groupColumns)
 
