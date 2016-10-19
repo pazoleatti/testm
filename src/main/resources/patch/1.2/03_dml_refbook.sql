@@ -12,12 +12,10 @@ begin
 			delete from ref_book_value where attribute_id = 7044;
 			delete from ref_book_attribute where id = 7044;
 			update ref_book set type=0 where id = 704;	
-	
+			dbms_output.put_line(l_task_name||'[INFO]: Success');	
 	else
-		dbms_output.put_line(l_task_name||'[INFO]:'||' changes to the ref_book had already been made');
+		dbms_output.put_line(l_task_name||'[INFO]:'||' сhanges had already been made');
 	end if;
-	
-	dbms_output.put_line(l_task_name||'[INFO]: Success');	
 	
 EXCEPTION
 	when OTHERS then
@@ -39,11 +37,10 @@ begin
 			delete from ref_book_attribute where id = 7023;
 			update ref_book_attribute set width=50 where id=7022;
 			update ref_book set type=0 where id = 702;		
+			dbms_output.put_line(l_task_name||'[INFO]: Success');	
 	else
 		dbms_output.put_line(l_task_name||'[INFO]:'||' changes to the ref_book had already been made');
 	end if;
-	
-	dbms_output.put_line(l_task_name||'[INFO]: Success');	
 	
 EXCEPTION
 	when OTHERS then
@@ -103,7 +100,7 @@ begin
 		
 		dbms_output.put_line(l_task_name||'[INFO]: Success');		
 	else
-		dbms_output.put_line(l_task_name||'[INFO]: ref_book or its attributes already exist');
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book or its attributes already exist');
 	end if;
 		
 EXCEPTION
@@ -123,7 +120,7 @@ declare
 begin	
 	
 	update ref_book_attribute set attribute_id = 15 where id = 19;	
-	dbms_output.put_line(l_task_name||'[INFO]: Success');		
+	dbms_output.put_line(l_task_name||'[INFO]: update completed');		
 	
 EXCEPTION
 	when OTHERS then
@@ -139,7 +136,7 @@ declare
 	l_task_name varchar2(128) := 'RefBook Block #6 (SBRFACCTAX-17131 - Off shore zones.Name)';
 begin	
 	update ref_book_attribute set required=0, is_unique=0 where id = 5195;
-	dbms_output.put_line(l_task_name||'[INFO]: Success');		
+	dbms_output.put_line(l_task_name||'[INFO]: update completed');		
 	
 EXCEPTION
 	when OTHERS then
