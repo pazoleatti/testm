@@ -296,7 +296,7 @@ comment on column department.region_id is 'Код региона';
 comment on column department.is_active is 'Действующее подразделение (0 - не действующее, 1 - действующее)';
 comment on column department.code is 'Код подразделения';
 comment on column department.garant_use is 'Признак, что используется в модуле Гарантий';
-COMMENT ON COLUMN department.sunr_use is 'Признак, что используется в СУНР';
+comment on column department.sunr_use is 'Признак, что используется в АС СУНР';
 
 create sequence seq_department start with 1000;
 ---------------------------------------------------------------------------------------------------
