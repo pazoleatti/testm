@@ -1,9 +1,16 @@
 package form_template.land.include_in_declaration.v2016
 
+import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.FormType
 import com.aplana.sbrf.taxaccounting.model.Relation
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
@@ -74,6 +81,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.GET_SOURCES:
+        getSources()
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -1003,4 +1013,187 @@ void consolidation() {
     }
     updateIndexes(dataRows)
     formDataService.getDataRowHelper(formData).allCached = dataRows
+}
+
+/** Получить результат для события FormDataEvent.GET_SOURCES. */
+void getSources() {
+    // нестандратны только формы-источники - "Расчет земельного налога за отчетные периоды"
+    if (!(form && needSources)) {
+        // формы-приемники, декларации-истчоники, декларации-приемники не переопределять
+        return
+    }
+
+    def reportPeriod = getReportPeriod()
+    def reportPeriodId = reportPeriod?.id
+    def periodOrder = null
+    def comparativePeriodId = null
+    def accruing = false
+    def SBId = 0
+
+    def departments = departmentService.getAllChildren(SBId)
+    for (def department : departments) {
+        def departmentId = department.id
+        def tmpFormData = formDataService.getLast(sourceTypeId, FormDataKind.SUMMARY, departmentId,
+                reportPeriodId, periodOrder, comparativePeriodId, accruing)
+        if (tmpFormData == null) {
+            continue
+        }
+        def relation = getRelation(tmpFormData, department, reportPeriod)
+        if (relation) {
+            sources.sourceList.add(relation)
+        }
+    }
+    sources.sourcesProcessedByScript = true
+}
+
+/**
+ * Получить запись для источника-приемника.
+ *
+ * @param tmpFormData нф
+ * @param department подразделение
+ * @param period период нф
+ * @param monthOrder номер месяца (для ежемесячной формы)
+ */
+def getRelation(FormData tmpFormData, Department department, ReportPeriod period, Integer monthOrder = null) {
+    // boolean excludeIfNotExist - исключить несозданные источники
+    if (excludeIfNotExist && tmpFormData == null) {
+        return null
+    }
+    // WorkflowState stateRestriction - ограничение по состоянию для созданных экземпляров
+    if (stateRestriction && tmpFormData != null && stateRestriction != tmpFormData.state) {
+        return null
+    }
+    Relation relation = new Relation()
+    def isSource = true
+
+    DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(tmpFormData?.departmentReportPeriodId) as DepartmentReportPeriod
+    DepartmentReportPeriod comparativePeriod = getDepartmentReportPeriodById(tmpFormData?.comparativePeriodId) as DepartmentReportPeriod
+    FormType formType = getFormTypeById(tmpFormData.formType.id) as FormType
+    def performers = [getDepartmentById(tmpFormData.performer.printDepartmentId) as Department]
+
+    // boolean light - заполняются только текстовые данные для GUI и сообщений
+    if (light) {
+        /**************  Параметры для легкой версии ***************/
+        /** Идентификатор подразделения */
+        relation.departmentId = tmpFormData.departmentId
+        /** полное название подразделения */
+        relation.fullDepartmentName = getDepartmentFullName(tmpFormData.departmentId)
+        /** Дата корректировки */
+        relation.correctionDate = departmentReportPeriod?.correctionDate
+        /** Вид нф */
+        relation.formTypeName = formType?.name
+        /** Год налогового периода */
+        relation.year = period.taxPeriod.year
+        /** Название периода */
+        relation.periodName = period.name
+        /** Название периода сравнения */
+        relation.comparativePeriodName = comparativePeriod?.reportPeriod?.name
+        /** Дата начала периода сравнения */
+        relation.comparativePeriodStartDate = comparativePeriod?.reportPeriod?.startDate
+        /** Год периода сравнения */
+        relation.comparativePeriodYear = comparativePeriod?.reportPeriod?.taxPeriod?.year
+        /** название подразделения-исполнителя */
+        relation.performerNames = [tmpFormData.performer.name]
+    }
+    /**************  Общие параметры ***************/
+    /** подразделение */
+    relation.department = department
+    /** Период */
+    relation.departmentReportPeriod = departmentReportPeriod
+    /** Статус ЖЦ */
+    relation.state = tmpFormData?.state
+    /** форма/декларация создана/не создана */
+    relation.created = (tmpFormData != null)
+    /** является ли форма источников, в противном случае приемник*/
+    relation.source = isSource
+    /** Введена/выведена в/из действие(-ия) */
+    try {
+        relation.status = getFormTemplateById(tmpFormData.formTemplateId) != null
+    } catch (DaoException e) {
+        relation.status = false
+    }
+    /** Налог */
+    relation.taxType = TaxType.LAND
+
+    /**************  Параметры НФ ***************/
+    /** Идентификатор созданной формы */
+    relation.formDataId = tmpFormData?.id
+    /** Вид НФ */
+    relation.formType = formType
+    /** Тип НФ */
+    relation.formDataKind = tmpFormData.kind
+    /** подразделение-исполнитель*/
+    relation.performers = performers
+    /** Период сравнения. Может быть null */
+    relation.comparativePeriod = comparativePeriod
+    /** Номер месяца */
+    relation.month = monthOrder
+    if (tmpFormData) {
+        /** Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения) */
+        relation.accruing = tmpFormData.accruing
+        /** Признак ручного ввода */
+        relation.manual = tmpFormData.manual
+    }
+    return relation
+}
+
+@Field
+def departmentReportPeriodMap = [:]
+
+def getDepartmentReportPeriodById(def id) {
+    if (id != null && departmentReportPeriodMap[id] == null) {
+        departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)
+    }
+    return departmentReportPeriodMap[id]
+}
+
+// Мапа для хранения типов форм (id типа формы -> тип формы)
+@Field
+def formTypeMap = [:]
+
+/** Получить тип фомры по id. */
+def getFormTypeById(def id) {
+    if (formTypeMap[id] == null) {
+        formTypeMap[id] = formTypeService.get(id)
+    }
+    return formTypeMap[id]
+}
+
+
+// Мапа для хранения подразделений (id подразделения -> подразделение)
+@Field
+def departmentMap = [:]
+
+/** Получить подразделение по id. */
+def getDepartmentById(def id) {
+    if (id != null && departmentMap[id] == null) {
+        departmentMap[id] = departmentService.get(id)
+    }
+    return departmentMap[id]
+}
+
+@Field
+def formTemplateMap = [:]
+
+def getFormTemplateById(def formTemplateId) {
+    if (formTemplateId == null) {
+        return null
+    }
+
+    if (formTemplateMap[formTemplateId] == null) {
+        formTemplateMap[formTemplateId] = formDataService.getFormTemplate(formTemplateId)
+    }
+    return formTemplateMap[formTemplateId]
+}
+
+// Мапа для хранения полного названия подразделения (id подразделения  -> полное название)
+@Field
+def departmentFullNameMap = [:]
+
+/** Получить полное название подразделения по id подразделения. */
+def getDepartmentFullName(def id) {
+    if (departmentFullNameMap[id] == null) {
+        departmentFullNameMap[id] = departmentService.getParentsHierarchy(id)
+    }
+    return departmentFullNameMap[id]
 }

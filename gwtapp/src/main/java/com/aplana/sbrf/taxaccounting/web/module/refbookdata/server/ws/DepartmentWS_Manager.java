@@ -138,8 +138,8 @@ public class DepartmentWS_Manager {
                 errorCode = "E5";
             }
             if (taxDepartmentChanges != null) {
-                taxDepartmentChanges.setErrorCode("E5");
-                taxDepartmentChanges.setErrorText(errorCode);
+                taxDepartmentChanges.setErrorCode(errorCode);
+                taxDepartmentChanges.setErrorText(msg);
             } else {
                 auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                         null, null, null, null, msg, null);
