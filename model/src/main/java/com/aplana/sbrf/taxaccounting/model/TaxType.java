@@ -35,13 +35,13 @@ public enum TaxType {
     /**
      * Земельный налог
      */
-    LAND('L', "Земельный налог", "");
+    LAND('L', "Земельный налог", "NO_ZEMND");
 
 	private final char code;
 	private final String name;
 	private final String declarationPrefix;
 	
-	private TaxType(char code, String name, String declarationPrefix) {
+	TaxType(char code, String name, String declarationPrefix) {
 		this.code = code;
 		this.name = name;
 		this.declarationPrefix = declarationPrefix;
