@@ -3,10 +3,7 @@
     <wsdl:types>
         <schema targetNamespace="http://taxaccounting.sbrf.aplana.com/AuditManagementService/" xmlns="http://www.w3.org/2001/XMLSchema">
             <element name="addAuditLog" type="tns:addAuditLog"/>
-            <element name="addAuditLogResponse">
-                <complexType/>
-            </element>
-            <element name="fault" type="tns:FaultInfo"/>
+            <element name="addAuditLogResponse" type="tns:addAuditLogResponse"/>
 
             <complexType name="addAuditLog">
                 <sequence>
@@ -49,10 +46,16 @@
                 </sequence>
             </complexType>
 
-            <complexType name="FaultInfo">
+            <xsd:complexType name="addAuditLogResponse">
+                <xsd:sequence>
+                    <xsd:element name="status" type="tns:StatusInfo" minOccurs="0"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <complexType name="StatusInfo">
                 <sequence>
-                    <element name="code" nillable="true" type="xsd:string"/>
-                    <element name="details" nillable="true" type="xsd:string"/>
+                    <element name="code" type="xsd:string"/>
+                    <element name="text" type="xsd:string" minOccurs="0"/>
                 </sequence>
             </complexType>
 
@@ -65,15 +68,11 @@
     <wsdl:message name="addAuditLogResponse">
         <wsdl:part name="parameters" element="tns:addAuditLogResponse"/>
     </wsdl:message>
-    <wsdl:message name="ServiceException">
-        <wsdl:part element="tns:fault" name="fault"/>
-    </wsdl:message>
 
     <wsdl:portType name="AuditManagementService">
         <wsdl:operation name="addAuditLog">
             <wsdl:input message="tns:addAuditLog"/>
             <wsdl:output message="tns:addAuditLogResponse"/>
-            <wsdl:fault message="tns:ServiceException" name="ServiceException"/>
         </wsdl:operation>
     </wsdl:portType>
 

@@ -4,7 +4,12 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint.DepartmentManagementServicePortType;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
@@ -20,11 +25,16 @@ import java.util.List;
         portName="AuditManagementServicePort")
 public class AuditManagementServicePortType extends SpringBeanAutowiringSupport implements AuditManagementService {
 
+    private static final Log LOG = LogFactory.getLog(AuditManagementServicePortType.class);
+
     @Autowired
     private AuditService auditService;
 
-    public void addAuditLog(AuditLog auditLog)
-            throws ServiceException {
+    @Autowired
+    private DepartmentService departmentService;
+
+    public StatusInfo addAuditLog(AuditLog auditLog) {
+        StatusInfo result = new StatusInfo();
 
         try {
             validate(auditLog);
@@ -32,48 +42,59 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
             TAUserInfo userInfo = assembleUserInfo(auditLog);
             Integer departmentId = null;
             auditService.add(FormDataEvent.SUNR_USER_ACTION, userInfo, departmentId, null, null, null, null, auditLog.getNote(), null, null);
+            result.setCode("E0");
+            result.setText("Успех");
         } catch (ServiceException e) {
-            String newMessage = e.getMessage() + "\n" + (auditLog != null ? auditLog.toString() : "");
-            throw new ServiceException(newMessage, e.getFaultInfo());
+            LOG.error(e.getMessage(), e);
+            result.setCode(e.getFaultInfo().getCode());
+            result.setText(e.getMessage() + (e.getFaultInfo().getDetails() != null ? "\n Описание ошибки: " + e.getFaultInfo().getDetails() : ""));
         } catch (Exception e) {
-            String newMessage = e.getMessage();
-            throwException("E0", "Внутренняя ошибка сервиса", newMessage);
+            LOG.error(e.getMessage(), e);
+            result.setCode("E7");
+            result.setText("Внутренняя ошибка сервиса" + "\n Описание ошибки: " + e.getMessage());
         }
+
+        return result;
     }
 
     private void validate(AuditLog auditLog) throws ServiceException {
         if (auditLog == null) {
-            throwException("E1", "Некорректная структура сообщения", "Не удалось получить данные для логирования");
+            throwException("E8", "Не удалось получить данные для логирования", "Некорректная структура сообщения");
         } else {
             if (auditLog.getUserInfo() == null) {
-                throwException("E1", "Некорректная структура сообщения", "Не удалось получить информацию о пользователе");
+                throwException("E8", "Не удалось получить информацию о пользователе", "Некорректная структура сообщения");
             } else {
                 if (auditLog.getUserInfo().getUser() == null) {
-                    throwException("E1", "Некорректная структура сообщения", "Не удалось получить информацию о пользователе");
+                    throwException("E8", "Не удалось получить информацию о пользователе", "Некорректная структура сообщения");
                 } else {
                     User user = auditLog.getUserInfo().getUser();
                     if (user.getLogin() == null || user.getLogin().isEmpty()) {
-                        throwException("E1", "Некорректная структура сообщения", "Не удалось получить логин пользователя");
+                        throwException("E8", "Не удалось получить логин пользователя", "Некорректная структура сообщения");
                     }
                     /*if (user.getName() == null || user.getName().isEmpty()) {
-                        throwException("E1", "Некорректная структура сообщения", "Не удалось получить имя пользователя");
+                        throwException("E8", "Не удалось получить имя пользователя", "Некорректная структура сообщения");
                     }*/
+                    try {
+                        departmentService.getDepartment(user.getDepartmentId());
+                    } catch (DaoException e) {
+                        throwException("E9", null, e.getMessage());
+                    }
                     if (user.getRoles() == null || user.getRoles().isEmpty()) {
-                        throwException("E1", "Некорректная структура сообщения", "Не удалось получить роли пользователя");
+                        throwException("E8", "Не удалось получить роли пользователя", "Некорректная структура сообщения");
                     } else {
                         for (Role role : user.getRoles()) {
                             if (role.getName() == null || role.getName().isEmpty()) {
-                                throwException("E1", "Некорректная структура сообщения", "Не удалось получить наименование роли пользователя");
+                                throwException("E8", "Не удалось получить наименование роли пользователя", "Некорректная структура сообщения");
                             }
                         }
                     }
                 }
                 /*if (auditLog.getUserInfo().getIp() == null) {
-                    throwException("E1", "Некорректная структура сообщения", "Не удалось получить ip пользователя");
+                    throwException("E8", "Не удалось получить ip пользователя", "Некорректная структура сообщения");
                 }*/
             }
             if (auditLog.getNote() == null) {
-                throwException("E1", "Некорректная структура сообщения", "Не удалось получить текст события");
+                throwException("E8", "Не удалось получить текст события", "Некорректная структура сообщения");
             }
         }
     }
