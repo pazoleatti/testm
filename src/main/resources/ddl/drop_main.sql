@@ -100,6 +100,7 @@ drop sequence seq_ref_book_oktmo;
 drop sequence seq_ref_book_oktmo_record_id;
 drop table form_kind;
 drop table event;
+drop table department_change;
 drop table department;
 drop table department_type;
 drop table async_task_type;

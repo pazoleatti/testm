@@ -96,6 +96,7 @@ begin
 		execute immediate 'COMMENT ON COLUMN FORM_SEARCH_DATA_RESULT.COLUMN_INDEX  IS ''Номер столбца в форме''';
 		execute immediate 'COMMENT ON COLUMN FORM_SEARCH_DATA_RESULT.RAW_VALUE  IS ''Значение в ячейке формы''';
 		execute immediate 'COMMENT ON COLUMN FORM_SEARCH_DATA_RESULT.ORD  IS ''Порядковый номер''';
+		execute immediate 'COMMENT ON COLUMN FORM_SEARCH_DATA_RESULT.SESSION_ID IS ''Идентификатор сессии в которой выполнялся поиск''';
 		execute immediate 'CREATE UNIQUE INDEX I_SEARCH_DATA_RESULT ON FORM_SEARCH_DATA_RESULT ( SESSION_ID, ID , ORD ) LOCAL';
 		
 		execute immediate 'CREATE TABLE FORM_SEARCH_RESULT  (ID  NUMBER(9,0) PRIMARY KEY, SESSION_ID  NUMBER(10,0), FORM_DATA_ID  NUMBER(18,0),  "DATE"  DATE, KEY VARCHAR2(4000 BYTE),  ROWS_COUNT  NUMBER(9,0))';
