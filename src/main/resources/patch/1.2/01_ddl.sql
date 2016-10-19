@@ -13,7 +13,7 @@ begin
 	if l_rerun_condition = 1 then 
 		execute immediate 'alter table department modify code number(15)';
 	
-		dbms_output.put_line(l_task_name||'[INFO]:'||' SUCCESS');
+		dbms_output.put_line(l_task_name||'[INFO]:'||' Success');
 	else
 		dbms_output.put_line(l_task_name||'[ERROR]:'||' column DEPARTMENT.CODE had already been modified');
 	end if;
@@ -38,7 +38,7 @@ begin
 		
 		insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (168,30,'Используется в АС СУНР','SUNR_USE',2,10,null,null,1,0,15,0,0,null,6,0,1);
 	
-		dbms_output.put_line(l_task_name||'[INFO]:'||' SUCCESS');
+		dbms_output.put_line(l_task_name||'[INFO]:'||' Success');
 	else
 		dbms_output.put_line(l_task_name||'[ERROR]:'||' column DEPARTMENT.SUNR_USE had already been modified');
 	end if;
@@ -74,7 +74,7 @@ begin
 	execute immediate 'alter table log_system drop constraint log_system_chk_dcl_form';
 	execute immediate 'alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 504, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951, 960) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null)) enable';
 		
-	dbms_output.put_line(l_task_name||'[INFO]:'||' SUCCESS');
+	dbms_output.put_line(l_task_name||'[INFO]:'||' Success');
 	
 EXCEPTION
 	when OTHERS then
@@ -111,7 +111,7 @@ begin
 		
 		execute immediate 'CREATE GLOBAL TEMPORARY TABLE FORM_SEARCH_DATA_RESULT_TMP(ROW_INDEX NUMBER(9,0), COLUMN_INDEX NUMBER(9,0), RAW_VALUE VARCHAR2(4000 BYTE)) ON COMMIT DELETE ROWS ';
 	
-		dbms_output.put_line(l_task_name||'[INFO]:'||' SUCCESS');
+		dbms_output.put_line(l_task_name||'[INFO]:'||' Success');
 	else
 		dbms_output.put_line(l_task_name||'[ERROR]:'||' tables for FORM_DATA.SEARCH() had already existed');
 	end if;
@@ -129,7 +129,51 @@ begin
 	execute immediate 'alter table log_system drop constraint log_system_chk_aft';
 	execute immediate 'alter table log_system add constraint log_system_chk_aft check (audit_form_type_id = 1 and not event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is not null or audit_form_type_id = 2 and not event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is not null or audit_form_type_id = 3 and event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is null or audit_form_type_id = 4 and event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is null or audit_form_type_id in (5,6) and event_id in (7) and form_type_name is null and declaration_type_name is null or audit_form_type_id is null or event_id in (402))';
 		
-	dbms_output.put_line(l_task_name||'[INFO]:'||' SUCCESS');
+	dbms_output.put_line(l_task_name||'[INFO]:'||' Success');
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]:'||sqlerrm);
+end;
+/
+-----------------------------------------------------------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17000: 1.2 Создать таблицу для хранения не переданных изменений.
+declare 
+	l_task_name varchar2(128) := 'DDL Block #6 - DEPARTMENT_CHANGE (SBRFACCTAX-17000)';
+	l_rerun_condition decimal(1) := 0;
+begin
+	select count(*) into l_rerun_condition from user_tables where table_name = 'DEPARTMENT_CHANGE';
+	
+	if l_rerun_condition = 0 then 
+		execute immediate 'create table department_change (  department_id number(9) not null,  log_date date not null,  operationType number(9) not null,  hier_level number(9),  name varchar2(510),  parent_id number(9),  type number(9),  shortname varchar2(510),  tb_index varchar2(3),  sbrf_code varchar2(255),  region varchar2(510),  is_active number(1),  code number(15),  garant_use number(1),  sunr_use number(1))';
+		
+		execute immediate 'comment on table department_change is ''Изменения справочника "Подразделения"''';
+		execute immediate 'comment on column department_change.code is ''Код подразделения''';
+		execute immediate 'comment on column department_change.department_id is ''Идентификатор подразделения''';
+		execute immediate 'comment on column department_change.garant_use is ''Признак, что используется в модуле Гарантий (0 - не используется, 1 - используется)''';
+		execute immediate 'comment on column department_change.hier_level is ''Уровень записи в иерархии''';
+		execute immediate 'comment on column department_change.is_active is ''Действующее подразделение (0 - не действующее, 1 - действующее)''';
+		execute immediate 'comment on column department_change.log_date is ''Дата/время изменения данных''';
+		execute immediate 'comment on column department_change.name is ''Наименование подразделения''';
+		execute immediate 'comment on column department_change.operationtype is ''Тип операции (0 - создание, 1 - изменение, 2 - удаление)''';
+		execute immediate 'comment on column department_change.parent_id is ''Идентификатор родительского подразделения''';
+		execute immediate 'comment on column department_change.region is ''Регион''';
+		execute immediate 'comment on column department_change.sbrf_code is ''Код подразделения в нотации Сбербанка''';
+		execute immediate 'comment on column department_change.shortname is ''Сокращенное наименование подразделения''';
+		execute immediate 'comment on column department_change.sunr_use is ''Признак, что используется в АС СУНР (0 - не используется, 1 - используется)''';
+		execute immediate 'comment on column department_change.tb_index is ''Индекс территориального банка''';
+		execute immediate 'comment on column department_change.type is ''Тип подразделения (1 - Банк, 2 - ТБ, 3 - ЦСКО, ПЦП, 4 - Управление, 5 - Не передается в СУДИР)''';
+		
+		execute immediate 'alter table department_change add constraint dep_change_pk primary key (department_id, log_date)';
+		execute immediate 'alter table department_change add constraint dep_change_chk_op_type check ((operationtype in (0,1) and hier_level is not null and name is not null and type is not null and is_active is not null and garant_use is not null and sunr_use is not null and code is not null) or (operationtype = 2 and hier_level is null and name is null and type is null and is_active is null and garant_use is null and sunr_use is null and code is null))';
+		execute immediate 'alter table department_change add constraint dep_change_chk_is_active check (is_active in (0, 1))';
+		execute immediate 'alter table department_change add constraint dep_change_chk_garant_use check (garant_use in (0, 1))';
+		execute immediate 'alter table department_change add constraint dep_change_chk_sunr_use check (sunr_use in (0, 1))';
+	
+		dbms_output.put_line(l_task_name||'[INFO]:'||' Success');
+	else
+		dbms_output.put_line(l_task_name||'[ERROR]:'||' table DEPARTMENT_CHANGE had already existed');
+	end if;
 	
 EXCEPTION
 	when OTHERS then
