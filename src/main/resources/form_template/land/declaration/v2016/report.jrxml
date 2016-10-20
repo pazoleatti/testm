@@ -572,14 +572,8 @@ $V{Filler}.substring(0, 9)
 ($F{КПП}+$V{Filler}).substring(0,9)]]></initialValueExpression>
 	</variable>
 	<variable name="NumbKorr" class="java.lang.String">
-		<variableExpression><![CDATA[$F{НомКорр}.length() < 3 ?
-($F{НомКорр}+"---").substring(0,3)
-:
-$F{НомКорр}]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{НомКорр}.length() < 3 ?
-($F{НомКорр}+"---").substring(0,3)
-:
-$F{НомКорр}]]></initialValueExpression>
+		<variableExpression><![CDATA[$F{НомКорр}==null ? $V{Filler}.substring(0,3) : ($F{НомКорр}.length() < 3 ?($F{НомКорр}+$V{Filler}).substring(0,3) : $F{НомКорр})]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{НомКорр}==null ? $V{Filler}.substring(0,3) : ($F{НомКорр}.length() < 3 ?($F{НомКорр}+$V{Filler}).substring(0,3) : $F{НомКорр})]]></initialValueExpression>
 	</variable>
 	<variable name="Nperiod" class="java.lang.String">
 		<variableExpression><![CDATA[$F{Период}.length() < 2 ?
