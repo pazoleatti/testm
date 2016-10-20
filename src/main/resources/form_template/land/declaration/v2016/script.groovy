@@ -20,20 +20,21 @@ import java.math.RoundingMode
  */
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE: // создать / обновить
-        checkDepartmentParams(LogLevel.WARNING)
-        break
-    case FormDataEvent.CHECK: // проверить
-        checkDepartmentParams(LogLevel.ERROR)
-        break
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED: // принять из создана
-        checkDepartmentParams(LogLevel.ERROR)
-        break
+//    case FormDataEvent.CREATE: // создать / обновить
+//        checkDepartmentParams(LogLevel.WARNING)
+//        break
+//    case FormDataEvent.CHECK: // проверить
+//        checkDepartmentParams(LogLevel.ERROR)
+//        break
+//    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED: // принять из создана
+//        checkDepartmentParams(LogLevel.ERROR)
+//        break
     case FormDataEvent.PRE_CALCULATION_CHECK:
-        checkDepartmentParams(LogLevel.WARNING)
+//        checkDepartmentParams(LogLevel.WARNING)
+        checkDepartmentParams(LogLevel.ERROR)
         break
     case FormDataEvent.CALCULATE:
-        checkDepartmentParams(LogLevel.WARNING)
+//        checkDepartmentParams(LogLevel.WARNING)
         generateXML()
         break
     default:
@@ -61,17 +62,6 @@ def departmentParam = null
 // значение подразделения из справочника 710 (таблица)
 @Field
 def departmentParamTable = null
-
-// Дата окончания отчетного периода
-@Field
-def reportPeriodEndDate = null
-
-def getReportPeriodEndDate() {
-    if (reportPeriodEndDate == null) {
-        reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
-    }
-    return reportPeriodEndDate
-}
 
 /** Получить строки формы. */
 def getDataRows(def formDataCollection, def formTypeId) {
@@ -124,7 +114,7 @@ def generateXML() {
     def departmentParamRow = getDepartmentParamTable(departmentParams.record_id.value)
 
     def knd = "1153005"
-    def versionFormat = "5.03"
+    def versionFormat = version
     def reorgFormCode = getRefBookValue(5, departmentParamRow?.REORG_FORM_CODE?.referenceValue)?.CODE?.stringValue
     def okvedCode = getRefBookValue(34, departmentParamRow?.OKVED_CODE?.referenceValue)?.CODE?.stringValue
     def taxPlaceTypeCode = getRefBookValue(2, departmentParamRow?.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue
@@ -382,14 +372,6 @@ List<String> getErrorDepartment(def record, def taxPlaceTypeCode) {
     }
     if (record.SIGNATORY_FIRSTNAME?.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
         errorList.add("«Имя»")
-    }
-    return errorList
-}
-
-List<String> getErrorVersion(record) {
-    List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION == null || version.equals(record.FORMAT_VERSION.stringValue)) {
-        errorList.add("«Версия формата»")
     }
     return errorList
 }
