@@ -26,7 +26,7 @@ public class DepartmentManagementServicePortType extends SpringBeanAutowiringSup
 
     private static final Log LOG = LogFactory.getLog(DepartmentManagementServicePortType.class);
 
-    private static String REQUEST_ALL_CHANGES_MSG = "Запрос всех изменений справочника \"Подразделения\". ";
+    public static final String REQUEST_ALL_CHANGES_MSG = "Запрос всех изменений справочника \"Подразделения\". ";
 
     @Autowired
     private AuditService auditService;
@@ -45,16 +45,11 @@ public class DepartmentManagementServicePortType extends SpringBeanAutowiringSup
             departmentWS_manager.sendChanges(result);
             if (result.getErrorCode() == null || result.getErrorCode().isEmpty()) {
                 result.setErrorCode("E0");
-                auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userService.getSystemUserInfo(), userService.getSystemUserInfo().getUser().getDepartmentId(),
-                        null, null, null, null, REQUEST_ALL_CHANGES_MSG + "Успешный обмен данными с АС СУНР.", null);
-            } else {
-                auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userService.getSystemUserInfo(), userService.getSystemUserInfo().getUser().getDepartmentId(),
-                        null, null, null, null, REQUEST_ALL_CHANGES_MSG + result.getErrorText(), null);
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             result.setErrorCode("E5");
-            result.setErrorText("Произошла непредвиденная ошибка при отправке сообщения в АС СУНР. Текст ошибки: «Неизвестная техническая ошибка»");
+            result.setErrorText("Произошла непредвиденная ошибка при отправке изменений справочника \"Подразделения\" в АС СУНР. Текст ошибки: «Неизвестная техническая ошибка»");
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                     null, null, null, null, REQUEST_ALL_CHANGES_MSG + "Произошли непредвиденные ошибки при обмен данными с вебсервисом АС СУНР: «Неизвестная техническая ошибка»", null);
         }
