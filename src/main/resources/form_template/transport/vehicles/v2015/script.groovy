@@ -193,46 +193,6 @@ def getRecord(def Long refBookId, def String alias, def String value, def int ro
             rowIndex, columnName, logger, required)
 }
 
-/**
- * Аналог FormDataServiceImpl.getRefBookRecord(...) но ожидающий получения из справочника больше одной записи.
- * @return первая из найденных записей
- */
-def getRecord(def refBookId, def filter, Date date) {
-    if (refBookId == null) {
-        return null
-    }
-    String dateStr = date?.format('dd.MM.yyyy')
-    if (recordCache.containsKey(refBookId)) {
-        Long recordId = recordCache.get(refBookId).get(dateStr + filter)
-        if (recordId != null) {
-            if (refBookCache != null) {
-                def key = getRefBookCacheKey(refBookId, recordId)
-                return refBookCache.get(key)
-            } else {
-                def retVal = new HashMap<String, RefBookValue>()
-                retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
-                return retVal
-            }
-        }
-    } else {
-        recordCache.put(refBookId, [:])
-    }
-
-    def records = getProvider(refBookId).getRecords(date, null, filter, null)
-    // отличие от FormDataServiceImpl.getRefBookRecord(...)
-    if (records.size() > 0) {
-        def retVal = records.get(0)
-        Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue()
-        recordCache.get(refBookId).put(dateStr + filter, recordId)
-        if (refBookCache != null) {
-            def key = getRefBookCacheKey(refBookId, recordId)
-            refBookCache.put(key, retVal)
-        }
-        return retVal
-    }
-    return null
-}
-
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     if (recordId == null) {
@@ -273,6 +233,7 @@ def addRow() {
     dataRows.add(index - 1, getNewRow())
     formDataService.saveCachedDataRows(formData, logger)
 }
+
 
 // Алгоритмы заполнения полей формы
 void calc() {
@@ -627,16 +588,6 @@ void consolidation() {
             }
         }
     }
-}
-
-def String checkPrevPeriod(def reportPeriod) {
-    if (reportPeriod != null) {
-        // ищем форму нового типа иначе две формы старого
-        if (formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder, formData.comparativePeriodId, formData.accruing) == null) {
-            return reportPeriod.name + " " + reportPeriod.taxPeriod.year + ", "
-        }
-    }
-    return ''
 }
 
 @Field
@@ -1255,42 +1206,6 @@ String REF_BOOK_NOT_FOUND_IMPORT_ERROR_NEW = "Проверка файла: Ст�
 @Field
 String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR_NEW = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» найдено более одной записи для графы «%s» актуальная на дату %s!";
 
-/**
- * Получить id записи из справочника по фильтру.
- * Не используется унифицированный метод formDataService.getRefBookRecordIdImport потому что в нем нет возможности
- * искать запись по фильтру.
- *
- * @param refBookId идентификатор справочника
- * @param date дата актуальности записи
- * @param filter фильтр для поиска
- * @param columnName название графы формы для которого ищется значение
- * @param rowIndex номер строки в файле
- * @param colIndex номер колонки в файле
- * @param required фатальность
- */
-Long getRefBookRecordIdImport(Long refBookId, Date date, String filter, String columnName,
-                              int rowIndex, int colIndex, boolean required) {
-    if (refBookId == null) {
-        return null
-    }
-    def records = getProvider(refBookId).getRecords(date, null, filter, null)
-    if (records != null && records.size() == 1) {
-        return records.get(0).record_id.value
-    }
-
-    def tooManyValue = (records != null && records.size() > 1)
-    RefBook rb = refBookFactory.get(refBookId)
-
-    String msg = String.format(tooManyValue ? REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR_NEW : REF_BOOK_NOT_FOUND_IMPORT_ERROR_NEW,
-            rowIndex, getXLSColumnName(colIndex), rb.getName(), columnName, date.format('dd.MM.yyyy'))
-    if (required) {
-        throw new ServiceException("%s", msg)
-    } else {
-        logger.warn("%s", msg)
-    }
-    return null
-}
-
 // Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
 void checkRegionId() {
     if (formDataDepartment.regionId == null) {
@@ -1633,7 +1548,7 @@ def getRegion(def record96Id) {
     def okato = getOkato(record96?.CODE?.stringValue)
     if (okato) {
         def allRecords = getAllRecords(4L).values()
-        allRecords.find { record ->
+        return allRecords.find { record ->
             record.OKTMO_DEFINITION.value == okato
         }
     }
