@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * Сведения о транспортных средствах, по которым уплачивается транспортный налог
- * TODO 19, 20
  * @author Yasinskii, Kinzyabulatov
  */
 public class Vehicles2Test extends ScriptTestBase {
@@ -50,6 +49,7 @@ public class Vehicles2Test extends ScriptTestBase {
         FormData formData = new FormData();
         FormType formType = new FormType();
         formType.setId(TYPE_ID);
+        formType.setName("Сведения о транспортных средствах, по которым уплачивается транспортный налог");
         formData.setId(TestScriptHelper.CURRENT_FORM_DATA_ID);
         formData.setFormType(formType);
         formData.setFormTemplateId(TYPE_ID);
@@ -321,8 +321,7 @@ public class Vehicles2Test extends ScriptTestBase {
     // 1. Проверка на заполнение поля
     @Test
     public void check1Test() {
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        FormData formData = testHelper.getFormData();
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
 
@@ -348,8 +347,7 @@ public class Vehicles2Test extends ScriptTestBase {
     // 2. Проверка на наличие в форме строк с одинаковым значением граф 2, 4, 8, 12, 13
     @Test
     public void check2Test() throws ParseException {
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        FormData formData = testHelper.getFormData();
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
 
@@ -396,8 +394,7 @@ public class Vehicles2Test extends ScriptTestBase {
     // 4, 5 аналогичны
     @Test
     public void check3Test() throws ParseException {
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        FormData formData = testHelper.getFormData();
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
 
@@ -435,8 +432,7 @@ public class Vehicles2Test extends ScriptTestBase {
     // 10. Проверка на наличие даты начала розыска ТС при указании даты возврата ТС
     @Test
     public void check4Test() throws ParseException {
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        FormData formData = testHelper.getFormData();
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
 
@@ -489,8 +485,7 @@ public class Vehicles2Test extends ScriptTestBase {
     // 16. Проверка на наличие даты начала использования льготы и кода налоговой льготы
     @Test
     public void check5Test() throws ParseException {
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        FormData formData = testHelper.getFormData();
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
 
@@ -542,8 +537,7 @@ public class Vehicles2Test extends ScriptTestBase {
     // 17. Проверка корректности заполнения «Графы 24»
     @Test
     public void check6Test() throws ParseException {
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        FormData formData = testHelper.getFormData();
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
 
@@ -578,12 +572,16 @@ public class Vehicles2Test extends ScriptTestBase {
     }
 
     // 18. Проверка наличия повышающего коэффициента для ТС с заполненной графой 25
+    // 19 и 20 должны пройти
     @Test
     public void check7Test() throws ParseException {
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        final String departmentName = "Подразделение";
+        final String summaryTypeName = "Расчет суммы налога по каждому транспортному средству";
+        FormData formData = testHelper.getFormData();
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
+
+        mockDestination(departmentName, summaryTypeName, true);
 
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
@@ -620,26 +618,16 @@ public class Vehicles2Test extends ScriptTestBase {
     }
 
     // 19. Проверка наличия параметров представления декларации для кода ОКТМО
-    // @Test TODO
+    // 20. Проверка наличия ставки для ТС
+    @Test
     public void check8Test() throws ParseException {
-        final int summaryTypeId = 203;
-        final Long declarationRegionId = 1L;
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        final String departmentName = "Подразделение";
+        final String summaryTypeName = "Расчет суммы налога по каждому транспортному средству";
+        FormData formData = testHelper.getFormData();
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
 
-        // назначаем приемние
-        List<Relation> relations = new ArrayList<Relation>();
-        relations.add(new Relation() {{
-            setFormType(new FormType() {{
-                setId(summaryTypeId);
-            }});
-            setDepartment( new Department() {{
-                setRegionId(declarationRegionId);
-            }});
-        }});
-        when(testHelper.getFormDataService().getDestinationsInfo(eq(formData), anyBoolean(), anyBoolean(), isNull(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(relations);
+        mockDestination(departmentName, summaryTypeName, false);
 
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
@@ -666,12 +654,34 @@ public class Vehicles2Test extends ScriptTestBase {
         row.getCell("version").setValue(2L, rowIndex);
         testHelper.execute(FormDataEvent.CHECK);
 
-        msg = String.format("Строка %s: В справочнике «Повышающие коэффициенты транспортного налога» отсутствует запись, актуальная на дату %s, " +
-                        "в которой поле «Средняя стоимость» равно значению графы «%s» (%s) и значение графы «%s» (%s) больше значения поля " +
-                        "«Количество лет, прошедших с года выпуска ТС (от)» и меньше или равно значения поля «Количество лет, прошедших с года выпуска ТС (до)»",
-                rowIndex, "31.12.2014", getColumnName(row, "averageCost"), "От 3 до 5 млн. руб.", getColumnName(row, "pastYear"), row.getCell("pastYear").getNumericValue());
+        msg = String.format("Строка %s: В справочнике «Параметры представления деклараций по транспортному налогу» отсутствует запись, " +
+                        "актуальная на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) справочника «Подразделения» для подразделения «%s» формы-приемника вида «%s», поле «Код субъекта РФ» = «%s», поле «Код по ОКТМО» = «%s»",
+                rowIndex, "31.12.2014", "00", departmentName, summaryTypeName, "02", "7190000");
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        msg = String.format("Строка %s: В справочнике «Ставки транспортного налога» %s на дату %s, в которой поле «Код субъекта РФ представителя декларации» " +
+                        "равно значению поля «Регион» (%s) справочника «Подразделения» для подразделения «%s» формы-приемника вида «%s», поле «Код субъекта РФ» равно " +
+                        "значению «%s», поле «Код ТС» = «%s», поле «Ед. измерения мощности» = «%s»",
+                rowIndex, "отсутствует запись, актуальная", "31.12.2014", "00", departmentName, summaryTypeName, "02", "56100", "A");
         Assert.assertEquals(msg, entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
+    }
+
+    private void mockDestination(final String departmentName, final String summaryTypeName, boolean exist) {
+        final int summaryTypeId = 203;
+        final Long declarationRegionId = exist ? 1L : 2L;
+        // назначаем приемник
+        List<Relation> relations = new ArrayList<Relation>();
+        relations.add(new Relation() {{
+            setFormType(new FormType() {{
+                setId(summaryTypeId);
+            }});
+            setDepartment( new Department() {{
+                setName(departmentName);
+                setRegionId(declarationRegionId);
+            }});
+            setFormTypeName(summaryTypeName);
+        }});
+        when(testHelper.getFormDataService().getDestinationsInfo(eq(testHelper.getFormData()), anyBoolean(), anyBoolean(), isNull(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(relations);
     }
 }
