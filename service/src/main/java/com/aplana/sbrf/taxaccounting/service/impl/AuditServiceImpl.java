@@ -266,7 +266,7 @@ public class AuditServiceImpl implements AuditService {
         LogSystem log = new LogSystem();
         log.setIp(userInfo.getIp());
         log.setEventId(event.getCode());
-		log.setUserLogin(userInfo.getUser().getName() + " (" + userInfo.getUser().getLogin() + ")");
+		log.setUserLogin((userInfo.getUser().getName() != null ? userInfo.getUser().getName() + " " : "") + "(" + userInfo.getUser().getLogin() + ")");
 
         StringBuilder roles = new StringBuilder();
         List<TARole> taRoles = userInfo.getUser().getRoles();
