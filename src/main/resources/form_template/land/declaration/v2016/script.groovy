@@ -23,9 +23,11 @@ switch (formDataEvent) {
 //    case FormDataEvent.CREATE: // создать / обновить
 //        checkDepartmentParams(LogLevel.WARNING)
 //        break
-//    case FormDataEvent.CHECK: // проверить
-//        checkDepartmentParams(LogLevel.ERROR)
-//        break
+    case FormDataEvent.CHECK: // проверить
+        if (!declarationData.accepted) {
+            checkDepartmentParams(LogLevel.ERROR)
+        }
+        break
 //    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED: // принять из создана
 //        checkDepartmentParams(LogLevel.ERROR)
 //        break
