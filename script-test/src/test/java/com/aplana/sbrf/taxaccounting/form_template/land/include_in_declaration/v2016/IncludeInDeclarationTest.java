@@ -81,14 +81,6 @@ public class IncludeInDeclarationTest extends ScriptTestBase {
         checkLogger();
     }
 
-    // Расчет пустой
-    @Test
-    public void calcTest() {
-        testHelper.execute(FormDataEvent.CALCULATE);
-        // ошибок быть не должно
-        checkLogger();
-    }
-
     @Test
     public void sortRowsTest() {
         testHelper.execute(FormDataEvent.SORT_ROWS);
@@ -167,6 +159,12 @@ public class IncludeInDeclarationTest extends ScriptTestBase {
         expected = 0;
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
+    }
+
+    // TODO (Ramil Timerbaev) пока нет возможности передать дополнительные параметры (https://jira.aplana.com/browse/SBRFACCTAX-17230)
+    // @Test
+    public void getSourcesTest() {
+        testHelper.execute(FormDataEvent.GET_SOURCES);
     }
 
     // TODO (Ramil Timerbaev) добавить тест, что б выполнилась каждая логическая проверка

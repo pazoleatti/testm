@@ -20,20 +20,23 @@ import java.math.RoundingMode
  */
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE: // создать / обновить
-        checkDepartmentParams(LogLevel.WARNING)
-        break
+//    case FormDataEvent.CREATE: // создать / обновить
+//        checkDepartmentParams(LogLevel.WARNING)
+//        break
     case FormDataEvent.CHECK: // проверить
-        checkDepartmentParams(LogLevel.ERROR)
+        if (!declarationData.accepted) {
+            checkDepartmentParams(LogLevel.ERROR)
+        }
         break
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED: // принять из создана
-        checkDepartmentParams(LogLevel.ERROR)
-        break
+//    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED: // принять из создана
+//        checkDepartmentParams(LogLevel.ERROR)
+//        break
     case FormDataEvent.PRE_CALCULATION_CHECK:
-        checkDepartmentParams(LogLevel.WARNING)
+//        checkDepartmentParams(LogLevel.WARNING)
+        checkDepartmentParams(LogLevel.ERROR)
         break
     case FormDataEvent.CALCULATE:
-        checkDepartmentParams(LogLevel.WARNING)
+//        checkDepartmentParams(LogLevel.WARNING)
         generateXML()
         break
     default:
@@ -49,18 +52,6 @@ def providerCache = [:]
 // Кэш значений справочника
 @Field
 def refBookCache = [:]
-@Field
-def recordCache = [:]
-@Field
-def String dateFormat = 'dd.MM.yyyy'
-
-// значение подразделения из справочника 700
-@Field
-def departmentParam = null
-
-// значение подразделения из справочника 710 (таблица)
-@Field
-def departmentParamTable = null
 
 // Дата окончания отчетного периода
 @Field
@@ -72,6 +63,14 @@ def getReportPeriodEndDate() {
     }
     return reportPeriodEndDate
 }
+
+// значение подразделения из справочника 700
+@Field
+def departmentParam = null
+
+// значение подразделения из справочника 710 (таблица)
+@Field
+def departmentParamTable = null
 
 /** Получить строки формы. */
 def getDataRows(def formDataCollection, def formTypeId) {
@@ -116,15 +115,14 @@ void checkDepartmentParams(LogLevel logLevel) {
 def generateXML() {
 
     def empty = 0
-    def departmentId = declarationData.departmentId
-    def reportPeriodId = declarationData.reportPeriodId
+    int precision = 20
 
     // Параметры подразделения
     def departmentParams = getDepartmentParam()
     def departmentParamRow = getDepartmentParamTable(departmentParams.record_id.value)
 
     def knd = "1153005"
-    def versionFormat = "5.03"
+    def versionFormat = version
     def reorgFormCode = getRefBookValue(5, departmentParamRow?.REORG_FORM_CODE?.referenceValue)?.CODE?.stringValue
     def okvedCode = getRefBookValue(34, departmentParamRow?.OKVED_CODE?.referenceValue)?.CODE?.stringValue
     def taxPlaceTypeCode = getRefBookValue(2, departmentParamRow?.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue
@@ -225,6 +223,90 @@ def generateXML() {
                         def avPUKv3 = isPrepayment ? row.q3 : empty
                         // НалПУ
                         def nalPU = nalIschisl - (avPUKv1 + avPUKv2 + avPUKv3)
+                        // НомКадастрЗУ
+                        def nomKadastrZU = row.cadastralNumber
+                        // КатегорЗем
+                        def kategorZem = getRefBookValue(702, row.landCategory).CODE.value
+                        // ПерСтр
+                        def perStr = getRefBookValue(701, row.constructionPhase)?.CODE?.value
+                        // СтКадастрЗУ
+                        BigDecimal stKadastrZU = getLong(row.cadastralCost)
+                        // ДоляЗУ
+                        String dolyaZU = row.taxPart
+                        // НалСтав
+                        BigDecimal nalStav = row.taxRate
+                        String[] partArray = dolyaZU?.split('/') ?: ['1', '1']
+                        //BigDecimal dolyaZUValue = (partArray[0].toBigDecimal()) / (partArray[1].toBigDecimal())
+                        // Строка  050 * 060
+                        BigDecimal nalBazaPlus = stKadastrZU.multiply(partArray[0].toBigDecimal()).divide(partArray[1].toBigDecimal(), precision, BigDecimal.ROUND_HALF_UP) // неполный расчет
+                        // СумНалИсчисл
+                        BigDecimal kolMesVlZU = row.period
+                        // Кв
+                        BigDecimal kv = row.kv
+                        // Кл
+                        BigDecimal kl = row.kl
+                        // Параметры налоговых льгот земельного налога
+                        def landBenefit = null
+                        String benefitCode = null
+                        def benefitParam = ''
+                        // Если графа 15 заполнена
+                        if (row.benefitCode != null) {
+                            landBenefit = getRefBookValue(705, row.benefitCode)
+                            benefitCode = getRefBookValue(704, landBenefit.TAX_BENEFIT_ID.value)?.CODE?.value
+                            benefitParam = landBenefit?.REDUCTION_PARAMS?.value
+                        }
+                        // КодНалЛьгот
+                        def kodNalLgot
+                        // СумНеОбл
+                        BigDecimal sumNeObl
+                        // СумЛьг
+                        BigDecimal sumLg = BigDecimal.ZERO
+                        // ДоляПлЗУ
+                        String dolyaPlZU
+                        BigDecimal nalBazaMinus = BigDecimal.ZERO
+                        if(benefitCode == '3022100'){
+                            kodNalLgot = "3022100/" + benefitParam
+                            sumNeObl = getLong(landBenefit.REDUCTION_SUM.value)
+                            nalBazaMinus = sumNeObl
+                        } else if(benefitCode.startsWith('30212')){
+                            kodNalLgot = benefitCode
+                            sumNeObl = getLong(landBenefit.REDUCTION_SUM.value)
+                            nalBazaMinus = sumNeObl
+                        } else if(benefitCode == '3022300'){
+                            kodNalLgot = "3022300/" + benefitParam
+                            dolyaPlZU = landBenefit.REDUCTION_SEGMENT.value
+                            String[] reductArray = dolyaPlZU?.split('/') ?: ['1', '1']
+                            //BigDecimal dolyaPlZUValue = (reductArray[0].toBigDecimal()) / (reductArray[1].toBigDecimal())
+                            // Строка 050 * Строка 060 * Строка 120 * (1 - графа 23 формы)
+                            nalBazaMinus = (stKadastrZU * (partArray[0].toBigDecimal()) * (1 - kl) * (reductArray[0].toBigDecimal())).divide(reductArray[1].toBigDecimal() * partArray[1].toBigDecimal(), precision, BigDecimal.ROUND_HALF_UP)
+                        } else if (benefitCode == '3022400') {
+                            kodNalLgot = "3022400/" + benefitParam
+                            sumLg = row.sum
+                        } else if (benefitCode.startsWith('30211')) {
+                            kodNalLgot = benefitCode
+                            sumLg = row.sum
+                        } else if (benefitCode == '3022200') {
+                            kodNalLgot = "3022200/" + benefitParam
+                            sumLg = row.sum
+                        } else if (benefitCode == '3022500') {
+                            kodNalLgot = "3022500/" + benefitParam
+                            sumLg = row.sum
+                        }
+                        // НалБаза
+                        BigDecimal nalBaza = getLong(nalBazaPlus - nalBazaMinus) // дорасчет
+                        // СумНалИсчисл
+                        BigDecimal sumNalIschisl = BigDecimal.ZERO
+                        if(perStr == 1) {
+                            sumNalIschisl = ("2".toBigDecimal() * nalBaza * nalStav * kv).divide("100".toBigDecimal(), 0, BigDecimal.ROUND_HALF_UP)
+                        } else if(perStr == 2) {
+                            sumNalIschisl = ("4".toBigDecimal() * nalBaza * nalStav * kv).divide("100".toBigDecimal(), 0, BigDecimal.ROUND_HALF_UP)
+                        } else {
+                            sumNalIschisl = (nalBaza * nalStav * kv).divide("100".toBigDecimal(), 0, BigDecimal.ROUND_HALF_UP)
+                        }
+                        // СумНалУплат
+                        BigDecimal sumNalUplat = getLong(sumNalIschisl - sumLg) // дорасчет
+                        // КолМесЛьгот
+                        BigDecimal kolMesLgot = row.benefitPeriod
                         // 1..n
                         СумПУ(КБК: kbk,
                                 ОКТМО: oktmo,
@@ -234,39 +316,6 @@ def generateXML() {
                                 АвПУКв3: avPUKv3,
                                 НалПУ: nalPU
                         ) {
-                            // НомКадастрЗУ
-                            def nomKadastrZU = row.cadastralNumber
-                            // КатегорЗем
-                            def kategorZem = getRefBookValue(702,row.landCategory).CODE.value
-                            // ПерСтр
-                            def perStr = getRefBookValue(701, row.constructionPhase)?.CODE?.value
-                            // СтКадастрЗУ
-                            def stKadastrZU = getLong(row.cadastralCost)
-                            // ДоляЗУ
-                            String dolyaZU = row.taxPart
-                            // НалСтав
-                            def nalStav = row.taxRate
-                            String[] partArray = dolyaZU?.split('/') ?: ['1', '1']
-                            //BigDecimal dolyaZUValue = (partArray[0].toBigDecimal()) / (partArray[1].toBigDecimal())
-                            def nalBazaPlus = (stKadastrZU * partArray[0].toBigDecimal()) / (partArray[1].toBigDecimal()) // неполный расчет
-                            // СумНалИсчисл
-                            def kolMesVlZU = row.period
-                            // Кв
-                            def kv = row.kv
-                            // СумНалИсчисл
-                            def sumNalIschisl = BigDecimal.ZERO
-                            // дорасчет
-                            if(perStr == 1) {
-                                sumNalIschisl = (2 * nalStav * kolMesVlZU * kv).divide("100".toBigDecimal(), 0, BigDecimal.ROUND_HALF_UP)
-                            } else if(perStr == 2) {
-                                sumNalIschisl = (4 * nalStav * kolMesVlZU * kv).divide("100".toBigDecimal(), 0, BigDecimal.ROUND_HALF_UP)
-                            } else {
-                                sumNalIschisl = (nalStav * kolMesVlZU * kv).divide("100".toBigDecimal(), 0, BigDecimal.ROUND_HALF_UP)
-                            }
-                            // КолМесЛьгот
-                            def kolMesLgot = row.benefitPeriod
-                            // Кл
-                            def kl = row.kl
                             // 1..n (у нас одна)
                             РасчПлатЗН(
                                     [НомКадастрЗУ: nomKadastrZU,
@@ -276,56 +325,6 @@ def generateXML() {
                                     (dolyaZU ? [ДоляЗУ: dolyaZU] : [:]) +
                                     [НалСтав: nalStav]
                             ){
-                                // Параметры налоговых льгот земельного налога
-                                def landBenefit = null
-                                String benefitCode = null
-                                def benefitParam = ''
-                                // Если графа 15 заполнена
-                                if (row.benefitCode != null) {
-                                    landBenefit = getRefBookValue(705, row.benefitCode)
-                                    benefitCode = getRefBookValue(704, landBenefit.TAX_BENEFIT_ID.value)?.CODE?.value
-                                    benefitParam = landBenefit?.REDUCTION_PARAMS?.value
-                                }
-                                // КодНалЛьгот
-                                def kodNalLgot
-                                // СумНеОбл
-                                def sumNeObl
-                                // СумЛьг
-                                def sumLg = BigDecimal.ZERO
-                                // ДоляПлЗУ
-                                def dolyaPlZU
-                                BigDecimal nalBazaMinus = BigDecimal.ZERO
-                                if(benefitCode == '3022100'){
-                                    kodNalLgot = "3022100/" + benefitParam
-                                    sumNeObl = getLong(landBenefit.REDUCTION_SUM.value)
-                                    nalBazaMinus = sumNeObl
-                                } else if(benefitCode.startsWith('30212')){
-                                    kodNalLgot = benefitCode
-                                    sumNeObl = getLong(landBenefit.REDUCTION_SUM.value)
-                                    nalBazaMinus = sumNeObl
-                                } else if(benefitCode == '3022300'){
-                                    kodNalLgot = "3022300/" + benefitParam
-                                    dolyaPlZU = landBenefit.REDUCTION_SEGMENT.value
-                                    String[] reductArray = dolyaPlZU?.split('/') ?: ['1', '1']
-                                    //BigDecimal dolyaPlZUValue = (reductArray[0].toBigDecimal()) / (reductArray[1].toBigDecimal())
-                                    nalBazaMinus = (stKadastrZU * (partArray[0].toBigDecimal()) * (1 - row.kl) * (reductArray[0].toBigDecimal())) / (reductArray[1].toBigDecimal() * partArray[1].toBigDecimal())
-                                } else if (benefitCode == '3022400') {
-                                    kodNalLgot = "3022400/" + benefitParam
-                                    sumLg = row.sum
-                                } else if (benefitCode.startsWith('30211')) {
-                                    kodNalLgot = benefitCode
-                                    sumLg = row.sum
-                                } else if (benefitCode == '3022200') {
-                                    kodNalLgot = "3022200/" + benefitParam
-                                    sumLg = row.sum
-                                } else if (benefitCode == '3022500') {
-                                    kodNalLgot = "3022500/" + benefitParam
-                                    sumLg = row.sum
-                                }
-                                // НалБаза
-                                def nalBaza = getLong(nalBazaPlus - nalBazaMinus) // дорасчет
-                                // СумНалУплат
-                                def sumNalUplat = sumNalIschisl - sumLg // дорасчет
                                 // 1..1
                                 ОпрНалБаза(НалБаза: (nalBaza)) {
                                     if(benefitCode == '3022100'){
@@ -382,14 +381,6 @@ List<String> getErrorDepartment(def record, def taxPlaceTypeCode) {
     }
     if (record.SIGNATORY_FIRSTNAME?.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
         errorList.add("«Имя»")
-    }
-    return errorList
-}
-
-List<String> getErrorVersion(record) {
-    List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION == null || version.equals(record.FORMAT_VERSION.stringValue)) {
-        errorList.add("«Версия формата»")
     }
     return errorList
 }
@@ -468,17 +459,5 @@ def getLong(def value) {
     if (value == null) {
         return 0
     }
-    return roundValue(value, 0)
+    return ((BigDecimal) value).setScale(0, BigDecimal.ROUND_HALF_UP)
 }
-
-/**
- * Округляет число до требуемой точности.
- *
- * @param value округляемое число
- * @param precision точность округления, знаки после запятой
- * @return округленное число
- */
-def roundValue(def value, def precision) {
-    ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
-}
-

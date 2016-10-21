@@ -57,11 +57,6 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CALCULATE:
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
     case FormDataEvent.CHECK:
         logicCheck()
         break
@@ -75,7 +70,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE: // Консолидация
         consolidation()
-        calc()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
@@ -181,8 +175,6 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
 // Логические проверки
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-
-    def isCalc = (formDataEvent == FormDataEvent.CALCULATE)
 
     def reportPeriod = getReportPeriod()
     def year = reportPeriod.taxPeriod.year
@@ -293,29 +285,27 @@ void logicCheck() {
         }
 
         // 11. Проверка корректности заполнения граф 14, 20, 22-28
-        if (!isCalc) {
-            needValue.period = calc14(row)
-            needValue.benefitPeriod = calc20(row)
-            needValue.kv = calc22(row)
-            needValue.kl = calc23(row)
-            needValue.sum = calc24(row, row.kv, row.kl)
-            needValue.q1 = calc25(row)
-            needValue.q2 = calc26(row)
-            needValue.q3 = calc27(row)
-            needValue.year = calc28(row)
-            def errorColumns = []
-            for (def alias : arithmeticCheckAlias) {
-                if (needValue[alias] == null && row[alias] == null) {
-                    continue
-                }
-                if (needValue[alias] == null || row[alias] == null || needValue[alias].compareTo(row[alias]) != 0) {
-                    errorColumns.add(getColumnName(row, alias))
-                }
+        needValue.period = calc14(row)
+        needValue.benefitPeriod = calc20(row)
+        needValue.kv = calc22(row)
+        needValue.kl = calc23(row)
+        needValue.sum = calc24(row, row.kv, row.kl)
+        needValue.q1 = calc25(row)
+        needValue.q2 = calc26(row)
+        needValue.q3 = calc27(row)
+        needValue.year = calc28(row)
+        def errorColumns = []
+        for (def alias : arithmeticCheckAlias) {
+            if (needValue[alias] == null && row[alias] == null) {
+                continue
             }
-            if (!errorColumns.isEmpty()) {
-                def columnNames = errorColumns.join('», «')
-                logger.error("Строка %s: Графы «%s» заполнены неверно", rowIndex, columnNames)
+            if (needValue[alias] == null || row[alias] == null || needValue[alias].compareTo(row[alias]) != 0) {
+                errorColumns.add(getColumnName(row, alias))
             }
+        }
+        if (!errorColumns.isEmpty()) {
+            def columnNames = errorColumns.join('», «')
+            logger.error("Строка %s: Графы «%s» заполнены неверно", rowIndex, columnNames)
         }
 
         // 12. Проверка правильности заполнения КПП
@@ -397,10 +387,6 @@ def logicCheck6(def taxPart) {
         return false
     }
     return true
-}
-
-void calc() {
-    // нет расчетов, но в логических проверках есть проверка расчетов
 }
 
 def calc14(def row) {
