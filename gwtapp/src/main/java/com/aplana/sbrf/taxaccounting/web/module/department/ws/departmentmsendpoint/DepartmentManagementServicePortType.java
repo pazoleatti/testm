@@ -49,9 +49,9 @@ public class DepartmentManagementServicePortType extends SpringBeanAutowiringSup
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             result.setErrorCode("E5");
-            result.setErrorText("Произошла непредвиденная ошибка при отправке изменений справочника \"Подразделения\" в АС СУНР. Текст ошибки: «Неизвестная техническая ошибка»");
+            result.setErrorText(String.format(DepartmentWS_Manager.SUNR_ERR_MSG, "Неизвестная техническая ошибка"));
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
-                    null, null, null, null, REQUEST_ALL_CHANGES_MSG + "Произошли непредвиденные ошибки при обмен данными с вебсервисом АС СУНР: «Неизвестная техническая ошибка»", null);
+                    null, null, null, null, REQUEST_ALL_CHANGES_MSG + String.format(DepartmentWS_Manager.SUNR_ERR_MSG, "Неизвестная техническая ошибка"), null);
         }
         return result;
     }

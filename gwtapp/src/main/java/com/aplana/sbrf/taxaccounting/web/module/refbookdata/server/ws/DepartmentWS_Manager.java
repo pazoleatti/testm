@@ -59,28 +59,10 @@ public class DepartmentWS_Manager {
     @Autowired
     private ConfigurationService configurationService;
 
-    private DepartmentWS getDepartmentWSPort() throws Exception {
-        int timeout = 0;
-        int rootDepartmentId = departmentService.getBankDepartment().getId();
-        ConfigurationParamModel configurationParamModel = configurationService.getAllConfig(userService.getSystemUserInfo());
-        List<String> sunrAddressParams = configurationParamModel.get(ConfigurationParam.WSDL_ADDRESS_DEPARTMENT_WS_SUNR, rootDepartmentId);
-        if (sunrAddressParams == null) {
-            throw new ServiceException("Не заполнен конфигурационный параметр \"" + ConfigurationParam.WSDL_ADDRESS_DEPARTMENT_WS_SUNR.getCaption() + '"');
-        }
-        List<String> sunrDepartmentWSTimeoutParams = configurationParamModel.get(ConfigurationParam.TIMEOUT_SUNR, rootDepartmentId);
-        if (sunrDepartmentWSTimeoutParams != null) {
-            try{
-                timeout = Integer.parseInt(sunrDepartmentWSTimeoutParams.get(0));
-            } catch (NumberFormatException ignored) {}
-        }
+    public static final String SUNR_ERR_MSG = "Произошла непредвиденная ошибка при отправке изменений справочника \"Подразделения\" в АС СУНР. Текст ошибки: «%s»";
 
-        //проверка доступности wsdl
-        URLConnection uc = (new URL(sunrAddressParams.get(0))).openConnection();
-        uc.setConnectTimeout(10000);
-        uc.setReadTimeout(10000);
-        uc.getContent();
-
-        DepartmentWS_Service departmentWS_Service = new DepartmentWS_Service(sunrAddressParams.get(0));
+    private DepartmentWS getDepartmentWSPort(String address, int timeout) throws Exception {
+        DepartmentWS_Service departmentWS_Service = new DepartmentWS_Service(address);
         DepartmentWS departmentWS = departmentWS_Service.getDepartmentWSPort();
 
         Map<String, Object> requestContext = ((BindingProvider) departmentWS).getRequestContext();
@@ -104,7 +86,48 @@ public class DepartmentWS_Manager {
         try {
             List<DepartmentChange> departmentChanges = departmentChangeService.getAllChanges();
             if (departmentChanges.size() > 0) {
-                DepartmentWS departmentWS = getDepartmentWSPort();
+                int timeout = 0;
+                int rootDepartmentId = departmentService.getBankDepartment().getId();
+                ConfigurationParamModel configurationParamModel = configurationService.getAllConfig(userService.getSystemUserInfo());
+                List<String> sunrAddressParams = configurationParamModel.get(ConfigurationParam.WSDL_ADDRESS_DEPARTMENT_WS_SUNR, rootDepartmentId);
+                if (sunrAddressParams == null) {
+                    String msg = String.format(SUNR_ERR_MSG, "Не заполнен конфигурационный параметр \"" + ConfigurationParam.WSDL_ADDRESS_DEPARTMENT_WS_SUNR.getCaption() + '"');
+                    if (taxDepartmentChanges != null) {
+                        taxDepartmentChanges.setErrorCode("E5");
+                        taxDepartmentChanges.setErrorText(msg);
+                        msg = DepartmentManagementServicePortType.REQUEST_ALL_CHANGES_MSG + msg;
+                    }
+                    auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
+                            null, null, null, null, msg, null);
+                    return;
+                }
+                List<String> sunrDepartmentWSTimeoutParams = configurationParamModel.get(ConfigurationParam.TIMEOUT_SUNR, rootDepartmentId);
+                if (sunrDepartmentWSTimeoutParams != null) {
+                    try{
+                        timeout = Integer.parseInt(sunrDepartmentWSTimeoutParams.get(0));
+                    } catch (NumberFormatException ignored) {}
+                }
+
+                //проверка доступности wsdl
+                try {
+                    URLConnection uc = (new URL(sunrAddressParams.get(0))).openConnection();
+                    uc.setConnectTimeout(10000);
+                    uc.setReadTimeout(10000);
+                    uc.getContent();
+                } catch (Exception e) {
+                    LOG.error("Произошла непредвиденная ошибка при отправке изменений справочника \"Подразделения\" в АС СУНР", e);
+                    String msg = String.format(SUNR_ERR_MSG, "Не удалось установить соединение с веб-сервисом");
+                    if (taxDepartmentChanges != null) {
+                        taxDepartmentChanges.setErrorCode("E5");
+                        taxDepartmentChanges.setErrorText(msg);
+                        msg = DepartmentManagementServicePortType.REQUEST_ALL_CHANGES_MSG + msg;
+                    }
+                    auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
+                            null, null, null, null, msg, null);
+                    return;
+                }
+
+                DepartmentWS departmentWS = getDepartmentWSPort(sunrAddressParams.get(0), timeout);
                 TaxDepartmentChangeStatus status = departmentWS.sendDepartmentChange(convert(departmentChanges));
                 if (status.getErrorCode().equalsIgnoreCase("E0")) {
                     departmentChangeService.clean();
@@ -126,7 +149,7 @@ public class DepartmentWS_Manager {
                 }
             } else {
                 String msg = "Отсутствуют изменения справочника \"Подразделения\" для передачи в АС СУНР.";
-                if (taxDepartmentChanges == null) {
+                if (taxDepartmentChanges != null) {
                     msg = DepartmentManagementServicePortType.REQUEST_ALL_CHANGES_MSG + msg;
                 }
                 auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
@@ -140,10 +163,10 @@ public class DepartmentWS_Manager {
                 msg = "Возникла ошибка при отправке изменений справочника \"Подразделения\" в АС СУНР. Текст ошибки: «Время ожидания ответа истекло»";
                 errorCode = "E4";
             } else if (ExceptionUtils.indexOfThrowable(e, ConnectException.class) != -1) {
-                msg = "Возникла ошибка при отправке изменений справочника \"Подразделения\" в АС СУНР. Текст ошибки: «Произошла ошибка при попытке соединения с веб-сервисом»";
+                msg = String.format(SUNR_ERR_MSG, "Произошла ошибка при попытке соединения с веб-сервисом");
                 errorCode = "E5";
             } else {
-                msg = "Произошла непредвиденная ошибка при отправке изменений справочника \"Подразделения\" в АС СУНР. Текст ошибки: «Неизвестная техническая ошибка»";
+                msg = String.format(SUNR_ERR_MSG, "Неизвестная техническая ошибка");
                 errorCode = "E5";
             }
             if (taxDepartmentChanges != null) {
