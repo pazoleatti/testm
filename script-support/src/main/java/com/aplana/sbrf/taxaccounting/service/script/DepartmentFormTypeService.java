@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.Date;
@@ -40,4 +38,15 @@ public interface DepartmentFormTypeService {
      * при формировании декларации
      */
     List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает информацию он назначенных подразделению формах по заданному виду налога.
+     *
+     * @param departmentId идентификатор подразделения
+     * @param taxType      вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
+     */
+    List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
 }
