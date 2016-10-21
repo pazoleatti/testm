@@ -628,7 +628,7 @@ def copyData() {
         def msg1 = plural ? "отсутствуют первичные формы" : "отсутствует первичная форма"
         def periodNames = absentPeriods.absentFormPeriodOrders.sort().collect { periodNameMap[it] }
         def msg2 = (plural ? "периоды: " : "период ") + periodNames.join(", ")
-        logger.warn("Данные по транспортным средстам из предыдущего периода не были скопированы. В Системе %s «%s» подразделения «%s» в состоянии «Принята» за %s %s",
+        logger.warn("Данные по транспортным средствам из предыдущего периода не были скопированы. В Системе %s «%s» подразделения «%s» в состоянии «Принята» за %s %s",
                 msg1, formData.formType.name, formDataDepartment.name, msg2, absentPeriods.prevPeriodYear)
     }
 
