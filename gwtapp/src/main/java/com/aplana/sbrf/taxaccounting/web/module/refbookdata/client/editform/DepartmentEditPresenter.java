@@ -123,6 +123,7 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
                                     final UnitEditingAction editingAction = new UnitEditingAction();
                                     editingAction.setDepId(currentUniqueRecordId.intValue());
                                     editingAction.setValueToSave(map);
+                                    editingAction.setDepName(map.get(DEPARTMENT_ATTRIBUTE_NAME).getStringValue());
                                     if (modifiedFields.containsKey(DEPARTMENT_ATTRIBUTE_TYPE) && depType == 2) {
                                         CheckOpenReportPeriodAction periodAction = new CheckOpenReportPeriodAction();
                                         periodAction.setDepId(currentUniqueRecordId.intValue());
@@ -134,13 +135,12 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
                                                             Dialog.errorMessage(OPEN_PERIOD_ERROR);
                                                             LogAddEvent.fire(DepartmentEditPresenter.this, result.getUuid());
                                                         } else {
-                                                            showRenameDialog(editingAction, map.get(DEPARTMENT_ATTRIBUTE_NAME).toString(), newDepType, recordChanges);
-
+                                                            showRenameDialog(editingAction, newDepType, recordChanges);
                                                         }
                                                     }
                                                 }, DepartmentEditPresenter.this));
                                     } else if(modifiedFields.containsKey(DEPARTMENT_ATTRIBUTE_NAME)){
-                                        showRenameDialog(editingAction, map.get(DEPARTMENT_ATTRIBUTE_NAME).getStringValue(), newDepType, recordChanges);
+                                        showRenameDialog(editingAction, newDepType, recordChanges);
                                     } else {
                                         dispatchAsync.execute(editingAction,
                                                 CallbackUtils.defaultCallback(
@@ -220,7 +220,7 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
         getView().updateRefBookPickerPeriod();
     }
 
-    private void showRenameDialog(final UnitEditingAction editingAction, final String depAttrName, final Long newDepType, final RecordChanges recordChanges){
+    private void showRenameDialog(final UnitEditingAction editingAction, final Long newDepType, final RecordChanges recordChanges){
         renameDialogPresenter.open(new ConfirmButtonClickHandler() {
             @Override
             public void onClick(Date dateFrom, Date dateTo) {
@@ -228,7 +228,6 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
                                                                     Dialog.infoMessage("Переименовываем с " + WidgetUtils.getDateString(dateFrom) +
                                                                             " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"")*/
                 editingAction.setChangeType(modifiedFields.containsKey(DEPARTMENT_ATTRIBUTE_TYPE));
-                editingAction.setDepName(depAttrName);
                 editingAction.setVersionFrom(dateFrom);
                 editingAction.setVersionTo(dateTo);
                 renameDialogPresenter.getView().cleanDates();

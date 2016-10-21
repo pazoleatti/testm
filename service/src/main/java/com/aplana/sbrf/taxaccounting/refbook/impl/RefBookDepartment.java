@@ -301,7 +301,7 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
                 auditService.add(FormDataEvent.ADD_DEPARTMENT, logger.getTaUserInfo(), null,
                         null, null, null, null,
                         String.format("Создано подразделение %s, значения атрибутов: %s",
-                                refBookValueMap.get(DEPARTMENT_NAME_ATTRIBUTE).toString(),
+                                departmentService.getParentsHierarchy(depId),
                                 assembleMessage(refBookValueMap)), null);
                 return Arrays.asList((long)depId);
             } finally {
