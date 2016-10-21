@@ -1055,7 +1055,9 @@ def getRelation(FormData tmpFormData, Department department, ReportPeriod period
     DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(tmpFormData?.departmentReportPeriodId) as DepartmentReportPeriod
     DepartmentReportPeriod comparativePeriod = getDepartmentReportPeriodById(tmpFormData?.comparativePeriodId) as DepartmentReportPeriod
     FormType formType = getFormTypeById(tmpFormData.formType.id) as FormType
-    def performers = [getDepartmentById(tmpFormData.performer.printDepartmentId) as Department]
+    def departmentFormTypes = departmentFormTypeService.getByTaxType(tmpFormData.departmentId, TaxType.LAND, getReportPeriodStartDate(), getReportPeriodEndDate())
+    def departmentFormType = departmentFormTypes.find { it.formTypeId == tmpFormData.formType.id && it.kind == tmpFormData.kind }
+    def performers = departmentFormType?.performers?.collect { getDepartmentById(it) as Department }
 
     // boolean light - заполняются только текстовые данные для GUI и сообщений
     if (light) {
@@ -1079,7 +1081,7 @@ def getRelation(FormData tmpFormData, Department department, ReportPeriod period
         /** Год периода сравнения */
         relation.comparativePeriodYear = comparativePeriod?.reportPeriod?.taxPeriod?.year
         /** название подразделения-исполнителя */
-        relation.performerNames = [tmpFormData.performer.name]
+        relation.performerNames = performers?.collect { it?.name }?.findAll { it }
     }
     /**************  Общие параметры ***************/
     /** подразделение */

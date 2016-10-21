@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.form_template.transport.vehicles.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -215,7 +216,14 @@ public class Vehicles2Test extends ScriptTestBase {
     @Test
     public void afterCreateTest() {
         testHelper.execute(FormDataEvent.AFTER_CREATE);
-        checkLogger();
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        int i = 0;
+        String msg = String.format("Данные по транспортным средствам из предыдущего периода не были скопированы. В Системе %s «%s» подразделения «%s» в состоянии «Принята» за %s %s",
+                "отсутствует первичная форма", "Сведения о транспортных средствах, по которым уплачивается транспортный налог", "test department name", "период четвёртый квартал", 2013);
+        Assert.assertEquals(LogLevel.WARNING, entries.get(i).getLevel());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
     }
 
     // Консолидация

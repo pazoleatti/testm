@@ -209,6 +209,7 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         taxPeriod.setYear(2014);
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setId(1);
+        reportPeriod.setOrder(1);
         reportPeriod.setTaxPeriod(taxPeriod);
         reportPeriod.setName("test period name");
         when(reportPeriodService.get(anyInt())).thenReturn(reportPeriod);
@@ -218,20 +219,17 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
 
     @Override
     public DepartmentService mockDepartmentService() {
-        DepartmentService departmentService = mock(DepartmentService.class);
-        return departmentService;
+        return mock(DepartmentService.class);
     }
 
     @Override
     public BookerStatementService mockBookerStatementService() {
-        BookerStatementService bookerStatementService = mock(BookerStatementService.class);
-        return bookerStatementService;
+        return mock(BookerStatementService.class);
     }
 
     @Override
     public ImportService mockImportService() {
-        ImportService importService = new ImportServiceImpl();
-        return importService;
+        return new ImportServiceImpl();
     }
 
     @Override
@@ -267,38 +265,32 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
 
     @Override
     public DepartmentFormTypeService mockDepartmentFormTypeService() {
-        DepartmentFormTypeService departmentFormTypeService = mock(DepartmentFormTypeService.class);
-        return departmentFormTypeService;
+        return mock(DepartmentFormTypeService.class);
     }
 
     @Override
     public RefBookFactory mockRefBookFactory() {
-        RefBookFactory refBookFactory = mock(RefBookFactory.class);
-        return refBookFactory;
+        return mock(RefBookFactory.class);
     }
 
     @Override
     public DepartmentReportPeriodService mockDepartmentReportPeriodService() {
-        DepartmentReportPeriodService departmentReportPeriodService = mock(DepartmentReportPeriodService.class);
-        return departmentReportPeriodService;
+        return mock(DepartmentReportPeriodService.class);
     }
 
     @Override
     public FormTypeService mockFormTypeService() {
-        FormTypeService formTypeService = mock(FormTypeService.class);
-        return formTypeService;
+        return mock(FormTypeService.class);
     }
 
     @Override
     public DeclarationService mockDeclarationService(){
-        DeclarationService declarationService = mock(DeclarationService.class);
-        return declarationService;
+        return mock(DeclarationService.class);
     }
 
     @Override
     public TransactionHelper mockTransactionHelper() {
-        TransactionHelper transactionHelper = mock(TransactionHelper.class);
-        return transactionHelper;
+        return mock(TransactionHelper.class);
     }
 
     /**
@@ -325,8 +317,7 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     }
 
     private RefBookDataProvider mockRefBookDataProvider() {
-        RefBookDataProvider refBookDataProvider = mock(RefBookDataProvider.class);
-        return  refBookDataProvider;
+        return mock(RefBookDataProvider.class);
     }
 
     @Override
@@ -341,8 +332,7 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
 
     @Override
     public DeclarationService getDeclarationService() {
-        DeclarationService declarationService = mock(DeclarationService.class);
-        return declarationService;
+        return mock(DeclarationService.class);
     }
 
     @Override

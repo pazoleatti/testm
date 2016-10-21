@@ -86,7 +86,7 @@ public class EditDialogView extends PopupViewWithUiHandlers<EditDialogUiHandlers
         data.setBalance(balancePeriod.getValue());
         data.setYear(yearBox.getValue());
         data.setReportPeriodId(period.getSingleValue() == null ? null : period.getSingleValue().intValue());
-        data.setDepartmentId(departmentPicker.getValue().get(0));
+        data.setDepartmentId(departmentPicker.getValue().isEmpty() ? null : departmentPicker.getValue().get(0));
         data.setDictTaxPeriodId(period.getSingleValue());
 		getUiHandlers().onContinue(data);
     }
