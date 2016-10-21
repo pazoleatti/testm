@@ -694,16 +694,16 @@ def getCodeValue(def sourceType, def sourceRow) {
         case formType171:
             return sourceRow.code
         case formType115:
-            if (sourceRow.incomeDelta != null) {
+            if (sourceRow.incomeDelta) {
                 return '19240'
-            } else if (sourceRow.outcomeDelta != null){
+            } else if (sourceRow.outcomeDelta){
                 return '19420'
             }
             break
         case formType116:
-            if (sourceRow.incomeDelta != null) {
+            if (sourceRow.incomeDelta) {
                 return '19270'
-            } else if (sourceRow.outcomeDelta != null){
+            } else if (sourceRow.outcomeDelta){
                 return '19450'
             }
             break
