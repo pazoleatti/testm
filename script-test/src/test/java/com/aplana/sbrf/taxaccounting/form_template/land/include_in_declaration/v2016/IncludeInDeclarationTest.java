@@ -1,13 +1,16 @@
 package com.aplana.sbrf.taxaccounting.form_template.land.include_in_declaration.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
@@ -18,6 +21,8 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +30,7 @@ import java.util.Map;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -38,6 +44,7 @@ public class IncludeInDeclarationTest extends ScriptTestBase {
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
     private static final FormDataKind KIND = FormDataKind.SUMMARY;
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
     protected FormData getFormData() {
@@ -167,10 +174,283 @@ public class IncludeInDeclarationTest extends ScriptTestBase {
         testHelper.execute(FormDataEvent.GET_SOURCES);
     }
 
-    // TODO (Ramil Timerbaev) добавить тест, что б выполнилась каждая логическая проверка
-    // @Test
-    public void check1Test() {
+    // Проверка с данными
+    @Test
+    public void check1Test() throws ParseException {
+        mockProvider(96L);
+
+        // текущий период
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2014);
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setOrder(4);
+        reportPeriod.setTaxPeriod(taxPeriod);
+        when(testHelper.getReportPeriodService().get(anyInt())).thenReturn(reportPeriod);
+
+        FormData formData = getFormData();
+        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+
+        // простая строка
+        DataRow<Cell> row = formData.createDataRow();
+        row.setIndex(1);
+        setDefaultValues(row);
+        dataRows.add(row);
+
+        // подитог КНО/КПП/ОКТМО
+        DataRow<Cell> total2Row = formData.createDataRow();
+        total2Row.setIndex(2);
+        total2Row.setAlias("total2#1");
+        total2Row.getCell("kno").setValue(row.getCell("kno").getValue(), null);
+        total2Row.getCell("kpp").setValue(row.getCell("kpp").getValue(), null);
+        total2Row.getCell("oktmo").setValue(row.getCell("oktmo").getValue(), null);
+        total2Row.getCell("q1").setValue(1, null);
+        total2Row.getCell("q2").setValue(1, null);
+        total2Row.getCell("q3").setValue(1, null);
+        total2Row.getCell("year").setValue(1, null);
+        dataRows.add(total2Row);
+
+        // подитог КНО/КПП/ОКТМО
+        DataRow<Cell> total1Row = formData.createDataRow();
+        total1Row.setIndex(3);
+        total1Row.setAlias("total1#1");
+        total1Row.getCell("kno").setValue(row.getCell("kno").getValue(), null);
+        total1Row.getCell("kpp").setValue(row.getCell("kpp").getValue(), null);
+        total1Row.getCell("q1").setValue(1, null);
+        total1Row.getCell("q2").setValue(1, null);
+        total1Row.getCell("q3").setValue(1, null);
+        total1Row.getCell("year").setValue(1, null);
+        dataRows.add(total1Row);
+
+        // строка всего
+        DataRow<Cell> totalRow = formData.createDataRow();
+        totalRow.setIndex(4);
+        totalRow.setAlias("total");
+        totalRow.getCell("q1").setValue(1, null);
+        totalRow.getCell("q2").setValue(1, null);
+        totalRow.getCell("q3").setValue(1, null);
+        totalRow.getCell("year").setValue(1, null);
+        dataRows.add(totalRow);
+
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        int i;
+        String msg;
+
+        // успешное выполнение всех логических проверок
+        setDefaultValues(row);
         testHelper.execute(FormDataEvent.CHECK);
+        checkLogger();
+        testHelper.getLogger().clear();
+
+        // 1. Проверка обязательности заполнения граф
+        for (Column column : formData.getFormColumns()) {
+            row.getCell(column.getAlias()).setValue(null, row.getIndex());
+        }
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        // графа 1..8, 10, 12, 14, 21, 22, 25..28
+        String [] nonEmptyColumns = { "rowNumber", "department", "kno", "kpp", "kbk", "oktmo", "cadastralNumber",
+                "landCategory", "cadastralCost", "ownershipDate", "period", "taxRate", "kv", "q1", "q2", "q3", "year" };
+        for (String alias : nonEmptyColumns) {
+            String columnName = row.getCell(alias).getColumn().getName();
+            msg = String.format(ScriptUtils.WRONG_NON_EMPTY, row.getIndex(), columnName);
+            Assert.assertEquals(msg, entries.get(i++).getMessage());
+        }
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+        setDefaultValues(row);
+
+        // 2. Проверка одновременного заполнения данных о налоговой льготе
+        setDefaultValues(row);
+        row.getCell("benefitCode").setValue(null, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        msg = String.format("Строка %s: Данные о налоговой льготе указаны не полностью", row.getIndex());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        // побочная проверка
+        Assert.assertTrue(entries.get(i++).getMessage().contains("заполнены неверно"));
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 3. Проверка корректности заполнения даты возникновения права собственности
+        // 7. Проверка корректности заполнения даты начала действия льготы
+        setDefaultValues(row);
+        row.getCell("ownershipDate").setValue(sdf.parse("01.01.2015"), null);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        msg = String.format("Строка %s: Значение графы «%s» должно быть меньше либо равно %s",
+                row.getIndex(), row.getCell("ownershipDate").getColumn().getName(), "31.12.2014");
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»",
+                row.getIndex(), row.getCell("startDate").getColumn().getName(), row.getCell("ownershipDate").getColumn().getName());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        // побочная проверка
+        Assert.assertTrue(entries.get(i++).getMessage().contains("заполнены неверно"));
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 4. Проверка корректности заполнения даты прекращения права собственности
+        setDefaultValues(row);
+        row.getCell("terminationDate").setValue(sdf.parse("01.01.2013"), null);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно %s, и больше либо равно значению графы «%s»",
+                row.getIndex(), row.getCell("terminationDate").getColumn().getName(), "01.01.2014", row.getCell("ownershipDate").getColumn().getName());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        // побочная проверка
+        Assert.assertTrue(entries.get(i++).getMessage().contains("заполнены неверно"));
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 5. Проверка доли налогоплательщика в праве на земельный участок
+        // 6. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
+        setDefaultValues(row);
+        row.getCell("taxPart").setValue("1a/0", null);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        msg = String.format("Строка %s: Графа «%s» должна быть заполнена согласно формату: " +
+                    "«(от 1 до 10 числовых знаков) / (от 1 до 10 числовых знаков)», " +
+                    "без лидирующих нулей в числителе и знаменателе, числитель должен быть меньше либо равен знаменателю",
+                row.getIndex(), row.getCell("taxPart").getColumn().getName());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        msg = String.format("Строка %s: Значение знаменателя в графе «%s» не может быть равным нулю",
+                row.getIndex(), row.getCell("taxPart").getColumn().getName());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        // побочная проверка
+        Assert.assertTrue(entries.get(i++).getMessage().contains("заполнены неверно"));
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 8. Проверка корректности заполнения даты окончания действия льготы
+        setDefaultValues(row);
+        row.getCell("endDate").setValue(sdf.parse("01.01.2013"), null);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s» и быть меньше либо равно значению графы «%s»",
+                row.getIndex(), row.getCell("endDate").getColumn().getName(),
+                row.getCell("startDate").getColumn().getName(), row.getCell("terminationDate").getColumn().getName());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        // побочная проверка
+        Assert.assertTrue(entries.get(i++).getMessage().contains("заполнены неверно"));
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 9. Проверка наличия в реестре земельных участков с одинаковым кадастровым номером и кодом ОКТМО, периоды владения которых пересекаются
+        setDefaultValues(row);
+        // дополнительная строка
+        DataRow<Cell> row2 = formData.createDataRow();
+        row2.setIndex(1);
+        setDefaultValues(row2);
+        dataRows.add(row2);
+        setDefaultValues(row2);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        msg = String.format("Строки %s. Кадастровый номер земельного участка «%s», Код ОКТМО «%s»: на форме не должно быть строк с одинаковым кадастровым номером, кодом ОКТМО и пересекающимися периодами владения правом собственности",
+                row.getIndex(), row.getCell("cadastralNumber").getValue(), "codeA96");
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+        dataRows.remove(row2);
+
+        // 10. Проверка корректности заполнения кода налоговой льготы (графа 15)
+        setDefaultValues(row);
+        row.getCell("oktmo").setValue(4L, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        msg = String.format("Строка %s: Код ОКТМО, в котором действует выбранная в графе «%s» льгота, должен быть равен значению графы «%s»",
+                row.getIndex(), row.getCell("benefitCode").getColumn().getName(), row.getCell("oktmo").getColumn().getName());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 11. Проверка корректности заполнения граф 14, 20, 22-28
+        setDefaultValues(row);
+        String [] calcColumns = { "period", "benefitPeriod", "kv", "kl", "sum", "q1", "q2", "q3", "year" };
+        for (String alias : calcColumns) {
+            row.getCell(alias).setValue(9L, null);
+        }
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        List<String> columnNames = new ArrayList<String>(calcColumns.length);
+        for (String alias : calcColumns) {
+            columnNames.add(row.getCell(alias).getColumn().getName());
+        }
+        String subMsg = StringUtils.join(columnNames.toArray(), "», «", null);
+        msg = String.format("Строка %s: Графы «%s» заполнены неверно", row.getIndex(), subMsg);
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 12. Проверка правильности заполнения КПП
+        setDefaultValues(row);
+        row.getCell("kpp").setValue("testKpp", null);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        msg = String.format("Строка %s: Не найдено ни одного подразделения, для которого на форме настроек подразделений существует запись с КПП равным «%s»",
+                row.getIndex(), row.getCell("kpp").getValue());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+    }
+
+    private void setDefaultValues(DataRow<Cell> row) throws ParseException {
+        Date date = sdf.parse("01.01.2014");
+        // графа 1
+        row.getCell("rowNumber").setValue(row.getIndex(), null);
+        // графа 2
+        row.getCell("department").setValue(1L, null);
+        // графа 3
+        row.getCell("kno").setValue("kno", null);
+        // графа 4
+        row.getCell("kpp").setValue("kppA710", null);
+        // графа 5
+        row.getCell("kbk").setValue(1L, null);
+        // графа 6
+        row.getCell("oktmo").setValue(1L, null);
+        // графа 7
+        row.getCell("cadastralNumber").setValue("cadastralNumber", null);
+        // графа 8
+        row.getCell("landCategory").setValue(1L, null);
+        // графа 9
+        row.getCell("constructionPhase").setValue(1L, null);
+        // графа 10
+        row.getCell("cadastralCost").setValue(100L, null);
+        // графа 11
+        row.getCell("taxPart").setValue(null, null);
+        // графа 12
+        row.getCell("ownershipDate").setValue(date, null);
+        // графа 13
+        row.getCell("terminationDate").setValue(null, null);
+        // графа 14
+        row.getCell("period").setValue(12L, null);
+        // графа 15
+        row.getCell("benefitCode").setValue(3L, null);
+        // графа 16
+        row.getCell("benefitBase").setValue(null, null);
+        // графа 17
+        row.getCell("benefitParam").setValue(null, null);
+        // графа 18
+        row.getCell("startDate").setValue(date, null);
+        // графа 19
+        row.getCell("endDate").setValue(null, null);
+        // графа 20
+        row.getCell("benefitPeriod").setValue(12L, null);
+        // графа 21
+        row.getCell("taxRate").setValue(9L, null);
+        // графа 22
+        row.getCell("kv").setValue(1L, null);
+        // графа 23
+        row.getCell("kl").setValue(0L, null);
+        // графа 24
+        row.getCell("sum").setValue(2L, null);
+        // графа 25
+        row.getCell("q1").setValue(9L, null);
+        // графа 26
+        row.getCell("q2").setValue(9L, null);
+        // графа 27
+        row.getCell("q3").setValue(9L, null);
+        // графа 28
+        row.getCell("year").setValue(-11L, null);
     }
 
     void checkValues(List<DataRow<Cell>> dataRows) {

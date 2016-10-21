@@ -21,7 +21,7 @@ import groovy.transform.Field
  * formTypeId = 917
  *
  * TODO:
- *      - тесты для логических проверок
+ *      - тесты для FormDataEvent.GET_SOURCES
  */
 
 // графа 1  - rowNumber
