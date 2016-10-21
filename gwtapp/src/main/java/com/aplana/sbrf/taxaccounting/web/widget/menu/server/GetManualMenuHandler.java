@@ -55,11 +55,11 @@ public class GetManualMenuHandler extends AbstractActionHandler<GetManualMenuAct
                     || currentUser.hasRole(TARole.ROLE_CONTROL)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                manualMenu.getSubMenu().add(new MenuItem("Руководство пользователя", "resources/Руководство_пользователя.pdf"));
+                manualMenu.getSubMenu().add(new MenuItem("Руководство пользователя", "resources/help_un.pdf"));
             }
 
             if (currentUser.hasRole(TARole.ROLE_CONF)) {
-                manualMenu.getSubMenu().add(new MenuItem("Руководство настройщика макетов", "resources/Руководство_настройщика_макетов.pdf"));
+                manualMenu.getSubMenu().add(new MenuItem("Руководство настройщика макетов", "resources/help_conf.pdf"));
             }
 
             menuItems.add(manualMenu);
