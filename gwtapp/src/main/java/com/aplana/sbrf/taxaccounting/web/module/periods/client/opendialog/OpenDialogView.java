@@ -97,7 +97,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 		OpenFilterData openFilterData = new OpenFilterData();
 		openFilterData.setYear(yearBox.getValue());
 		openFilterData.setBalancePeriod(balancePeriod.getValue());
-		openFilterData.setDepartmentId(departmentPicker.getValue().iterator().next());
+		openFilterData.setDepartmentId(departmentPicker.getValue().isEmpty() ? null : departmentPicker.getValue().get(0));
 	    openFilterData.setDictionaryTaxPeriodId(period.getSingleValue());
         if (correctPeriod.getValue()) {
             openFilterData.setCorrectPeriod(term.getValue());
