@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.form_template.transport.summary.v2014;
 
-import com.aplana.sbrf.taxaccounting.form_template.transport.vehicles.v2014.Vehicles1Test;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
@@ -18,14 +19,16 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.getColumnName;
 import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -36,11 +39,14 @@ import static org.mockito.Mockito.when;
 public class SummaryTest extends ScriptTestBase {
     private static final int TYPE_ID = 203;
     private static final int SOURCE_TYPE_ID = 201;
+    private static final long SOURCE_DATA_ID = 2L;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
     private static final FormDataKind KIND = FormDataKind.SUMMARY;
     private static final FormDataKind SOURCE_KIND = FormDataKind.PRIMARY;
+    private static final SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat yFormat = new SimpleDateFormat("yyyy");
 
     @Override
     protected FormData getFormData() {
@@ -64,38 +70,27 @@ public class SummaryTest extends ScriptTestBase {
     }
 
     @Before
-    public void mockRefBookDataProvider() {
-        // Для работы проверок
-        when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), anyString(),
-                any(RefBookAttribute.class))).thenAnswer(
-                new Answer<PagingResult<Map<String, RefBookValue>>>() {
-                    @Override
-                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
-                        String filter = (String)invocation.getArguments()[2];
-                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-                        if (filter.equals("DECLARATION_REGION_ID = 1 and OKTMO = 1")) {
-                            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                            map.put("REGION_ID", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                            map.put("TAX_ORGAN_CODE", new RefBookValue(RefBookAttributeType.STRING, "taxA"));
-                            map.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "kpp"));
-
-                            result.add(map);
-                        } else if (filter.toLowerCase().contains("OKTMO_DEFINITION like ".toLowerCase()) || filter.toLowerCase().contains("CODE like ".toLowerCase())) {
-                            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                            result.add(map);
-                        } else if (filter.contains("(YEAR_FROM <")) {
-                            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                            map.put("COEF", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                            result.add(map);
-                        }
-                        return result;
-                    }
-                });
-
+    public void mockBefore() {
         when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(testHelper.getFormTemplate());
+
+        // провайдер
+        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), anyLong(),
+                anyMapOf(Long.class, RefBookDataProvider.class))).thenAnswer(new Answer<RefBookDataProvider>() {
+            @Override
+            public RefBookDataProvider answer(InvocationOnMock invocation) throws Throwable {
+                Long refBookId = (Long) invocation.getArguments()[1];
+                if (refBookId == 209L || refBookId == 210L || refBookId == 41L || refBookId == 4L) {
+                    RefBookUniversal provider = mock(RefBookUniversal.class);
+                    // вернуть все записи справочника
+                    Map<Long, Map<String, RefBookValue>> refBookAllRecords = testHelper.getRefBookAllRecords(refBookId);
+                    ArrayList<Long> recordIds = new ArrayList<Long>(refBookAllRecords.keySet());
+                    when(provider.getUniqueRecordIds(any(Date.class), isNull(String.class))).thenReturn(recordIds);
+                    when(provider.getRecordData(eq(recordIds))).thenReturn(refBookAllRecords);
+                    return provider;
+                }
+                return testHelper.getRefBookDataProvider();
+            }
+        });
     }
 
     @Test
@@ -122,23 +117,105 @@ public class SummaryTest extends ScriptTestBase {
         checkLogger();
     }
 
-    // Консолидация
-    // TODO @Test
-    public void composeTest() {
+    // Консолидация падающая на всех предварительных проверках
+    @Test
+    public void composeFailTest() throws ParseException {
         // собирается из первички транспорта
-        DepartmentFormType departmentFormType = new DepartmentFormType();
-        departmentFormType.setKind(SOURCE_KIND);
-        departmentFormType.setDepartmentId(DEPARTMENT_ID);
-        departmentFormType.setFormTypeId(SOURCE_TYPE_ID);
-        departmentFormType.setId(1);
-        when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
-                any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
+        Relation relation = getSourceRelation();
+        FormData formData = mockCompose(relation, false);
 
-        // Один экземпляр-источник(первичная)
+        // Консолидация
+        testHelper.execute(FormDataEvent.COMPOSE);
+        int i = 0;
+        String msg;
+        DataRow<Cell> row = formData.createDataRow();
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        msg = String.format("Строки %s формы-источника. Графа «%s» = «%s», графа «%s» = «%s». В справочнике «Повышающие коэффициенты транспортного налога» отсутствует запись, " +
+                "актуальная на дату %s, в которой поле «Средняя стоимость» = «%s» и значение «%s» больше значения поля «Количество лет, прошедших с года выпуска ТС (от)» и меньше или равно значения поля «Количество лет, прошедших с года выпуска ТС (до)». " +
+                "Форма-источник: Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s %s»",
+                "2", getColumnName(row, "pastYear"), "20", getColumnName(row, "averageCost"), "A",
+                "31.12.2014", "A", getColumnName(row, "pastYear"),
+                relation.getFormDataKind().getTitle(), relation.getFormTypeName(), relation.getDepartment().getName(), relation.getPeriodName(), relation.getYear());
+        Assert.assertEquals(LogLevel.WARNING, entries.get(i).getLevel());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+
+        msg = String.format("Строки %s формы-источника. Графа «%s» = «%s»: В справочнике «Параметры представления деклараций по транспортному налогу» отсутствует запись, " +
+                        "актуальная на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) справочника «Подразделения» " +
+                        "для подразделения «%s», поле «Код субъекта РФ» = «%s», поле «Код по ОКТМО» = «%s». " +
+                        "Форма-источник: Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s %s»",
+                2, getColumnName(row, "codeOKATO"), "5200000", "31.12.2014", "02", "test department name", "03", "5200000",
+                relation.getFormDataKind().getTitle(), relation.getFormTypeName(), relation.getDepartment().getName(), relation.getPeriodName(), relation.getYear());
+        Assert.assertEquals(LogLevel.ERROR, entries.get(i).getLevel());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+
+        msg = String.format("Строки %s формы-источника. Графа «%s» = «%s», графа «%s» = «%s», графа «%s» = «%s»: В справочнике «Ставки транспортного налога» " +
+                        "%s на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
+                        "справочника «Подразделения» для подразделения «%s», поле «Код субъекта РФ» = «%s», поле «Код ТС» = «%s», поле «Ед. измерения мощности» = «%s». " +
+                        "Форма-источник: Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s %s»",
+                "2", getColumnName(row, "codeOKATO"), "5200000", getColumnName(row, "tsTypeCode"), "50000", getColumnName(row, "baseUnit"), "A",
+                "отсутствует запись, актуальная", "31.12.2014", "02", relation.getDepartment().getName(), "03", "50000", "A",
+                relation.getFormDataKind().getTitle(), relation.getFormTypeName(), relation.getDepartment().getName(), relation.getPeriodName(), relation.getYear());
+        Assert.assertEquals(LogLevel.ERROR, entries.get(i).getLevel());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+
+        Assert.assertEquals(i, entries.size());
+        Assert.assertEquals(7, testHelper.getDataRowHelper().getAll().size());
+    }
+
+    // Консолидация
+    @Test
+    public void composeTest() throws ParseException {
+        // собирается из первички транспорта
+        mockCompose(getSourceRelation(), true);
+
+        // Консолидация
+        testHelper.execute(FormDataEvent.COMPOSE);
+        Assert.assertEquals(0, testHelper.getLogger().getEntries().size());
+        Assert.assertEquals(8, testHelper.getDataRowHelper().getAll().size());
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+    }
+
+    private Relation getSourceRelation(){
+        return new Relation() {{
+            setFormDataId(SOURCE_DATA_ID);
+            setFormType(new FormType() {{
+                setId(SOURCE_TYPE_ID);
+                setName("Сведения о транспортных средствах, по которым уплачивается транспортный налог");
+            }});
+            setFormDataKind(FormDataKind.PRIMARY);
+            setDepartment(new Department() {{
+                setName("Department");
+                setRegionId(1L);
+            }});
+            setPeriodName("первый квартал");
+            setYear(2014);
+            setFormTypeName("Сведения о транспортных средствах, по которым уплачивается транспортный налог");
+        }};
+    }
+
+    private FormData mockCompose(Relation sourceRelation, boolean valid) throws ParseException {
+        Department department = new Department();
+        department.setId(DEPARTMENT_ID);
+        department.setName("Подразделение");
+        when(testHelper.getDepartmentService().get(DEPARTMENT_ID)).thenReturn(department);
+
+        // назначаем приемник
+        List<Relation> relations = new ArrayList<Relation>();
+        relations.add(sourceRelation);
+        when(testHelper.getFormDataService().getSourcesInfo(eq(testHelper.getFormData()), anyBoolean(), anyBoolean(), eq(WorkflowState.ACCEPTED), any(TAUserInfo.class), any(Logger.class))).thenReturn(relations);
+
+        return fillSourceDataRows(valid);
+    }
+
+    private FormData getSourceFormData() {
+        FormTemplate sourceTemplate = testHelper.getTemplate("..//src/main//resources//form_template//transport//vehicles//v2015//");
+        when(testHelper.getFormDataService().getFormTemplate(anyInt())).thenReturn(sourceTemplate);
+
         FormData sourceFormData = new FormData();
         FormType formType = new FormType();
         formType.setId(SOURCE_TYPE_ID);
         sourceFormData.setId(2L);
+        sourceFormData.initFormTemplateParams(sourceTemplate);
         sourceFormData.setKind(SOURCE_KIND);
         sourceFormData.setFormType(formType);
         sourceFormData.setDepartmentId(DEPARTMENT_ID);
@@ -146,80 +223,68 @@ public class SummaryTest extends ScriptTestBase {
         sourceFormData.setReportPeriodId(REPORT_PERIOD_ID);
         sourceFormData.setState(WorkflowState.ACCEPTED);
 
-        Department department = new Department();
-        department.setId(DEPARTMENT_ID);
-        department.setName("Подразделение");
+        when(testHelper.getFormDataService().get(eq(SOURCE_DATA_ID), isNull(Boolean.class))).thenReturn(sourceFormData);
+        return sourceFormData;
+    }
 
-        // DataRowHelper источника
+    /**
+     * Заполнить строки источника.
+     */
+    private FormData fillSourceDataRows(boolean valid) throws ParseException {
+        FormData sourceFormData = getSourceFormData();
+        List<DataRow<Cell>> dataRows = sourceFormData.getFormTemplate().getRows();
+        DataRow<Cell> row = sourceFormData.createDataRow();
+        // графа 2  - codeOKATO         - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
+        row.getCell("codeOKATO").setValue(valid ? 1L : 2L, null);
+        // графа 3  - regionName        - зависит от графы 2 - атрибут 841 - NAME - «Наименование», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
+        // графа 4  - tsTypeCode        - атрибут 422 - CODE - «Код вида ТС», справочник 42 «Коды видов транспортных средств»
+        row.getCell("tsTypeCode").setValue(valid ? 6L : 1L, null);
+        // графа 5  - tsType            - зависит от графы 4 - атрибут 423 - NAME - «Наименование вида транспортного средства», справочник 42 «Коды видов транспортных средств»
+        // графа 6  - model
+        row.getCell("model").setValue("12", null);
+        // графа 7  - ecoClass          - атрибут 400 - CODE - «Код экологического класса», справочник 40 «Экологические классы»
+        row.getCell("ecoClass").setValue(1L, null);
+        // графа 8  - identNumber
+        row.getCell("identNumber").setValue("12", null);
+        // графа 9  - regNumber
+        row.getCell("regNumber").setValue("12", null);
+        // графа 10 - regDate
+        row.getCell("regDate").setValue(format.parse("12.01.2012"), null);
+        // графа 11 - regDateEnd
+        row.getCell("regDateEnd").setValue(format.parse("12.01.2014"), null);
+        // графа 12 - taxBase
+        row.getCell("taxBase").setValue(12, null);
+        // графа 13 - baseUnit          - атрибут 57 - CODE - «Код единицы измерения», справочник 12 «Коды единиц измерения налоговой базы на основании ОКЕИ»
+        row.getCell("baseUnit").setValue(1L, null);
+        // графа 14 - year
+        row.getCell("year").setValue(yFormat.parse("2008"), null);
+        // графа 15 - pastYear
+        row.getCell("pastYear").setValue(valid ? 2 : 20, null);
+        // графа 16 - stealDateStart
+        // графа 17 - stealDateEnd
+        // графа 18 - share
+        row.getCell("share").setValue("12/13", null);
+        // графа 19 - costOnPeriodBegin
+        row.getCell("costOnPeriodBegin").setValue(12, null);
+        // графа 20 - costOnPeriodEnd
+        row.getCell("costOnPeriodEnd").setValue(12, null);
+        // графа 21 - benefitStartDate
+        row.getCell("benefitStartDate").setValue(format.parse("12.01.2013"), null);
+        // графа 22 - benefitEndDate
+        row.getCell("benefitEndDate").setValue(format.parse("12.01.2014"), null);
+        // графа 23 - taxBenefitCode    - атрибут 19 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 7 «Параметры налоговых льгот транспортного налога»
+        row.getCell("taxBenefitCode").setValue(1L, null);
+        // графа 24 - base
+        row.getCell("base").setValue("12/1", null);
+        // графа 25 - version           - атрибут 2183 - MODEL - «Модель (версия)», справочник 218 «Средняя стоимость транспортных средств»
+        row.getCell("version").setValue(1L, null);
+        // графа 26 - averageCost       - атрибут 2111 - NAME - «Наименование», справочник 211 «Категории средней стоимости транспортных средств»
+
+        dataRows.add(1, row);
         DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
+        sourceDataRowHelper.save(dataRows);
         when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
-
-        TestScriptHelper sourceTestHelper = new TestScriptHelper("/form_template/transport/vehicles/v2014/", sourceFormData, getDefaultScriptTestMockHelper(Vehicles1Test.class));
-        sourceTestHelper.setImportFileInputStream(getCustomInputStream("sourceImportFile.xlsm"));
-        sourceTestHelper.initRowData();
-
-        when(sourceTestHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(
-                new Answer<DepartmentReportPeriod>() {
-                    @Override
-                    public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
-                        DepartmentReportPeriod result = new DepartmentReportPeriod();
-                        result.setBalance(true);
-                        return result;
-                    }
-                });
-
-        when(sourceTestHelper.getRefBookFactory().get(anyLong())).then(
-                new Answer<RefBook>() {
-                    @Override
-                    public RefBook answer(InvocationOnMock invocation) throws Throwable {
-                        RefBook result = new RefBook();
-                        result.setName("ref_book_" + invocation.getArguments()[0]);
-                        return result;
-                    }
-                });
-
-        when(sourceTestHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), anyString(),
-                any(RefBookAttribute.class))).thenAnswer(
-                new Answer<PagingResult<Map<String, RefBookValue>>>() {
-                    @Override
-                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
-                        String filter = (String)invocation.getArguments()[2];
-                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-                        if (filter.startsWith("TAX_BENEFIT_ID = ") && filter.endsWith(" and DECLARATION_REGION_ID = 1")) {
-                            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                            if (filter.contains("TAX_BENEFIT_ID = 2")) {
-                                map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
-                            }
-                            if (filter.contains("TAX_BENEFIT_ID = 3")) {
-                                map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
-                            }
-                            if (filter.contains("TAX_BENEFIT_ID = 1"))  {
-                                map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                            }
-                            result.add(map);
-                        }
-                        return result;
-                    }
-                });
-
-        sourceTestHelper.execute(FormDataEvent.IMPORT);
-        sourceDataRowHelper.save(sourceTestHelper.getDataRowHelper().getAll());
-
-        when(testHelper.getFormDataService().getLast(eq(SOURCE_TYPE_ID), eq(SOURCE_KIND), eq(DEPARTMENT_ID), anyInt(),
-                any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(sourceFormData);
-
-        when(testHelper.getDepartmentService().get(DEPARTMENT_ID)).thenReturn(department);
-
-        // DataRowHelper НФ-источника
-        when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
-
-        // Консолидация
-        testHelper.initRowData();
-        testHelper.execute(FormDataEvent.COMPOSE);
-        Assert.assertEquals(11, testHelper.getDataRowHelper().getAll().size());
-        checkLoadData(testHelper.getDataRowHelper().getAll());
-
-        Assert.assertTrue("Logger must contains error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        return sourceFormData;
     }
 
     @Test
@@ -241,79 +306,51 @@ public class SummaryTest extends ScriptTestBase {
     /**
      * Проверить загруженные данные, а также выполнение расчетов и логических проверок.
      */
-    void checkLoadData(List<DataRow<Cell>> dataRows) {
-
+    private void checkLoadData(List<DataRow<Cell>> dataRows) {
+        //графа 2, 3
+        Assert.assertEquals("A", dataRows.get(1).getCell("taxAuthority").getStringValue());
+        Assert.assertEquals("A", dataRows.get(1).getCell("kpp").getStringValue());
+        // графа 4
+        Assert.assertEquals(1, dataRows.get(1).getCell("okato").getNumericValue().intValue());
+        // графа 5 (6 пропускаем)
+        Assert.assertEquals(6, dataRows.get(1).getCell("tsTypeCode").getNumericValue().intValue());
+        // графа 7
+        Assert.assertEquals("12", dataRows.get(1).getCell("model").getStringValue());
+        // графа 8
+        Assert.assertEquals(1, dataRows.get(1).getCell("ecoClass").getNumericValue().intValue());
+        // графа 9
+        Assert.assertEquals("12", dataRows.get(1).getCell("vi").getStringValue());
+        // графа 10
+        Assert.assertEquals("12", dataRows.get(1).getCell("regNumber").getStringValue());
         // графа 11
-        Assert.assertEquals("12.01.2012", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(1).getCell("regDate").getDateValue())));
-        Assert.assertEquals("12.01.2012", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(2).getCell("regDate").getDateValue())));
-        Assert.assertEquals("12.02.2011", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(5).getCell("regDate").getDateValue())));
-        Assert.assertEquals("20.01.2008", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(8).getCell("regDate").getDateValue())));
-
+        Assert.assertEquals("12.01.2012", String.valueOf(format.format(dataRows.get(1).getCell("regDate").getDateValue())));
         // графа 12
-        Assert.assertEquals("12.01.2014", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(1).getCell("regDateEnd").getDateValue())));
-
+        Assert.assertEquals("12.01.2014", String.valueOf(format.format(dataRows.get(1).getCell("regDateEnd").getDateValue())));
         // графа 13
         Assert.assertEquals(12.0, dataRows.get(1).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
-        Assert.assertNull(dataRows.get(2).getCell("taxBase").getNumericValue());
-        Assert.assertEquals(34.0, dataRows.get(5).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
-        Assert.assertEquals(56.0, dataRows.get(8).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
-
         // графа 14
         Assert.assertEquals(1, dataRows.get(1).getCell("taxBaseOkeiUnit").getNumericValue().intValue());
-        Assert.assertEquals(1, dataRows.get(2).getCell("taxBaseOkeiUnit").getNumericValue().intValue());
-        Assert.assertEquals(1, dataRows.get(5).getCell("taxBaseOkeiUnit").getNumericValue().intValue());
-        Assert.assertEquals(1, dataRows.get(8).getCell("taxBaseOkeiUnit").getNumericValue().intValue());
-
         // графа 15
         Assert.assertEquals("2008", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(1).getCell("createYear").getDateValue())));
-        Assert.assertEquals("2012", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(2).getCell("createYear").getDateValue())));
-        Assert.assertEquals("2001", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(5).getCell("createYear").getDateValue())));
-        Assert.assertEquals("2011", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(8).getCell("createYear").getDateValue())));
-
         // графа 20
         Assert.assertEquals(12.0, dataRows.get(1).getCell("periodStartCost").getNumericValue().doubleValue(), 0.0);
-
-        //графа 2, 3
-        Assert.assertEquals("taxA", dataRows.get(1).getCell("taxAuthority").getStringValue());
-        Assert.assertEquals("kpp", dataRows.get(2).getCell("kpp").getStringValue());
-
-        // графа 21
-        Assert.assertEquals(12, dataRows.get(2).getCell("ownMonths").getNumericValue().intValue());
-
         // Графа 23
         Assert.assertEquals(0.3333, dataRows.get(1).getCell("coef362").getNumericValue().doubleValue(), 0.0);
-
         // Графа 24
-        Assert.assertEquals("12/1", dataRows.get(1).getCell("partRight").getStringValue());
-        Assert.assertEquals("23/1", dataRows.get(2).getCell("partRight").getStringValue());
-
+        Assert.assertEquals("12/13", dataRows.get(1).getCell("partRight").getStringValue());
         // Графа 25
-        Assert.assertEquals(48, dataRows.get(1).getCell("calculatedTaxSum").getNumericValue().intValue());
-        Assert.assertNull(dataRows.get(2).getCell("calculatedTaxSum").getNumericValue());
-
+        Assert.assertEquals(7.38, dataRows.get(1).getCell("calculatedTaxSum").getNumericValue().doubleValue(), 0.0);
         // Графа 26
         Assert.assertEquals(1, dataRows.get(1).getCell("benefitMonths").getNumericValue().intValue());
-
         // Графа 29
         Assert.assertEquals(0.3333, dataRows.get(1).getCell("coefKl").getNumericValue().doubleValue(), 0.0);
-        Assert.assertNull(dataRows.get(2).getCell("coefKl").getNumericValue());
-
         // Графа 31
-        Assert.assertNull(dataRows.get(1).getCell("benefitSum").getNumericValue());
-        Assert.assertNull(dataRows.get(5).getCell("benefitSum").getNumericValue());
-        Assert.assertEquals(1045.23, dataRows.get(8).getCell("benefitSum").getNumericValue().doubleValue(), 0.0);
-
+        Assert.assertEquals(7.38, dataRows.get(1).getCell("benefitSum").getNumericValue().doubleValue(), 0.0);
         // Графа 33
         Assert.assertNull(dataRows.get(1).getCell("benefitSumDecrease").getNumericValue());
-        Assert.assertEquals(7.71, dataRows.get(5).getCell("benefitSumDecrease").getNumericValue().doubleValue(), 0.0);
-        Assert.assertNull(dataRows.get(8).getCell("benefitSumDecrease").getNumericValue());
-
         // Графа 35
-        Assert.assertEquals(-0.96, dataRows.get(1).getCell("benefitSumReduction").getNumericValue().doubleValue(), 0.0);
-        Assert.assertNull(dataRows.get(5).getCell("benefitSumReduction").getNumericValue());
-        Assert.assertNull(dataRows.get(8).getCell("benefitSumReduction").getNumericValue());
-
+        Assert.assertNull(dataRows.get(1).getCell("benefitSumReduction").getNumericValue());
         // Графа 37
-        Assert.assertEquals(49.00, dataRows.get(1).getCell("taxSumToPay").getNumericValue().doubleValue(), 0.0);
+        Assert.assertEquals(0.00, dataRows.get(1).getCell("taxSumToPay").getNumericValue().doubleValue(), 0.0);
     }
 }

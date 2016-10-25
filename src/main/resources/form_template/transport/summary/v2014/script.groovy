@@ -202,46 +202,6 @@ def getRecord(def Long refBookId, def String alias, def String value, def int ro
             rowIndex, columnName, logger, required)
 }
 
-/**
- * Аналог FormDataServiceImpl.getRefBookRecord(...) но ожидающий получения из справочника больше одной записи.
- * @return первая из найденных записей
- */
-def getRecord(def refBookId, def filter, Date date) {
-    if (refBookId == null) {
-        return null
-    }
-    String dateStr = date?.format('dd.MM.yyyy')
-    if (recordCache.containsKey(refBookId)) {
-        Long recordId = recordCache.get(refBookId).get(dateStr + filter)
-        if (recordId != null) {
-            if (refBookCache != null) {
-                def key = getRefBookCacheKey(refBookId, recordId)
-                return refBookCache.get(key)
-            } else {
-                def retVal = new HashMap<String, RefBookValue>()
-                retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
-                return retVal
-            }
-        }
-    } else {
-        recordCache.put(refBookId, [:])
-    }
-
-    def records = getProvider(refBookId).getRecords(date, null, filter, null)
-    // отличие от FormDataServiceImpl.getRefBookRecord(...)
-    if (records.size() > 0) {
-        def retVal = records.get(0)
-        Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue()
-        recordCache.get(refBookId).put(dateStr + filter, recordId)
-        if (refBookCache != null) {
-            def key = getRefBookCacheKey(refBookId, recordId)
-            refBookCache.put(key, retVal)
-        }
-        return retVal
-    }
-    return null
-}
-
 def getProvider(def id) {
     return formDataService.getRefBookProvider(refBookFactory, id, providerCache)
 }
@@ -732,7 +692,7 @@ def preComposeCheck() {
                             "Форма-источник: Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s %s»",
                             rowIndexes.join(', '), getColumnName(row, 'pastYear'), row.pastYear, getColumnName(row, 'averageCost'), avgCost,
                             getReportPeriodEndDate().format("dd.MM.yyyy"), avgCost, getColumnName(row, 'pastYear'),
-                            relation.formDataKind.name(), relation.formTypeName, relation.department.name, relation.periodName, relation.year
+                            relation.formDataKind.title, relation.formTypeName, relation.department.name, relation.periodName, relation.year
                     )
                 }
             }
@@ -767,9 +727,9 @@ def preComposeCheck() {
                             "для подразделения «%s», поле «Код субъекта РФ» = «%s», поле «Код по ОКТМО» = «%s». " +
                             "Форма-источник: Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s %s»",
                             rowIndexes.join(', '), getColumnName(row, 'codeOKATO'), codeOKATO,
-                            getReportPeriodEndDate().format(dFormat), declarationRegionCode,
+                            getReportPeriodEndDate().format('dd.MM.yyyy'), declarationRegionCode,
                             formDataDepartment.name, regionCode, codeOKATO,
-                            relation.formDataKind.name(), relation.formTypeName, relation.department.name, relation.periodName, relation.year
+                            relation.formDataKind.title, relation.formTypeName, relation.department.name, relation.periodName, relation.year
                     )
                 }
             }
@@ -809,13 +769,13 @@ def preComposeCheck() {
                     def codeOKATO = getRefBookValue(96L, row.codeOKATO).CODE.value
                     def msg1 = isMany ? "более одной записи, актуальной" : "отсутствует запись, актуальная"
                     logger.error("Строки %s формы-источника. Графа «%s» = «%s», графа «%s» = «%s», графа «%s» = «%s»: В справочнике «Ставки транспортного налога» " +
-                            "%s, на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
+                            "%s на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
                             "справочника «Подразделения» для подразделения «%s», поле «Код субъекта РФ» = «%s», поле «Код ТС» = «%s», поле «Ед. измерения мощности» = «%s». " +
                             "Форма-источник: Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s %s»",
                             rowIndexes.join(', '), getColumnName(row, 'codeOKATO'), codeOKATO, getColumnName(row, 'tsTypeCode'), tsTypeCode, getColumnName(row, 'baseUnit'), baseUnit,
-                            msg1, getReportPeriodEndDate().format(dFormat), declarationRegionCode,
+                            msg1, getReportPeriodEndDate().format('dd.MM.yyyy'), declarationRegionCode,
                             relation.getDepartment().name, regionCode, tsTypeCode, baseUnit,
-                            relation.formDataKind.name(), relation.formTypeName, relation.department.name, relation.periodName, relation.year
+                            relation.formDataKind.title, relation.formTypeName, relation.department.name, relation.periodName, relation.year
                     )
                 }
 
@@ -1168,7 +1128,7 @@ void calc24(def row, def region) {
                     "%s, на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
                     "справочника «Подразделения» для подразделения «%s», поле «Код субъекта РФ» = «%s», поле «Код ТС» = «%s», поле «Ед. измерения мощности» = «%s». ",
                     row.getIndex(), getColumnName(row, 'okato'), okato, getColumnName(row, 'tsTypeCode'), tsTypeCode, getColumnName(row, 'taxBaseOkeiUnit'), taxBaseOkeiUnit,
-                    msg1, getReportPeriodEndDate().format(dFormat), declarationRegionCode,
+                    msg1, getReportPeriodEndDate().format('dd.MM.yyyy'), declarationRegionCode,
                     formDataDepartment.name, regionCode, tsTypeCode, taxBaseOkeiUnit
             )
         }
@@ -1727,7 +1687,7 @@ def allRecordsMap = [:]
 def getAllRecords(def refBookId) {
     if (allRecordsMap[refBookId] == null) {
         def date = getReportPeriodEndDate()
-        def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
+        def provider = getProvider(refBookId)
         List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
         allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
     }
