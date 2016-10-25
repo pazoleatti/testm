@@ -88,5 +88,49 @@ end;
 
 COMMIT;
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17302: 1.25 ТН. Доработать справочник "Коды налоговых льгот транспортного налога"
+
+COMMIT;
+---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17303: 1.25 ТН. Доработать справочник "Параметры налоговых льгот транспортного налога"
+declare 
+	l_task_name varchar2(128) := 'RefBook Block #5 (SBRFACCTAX-17303) - tax params(T))';
+	l_rerun_condition number(1) := 0;
+begin
+	
+	select case when count(*) > 8 then 1 else 0 end into l_rerun_condition from ref_book_attribute where ref_book_id = 7;
+	
+	if l_rerun_condition = 0 then
+		
+		INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (702,7,'Основание','BASE',1,8,null,null,1,null,10,0,1,null,null,0,12);
+		
+		INSERT INTO ref_book_value (record_id, attribute_id, string_value)
+		SELECT DISTINCT record_id,
+						702 AS attribute_id,
+						listagg(lpad(string_value, 4, '0'), '') within GROUP (ORDER  BY attribute_id) over(PARTITION BY record_id)
+		FROM   ref_book_value
+		WHERE  attribute_id IN (20, 21, 22) AND string_value IS NOT NULL;
+		
+		UPDATE ref_book_attribute SET precision = 0 WHERE id = 23;
+		UPDATE ref_book_attribute SET max_length = 8 WHERE id = 24;
+		
+	dbms_output.put_line(l_task_name||'[INFO]: Success');
+
+	else
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book had already been modified');
+	end if;	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+
+COMMIT;	
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
