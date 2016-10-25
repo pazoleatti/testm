@@ -99,8 +99,9 @@ begin
 	if l_rerun_condition = 0 then
 				
 		update ref_book set name = 'Коды налоговых льгот и вычетов транспортного налога', type=0 where id = 6;
+		
 		update ref_book_attribute set name = 'Код' where id = 15;
-		update ref_book_attribute set name = 'Наименование льготы/вычета' where id = 16;
+		update ref_book_attribute set name = 'Наименование льготы/вычета', width = 40 where id = 16;
 		
 		delete from ref_book_value where attribute_id = 300;
 		delete from ref_book_attribute where id = 300;
