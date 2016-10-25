@@ -1164,7 +1164,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
         def param = values[17] ?: null
         def record705 = getRecord705Import(code, oktmo, param)
         newRow.benefitCode = record705?.record_id?.value
-        if (values[2] && record705 == null) {
+        if (values[6] && record705 == null) {
             def xlsColumnName15 = getXLSColumnName(colIndex + colOffset)
             def columnName15 = getColumnName(newRow, 'benefitCode')
             def columnName16 = getColumnName(newRow, 'benefitBase')
