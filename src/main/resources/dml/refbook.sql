@@ -172,6 +172,9 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (703,'Коды бюджетной классификации земельного налога',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (704,'Коды налоговых льгот земельного налога',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (705,'Параметры налоговых льгот земельного налога',  1, 0, 0, 7051);
+
+--Прибыль 1.25
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (800,'Признаки признания сделки контролируемой в целях налогообложения',1,0,0,null);
 	
 UPDATE ref_book SET is_versioned = 0 WHERE id IN (30, 93, 207, 95, 74, 103, 94, 105, 104, 108, 204, 205, 400, 401, 510, 511, 106);
 
@@ -885,6 +888,10 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7059, 705, 'Уменьшающий процент, %', 'REDUCTION_PERCENT', 2, 9, null, null, 1, 0, 10, 0, 0, null, null, 0, 3);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7060, 705, 'Пониженная ставка, %', 'REDUCTION_RATE', 2, 10, null, null, 1, 4, 10, 0, 0, null, null, 0, 5);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (7061, 705, 'Параметры льготы', 'REDUCTION_PARAMS', 1, 11, null, null, 1, null, 10, 0, 1, null, null, 1, 12);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (8001, 800, 'Признак',  'CODE',1,1,null,null,1,null,5,1,1,null,null,0,1);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (8002, 800, 'Описание', 'NAME',1,2,null,null,1,null,30,1,0,null,null,0,256);
+	
 	
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_attribute_id;
