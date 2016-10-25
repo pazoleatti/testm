@@ -5,11 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
@@ -112,7 +109,7 @@ switch (formDataEvent) {
 }
 
 @Field
-def summaryTypeId = 203
+def summaryTypeId = 200
 
 //// Кэши и константы
 @Field
@@ -485,11 +482,11 @@ def logicCheck() {
                 }
                 if (records == null || records.isEmpty()) {
                     def declarationRegionCode = getRefBookValue(4, declarationRegionId).CODE.value
-                    def regionCode = region.CODE.value
+                    def regionCode = region?.CODE?.value ?: ''
                     def codeOKATO = getRefBookValue(96L, row.codeOKATO).CODE.value
                     logger.error("Строка %s: В справочнике «Параметры представления деклараций по транспортному налогу» отсутствует запись, " +
                             "актуальная на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) справочника «Подразделения» для подразделения «%s» формы-приемника вида «%s», поле «Код субъекта РФ» = «%s», поле «Код по ОКТМО» = «%s»",
-                            index, dTo.format(dFormat), declarationRegionCode, relation.getDepartment().name, relation.formTypeName, regionCode, codeOKATO)
+                            index, dTo.format(dFormat), declarationRegionCode, relation.getDepartment().name, relation.formType.name, regionCode, codeOKATO)
                 }
                 // 20. Проверка наличия ставки для ТС
                 if (checkRateTS) {
@@ -507,14 +504,14 @@ def logicCheck() {
                     if (records == null || records.size() != 1) {
                         boolean isMany = records != null && records.size() > 1
                         def declarationRegionCode = getRefBookValue(4, declarationRegionId).CODE.value
-                        def regionCode = region.CODE.value
+                        def regionCode = region?.CODE?.value ?: ''
                         def tsTypeCode = getRefBookValue(42L, row.tsTypeCode).CODE.value
                         def baseUnit = getRefBookValue(12L, row.baseUnit).CODE.value
                         def msg1 = isMany ? "более одной записи, актуальной" : "отсутствует запись, актуальная"
                         logger.error("Строка %s: В справочнике «Ставки транспортного налога» %s на дату %s, в которой поле «Код субъекта РФ представителя декларации» " +
                                 "равно значению поля «Регион» (%s) справочника «Подразделения» для подразделения «%s» формы-приемника вида «%s», поле «Код субъекта РФ» равно " +
                                 "значению «%s», поле «Код ТС» = «%s», поле «Ед. измерения мощности» = «%s»",
-                                index, msg1, dTo.format(dFormat), declarationRegionCode, relation.getDepartment().name, relation.formTypeName, regionCode, tsTypeCode, baseUnit)
+                                index, msg1, dTo.format(dFormat), declarationRegionCode, relation.getDepartment().name, relation.formType.name, regionCode, tsTypeCode, baseUnit)
                     }
                 }
             }

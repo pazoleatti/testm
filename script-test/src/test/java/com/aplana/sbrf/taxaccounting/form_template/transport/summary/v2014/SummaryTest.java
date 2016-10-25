@@ -135,7 +135,7 @@ public class SummaryTest extends ScriptTestBase {
                 "Форма-источник: Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s %s»",
                 "2", getColumnName(row, "pastYear"), "20", getColumnName(row, "averageCost"), "A",
                 "31.12.2014", "A", getColumnName(row, "pastYear"),
-                relation.getFormDataKind().getTitle(), relation.getFormTypeName(), relation.getDepartment().getName(), relation.getPeriodName(), relation.getYear());
+                relation.getFormDataKind().getTitle(), relation.getFormType().getName(), relation.getDepartment().getName(), "test period name", relation.getYear());
         Assert.assertEquals(LogLevel.WARNING, entries.get(i).getLevel());
         Assert.assertEquals(msg, entries.get(i++).getMessage());
 
@@ -144,7 +144,7 @@ public class SummaryTest extends ScriptTestBase {
                         "для подразделения «%s», поле «Код субъекта РФ» = «%s», поле «Код по ОКТМО» = «%s». " +
                         "Форма-источник: Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s %s»",
                 2, getColumnName(row, "codeOKATO"), "5200000", "31.12.2014", "02", "test department name", "03", "5200000",
-                relation.getFormDataKind().getTitle(), relation.getFormTypeName(), relation.getDepartment().getName(), relation.getPeriodName(), relation.getYear());
+                relation.getFormDataKind().getTitle(), relation.getFormType().getName(), relation.getDepartment().getName(), "test period name", relation.getYear());
         Assert.assertEquals(LogLevel.ERROR, entries.get(i).getLevel());
         Assert.assertEquals(msg, entries.get(i++).getMessage());
 
@@ -154,7 +154,7 @@ public class SummaryTest extends ScriptTestBase {
                         "Форма-источник: Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s %s»",
                 "2", getColumnName(row, "codeOKATO"), "5200000", getColumnName(row, "tsTypeCode"), "50000", getColumnName(row, "baseUnit"), "A",
                 "отсутствует запись, актуальная", "31.12.2014", "02", relation.getDepartment().getName(), "03", "50000", "A",
-                relation.getFormDataKind().getTitle(), relation.getFormTypeName(), relation.getDepartment().getName(), relation.getPeriodName(), relation.getYear());
+                relation.getFormDataKind().getTitle(), relation.getFormType().getName(), relation.getDepartment().getName(), "test period name", relation.getYear());
         Assert.assertEquals(LogLevel.ERROR, entries.get(i).getLevel());
         Assert.assertEquals(msg, entries.get(i++).getMessage());
 

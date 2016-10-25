@@ -676,19 +676,19 @@ public class Vehicles2Test extends ScriptTestBase {
     }
 
     private void mockDestination(final String departmentName, final String summaryTypeName, boolean exist) {
-        final int summaryTypeId = 203;
+        final int summaryTypeId = 200;
         final Long declarationRegionId = exist ? 1L : 2L;
         // назначаем приемник
         List<Relation> relations = new ArrayList<Relation>();
         relations.add(new Relation() {{
             setFormType(new FormType() {{
                 setId(summaryTypeId);
+                setName(summaryTypeName);
             }});
             setDepartment( new Department() {{
                 setName(departmentName);
                 setRegionId(declarationRegionId);
             }});
-            setFormTypeName(summaryTypeName);
         }});
         when(testHelper.getFormDataService().getDestinationsInfo(eq(testHelper.getFormData()), anyBoolean(), anyBoolean(), isNull(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(relations);
     }
