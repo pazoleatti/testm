@@ -89,6 +89,43 @@ end;
 COMMIT;
 ---------------------------------------------------------------------------
 --https://jira.aplana.com/browse/SBRFACCTAX-17302: 1.25 ТН. Доработать справочник "Коды налоговых льгот транспортного налога"
+declare 
+	l_task_name varchar2(128) := 'RefBook Block #4 (SBRFACCTAX-17302) - tax codes(T))';
+	l_rerun_condition number(1) :=0;
+begin
+	
+	select case when count(*) = 2 then 1 else 0 end into l_rerun_condition from ref_book_attribute where ref_book_id = 6;
+	
+	if l_rerun_condition = 0 then
+				
+		update ref_book set name = 'Коды налоговых льгот и вычетов транспортного налога', type=0 where id = 6;
+		update ref_book_attribute set name = 'Код' where id = 15;
+		update ref_book_attribute set name = 'Наименование льготы/вычета' where id = 16;
+		
+		delete from ref_book_value where attribute_id = 300;
+		delete from ref_book_attribute where id = 300;
+		
+		INSERT INTO ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, seq_ref_book_record_row_id.nextval, 6, to_date('01.01.2016', 'DD.MM.YYYY'), 0);
+			INSERT INTO ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 15, '40200');	
+			INSERT INTO ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 16, 'Налоговый вычет в отношении каждого транспортного средства, имеющего разрешенную максимальную массу свыше 12 тонн, зарегистрированного в реестре транспортных средств системы взимания платы');	
+	
+		
+		dbms_output.put_line(l_task_name||'[INFO]: Success');	
+	
+	else
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book had already been modified');
+	
+	end if;
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book_value had already been added('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
 
 COMMIT;
 ---------------------------------------------------------------------------

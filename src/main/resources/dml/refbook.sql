@@ -10,7 +10,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (3,'Коды ОКАТО',1,0,1,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (4,'Коды субъектов Российской Федерации',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (5,'Коды форм реорганизации и ликвидации организации',1,0,0,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (6,'Коды налоговых льгот транспортного налога',1,1,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (6,'Коды налоговых льгот и вычетов транспортного налога',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (7,'Параметры налоговых льгот транспортного налога',1,0,0,701);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (8,'Коды, определяющие налоговый (отчётный) период',1,0,1,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (9,'Организации-участники контролируемых сделок',1,0,1,null);
@@ -204,9 +204,8 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (13,5,'Код','CODE',1,0,null,null,1,null,10,1,1,null,null,0,1);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (14,5,'Наименование','NAME',1,1,null,null,1,null,50,1,0,null,null,0,255);
 
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (15,6,'Код налоговой льготы','CODE',1,0,null,null,1,null,10,1,1,null,null,0,10);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (16,6,'Наименование льготы','NAME',1,1,null,null,1,null,100,1,0,null,null,0,2000);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (300,6,'Код родительской записи','PARENT_ID',4,2,6,16,1,null,100,0,0,null,null,0,null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (15,6,'Код','CODE',1,0,null,null,1,null,10,1,1,null,null,0,10);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (16,6,'Наименование льготы/вычета','NAME',1,1,null,null,1,null,100,1,0,null,null,0,2000);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (701,7,'Код субъекта РФ представителя декларации','DECLARATION_REGION_ID',4,0,4,9,1,null,20,1,1,null,null,0,null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (18,7,'Код субъекта РФ','DICT_REGION_ID',4,1,4,9,1,null,20,1,1,null,null,0,null);
