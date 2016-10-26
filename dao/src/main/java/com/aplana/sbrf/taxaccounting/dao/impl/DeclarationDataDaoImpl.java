@@ -292,7 +292,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             }
         }
 
-        if (filter.getTaxType() == TaxType.PROPERTY || filter.getTaxType() == TaxType.TRANSPORT || filter.getTaxType() == TaxType.INCOME) {
+        if (filter.getTaxType() == TaxType.PROPERTY || filter.getTaxType() == TaxType.TRANSPORT || filter.getTaxType() == TaxType.INCOME || filter.getTaxType() == TaxType.LAND) {
             if (filter.getTaxOrganCode() != null && !filter.getTaxOrganCode().isEmpty()) {
                 String[] codes = filter.getTaxOrganCode().split("; ");
                 for (int i = 0; i < codes.length; i++) {
