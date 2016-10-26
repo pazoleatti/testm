@@ -1550,6 +1550,24 @@ void comparePrevRows() {
                     row.getCell(alias).setStyleAlias(compareStyleName)
                 }
             }
+
+            // сравнение зависимых граф
+            def record705 = getRefBookValue(705L, row.benefitCode)
+            def prevRecord705 = getRefBookValue(705L, prevRow.benefitCode)
+
+            // графа 16
+            def benefitBase1 = getRefBookValue(704L, record705?.TAX_BENEFIT_ID?.value)?.BASE?.value
+            def benefitBase2 = getRefBookValue(704L, prevRecord705?.TAX_BENEFIT_ID?.value)?.BASE?.value
+            if (benefitBase1 != benefitBase2) {
+                row.getCell('benefitBase').setStyleAlias(compareStyleName)
+            }
+
+            // графа 17
+            def benefitParam1 = record705?.REDUCTION_PARAMS?.value
+            def benefitParam2 = prevRecord705?.REDUCTION_PARAMS?.value
+            if (benefitParam1 != benefitParam2) {
+                row.getCell('benefitParam').setStyleAlias(compareStyleName)
+            }
         }
     }
 }
