@@ -33,8 +33,8 @@ try {
 							   r.version as start_version,
 							   lead(r.version) over (partition by r.record_id order by r.version) - interval '1' day as end_version
 						FROM ref_book_record r
-						JOIN v ON v.record_id = r.id
-						WHERE r.ref_book_id = 91
+						LEFT JOIN v ON v.record_id = r.id
+						WHERE r.ref_book_id = 91 and r.status <> -1
 	""")
 	  	while (res.next()) {
 		  newLogger.info("${res.getInt(1)};${res.getInt(2)};${res.getInt(3)};${res.getString(4)};${res.getString(5)};${res.getDate(6)};${res.getDate(7)}" 
