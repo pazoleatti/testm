@@ -59,32 +59,35 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
 
     private void validate(AuditLog auditLog) throws ServiceException {
         if (auditLog == null) {
-            throwException("E8", "Не удалось получить данные для логирования", "Некорректная структура сообщения");
+            throwException("E8", "Отсутствует или не заполнен обязательный атрибут \"auditLog\"", "Некорректная структура сообщения");
         } else {
             if (auditLog.getUserInfo() == null) {
-                throwException("E8", "Не удалось получить информацию о пользователе", "Некорректная структура сообщения");
+                throwException("E8", "Отсутствует или не заполнен обязательный атрибут \"userInfo\"", "Некорректная структура сообщения");
             } else {
                 if (auditLog.getUserInfo().getUser() == null) {
-                    throwException("E8", "Не удалось получить информацию о пользователе", "Некорректная структура сообщения");
+                    throwException("E8", "Отсутствует или не заполнен обязательный атрибут \"user\"", "Некорректная структура сообщения");
                 } else {
                     User user = auditLog.getUserInfo().getUser();
                     if (user.getLogin() == null || user.getLogin().isEmpty()) {
-                        throwException("E8", "Не удалось получить логин пользователя", "Некорректная структура сообщения");
+                        throwException("E8", "Отсутствует или не заполнен обязательный атрибут \"login\"", "Некорректная структура сообщения");
                     }
                     /*if (user.getName() == null || user.getName().isEmpty()) {
                         throwException("E8", "Не удалось получить имя пользователя", "Некорректная структура сообщения");
                     }*/
+                    if (user.getDepartmentId() == 0) {
+                        throwException("E8", "Значение атрибута \"departmentId\" указано неверно", "Некорректная структура сообщения");
+                    }
                     try {
                         departmentService.getDepartment(user.getDepartmentId());
                     } catch (DaoException e) {
-                        throwException("E9", null, e.getMessage());
+                        throwException("E9", null, "Не удалось найти подразделение банка с id = " + user.getDepartmentId());
                     }
                     if (user.getRoles() == null || user.getRoles().isEmpty()) {
-                        throwException("E8", "Не удалось получить роли пользователя", "Некорректная структура сообщения");
+                        throwException("E8", "Отсутствует или не заполнен обязательный атрибут \"roles\"", "Некорректная структура сообщения");
                     } else {
                         for (Role role : user.getRoles()) {
                             if (role.getName() == null || role.getName().isEmpty()) {
-                                throwException("E8", "Не удалось получить наименование роли пользователя", "Некорректная структура сообщения");
+                                throwException("E8", "Отсутствует или не заполнен обязательный атрибут \"name\"(Role)", "Некорректная структура сообщения");
                             }
                         }
                     }
