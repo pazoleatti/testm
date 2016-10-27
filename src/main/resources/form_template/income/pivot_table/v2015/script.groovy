@@ -274,7 +274,7 @@ void logicCheck() {
             def allRecords = getAllRecords(541).values()
             def absentCodes = baseCodes.findAll { code ->
                 code && (allRecords.find { record ->
-                    record.CODE.value == (code as Integer)
+                    record.CODE.value == code
                 } == null)
             }
             if (!absentCodes.isEmpty()) {

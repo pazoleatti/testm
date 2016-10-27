@@ -244,7 +244,7 @@ def generateXML() {
                         // Кв
                         BigDecimal kv = row.kv
                         // Кл
-                        BigDecimal kl = row.kl
+                        BigDecimal kl = row.kl ?: empty
                         // Параметры налоговых льгот земельного налога
                         def landBenefit = null
                         String benefitCode = null
