@@ -74,9 +74,6 @@ public class AuditManagementServicePortType extends SpringBeanAutowiringSupport 
                     /*if (user.getName() == null || user.getName().isEmpty()) {
                         throwException("E8", "Не удалось получить имя пользователя", "Некорректная структура сообщения");
                     }*/
-                    if (user.getDepartmentId() == 0) {
-                        throwException("E8", "Значение атрибута \"departmentId\" указано неверно", "Некорректная структура сообщения");
-                    }
                     try {
                         departmentService.getDepartment(user.getDepartmentId());
                     } catch (DaoException e) {
