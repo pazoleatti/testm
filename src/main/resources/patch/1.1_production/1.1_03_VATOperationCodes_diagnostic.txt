@@ -1,0 +1,47 @@
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+
+Logger newLogger = new Logger() {
+  public void info(String message, Object... args) {
+  log(LogLevel.INFO, message, args);
+ }
+  
+  public void log(LogLevel level, String message, Object...args) {
+ String extMessage = String.format(message, args);
+ if (messageDecorator != null) {
+   extMessage = messageDecorator.getDecoratedMessage(extMessage);
+ }
+ LogEntry entry = new LogEntry(level, extMessage);
+ entries.add(entry);
+  }
+};
+logger.entries = newLogger.entries
+
+try {
+    def connection = dataSource.connection
+    def stmt = connection.createStatement()
+	
+	def res = stmt.executeQuery("""
+						WITH v AS (SELECT v1.record_id,
+								   v1.string_value AS attr6501_code,
+								   v2.string_value AS attr6502_name
+							  FROM   ref_book_value v1
+							  JOIN   ref_book_value v2 ON v1.record_id = v2.record_id AND
+											v1.attribute_id = 6501 AND v2.attribute_id = 6502)
+						SELECT r.id, r.record_id, r.status,  v.attr6501_code, v.attr6502_name, 
+							 r.version as start_version,
+							 lead(r.version) over (partition by r.record_id order by r.version) - interval '1' day as end_version
+						FROM ref_book_record r
+						LEFT JOIN v ON v.record_id = r.id
+						WHERE r.ref_book_id = 650 and r.status <> -1
+	""")
+	  	while (res.next()) {
+		  newLogger.info("${res.getInt(1)};${res.getInt(2)};${res.getInt(3)};${res.getString(4)};[${res.getString(5)}];${res.getDate(6)};${res.getDate(7)}" 
+					 )
+	  	}
+  	
+    connection.close()
+} catch (Exception ex) {
+    logger.error("Error: ${ex.getLocalizedMessage()}")
+}
