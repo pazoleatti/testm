@@ -196,7 +196,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecord(def Long refBookId, def String alias, def String value, def int rowIndex, def String columnName,
               def Date date, boolean required = true) {
-    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, date,
+    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, null, date,
             rowIndex, columnName, logger, required)
 }
 
@@ -483,7 +483,7 @@ void logicCheck() {
         // 9. Проверка корректности заполнения даты снятия с регистрации ТС
         if (row.regDateEnd != null && (row.regDateEnd < dFrom || (row.regDate != null && row.regDateEnd < row.regDate))) {
             logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно %s, и больше либо равно значения графы «%s»",
-                    index, getColumnName(row, 'regDate'), dFrom.format('dd.MM.yyyy'), getColumnName(row, 'regDate'))
+                    index, getColumnName(row, 'regDateEnd'), dFrom.format('dd.MM.yyyy'), getColumnName(row, 'regDate'))
         }
 
         // 10. Проверка года изготовления ТС
@@ -1129,7 +1129,7 @@ void calc24(def row, def region) {
             def okato = getRefBookValue(96L, row.okato).CODE.value
             def msg1 = isMany ? "более одной записи, актуальной" : "отсутствует запись, актуальная"
             logger.error("Строка %s. Графа «%s» = «%s», графа «%s» = «%s», графа «%s» = «%s»: В справочнике «Ставки транспортного налога» " +
-                    "%s, на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
+                    "%s на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
                     "справочника «Подразделения» для подразделения «%s», поле «Код субъекта РФ» = «%s», поле «Код ТС» = «%s», поле «Ед. измерения мощности» = «%s». ",
                     row.getIndex(), getColumnName(row, 'okato'), okato, getColumnName(row, 'tsTypeCode'), tsTypeCode, getColumnName(row, 'taxBaseOkeiUnit'), taxBaseOkeiUnit,
                     msg1, getReportPeriodEndDate().format('dd.MM.yyyy'), declarationRegionCode,
