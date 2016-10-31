@@ -1327,8 +1327,8 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[(налогоплательщик)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="4c9c0c9a-320c-4432-9f47-b48555d47a2f" x="1" y="132" width="246" height="20"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<reportElement uuid="4c9c0c9a-320c-4432-9f47-b48555d47a2f" x="1" y="132" width="195" height="20"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Представляется в налоговый орган (код)]]></text>
@@ -1350,7 +1350,7 @@ $F{ДатаДок}]]></initialValueExpression>
 			<staticText>
 				<reportElement uuid="9edc8461-48ca-4dbe-83c9-f6b74909470e" x="1" y="66" width="593" height="30">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.1"/>
-					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.241f"/>
+					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.161f"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="12" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
@@ -1358,7 +1358,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[Налоговая декларация по транспортному налогу]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="0da54c1b-c536-441b-9ff1-b9a5acc030b8" x="7" y="103" width="116" height="22"/>
+				<reportElement uuid="0da54c1b-c536-441b-9ff1-b9a5acc030b8" x="1" y="103" width="116" height="22"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
@@ -1380,18 +1380,24 @@ $F{ДатаДок}]]></initialValueExpression>
 			</staticText>
 			<staticText>
 				<reportElement uuid="64d162c3-23be-4b6f-9bb2-3dd13318dbf2" x="1" y="260" width="400" height="20"/>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
+				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Код вида экономической деятельности по классификатору ОКВЭД]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="3708cb77-9e15-4d40-abe6-60f8faf86c6c" x="1" y="280" width="123" height="32"/>
+				<reportElement uuid="3708cb77-9e15-4d40-abe6-60f8faf86c6c" x="1" y="280" width="105" height="15"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Форма реорганизации]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3708cb77-9e15-4d40-abe6-60f8faf86c6c" x="1" y="295" width="105" height="15"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Форма реорганизации
-(ликвидация) (код)]]></text>
+				<text><![CDATA[(ликвидация) (код)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="c5d971fe-4056-4718-af14-2840590108bd" x="146" y="280" width="147" height="32"/>
@@ -1401,8 +1407,8 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[ИНН/КПП реорганизованной организации]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="9c9401ea-9fd6-41f5-8c85-e01d03636e46" x="19" y="317" width="158" height="22"/>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
+				<reportElement uuid="9c9401ea-9fd6-41f5-8c85-e01d03636e46" x="1" y="317" width="158" height="22"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Номер контактного телефона]]></text>
@@ -1436,28 +1442,22 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[листах]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="70f2ada9-83d7-4de4-ba9c-0371043248df" x="1" y="385" width="297" height="20"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom">
+				<reportElement uuid="70f2ada9-83d7-4de4-ba9c-0371043248df" x="1" y="385" width="297" height="30"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="Arial" size="10" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Достоверность и полноту сведений, указанных]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="c604eb9c-b488-4d22-af19-9f62c65b5f0f" x="1" y="405" width="297" height="20"/>
-				<textElement textAlignment="Center">
-					<font fontName="Arial" size="10" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<text><![CDATA[в настоящей декларации, подтверждаю:]]></text>
+				<text><![CDATA[Достоверность и полноту сведений, указанных
+в настоящей декларации, подтверждаю:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="6c7c31e9-8625-46a2-86a6-1b03ce25a1c6" x="308" y="385" width="284" height="20"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="Arial" size="10" isBold="true" pdfFontName="Arialbd.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Заполняется работником налогового органа]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="bb636db9-36c9-430e-8316-ab116c72f4ab" x="73" y="426" width="225" height="22"/>
+				<reportElement uuid="bb636db9-36c9-430e-8316-ab116c72f4ab" x="42" y="420" width="225" height="22"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
@@ -1465,71 +1465,71 @@ $F{ДатаДок}]]></initialValueExpression>
 2 - представитель налогоплательщика]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="8ed313b9-be5b-4a48-abc0-eb4776868ac0" x="308" y="427" width="241" height="20"/>
+				<reportElement uuid="8ed313b9-be5b-4a48-abc0-eb4776868ac0" x="308" y="410" width="241" height="20"/>
 				<textElement textAlignment="Right">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Сведения о представлении декларации]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a268214f-20e4-42e7-835e-16229857e280" x="308" y="447" width="240" height="20"/>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
+				<reportElement uuid="a268214f-20e4-42e7-835e-16229857e280" x="308" y="440" width="185" height="20"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Данная декларация представлена (код)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="42757caf-dfcc-4b7e-b934-cce10aaea476" x="320" y="467" width="20" height="20"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<reportElement uuid="42757caf-dfcc-4b7e-b934-cce10aaea476" x="308" y="472" width="20" height="20"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[на]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="bd9331f3-7289-4a83-a31d-cc45da0dfb1a" x="465" y="467" width="128" height="20"/>
+				<reportElement uuid="bd9331f3-7289-4a83-a31d-cc45da0dfb1a" x="435" y="472" width="128" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[ страницах]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="ca7c7249-2433-4eae-bb42-320f42b75949" x="317" y="515" width="142" height="14"/>
+				<reportElement uuid="ca7c7249-2433-4eae-bb42-320f42b75949" x="308" y="526" width="140" height="12"/>
 				<textElement textAlignment="Right">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[ или их копий на]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="7a740ef8-fc60-4afb-aa79-c97c97663883" x="351" y="487" width="108" height="14"/>
+				<reportElement uuid="7a740ef8-fc60-4afb-aa79-c97c97663883" x="308" y="502" width="140" height="12"/>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[с приложением ]]></text>
+				<text><![CDATA[с приложением]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="972a36d6-d3d7-4bb4-84ce-7e1e784e44a6" x="305" y="501" width="154" height="14"/>
+				<reportElement uuid="972a36d6-d3d7-4bb4-84ce-7e1e784e44a6" x="308" y="514" width="140" height="12"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[подтверждающих документов]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="8b29d03e-cd2c-4200-a024-9d22ed653875" x="541" y="501" width="50" height="14"/>
-				<textElement textAlignment="Center">
+				<reportElement uuid="8b29d03e-cd2c-4200-a024-9d22ed653875" x="541" y="513" width="50" height="14"/>
+				<textElement textAlignment="Right">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[листах]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="cd4378db-5a58-4b90-8322-d89036fd20c5" x="306" y="529" width="123" height="26"/>
+				<reportElement uuid="cd4378db-5a58-4b90-8322-d89036fd20c5" x="308" y="548" width="123" height="26"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Дата представления декларации]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a38a492a-fe9c-440f-a480-54b9e3986dbc" x="305" y="555" width="92" height="26"/>
-				<textElement textAlignment="Center">
+				<reportElement uuid="a38a492a-fe9c-440f-a480-54b9e3986dbc" x="308" y="590" width="90" height="25"/>
+				<textElement textAlignment="Left">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Зарегистрирована
@@ -1550,18 +1550,18 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[(наименование организации - представителя налогоплательщика)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="3a928f8a-7004-45d8-92c1-9d9788e120a8" x="346" y="621" width="80" height="11"/>
-				<textElement verticalAlignment="Bottom">
-					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<text><![CDATA[(Фамилия, И.О.*)]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="db8e9051-e6ec-484e-b725-3c2a54899144" x="470" y="621" width="100" height="11"/>
+				<reportElement uuid="3a928f8a-7004-45d8-92c1-9d9788e120a8" x="346" y="792" width="80" height="14"/>
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[(Подпись)]]></text>
+				<text><![CDATA[Фамилия, И.О.*]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="db8e9051-e6ec-484e-b725-3c2a54899144" x="470" y="792" width="100" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Подпись]]></text>
 			</staticText>
 			<line>
 				<reportElement uuid="9d5c2a63-5a23-43c1-a464-f04897802536" x="1" y="376" width="591" height="1"/>
@@ -1576,13 +1576,13 @@ $F{ДатаДок}]]></initialValueExpression>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement uuid="b9eda270-8b86-48e0-9e92-3c7c65753ac8" x="341" y="620" width="100" height="1"/>
+				<reportElement uuid="b9eda270-8b86-48e0-9e92-3c7c65753ac8" x="341" y="790" width="100" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement uuid="e876af49-d826-47a4-8715-943fc6201af6" x="472" y="620" width="100" height="1"/>
+				<reportElement uuid="e876af49-d826-47a4-8715-943fc6201af6" x="472" y="790" width="100" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
@@ -1612,7 +1612,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<textElement>
 					<font fontName="Arial" size="7" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[М.П.]]></text>
+				<text><![CDATA[М.П. *]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="6f7cd000-28b2-4f21-b5d6-6f3f839cd1ac" x="1" y="742" width="298" height="12"/>
@@ -1629,11 +1629,11 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[подтверждающего полномочия представителя]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e6ecc0e1-fb74-4f28-aace-6a54c24126bd" x="3" y="813" width="130" height="12"/>
-				<textElement textAlignment="Right" verticalAlignment="Bottom">
+				<reportElement uuid="e6ecc0e1-fb74-4f28-aace-6a54c24126bd" x="20" y="820" width="130" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Bottom">
 					<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[* Отчество при наличии.]]></text>
+				<text><![CDATA[* при наличии]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="6dcc5501-7e39-4e50-aa74-2949cabc55a5" x="445" y="286" width="13" height="20"/>
@@ -1643,7 +1643,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[/]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="2fe6f2c1-5e45-424d-b579-1cb4ee19bacc" x="57" y="425" width="15" height="20"/>
+				<reportElement uuid="2fe6f2c1-5e45-424d-b579-1cb4ee19bacc" x="17" y="420" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -2903,7 +2903,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<textFieldExpression><![CDATA[$V{RepYear}.charAt( 0 )]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="d9005847-1e55-4ad4-8f99-b58b9ca01a34" x="292" y="132" width="15" height="20"/>
+				<reportElement uuid="d9005847-1e55-4ad4-8f99-b58b9ca01a34" x="245" y="132" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -2917,7 +2917,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<textFieldExpression><![CDATA[$V{KNO}.charAt( 3 )]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="4e163774-b1af-498c-8092-88370d96b71e" x="247" y="132" width="15" height="20"/>
+				<reportElement uuid="4e163774-b1af-498c-8092-88370d96b71e" x="200" y="132" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -2931,7 +2931,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<textFieldExpression><![CDATA[$V{KNO}.charAt( 0 )]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="5bd2dbc8-0176-40db-8c2b-7d5ddf9e8e5d" x="262" y="132" width="15" height="20"/>
+				<reportElement uuid="5bd2dbc8-0176-40db-8c2b-7d5ddf9e8e5d" x="215" y="132" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -2945,7 +2945,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<textFieldExpression><![CDATA[$V{KNO}.charAt( 1 )]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="525dffcc-e527-47bc-aef9-b62060bb9f0d" x="277" y="132" width="15" height="20"/>
+				<reportElement uuid="525dffcc-e527-47bc-aef9-b62060bb9f0d" x="230" y="132" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -4219,7 +4219,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[.]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="020ef2be-ce8c-4b90-92ac-1751f404cc79" x="129" y="286" width="15" height="20"/>
+				<reportElement uuid="020ef2be-ce8c-4b90-92ac-1751f404cc79" x="109" y="286" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8419,7 +8419,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<textFieldExpression><![CDATA[$V{NameDoc}.charAt( 36 )]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="d43ae489-103b-4bf6-b94a-4f61309a611c" x="564" y="447" width="15" height="20"/>
+				<reportElement uuid="d43ae489-103b-4bf6-b94a-4f61309a611c" x="511" y="440" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8431,7 +8431,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="5d7758a0-2178-41d7-b67d-133452ada7e5" x="549" y="447" width="15" height="20"/>
+				<reportElement uuid="5d7758a0-2178-41d7-b67d-133452ada7e5" x="496" y="440" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8443,7 +8443,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="6efb1847-f8f1-4ca6-84c0-1bc933dd54fb" x="383" y="467" width="15" height="20"/>
+				<reportElement uuid="6efb1847-f8f1-4ca6-84c0-1bc933dd54fb" x="353" y="472" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8455,7 +8455,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="073a0e1a-7d20-453d-b988-13afde566fe2" x="398" y="467" width="15" height="20"/>
+				<reportElement uuid="073a0e1a-7d20-453d-b988-13afde566fe2" x="368" y="472" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8467,7 +8467,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="ee52456c-b77c-4b85-b312-d083771ee726" x="413" y="467" width="15" height="20"/>
+				<reportElement uuid="ee52456c-b77c-4b85-b312-d083771ee726" x="383" y="472" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8479,7 +8479,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="bccd59d2-747e-44d9-a442-0d1f3905714a" x="428" y="467" width="15" height="20"/>
+				<reportElement uuid="bccd59d2-747e-44d9-a442-0d1f3905714a" x="398" y="472" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8491,7 +8491,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="26ba6235-de37-4ec9-ba15-6985cec2235e" x="443" y="467" width="15" height="20"/>
+				<reportElement uuid="26ba6235-de37-4ec9-ba15-6985cec2235e" x="413" y="472" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8503,7 +8503,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="1c1dff93-5c00-4aa9-9556-915414972bcc" x="496" y="499" width="15" height="20"/>
+				<reportElement uuid="1c1dff93-5c00-4aa9-9556-915414972bcc" x="496" y="510" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8515,7 +8515,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="63b21c3d-551d-4e4b-b11e-199bd270658a" x="481" y="499" width="15" height="20"/>
+				<reportElement uuid="63b21c3d-551d-4e4b-b11e-199bd270658a" x="481" y="510" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8527,7 +8527,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a750c790-2208-4055-9821-dc554830f050" x="466" y="499" width="15" height="20"/>
+				<reportElement uuid="a750c790-2208-4055-9821-dc554830f050" x="466" y="510" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8539,7 +8539,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="d250b808-b725-448d-8607-afff17b873af" x="526" y="499" width="15" height="20"/>
+				<reportElement uuid="d250b808-b725-448d-8607-afff17b873af" x="526" y="510" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8551,7 +8551,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a7f69861-52fc-43d9-b0e6-77bee5992438" x="511" y="499" width="15" height="20"/>
+				<reportElement uuid="a7f69861-52fc-43d9-b0e6-77bee5992438" x="511" y="510" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8563,7 +8563,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e74c034e-271d-46f7-afdd-f7409f977b2d" x="440" y="533" width="15" height="20"/>
+				<reportElement uuid="e74c034e-271d-46f7-afdd-f7409f977b2d" x="443" y="548" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8575,7 +8575,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e424d0fd-a1f6-4215-acb6-e8aa0bddeb89" x="485" y="533" width="15" height="20"/>
+				<reportElement uuid="e424d0fd-a1f6-4215-acb6-e8aa0bddeb89" x="488" y="548" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8587,7 +8587,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="dc3ab355-77e7-4b50-b5f6-14344893ff38" x="455" y="533" width="15" height="20"/>
+				<reportElement uuid="dc3ab355-77e7-4b50-b5f6-14344893ff38" x="458" y="548" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8599,7 +8599,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="78d107ac-f420-4fe2-b1d2-967dc65d4085" x="500" y="533" width="15" height="20"/>
+				<reportElement uuid="78d107ac-f420-4fe2-b1d2-967dc65d4085" x="503" y="548" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8611,7 +8611,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="7fc9fe8e-9414-4cf9-b933-2198400b3b9a" x="470" y="533" width="15" height="20"/>
+				<reportElement uuid="7fc9fe8e-9414-4cf9-b933-2198400b3b9a" x="473" y="548" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.0" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.0" lineStyle="Dashed" lineColor="#999999"/>
@@ -8625,7 +8625,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="d7d52d4f-77bf-46f6-870f-788130163b46" x="530" y="533" width="15" height="20"/>
+				<reportElement uuid="d7d52d4f-77bf-46f6-870f-788130163b46" x="533" y="548" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8637,7 +8637,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="1f5d2593-3ba4-4a5d-b9e3-02956bb1607a" x="545" y="533" width="15" height="20"/>
+				<reportElement uuid="1f5d2593-3ba4-4a5d-b9e3-02956bb1607a" x="548" y="548" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8649,7 +8649,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a828d3ac-b9ad-44a2-b429-52d487dad7f7" x="515" y="533" width="15" height="20"/>
+				<reportElement uuid="a828d3ac-b9ad-44a2-b429-52d487dad7f7" x="518" y="548" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.0" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.0" lineStyle="Dashed" lineColor="#999999"/>
@@ -8663,7 +8663,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="f6eb6b33-047c-43f8-a293-9e9a1ecc00ee" x="560" y="533" width="15" height="20"/>
+				<reportElement uuid="f6eb6b33-047c-43f8-a293-9e9a1ecc00ee" x="563" y="548" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8675,7 +8675,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a159c6af-4ae0-4991-9f0f-3f9aa2026fe2" x="575" y="533" width="15" height="20"/>
+				<reportElement uuid="a159c6af-4ae0-4991-9f0f-3f9aa2026fe2" x="578" y="548" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8687,7 +8687,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="06a9e351-2224-44e3-b838-d2b5c8e67e98" x="428" y="558" width="15" height="20"/>
+				<reportElement uuid="06a9e351-2224-44e3-b838-d2b5c8e67e98" x="428" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8699,7 +8699,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="5d43a469-eecc-49f4-9e46-d26b2f501f91" x="413" y="558" width="15" height="20"/>
+				<reportElement uuid="5d43a469-eecc-49f4-9e46-d26b2f501f91" x="413" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8711,7 +8711,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="99ebebb7-76d1-4ad1-b489-bc6ff4f3283d" x="398" y="558" width="15" height="20"/>
+				<reportElement uuid="99ebebb7-76d1-4ad1-b489-bc6ff4f3283d" x="398" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8723,7 +8723,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e4d4a72a-0bc6-4e1c-82ea-d420ea6856e9" x="458" y="558" width="15" height="20"/>
+				<reportElement uuid="e4d4a72a-0bc6-4e1c-82ea-d420ea6856e9" x="458" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8735,7 +8735,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="91440f0c-87f8-489c-9702-ecd10bbdf0e7" x="443" y="558" width="15" height="20"/>
+				<reportElement uuid="91440f0c-87f8-489c-9702-ecd10bbdf0e7" x="443" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8747,7 +8747,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e9dfbce9-2b01-44d3-bcce-e1a817c02df5" x="503" y="558" width="15" height="20"/>
+				<reportElement uuid="e9dfbce9-2b01-44d3-bcce-e1a817c02df5" x="503" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8759,7 +8759,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a2183da3-c4ed-4d4b-9a3b-e482c4cb735a" x="488" y="558" width="15" height="20"/>
+				<reportElement uuid="a2183da3-c4ed-4d4b-9a3b-e482c4cb735a" x="488" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8771,7 +8771,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a0bf4a57-afe3-4f44-ace2-29d52a134081" x="473" y="558" width="15" height="20"/>
+				<reportElement uuid="a0bf4a57-afe3-4f44-ace2-29d52a134081" x="473" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8783,7 +8783,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="4c37a20d-0bee-45c4-9fbf-f81aad8117b1" x="533" y="558" width="15" height="20"/>
+				<reportElement uuid="4c37a20d-0bee-45c4-9fbf-f81aad8117b1" x="533" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8795,7 +8795,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="2ab26e28-6ad3-426a-a004-b2421092a8df" x="518" y="558" width="15" height="20"/>
+				<reportElement uuid="2ab26e28-6ad3-426a-a004-b2421092a8df" x="518" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8807,7 +8807,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="6d177ee1-57d9-4386-a82e-981d4a38416d" x="578" y="558" width="15" height="20"/>
+				<reportElement uuid="6d177ee1-57d9-4386-a82e-981d4a38416d" x="578" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8819,7 +8819,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="c4aac86e-8d60-45cd-b99e-ffa1adc205f2" x="563" y="558" width="15" height="20"/>
+				<reportElement uuid="c4aac86e-8d60-45cd-b99e-ffa1adc205f2" x="563" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -8831,7 +8831,7 @@ $F{ДатаДок}]]></initialValueExpression>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="633a40c3-aeb6-4ae4-bacb-aa8551d81cd4" x="548" y="558" width="15" height="20"/>
+				<reportElement uuid="633a40c3-aeb6-4ae4-bacb-aa8551d81cd4" x="548" y="590" width="15" height="20"/>
 				<box>
 					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
 					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
@@ -9128,6 +9128,30 @@ $F{ДатаДок}]]></initialValueExpression>
 				<reportElement uuid="d2ae7efc-c968-49bb-85b2-2fb6fb519287" x="16" y="0" width="115" height="48"/>
 				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage}).processString() )]]></imageExpression>
 			</image>
+			<staticText>
+				<reportElement uuid="7fa99884-439e-4109-808e-b13899c73886" x="338" y="472" width="15" height="20"/>
+				<box>
+					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
+					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
+					<leftPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
+					<rightPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
+				</box>
+				<textElement/>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="dbc56f64-0867-405b-bd54-4f4b7fde5f51" x="451" y="510" width="15" height="20"/>
+				<box>
+					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
+					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
+					<leftPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
+					<rightPen lineWidth="0.25" lineStyle="Dashed" lineColor="#999999"/>
+				</box>
+				<textElement/>
+				<text><![CDATA[]]></text>
+			</staticText>
 		</band>
 		<band height="842">
 			<textField>
