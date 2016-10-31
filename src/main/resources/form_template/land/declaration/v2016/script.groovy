@@ -244,7 +244,7 @@ def generateXML() {
                         // Кв
                         BigDecimal kv = row.kv
                         // Кл
-                        BigDecimal kl = row.kl
+                        BigDecimal kl = row.kl ?: empty
                         // Параметры налоговых льгот земельного налога
                         def landBenefit = null
                         String benefitCode = null
@@ -268,7 +268,7 @@ def generateXML() {
                             kodNalLgot = "3022100/" + benefitParam
                             sumNeObl = getLong(landBenefit.REDUCTION_SUM.value)
                             nalBazaMinus = sumNeObl
-                        } else if(benefitCode.startsWith('30212')){
+                        } else if(benefitCode?.startsWith('30212')){
                             kodNalLgot = benefitCode
                             sumNeObl = getLong(landBenefit.REDUCTION_SUM.value)
                             nalBazaMinus = sumNeObl
@@ -282,7 +282,7 @@ def generateXML() {
                         } else if (benefitCode == '3022400') {
                             kodNalLgot = "3022400/" + benefitParam
                             sumLg = row.sum
-                        } else if (benefitCode.startsWith('30211')) {
+                        } else if (benefitCode?.startsWith('30211')) {
                             kodNalLgot = benefitCode
                             sumLg = row.sum
                         } else if (benefitCode == '3022200') {
@@ -329,7 +329,7 @@ def generateXML() {
                                 ОпрНалБаза(НалБаза: (nalBaza)) {
                                     if(benefitCode == '3022100'){
                                         Льгот387_2Сум(КодНалЛьгот: kodNalLgot, СумНеОбл: sumNeObl)
-                                    } else if(benefitCode.startsWith('30212')){
+                                    } else if(benefitCode?.startsWith('30212')){
                                         Льгот391_5(КодНалЛьгот: kodNalLgot, СумНеОбл: sumNeObl)
                                     } else if(benefitCode == '3022300'){
                                         Льгот387_2Пл(КодНалЛьгот: kodNalLgot, ДоляПлЗУ: dolyaPlZU)
@@ -345,7 +345,7 @@ def generateXML() {
                                 ) {
                                     if(benefitCode == '3022400'){
                                         Льгот387_2Осв(КодНалЛьгот: kodNalLgot, СумЛьг: sumLg)
-                                    } else if(benefitCode.startsWith('30211')){
+                                    } else if(benefitCode?.startsWith('30211')){
                                         Льгот395(КодНалЛьгот: kodNalLgot, СумЛьг: sumLg)
                                     } else if(benefitCode == '3022200'){
                                         Льгот387_2УмСум(КодНалЛьгот: kodNalLgot, СумЛьг: sumLg)

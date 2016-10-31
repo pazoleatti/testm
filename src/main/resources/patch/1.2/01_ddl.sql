@@ -170,6 +170,10 @@ begin
 		execute immediate 'alter table department_change add constraint dep_change_chk_is_active check (is_active in (0, 1))';
 		execute immediate 'alter table department_change add constraint dep_change_chk_garant_use check (garant_use in (0, 1))';
 		execute immediate 'alter table department_change add constraint dep_change_chk_sunr_use check (sunr_use in (0, 1))';
+		
+		--https://jira.aplana.com/browse/SBRFACCTAX-17311: передачу первоначального наполнения справочника "Подразделения" в СУНР
+		execute immediate('INSERT INTO department_change SELECT dep.ID AS department_id,  (SYSDATE + LEVEL/24/60/60) AS log_date, 0 AS operationtype, LEVEL AS hier_level, dep.NAME, dep.parent_id, dep.TYPE, dep.shortname, dep.tb_index, dep.sbrf_code, rbv.string_value AS region, dep.is_active, dep.code, dep.garant_use, dep.sunr_use FROM department dep LEFT JOIN ref_book_value rbv ON rbv.record_id = dep.region_id AND rbv.attribute_id = 10 START WITH dep.parent_id IS NULL CONNECT BY PRIOR dep.ID = dep.parent_id');
+		dbms_output.put_line(l_task_name||'[INFO]: '||sql%rowcount||' row(s) added in department_change');
 	
 		dbms_output.put_line(l_task_name||'[INFO]:'||' Success');
 	else
