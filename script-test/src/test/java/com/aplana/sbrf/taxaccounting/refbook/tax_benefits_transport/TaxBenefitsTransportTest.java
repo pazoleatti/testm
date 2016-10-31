@@ -52,77 +52,124 @@ public class TaxBenefitsTransportTest extends RefBookScriptTestBase {
     @Test
     public void save() throws ParseException {
         ArrayList<Map<String, RefBookValue>> saveRecords = new ArrayList<Map<String, RefBookValue>>();
-
-        HashMap<String, RefBookValue> value1 = new HashMap<String, RefBookValue>();
-        value1.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 20200L));
-        value1.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value1.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value1.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value1.put("PERCENT", new RefBookValue(RefBookAttributeType.NUMBER, null));
-        value1.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, 0));
-        saveRecords.add(value1);
-
-        HashMap<String, RefBookValue> value2 = new HashMap<String, RefBookValue>();
-        value2.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 20210L));
-        value2.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value2.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, null));
-        value2.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value2.put("PERCENT", new RefBookValue(RefBookAttributeType.NUMBER, 0));
-        value2.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, null));
-        saveRecords.add(value2);
-
-        HashMap<String, RefBookValue> value3 = new HashMap<String, RefBookValue>();
-        value3.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 20220L));
-        value3.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value3.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value3.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value3.put("PERCENT", new RefBookValue(RefBookAttributeType.NUMBER, 0));
-        value3.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, 0));
-        saveRecords.add(value3);
-
-        HashMap<String, RefBookValue> value4 = new HashMap<String, RefBookValue>();
-        value4.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 20220L));
-        value4.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value4.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value4.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value4.put("PERCENT", new RefBookValue(RefBookAttributeType.NUMBER, null));
-        value4.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, 0));
-        saveRecords.add(value4);
-
-        HashMap<String, RefBookValue> value5 = new HashMap<String, RefBookValue>();
-        value5.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 20230L));
-        value5.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value5.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value5.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value5.put("PERCENT", new RefBookValue(RefBookAttributeType.NUMBER, 0));
-        value5.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, 0));
-        saveRecords.add(value5);
-
-        HashMap<String, RefBookValue> value6 = new HashMap<String, RefBookValue>();
-        value6.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 20230L));
-        value6.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value6.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value6.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
-        value6.put("PERCENT", new RefBookValue(RefBookAttributeType.NUMBER, 0));
-        value6.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, null));
-        saveRecords.add(value6);
-
+        HashMap<String, RefBookValue> value = getRecord(20200L, "1234", "1234", "1234", 1L, 1L, null);
+        saveRecords.add(value);
         testHelper.setSaveRecords(saveRecords);
-
-        testHelper.execute(FormDataEvent.SAVE);
-
         List<LogEntry> entries = testHelper.getLogger().getEntries();
-        int i = 0;
-        // value1
-        // value2
-        Assert.assertEquals("Для налоговой льготы «20210» поле «Основание - пункт» является обязательным!", entries.get(i++).getMessage());
-        // value3
-        // value4
-        Assert.assertEquals("Для налоговой льготы «20220» поле «Уменьшающий процент, %» является обязательным!", entries.get(i++).getMessage());
-        // value5
-        // value6
-        Assert.assertEquals("Для налоговой льготы «20230» поле «Пониженная ставка» является обязательным!", entries.get(i++).getMessage());
 
-        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        // 1. Проверка корректности заполнения уменьшающего процента
+        value.get("PERCENT").setValue(-1L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значение поля «Уменьшающий процент, %» должно быть больше 0 и меньше 100", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        Assert.assertEquals(null, value.get("BASE").getStringValue());
+        testHelper.getLogger().clear();
+        value.get("PERCENT").setValue(0L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значение поля «Уменьшающий процент, %» должно быть больше 0 и меньше 100", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        testHelper.getLogger().clear();
+        value.get("PERCENT").setValue(100L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значение поля «Уменьшающий процент, %» должно быть больше 0 и меньше 100", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        testHelper.getLogger().clear();
+        value.get("PERCENT").setValue(101L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значение поля «Уменьшающий процент, %» должно быть больше 0 и меньше 100", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        testHelper.getLogger().clear();
+
+        // 2. Проверка корректности заполнения пониженной ставки
+        value.get("PERCENT").setValue(99L);
+        value.get("RATE").setValue(0L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значение поля «Пониженная ставка» должно быть больше 0", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        testHelper.getLogger().clear();
+
+        // 3. Проверка корректности заполнения кода налоговой льготы
+        value.get("PERCENT").setValue(99L);
+        value.get("RATE").setValue(1L);
+        value.get("SECTION").setValue(null);
+        value.get("ITEM").setValue(null);
+        value.get("SUBITEM").setValue(null);
+        value.get("TAX_BENEFIT_ID").setValue(40200L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значение поля «Код налоговой льготы» не должно содержать кода налогового вычета", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        testHelper.getLogger().clear();
+        value.get("TAX_BENEFIT_ID").setValue(40L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значение поля «Код налоговой льготы» не должно содержать кода налогового вычета", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        testHelper.getLogger().clear();
+        value.get("TAX_BENEFIT_ID").setValue(1L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals(0, entries.size());
+        testHelper.getLogger().clear();
+
+        // 4. Проверка корректности заполнения основания
+        // 4а
+        value.get("SECTION").setValue("1234");
+        value.get("ITEM").setValue("1234");
+        value.get("SUBITEM").setValue("1234");
+        value.get("TAX_BENEFIT_ID").setValue(20201L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значения полей: «Основание - статья», «Основание - пункт», «Основание - подпункт» для выбранного кода льготы не заполняются", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        testHelper.getLogger().clear();
+        value.get("SECTION").setValue("1234");
+        value.get("ITEM").setValue("1234");
+        value.get("SUBITEM").setValue(null);
+        value.get("TAX_BENEFIT_ID").setValue(20201L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значения полей: «Основание - статья», «Основание - пункт» для выбранного кода льготы не заполняются", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        testHelper.getLogger().clear();
+        value.get("SECTION").setValue(null);
+        value.get("ITEM").setValue(null);
+        value.get("SUBITEM").setValue("1234");
+        value.get("TAX_BENEFIT_ID").setValue(20201L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значения полей: «Основание - подпункт» для выбранного кода льготы не заполняются", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        testHelper.getLogger().clear();
+        // 4б
+        value.get("SECTION").setValue(null);
+        value.get("ITEM").setValue("");
+        value.get("SUBITEM").setValue(null);
+        value.get("TAX_BENEFIT_ID").setValue(20230L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значения полей: «Основание - статья», «Основание - пункт», «Основание - подпункт» для выбранного кода льготы должны быть заполнены", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        testHelper.getLogger().clear();
+        value.get("SECTION").setValue("123-");
+        value.get("ITEM").setValue("");
+        value.get("SUBITEM").setValue("4");
+        value.get("TAX_BENEFIT_ID").setValue(20230L);
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals("Значения полей: «Основание - пункт» для выбранного кода льготы должны быть заполнены", entries.get(0).getMessage());
+        Assert.assertEquals(1, entries.size());
+        testHelper.getLogger().clear();
+
+        // Для прохождения всех проверок
+        value.get("ITEM").setValue("3333");
+        testHelper.execute(FormDataEvent.SAVE);
+        Assert.assertEquals(0, entries.size());
+        Assert.assertEquals("123-33330004", value.get("BASE").getStringValue());
+        testHelper.getLogger().clear();
+    }
+
+    HashMap<String, RefBookValue> getRecord (Long taxBenefitId, String section, String item, String subitem, Long percent, Long rate, String base) {
+        HashMap<String, RefBookValue> value = new HashMap<String, RefBookValue>();
+        value.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, taxBenefitId));
+        value.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, section));
+        value.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, item));
+        value.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, subitem));
+        value.put("PERCENT", new RefBookValue(RefBookAttributeType.NUMBER, percent));
+        value.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, rate));
+        value.put("BASE", new RefBookValue(RefBookAttributeType.STRING, base));
+        return value;
     }
 }
