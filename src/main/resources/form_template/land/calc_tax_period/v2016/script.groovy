@@ -1164,7 +1164,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
         def param = values[17] ?: null
         def record705 = getRecord705Import(code, oktmo, param)
         newRow.benefitCode = record705?.record_id?.value
-        if (values[2] && record705 == null) {
+        if (values[6] && record705 == null) {
             def xlsColumnName15 = getXLSColumnName(colIndex + colOffset)
             def columnName15 = getColumnName(newRow, 'benefitCode')
             def columnName16 = getColumnName(newRow, 'benefitBase')
@@ -1549,6 +1549,24 @@ void comparePrevRows() {
                 if (row[alias] != prevRow[alias]) {
                     row.getCell(alias).setStyleAlias(compareStyleName)
                 }
+            }
+
+            // сравнение зависимых граф
+            def record705 = getRefBookValue(705L, row.benefitCode)
+            def prevRecord705 = getRefBookValue(705L, prevRow.benefitCode)
+
+            // графа 16
+            def benefitBase1 = getRefBookValue(704L, record705?.TAX_BENEFIT_ID?.value)?.BASE?.value
+            def benefitBase2 = getRefBookValue(704L, prevRecord705?.TAX_BENEFIT_ID?.value)?.BASE?.value
+            if (benefitBase1 != benefitBase2) {
+                row.getCell('benefitBase').setStyleAlias(compareStyleName)
+            }
+
+            // графа 17
+            def benefitParam1 = record705?.REDUCTION_PARAMS?.value
+            def benefitParam2 = prevRecord705?.REDUCTION_PARAMS?.value
+            if (benefitParam1 != benefitParam2) {
+                row.getCell('benefitParam').setStyleAlias(compareStyleName)
             }
         }
     }

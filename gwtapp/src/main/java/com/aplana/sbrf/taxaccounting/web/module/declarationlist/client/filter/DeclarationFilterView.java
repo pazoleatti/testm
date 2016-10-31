@@ -197,13 +197,11 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
                 break;
             case PROPERTY:
             case TRANSPORT:
-                fillTransportAndProperty(taxType);
+            case LAND:
+                fillTransportAndPropertyAndLand(taxType);
                 break;
             case INCOME:
                 fillIncome();
-                break;
-            case LAND:
-                fillLand();
                 break;
             default:
                 fillDefault();
@@ -259,63 +257,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         panel.add(horizontalPanel);
     }
 
-    private void fillLand() {
-        HorizontalPanel horizontalPanel = new HorizontalPanel();
-        horizontalPanel.setWidth("100%");
-        VerticalPanel verticalPanel1 = new VerticalPanel();
-        VerticalPanel verticalPanel2 = new VerticalPanel();
-        VerticalPanel verticalPanel3 = new VerticalPanel();
-        VerticalPanel verticalPanel4 = new VerticalPanel();
-        VerticalPanel verticalPanel5 = new VerticalPanel();
-        VerticalPanel verticalPanel6 = new VerticalPanel();
-        VerticalPanel verticalPanel7 = new VerticalPanel();
-
-        verticalPanel2.setWidth("100%");
-        verticalPanel3.setWidth("100%");
-        verticalPanel5.setWidth("100%");
-        verticalPanel7.setWidth("100%");
-
-        horizontalPanel.add(verticalPanel1);
-        horizontalPanel.add(verticalPanel2);
-        horizontalPanel.add(verticalPanel3);
-        horizontalPanel.add(verticalPanel4);
-        horizontalPanel.add(verticalPanel5);
-        horizontalPanel.add(verticalPanel6);
-        horizontalPanel.add(verticalPanel7);
-
-        horizontalPanel.setCellWidth(verticalPanel2, "33%");
-        horizontalPanel.setCellWidth(verticalPanel5, "33%");
-        horizontalPanel.setCellWidth(verticalPanel7, "33%");
-
-        Label label = getLabel("Период:", false);
-        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        verticalPanel1.add(label);
-
-        label = getLabel("Подразделение:", false);
-        verticalPanel1.add(label);
-        verticalPanel2.add(reportPeriodPicker);
-        verticalPanel2.add(departmentPicker);
-        verticalPanel3.add(correctionTag);
-
-        label = getLabel("Вид декларации:");
-        verticalPanel4.add(label);
-
-        label = getLabel("Состояние:");
-        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        verticalPanel4.add(label);
-        verticalPanel5.add(declarationTypePicker);
-        verticalPanel5.add(formStatePicker);
-
-
-        label = getLabel("Код налогового органа (кон.):");
-        verticalPanel6.add(label);
-
-        verticalPanel7.add(taxOrganisationPicker);
-
-        panel.add(horizontalPanel);
-    }
-
-    private void fillTransportAndProperty(TaxType taxType) {
+    private void fillTransportAndPropertyAndLand(TaxType taxType) {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         horizontalPanel.setWidth("100%");
         VerticalPanel verticalPanel1 = new VerticalPanel();
@@ -365,6 +307,8 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
         if (taxType == TaxType.TRANSPORT) {
             label = getLabel("Налоговый орган (кон.):");
+        } else if (taxType == TaxType.LAND) {
+            label = getLabel("Код налогового органа (кон.):");
         } else {
             label = getLabel("Налоговый орган:");
         }
