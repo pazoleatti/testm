@@ -560,10 +560,10 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<sonar.jdbc.url>jdbc:h2:tcp://172.16.127.19:9092/sonar</sonar.jdbc.url>
+				<sonar.jdbc.url>jdbc:h2:tcp://172.19.214.42:9092/sonar</sonar.jdbc.url>
 				<sonar.jdbc.username>sonar</sonar.jdbc.username>
 				<sonar.jdbc.password>sonar</sonar.jdbc.password>
-				<sonar.host.url>http://172.16.127.19:9000</sonar.host.url>
+				<sonar.host.url>http://172.19.214.42:9000</sonar.host.url>
 			</properties>
 		</profile>
 	</profiles>
@@ -577,7 +577,7 @@
         <repository>
             <id>taxaccounting-thirdparty</id>
             <name>Сторонние библиотеки, используемые в проекте</name>
-            <url>http://aplana.datateh.ru:8181/nexus/content/repositories/thirdparty/</url>
+            <url>http://172.19.214.42:8081/nexus/content/repositories/thirdparty/</url>
         </repository>
     </repositories>
 
@@ -593,7 +593,7 @@
 	</issueManagement>
 
 	<ciManagement>
-		<url>http://172.16.128.120:8080/job/tax-master-build</url>
+		<url>http://172.16.121.53:8080/job/tax-unstable-build</url>
 		<system>Jenkins</system>
 	</ciManagement>
 
@@ -601,7 +601,7 @@
         <repository>
             <id>deployment</id>
             <name>Internal Releases</name>
-            <url>http://172.16.127.19:8081/nexus/content/repositories/SBRFACCTAX/</url>
+            <url>http://172.19.214.42:8081/nexus/content/repositories/SBRFACCTAX/</url>
         </repository>
     </distributionManagement>
 
