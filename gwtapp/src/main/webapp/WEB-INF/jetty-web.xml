@@ -35,7 +35,7 @@
 				<Get name="driverProperties">
 					<Put name="driverClassName">oracle.jdbc.OracleDriver</Put>
 					<Put name="url">
-                        jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL
+                        jdbc:oracle:thin:@//172.19.214.45:1521/ORCL.APLANA.LOCAL
 					</Put>
 					<Put name="user">TAX_1_2</Put>
 					<Put name="password">TAX</Put>
