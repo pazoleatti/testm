@@ -140,7 +140,7 @@ begin
 	
 	if l_rerun_condition = 0 then
 		
-		INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (702,7,'Основание','BASE',1,8,null,null,1,null,10,0,1,null,null,0,12);
+		INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (702,7,'Основание','BASE',1,8,null,null,1,null,10,0,1,null,null,1,12);
 		
 		INSERT INTO ref_book_value (record_id, attribute_id, string_value)
 		SELECT DISTINCT record_id,
