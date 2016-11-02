@@ -1500,7 +1500,7 @@ void generateXML(def xml, boolean showApp2) {
                     // сортируем по ФИО, потом по остальным полям
                     if (isCFOApp2 && dataRowsApp2 != null) {
                         def sortColumns = ['surname', 'name', 'patronymic', 'innRF', 'inn', 'taxRate']
-                        sortRows(dataRowsApp2, sortColumns)
+                        sortRowsRussian(dataRowsApp2, sortColumns)
                     }
 
                     //ДатаСправ   Дата составления
@@ -1691,7 +1691,7 @@ def getDataRowsApp2(def groupsApp2) {
     // сортируем по ФИО, потом по остальным полям
     if (isCFOApp2 && dataRowsApp2 != null) {
         def sortColumns = ['surname', 'name', 'patronymic', 'innRF', 'inn', 'taxRate']
-        sortRows(dataRowsApp2, sortColumns)
+        sortRowsRussian(dataRowsApp2, sortColumns)
     }
 
     if (dataRowsApp2) {

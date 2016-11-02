@@ -1,6 +1,7 @@
 package form_template.vat.declaration_10_3q2016.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -35,6 +36,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.PRE_CALCULATION_CHECK:
         checkDepartmentParams(LogLevel.WARNING)
+        preCalcCheck()
         break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
@@ -134,6 +136,21 @@ List<String> getErrorDepartment(def record, def refBook) {
     errorList
 }
 
+@Field
+def sourceFormTypeId = 859
+
+void preCalcCheck() {
+    // Предрасчетная проверка 1.
+    List<Relation> sources = declarationService.getDeclarationSourcesInfo(declarationData, false, false, null, userInfo, logger);
+
+    def correctSources = sources?.findAll { it.formType.id == sourceFormTypeId }
+    if (correctSources.size() > 1) {
+        def formName = formTypeService.get(sourceFormTypeId)?.name
+        logger.error("Для текущего экземпляра декларации источником назначено несколько форм вида «%s». " +
+                "Источником должно быть назначено не более одной формы данного вида", formName)
+    }
+}
+
 void generateXML() {
     // атрибуты, заполняемые по настройкам подразделений
     def departmentParam = getDepartmentParam()
@@ -153,16 +170,8 @@ void generateXML() {
     def index = "0000100"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
-    // Предрасчетная проверка 1.
     def acceptedFormDataSources = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()
-    def sourceFormTypeId = 859
     def sourceformDatas = acceptedFormDataSources?.findAll { it.formType.id == sourceFormTypeId }
-    if (sourceformDatas.size() > 1) {
-        def formName = formTypeService.get(sourceFormTypeId)?.name
-        logger.error("Для текущего экземпляра декларации источником назначено несколько форм вида «%s». " +
-                "Источником должно быть назначено не более одной формы данного вида", formName)
-        return
-    }
 
     // атрибуты, заполняемые по форме 937.3 (строка 001 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
