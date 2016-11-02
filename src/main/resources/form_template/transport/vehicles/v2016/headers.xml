@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="">
-        <cell alias="fix" colSpan="2" rowSpan="2" value="№ пп"/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ пп"/>
         <cell alias="codeOKATO" colSpan="1" rowSpan="2" value="Код ОКТМО"/>
         <cell alias="regionName" colSpan="1" rowSpan="2" value="Муниципальное образование, на территории которого зарегистрировано транспортное средство (ТС)"/>
         <cell alias="tsTypeCode" colSpan="1" rowSpan="2" value="Код вида ТС"/>
@@ -29,7 +28,6 @@
         <cell alias="deduction" colSpan="1" rowSpan="2" value="Сумма налогового вычета"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="1" rowSpan="1" value="№ пп"/>
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
         <cell alias="codeOKATO" colSpan="1" rowSpan="1" value="Код ОКТМО"/>
         <cell alias="regionName" colSpan="1" rowSpan="1" value="Муниципальное образование, на территории которого зарегистрировано транспортное средство (ТС)"/>
@@ -57,7 +55,6 @@
         <cell alias="deduction" colSpan="1" rowSpan="1" value="Сумма налогового вычета"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="2" rowSpan="1" value="1"/>
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
         <cell alias="codeOKATO" colSpan="1" rowSpan="1" value="2"/>
         <cell alias="regionName" colSpan="1" rowSpan="1" value="3"/>

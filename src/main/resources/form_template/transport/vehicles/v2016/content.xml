@@ -7,22 +7,12 @@
     <updating>false</updating>
     <name>Сведения о транспортных средствах, по которым уплачивается транспортный налог</name>
     <fullName>Сведения о транспортных средствах, по которым уплачивается транспортный налог</fullName>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>fix</alias>
-        <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>fix</name>
-        <order>1</order>
-        <width>0</width>
-        <maxLength>100</maxLength>
-        <prevLength>0</prevLength>
-    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <columnType>AUTO</columnType>
         <name>№ пп</name>
-        <order>2</order>
+        <order>1</order>
         <width>5</width>
         <numerationType>SERIAL</numerationType>
     </columns>
@@ -31,7 +21,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Код ОКТМО</name>
-        <order>3</order>
+        <order>2</order>
         <width>5</width>
         <hierarchical>true</hierarchical>
         <nameAttributeId>841</nameAttributeId>
@@ -43,7 +33,7 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Муниципальное образование, на территории которого зарегистрировано транспортное средство (ТС)</name>
-        <order>4</order>
+        <order>3</order>
         <shortName>Муниципальное образование</shortName>
         <width>15</width>
         <parentAlias>codeOKATO</parentAlias>
@@ -54,7 +44,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Код вида ТС</name>
-        <order>5</order>
+        <order>4</order>
         <width>5</width>
         <hierarchical>true</hierarchical>
         <nameAttributeId>423</nameAttributeId>
@@ -66,7 +56,7 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Вид ТС</name>
-        <order>6</order>
+        <order>5</order>
         <width>15</width>
         <parentAlias>tsTypeCode</parentAlias>
         <refBookAttributeId>423</refBookAttributeId>
@@ -76,7 +66,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Марка ТС</name>
-        <order>7</order>
+        <order>6</order>
         <width>10</width>
         <maxLength>120</maxLength>
         <prevLength>0</prevLength>
@@ -86,7 +76,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Экологический класс</name>
-        <order>8</order>
+        <order>7</order>
         <width>7</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>401</nameAttributeId>
@@ -98,7 +88,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Идентификационный номер ТС</name>
-        <order>9</order>
+        <order>8</order>
         <width>9</width>
         <maxLength>25</maxLength>
         <prevLength>0</prevLength>
@@ -108,7 +98,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Регистрационный знак ТС</name>
-        <order>10</order>
+        <order>9</order>
         <width>8</width>
         <maxLength>30</maxLength>
         <prevLength>0</prevLength>
@@ -118,7 +108,7 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Дата регистрации ТС</name>
-        <order>11</order>
+        <order>10</order>
         <width>6</width>
         <formatId>0</formatId>
     </columns>
@@ -127,7 +117,7 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Дата снятия с регистрации ТС</name>
-        <order>12</order>
+        <order>11</order>
         <width>6</width>
         <formatId>0</formatId>
     </columns>
@@ -136,7 +126,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Количество полных месяцев владения</name>
-        <order>13</order>
+        <order>12</order>
         <width>5</width>
         <maxLength>2</maxLength>
         <precision>0</precision>
@@ -146,8 +136,8 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Налоговая база</name>
-        <order>14</order>
-        <width>5</width>
+        <order>13</order>
+        <width>8</width>
         <maxLength>14</maxLength>
         <precision>2</precision>
     </columns>
@@ -156,7 +146,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Единица измерения налоговой базы по ОКЕИ</name>
-        <order>15</order>
+        <order>14</order>
         <width>7</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>58</nameAttributeId>
@@ -168,7 +158,7 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Год выпуска ТС</name>
-        <order>16</order>
+        <order>15</order>
         <width>6</width>
         <formatId>4</formatId>
     </columns>
@@ -177,7 +167,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Количество лет, прошедших с года выпуска ТС</name>
-        <order>17</order>
+        <order>16</order>
         <width>7</width>
         <maxLength>3</maxLength>
         <precision>0</precision>
@@ -187,7 +177,7 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Сведения об угоне. Дата начала розыска ТС</name>
-        <order>18</order>
+        <order>17</order>
         <width>6</width>
         <formatId>0</formatId>
     </columns>
@@ -196,7 +186,7 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Сведения об угоне. Дата возврата ТС</name>
-        <order>19</order>
+        <order>18</order>
         <width>6</width>
         <formatId>0</formatId>
     </columns>
@@ -205,7 +195,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Доля налогоплательщика в праве на ТС</name>
-        <order>20</order>
+        <order>19</order>
         <shortName>Доля налогоплательщика</shortName>
         <width>10</width>
         <maxLength>21</maxLength>
@@ -216,8 +206,8 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Балансовая стоимость ТС на начало отчетного периода (руб.)</name>
-        <order>21</order>
-        <width>8</width>
+        <order>20</order>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -226,8 +216,8 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Балансовая стоимость ТС на конец отчетного периода (руб.)</name>
-        <order>22</order>
-        <width>8</width>
+        <order>21</order>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -236,7 +226,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Модель (версия) из перечня, утвержденного на налоговый период</name>
-        <order>23</order>
+        <order>22</order>
         <shortName>Модель (версия)</shortName>
         <width>8</width>
         <hierarchical>false</hierarchical>
@@ -249,8 +239,8 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Средняя стоимость</name>
-        <order>24</order>
-        <width>15</width>
+        <order>23</order>
+        <width>10</width>
         <parentAlias>version</parentAlias>
         <refBookAttributeId>2181</refBookAttributeId>
         <refBookAttributeId2>2111</refBookAttributeId2>
@@ -260,7 +250,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Код налогового вычета</name>
-        <order>25</order>
+        <order>24</order>
         <width>8</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>16</nameAttributeId>
@@ -272,8 +262,8 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма налогового вычета</name>
-        <order>26</order>
-        <width>8</width>
+        <order>25</order>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -316,13 +306,6 @@
         <alias>Корректировка-удалено</alias>
         <backColor>LIGHT_CORAL</backColor>
         <bold>false</bold>
-        <fontColor>BLACK</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Раздел 2 уровня</alias>
-        <backColor>LIGHT_YELLOW</backColor>
-        <bold>true</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
