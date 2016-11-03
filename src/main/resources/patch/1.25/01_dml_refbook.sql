@@ -170,5 +170,20 @@ end;
 
 COMMIT;	
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17480: 1.25 ТН. Переименовать поле "Код субъекта РФ" в справочниках ТН
+declare 
+	l_task_name varchar2(128) := 'RefBook Block #6 (SBRFACCTAX-17480) - ref_books(T))';
+begin
+	update ref_book_attribute set name='Код региона РФ' where id in (18, 2101);
+	dbms_output.put_line(l_task_name||'[INFO]: Success ('||sql%rowcount||' row(s) updated)');
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+
+COMMIT;	
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
