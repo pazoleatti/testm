@@ -428,6 +428,9 @@ void generateXML(XMLStreamReader readerBank, def xml) {
     // Данные налоговых форм.
 
     def formDataCollection = getAcceptedFormDataSources()
+    if (!checkAdvance(formDataCollection)) {
+        return
+    }
 
     /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
     def dataRowsAdvance = getDataRows(formDataCollection, getAdvanceTypeId())
@@ -859,4 +862,20 @@ def getAdvanceTypeId() {
     def reportPeriod = getReportPeriod()
     def isAfterFirstQuarter2016 = (reportPeriod?.taxPeriod?.year > 2016 || reportPeriod?.order > 1)
     return (isAfterFirstQuarter2016 ? 507 : 500)
+}
+
+// Условия выполнения расчета декларации: проверка назначения источников форм РАПОП.
+def checkAdvance(def formDataCollection) {
+    def advance500 = 500
+    def advance507 = 507
+    def has500 = formDataCollection?.records?.findAll { it.formType.id == advance500 }
+    def has507 = formDataCollection?.records?.findAll { it.formType.id == advance507 }
+    if (has500 && has507) {
+        def formName500 = formTypeService.get(advance500)?.name
+        def formName507 = formTypeService.get(advance507)?.name
+        logger.error("Для текущей декларации источником назначены формы «%s», «%s». Источником должна быть назначена только одна из форм",
+                formName500, formName507)
+        return false
+    }
+    return true
 }
