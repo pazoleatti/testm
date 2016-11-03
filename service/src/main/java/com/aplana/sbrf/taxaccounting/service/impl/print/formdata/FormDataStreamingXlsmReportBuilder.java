@@ -42,7 +42,7 @@ public class FormDataStreamingXlsmReportBuilder extends FormDataXlsmReportBuilde
         InputStream templateInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
         try {
             template = new XSSFWorkbook(templateInputStream);
-            workBook = new SXSSFWorkbook(template, 100);
+            workBook = new SXSSFWorkbook(template, 200);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw new IOException("Wrong file format. Template must be in format of 2007 Excel!!!");
