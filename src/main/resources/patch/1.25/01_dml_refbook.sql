@@ -185,5 +185,54 @@ end;
 
 COMMIT;	
 ---------------------------------------------------------------------------
+--https://jira.aplana.com/browse/SBRFACCTAX-17304: 1.25 ТН. Доработать справочник "Ставки транспортного налога"
+declare 
+	l_task_name varchar2(128) := 'RefBook Block #7 (SBRFACCTAX-17304) - tax rates(T))';
+	l_rerun_condition number(1) := 0;
+begin
+	
+	select case when count(*) > 9 then 1 else 0 end into l_rerun_condition from ref_book_attribute where ref_book_id = 41;
+	
+	if l_rerun_condition = 0 then
+		
+		update ref_book_attribute set name = 'Код региона' where id = 417;
+		update ref_book_attribute set name = 'Код вида ТС' where id = 411;
+		update ref_book_attribute set name = 'Мощность до (включительно)' where id = 415;
+		update ref_book_attribute set name = 'Срок использования (лет) до (включительно)' where id = 413;
+		update ref_book_attribute set max_length = 3 where id in (412, 413);
+		update ref_book_attribute set is_unique = 0 where id = 416;
+		
+		merge into ref_book_attribute t
+		using (
+		  select 418 as id, 3 as new_ord from dual union all
+		  select 412 as id, 4 as new_ord from dual union all
+		  select 413 as id, 5 as new_ord from dual union all
+		  select 414 as id, 6 as new_ord from dual union all
+		  select 415 as id, 7 as new_ord from dual union all
+		  select 416 as id, 10 as new_ord from dual ) s
+		on (t.id = s.id)  
+		when matched then update set t.ord = s.new_ord;
+		
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (419,41,'Экологический класс от','MIN_ECOCLASS',4,8,40,400,1,null,10,0,1,null,null,0,null);
+	INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (420,41,'Экологический класс до (включительно)','MAX_ECOCLASS',4,9,40,400,1,null,10,0,1,null,null,0,null);
+		
+	dbms_output.put_line(l_task_name||'[INFO]: Success');
+
+	else
+		dbms_output.put_line(l_task_name||'[ERROR]: ref_book had already been modified');
+	end if;	
+	
+EXCEPTION
+	when DUP_VAL_ON_INDEX then
+		dbms_output.put_line(l_task_name||'[ERROR]: ('||sqlerrm||')');
+		ROLLBACK;
+	when OTHERS then
+		dbms_output.put_line(l_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+
+COMMIT;	
+---------------------------------------------------------------------------
 COMMIT;
 EXIT;
