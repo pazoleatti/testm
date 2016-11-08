@@ -502,7 +502,7 @@ public class VehiclesTest extends ScriptTestBase {
         // 8. Проверка корректности заполнения даты начала розыска ТС
         setDefaultValues(row);
         row.getCell("regDate").setValue(format.parse("01.02.2014"), row.getIndex());
-        row.getCell("month").setValue(-1, row.getIndex());
+        row.getCell("month").setValue(1, row.getIndex());
         row.getCell("stealDateStart").setValue(format.parse("01.01.2014"), row.getIndex());
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
@@ -529,7 +529,7 @@ public class VehiclesTest extends ScriptTestBase {
         // 10. Проверка заполнения даты возврата ТС
         setDefaultValues(row);
         row.getCell("regDateEnd").setValue(format.parse("01.01.2014"), row.getIndex());
-        row.getCell("month").setValue(-1, row.getIndex());
+        row.getCell("month").setValue(0, row.getIndex());
         row.getCell("stealDateStart").setValue(format.parse("01.02.2014"), row.getIndex());
         row.getCell("stealDateEnd").setValue(format.parse("01.03.2014"), row.getIndex());
         testHelper.execute(FormDataEvent.CHECK);

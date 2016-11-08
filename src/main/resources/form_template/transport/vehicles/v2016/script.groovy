@@ -50,7 +50,6 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.CALCULATE:
-        checkRegionId()
         calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
@@ -184,14 +183,23 @@ def calc12(def row) {
     if (tmp1 == null) {
         return null
     }
-    def tmp2 = subCalc12(row, 'stealDateStart', 'stealDateEnd')
+    def tmp2 = subCalc12(row, 'stealDateStart', 'stealDateEnd', true)
     if (tmp2 == null) {
         tmp2 = BigDecimal.ZERO
     }
     return round(tmp1 - tmp2, 0)
 }
 
-def subCalc12(def row, def startAlias, def endAlias) {
+/**
+ * Для расчета графы 12.
+ *
+ * @param row строка нф
+ * @param startAlias алиас даты начала
+ * @param endAlias алиас даты окончания
+ * @param isSteal true - расчет месяцев угона, false - расчет месяцев владения
+ */
+def subCalc12(def row, def startAlias, def endAlias, def isSteal = false) {
+    // общая часть
     if (row[startAlias] == null) {
         return null
     }
@@ -200,7 +208,19 @@ def subCalc12(def row, def startAlias, def endAlias) {
     }
     def end = (row[endAlias] == null || row[endAlias] > getReportPeriodEndDate() ? getReportPeriodEndDate() : row[endAlias])
     def start = (row[startAlias] < getReportPeriodStartDate() ? getReportPeriodStartDate() : row[startAlias])
-    BigDecimal tmp = end.format('M').toInteger() - start.format('M').toInteger() + 1
+
+    // специфика
+    BigDecimal tmp
+    if (isSteal) {
+        tmp = end.format('M').toInteger() - start.format('M').toInteger() - 1
+        if (tmp < 0) {
+            tmp = BigDecimal.ZERO
+        }
+    } else {
+        def m1 = start.format('M').toInteger() + (start.format('d').toInteger() > 15 ? 1 : 0)
+        def m2 = end.format('M').toInteger() - (end.format('d').toInteger() > 15 ? 0 : 1)
+        tmp = m2 - m1 + 1
+    }
     return round(tmp, 0)
 }
 
@@ -404,7 +424,7 @@ def logicCheck() {
                 def start2 = row2.regDate
                 def end1 = row1.regDateEnd ?: getReportPeriodEndDate()
                 def end2 = row1.regDateEnd ?: getReportPeriodEndDate()
-                if (start1 <= start2 && end1 > start2 || start2 <= start1 && end2 > start1) {
+                if (start1 <= start2 && end1 >= start2 || start2 <= start1 && end2 >= start1) {
                     hasCross = true
                     break
                 }
@@ -435,19 +455,9 @@ def logicCheck() {
     }
 }
 
-@Field
-def isConsolidated = null
-
-def isConsolidated() {
-    if (isConsolidated == null) {
-        isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
-    }
-    return isConsolidated
-}
-
 /** Получить строки за предыдущий отчетный период. */
 def getPrevDataRows() {
-    if (isConsolidated() || getPrevReportPeriod()?.period == null) {
+    if (formData.kind == FormDataKind.CONSOLIDATED || getPrevReportPeriod()?.period == null) {
         return null
     }
     def prevFormData = formDataService.getFormDataPrev(formData)
@@ -582,13 +592,6 @@ void sortFormDataRows() {
     refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns())
     sortRows(dataRows, sortColumns)
     dataRowHelper.saveSort()
-}
-
-// Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
-void checkRegionId() {
-    if (formDataDepartment.regionId == null) {
-        throw new Exception("В справочнике «Подразделения» не заполнено поле «Регион» для подразделения «$formDataDepartment.name»", )
-    }
 }
 
 void importData() {
