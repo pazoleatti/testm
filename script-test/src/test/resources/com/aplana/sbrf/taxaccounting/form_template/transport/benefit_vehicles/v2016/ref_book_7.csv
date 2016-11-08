@@ -1,0 +1,6 @@
+record_id(N);TAX_BENEFIT_ID(R);BASE(S);DECLARATION_REGION_ID(R);DICT_REGION_ID(R)
+1;1;baseA7;1;1
+2;2;baseB7;2;2
+3;3;baseC7;3;3
+4;1;baseA7;1;4
+5;2;baseA7;1;4

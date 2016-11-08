@@ -7,22 +7,12 @@
     <updating>false</updating>
     <name>Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог</name>
     <fullName>Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог</fullName>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>fix</alias>
-        <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>fix</name>
-        <order>1</order>
-        <width>0</width>
-        <maxLength>100</maxLength>
-        <prevLength>0</prevLength>
-    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <columnType>AUTO</columnType>
         <name>№ пп</name>
-        <order>2</order>
+        <order>1</order>
         <width>5</width>
         <numerationType>SERIAL</numerationType>
     </columns>
@@ -31,7 +21,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Код ОКТМО</name>
-        <order>3</order>
+        <order>2</order>
         <width>5</width>
         <hierarchical>true</hierarchical>
         <nameAttributeId>841</nameAttributeId>
@@ -43,7 +33,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Код вида ТС</name>
-        <order>4</order>
+        <order>3</order>
         <width>5</width>
         <hierarchical>true</hierarchical>
         <nameAttributeId>423</nameAttributeId>
@@ -55,7 +45,7 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Вид ТС</name>
-        <order>5</order>
+        <order>4</order>
         <width>15</width>
         <parentAlias>tsTypeCode</parentAlias>
         <refBookAttributeId>423</refBookAttributeId>
@@ -65,7 +55,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Идентификационный номер ТС</name>
-        <order>6</order>
+        <order>5</order>
         <width>9</width>
         <maxLength>25</maxLength>
         <prevLength>0</prevLength>
@@ -75,7 +65,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Регистрационный знак ТС</name>
-        <order>7</order>
+        <order>6</order>
         <width>8</width>
         <maxLength>30</maxLength>
         <prevLength>0</prevLength>
@@ -85,7 +75,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Мощность. Величина</name>
-        <order>8</order>
+        <order>7</order>
         <width>8</width>
         <maxLength>14</maxLength>
         <precision>2</precision>
@@ -95,7 +85,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Мощность. Ед. измерения</name>
-        <order>9</order>
+        <order>8</order>
         <width>8</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>58</nameAttributeId>
@@ -107,12 +97,12 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Код налоговой льготы</name>
-        <order>10</order>
+        <order>9</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>19</nameAttributeId>
         <refBookAttributeId>19</refBookAttributeId>
-        <refBookAttributeId2>19</refBookAttributeId2>
+        <refBookAttributeId2>15</refBookAttributeId2>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
@@ -120,7 +110,7 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Основание льготы</name>
-        <order>11</order>
+        <order>10</order>
         <width>10</width>
         <parentAlias>taxBenefitCode</parentAlias>
         <refBookAttributeId>702</refBookAttributeId>
@@ -130,7 +120,7 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Использование льготы. Дата начала</name>
-        <order>12</order>
+        <order>11</order>
         <width>7</width>
         <formatId>0</formatId>
     </columns>
@@ -139,7 +129,7 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Использование льготы. Дата окончания</name>
-        <order>13</order>
+        <order>12</order>
         <width>7</width>
         <formatId>0</formatId>
     </columns>
@@ -182,13 +172,6 @@
         <alias>Корректировка-удалено</alias>
         <backColor>LIGHT_CORAL</backColor>
         <bold>false</bold>
-        <fontColor>BLACK</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Раздел 2 уровня</alias>
-        <backColor>LIGHT_YELLOW</backColor>
-        <bold>true</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>

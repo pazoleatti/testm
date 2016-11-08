@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="">
-        <cell alias="fix" colSpan="2" rowSpan="2" value="№ пп"/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ пп"/>
         <cell alias="codeOKATO" colSpan="1" rowSpan="2" value="Код ОКТМО"/>
         <cell alias="tsTypeCode" colSpan="1" rowSpan="2" value="Код вида ТС"/>
         <cell alias="tsType" colSpan="1" rowSpan="2" value="Вид ТС"/>
@@ -16,7 +15,6 @@
         <cell alias="benefitEndDate" colSpan="1" rowSpan="1" value="Использование льготы"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="1" rowSpan="1" value="№ пп"/>
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
         <cell alias="codeOKATO" colSpan="1" rowSpan="1" value="Код ОКТМО"/>
         <cell alias="tsTypeCode" colSpan="1" rowSpan="1" value="Код вида ТС"/>
@@ -31,7 +29,6 @@
         <cell alias="benefitEndDate" colSpan="1" rowSpan="1" value="Дата окончания"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="2" rowSpan="1" value="1"/>
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
         <cell alias="codeOKATO" colSpan="1" rowSpan="1" value="2"/>
         <cell alias="tsTypeCode" colSpan="1" rowSpan="1" value="3"/>
