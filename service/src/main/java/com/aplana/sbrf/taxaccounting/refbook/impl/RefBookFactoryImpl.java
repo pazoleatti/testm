@@ -393,4 +393,22 @@ public class RefBookFactoryImpl implements RefBookFactory {
             return false;
         }
     }
+
+    @Override
+    public Map<FormDataEvent, Boolean> getEventScriptStatus(long refBookId) {
+        List<FormDataEvent> formDataEventList = Arrays.asList(FormDataEvent.ADD_ROW, FormDataEvent.IMPORT);
+        Map<FormDataEvent, Boolean> eventScriptStatus = new HashMap<FormDataEvent, Boolean>();
+        String script = refBookScriptingService.getScript(refBookId);
+        if (script != null && !script.isEmpty()) {
+            for (FormDataEvent event : formDataEventList) {
+                eventScriptStatus.put(event, TAAbstractScriptingServiceImpl.canExecuteScript(script, event));
+            }
+        } else {
+            for (FormDataEvent event : formDataEventList) {
+                eventScriptStatus.put(event, false);
+            }
+        }
+        return eventScriptStatus;
+    }
+
 }

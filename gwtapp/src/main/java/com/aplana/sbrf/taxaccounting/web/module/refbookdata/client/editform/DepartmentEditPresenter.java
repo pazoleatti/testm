@@ -213,7 +213,7 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
     }
 
     @Override
-    public void clean(boolean isVersion) {
+    public void clean(boolean isVersion, boolean isAddRowHandler) {
         //isVersion всегда должен быть null или false
         currentUniqueRecordId = null;
         getView().fillInputFields(new HashMap<String, RefBookValueSerializable>());

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
@@ -142,7 +143,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
     }
 
     @Override
-    public void clean(boolean isVersion) {
+    public void clean(boolean isVersion, boolean isAddRowHandler) {
         if (isVersion) {
             GetRefBookRecordAction action = new GetRefBookRecordAction();
             action.setRefBookId(currentRefBookId);
@@ -160,24 +161,38 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                                 }
                             }, EditFormPresenter.this));
         } else {
-            setCurrentUniqueRecordId(null);
-            getView().cleanFields();
-            RefBookValueSerializable rbStringField = new RefBookValueSerializable();
-            rbStringField.setAttributeType(RefBookAttributeType.STRING);
-            rbStringField.setStringValue("Новая запись");
-            HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(1);
-            field.put(MyView.NEW_RECORD_ALIAS, rbStringField);
-            getView().fillInputFields(field);
-
-            /*if (!isVersionMode && mode == FormMode.EDIT) {
-                setMode(FormMode.CREATE);
-            } else if(!isVersionMode && mode == FormMode.CREATE){
-                setMode(FormMode.EDIT);
+            if (isAddRowHandler) {
+                AddRowRefBookAction action = new AddRowRefBookAction();
+                action.setRefBookId(currentRefBookId);
+                dispatchAsync.execute(action,
+                        CallbackUtils.defaultCallback(
+                                new AbstractCallback<AddRowRefBookResult>() {
+                                    @Override
+                                    public void onSuccess(AddRowRefBookResult result) {
+                                        setCurrentUniqueRecordId(null);
+                                        getView().cleanFields();
+                                        RefBookValueSerializable rbStringField = new RefBookValueSerializable();
+                                        rbStringField.setAttributeType(RefBookAttributeType.STRING);
+                                        rbStringField.setStringValue("Новая запись");
+                                        result.getRecord().put(MyView.NEW_RECORD_ALIAS, rbStringField);
+                                        getView().fillInputFields(result.getRecord());
+                                        getView().setVersionFrom(null);
+                                        getView().setVersionTo(null);
+                                    }
+                                }, EditFormPresenter.this));
             } else {
-                setMode(mode);
-            } */
-            getView().setVersionFrom(null);
-            getView().setVersionTo(null);
+                setCurrentUniqueRecordId(null);
+                getView().cleanFields();
+                RefBookValueSerializable rbStringField = new RefBookValueSerializable();
+                rbStringField.setAttributeType(RefBookAttributeType.STRING);
+                rbStringField.setStringValue("Новая запись");
+                HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(1);
+                field.put(MyView.NEW_RECORD_ALIAS, rbStringField);
+                getView().fillInputFields(field);
+
+                getView().setVersionFrom(null);
+                getView().setVersionTo(null);
+            }
         }
         //getView().updateRefBookPickerPeriod();
     }

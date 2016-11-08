@@ -66,7 +66,7 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
         Map<String, RefBookValue> record = refBookDataProvider.getRecordData(recordId);
 
 		if (record != null) {
-			recordData = convert(refBook, record);
+			recordData = convert(refBook, record, refBookFactory);
 
 			//Получаем версию выбранной записи
 			recordVersion = refBookDataProvider.getRecordVersionInfo(recordId);
@@ -94,7 +94,7 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 		return result;
 	}
 
-	private Map<String, RefBookValueSerializable> convert(RefBook refBook, Map<String, RefBookValue> record) {
+	static public Map<String, RefBookValueSerializable> convert(RefBook refBook, Map<String, RefBookValue> record, RefBookFactory refBookFactory) {
 		Map<String, RefBookValueSerializable> convertedRecord = new HashMap<String, RefBookValueSerializable>();
 		for (Map.Entry<String, RefBookValue> recordValue : record.entrySet()) {
 			RefBookValueSerializable serializedValue = new RefBookValueSerializable();

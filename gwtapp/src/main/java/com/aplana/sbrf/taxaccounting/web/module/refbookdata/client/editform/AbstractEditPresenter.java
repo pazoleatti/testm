@@ -230,21 +230,32 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
             Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
                 @Override
                 public void yes() {
-                    setIsFormModified(false);
-                    //showRecord(null);
-                    RefBookValueSerializable refBookParent = new RefBookValueSerializable();
-                    refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
-                    refBookParent.setDereferenceValue(dereferenceValue);
-                    refBookParent.setReferenceValue(recordId);
-                    RefBookValueSerializable rbStringField = new RefBookValueSerializable();
-                    rbStringField.setAttributeType(RefBookAttributeType.STRING);
-                    rbStringField.setStringValue("Новая запись");
-                    HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(2);
-                    field.put("PARENT_ID", refBookParent);
-                    getView().fillInputFields(field);
-
-                    getView().cleanErrorFields();
-                    SetFormMode.fire(AbstractEditPresenter.this, mode);
+                    AddRowRefBookAction action = new AddRowRefBookAction();
+                    action.setRefBookId(currentRefBookId);
+                    dispatchAsync.execute(action,
+                            CallbackUtils.defaultCallback(
+                                    new AbstractCallback<AddRowRefBookResult>() {
+                                        @Override
+                                        public void onSuccess(AddRowRefBookResult result) {
+                                            setIsFormModified(false);
+                                            //showRecord(null);
+                                            RefBookValueSerializable refBookParent = new RefBookValueSerializable();
+                                            refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
+                                            refBookParent.setDereferenceValue(dereferenceValue);
+                                            refBookParent.setReferenceValue(recordId);
+                                            RefBookValueSerializable rbStringField = new RefBookValueSerializable();
+                                            rbStringField.setAttributeType(RefBookAttributeType.STRING);
+                                            rbStringField.setStringValue("Новая запись");
+                                            RefBookValueSerializable activeValue = new RefBookValueSerializable();
+                                            activeValue.setNumberValue(1);
+                                            result.getRecord().put("PARENT_ID", refBookParent);
+                                            result.getRecord().put(MyView.NEW_RECORD_ALIAS, rbStringField);
+                                            getView().fillInputFields(result.getRecord());
+                                            result.getRecord().put("IS_ACTIVE", activeValue);
+                                            getView().cleanErrorFields();
+                                            SetFormMode.fire(AbstractEditPresenter.this, mode);
+                                        }
+                                    }, AbstractEditPresenter.this));
                 }
 
                 @Override
@@ -266,22 +277,31 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
 
             });
         } else {
-            //showRecord(null);
-            getView().cleanFields();
-            RefBookValueSerializable refBookParent = new RefBookValueSerializable();
-            refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
-            refBookParent.setDereferenceValue(dereferenceValue);
-            refBookParent.setReferenceValue(recordId);
-            RefBookValueSerializable rbStringField = new RefBookValueSerializable();
-            rbStringField.setAttributeType(RefBookAttributeType.STRING);
-            rbStringField.setStringValue("Новая запись");
-            HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(2);
-            RefBookValueSerializable activeValue = new RefBookValueSerializable();
-            activeValue.setNumberValue(1);
-            field.put("PARENT_ID", refBookParent);
-            field.put(MyView.NEW_RECORD_ALIAS, rbStringField);
-            field.put("IS_ACTIVE", activeValue);
-            getView().fillInputFields(field);
+            AddRowRefBookAction action = new AddRowRefBookAction();
+            action.setRefBookId(currentRefBookId);
+            dispatchAsync.execute(action,
+                    CallbackUtils.defaultCallback(
+                            new AbstractCallback<AddRowRefBookResult>() {
+                                @Override
+                                public void onSuccess(AddRowRefBookResult result) {
+                                    //showRecord(null);
+                                    getView().cleanFields();
+                                    RefBookValueSerializable refBookParent = new RefBookValueSerializable();
+                                    refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
+                                    refBookParent.setDereferenceValue(dereferenceValue);
+                                    refBookParent.setReferenceValue(recordId);
+                                    RefBookValueSerializable rbStringField = new RefBookValueSerializable();
+                                    rbStringField.setAttributeType(RefBookAttributeType.STRING);
+                                    rbStringField.setStringValue("Новая запись");
+                                    RefBookValueSerializable activeValue = new RefBookValueSerializable();
+                                    activeValue.setNumberValue(1);
+                                    result.getRecord().put("PARENT_ID", refBookParent);
+                                    result.getRecord().put(MyView.NEW_RECORD_ALIAS, rbStringField);
+                                    result.getRecord().put("IS_ACTIVE", activeValue);
+                                    getView().cleanErrorFields();
+                                    getView().fillInputFields(result.getRecord());
+                                }
+                            }, AbstractEditPresenter.this));
         }
     }
     //Редактирование версии
@@ -289,7 +309,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     //Создание новой версии
     abstract void create() throws BadValueException;
     abstract void updateView(GetRefBookRecordResult result);
-    public abstract void clean(boolean isVersion);
+    public abstract void clean(boolean isVersion, boolean isAddRowHandler);
 
     @Override
     public void onCancelClicked() {

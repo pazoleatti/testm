@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -43,6 +44,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
@@ -83,8 +85,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     private FormMode mode;
     private String refBookName;
     private IRefBookExecutor dataInterface;
-    private boolean importScriptStatus;
     private boolean isVersioned;
+    protected Map<FormDataEvent, Boolean> eventScriptStatus;
 
     private String lockId;
 
@@ -196,7 +198,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     public void onAddRowClicked() {
         getView().updateMode(FormMode.CREATE);
         editFormPresenter.setMode(FormMode.CREATE);
-        editFormPresenter.clean(versionPresenter.isVisible());
+        editFormPresenter.clean(versionPresenter.isVisible(), eventScriptStatus.get(FormDataEvent.ADD_ROW));
         dataInterface.setMode(FormMode.CREATE);
     }
 
@@ -237,7 +239,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 isVersioned = result.isVersioned();
                                 getView().setIsVersion(result.isVersioned());
                                 getView().setUploadAvailable(result.isUploadAvailable());
-                                importScriptStatus = result.isScriptStatus();
+                                eventScriptStatus = result.getEventScriptStatus();
                                 registrations[0] = editFormPresenter.addClickHandlerForAllVersions(getClick());
                                 if (result.isAvailable()) {
                                     getView().resetSearchInputBox();
@@ -505,7 +507,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
     @Override
     public void showUploadDialogClicked() {
-        if (importScriptStatus) {
+        if (eventScriptStatus.get(FormDataEvent.IMPORT)) {
             if (!editFormPresenter.isFormModified()) {
                 uploadDialogPresenter.open(refBookId, isVersioned);
             } else {

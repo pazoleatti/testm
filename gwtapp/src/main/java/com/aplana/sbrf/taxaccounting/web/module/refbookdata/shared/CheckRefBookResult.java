@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.gwtplatform.dispatch.shared.Result;
+
+import java.util.Map;
 
 public class CheckRefBookResult implements Result {
     private static final long serialVersionUID = 6657849317878384244L;
@@ -8,7 +11,7 @@ public class CheckRefBookResult implements Result {
     private boolean available;
     private boolean versioned;
     private boolean uploadAvailable;
-    private boolean scriptStatus;
+    private Map<FormDataEvent, Boolean> eventScriptStatus;
 
     public boolean isAvailable() {
         return available;
@@ -34,11 +37,11 @@ public class CheckRefBookResult implements Result {
         this.uploadAvailable = uploadAvailable;
     }
 
-    public boolean isScriptStatus() {
-        return scriptStatus;
+    public Map<FormDataEvent, Boolean> getEventScriptStatus() {
+        return eventScriptStatus;
     }
 
-    public void setScriptStatus(boolean scriptStatus) {
-        this.scriptStatus = scriptStatus;
+    public void setEventScriptStatus(Map<FormDataEvent, Boolean> eventScriptStatus) {
+        this.eventScriptStatus = eventScriptStatus;
     }
 }

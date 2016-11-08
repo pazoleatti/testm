@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -11,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Фабрика для получения адаптеров справочников
@@ -95,6 +93,13 @@ public interface RefBookFactory {
     List<String> getSpecificReportTypes(long refBookId, TAUserInfo userInfo, Logger logger);
 
     boolean getEventScriptStatus(long refBookId, FormDataEvent event);
+
+    /**
+     * Статус возможности обработки события FormDataEvent скриптом макета
+     * @param refBookId
+     * @return
+     */
+    Map<FormDataEvent, Boolean> getEventScriptStatus(long refBookId);
 
     /**
      * Получение блокировки и её типа для справочника, null если для справочника нет блокировок

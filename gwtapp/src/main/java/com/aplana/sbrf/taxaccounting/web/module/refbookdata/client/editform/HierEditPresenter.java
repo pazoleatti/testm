@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -143,7 +144,7 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
     }
 
     @Override
-    public void clean(boolean isVersion) {
+    public void clean(boolean isVersion, boolean isAddRowHandler) {
         if (isVersion) {
             GetRefBookRecordAction action = new GetRefBookRecordAction();
             action.setRefBookId(currentRefBookId);

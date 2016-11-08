@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -43,6 +44,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: avanteev
@@ -69,8 +71,8 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     private FormMode mode;
     private Long attrId, uniqueRecordId, refBookId;
     private String refBookName;
-    private boolean importScriptStatus;
     private boolean isVersioned;
+    protected Map<FormDataEvent, Boolean> eventScriptStatus;
 
     private String lockId;
 
@@ -102,7 +104,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
 
     @Override
     public void onRelevanceDateChanged(Date relevanceDate) {
-        commonEditPresenter.clean(false);
+        commonEditPresenter.clean(false, false);
         commonEditPresenter.setNeedToReload();
         SearchButtonEvent.fire(this, relevanceDate, getView().getSearchPattern(), getView().getExactSearch());
     }
@@ -148,9 +150,9 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         commonEditPresenter.setMode(FormMode.CREATE);
         dataInterface.setMode(FormMode.CREATE);
         if (versionPresenter.isVisible()) {
-            commonEditPresenter.clean(true);
+            commonEditPresenter.clean(true, false);
         } else {
-            commonEditPresenter.clean(false);
+            commonEditPresenter.clean(false, eventScriptStatus.get(FormDataEvent.ADD_ROW));
             AddItemEvent.fire(RefBookHierPresenter.this);
         }
     }
@@ -295,7 +297,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                     @Override
                     public void onSuccess(CheckRefBookResult result) {
                         commonEditPresenter.init(refBookId, result.isVersioned());
-                        importScriptStatus = result.isScriptStatus();
+                        eventScriptStatus = result.getEventScriptStatus();
                         isVersioned = result.isVersioned();
                         getView().setIsVersion(result.isVersioned());
                         getView().setUploadAvailable(result.isUploadAvailable());
@@ -468,7 +470,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
 
     @Override
     public void showUploadDialogClicked() {
-        if (importScriptStatus) {
+        if (eventScriptStatus.get(FormDataEvent.IMPORT)) {
             if (!commonEditPresenter.isFormModified()) {
                 uploadDialogPresenter.open(refBookId, isVersioned);
             } else {

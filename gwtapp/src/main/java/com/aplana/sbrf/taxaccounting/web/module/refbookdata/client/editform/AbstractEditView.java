@@ -203,7 +203,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
         for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
             //Первый по порядку текстовый атрибут справочника принимает значение "Новая запись" (если текстовые атрибуты отсутствуют, то шаг не выполняется)
             if (record.containsKey(NEW_RECORD_ALIAS) && w.getValue() instanceof HasText && !(w.getValue() instanceof CheckBox)
-                    && w.getKey().getAttributeType() == RefBookAttributeType.STRING && !textFieldFound) {
+                    && w.getKey().getAttributeType() == RefBookAttributeType.STRING && (record.get(w.getKey().getAlias()) == null || record.get(w.getKey().getAlias()).getStringValue() == null) && !textFieldFound) {
                 textFieldFound = true;
                 w.getValue().setValue(record.get(NEW_RECORD_ALIAS).getStringValue());
                 continue;
