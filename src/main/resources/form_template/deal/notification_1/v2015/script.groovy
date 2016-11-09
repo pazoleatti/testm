@@ -263,7 +263,7 @@ void generateXML() {
                                 def tnVedCode = row.dealSubjectCode1 != null ? getRefBookValue(17, row.dealSubjectCode1)?.TN_VED_CODE?.value : null
                                 def String dealSubjectCode1 = tnVedCode != null ? getRefBookValue(73, tnVedCode)?.CODE?.numberValue : null
                                 def okpCode = row.dealSubjectCode2 != null ? getRefBookValue(17, row.dealSubjectCode2)?.OKP_CODE?.value : null
-                                def String dealSubjectCode2 = okpCode != null ? getRefBookValue(68, okpCode)?.CODE?.numberValue : null
+                                def String dealSubjectCode2 = okpCode != null ? getRefBookValue(68, okpCode)?.CODE?.stringValue : null
                                 def String dealSubjectCode3 = row.dealSubjectCode3 != null ? getRefBookValue(34, row.dealSubjectCode3)?.CODE?.stringValue : null
                                 def String countryCode = row.countryCode != null ? getRefBookValue(10, row.countryCode)?.CODE?.stringValue : null
                                 def String deliveryCode = row.deliveryCode != null ? getRefBookValue(63, row.deliveryCode)?.STRCODE?.stringValue : null
