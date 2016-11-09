@@ -2,6 +2,7 @@ package form_template.income.declaration_bank_2.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -551,12 +552,12 @@ void generateXML(def xml, boolean showApp2) {
         }
     }
 
-    // Данные налоговых форм.
-
-    def formDataCollection = getAcceptedFormDataSources()
-    if (!checkAdvance(formDataCollection)) {
+    if (!checkAdvance()) {
         return
     }
+
+    // Данные налоговых форм.
+    def formDataCollection = getAcceptedFormDataSources()
 
     /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
     def dataRowsComplexIncome = getDataRows(formDataCollection, 302)
@@ -3243,19 +3244,18 @@ def getAcceptedFormDataSources() {
     return acceptedFormDataSources
 }
 
-/** Получить form_type_id "авансовых платежей". До 1 кв 2016 (включительно) используется макет 500, после - 507. */
+/** Получить form_type_id "авансовых платежей". Ищутся существующие формы. */
 def getAdvanceTypeId() {
-    def reportPeriod = getReportPeriod()
-    def isAfterFirstQuarter2016 = (reportPeriod?.taxPeriod?.year > 2016 || reportPeriod?.order > 1)
-    return (isAfterFirstQuarter2016 ? 507 : 500)
+    return (getAcceptedFormDataSources()?.records?.find { it.formType.id == 500 } != null) ? 500 : 507
 }
 
 // Условия выполнения расчета декларации: проверка назначения источников форм РАПОП.
-def checkAdvance(def formDataCollection) {
+def checkAdvance() {
     def advance500 = 500
     def advance507 = 507
-    def has500 = formDataCollection?.records?.findAll { it.formType.id == advance500 }
-    def has507 = formDataCollection?.records?.findAll { it.formType.id == advance507 }
+    List<Relation> sources = declarationService.getDeclarationSourcesInfo(declarationData, false, false, null, userInfo, logger);
+    def has500 = sources?.find { it.formType.id == advance500 } != null
+    def has507 = sources?.find { it.formType.id == advance507 } != null
     if (has500 && has507) {
         def formName500 = formTypeService.get(advance500)?.name
         def formName507 = formTypeService.get(advance507)?.name
