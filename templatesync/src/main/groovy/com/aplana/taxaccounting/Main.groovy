@@ -17,7 +17,7 @@ import groovy.sql.Sql
  */
 class Main {
     // Параметры подключения к БД
-    def static DB_URL = 'jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL'
+    def static DB_URL = 'jdbc:oracle:thin:@//172.19.214.45:1521/ORCL.APLANA.LOCAL'
     def static DB_USER = 'TAX_1_2'
     def static DB_PASSWORD = 'TAX'
     // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД

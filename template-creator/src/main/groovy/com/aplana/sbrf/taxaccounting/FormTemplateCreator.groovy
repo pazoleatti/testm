@@ -110,6 +110,7 @@ static void main(String[] args) {
             sb.append("${index == 0 ? 'def Column ' : '        '}formColumn = new $columnClassName()\n")
             sb.append("        formColumn.setOrder(${column.order})\n")
             sb.append("        formColumn.setName('${column.name.replaceAll(/"/, /\"/).replaceAll(/\n/, ' ').replaceAll(/ +/, ' ')}')\n")
+            sb.append("        formColumn.setShortName('${column.shortName?.replaceAll(/"/, /\"/)?.replaceAll(/\n/, ' ')?.replaceAll(/ +/, ' ')}')\n")
             sb.append("        formColumn.setAlias('${column.alias}')\n")
             sb.append("        formColumn.setWidth(${column.getWidth()})\n")
             sb.append("        formColumn.setChecking(${column.checking})\n")
