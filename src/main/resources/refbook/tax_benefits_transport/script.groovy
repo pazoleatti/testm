@@ -2,6 +2,8 @@ package refbook.tax_benefits_transport
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 
 /**
@@ -9,6 +11,9 @@ import groovy.transform.Field
  *
  */
 switch (formDataEvent) {
+    case FormDataEvent.ADD_ROW:
+        record.put("DECLARATION_REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, departmentService.get(userInfo.getUser().getDepartmentId()).getRegionId()));
+        break
     case FormDataEvent.SAVE:
         save()
         break

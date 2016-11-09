@@ -1,6 +1,8 @@
 package refbook.declaration_params_transport
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 
 /**
  * Cкрипт справочника "Параметры представления деклараций по транспортному налогу" (id = 210)
@@ -9,6 +11,9 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.ADD_ROW:
+        record.put("DECLARATION_REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, departmentService.get(userInfo.getUser().getDepartmentId()).getRegionId()));
+        break
     case FormDataEvent.SAVE:
         save()
         break
