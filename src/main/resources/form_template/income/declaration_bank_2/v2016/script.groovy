@@ -48,6 +48,7 @@ switch (formDataEvent) {
     case FormDataEvent.PRE_CALCULATION_CHECK:
         checkDepartmentParams(LogLevel.WARNING)
         sourceCheck(true, LogLevel.WARNING)
+        checkAdvance()
         break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
@@ -550,10 +551,6 @@ void generateXML(def xml, boolean showApp2) {
                 reader9month.close()
             }
         }
-    }
-
-    if (!checkAdvance()) {
-        return
     }
 
     // Данные налоговых форм.
@@ -3250,7 +3247,7 @@ def getAdvanceTypeId() {
 }
 
 // Условия выполнения расчета декларации: проверка назначения источников форм РАПОП.
-def checkAdvance() {
+void checkAdvance() {
     def advance500 = 500
     def advance507 = 507
     List<Relation> sources = declarationService.getDeclarationSourcesInfo(declarationData, false, false, null, userInfo, logger);
@@ -3261,7 +3258,5 @@ def checkAdvance() {
         def formName507 = formTypeService.get(advance507)?.name
         logger.error("Для текущей декларации источником назначены формы «%s», «%s». Источником должна быть назначена только одна из форм",
                 formName500, formName507)
-        return false
     }
-    return true
 }
