@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>РНУ-81. Регистр налогового учета доходов и расходов по операциям со сделками опцион, квалифицированным в качестве операций с ФИСС для целей налогообложения</name>
+    <fullName>РНУ-81. Регистр налогового учета доходов и расходов по операциям со сделками опцион, квалифицированным в качестве операций с ФИСС для целей налогообложения</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>fix</name>
+        <order>1</order>
+        <width>0</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNumber</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ пп</name>
+        <order>2</order>
+        <width>5</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>dealNumber</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Общая информация о сделке. Номер сделки</name>
+        <order>3</order>
+        <width>9</width>
+        <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Общая информация о сделке. Наименование контрагента</name>
+        <order>4</order>
+        <width>15</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>dealKind</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Общая информация о сделке. Вид сделки</name>
+        <order>5</order>
+        <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>831</nameAttributeId>
+        <refBookAttributeId>831</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>date1</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата заключения сделки</name>
+        <order>6</order>
+        <width>7</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>date2</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата окончания сделки</name>
+        <order>7</order>
+        <width>7</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>date3</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата исполнения сделки (в части требований Банка)</name>
+        <order>8</order>
+        <width>7</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>date4</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата исполнения сделки (в части обязательств Банка)</name>
+        <order>9</order>
+        <width>7</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>option</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Опционная премия. Размер опционной премии к получению (+)/ уплате (-), в валюте расчетов</name>
+        <order>10</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>optionCurrency</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Опционная премия. Валюта опционной премии</name>
+        <order>11</order>
+        <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>65</nameAttributeId>
+        <refBookAttributeId>65</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>optionSum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Опционная премия. Сумма опционной премии  к получению (+)/ уплате (-), в рублях</name>
+        <order>12</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>rate</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Курс Банка России на дату осуществления расчетов по уплате премии</name>
+        <order>13</order>
+        <width>10</width>
+        <maxLength>27</maxLength>
+        <precision>12</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>costMin</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Максимальная/минимальная расчетная стоимость сделки для целей налогообложения на дату заключения. Минимальная расчетная стоимость</name>
+        <order>14</order>
+        <width>10</width>
+        <maxLength>27</maxLength>
+        <precision>12</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>costMax</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Максимальная/минимальная расчетная стоимость сделки для целей налогообложения на дату заключения. Максимальная расчетная стоимость</name>
+        <order>15</order>
+        <width>10</width>
+        <maxLength>27</maxLength>
+        <precision>12</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sumMin</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма отклонения от расчетной стоимости сделки более чем на 20%, руб. Сумма отклонения от минимальной (расчетной) цены</name>
+        <order>16</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sumMax</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма отклонения от расчетной стоимости сделки более чем на 20%, руб. Сумма отклонения от максимальной (расчетной) цены.</name>
+        <order>17</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>requirements</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Требования (+)/ обязательства (-) по исполненным сделкам, руб. Требования</name>
+        <order>18</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>guaranty</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Требования (+)/ обязательства (-) по исполненным сделкам, руб. Обязательства</name>
+        <order>19</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>income</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Доходы/расходы, учитываемые в целях налога на прибыль по сделке, руб. Доходы</name>
+        <order>20</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>outcome</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Доходы/расходы, учитываемые в целях налога на прибыль по сделке, руб. Расходы</name>
+        <order>21</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

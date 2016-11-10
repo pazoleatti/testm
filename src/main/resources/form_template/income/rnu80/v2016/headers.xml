@@ -17,7 +17,7 @@
     </row>
     <row alias="">
         <cell alias="dealNumber" colSpan="1" rowSpan="1" value="Номер сделки"/>
-        <cell alias="dealKind" colSpan="1" rowSpan="1" value="Тип сделки"/>
+        <cell alias="dealKind" colSpan="1" rowSpan="1" value="Вид сделки"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Наименование контрагента"/>
         <cell alias="dealPrice1" colSpan="1" rowSpan="1" value="Форвардный курс (цена)/ фиксированная ставка"/>
         <cell alias="dealPrice2" colSpan="1" rowSpan="1" value="Курс Банка России/ обменный курс/ плавающая ставка"/>
