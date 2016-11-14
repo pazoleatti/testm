@@ -697,7 +697,7 @@ def getPrevDataRows() {
     if (isConsolidated() || getPrevReportPeriod()?.period == null) {
         return null
     }
-    def prevFormData = getFormDataPrev(formData)
+    def prevFormData = formDataService.getFormDataPrev(formData)
     return (prevFormData?.state == WorkflowState.ACCEPTED ? formDataService.getDataRowHelper(prevFormData)?.allSaved : null)
 }
 
@@ -717,7 +717,7 @@ def getPrevReportPeriod() {
         return prevReportPeriodMap
     }
     def reportPeriod = getReportPeriod()
-    def prevReportPeriod = getPrevReportPeriod(formData.reportPeriodId)
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     def find = false
     // предыдущий период в том же году, что и текущий, и номера периодов отличаются на единицу
     if (prevReportPeriod && reportPeriod.order > 1 && reportPeriod.order - 1 == prevReportPeriod.order &&
@@ -851,53 +851,4 @@ def getAllRecords705() {
         }
     }
     return allRecords705
-}
-
-public def getPrevReportPeriod(int reportPeriodId) {
-    // текущий отчетный период
-    def thisReportPeriod = reportPeriodService.get(reportPeriodId);
-    // текущий налоговый период
-    def thisTaxPeriod = thisReportPeriod.getTaxPeriod();
-    // список отчетных периодов в текущем налоговом периоде
-    def reportPeriodList = reportPeriodService.listByTaxPeriod(thisReportPeriod.getTaxPeriod().getId());
-    reportPeriodList.sort { it.endDate }
-
-    /**
-     *  если это первый отчетный период в данном налоговом периоде
-     *  то возвращать последний отчетный период с предыдущего налогового периода
-     */
-    if (thisReportPeriod.getOrder() == 1 && !reportPeriodList.isEmpty() && reportPeriodList.get(0).getId() == reportPeriodId){
-        def taxPeriodList = taxPeriodService.listByTaxType(thisTaxPeriod.getTaxType());
-        for (int i = 0; i < taxPeriodList.size(); i++){
-            if (taxPeriodList.get(i).getId().equals(thisTaxPeriod.getId())){
-                if (i == 0) {
-                    return null;
-                }
-                // получим список отчетных периодов для данного налогового периода
-                def prevTaxPeriod = taxPeriodList.get(i - 1);
-                // проверим что налоговые периоды по порядку
-                if (prevTaxPeriod.getYear() + 1 != thisTaxPeriod.getYear()) {
-                    return null;
-                }
-                reportPeriodList = reportPeriodService.listByTaxPeriod(prevTaxPeriod.getId());
-                // вернем последний отчетный период
-                return !reportPeriodList.isEmpty() ? reportPeriodList.get(reportPeriodList.size() - 1) : null;
-            }
-        }
-    } else {
-        // не первый отчетный период в данном налоговом
-        for (int i = 1; i < reportPeriodList.size(); i++){
-            def reportPeriod = reportPeriodList.get(i)
-            if (reportPeriod.getId().equals(reportPeriodId)) {
-                return reportPeriodList.get(i - 1);
-            }
-        }
-    }
-    return null;
-}
-
-def getFormDataPrev(def currFormData) {
-    def prevReportPeriod = getPrevReportPeriod(currFormData.reportPeriodId)
-    return formDataService.getLast(currFormData.getFormType().getId(), currFormData.getKind(), currFormData.getDepartmentId(),
-            prevReportPeriod.getId(), currFormData.getPeriodOrder(), currFormData.getComparativePeriodId(), currFormData.isAccruing())
 }

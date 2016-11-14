@@ -540,7 +540,7 @@ public class LandRegistryTest extends ScriptTestBase {
     }
 
     // после создания - отсутствует предыдущий период, данные не копируются
-    //@Test
+    @Test
     public void afterCreateFailTest() {
         // провайдер для периодов
         mockProvider(8L);
@@ -576,7 +576,7 @@ public class LandRegistryTest extends ScriptTestBase {
     }
 
     // после создания - данные копируются нормально
-    //@Test
+    @Test
     public void afterCreateOkTest() throws ParseException {
         // провайдер для периодов
         mockProvider(8L);
