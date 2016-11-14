@@ -14,8 +14,8 @@
     <cell alias="date4" colSpan="1" rowSpan="3" value="Дата исполнения сделки (в части обязательств Банка)"/>
     <cell alias="rate" colSpan="1" rowSpan="3" value="Официальный курс Банка России"/>
     <cell alias="cost" colSpan="1" rowSpan="3" value="Расчетная стоимость сделки на дату заключения"/>
-    <cell alias="costMin" colSpan="2" rowSpan="1" value="Максимальная/минимальная расчетная стоимость сделки для целей налогообложения на дату заключения"/>
-    <cell alias="costMax" colSpan="1" rowSpan="1" value="Максимальная/минимальная расчетная стоимость сделки для целей налогообложения на дату заключения"/>
+    <cell alias="costMin" colSpan="2" rowSpan="1" value="Максимальная/минимальная расчетная стоимость сделки для целей налогообложения"/>
+    <cell alias="costMax" colSpan="1" rowSpan="1" value="Максимальная/минимальная расчетная стоимость сделки для целей налогообложения"/>
     <cell alias="reqTaxRateKind" colSpan="6" rowSpan="1" value="Требования"/>
     <cell alias="reqSpread" colSpan="1" rowSpan="1" value="Требования"/>
     <cell alias="reqTaxRate" colSpan="1" rowSpan="1" value="Требования"/>
