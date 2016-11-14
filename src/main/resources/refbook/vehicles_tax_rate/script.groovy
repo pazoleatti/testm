@@ -53,7 +53,7 @@ void addRow() {
 }
 
 void save() {
-    def refbook = refBookFactory.get(REF_BOOK_ID)
+    def refBook = refBookFactory.get(REF_BOOK_ID)
     provider = refBookFactory.getDataProvider(REF_BOOK_ID)
     def Date start = Date.parse('dd.MM.yyyy', '01.01.2016')
 
