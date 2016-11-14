@@ -444,13 +444,13 @@ public class IncludeInDeclarationTest extends ScriptTestBase {
         // графа 24
         row.getCell("sum").setValue(2L, null);
         // графа 25
-        row.getCell("q1").setValue(9L, null);
+        row.getCell("q1").setValue(4L, null);
         // графа 26
-        row.getCell("q2").setValue(9L, null);
+        row.getCell("q2").setValue(4L, null);
         // графа 27
-        row.getCell("q3").setValue(9L, null);
+        row.getCell("q3").setValue(4L, null);
         // графа 28
-        row.getCell("year").setValue(-11L, null);
+        row.getCell("year").setValue(4L, null);
     }
 
     void checkValues(List<DataRow<Cell>> dataRows) {

@@ -102,7 +102,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
 		return getJdbcTemplate().query(
 				"select id, name, tax_period_id, start_date, end_date, dict_tax_period_id, calendar_start_date " +
-						"from report_period where tax_period_id = ?",
+						"from report_period where tax_period_id = ? order by end_date, calendar_start_date desc",
 				new Object[]{taxPeriodId},
 				new int[]{Types.NUMERIC},
 				new ReportPeriodMapper()

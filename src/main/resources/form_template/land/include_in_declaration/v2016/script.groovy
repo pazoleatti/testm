@@ -389,16 +389,19 @@ def logicCheck6(def taxPart) {
     return true
 }
 
-def calc14(def row) {
+def calc14(def row, def periodOrder = null) {
     if (row.ownershipDate == null) {
         return null
     }
+    def dates = getPeriodDates(periodOrder)
+    def periodStart = dates?.get(0)
+    def periodEnd = dates?.get(1)
     BigDecimal tmp
-    if (row.terminationDate && row.terminationDate < getReportPeriodStartDate() || row.ownershipDate > getReportPeriodEndDate()) {
+    if (row.terminationDate && row.terminationDate < periodStart || row.ownershipDate > periodEnd) {
         tmp = BigDecimal.ZERO
     } else {
-        def end = (row.terminationDate == null || row.terminationDate > getReportPeriodEndDate() ? getReportPeriodEndDate() : row.terminationDate)
-        def start = (row.ownershipDate < getReportPeriodStartDate() ? getReportPeriodStartDate() : row.ownershipDate)
+        def end = (row.terminationDate == null || row.terminationDate > periodEnd ? periodEnd : row.terminationDate)
+        def start = (row.ownershipDate < periodStart ? periodStart : row.ownershipDate)
         def startM = start.format('M').toInteger() + (start.format('d').toInteger() > 15 ? 1 : 0)
         def endM = end.format('M').toInteger() - (end.format('d').toInteger() > 15 ? 0 : 1)
         tmp = endM - startM + 1
@@ -407,28 +410,50 @@ def calc14(def row) {
 }
 
 // метод взят из формы "Реестр земельных участков" (form_template.land.land_registry.v2016) - там это calc16()
-def calc20(def row) {
+def calc20(def row, def periodOrder = null) {
     if (row.startDate == null) {
         return null
     }
+    def dates = getPeriodDates(periodOrder)
+    def periodStart = dates?.get(0)
+    def periodEnd = dates?.get(1)
     BigDecimal tmp
-    if (row.endDate && row.endDate < getReportPeriodStartDate() || row.startDate > getReportPeriodEndDate()) {
+    if (row.endDate && row.endDate < periodStart || row.startDate > periodEnd) {
         tmp = BigDecimal.ZERO
     } else {
-        def end = (row.endDate == null || row.endDate > getReportPeriodEndDate() ? getReportPeriodEndDate() : row.endDate)
-        def start = (row.startDate < getReportPeriodStartDate() ? getReportPeriodStartDate() : row.startDate)
+        def end = (row.endDate == null || row.endDate > periodEnd ? periodEnd : row.endDate)
+        def start = (row.startDate < periodStart ? periodStart : row.startDate)
         tmp = end.format('M').toInteger() - start.format('M').toInteger() + 1
     }
     return round(tmp, 0)
 }
 
 def calc22(def row, def periodOrder = null) {
-    if (row.period == null) {
+    BigDecimal tmpPeriod = calc14(row, periodOrder)
+    if (tmpPeriod == null) {
         return null
     }
     def n = getMonthCount(periodOrder)
     // Графа 22 = ОКРУГЛ(Графа 14/N; 4)
-    return row.period.divide(n, 4, BigDecimal.ROUND_HALF_UP)
+    return tmpPeriod.divide(n, 4, BigDecimal.ROUND_HALF_UP)
+}
+
+// мапа с датами граничных значении периодов
+@Field
+def datesMap = [:]
+
+/** Получить даты начала и окончания периода по номеру периода в году. */
+def getPeriodDates(def periodOrder = null) {
+    def period = (periodOrder ?: getReportPeriod()?.order)
+    if (datesMap.isEmpty()) {
+        def year = getReportPeriod()?.taxPeriod?.year
+        def format = 'dd.MM.yyyy'
+        datesMap[1] = [ Date.parse(format, '01.01.' + year), Date.parse(format, '31.03.' + year) ]
+        datesMap[2] = [ Date.parse(format, '01.04.' + year), Date.parse(format, '30.06.' + year) ]
+        datesMap[3] = [ Date.parse(format, '01.07.' + year), Date.parse(format, '30.09.' + year) ]
+        datesMap[4] = [ Date.parse(format, '01.01.' + year), Date.parse(format, '31.12.' + year) ]
+    }
+    return datesMap[period]
 }
 
 /** Получить количество месяцев в периоде. Для периода "год" равен 12 месяцев, для остальные периодов - 3. */
@@ -441,7 +466,7 @@ def calc23(def row, def periodOrder = null) {
     if (row.benefitCode == null) {
         return null
     }
-    def termUse = calc20(row)
+    def termUse = calc20(row, periodOrder)
     if (termUse == null || termUse == 0) {
         return termUse
     }
