@@ -252,8 +252,6 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
                 row.getIndex(), row.getCell("endDate").getColumn().getName(),
                 row.getCell("startDate").getColumn().getName(), row.getCell("terminationDate").getColumn().getName());
         Assert.assertEquals(msg, entries.get(i++).getMessage());
-        // побочная проверка
-        Assert.assertTrue(entries.get(i++).getMessage().contains("заполнены неверно"));
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -558,13 +556,13 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         // графа 24
         row.getCell("sum").setValue(2L, null);
         // графа 25
-        row.getCell("q1").setValue(9L, null);
+        row.getCell("q1").setValue(4L, null);
         // графа 26
-        row.getCell("q2").setValue(9L, null);
+        row.getCell("q2").setValue(4L, null);
         // графа 27
-        row.getCell("q3").setValue(9L, null);
+        row.getCell("q3").setValue(4L, null);
         // графа 28
-        row.getCell("year").setValue(-11L, null);
+        row.getCell("year").setValue(4L, null);
     }
 
     @Test
