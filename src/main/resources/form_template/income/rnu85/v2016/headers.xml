@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="fix" colSpan="2" rowSpan="3" value="№ п/п"/>
+        <cell alias="dealNumber" colSpan="16" rowSpan="1" value="Общая информация о сделке с ФИСС"/>
+        <cell alias="bondDate" colSpan="7" rowSpan="1" value="Информация в отношении реализуемых ценных бумаг (стоимость приобретения ценных бумаг)"/>
+        <cell alias="sumMin" colSpan="2" rowSpan="1" value="Сумма отклонения от расчетной стоимости ФИСС более чем на 20%"/>
+        <cell alias="income" colSpan="3" rowSpan="1" value="Доходы/ расходы по сделке с ФИСС"/>
+    </row>
+    <row alias="">
+        <!-- Общая информация о сделке с ФИСС -->
+        <cell alias="dealNumber" colSpan="1" rowSpan="2" value="Номер сделки"/>
+        <cell alias="name" colSpan="1" rowSpan="2" value="Наименование контрагента"/>
+        <cell alias="nameBond" colSpan="1" rowSpan="2" value="Наименование ценной бумаги"/>
+        <cell alias="series" colSpan="1" rowSpan="2" value="Серия"/>
+        <cell alias="bondKind" colSpan="1" rowSpan="2" value="Вид ценной бумаги"/>
+        <cell alias="bondSign" colSpan="1" rowSpan="2" value="Признак ценной бумаги"/>
+        <cell alias="bondNominal" colSpan="1" rowSpan="2" value="Номинал ценной бумаги"/>
+        <cell alias="bondCount" colSpan="1" rowSpan="2" value="Количество ценных бумаг"/>
+        <cell alias="dealType" colSpan="1" rowSpan="2" value="Тип сделки"/>
+        <cell alias="date1" colSpan="1" rowSpan="2" value="Дата заключения сделки"/>
+        <cell alias="date2" colSpan="1" rowSpan="2" value="Дата окончания сделки"/>
+        <cell alias="date3" colSpan="1" rowSpan="2" value="Дата осуществления расчетов"/>
+        <cell alias="dealPrice" colSpan="1" rowSpan="2" value="Цена исполнения сделки без НКД"/>
+        <cell alias="dealRate" colSpan="1" rowSpan="2" value="Курс Банка России"/>
+        <cell alias="dealCostMin" colSpan="1" rowSpan="2" value="Минимальная расчетная стоимость"/>
+        <cell alias="dealCostMax" colSpan="1" rowSpan="2" value="Максимальная расчетная стоимость"/>
+        <!-- Информация в отношении реализуемых ценных бумаг (стоимость приобретения ценных бумаг) -->
+        <cell alias="bondDate" colSpan="1" rowSpan="2" value="Дата приобретения"/>
+        <cell alias="bondCost" colSpan="1" rowSpan="2" value="Стоимость покупки без НКД"/>
+        <cell alias="bondOutcome1" colSpan="1" rowSpan="2" value="Расходы Банка, связанные с приобретением"/>
+        <cell alias="bondOutcome2" colSpan="1" rowSpan="2" value="Расходы Банка, связанные с реализацией"/>
+        <cell alias="bondType" colSpan="1" rowSpan="2" value="Тип сделки по приобретению ценных бумаг"/>
+        <cell alias="bondPrice1" colSpan="2" rowSpan="1" value="Рыночная (расчетная) цена на дату приобретения"/>
+        <!-- Сумма отклонения от расчетной стоимости ФИСС более чем на 20% -->
+        <cell alias="sumMin" colSpan="1" rowSpan="2" value="Сумма отклонения от минимальной (расчетной) цены"/>
+        <cell alias="sumMax" colSpan="1" rowSpan="2" value="Сумма отклонения от максимальной (расчетной) цены"/>
+        <!-- Доходы/ расходы по сделке с ФИСС -->
+        <cell alias="income" colSpan="1" rowSpan="2" value="Доходы"/>
+        <cell alias="outcome" colSpan="1" rowSpan="2" value="Расходы"/>
+        <cell alias="delta" colSpan="1" rowSpan="2" value="Сумма отклонения стоимости приобретения ценных бумаг от максимальной (расчетной) цены"/>
+    </row>
+    <row alias="">
+        <cell alias="bondPrice1" colSpan="1" rowSpan="1" value="% к номиналу/ руб. коп."/>
+        <cell alias="bondPrice2" colSpan="1" rowSpan="1" value="рублей по курсу на дату приобретения"/>
+    </row>
+    <row alias="">
+        <cell alias="fix" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
+        <!-- Общая информация о сделке с ФИСС -->
+        <cell alias="dealNumber" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="nameBond" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="series" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="bondKind" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="bondSign" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="bondNominal" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="bondCount" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="dealType" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="date1" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="date2" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="date3" colSpan="1" rowSpan="1" value="13"/>
+        <cell alias="dealPrice" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="dealRate" colSpan="1" rowSpan="1" value="15"/>
+        <cell alias="dealCostMin" colSpan="1" rowSpan="1" value="16"/>
+        <cell alias="dealCostMax" colSpan="1" rowSpan="1" value="17"/>
+        <!-- Информация в отношении реализуемых ценных бумаг (стоимость приобретения ценных бумаг) -->
+        <cell alias="bondDate" colSpan="1" rowSpan="1" value="18"/>
+        <cell alias="bondCost" colSpan="1" rowSpan="1" value="19"/>
+        <cell alias="bondOutcome1" colSpan="1" rowSpan="1" value="20"/>
+        <cell alias="bondOutcome2" colSpan="1" rowSpan="1" value="21"/>
+        <cell alias="bondType" colSpan="1" rowSpan="1" value="22"/>
+        <cell alias="bondPrice1" colSpan="1" rowSpan="1" value="23"/>
+        <cell alias="bondPrice2" colSpan="1" rowSpan="1" value="24"/>
+        <!-- Сумма отклонения от расчетной стоимости ФИСС более чем на 20% -->
+        <cell alias="sumMin" colSpan="1" rowSpan="1" value="25"/>
+        <cell alias="sumMax" colSpan="1" rowSpan="1" value="26"/>
+        <!-- Доходы/ расходы по сделке с ФИСС -->
+        <cell alias="income" colSpan="1" rowSpan="1" value="27"/>
+        <cell alias="outcome" colSpan="1" rowSpan="1" value="28"/>
+        <cell alias="delta" colSpan="1" rowSpan="1" value="29"/>
+    </row>
+</rows>
