@@ -65,7 +65,7 @@ def refBookCache = [:]
 
 @Field
 def allColumns = ['rowNumber', 'dealNumber', 'dealKind', 'name1', 'opType', 'status', 'dealDate','name2', 'date','income',
-                  'outcome', 'costMin', 'costMax', 'sumDivMin', 'sumDivMax']
+                  'outcome', 'costMin', 'costMax', 'sumMin', 'sumMax']
 
 @Field
 def editableColumns = allColumns - ['rowNumber']

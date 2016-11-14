@@ -10,7 +10,7 @@
         <cell alias="outcome" colSpan="1" rowSpan="2" value="Расходы: сумма платежа по сделке, подлежащая уплате Банком"/>
         <cell alias="costMin" colSpan="1" rowSpan="2" value="Минимальная расчетная стоимость"/>
         <cell alias="costMax" colSpan="1" rowSpan="2" value="Максимальная расчетная стоимость"/>
-        <cell alias="sumDivMin" colSpan="2" rowSpan="1" value="Сумма отклонения от расчетной стоимости ФИСС более чем на 20%"/>
+        <cell alias="sumMin" colSpan="2" rowSpan="1" value="Сумма отклонения от расчетной стоимости ФИСС более чем на 20%"/>
     </row>
     <row alias="">
         <cell alias="dealNumber" colSpan="1" rowSpan="1" value="Номер сделки"/>
@@ -20,8 +20,8 @@
         <cell alias="status" colSpan="1" rowSpan="1" value="Статус Банка (в отношении операций уступки/новации)"/>
         <cell alias="dealDate" colSpan="1" rowSpan="1" value="Дата заключения"/>
         <cell alias="name2" colSpan="1" rowSpan="1" value="Наименование контрагента"/>
-        <cell alias="sumDivMin" colSpan="1" rowSpan="1" value="Сумма отклонения от минимальной (расчетной) цены"/>
-        <cell alias="sumDivMax" colSpan="1" rowSpan="1" value="Сумма отклонения от максимальной (расчетной) цены"/>
+        <cell alias="sumMin" colSpan="1" rowSpan="1" value="Сумма отклонения от минимальной (расчетной) цены"/>
+        <cell alias="sumMax" colSpan="1" rowSpan="1" value="Сумма отклонения от максимальной (расчетной) цены"/>
     </row>
     <row alias="">
         <cell alias="fix" colSpan="1" rowSpan="1" value="1"/>
@@ -38,7 +38,7 @@
         <cell alias="outcome" colSpan="1" rowSpan="1" value="11"/>
         <cell alias="costMin" colSpan="1" rowSpan="1" value="12"/>
         <cell alias="costMax" colSpan="1" rowSpan="1" value="13"/>
-        <cell alias="sumDivMin" colSpan="1" rowSpan="1" value="14"/>
-        <cell alias="sumDivMax" colSpan="1" rowSpan="1" value="15"/>
+        <cell alias="sumMin" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="sumMax" colSpan="1" rowSpan="1" value="15"/>
     </row>
 </rows>

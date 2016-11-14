@@ -30,7 +30,7 @@
         <alias>dealNumber</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Общая информация о сделке. Номер сделки</name>
+        <name>Общая информация о сделке с ФИСС. Номер сделки</name>
         <order>3</order>
         <width>9</width>
         <maxLength>128</maxLength>
@@ -40,7 +40,7 @@
         <alias>dealKind</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>Общая информация о сделке. Вид сделки</name>
+        <name>Общая информация о сделке с ФИСС. Вид сделки</name>
         <order>4</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
@@ -52,13 +52,13 @@
         <alias>name1</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Общая информация о сделке. Наименование контрагента</name>
+        <name>Общая информация о сделке с ФИСС. Наименование контрагента</name>
         <order>5</order>
         <width>15</width>
         <maxLength>256</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>opType</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
@@ -70,7 +70,7 @@
         <refBookAttributeId>8021</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>status</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
@@ -91,7 +91,7 @@
         <width>7</width>
         <formatId>0</formatId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>name2</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
@@ -101,7 +101,7 @@
         <maxLength>256</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>date</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
@@ -151,7 +151,7 @@
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>sumDivMin</alias>
+        <alias>sumMin</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма отклонения от расчетной стоимости ФИСС более чем на 20%. Сумма отклонения от минимальной (расчетной) цены</name>
@@ -161,7 +161,7 @@
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>sumDivMax</alias>
+        <alias>sumMax</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма отклонения от расчетной стоимости ФИСС более чем на 20%. Сумма отклонения от максимальной (расчетной) цены</name>
