@@ -3,6 +3,7 @@ package form_template.transport.summary.v2016
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import groovy.transform.Field
 
 /**
@@ -1179,6 +1180,10 @@ void importData() {
                 getColumnName(tmpRow, 'taxBenefitCode'))
     }
 
+    // заполнить кэш данными из справочника ОКТМО
+    fillRefBookCache(96L)
+    fillRecordCache(96L, 'CODE', getReportPeriodEndDate())
+
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
         rowValues = allValues[0]
@@ -1910,4 +1915,84 @@ void setDefaultStyles(def row) {
     autoFillColumns.each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
+}
+
+/** Заполнить refBookCache всеми записями справочника refBookId. */
+void fillRefBookCache(def refBookId) {
+    def records = getAllRecords2(refBookId)
+    for (def record : records) {
+        def recordId = record?.record_id?.value
+        def key = getRefBookCacheKey(refBookId, recordId)
+        if (refBookCache[key] == null) {
+            refBookCache.put(key, record)
+        }
+    }
+}
+
+/**
+ * Заполнить recordCache всеми записями справочника refBookId из refBookCache.
+ *
+ * @param refBookId идентификатор справочника
+ * @param alias алиас атрибута справочника по которому будет осуществляться поиск
+ * @param date дата по которой будет осуществляться поиск
+ */
+void fillRecordCache(def refBookId, def alias, def date) {
+    def keys = refBookCache.keySet().toList()
+    def needKeys = keys.findAll { it.contains(refBookId + SEPARATOR) }
+    def dateSts = date.format('dd.MM.yyyy')
+    def rb = refBookFactory.get(refBookId)
+    for (def needKey : needKeys) {
+        def recordId = refBookCache[needKey]?.record_id?.value
+        def value = refBookCache[needKey][alias]?.value
+        def filter = getFilter(alias, value, rb)
+        def key = dateSts + filter
+        if (recordCache[refBookId] == null) {
+            recordCache[refBookId] = [:]
+        }
+        recordCache[refBookId][key] = recordId
+    }
+}
+
+/**
+ * Формирование фильтра. Взято из FormDataServiceImpl.getRefBookRecord(...)
+ *
+ * @param alias алиас атрибута справочника по которому будет осуществляться поиск
+ * @param value значение атрибута справочника
+ * @param rb справочник
+ */
+def getFilter(def alias, def value, def rb) {
+    def filter
+    if (value == null || value.isEmpty()) {
+        filter = alias + " is null"
+    } else {
+        RefBookAttributeType type = rb.getAttribute(alias).getAttributeType()
+        String template
+        // TODO: поиск по выражениям с датами не реализован
+        if (type == RefBookAttributeType.REFERENCE || type == RefBookAttributeType.NUMBER) {
+            if (!isNumeric(value)) {
+                // В справочнике поле числовое, а у нас строка, которая не парсится — ничего не ищем выдаем ошибку
+                return null
+            }
+            template = "%s = %s"
+        } else {
+            template = "LOWER(%s) = LOWER('%s')"
+        }
+        filter = String.format(template, alias, value)
+    }
+    return filter
+}
+
+boolean isNumeric(String str) {
+    return str.matches("-?\\d+(\\.\\d+)?")
+}
+
+@Field
+def allRecordsMap2 = [:]
+
+def getAllRecords2(def refbookId) {
+    if (allRecordsMap2[refbookId] == null) {
+        def provider = formDataService.getRefBookProvider(refBookFactory, refbookId, providerCache)
+        allRecordsMap2[refbookId] = provider.getRecords(getReportPeriodEndDate(), null, null, null)
+    }
+    return allRecordsMap2[refbookId]
 }

@@ -22,7 +22,7 @@
         <columnType>REFBOOK</columnType>
         <name>Код ОКТМО</name>
         <order>2</order>
-        <width>5</width>
+        <width>7</width>
         <hierarchical>true</hierarchical>
         <nameAttributeId>841</nameAttributeId>
         <refBookAttributeId>840</refBookAttributeId>
