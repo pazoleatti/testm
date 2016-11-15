@@ -682,7 +682,7 @@ void preCalcCheck() {
 
     // проверка формы 724.1.1
     def formDataKind = FormDataKind.CONSOLIDATED.title
-    def forFormNamePeriod4Id = (getPeriod4Id() ?: declarationData.departmentReportPeriodId)
+    def forFormNamePeriod4Id = (getPeriod4Id() ?: declarationData.reportPeriodId)
     def formName = formDataService.getFormTemplate(formType_724_1_1, forFormNamePeriod4Id)?.name
     def formData = getFormData724_1_1()
     if (formData) {
