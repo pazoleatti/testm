@@ -132,6 +132,8 @@ public class LandRegistryTest extends ScriptTestBase {
 
     @Test
     public void check1Test() throws ParseException {
+        mockProvider(705L);
+
         FormData formData = getFormData();
         formData.initFormTemplateParams(testHelper.getFormTemplate());
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
@@ -152,7 +154,7 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 1. Проверка обязательности заполнения граф
+        // 2. Проверка обязательности заполнения граф
         i = 0;
         // Проверяемые на пустые значения атрибуты (графа 3, 4, 5, 7, 9)
         String [] nonEmptyColumns = { "oktmo", "cadastralNumber", "landCategory", "cadastralCost", "ownershipDate" };
@@ -167,7 +169,7 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 2. Проверка одновременного заполнения данных о налоговой льготе
+        // 3. Проверка одновременного заполнения данных о налоговой льготе
         i = 0;
         setDefaultValue(row);
         row.getCell("benefitCode").setValue(null, null);
@@ -177,7 +179,7 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 3. Проверка корректности заполнения даты возникновения права собственности
+        // 4. Проверка корректности заполнения даты возникновения права собственности
         i = 0;
         setDefaultValue(row);
         date = sdf.parse("01.01.2015");
@@ -192,7 +194,7 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 4. Проверка корректности заполнения даты прекращения права собственности
+        // 5. Проверка корректности заполнения даты прекращения права собственности
         i = 0;
         setDefaultValue(row);
         date = sdf.parse("31.12.2013");
@@ -208,8 +210,8 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 5 Проверка доли налогоплательщика в праве на земельный участок
-        // 5.1 не цифры
+        // 6 Проверка доли налогоплательщика в праве на земельный участок
+        // 6.1 не цифры
         i = 0;
         setDefaultValue(row);
         row.getCell("taxPart").setValue("a/b", null);
@@ -220,7 +222,7 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 5.2 начинаются с нулей
+        // 6.2 начинаются с нулей
         i = 0;
         setDefaultValue(row);
         row.getCell("taxPart").setValue("01/01", null);
@@ -229,7 +231,7 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 5.3 числитель больше знаменателя
+        // 6.3 числитель больше знаменателя
         i = 0;
         setDefaultValue(row);
         row.getCell("taxPart").setValue("2/1", null);
@@ -238,7 +240,7 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 5.4 нет знака дроби
+        // 6.4 нет знака дроби
         i = 0;
         setDefaultValue(row);
         row.getCell("taxPart").setValue("ab", null);
@@ -247,7 +249,7 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 6. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
+        // 7. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
         i = 0;
         setDefaultValue(row);
         row.getCell("taxPart").setValue("0/0", null);
@@ -260,7 +262,7 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 7. Проверка корректности заполнения даты начала действия льготы
+        // 8. Проверка корректности заполнения даты начала действия льготы
         i = 0;
         setDefaultValue(row);
         row.getCell("startDate").setValue(sdf.parse("31.12.2013"), null);
@@ -272,7 +274,7 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 8. Проверка корректности заполнения даты окончания действия льготы
+        // 9. Проверка корректности заполнения даты окончания действия льготы
         i = 0;
         setDefaultValue(row);
         row.getCell("endDate").setValue(sdf.parse("31.12.2013"), null);
@@ -285,7 +287,35 @@ public class LandRegistryTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 11. Проверка корректности заполнения графы 16
+        // 10. Проверка наличия в реестре земельных участков с одинаковым кадастровым номером и кодом ОКТМО, периоды владения которых пересекаются
+        setDefaultValue(row);
+        // дополнительная строка
+        DataRow<Cell> row2 = formData.createDataRow();
+        row2.setIndex(2);
+        setDefaultValue(row2);
+        dataRows.add(row2);
+        setDefaultValue(row2);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        msg = String.format("Строки 1, 2: Кадастровый номер земельного участка «%s», Код ОКТМО «%s»: на форме не должно быть строк с одинаковым кадастровым номером, кодом ОКТМО и пересекающимися периодами владения правом собственности",
+                row.getCell("cadastralNumber").getValue(), "codeA96");
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+        dataRows.remove(row2);
+
+        // 11. Проверка корректности заполнения кода налоговой льготы (графа 11)
+        i = 0;
+        setDefaultValue(row);
+        row.getCell("oktmo").setValue(2L, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка %s: Код ОКТМО, в котором действует выбранная в графе «%s» льгота, должен быть равен значению графы «%s»",
+                row.getIndex(), ScriptUtils.getColumnName(row, "benefitCode"), ScriptUtils.getColumnName(row, "oktmo"));
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 12. Проверка корректности заполнения графы 16
         i = 0;
         setDefaultValue(row);
         row.getCell("benefitPeriod").setValue(0, null);

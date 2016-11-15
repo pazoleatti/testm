@@ -974,8 +974,7 @@ def allRecordsMap = [:]
 def getAllRecords(def refbookId) {
     if (allRecordsMap[refbookId] == null) {
         def provider = formDataService.getRefBookProvider(refBookFactory, refbookId, providerCache)
-        def filter = (refbookId == 705 ? 'DECLARATION_REGION_ID = ' + formDataDepartment.regionId : null)
-        allRecordsMap[refbookId] = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+        allRecordsMap[refbookId] = provider.getRecords(getReportPeriodEndDate(), null, null, null)
     }
     return allRecordsMap[refbookId]
 }

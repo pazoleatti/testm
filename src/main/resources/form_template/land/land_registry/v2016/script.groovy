@@ -41,11 +41,9 @@ switch (formDataEvent) {
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        if (preCalcCheck()) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        calc()
+        logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -176,7 +174,12 @@ void logicCheck() {
     def year = reportPeriod.taxPeriod.year
     def startYearDate = Date.parse('dd.MM.yyyy', '01.01.' + year)
     def cadastralNumberMap = [:]
-    def allRecords705 = (dataRows.size() > 0 ? getAllRecords705() : null)
+    def allRecords705 = (dataRows.size() > 0 ? getAllRecords(705L) : null)
+
+    // 1. Проверка заполнения поля «Регион» справочника «Подразделения» для подразделения формы
+    if (formDataDepartment.regionId == null) {
+        logger.error("В справочнике «Подразделения» не заполнено поле «Регион» для подразделения «%s»", formDataDepartment.name)
+    }
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -184,24 +187,24 @@ void logicCheck() {
         }
         def rowIndex = row.getIndex()
 
-        // 1. Проверка обязательности заполнения граф
+        // 2. Проверка обязательности заполнения граф
         checkNonEmptyColumns(row, rowIndex, nonEmptyColumns, logger, true)
 
-        // 2. Проверка одновременного заполнения данных о налоговой льготе
+        // 3. Проверка одновременного заполнения данных о налоговой льготе
         def value11 = (row.benefitCode ? true : false)
         def value14 = (row.startDate ? true : false)
         if (value11 ^ value14) {
             logger.error("Строка %s: Данные о налоговой льготе указаны не полностью", rowIndex)
         }
 
-        // 3. Проверка корректности заполнения даты возникновения права собственности
+        // 4. Проверка корректности заполнения даты возникновения права собственности
         if (row.ownershipDate != null && row.ownershipDate > getReportPeriodEndDate()) {
             def columnName9 = getColumnName(row, 'ownershipDate')
             def dateStr = getReportPeriodEndDate().format('dd.MM.yyyy')
             logger.error("Строка %s: Значение графы «%s» должно быть меньше либо равно %s", rowIndex, columnName9, dateStr)
         }
 
-        // 4. Проверка корректности заполнения даты прекращения права собственности
+        // 5. Проверка корректности заполнения даты прекращения права собственности
         if (row.terminationDate != null && (row.terminationDate < row.ownershipDate || row.terminationDate < startYearDate)) {
             def columnName10 = getColumnName(row, 'terminationDate')
             def dateStr = '01.01.' + year
@@ -213,7 +216,7 @@ void logicCheck() {
         if (row.taxPart != null) {
             def partArray = row.taxPart.split('/')
 
-            // 5. Проверка доли налогоплательщика в праве на земельный участок
+            // 6. Проверка доли налогоплательщика в праве на земельный участок
             if (!(row.taxPart ==~ /\d{1,10}\/\d{1,10}/) ||
                     partArray[0].toString().startsWith('0') ||
                     partArray[1].toString().startsWith('0') ||
@@ -225,14 +228,14 @@ void logicCheck() {
                         rowIndex, columnName8)
             }
 
-            // 6. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
+            // 7. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
             if (partArray.size() == 2 && partArray[1] ==~ /\d{1,}/ && partArray[1].toBigDecimal() == 0) {
                 def columnName8 = getColumnName(row, 'taxPart')
                 logger.error("Строка %s: Значение знаменателя в графе «%s» не может быть равным нулю", rowIndex, columnName8)
             }
         }
 
-        // 7. Проверка корректности заполнения даты начала действия льготы
+        // 8. Проверка корректности заполнения даты начала действия льготы
         if (row.startDate && row.ownershipDate && row.startDate < row.ownershipDate) {
             def columnName14 = getColumnName(row, 'startDate')
             def columnName9 = getColumnName(row, 'ownershipDate')
@@ -240,7 +243,7 @@ void logicCheck() {
                     rowIndex, columnName14, columnName9)
         }
 
-        // 8. Проверка корректности заполнения даты окончания действия льготы
+        // 9. Проверка корректности заполнения даты окончания действия льготы
         if (row.startDate && row.endDate && (row.endDate < row.startDate || row.terminationDate && row.terminationDate < row.endDate)) {
             def columnName15 = getColumnName(row, 'endDate')
             def columnName14 = getColumnName(row, 'startDate')
@@ -249,7 +252,7 @@ void logicCheck() {
                     rowIndex, columnName15, columnName14, columnName10)
         }
 
-        // 9. Проверка наличия в реестре земельных участков с одинаковым кадастровым номером и кодом ОКТМО, периоды владения которых пересекаются
+        // 10. Проверка наличия в реестре земельных участков с одинаковым кадастровым номером и кодом ОКТМО, периоды владения которых пересекаются
         // сбор данных
         if (row.oktmo && row.cadastralNumber) {
             def groupKey = getRefBookValue(96L, row.oktmo)?.CODE?.value + "#" + row.cadastralNumber
@@ -259,7 +262,7 @@ void logicCheck() {
             cadastralNumberMap[groupKey].add(row)
         }
 
-        // 10. Проверка корректности заполнения кода налоговой льготы (графа 11)
+        // 11. Проверка корректности заполнения кода налоговой льготы (графа 11)
         if (row.benefitCode && row.oktmo) {
             def findRecord = allRecords705.find { it?.record_id?.value == row.benefitCode }
             if (findRecord && findRecord?.OKTMO?.value != row.oktmo) {
@@ -270,15 +273,15 @@ void logicCheck() {
             }
         }
 
-        // 11. Проверка корректности заполнения графы 16
-        if(formDataEvent != FormDataEvent.CALCULATE && row.benefitPeriod != calc16(row)){
+        // 12. Проверка корректности заполнения графы 16
+        if (formDataEvent != FormDataEvent.CALCULATE && row.benefitPeriod != calc16(row)) {
             def columnName16 = getColumnName(row, 'benefitPeriod')
             logger.error("Строка %s: Графа «%s» заполнена неверно. Выполните расчет формы",
                     rowIndex, columnName16)
         }
     }
 
-    // 9. Проверка наличия в реестре земельных участков с одинаковым кадастровым номером и кодом ОКТМО, периоды владения которых пересекаются
+    // 10. Проверка наличия в реестре земельных участков с одинаковым кадастровым номером и кодом ОКТМО, периоды владения которых пересекаются
     if (!cadastralNumberMap.isEmpty()) {
         def groupKeys = cadastralNumberMap.keySet().toList()
         for (def groupKey : groupKeys) {
@@ -306,7 +309,7 @@ void logicCheck() {
                 rowIndexes = rowIndexes.join(', ')
                 def value4 = rows[0].cadastralNumber
                 def value3 = getRefBookValue(96L, rows[0].oktmo)?.CODE?.value
-                logger.error("Строки %s. Кадастровый номер земельного участка «%s», Код ОКТМО «%s»: на форме не должно быть строк с одинаковым кадастровым номером, кодом ОКТМО и пересекающимися периодами владения правом собственности",
+                logger.error("Строки %s: Кадастровый номер земельного участка «%s», Код ОКТМО «%s»: на форме не должно быть строк с одинаковым кадастровым номером, кодом ОКТМО и пересекающимися периодами владения правом собственности",
                         rowIndexes, value4, value3)
             }
         }
@@ -672,16 +675,6 @@ void sortFormDataRows() {
     dataRowHelper.saveSort()
 }
 
-// Предрасчетные проверки
-def preCalcCheck() {
-    // 1. Проверка заполнения атрибута «Регион»
-    if (formDataDepartment.regionId == null) {
-        logger.error("В справочнике «Подразделения» не заполнено поле «Регион» для подразделения «%s»", formDataDepartment.name)
-        return false
-    }
-    return true
-}
-
 @Field
 def isConsolidated = null
 
@@ -755,7 +748,7 @@ void copyFromPrevForm() {
         return
     }
 
-    // Логическая проверка 9 - нет формы предыдущего периода
+    // 1. нет формы предыдущего периода
     def prevDataRows = getPrevDataRows()
     if (prevDataRows == null) {
         def prevReportPeriod = getPrevReportPeriod()
@@ -828,7 +821,7 @@ def getRecord705Import(def code, def oktmo, def param) {
     if (code == null || oktmo == null) {
         return null
     }
-    def allRecords = getAllRecords705()
+    def allRecords = getAllRecords(705L)
     for (def record : allRecords) {
         if (code == record?.TAX_BENEFIT_ID?.value && oktmo == record?.OKTMO?.value &&
                 ((param ?: null) == (record?.REDUCTION_PARAMS?.value ?: null) || param?.equalsIgnoreCase(record?.REDUCTION_PARAMS?.value))) {
@@ -839,16 +832,12 @@ def getRecord705Import(def code, def oktmo, def param) {
 }
 
 @Field
-def allRecords705 = null
+def allRecordsMap = [:]
 
-def getAllRecords705() {
-    if (allRecords705 == null) {
-        def filter = 'DECLARATION_REGION_ID = ' + formDataDepartment.regionId
-        def provider = formDataService.getRefBookProvider(refBookFactory, 705L, providerCache)
-        allRecords705 = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
-        if (allRecords705 == null) {
-            allRecords705 = []
-        }
+def getAllRecords(def refbookId) {
+    if (allRecordsMap[refbookId] == null) {
+        def provider = formDataService.getRefBookProvider(refBookFactory, refbookId, providerCache)
+        allRecordsMap[refbookId] = provider.getRecords(getReportPeriodEndDate(), null, null, null)
     }
-    return allRecords705
+    return allRecordsMap[refbookId]
 }
