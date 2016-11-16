@@ -822,7 +822,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     // графа 15, 16, 17
     if (hasRegion) {
         // графа 15 - атрибут 7053 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 705 «Параметры налоговых льгот земельного налога»
-        colIndex = 14
+        colIndex = 15
         def record704 = (values[6] ? getRecordImport(704, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false) : null)
         def code = record704?.record_id?.value
         def oktmo = newRow.oktmo
