@@ -17,15 +17,12 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookValuesAction, GetRefBookValuesResult> {
 
@@ -42,16 +39,13 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
     @Autowired
     LogEntryService logEntryService;
 
-    Map<String, RefBookDataProvider> refProviders;
-    Map<String, String> refAliases;
-
     @Override
     public GetRefBookValuesResult execute(GetRefBookValuesAction getRefBookValuesAction, ExecutionContext executionContext) throws ActionException {
         Logger logger = new Logger();
 
         //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
-        refProviders = new HashMap<String, RefBookDataProvider>();
-        refAliases = new HashMap<String, String>();
+        Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
+        Map<String, String> refAliases = new HashMap<String, String>();
         RefBook refBook = rbFactory.get(getRefBookValuesAction.getSlaveRefBookId());
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
@@ -75,7 +69,7 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         if (paramsMaster.isEmpty()) {
             return result;
         }
-        result.setNotTableValues(convert(paramsMaster, getRefBookValuesAction.getRefBookId(), false).get(0));
+        result.setNotTableValues(convert(paramsMaster, getRefBookValuesAction.getRefBookId(), false, refProviders, refAliases).get(0));
         if (paramsMaster.get(0).containsKey(RefBook.RECORD_ID_ALIAS)) {
             result.setRecordId(paramsMaster.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
         }
@@ -85,7 +79,7 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         RefBookAttribute sortAttr = rbFactory.get(getRefBookValuesAction.getSlaveRefBookId()).getAttribute("ROW_ORD");
         PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(
                 addDayToDate(reportPeriod.getEndDate(), -1), null, filterSlave, sortAttr);
-        result.setTableValues(convert(paramsSlave, getRefBookValuesAction.getSlaveRefBookId(), true));
+        result.setTableValues(convert(paramsSlave, getRefBookValuesAction.getSlaveRefBookId(), true, refProviders, refAliases));
 
         //Проверяем справочные значения для полученной таблицы
         if (getRefBookValuesAction.getOldUUID() == null) {
@@ -148,16 +142,16 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
     }
 
-    private List<Map<String, TableCell>> convert(List<Map<String, RefBookValue>> data, Long refBookId, boolean needDeref) {
+    private List<Map<String, TableCell>> convert(List<Map<String, RefBookValue>> data, Long refBookId, boolean needDeref, Map<String, RefBookDataProvider> refProviders, Map<String, String> refAliases) {
         List<Map<String, TableCell>> converted = new ArrayList<Map<String, TableCell>>();
         for (Map<String, RefBookValue> row : data) {
-            converted.add(convertRow(row, refBookId, needDeref));
+            converted.add(convertRow(row, refBookId, needDeref, refProviders, refAliases));
         }
 
         return converted;
     }
 
-    private Map<String, TableCell> convertRow(Map<String, RefBookValue> data, Long refBookId, boolean needDeref) {
+    private Map<String, TableCell> convertRow(Map<String, RefBookValue> data, Long refBookId, boolean needDeref, Map<String, RefBookDataProvider> refProviders, Map<String, String> refAliases) {
         Map<String, TableCell> res = new HashMap<String, TableCell>();
         for (String a : data.keySet()) {
             TableCell cell = new TableCell();
