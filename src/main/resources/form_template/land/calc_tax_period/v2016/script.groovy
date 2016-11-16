@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import groovy.transform.Field
 
 /**
@@ -193,7 +194,7 @@ void logicCheck() {
     def year = reportPeriod.taxPeriod.year
     def startYearDate = Date.parse('dd.MM.yyyy', '01.01.' + year)
     def cadastralNumberMap = [:]
-    def allRecords705 = (dataRows.size() > 0 ? getAllRecords(705L) : null)
+    def allRecords705 = (dataRows.size() > 0 ? getAllRecords2(705L) : null)
 
     // для логической проверки 1
     def nonEmptyColumnsTmp = nonEmptyColumns
@@ -212,7 +213,7 @@ void logicCheck() {
 
     // для логической проверки 14
     def records710Map = [:]
-    def records710 = getAllRecords(710L)
+    def records710 = getAllRecords2(710L)
     for (def record : records710) {
         def key = record?.KPP?.value
         if (records710Map[key] == null) {
@@ -599,7 +600,7 @@ def calc5(def row) {
         return null
     }
     def code = "182 1 06 0603 $value 1000 110".replaceAll(' ', '')
-    def records = getAllRecords(703L)
+    def records = getAllRecords2(703L)
     def record = records.find { it?.CODE?.value == code }
     return record?.record_id?.value
 }
@@ -978,6 +979,13 @@ void importData() {
                 columnName15)
     }
 
+    // заполнить кэш данными из справочника ОКТМО
+    def limitRows = 10
+    if (allValuesCount > limitRows) {
+        fillRefBookCache(96L)
+        fillRecordCache(96L, 'CODE', getReportPeriodEndDate())
+    }
+
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
         rowValues = allValues[0]
@@ -1139,10 +1147,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     if (values[colIndex]) {
         newRow.oktmo = getRecordIdImport(96L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
     } else {
+        // проверка графы 6
         def xlsColumnName6 = getXLSColumnName(colIndex + colOffset)
         def columnName15 = getColumnName(newRow, 'benefitCode')
         def columnName6 = getColumnName(newRow, 'oktmo')
-        //
         logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. не заполнена графа «%s»",
                 fileRowIndex, xlsColumnName6, columnName15, columnName6)
     }
@@ -1469,7 +1477,7 @@ def getRecord705Import(def code, def oktmo, def param) {
     if (code == null || oktmo == null) {
         return null
     }
-    def allRecords = getAllRecords(705L)
+    def allRecords = getAllRecords2(705L)
     for (def record : allRecords) {
         if (code == record?.TAX_BENEFIT_ID?.value && oktmo == record?.OKTMO?.value &&
                 ((param ?: null) == (record?.REDUCTION_PARAMS?.value ?: null) || param?.equalsIgnoreCase(record?.REDUCTION_PARAMS?.value))) {
@@ -1482,10 +1490,11 @@ def getRecord705Import(def code, def oktmo, def param) {
 @Field
 def allRecordsMap = [:]
 
-def getAllRecords(def refbookId) {
+def getAllRecords2(def refbookId) {
     if (allRecordsMap[refbookId] == null) {
         def provider = formDataService.getRefBookProvider(refBookFactory, refbookId, providerCache)
-        allRecordsMap[refbookId] = provider.getRecords(getReportPeriodEndDate(), null, null, null)
+        def date = (refbookId == 710L ? getReportPeriodEndDate() - 1 : getReportPeriodEndDate())
+        allRecordsMap[refbookId] = provider.getRecords(date, null, null, null)
     }
     return allRecordsMap[refbookId]
 }
@@ -1742,4 +1751,73 @@ def getRow(def dataRows, int i) {
     } else {
         return null
     }
+}
+
+/** Заполнить refBookCache всеми записями справочника refBookId. */
+void fillRefBookCache(def refBookId) {
+    def records = getAllRecords2(refBookId)
+    for (def record : records) {
+        def recordId = record?.record_id?.value
+        def key = getRefBookCacheKey(refBookId, recordId)
+        if (refBookCache[key] == null) {
+            refBookCache.put(key, record)
+        }
+    }
+}
+
+/**
+ * Заполнить recordCache всеми записями справочника refBookId из refBookCache.
+ *
+ * @param refBookId идентификатор справочника
+ * @param alias алиас атрибута справочника по которому будет осуществляться поиск
+ * @param date дата по которой будет осуществляться поиск
+ */
+void fillRecordCache(def refBookId, def alias, def date) {
+    def keys = refBookCache.keySet().toList()
+    def needKeys = keys.findAll { it.contains(refBookId + SEPARATOR) }
+    def dateSts = date.format('dd.MM.yyyy')
+    def rb = refBookFactory.get(refBookId)
+    for (def needKey : needKeys) {
+        def recordId = refBookCache[needKey]?.record_id?.value
+        def value = refBookCache[needKey][alias]?.value
+        def filter = getFilter(alias, value, rb)
+        def key = dateSts + filter
+        if (recordCache[refBookId] == null) {
+            recordCache[refBookId] = [:]
+        }
+        recordCache[refBookId][key] = recordId
+    }
+}
+
+/**
+ * Формирование фильтра. Взято из FormDataServiceImpl.getRefBookRecord(...)
+ *
+ * @param alias алиас атрибута справочника по которому будет осуществляться поиск
+ * @param value значение атрибута справочника
+ * @param rb справочник
+ */
+def getFilter(def alias, def value, def rb) {
+    def filter
+    if (value == null || value.isEmpty()) {
+        filter = alias + " is null"
+    } else {
+        RefBookAttributeType type = rb.getAttribute(alias).getAttributeType()
+        String template
+        // TODO: поиск по выражениям с датами не реализован
+        if (type == RefBookAttributeType.REFERENCE || type == RefBookAttributeType.NUMBER) {
+            if (!isNumeric(value)) {
+                // В справочнике поле числовое, а у нас строка, которая не парсится — ничего не ищем выдаем ошибку
+                return null
+            }
+            template = "%s = %s"
+        } else {
+            template = "LOWER(%s) = LOWER('%s')"
+        }
+        filter = String.format(template, alias, value)
+    }
+    return filter
+}
+
+boolean isNumeric(String str) {
+    return str.matches("-?\\d+(\\.\\d+)?")
 }
