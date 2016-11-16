@@ -870,6 +870,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
 
+    // графа 29
+    colIndex++
+    newRow.name = values[colIndex]
+
     return newRow
 }
 

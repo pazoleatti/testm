@@ -389,8 +389,11 @@ void importDataXlsm() {
     }
 
     // заполнить кэш данными из справочника ОКТМО
-    fillRefBookCache(96L)
-    fillRecordCache(96L, 'CODE', getReportPeriodEndDate())
+    def limitRows = 10
+    if (allValuesCount > limitRows) {
+        fillRefBookCache(96L)
+        fillRecordCache(96L, 'CODE', getReportPeriodEndDate())
+    }
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {

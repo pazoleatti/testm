@@ -25,11 +25,12 @@
         <cell alias="taxRate" colSpan="1" rowSpan="2" value="Ставка налога (%)"/>
         <cell alias="kv" colSpan="1" rowSpan="2" value="Коэффициент владения земельным участком (Кв)"/>
         <cell alias="kl" colSpan="1" rowSpan="2" value="Коэффициент использования льготы по земельному участку (Кл)"/>
-        <cell alias="sum" colSpan="1" rowSpan="2" value="Сумма налоговой льготы, руб."/>
+        <cell alias="sum" colSpan="1" rowSpan="2" value="Сумма налоговой льготы, руб./сумма уменьшения налоговой базы, руб."/>
         <cell alias="q1" colSpan="4" rowSpan="1" value="Налог, исчисленный за период"/>
         <cell alias="q2" colSpan="1" rowSpan="1" value="Налог, исчисленный за период"/>
         <cell alias="q3" colSpan="1" rowSpan="1" value="Налог, исчисленный за период"/>
         <cell alias="year" colSpan="1" rowSpan="1" value="Налог, исчисленный за период"/>
+        <cell alias="name" colSpan="1" rowSpan="2" value="Наименование"/>
     </row>
     <row alias="">
         <cell alias="fix" colSpan="1" rowSpan="1" value="№ п/п"/>
@@ -56,11 +57,12 @@
         <cell alias="taxRate" colSpan="1" rowSpan="1" value="Ставка налога (%)"/>
         <cell alias="kv" colSpan="1" rowSpan="1" value="Коэффициент владения земельным участком (Кв)"/>
         <cell alias="kl" colSpan="1" rowSpan="1" value="Коэффициент использования льготы по земельному участку (Кл)"/>
-        <cell alias="sum" colSpan="1" rowSpan="1" value="Сумма налоговой льготы, руб."/>
+        <cell alias="sum" colSpan="1" rowSpan="1" value="Сумма налоговой льготы, руб./сумма уменьшения налоговой базы, руб."/>
         <cell alias="q1" colSpan="1" rowSpan="1" value="1 квартал"/>
         <cell alias="q2" colSpan="1" rowSpan="1" value="2 квартал"/>
         <cell alias="q3" colSpan="1" rowSpan="1" value="3 квартал"/>
         <cell alias="year" colSpan="1" rowSpan="1" value="Год"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименование"/>
     </row>
     <row alias="">
         <cell alias="fix" colSpan="2" rowSpan="1" value="1"/>
@@ -92,5 +94,6 @@
         <cell alias="q2" colSpan="1" rowSpan="1" value="26"/>
         <cell alias="q3" colSpan="1" rowSpan="1" value="27"/>
         <cell alias="year" colSpan="1" rowSpan="1" value="28"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="29"/>
     </row>
 </rows>

@@ -260,7 +260,7 @@
         <alias>sum</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Сумма налоговой льготы, руб.</name>
+        <name>Сумма налоговой льготы, руб./сумма уменьшения налоговой базы, руб.</name>
         <order>25</order>
         <width>10</width>
         <maxLength>15</maxLength>
@@ -305,6 +305,16 @@
         <width>10</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование</name>
+        <order>30</order>
+        <width>12</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <styles>
         <alias>Редактируемая</alias>

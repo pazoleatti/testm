@@ -164,7 +164,7 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         checkLogger();
         testHelper.getLogger().clear();
 
-        // 1. Проверка обязательности заполнения граф
+        // 2. Проверка обязательности заполнения граф
         for (Column column : formData.getFormColumns()) {
             row.getCell(column.getAlias()).setValue(null, row.getIndex());
         }
@@ -181,7 +181,7 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         testHelper.getLogger().clear();
         setDefaultValues(row);
 
-        // 2. Проверка одновременного заполнения данных о налоговой льготе
+        // 3. Проверка одновременного заполнения данных о налоговой льготе
         setDefaultValues(row);
         row.getCell("benefitCode").setValue(null, null);
         testHelper.execute(FormDataEvent.CHECK);
@@ -193,8 +193,8 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 3. Проверка корректности заполнения даты возникновения права собственности
-        // 7. Проверка корректности заполнения даты начала действия льготы
+        // 4. Проверка корректности заполнения даты возникновения права собственности
+        // 8. Проверка корректности заполнения даты начала действия льготы
         setDefaultValues(row);
         row.getCell("ownershipDate").setValue(sdf.parse("01.01.2015"), null);
         testHelper.execute(FormDataEvent.CHECK);
@@ -210,7 +210,7 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 4. Проверка корректности заполнения даты прекращения права собственности
+        // 5. Проверка корректности заполнения даты прекращения права собственности
         setDefaultValues(row);
         row.getCell("terminationDate").setValue(sdf.parse("01.01.2013"), null);
         testHelper.execute(FormDataEvent.CHECK);
@@ -223,8 +223,8 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 5. Проверка доли налогоплательщика в праве на земельный участок
-        // 6. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
+        // 6. Проверка доли налогоплательщика в праве на земельный участок
+        // 7. Проверка значения знаменателя доли налогоплательщика в праве на земельный участок
         setDefaultValues(row);
         row.getCell("taxPart").setValue("1a/0", null);
         testHelper.execute(FormDataEvent.CHECK);
@@ -242,7 +242,7 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 8. Проверка корректности заполнения даты окончания действия льготы
+        // 9. Проверка корректности заполнения даты окончания действия льготы
         setDefaultValues(row);
         row.getCell("endDate").setValue(sdf.parse("01.01.2013"), null);
         row.getCell("benefitPeriod").setValue(0, null);
@@ -255,13 +255,13 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 9. Проверка наличия формы предыдущего периода в состоянии «Принята»
+        // 10. Проверка наличия формы предыдущего периода в состоянии «Принята»
         // Выполняется после консолидации, перед копированием данных, в методе copyFromPrevForm()
 
-        // 10. Проверка наличия формы предыдущего периода в состоянии «Принята»
+        // 11. Проверка наличия формы предыдущего периода в состоянии «Принята»
         // Выполняется после расчетов, перед сравнением данных, в методе comparePrevRows()
 
-        // 11. Проверка наличия в реестре земельных участков с одинаковым кадастровым номером и кодом ОКТМО, периоды владения которых пересекаются
+        // 12. Проверка наличия в реестре земельных участков с одинаковым кадастровым номером и кодом ОКТМО, периоды владения которых пересекаются
         setDefaultValues(row);
         // дополнительная строка
         DataRow<Cell> row2 = formData.createDataRow();
@@ -286,7 +286,7 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         totalRow.getCell("q3").setValue(row.getCell("q3").getValue(), null);
         totalRow.getCell("year").setValue(row.getCell("year").getValue(), null);
 
-        // 12. Проверка корректности заполнения кода налоговой льготы (графа 15)
+        // 13. Проверка корректности заполнения кода налоговой льготы (графа 15)
         setDefaultValues(row);
         row.getCell("oktmo").setValue(4L, null);
         total2Row.getCell("oktmo").setValue(4L, null);
@@ -300,7 +300,7 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         setDefaultValues(row);
         total2Row.getCell("oktmo").setValue(row.getCell("oktmo").getValue(), null);
 
-        // 13. Проверка корректности заполнения граф 14, 20, 22-28
+        // 14. Проверка корректности заполнения граф 14, 20, 22-28
         setDefaultValues(row);
         String [] calcColumns = { "period", /* "benefitPeriod", */ "kv", "kl", "sum", "q1", "q2", "q3", "year" };
         for (String alias : calcColumns) {
@@ -329,32 +329,33 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
             totalRow.getCell(alias).setValue(row.getCell(alias).getValue(), null);
         }
 
-        // 14. Проверка правильности заполнения КПП
-        setDefaultValues(row);
-        row.getCell("kpp").setValue("testKpp", null);
-        total2Row.getCell("kpp").setValue(row.getCell("kpp").getValue(), null);
-        total1Row.getCell("kpp").setValue(row.getCell("kpp").getValue(), null);
-        testHelper.execute(FormDataEvent.CHECK);
-        i = 0;
-        msg = String.format("Строка %s: Не найдено ни одного подразделения, для которого на форме настроек подразделений существует запись с КПП равным «%s»",
-                row.getIndex(), row.getCell("kpp").getValue());
-        Assert.assertEquals(msg, entries.get(i++).getMessage());
-        Assert.assertEquals(i, entries.size());
-        testHelper.getLogger().clear();
-        setDefaultValues(row);
-        total2Row.getCell("kpp").setValue(row.getCell("kpp").getValue(), null);
-        total1Row.getCell("kpp").setValue(row.getCell("kpp").getValue(), null);
+        // TODO (Ramil Timerbaev)
+        // 15. Проверка заполнения формы настроек подразделений
+//        setDefaultValues(row);
+//        row.getCell("kpp").setValue("testKpp", null);
+//        total2Row.getCell("kpp").setValue(row.getCell("kpp").getValue(), null);
+//        total1Row.getCell("kpp").setValue(row.getCell("kpp").getValue(), null);
+//        testHelper.execute(FormDataEvent.CHECK);
+//        i = 0;
+//        msg = String.format("Строки %s: На форме настроек подразделений отсутствует запись с «Код налогового органа (кон.) = %s» и «КПП = %s»",
+//                "1, 2", row.getCell("kno").getValue(), row.getCell("kpp").getValue());
+//        Assert.assertEquals(msg, entries.get(i++).getMessage());
+//        Assert.assertEquals(i, entries.size());
+//        testHelper.getLogger().clear();
+//        setDefaultValues(row);
+//        total2Row.getCell("kpp").setValue(row.getCell("kpp").getValue(), null);
+//        total1Row.getCell("kpp").setValue(row.getCell("kpp").getValue(), null);
 
-        // 15. Проверка корректности значения пониженной ставки
+        // 16. Проверка корректности значения пониженной ставки
         // Выполняется в методе calc24() при расчете
 
-        // 16. Проверка корректности значения налоговой базы
+        // 17. Проверка корректности значения налоговой базы
         // Выполняется в методе getB() при расчете
 
-        // 17. Проверка корректности суммы исчисленного налога и суммы налоговой льготы
+        // 18. Проверка корректности суммы исчисленного налога и суммы налоговой льготы
         // Выполняется в методе getH() при расчете
 
-        // 18.1 Проверка корректности значений итоговых строк (нет строки ВСЕГО и подитговых строк)
+        // 19.1 Проверка корректности значений итоговых строк (нет строки ВСЕГО и подитговых строк)
         setDefaultValues(row);
         dataRows.remove(total2Row);
         dataRows.remove(total1Row);
@@ -370,7 +371,7 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         dataRows.add(total1Row);
         dataRows.add(totalRow);
 
-        // 18.2 Проверка корректности значений итоговых строк (ошибка в суммах ВСЕГО и в подитогах)
+        // 19.2 Проверка корректности значений итоговых строк (ошибка в суммах ВСЕГО и в подитогах)
         setDefaultValues(row);
         for (String alias : totalColumns) {
             total2Row.getCell(alias).setValue(0, null);
@@ -394,7 +395,7 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
             totalRow.getCell(alias).setValue(row.getCell(alias).getValue(), null);
         }
 
-        // 18.3 Проверка корректности значений итоговых строк (лишний подитог)
+        // 19.3 Проверка корректности значений итоговых строк (лишний подитог)
         DataRow<Cell> tmpTotal2Row = formData.createDataRow();
         tmpTotal2Row.setIndex(6);
         tmpTotal2Row.setAlias("total2#tmp");
@@ -573,6 +574,12 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         testHelper.setImportFileName(fileName);
         testHelper.setImportFileInputStream(getCustomInputStream(fileName));
         testHelper.execute(FormDataEvent.IMPORT);
+        // TODO (Ramil Timerbaev)
+        int count = 0;
+        for (LogEntry log : testHelper.getLogger().getEntries()) {
+            count++;
+            System.out.println(count + " - " + log.getLevel().name() + " >>>>>> " + log.getMessage());
+        }
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
 
@@ -633,6 +640,8 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         Assert.assertEquals(2833, row.getCell("q3").getNumericValue().longValue());
         // графа 28
         Assert.assertEquals(-4766, row.getCell("year").getNumericValue().longValue());
+        // графа 29
+        Assert.assertEquals("тест29", row.getCell("name").getValue());
     }
 
     @Test
@@ -703,6 +712,8 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         Assert.assertEquals(2833, row.getCell("q3").getNumericValue().longValue());
         // графа 28
         Assert.assertEquals(-4766, row.getCell("year").getNumericValue().longValue());
+        // графа 29
+        Assert.assertEquals("тест29", row.getCell("name").getValue());
 
         // проверка сообщении
         int i = 0;
@@ -782,6 +793,8 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         Assert.assertEquals(2833, row.getCell("q3").getNumericValue().longValue());
         // графа 28
         Assert.assertEquals(-4766, row.getCell("year").getNumericValue().longValue());
+        // графа 29
+        Assert.assertEquals("тест29", row.getCell("name").getValue());
 
         // проверка сообщении
         int i = 0;
