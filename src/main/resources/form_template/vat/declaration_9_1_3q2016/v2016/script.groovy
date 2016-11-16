@@ -203,15 +203,17 @@ void generateXML() {
     code350 = (row10 ? row10.sumNdsPlus : code060)
     code360 = code070
 
-    def departmentReportPeriodId_937_2_1 = null
+    def drp_937_2_1 = null
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()) {
         // 937.2.1 - Сведения из дополнительных листов книги продаж с 3 квартала 2016
         if (formData.formType.id == 858) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
-            departmentReportPeriodId_937_2_1 = formData.departmentReportPeriodId
+            drp_937_2_1 = departmentReportPeriodService.get(formData.departmentReportPeriodId)
         }
     }
-    code001 = (declarationData.departmentReportPeriodId == departmentReportPeriodId_937_2_1) ? 0 : 1
+    def drp = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    // в том же периоде и корректировке. подразделение не проверяем
+    code001 = (drp?.reportPeriod?.id == drp_937_2_1?.reportPeriod?.id && drp?.correctionDate == drp_937_2_1?.correctionDate) ? 0 : 1
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
