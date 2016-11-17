@@ -246,6 +246,7 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         setDefaultValues(row);
         row.getCell("endDate").setValue(sdf.parse("01.01.2013"), null);
         row.getCell("benefitPeriod").setValue(0, null);
+        row.getCell("kl").setValue(1, null);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
         msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s» и быть меньше либо равно значению графы «%s»",
