@@ -1756,20 +1756,15 @@ def getPrevDataRows(def showMsg = false) {
         return prevDataRows
     }
 
+    def is2Quartal2016 = (reportPeriod?.taxPeriod?.year == 2016 && reportPeriod.order == 2)
+    def formTypeId = (is2Quartal2016 ? 500 : 507)
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     def formDataKind = FormDataKind.SUMMARY
 
     def prevFormData = null
     if (prevReportPeriod) {
         def order = null
-        // текущий РАПОП
-        def formTypeId = 507
         prevFormData = formDataService.getLast(formTypeId, formDataKind, formData.departmentId, prevReportPeriod?.id, order, formData.comparativePeriodId, formData.accruing)
-        if (prevFormData == null) {
-            // старый РАПОП
-            formTypeId = 500
-            prevFormData = formDataService.getLast(formTypeId, formDataKind, formData.departmentId, prevReportPeriod?.id, order, formData.comparativePeriodId, formData.accruing)
-        }
     }
     if (prevFormData && prevFormData.state == WorkflowState.ACCEPTED) {
         prevDataRows = formDataService.getDataRowHelper(prevFormData)?.allSaved
