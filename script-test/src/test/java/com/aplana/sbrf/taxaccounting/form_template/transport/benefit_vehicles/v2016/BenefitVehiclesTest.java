@@ -449,7 +449,7 @@ public class BenefitVehiclesTest extends ScriptTestBase {
         dataRows.add(row2);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
-        msg = String.format("Строки 1, 2: Для ТС не может быть указано  более одного вида льготы");
+        msg = String.format("Строки 1, 2: Для ТС не может быть указано более одного вида льготы");
         Assert.assertEquals(msg, entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();

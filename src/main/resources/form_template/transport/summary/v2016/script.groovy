@@ -19,10 +19,7 @@ import groovy.transform.Field
  *      - проверить логические проверки
  *      - загрузка
  *      - проверить загрузку
- *      - консолидация
- *      - проверить консолидацию
  *      - добавить тесты
- *      - копирование данных
  *      - сравнение данных
  *
  *      - выполнять предрасчетную проверку только перед расчетом? или еще при принятии, проверке, консолидации?
@@ -39,7 +36,7 @@ import groovy.transform.Field
 // графа 1  - rowNumber
 // графа 2  - kno               - атрибут 2102 - TAX_ORGAN_CODE - «Код налогового органа (кон.)», справочник 210 «Параметры представления деклараций по транспортному налогу»
 // графа 3  - kpp               - зависит от графы 2 - атрибут 2103 - KPP - «КПП», справочник 210 «Параметры представления деклараций по транспортному налогу»
-// графа 4  - okato             - зависит от графы 2 - атрибут 2104.840 - OKTMO.CODE - «Код ОКТМО».«Код», справочник 210.96 «Параметры представления деклараций по транспортному налогу».«Общероссийский классификатор территорий муниципальных образований (ОКТМО)»
+// графа 4  - okato             - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
 // графа 5  - tsTypeCode        - атрибут 422 - CODE - «Код вида ТС», справочник 42 «Коды видов транспортных средств»
 // графа 6  - tsType            - зависит от графы 5 - атрибут 423 - NAME - «Наименование вида транспортного средства», справочник 42 «Коды видов транспортных средств»
 // графа 7  - model
@@ -100,13 +97,12 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         checkRegionId()
-        def sourcesInfo = preComposeCheck()
+        preConsolidationCheck()
         if (logger.containsLevel(LogLevel.ERROR)) {
             return
         }
-        consolidation(sourcesInfo)
+        consolidation()
         calc()
-        logicCheck()
         formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
@@ -156,7 +152,7 @@ def autoFillColumns = allColumns - editableColumns - 'fix'
 
 // графа 1..7, 9..11, 13..20, 22, 30, 31 (графа 32..34 обязательны для некоторых периодов)
 @Field
-def nonEmptyColumns = ['kno', 'tsTypeCode', 'model', 'vi', 'regNumber', 'regDate',
+def nonEmptyColumns = ['kno', 'okato', 'tsTypeCode', 'model', 'vi', 'regNumber', 'regDate',
         'taxBase', 'taxBaseOkeiUnit', 'createYear', 'years', 'ownMonths', 'partRight', 'coefKv',
         'taxRate', 'calculatedTaxSum', 'taxSumToPay', 'q1' /*, 'q2', 'q3', 'q4'*/ ]
 
@@ -343,6 +339,7 @@ void logicCheck() {
 
     def isCalc = (formDataEvent == FormDataEvent.CALCULATE)
 
+    // TODO (Ramil Timerbaev) переделать аналогично SBRFACCTAX-17678
     // для логической проверки 1
     def nonEmptyColumnsTmp = nonEmptyColumns
     if (getReportPeriod().order == 2) {
@@ -449,7 +446,7 @@ void logicCheck() {
                     continue
                 }
                 // проверка сумм
-                def srow = calcSubTotalRow2(dataRows.indexOf(row) - 1, dataRows, row.kno /*, row.kpp, row.okato*/)
+                def srow = calcSubTotalRow2(dataRows.indexOf(row) - 1, dataRows, row.kno, /*, row.kpp,*/ row.okato)
                 checkTotalRow(row, srow)
             } else if (row.getAlias() != null && row.getAlias().indexOf('total1') != -1) {
                 // подитог кно/кпп
@@ -547,23 +544,40 @@ def getSectionTsTypeName(def sectionTsTypeCode) {
     return tsCodeNamesMap[sectionTsTypeCode]
 }
 
+
 @Field
-def groupColumnsListList = [
-        ['version', 'pastYear'],
-        ['codeOKATO'],
-        ['codeOKATO', 'tsTypeCode', 'baseUnit']
+def groupColumnsListListB = [
+        // для предконсолидационной проверки 5 b 6 (графа 2, 3, 5, 6, 7, 8)
+        ['codeOKATO', 'tsTypeCode', 'identNumber', 'regNumber', 'powerVal', 'baseUnit']
 ]
 
-def preComposeCheck() {
-    def sourcesInfo = formDataService.getSourcesInfo(formData, false, true, WorkflowState.ACCEPTED, userInfo, logger)
+@Field
+def groupColumnsListList = [
+        // для предконсолидационной проверки 1
+        ['version', 'pastYear'],
+        // для предконсолидационной проверки 2
+        ['codeOKATO'],
+        // для предконсолидационной проверки 3
+        ['codeOKATO', 'tsTypeCode', 'baseUnit'],
+        // для предконсолидационной проверки 4 (графа 2, 4, 8, 12, 13, 14)
+        ['codeOKATO', 'tsTypeCode', 'identNumber', 'taxBase', 'baseUnit', 'baseUnit']
+]
+
+def preConsolidationCheck() {
+    // получить все принятые источники и сгруппировать: по проверке, по источнику, по группе столбцов - группа строк
+    def sourcesInfo = getSourcesInfo()
     def complexMap = [:]
     for (relation in sourcesInfo) {
-        if (relation.formType.id != formTypeVehicleId) {
+        def groupColumnsList
+        if (relation.formType.id == formTypeVehicleId) {
+            groupColumnsList = groupColumnsListList
+        } else if (relation.formType.id == formTypeBenefitId) {
+            groupColumnsList = groupColumnsListListB
+        } else {
             continue
         }
-        def sourceFormData = formDataService.get(relation.formDataId, null)
-        def dataRows = formDataService.getDataRowHelper(sourceFormData).allSaved
-        groupColumnsListList.each { groupColumns ->
+        def dataRows = getDataRows(relation.formDataId)
+        groupColumnsList.each { groupColumns ->
             def columnsKey = groupColumns.toString()
             if (complexMap[columnsKey] == null) {
                 complexMap[columnsKey] = [:]
@@ -584,8 +598,9 @@ def preComposeCheck() {
             }
         }
     }
+
+    // 1. Проверка наличия повышающего коэффициента для ТС с заполненной графой 22 «Модель (версия) из перечня, утвержденного на налоговый период» в форме-источнике
     int i = 0
-    // 1. Проверка наличия повышающего коэффициента для ТС с заполненной графой 25 «Модель (версия) из перечня, утвержденного на налоговый период» в форме-источнике
     def groupColumns = groupColumnsListList[i]
     def columnsKey = groupColumns.toString()
     def sourceRowsMap = complexMap[columnsKey]
@@ -596,12 +611,12 @@ def preComposeCheck() {
                 def avgCostId = getRefBookValue(218L, row.version)?.AVG_COST?.value
                 // справочник «Повышающие коэффициенты транспортного налога»
                 def allRecords = getAllRecords(209L).values()
-                def records = allRecords.findAll { record ->
+                def record = allRecords.find { record ->
                     record.AVG_COST.value == avgCostId &&
-                            record.YEAR_FROM.value <= row.pastYear &&
+                            record.YEAR_FROM.value < row.pastYear &&
                             record.YEAR_TO.value >= row.pastYear
                 }
-                if (records == null || records.isEmpty()) {
+                if (record == null) {
                     def rowIndexes = dataRows.collect { it.getIndex() }
                     def avgCost = getRefBookValue(211L, avgCostId).NAME.value
                     def periodName = getReportPeriod().name
@@ -617,8 +632,9 @@ def preComposeCheck() {
             }
         }
     }
+
+    // 2. Проверка наличия параметров представления декларации для кода ОКТМО, заданного в графе 2 «Код ОКТМО» формы-источника
     i = 1
-    // 2. Проверка наличия параметров представления декларации для кода ОКТМО, заданного по графе 2 «Код ОКТМО» формы-источника
     groupColumns = groupColumnsListList[i]
     columnsKey = groupColumns.toString()
     sourceRowsMap = complexMap[columnsKey]
@@ -628,15 +644,15 @@ def preComposeCheck() {
             if (row.codeOKATO != null) {
                 def region = getRegion(row.codeOKATO)
                 def regionId = region?.record_id?.value
-                def declarationRegionId = relation.getDepartment().regionId
+                def declarationRegionId = formDataDepartment.regionId
                 // справочник «Параметры представления деклараций по транспортному налогу»
                 def allRecords = getAllRecords(210L).values()
-                def records = allRecords.findAll { record ->
+                def record = allRecords.find { record ->
                     record.DECLARATION_REGION_ID.value == declarationRegionId &&
                             record.REGION_ID.value == regionId &&
                             record.OKTMO.value == row.codeOKATO
                 }
-                if (records == null || records.isEmpty()) {
+                if (record == null) {
                     def rowIndexes = dataRows.collect { it.getIndex() }
                     def declarationRegionCode = getRefBookValue(4, declarationRegionId).CODE.value
                     def regionCode = region?.CODE?.value ?: ''
@@ -656,47 +672,49 @@ def preComposeCheck() {
             }
         }
     }
-    i = 2
+
     // 3. Проверка наличия ставки для ТС формы-источника
+    i = 2
     groupColumns = groupColumnsListList[i]
     columnsKey = groupColumns.toString()
     sourceRowsMap = complexMap[columnsKey]
     sourceRowsMap.each { Relation relation, rowsMap ->
         rowsMap.each { key, dataRows ->
             def row = dataRows[0]
-            if (row.codeOKATO != null && row.tsTypeCode != null && row.taxBase != null && row.baseUnit != null && row.pastYear != null) {
+            if (row.codeOKATO != null && row.tsTypeCode != null && row.taxBase != null && row.pastYear != null && row.ecoClass != null) {
                 def region = getRegion(row.codeOKATO)
                 def regionId = region?.record_id?.value
-                def declarationRegionId = relation.getDepartment().regionId
+                def declarationRegionId = formDataDepartment.regionId
+                def ecoClassCode = getRefBookValue(40L, row.ecoClass)?.CODE?.value
                 // справочник «Ставки транспортного налога»
                 def allRecords = getAllRecords(41L).values()
-                def records = allRecords.findAll { record ->
+                def record = allRecords.find { record ->
                     record.DECLARATION_REGION_ID.value == declarationRegionId &&
                             record.DICT_REGION_ID.value == regionId &&
                             record.CODE.value == row.tsTypeCode &&
-                            record.UNIT_OF_POWER.value == row.baseUnit &&
                             ((record.MIN_AGE.value == null) || (record.MIN_AGE.value < row.pastYear)) &&
                             ((record.MAX_AGE.value == null) || (record.MAX_AGE.value >= row.pastYear)) &&
                             ((record.MIN_POWER.value == null) || (record.MIN_POWER.value < row.taxBase)) &&
-                            ((record.MAX_POWER.value == null) || (record.MAX_POWER.value >= row.taxBase))
+                            ((record.MAX_POWER.value == null) || (record.MAX_POWER.value >= row.taxBase)) &&
+                            ((record.MIN_ECOCLASS.value == null) || (getRefBookValue(40L, record.MIN_ECOCLASS.value)?.CODE?.value < ecoClassCode)) &&
+                            ((record.MAX_ECOCLASS.value == null) || (getRefBookValue(40L, record.MAX_ECOCLASS.value)?.CODE?.value >= ecoClassCode))
                 }
-                if (records == null || records.size() != 1) {
+                if (record == null) {
                     def rowIndexes = dataRows.collect { it.getIndex() }
-                    boolean isMany = records != null && records.size() > 1
                     def declarationRegionCode = getRefBookValue(4, declarationRegionId).CODE.value
                     def regionCode = region?.CODE?.value ?: ''
                     def tsTypeCode = getRefBookValue(42L, row.tsTypeCode).CODE.value
                     def baseUnit = getRefBookValue(12L, row.baseUnit).CODE.value
                     def codeOKATO = getRefBookValue(96L, row.codeOKATO).CODE.value
-                    def msg1 = isMany ? "более одной записи, актуальной" : "отсутствует запись, актуальная"
                     def periodName = getReportPeriod().name
                     def periodYear = getReportPeriod().taxPeriod.year
                     logger.error("Строки %s формы-источника. Графа «%s» = «%s», графа «%s» = «%s», графа «%s» = «%s»: В справочнике «Ставки транспортного налога» " +
-                            "%s на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
-                            "справочника «Подразделения» для подразделения «%s», поле «Код субъекта РФ» = «%s», поле «Код ТС» = «%s», поле «Ед. измерения мощности» = «%s». " +
+                            "отсутствует запись, актуальная на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
+                            "справочника «Подразделения» для подразделения «%s», поле «Код субъекта РФ» = «%s», поле «Код вида ТС» = «%s», поле «Ед. измерения мощности» = «%s». " +
                             "Форма-источник: Тип: «%s», Вид: «%s», Подразделение: «%s», Период: «%s %s»",
-                            rowIndexes.join(', '), getColumnName(row, 'codeOKATO'), codeOKATO, getColumnName(row, 'tsTypeCode'), tsTypeCode, getColumnName(row, 'baseUnit'), baseUnit,
-                            msg1, getReportPeriodEndDate().format('dd.MM.yyyy'), declarationRegionCode,
+                            rowIndexes.join(', '), getColumnName(row, 'codeOKATO'), codeOKATO,
+                            getColumnName(row, 'tsTypeCode'), tsTypeCode, getColumnName(row, 'baseUnit'), baseUnit,
+                            getReportPeriodEndDate().format('dd.MM.yyyy'), declarationRegionCode,
                             relation.getDepartment().name, regionCode, tsTypeCode, baseUnit,
                             relation.formDataKind.title, relation.formType.name, relation.department.name, periodName, periodYear
                     )
@@ -706,7 +724,51 @@ def preComposeCheck() {
         }
     }
 
-    return sourcesInfo
+    // 4. Проверка корректности данных в формах-источниках вида «Сведения о ТС»
+    def relationsV = sourcesInfo?.findAll { it.formType.id == formTypeVehicleId }
+    if (relationsV?.size() > 1) {
+        i = 3
+        groupColumns = groupColumnsListList[i]
+        columnsKey = groupColumns.toString()
+        sourceRowsMap = complexMap[columnsKey]
+        preConsolidationCheck4or5or6(relationsV, sourceRowsMap, 'regDate', 'regDateEnd')
+    }
+
+    def relationsB = sourcesInfo?.findAll { it.formType.id == formTypeBenefitId }
+    if (relationsB?.size() > 1) {
+        groupColumns = groupColumnsListListB[0]
+        columnsKey = groupColumns.toString()
+        sourceRowsMap = complexMap[columnsKey]
+
+        // 5. Проверка корректности данных в формах-источниках вида «Сведения о льготируемых ТС»
+        preConsolidationCheck4or5or6(relationsB, sourceRowsMap, 'benefitStartDate', 'benefitEndDate')
+
+        // 6. Проверка использования для ТС одного вида льготы
+        preConsolidationCheck4or5or6(relationsB, sourceRowsMap, null, null, true)
+    }
+
+    // 7. Проверка правильности назначения форм-источников
+    // получить все источники: созданные и несозданные
+    def light = false
+    def excludeIfNotExist = false
+    def workflowState = null
+    def allRelations = formDataService.getSourcesInfo(formData, light, excludeIfNotExist, workflowState, userInfo, logger)
+    relationsB = allRelations?.findAll { it.formType.id == formTypeBenefitId }
+    if (relationsB) {
+        // если есть льготы, то проверить чтобы у каждой льготы была в подразделении форма "сведения о ТС"
+        relationsV = allRelations?.findAll { it.formType.id == formTypeVehicleId }
+        for (def relation : relationsB) {
+            def find = relationsV.find { it.department.id == relation.department.id }
+            if (!find) {
+                def formNameV = relationsV[0].formType.name
+                def formNameB = relation.formType.name
+                def departmentName = relationsV[0].department.name
+                logger.error("Подразделения назначенных форм-источников вида «%s» и «%s» должны совпадать. " +
+                        "В назначениях отсутствует форма вида «%s» для подразделения «%s»",
+                        formNameV, formNameB, formNameV, departmentName)
+            }
+        }
+    }
 }
 
 // Ключ для строк формы-источника, по графам columns
@@ -714,149 +776,289 @@ String getKey(def row, def columns) {
     return columns.collect { row[it] }.join('#')
 }
 
+/**
+ * Предконсолидационная проверка 4, 5 или 6.
+ *
+ * @param relations список назначении
+ * @param sourceRowsMap мапа со сгруппированными данными по всем источника
+ * @param aliasStart алиас даты начала
+ * @param aliasEnd алиас даты окончания
+ * @param isPreConsolidationCheck6 признак того что это предконсолидационная проверка 6 (только для льгот)
+ */
+void preConsolidationCheck4or5or6(def relations, def sourceRowsMap, def aliasStart, aliasEnd, def isPreConsolidationCheck6 = false) {
+    def usedMap = [:]
+    def findCrossMap = [:]
+    for (def relation : relations) {
+        def otherRelations = relations?.findAll { it != relation }
+        def rowsMap = sourceRowsMap[relation]
+        for (def key : rowsMap.keySet().toList()) {
+            if (usedMap[key]) {
+                continue
+            }
+            usedMap[key] = true
+            def rows = rowsMap[key]
+            for (def otherRelation : otherRelations) {
+                if (usedMap[otherRelation]) {
+                    continue
+                }
+                def otherRowsMap = sourceRowsMap[otherRelation]
+                def otherRows = otherRowsMap[key]
+                for (def row : rows) {
+                    for (def otherRow : otherRows) {
+                        def hasError
+                        // проверка двух строк источников
+                        if (isPreConsolidationCheck6) {
+                            hasError = (row.taxBenefitCode != otherRow.taxBenefitCode)
+                        } else {
+                            hasError = isCross(row[aliasStart], row[aliasEnd], otherRow[aliasStart], otherRow[aliasEnd], true)
+                        }
+                        if (hasError) {
+                            // запомнить номера строк источников
+                            if (findCrossMap[relation] == null) {
+                                findCrossMap[relation] = []
+                            }
+                            findCrossMap[relation].add(row.getIndex())
+
+                            if (findCrossMap[otherRelation] == null) {
+                                findCrossMap[otherRelation] = []
+                            }
+                            findCrossMap[otherRelation].add(otherRow.getIndex())
+                        }
+                    }
+                }
+            }
+        }
+        usedMap[relation] = true
+    }
+    if (findCrossMap) {
+        def messages = []
+        findCrossMap.each { relation, rowIndexes ->
+            def rowIndexesInStr = rowIndexes?.unique()?.join(', ')
+            def formNameV = relation.formType.name
+            def departmentName = relation.department.name
+            def subMsg = String.format("Строки %s формы-источника вида «%s» для подразделения «%s»",
+                    rowIndexesInStr, formNameV, departmentName)
+            messages.add(subMsg)
+        }
+        def subMsg = messages.join(', ')
+        if (isPreConsolidationCheck6) {
+            logger.error("%s, содержат более одного вида льготы для одного ТС. Проверьте данные форм-источников", subMsg)
+        } else {
+            logger.error("%s, содержат ТС с пересекающимися периодами владения. Проверьте данные форм-источников", subMsg)
+        }
+    }
+}
+
 @Field
 def formTypeVehicleId = 201
 
-/**
- * Консолидация формы
- * Собирает данные с консолидированных нф
- */
-def consolidation(def sourcesInfo) {
-    // очистить форму
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
-    dataRows.removeAll { it.getAlias() == null }
-    Map<String, List> dataRowsMap = ['A': [], 'B': [], 'C': []]
+@Field
+def formTypeBenefitId = 202
 
-    sourcesInfo.each { relation ->
-        def source = formDataService.get(relation.formDataId, null)
-        def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
-        if (source.formType.id == formTypeVehicleId) {
-            def alias = null
-            for (sRow in sourceDataRows) {
-                if (sRow.getAlias() != null) {
-                    alias = sRow.getAlias()
-                    continue
-                }
-                if (alias != null && alias in groups) {
-                    def newRow = formNewRow(sRow)
-                    dataRowsMap[alias].add(newRow)
-                }
+def consolidation() {
+    // мапа для опредения источника по строке (строка -> источник)
+    def relationMap = [:]
+
+    // сведения о ТС
+    def dataRowsVehicles = getAllRowsSources(formTypeVehicleId, relationMap)
+    // льготы ТС
+    def dataRowsBenefit = getAllRowsSources(formTypeBenefitId, relationMap)
+
+    // графы соответствия 2, 4, 8, 9, 13, 14
+    def keyColumnsVehilces = ['codeOKATO', 'tsTypeCode', 'identNumber', 'regNumber', 'taxBase', 'baseUnit']
+    // графы соответствия 2, 3, 5, 6, 7, 8
+    def keyColumnsBenefit = ['codeOKATO', 'tsTypeCode', 'identNumber', 'regNumber', 'powerVal', 'baseUnit']
+
+    // кэш совпадении
+    def equalsRowsMap = [:]
+    if (dataRowsVehicles && dataRowsBenefit) {
+        for (def row : dataRowsBenefit) {
+            def key = getKey(row, keyColumnsBenefit)
+            if (equalsRowsMap[key] == null) {
+                equalsRowsMap[key] = []
             }
-        } else if (source.getFormType().getId() == formData.getFormType().getId()) {
-            def alias = null
-            for (row in sourceDataRows) {
-                if (row.getAlias() != null) {
-                    alias = row.getAlias()
-                    continue
-                }
-                if (alias != null && alias in groups) {
-                    dataRowsMap[alias].add(row)
-                }
+            equalsRowsMap[key].add(row)
+        }
+    }
+    def rowIndex = 0
+    def dataRows = []
+    for (def rowV : dataRowsVehicles) {
+        def key = getKey(rowV, keyColumnsVehilces)
+        def rowsB = equalsRowsMap[key]
+        def findRowsB = []
+        for (def rowB : rowsB) {
+            // проверка пересечения
+            if (isCross(rowV.regDate, rowV.regDateEnd, rowB.benefitStartDate, rowB.benefitEndDate)) {
+                findRowsB.add(rowB)
+            }
+        }
+        def newRow = null
+        // шаг a и b
+        newRow = getNewRow(rowV, findRowsB, relationMap)
+        newRow.setIndex(rowIndex++)
+        dataRows.add(newRow)
+
+        if (findRowsB) {
+            rowsB.removeAll(findRowsB)
+            if (rowsB?.isEmpty()) {
+                equalsRowsMap.remove(key)
             }
         }
     }
 
-    // копирование данных по разделам
-    def int insertIndex = 1
-    groups.each { section ->
-        def copyRows = dataRowsMap[section]
-        if (copyRows != null && !copyRows.isEmpty()) {
-            dataRows.addAll(insertIndex, copyRows)
-            insertIndex += copyRows.size()
-        }
-        insertIndex += 2
-    }
+    // шаг c
+    for (def key : equalsRowsMap.keySet().toList()) {
+        def rowsB = equalsRowsMap[key]
+        for (def rowB : rowsB) {
+            // 1. Проверка наличия данных о льготируемом ТС в форме «Сведения о ТС»
+            def relation = relationMap[rowB]
+            def formName = relation?.formType?.name
+            def formType = relation?.formDataKind?.title
+            def periodName = getReportPeriod()?.name + ' ' + getReportPeriod()?.taxPeriod?.year
+            def departmentName = relation?.department?.name
+            def formNameV = getFormTypeById(formTypeVehicleId)?.name
+            logger.warn("Строка %s формы-источника вида «%s», типа «%s» за период «%s» для подразделения «%s»: " +
+                    "содержит данные по ТС, которое отсутствует в формах-источниках вида «%s». Проверьте данные форм-источников",
+                    rowB.getIndex(), formName, formType, periodName, departmentName, formNameV)
 
+            def newRow = getNewRow(rowB)
+            newRow.setIndex(rowIndex++)
+            dataRows.add(newRow)
+        }
+    }
     updateIndexes(dataRows)
+    formDataService.getDataRowHelper(formData).allCached = dataRows
 }
 
-def formNewRow(def sRow) {
-// новая строка
-    def newRow = formData.createDataRow()
-    editableColumns.each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias("Редактируемая")
-    }
-    // «Графа 4» принимает значение «графы 2» формы-источника
-    newRow.okato = sRow.codeOKATO
-    // «Графа 5» принимает значение «графы 4» формы-источника
-    newRow.tsTypeCode = sRow.tsTypeCode
-    // «Графа 6» принимает значение «графы 5» формы-источника
-    // зависимая графа newRow.tsType = sRow.tsType
-    // «Графа 7» принимает значение «графы 6» формы-источника
-    newRow.model = sRow.model
-    // «Графа 8» принимает значение «графы 7» формы-источника
-    newRow.ecoClass = sRow.ecoClass
-    // «Графа 9» принимает значение «графы 8» формы-источника
-    newRow.vi = sRow.identNumber
-    // «Графа 10» принимает значение «графы 9» формы-источника
-    newRow.regNumber = sRow.regNumber
-    // «Графа 11» принимает значение «графы 10» формы-источника
-    newRow.regDate = sRow.regDate
-    // «Графа 12» принимает значение «графы 11» формы-источника
-    newRow.regDateEnd = sRow.regDateEnd
-    // «Графа 13» принимает значение «графы 12» формы-источника
-    newRow.taxBase = sRow.taxBase
-    // «Графа 14» принимает значение «графы 13» формы-источника
-    newRow.taxBaseOkeiUnit = sRow.baseUnit
-    // «Графа 15» принимает значение «графы 14» формы-источника
-    newRow.createYear = sRow.year
-    // «Графа 16» принимает значение «графы 15» формы-источника
-    newRow.years = sRow.pastYear
-    // «Графа 17» принимает значение «графы 16» формы-источника
-    newRow.stealDateStart = sRow.stealDateStart
-    // «Графа 18» принимает значение «графы 17» формы-источника
-    newRow.stealDateEnd = sRow.stealDateEnd
-    // «Графа 19» принимает значение «графы 19» формы-источника
-    newRow.periodStartCost = sRow.costOnPeriodBegin
-    // «Графа 20» принимает значение «графы 20» формы-источника
-    newRow.periodEndCost = sRow.costOnPeriodEnd
-    // «Графа 22» принимает значение «графы 18» формы-источника
-    newRow.partRight = sRow.share
-    // «Графа 27» принимает значение «графы 21» формы-источника
-    newRow.benefitStartDate = sRow.benefitStartDate
-    // «Графа 28» принимает значение «графы 22» формы-источника
-    newRow.benefitEndDate = sRow.benefitEndDate
-    // «Графа 38» принимает значение «графы 24» формы-источника
-    newRow.benefitBase = sRow.base
-    // «Графы 30, 32, 34»
-    // Если «Графа 23» формы-источника имеет пустое значение, то «Графа 30», «Графа 32» и «Графа 34» не заполняются.
-    def taxBenefitCode = sRow.taxBenefitCode
-    if (taxBenefitCode != null) {
-        def benefitCode = getBenefitCode(taxBenefitCode)
-        switch (benefitCode) {
-        // Иначе если « Графа 23 » формы - источника
-        // имеет значение « 20220 », то « Графа 32 » принимает значение « Графы 23 » формы - источника, « Графа 30 » и « Графа 34 » не заполняются.
-            case '20220': newRow.taxBenefitCodeDecrease = taxBenefitCode
-                break
-        // Иначе если « Графа 23 » формы - источника
-        // имеет значение « 20230 », то « Графа 34 » принимает значение « Графы 23 » формы - источника, « Графа 30 » и « Графа 32 » не заполняются.
-            case '20230': newRow.benefitCodeReduction = taxBenefitCode
-                break
-        // Иначе « Графа 30 » принимает значение « Графы 23 » формы - источника, « Графа 32 » и « Графа 34 » не заполняются.
-            default: newRow.taxBenefitCode = taxBenefitCode
+/**
+ * Получить все строки всех источников. Также заполнить мапу relationMap для опредения к какому источнику принадлежит строка.
+ *
+ * @param sourceFormTypeId идентификатор типа источника
+ * @param relationMap мапа для опредения источника по строке (строка -> источник)
+ */
+def getAllRowsSources(def sourceFormTypeId, def relationMap) {
+    def sourcesInfoVehicles = getSourcesInfo()?.findAll { it.formType.id == sourceFormTypeId }
+    def dataRowsVehicles = []
+    for (def relation : sourcesInfoVehicles) {
+        def rows = getDataRows(relation.formDataId)
+        dataRowsVehicles.addAll(rows)
+        rows.each { row ->
+            relationMap[row] = relation
         }
     }
-    // «Графа 36»
-    // Если «Графа 25» формы-источника имеет пустое значение, то «Графа 36» не заполняется
-    if (sRow.version != null) {
-        // "Средняя стоимость транспортных средст"
-        def avgPriceRecord = getRefBookValue(218, sRow.version)
-        // В справочнике «Повышающие коэффициенты транспортного налога» найти записи
-        def allRecords = getAllRecords(209L).values()
-        def records = allRecords.findAll { record ->
-            record.AVG_COST.value == avgPriceRecord.AVG_COST.value &&
-                    record.YEAR_FROM.value <= sRow.pastYear &&
-                    record.YEAR_TO.value >= sRow.pastYear
+    return dataRowsVehicles
+}
+
+/**
+ * Сформировать новую строку по строке сведении о ТС и по строке льготы.
+ *
+ * @param rowV строка сведении о ТС
+ * @param rowsB строки льгот (может быть null)
+ * @param relationMap мапа для опредения источника по строке (строка -> источник)
+ */
+def getNewRow(def rowV, def rowsB, def relationMap) {
+    def newRow = getNewRow()
+    // графа 4 = графа 2 источника
+    newRow.okato = rowV.codeOKATO
+    // графа 5 = графа 4 источника
+    newRow.tsTypeCode = rowV.tsTypeCode
+    // графа 7 = графа 6 источника
+    newRow.model = rowV.model
+    // графа 8 = графа 7 источника
+    newRow.ecoClass = rowV.ecoClass
+    // графа 9 = графа 8 источника
+    newRow.vi = rowV.identNumber
+    // графа 10 = графа 9 источника
+    newRow.regNumber = rowV.regNumber
+    // графа 11 = графа 10 источника
+    newRow.regDate = rowV.regDate
+    // графа 12 = графа 11 источника
+    newRow.regDateEnd = rowV.regDateEnd
+    // графа 13 = графа 13 источника
+    newRow.taxBase = rowV.taxBase
+    // графа 14 = графа 14 источника
+    newRow.taxBaseOkeiUnit = rowV.baseUnit
+    // графа 15 = графа 15 источника
+    newRow.createYear = rowV.year
+    // графа 16 = графа 16 источника
+    newRow.years = rowV.pastYear
+    // графа 17 = графа 12 источника
+    newRow.ownMonths = rowV.month
+    // графа 18 = графа 19 источника
+    newRow.partRight = rowV.share
+
+    // графа 21 = графа 2 источника
+    if (rowV.version) {
+        def record218 = getAllRecords(218L)?.get(rowV.version)
+        def record209 = getAllRecords(209L)?.values()?.find {
+            it?.AVG_COST?.value == record218?.AVG_COST?.value &&
+                    it?.YEAR_FROM?.value < rowV.pastYear && rowV.pastYear <= it?.YEAR_TO?.value
         }
-        if (records.size() == 1) {
-            newRow.koefKp = records[0].COEF.value
-        } else {
-            newRow.koefKp = null
+        if (record209 == null) {
+            // 2. Проверка наличия повышающего коэффициента для ТС с заполненной графой 22 формы-источника «Сведения о ТС»
+            def relation = relationMap[rowV]
+            def formName = relation?.formType?.name
+            def formType = relation?.formDataKind?.title
+            def periodName = getReportPeriod()?.name + ' ' + getReportPeriod()?.taxPeriod?.year
+            def departmentName = relation?.department?.name
+            def valuas23 = getRefBookValue(211L, record218?.AVG_COST?.value)?.NAME?.value
+            def value16 = rowV.pastYear
+            logger.warn("Строка %s формы-источника вида «%s», типа «%s» за период «%s» для подразделения «%s»: " +
+                    "в справочнике «Повышающие коэффициенты транспортного налога» отсутствует запись, " +
+                    "в которой поле «Средняя стоимость» = «%s» и " +
+                    "значение «%s» больше значения поля «Количество лет, прошедших с года выпуска ТС (от)» и " +
+                    "меньше или равно значения поля «Количество лет, прошедших с года выпуска ТС (до)»",
+                    rowV.getIndex(), formName, formType, periodName, departmentName, valuas23, value16)
         }
-    } else {
-        newRow.koefKp = null
+        newRow.coefKp = record209?.record_id?.value
     }
+
+    if (rowsB) {
+        // графа 23
+        def value23 = BigDecimal.ZERO
+        for (def rowB : rowsB) {
+            def start = [ rowV.regDate, rowB.benefitStartDate, getReportPeriodStartDate() ].max()
+            def end = [ (rowV.regDateEnd ?: getReportPeriodEndDate()),
+                    (rowB.benefitEndDate ?: getReportPeriodEndDate()), getReportPeriodEndDate() ].min()
+            def tmp = end.format('M').toInteger() - start.format('M').toInteger() + 1
+            if (tmp < 0) {
+                tmp = BigDecimal.ZERO
+            }
+            value23 = value23 + tmp
+        }
+        newRow.benefitMonths = round(value23, 0)
+
+        // графа 25 = графа 9 источника
+        newRow.taxBenefitCode = rowsB[0].taxBenefitCode
+    }
+
+    // графа 28 = графа 24 источника
+    newRow.deductionCode = rowV.deductionCode
+    // графа 29 = графа 25 источника
+    newRow.deductionSum = rowV.deduction
+
+    return newRow
+}
+
+/** Сформировать новую строку по строке льготы. */
+def getNewRow(def rowB) {
+    def newRow = getNewRow()
+
+    // графа 4 = графа 2 источника
+    newRow.okato = rowB.codeOKATO
+    // графа 5 = графа 3 источника
+    newRow.tsTypeCode = rowB.tsTypeCode
+    // графа 9 = графа 5 источника
+    newRow.vi = rowB.identNumber
+    // графа 10 = графа 6 источника
+    newRow.regNumber = rowB.regNumber
+    // графа 13 = графа 7 источника
+    newRow.taxBase = rowB.powerVal
+    // графа 14 = графа 8 источника
+    newRow.taxBaseOkeiUnit = rowB.baseUnit
+    // графа 25 = графа 9 источника
+    newRow.taxBenefitCode = rowB.taxBenefitCode
+
     return newRow
 }
 
@@ -1181,8 +1383,11 @@ void importData() {
     }
 
     // заполнить кэш данными из справочника ОКТМО
-    fillRefBookCache(96L)
-    fillRecordCache(96L, 'CODE', getReportPeriodEndDate())
+    def limitRows = 10
+    if (allValuesCount > limitRows) {
+        fillRefBookCache(96L)
+        fillRecordCache(96L, 'CODE', getReportPeriodEndDate())
+    }
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -1342,10 +1547,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     newRow.kno = record210?.record_id?.value
 
     // графа 3 - зависит от графы 2 - не проверяется, потому что используется для нахождения записи для графы 2
-    // графа 4 - зависит от графы 2 - не проверяется, потому что используется для нахождения записи для графы 2
+
+    // графа 4 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
+    olIndex = 4
+    newRow.codeOKATO = getRecordIdImport(96, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
 
     // графа 5 - атрибут 422 - CODE - «Код вида ТС», справочник 42 «Коды видов транспортных средств»
-    colIndex = 5
+    colIndex++
     def record42 = getRecordImport(42, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
     newRow.tsTypeCode = record42?.record_id?.value
 
@@ -1506,10 +1714,10 @@ def getNewTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIn
 //    // графа 3
 //    colIndex++
 //    newRow.kpp = values[colIndex]
-//
-//    // графа 4 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований (ОКТМО)»
-//    colIndex = 6
-//    newRow.okato = getRecordIdImport(96L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // графа 4 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований (ОКТМО)»
+    colIndex = 4
+    newRow.okato = getRecordIdImport(96L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
 
     // графа 30..34
     colIndex = 29
@@ -1534,16 +1742,6 @@ def getRecord210(def kno, def kpp, def oktmo, def fileRowIndex, def colIndex, de
                     it?.TAX_ORGAN_CODE?.value == kno &&
                     it?.KPP?.value == kpp &&
                     it?.OKTMO?.value == oktmoId
-        }
-        // TODO (Ramil Timerbaev)
-        if (!record210) {
-            logger.info("========kno = $kno, kpp = $kpp, oktmo = $oktmo")
-            logger.info("========declarationRegionId = $declarationRegionId")
-            logger.info("========record96 = $record96")
-            logger.info("========regionId = $regionId")
-            logger.info("========oktmoId = $oktmoId")
-            logger.info("========record210 = $record210")
-            logger.info("========getAllRecords(210L) = " + getAllRecords(210L))
         }
     }
     return record210
@@ -1743,6 +1941,7 @@ void comparePrevRows() {
 
 // Получить ключ группировки при копировании и сравнении данных из предыдущего периода (по графе 6, 7)
 def getGroupKey(def row) {
+    // TODO (Ramil Timerbaev)
     return row.okato + '#' + row.cadastralNumber
 }
 
@@ -1767,18 +1966,10 @@ def getActualRowsMap(def rows) {
     return map
 }
 
-/**
- * Получить итоговую строку.
- *
- * @param level null - итог, 1 - подитого первого уровня, 2 - подитог второго уровня
- */
-def creatTotalRow(def level = null) {
+/** Получить итоговую строку. */
+def creatTotalRow() {
     def newRow = createRow()
     newRow.getCell("fix").colSpan = 2
-    // TODO (Ramil Timerbaev) возможно надо добавить скрытый столбец перед okato, потому что в подитоговой строке okato не надо отображать
-    if (level == 1) {
-        newRow.getCell("kpp").colSpan = 2
-    }
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -1808,10 +1999,10 @@ void addAllStatic(def dataRows) {
         int j = 0
 
         // 2 уровнь группировки
-        def value2 = row?.okato
-        def nextValue2 = nextRow?.okato
+        def value2 = row?.getCell('okato')?.refBookDereference
+        def nextValue2 = nextRow?.getCell('okato')?.refBookDereference
         if (row.getAlias() == null && nextRow == null || value2 != nextValue2) {
-            def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno /*, row.kpp, row.okato*/)
+            def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno, /* row.kpp, */ row.okato)
             j++
             dataRows.add(i + j, subTotalRow2)
         }
@@ -1823,7 +2014,7 @@ void addAllStatic(def dataRows) {
             // если все значения пустые, то подитог по 2 уровню группировки не добавится,
             // поэтому перед добавлением подитога по 1 уровню группировки, нужно добавить подитог с пустыми значениями по 2 уровню
             if (j == 0) {
-                def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno /*, row.kpp, row.okato*/)
+                def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno, /* row.kpp, */ row.okato)
                 j++
                 dataRows.add(i + j, subTotalRow2)
             }
@@ -1837,7 +2028,7 @@ void addAllStatic(def dataRows) {
 
 /** Расчет итога 1 уровня группировки - по графе 2, 3 КНО/КПП. */
 def calcSubTotalRow1(int i, def dataRows, def kno /*, def kpp*/) {
-    def newRow = creatTotalRow(1)
+    def newRow = creatTotalRow()
     newRow.setAlias('total1#' + i)
     newRow.fix = 'Итого по КНО/КПП'
 
@@ -1863,15 +2054,15 @@ def calcSubTotalRow1(int i, def dataRows, def kno /*, def kpp*/) {
 }
 
 /** Расчет итога 2 уровня группировки - по графе 4 ОКТМО (группировка внутри группы по КНО/КПП). */
-def calcSubTotalRow2(int i, def dataRows, def kno /*, def kpp, def okato*/) {
-    def newRow = creatTotalRow(2)
+def calcSubTotalRow2(int i, def dataRows, def kno, /* def kpp, */ def okato) {
+    def newRow = creatTotalRow()
     newRow.setAlias("total2#" + i)
     newRow.fix = 'ИТОГО по КНО/КПП/ОКТМО'
 
     // значения группы
     newRow.kno = kno
 //    newRow.kpp = kpp
-//    newRow.okato = okato
+    newRow.okato = okato
 
     // идем от текущей позиции вверх и ищем нужные строки
     for (int j = i; j >= 0; j--) {
@@ -1995,4 +2186,65 @@ def getAllRecords2(def refbookId) {
         allRecordsMap2[refbookId] = provider.getRecords(getReportPeriodEndDate(), null, null, null)
     }
     return allRecordsMap2[refbookId]
+}
+
+@Field
+def sourcesInfo = null
+
+def getSourcesInfo() {
+    if (sourcesInfo == null) {
+        sourcesInfo = formDataService.getSourcesInfo(formData, false, true, WorkflowState.ACCEPTED, userInfo, logger)
+        if (!sourcesInfo) {
+            sourcesInfo = []
+        }
+    }
+    return sourcesInfo
+}
+
+@Field
+def dataRowsSourceMap = [:]
+
+def getDataRows(def formDataId) {
+    if (dataRowsSourceMap[formDataId] == null) {
+        def source = formDataService.get(formDataId, null)
+        def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
+        dataRowsSourceMap[formDataId] = sourceDataRows
+        if (dataRowsSourceMap[formDataId] == null) {
+            dataRowsSourceMap[formDataId] = []
+        }
+    }
+    return dataRowsSourceMap[formDataId]
+}
+
+/**
+ * Проверка пересечения диапозона дат.
+ *
+ * @param start1 дата начала 1
+ * @param end1 дата окончания 1
+ * @param start2 дата начала 2
+ * @param end2 дата окончания 2
+ * @param useEndPeriodDate признак использования даты окончания периода формы, если даты окончания не заданы
+ */
+def isCross(def start1, def end1, def start2, def end2, def useEndPeriodDate = false) {
+    if (start1 == null || start2 == null) {
+        return null
+    }
+    def tmpEnd1 = end1 ?: (useEndPeriodDate ? getReportPeriodEndDate() : null)
+    def tmpEnd2 = end2 ?: (useEndPeriodDate ? getReportPeriodEndDate() : null)
+    if (start1 <= start2 && (tmpEnd1 && start2 <= tmpEnd1) || start2 <= start1 && (tmpEnd2 && start1 <= tmpEnd2)) {
+        return true
+    }
+    return false
+}
+
+// Мапа для хранения типов форм (id типа формы -> тип формы)
+@Field
+def formTypeMap = [:]
+
+/** Получить тип фомры по id. */
+def getFormTypeById(def id) {
+    if (formTypeMap[id] == null) {
+        formTypeMap[id] = formTypeService.get(id)
+    }
+    return formTypeMap[id]
 }

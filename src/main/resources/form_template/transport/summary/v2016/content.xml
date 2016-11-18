@@ -48,16 +48,17 @@
         <parentAlias>kno</parentAlias>
         <refBookAttributeId>2103</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>okato</alias>
         <checking>false</checking>
-        <columnType>REFERENCE</columnType>
+        <columnType>REFBOOK</columnType>
         <name>Код ОКТМО</name>
         <order>5</order>
         <width>7</width>
-        <parentAlias>kno</parentAlias>
-        <refBookAttributeId>2104</refBookAttributeId>
-        <refBookAttributeId2>840</refBookAttributeId2>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>841</nameAttributeId>
+        <refBookAttributeId>840</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>tsTypeCode</alias>
@@ -317,7 +318,7 @@
         <columnType>NUMBER</columnType>
         <name>Налоговый вычет. Сумма</name>
         <order>30</order>
-        <width>10</width>
+        <width>12</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

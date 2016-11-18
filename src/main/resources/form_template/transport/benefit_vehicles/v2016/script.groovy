@@ -280,7 +280,7 @@ def logicCheck() {
                 def start1 = row1.benefitStartDate
                 def start2 = row2.benefitStartDate
                 def end1 = row1.benefitEndDate ?: getReportPeriodEndDate()
-                def end2 = row1.benefitEndDate ?: getReportPeriodEndDate()
+                def end2 = row2.benefitEndDate ?: getReportPeriodEndDate()
                 if (start1 <= start2 && end1 >= start2 || start2 <= start1 && end2 >= start1) {
                     hasCross = true
                     break
@@ -323,7 +323,7 @@ def logicCheck() {
             if (hasError) {
                 def indexes = rows?.collect { it.getIndex() }
                 def indexesInStr = indexes?.join(', ')
-                logger.error("Строки %s: Для ТС не может быть указано  более одного вида льготы", indexesInStr)
+                logger.error("Строки %s: Для ТС не может быть указано более одного вида льготы", indexesInStr)
             }
         }
     }
