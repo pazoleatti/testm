@@ -212,7 +212,12 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
 
         // 5. Проверка корректности заполнения даты прекращения права собственности
         setDefaultValues(row);
-        row.getCell("terminationDate").setValue(sdf.parse("01.01.2013"), null);
+        Date date = sdf.parse("01.01.2013");
+        row.getCell("terminationDate").setValue(date, null);
+        row.getCell("ownershipDate").setValue(date, null);
+        row.getCell("startDate").setValue(date, null);
+        row.getCell("endDate").setValue(date, null);
+        row.getCell("benefitPeriod").setValue(0, null);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
         msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно %s, и больше либо равно значению графы «%s»",
@@ -244,17 +249,35 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
 
         // 9. Проверка корректности заполнения даты окончания действия льготы
         setDefaultValues(row);
+        row.getCell("terminationDate").setValue(sdf.parse("01.01.2014"), null);
         row.getCell("endDate").setValue(sdf.parse("01.01.2013"), null);
         row.getCell("benefitPeriod").setValue(0, null);
-        row.getCell("kl").setValue(1, null);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
-        msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s» и быть меньше либо равно значению графы «%s»",
+        msg = String.format("Строка %s: Графа «%s» должна быть заполнена. Значение графы должно быть больше либо равно значению графы «%s» и быть меньше либо равно значению графы «%s»",
                 row.getIndex(), row.getCell("endDate").getColumn().getName(),
                 row.getCell("startDate").getColumn().getName(), row.getCell("terminationDate").getColumn().getName());
         Assert.assertEquals(msg, entries.get(i++).getMessage());
+        // побочная проверка
+        Assert.assertTrue(entries.get(i++).getMessage().contains("заполнены неверно"));
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
+
+        setDefaultValues(row);
+        row.getCell("endDate").setValue(sdf.parse("01.01.2013"), null);
+        row.getCell("benefitPeriod").setValue(0, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»",
+                row.getIndex(), row.getCell("endDate").getColumn().getName(), row.getCell("startDate").getColumn().getName());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        // побочная проверка
+        Assert.assertTrue(entries.get(i++).getMessage().contains("заполнены неверно"));
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        // 9. Проверка наличия формы предыдущего периода в состоянии «Принята»
+        // Выполняется после консолидации, перед копированием данных, в методе copyFromPrevForm()
 
         // 10. Проверка наличия формы предыдущего периода в состоянии «Принята»
         // Выполняется после консолидации, перед копированием данных, в методе copyFromPrevForm()

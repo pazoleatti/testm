@@ -245,12 +245,21 @@ void logicCheck() {
         }
 
         // 9. Проверка корректности заполнения даты окончания действия льготы
-        if (row.startDate && row.endDate && (row.endDate < row.startDate || row.terminationDate && row.terminationDate < row.endDate)) {
-            def columnName15 = getColumnName(row, 'endDate')
-            def columnName14 = getColumnName(row, 'startDate')
-            def columnName10 = getColumnName(row, 'terminationDate')
-            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s» и быть меньше либо равно значению графы «%s»",
-                    rowIndex, columnName15, columnName14, columnName10)
+        if (row.benefitCode && row.startDate) {
+            if (row.terminationDate) {
+                if (row.endDate == null || row.endDate < row.startDate || row.endDate > row.terminationDate) {
+                    def columnName15 = getColumnName(row, 'endDate')
+                    def columnName14 = getColumnName(row, 'startDate')
+                    def columnName10 = getColumnName(row, 'terminationDate')
+                    logger.error("Строка %s: Графа «%s» должна быть заполнена. Значение графы должно быть больше либо равно значению графы «%s» и быть меньше либо равно значению графы «%s»",
+                            rowIndex, columnName15, columnName14, columnName10)
+                }
+            } else if (row.endDate != null && row.endDate < row.startDate) {
+                def columnName15 = getColumnName(row, 'endDate')
+                def columnName14 = getColumnName(row, 'startDate')
+                logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»",
+                        rowIndex, columnName15, columnName14)
+            }
         }
 
         // 10. Проверка наличия в реестре земельных участков с одинаковым кадастровым номером и кодом ОКТМО, периоды владения которых пересекаются

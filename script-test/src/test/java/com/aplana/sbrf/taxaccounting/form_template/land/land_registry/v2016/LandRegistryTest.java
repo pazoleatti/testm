@@ -186,7 +186,7 @@ public class LandRegistryTest extends ScriptTestBase {
         row.getCell("ownershipDate").setValue(date, null);
         row.getCell("terminationDate").setValue(date, null);
         row.getCell("startDate").setValue(date, null);
-        row.getCell("endDate").setValue(null, null);
+        row.getCell("endDate").setValue(date, null);
         row.getCell("benefitPeriod").setValue(0, null);
         testHelper.execute(FormDataEvent.CHECK);
         msg = String.format("Строка %s: Значение графы «%s» должно быть меньше либо равно %s", row.getIndex(), ScriptUtils.getColumnName(row, "ownershipDate"), "31.12.2014");
@@ -201,8 +201,8 @@ public class LandRegistryTest extends ScriptTestBase {
         row.getCell("ownershipDate").setValue(date, null);
         row.getCell("terminationDate").setValue(date, null);
         row.getCell("startDate").setValue(date, null);
-        row.getCell("endDate").setValue(null, null);
-        row.getCell("benefitPeriod").setValue(12, null);
+        row.getCell("endDate").setValue(date, null);
+        row.getCell("benefitPeriod").setValue(0, null);
         testHelper.execute(FormDataEvent.CHECK);
         msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно %s, и больше либо равно значению графы «%s»",
                 row.getIndex(), ScriptUtils.getColumnName(row, "terminationDate"), "01.01.2014", ScriptUtils.getColumnName(row, "ownershipDate"));
@@ -280,9 +280,21 @@ public class LandRegistryTest extends ScriptTestBase {
         row.getCell("endDate").setValue(sdf.parse("31.12.2013"), null);
         row.getCell("benefitPeriod").setValue(0, null);
         testHelper.execute(FormDataEvent.CHECK);
-        msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s» и быть меньше либо равно значению графы «%s»",
+        msg = String.format("Строка %s: Графа «%s» должна быть заполнена. Значение графы должно быть больше либо равно значению графы «%s» и быть меньше либо равно значению графы «%s»",
                 row.getIndex(), ScriptUtils.getColumnName(row, "endDate"), ScriptUtils.getColumnName(row, "startDate"),
                 ScriptUtils.getColumnName(row, "terminationDate"));
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
+
+        i = 0;
+        setDefaultValue(row);
+        row.getCell("endDate").setValue(sdf.parse("31.12.2013"), null);
+        row.getCell("terminationDate").setValue(null, null);
+        row.getCell("benefitPeriod").setValue(0, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        msg = String.format("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»",
+                row.getIndex(), ScriptUtils.getColumnName(row, "endDate"), ScriptUtils.getColumnName(row, "startDate"));
         Assert.assertEquals(msg, entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
