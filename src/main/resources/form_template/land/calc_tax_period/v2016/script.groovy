@@ -877,7 +877,7 @@ def getN(def row, def periodOrder, def showMsg = false) {
     if (b == null) {
         return null
     }
-    int precision = 2 // точность при делении
+    int precision = 10 // точность при делении
     // Н = В * Графа 21 * Графа 22 * К / 100 – Графа 24;
     def tmp = b.multiply(row.taxRate).multiply(value22).multiply(k).divide(100, precision, BigDecimal.ROUND_HALF_UP).subtract(value24)
 
