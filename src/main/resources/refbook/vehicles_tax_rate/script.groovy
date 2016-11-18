@@ -75,12 +75,19 @@ void save() {
 
         def boolean allRequired = declarationRegionId && dictRegionId && code && unitOfPower && value
 
-        // 1. Проверка типов дифференциации ставок
-        if (allRequired && ((minPower || maxPower) && (minEcoclass || maxEcoclass))) {
-            logger.error("Ставка не может дифференцироваться по значению мощности и по значению экологического класса одновременно")
+        // 1. Проверка обязательности заполнения мощности
+        if (allRequired && !minPower && !maxPower) {
+            logger.error("Поле «%s» или поле «%s» должно быть обязательно заполнено", refBook.getAttribute('MIN_POWER').name, refBook.getAttribute('MAX_POWER').name)
         }
 
-        // 2. Проверка корректности задания границ интервалов
+        // 2. Проверка типов дифференциации ставок
+        if (allRequired && ((minAge || maxAge) && (minEcoclass || maxEcoclass) && (minPower || maxPower))) {
+            logger.error("Ставка не может дифференцироваться по значениям мощности, срока использования и экологического класса одновременно")
+        } else if (allRequired && ((minAge || maxAge) && (minEcoclass || maxEcoclass))) {
+            logger.error("Ставка не может дифференцироваться по значению срока использования и по значению экологического класса одновременно")
+        }
+
+        // 3. Проверка корректности задания границ интервалов
         def String errStr = "Значение поля «%s» должно быть меньше или равно значению поля «%s»"
         if (minAge && maxAge && minAge > maxAge) {
             logger.error(errStr, refBook.getAttribute('MIN_AGE').name, refBook.getAttribute('MAX_AGE').name)
@@ -92,7 +99,7 @@ void save() {
             logger.error(errStr, refBook.getAttribute('MIN_ECOCLASS').name, refBook.getAttribute('MAX_ECOCLASS').name)
         }
 
-        // 3. Проверка корректности интервалов дифференциации ставок
+        // 4, 5
         if (allRequired && !logger.containsLevel(LogLevel.ERROR)) {
             String filter = "DECLARATION_REGION_ID =" + declarationRegionId +
                     " and DICT_REGION_ID = " + dictRegionId +
@@ -123,57 +130,68 @@ void save() {
                     boolean recordHas2 = minPower1 || maxPower1
                     boolean recordHas3 = minEcoclass1 || maxEcoclass1
 
-                    //Виды дифференциации ставки НЕ совпадают с видами дифференциации ставки сохраняемой записи
-                    if ((has1 != recordHas1) || (has2 != recordHas2) || (has3 != recordHas3)) {
-                        continue
+                    // 4. Проверка дифференциации ТС
+                    if ((minAge || maxAge) && (minEcoclass1 || maxEcoclass1)) {
+                        logger.error("Для вида ТС «%s» уже задана ставка, которая дифференцируется по мощности и экологическому классу", getRecord(42L, code)?.CODE.stringValue)
+                    }
+                    if ((minEcoclass || maxEcoclass) && (minAge1 || maxAge1)) {
+                        logger.error("Для вида ТС «%s» уже задана ставка, которая дифференцируется по мощности и сроку использования", getRecord(42L, code)?.CODE.stringValue)
                     }
 
-                    boolean group1 = has1 && recordHas1
-                    boolean group2 = has2 && recordHas2
-                    boolean group3 = has3 && recordHas3
+                    // 5. Проверка корректности интервалов дифференциации ставок
+                    if (!logger.containsLevel(LogLevel.ERROR)) {
+                        //Виды дифференциации ставки НЕ совпадают с видами дифференциации ставки сохраняемой записи
+                        if ((has1 != recordHas1) || (has2 != recordHas2) || (has3 != recordHas3)) {
+                            continue
+                        }
 
-                    boolean badAge = false
-                    if (group1) {
-                        minAge1 = minAge1 ?: 0
-                        maxAge1 = maxAge1 ?: 999
-                        minAgeC = minAge ?: 0
-                        maxAgeC = maxAge ?: 999
-                        badAge = !((minAge1 < minAgeC && maxAge1 < minAgeC) || (minAge1 > maxAgeC && maxAge1 > maxAgeC))
-                    }
-                    boolean badPower = false
-                    if (group2) {
-                        minPower1 = minPower1 ?: 0
-                        maxPower1 = maxPower1 ?: 9999999999999.99
-                        minPowerC = minPower ?: 0
-                        maxPowerC = maxPower ?: 9999999999999.99
-                        badPower = !((minPower1 < minPowerC && maxPower1 < minPowerC) || (minPower1 > maxPowerC && maxPower1 > maxPowerC))
-                    }
-                    boolean badEcoclass = false
-                    if (group3) {
-                        minEcoclass1 = minEcoclass1 ? getRecord(REF_BOOK_ECO_ID, minEcoclass1.longValue())?.CODE.numberValue : 0
-                        maxEcoclass1 = maxEcoclass1 ? getRecord(REF_BOOK_ECO_ID, maxEcoclass1.longValue())?.CODE.numberValue : 5
-                        minEcoclassC = minEcoclass ? getRecord(REF_BOOK_ECO_ID, minEcoclass.longValue())?.CODE.numberValue : 0
-                        maxEcoclassC = maxEcoclass ? getRecord(REF_BOOK_ECO_ID, maxEcoclass.longValue())?.CODE.numberValue : 5
-                        badEcoclass = !((minEcoclass1 < minEcoclassC && maxEcoclass1 < minEcoclassC) || (minEcoclass1 > maxEcoclassC && maxEcoclass1 > maxEcoclassC))
-                    }
+                        boolean group1 = has1 && recordHas1
+                        boolean group2 = has2 && recordHas2
+                        boolean group3 = has3 && recordHas3
 
-                    error = false
-                    if (group1 && group2) {
-                        error = badAge && badPower
-                    } else if (group1 && group3) {
-                        error = badAge && badEcoclass
-                    } else if (group1) {
-                        error = badAge
-                    } else if (group2) {
-                        error = badPower
-                    } else if (group3) {
-                        error = badEcoclass
-                    }
+                        boolean badAge = false
+                        if (group1) {
+                            minAge1 = minAge1 ?: 0
+                            maxAge1 = maxAge1 ?: 999
+                            minAgeC = minAge ?: 0
+                            maxAgeC = maxAge ?: 999
+                            badAge = !((minAge1 < minAgeC && maxAge1 < minAgeC) || (minAge1 > maxAgeC && maxAge1 > maxAgeC))
+                        }
+                        boolean badPower = false
+                        if (group2) {
+                            minPower1 = minPower1 ?: 0
+                            maxPower1 = maxPower1 ?: 9999999999999.99
+                            minPowerC = minPower ?: 0
+                            maxPowerC = maxPower ?: 9999999999999.99
+                            badPower = !((minPower1 < minPowerC && maxPower1 < minPowerC) || (minPower1 > maxPowerC && maxPower1 > maxPowerC))
+                        }
+                        boolean badEcoclass = false
+                        if (group3) {
+                            minEcoclass1 = minEcoclass1 ? getRecord(REF_BOOK_ECO_ID, minEcoclass1.longValue())?.CODE.numberValue : 0
+                            maxEcoclass1 = maxEcoclass1 ? getRecord(REF_BOOK_ECO_ID, maxEcoclass1.longValue())?.CODE.numberValue : 5
+                            minEcoclassC = minEcoclass ? getRecord(REF_BOOK_ECO_ID, minEcoclass.longValue())?.CODE.numberValue : 0
+                            maxEcoclassC = maxEcoclass ? getRecord(REF_BOOK_ECO_ID, maxEcoclass.longValue())?.CODE.numberValue : 5
+                            badEcoclass = !((minEcoclass1 < minEcoclassC && maxEcoclass1 < minEcoclassC) || (minEcoclass1 > maxEcoclassC && maxEcoclass1 > maxEcoclassC))
+                        }
 
-                    if (error) {
-                        logger.error("В справочнике не должно быть записей с одинаковым значением полей «Код субъекта РФ представителя декларации», " +
-                                "«Код региона РФ», «Код вида ТС», «Ед. измерения мощности» и с пересекающимися интервалами срока использования, мощности и экологического класса")
-                        break
+                        error = false
+                        if (group1 && group2) {
+                            error = badAge && badPower
+                        } else if (group1 && group3) {
+                            error = badAge && badEcoclass
+                        } else if (group1) {
+                            error = badAge
+                        } else if (group2) {
+                            error = badPower
+                        } else if (group3) {
+                            error = badEcoclass
+                        }
+
+                        if (error) {
+                            logger.error("В справочнике не должно быть записей с одинаковым значением полей «Код субъекта РФ представителя декларации», " +
+                                    "«Код региона РФ», «Код вида ТС», «Ед. измерения мощности» и с пересекающимися интервалами срока использования, мощности и экологического класса")
+                            break
+                        }
                     }
                 }
             }
