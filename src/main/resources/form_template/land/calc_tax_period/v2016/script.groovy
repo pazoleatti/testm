@@ -112,7 +112,7 @@ def autoFillColumns = allColumns - editableColumns - 'fix'
 // Проверяемые на пустые значения атрибуты (графа 1..8, 10, 12, 14, 21, 22, 25 (графа 26, 27, 28 обязательны для некоторых периодов))
 @Field
 def nonEmptyColumns = ['rowNumber', 'department', 'kno', 'kpp', 'kbk', 'oktmo', 'cadastralNumber',
-        'landCategory', 'cadastralCost', 'ownershipDate', 'period', 'taxRate', 'kv', 'q1' /*, 'q2', 'q3', 'year'*/]
+        'landCategory', 'cadastralCost', 'ownershipDate', 'period', 'taxRate', 'kv' /*, 'q1', 'q2', 'q3', 'year'*/]
 
 // графа 3, 4, 6
 @Field
@@ -120,7 +120,7 @@ def groupColumns = ['kno', 'kpp', 'oktmo']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 25..28)
 @Field
-def totalColumns = ['q1', 'q2', 'q3', 'year']
+def totalColumns = null
 
 // Дата начала отчетного периода
 @Field
@@ -195,14 +195,7 @@ void logicCheck() {
     def allRecords705 = (dataRows.size() > 0 ? getAllRecords2(705L) : null)
 
     // для логической проверки 2
-    def nonEmptyColumnsTmp = nonEmptyColumns
-    if (getReportPeriod().order == 2) {
-        nonEmptyColumnsTmp = nonEmptyColumnsTmp + 'q2'
-    } else if (getReportPeriod().order == 3) {
-        nonEmptyColumnsTmp = nonEmptyColumnsTmp + 'q2' + 'q3'
-    } else if (getReportPeriod().order == 4) {
-        nonEmptyColumnsTmp = nonEmptyColumnsTmp + 'q2' + 'q3' + 'year'
-    }
+    def nonEmptyColumnsTmp = nonEmptyColumns + getTotalColumns()
 
     // для логической проверки 14
     def needValue = [:]
@@ -496,7 +489,7 @@ void logicCheck() {
  */
 void checkTotalRow(def row, def tmpRow) {
     def errorColumns = []
-    for (def column : totalColumns) {
+    for (def column : getTotalColumns()) {
         if (row[column] != tmpRow[column]) {
             errorColumns.add(getColumnName(row, column))
         }
@@ -1096,10 +1089,10 @@ void importData() {
         totalRowFromFileMap.keySet().toArray().each { index ->
             def totalFromFile = totalRowFromFileMap[index]
             def total = totalRowMap[index]
-            compareTotalValues(totalFromFile, total, totalColumns, logger, 0, false)
+            compareTotalValues(totalFromFile, total, getTotalColumns(), logger, 0, false)
             // задание значении итоговой строке нф из итоговой строки файла (потому что в строках из файла стили для простых строк)
             total.setImportIndex(totalFromFile.getImportIndex())
-            (totalColumns + 'fix').each { alias ->
+            (getTotalColumns() + 'fix').each { alias ->
                 total[alias] = totalFromFile[alias]
             }
         }
@@ -1682,7 +1675,7 @@ def getTotalRow() {
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-    for (def alias : totalColumns) {
+    for (def alias : getTotalColumns()) {
         newRow[alias] = BigDecimal.ZERO
     }
     return newRow
@@ -1693,7 +1686,7 @@ def calcTotalRow(def dataRows) {
     def newRow = getTotalRow()
     newRow.setAlias('total')
     newRow.fix = 'ВСЕГО'
-    calcTotalSum(dataRows, newRow, totalColumns)
+    calcTotalSum(dataRows, newRow, getTotalColumns())
     return newRow
 }
 
@@ -1753,7 +1746,7 @@ def calcSubTotalRow1(int i, def dataRows, def kno, def kpp) {
         if (newRow.kno != srow.kno || newRow.kpp != srow.kpp) {
             break
         }
-        for (def alias : totalColumns) {
+        for (def alias : getTotalColumns()) {
             if (srow[alias] != null) {
                 newRow[alias] = newRow[alias] + srow[alias]
             }
@@ -1779,7 +1772,7 @@ def calcSubTotalRow2(int i, def dataRows, def kno, def kpp, def oktmo) {
         if (srow.getAlias() != null || srow.oktmo != newRow.oktmo) {
             break
         }
-        for (def alias : totalColumns) {
+        for (def alias : getTotalColumns()) {
             if (srow[alias] != null) {
                 newRow[alias] = newRow[alias] + srow[alias]
             }
@@ -1877,4 +1870,20 @@ def getRecords710() {
         }
     }
     return records710
+}
+
+def getTotalColumns() {
+    if (totalColumns == null) {
+        def order = getReportPeriod().order
+        if (order == 1) {
+            totalColumns = ['q1']
+        } else if (order == 2) {
+            totalColumns = ['q1', 'q2']
+        } else if (order == 3) {
+            totalColumns = ['q1', 'q2', 'q3']
+        } else if (order == 4) {
+            totalColumns = ['q1', 'q2', 'q3', 'year']
+        }
+    }
+    return totalColumns
 }
