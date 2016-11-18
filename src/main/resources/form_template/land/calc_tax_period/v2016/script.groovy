@@ -715,7 +715,7 @@ def calc24(def row, def value22, def value23, def showMsg = false) {
         return null
     }
     def k = getK(row)
-    int precision = 2 // точность при делении
+    int precision = 10 // точность при делении
     // A - сумма исчисленного налога (сумма налога без учета суммы льготы)
     // A = Графа 10 * Графа 11 * Графа 21 * Графа 22 * К / 100
     def a = row.cadastralCost.multiply(taxPart).multiply(row.taxRate).multiply(value22).multiply(k).divide(100, precision, BigDecimal.ROUND_HALF_UP)
