@@ -262,7 +262,7 @@ public class VehiclesTest extends ScriptTestBase {
         testHelper.setImportFileInputStream(getCustomInputStream(fileName));
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-        checkLogger();
+        // checkLogger();
         // проверка значении
         DataRow<Cell> row = testHelper.getDataRowHelper().getAll().get(0);
         // графа 22
@@ -289,7 +289,7 @@ public class VehiclesTest extends ScriptTestBase {
         testHelper.setImportFileInputStream(getCustomInputStream(fileName));
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-        checkLogger();
+        // checkLogger();
         // проверка значении
         DataRow<Cell> row = testHelper.getDataRowHelper().getAll().get(0);
         // графа 22
@@ -299,7 +299,7 @@ public class VehiclesTest extends ScriptTestBase {
         int i = 0;
         String msg = String.format("Строка %s, столбец %s: Не удалось заполнить графу «%s», " +
                 "т.к. в справочнике «Категории средней стоимости транспортных средств» " +
-                "не найдена запись со значением поля «Наименование» равным «%s»",
+                "не найдена категория «%s»",
                 "9", ScriptUtils.getXLSColumnName(22), ScriptUtils.getColumnName(row, "version"), "fakeValue");
         Assert.assertEquals(msg, testHelper.getLogger().getEntries().get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
@@ -317,7 +317,7 @@ public class VehiclesTest extends ScriptTestBase {
         testHelper.setImportFileInputStream(getCustomInputStream(fileName));
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-        checkLogger();
+        // checkLogger();
         // проверка значении
         DataRow<Cell> row = testHelper.getDataRowHelper().getAll().get(0);
         // графа 22
@@ -327,8 +327,8 @@ public class VehiclesTest extends ScriptTestBase {
         int i = 0;
         String msg = String.format("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
                 "«Средняя стоимость транспортных средств (с 2015)» не найдена запись " +
-                "со значением поля «Модель(версия)» равным «%s»",
-                "9", ScriptUtils.getXLSColumnName(22), ScriptUtils.getColumnName(row, "version"), "fakeValue");
+                "со значением поля «Модель(версия)» равным «%s» и значением поля «Средняя стоимость» равным «%s»",
+                "9", ScriptUtils.getXLSColumnName(22), ScriptUtils.getColumnName(row, "version"), "fakeValue", "nameA211");
         Assert.assertEquals(msg, testHelper.getLogger().getEntries().get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
@@ -346,7 +346,7 @@ public class VehiclesTest extends ScriptTestBase {
         testHelper.setImportFileInputStream(getCustomInputStream(fileName));
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-        checkLogger();
+        // checkLogger();
         // проверка значении
         DataRow<Cell> row = testHelper.getDataRowHelper().getAll().get(0);
         // графа 22
@@ -356,8 +356,8 @@ public class VehiclesTest extends ScriptTestBase {
         int i = 0;
         String msg = String.format("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
                 "«Средняя стоимость транспортных средств (с 2015)» найдено несколько записей " +
-                "со значением поля «Модель(версия)» равным «%s»",
-                "9", ScriptUtils.getXLSColumnName(22), ScriptUtils.getColumnName(row, "version"), "manyValue");
+                "со значением поля «Модель(версия)» равным «%s» и значением поля «Средняя стоимость» равным «%s»",
+                "9", ScriptUtils.getXLSColumnName(22), ScriptUtils.getColumnName(row, "version"), "manyValue", "nameA211");
         Assert.assertEquals(msg, testHelper.getLogger().getEntries().get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
@@ -400,7 +400,8 @@ public class VehiclesTest extends ScriptTestBase {
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
-        // 2.1 Проверка на наличие в форме строк с одинаковым значением граф 2, 4, 8, 12, 13, 14
+        // 2.1 Проверка на наличие в форме строк с одинаковым значением граф 2, 4, 8, 9, 13, 14
+        // 15. Проверка на наличие в форме строк с одинаковым значением граф 8, 9 и пересекающимися периодами владения
         setDefaultValues(row);
         DataRow<Cell> row2 = testHelper.getFormData().createDataRow();
         row2.setIndex(2);
@@ -413,6 +414,12 @@ public class VehiclesTest extends ScriptTestBase {
                 "на форме не должно быть строк с одинаковым кодом ОКТМО, кодом вида ТС, идентификационным номером ТС, " +
                 "регистрационным знаком ТС, налоговой базой, единицей измерения налоговой базы по ОКЕИ и пересекающимися периодами владения ТС",
                 "1, 2", "7190000", "50000", "test", "test", "1.00", "A");
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        msg = String.format("Строки %s: На форме не должно быть строк с одинаковым значением графы «%s» («%s») и пересекающимися периодами владения ТС",
+                "1, 2", "Идентификационный номер ТС", "test");
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        msg = String.format("Строки %s: На форме не должно быть строк с одинаковым значением графы «%s» («%s») и пересекающимися периодами владения ТС",
+                "1, 2", "Регистрационный знак ТС", "test");
         Assert.assertEquals(msg, entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();

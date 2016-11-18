@@ -698,8 +698,8 @@ def calc23(def row, def periodOrder = null) {
         return null
     }
     def termUse = calc20(row, periodOrder)
-    if (termUse == null || termUse == 0) {
-        return termUse
+    if (termUse == null) {
+        return null
     }
     def n = getMonthCount(periodOrder)
     BigDecimal tmp = (n - termUse) / n
@@ -750,8 +750,8 @@ def calc24(def row, def value22, def value23, def showMsg = false) {
                         row.getIndex(), columnName21)
             }
         } else {
-            // Графа 24 = Графа 10 * Графа 11 * Графа 22 * K * (Графа 21 – Р) / 100
-            tmp = row.cadastralCost.multiply(taxPart).multiply(value22).multiply(k).multiply(row.taxRate - p).divide(100, precision, BigDecimal.ROUND_HALF_UP)
+            // Графа 24 = Графа 10 * Графа 11 * (Графа 21 – Р) / 100
+            tmp = row.cadastralCost.multiply(taxPart).multiply(row.taxRate - p).divide(100, precision, BigDecimal.ROUND_HALF_UP)
         }
     } else if (check15 == 5 && value23 != null) {
         // Графа 24 = A * (1 – Графа 23)
@@ -877,7 +877,7 @@ def getN(def row, def periodOrder, def showMsg = false) {
     if (b == null) {
         return null
     }
-    int precision = 2 // точность при делении
+    int precision = 10 // точность при делении
     // Н = В * Графа 21 * Графа 22 * К / 100 – Графа 24;
     def tmp = b.multiply(row.taxRate).multiply(value22).multiply(k).divide(100, precision, BigDecimal.ROUND_HALF_UP).subtract(value24)
 

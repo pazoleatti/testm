@@ -221,7 +221,7 @@ def logicCheck() {
 
         // 9. Проверка корректности заполнения кода налоговой льготы
         if (row.codeOKATO && row.taxBenefitCode) {
-            def value2RegionId = getRegion(row.codeOKATO)?.record_id?.value
+            def value2RegionId = getRegion(row.codeOKATO, row.getIndex())?.record_id?.value
             def record7 = getAllRecords(7L).get(row.taxBenefitCode)
             def value9RegionId = record7?.DICT_REGION_ID?.value
             if (value2RegionId != value9RegionId) {
@@ -636,7 +636,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     colIndex++
     if (departmentRegionId && newRow.codeOKATO) {
         def record6 = getAllRecords(6L)?.values()?.find { it?.CODE?.value == values[colIndex] }
-        def regionId = getRegion(newRow.codeOKATO)?.record_id?.value
+        def regionId = getRegion(newRow.codeOKATO, fileRowIndex)?.record_id?.value
         def record7 = null
         if (record6) {
             record7 = getAllRecords(7L)?.values()?.find {
@@ -671,14 +671,19 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     return newRow
 }
 
-def getRegion(def record96Id) {
+def getRegion(def record96Id, def rowIndex) {
     def record96 = getRefBookValue(96L, record96Id)
     def okato = getOkato(record96?.CODE?.stringValue)
     if (okato) {
         def allRecords = getAllRecords(4L).values()
-        return allRecords.find { record ->
+        def record = allRecords.find { record ->
             record.OKTMO_DEFINITION.value == okato
         }
+        if (record == null) {
+            logger.error("Строка %s: В справочнике «Коды субъектов Российской Федерации» отсутствует запись с кодом «%s». Для обновления данных справочника обратитесь к контролеру УНП",
+                    rowIndex, okato)
+        }
+        return record
     }
     return null
 }

@@ -1,24 +1,37 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rows>
+<?xml version="1.0" encoding="utf-8"?><rows>
     <row alias="">
         <cell alias="fix" colSpan="2" rowSpan="2" value="№ п/п"/>
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
         <cell alias="dealNumber" colSpan="3" rowSpan="1" value="Общая информация о сделке"/>
+        <cell alias="dealKind" colSpan="1" rowSpan="1" value="Общая информация о сделке"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Общая информация о сделке"/>
         <cell alias="date1" colSpan="1" rowSpan="2" value="Дата заключения сделки"/>
         <cell alias="date2" colSpan="1" rowSpan="2" value="Дата окончания сделки"/>
         <cell alias="date3" colSpan="1" rowSpan="2" value="Дата исполнения сделки (в части требований Банка)"/>
         <cell alias="date4" colSpan="1" rowSpan="2" value="Дата исполнения сделки (в части обязательств Банка)"/>
         <cell alias="dealType" colSpan="1" rowSpan="2" value="Тип сделки"/>
         <cell alias="dealPrice1" colSpan="2" rowSpan="1" value="Цена сделки"/>
+        <cell alias="dealPrice2" colSpan="1" rowSpan="1" value="Цена сделки"/>
         <cell alias="costMin" colSpan="2" rowSpan="1" value="Максимальная/минимальная расчетная стоимость сделки для целей налогообложения на  дату заключения"/>
+        <cell alias="costMax" colSpan="1" rowSpan="1" value="Максимальная/минимальная расчетная стоимость сделки для целей налогообложения на  дату заключения"/>
         <cell alias="requirements" colSpan="2" rowSpan="1" value="Требования (+)/ обязательства (-) по сделке, руб."/>
+        <cell alias="guaranty" colSpan="1" rowSpan="1" value="Требования (+)/ обязательства (-) по сделке, руб."/>
         <cell alias="income" colSpan="2" rowSpan="1" value="Доходы/расходы, учитываемые в целях налога на прибыль по сделке, руб."/>
+        <cell alias="outcome" colSpan="1" rowSpan="1" value="Доходы/расходы, учитываемые в целях налога на прибыль по сделке, руб."/>
         <cell alias="sumMin" colSpan="2" rowSpan="1" value="Сумма отклонения от расчетной стоимости сделки более чем на 20%"/>
+        <cell alias="sumMax" colSpan="1" rowSpan="1" value="Сумма отклонения от расчетной стоимости сделки более чем на 20%"/>
     </row>
     <row alias="">
+        <cell alias="fix" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
         <cell alias="dealNumber" colSpan="1" rowSpan="1" value="Номер сделки"/>
         <cell alias="dealKind" colSpan="1" rowSpan="1" value="Вид сделки"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Наименование контрагента"/>
+        <cell alias="date1" colSpan="1" rowSpan="1" value="Дата заключения сделки"/>
+        <cell alias="date2" colSpan="1" rowSpan="1" value="Дата окончания сделки"/>
+        <cell alias="date3" colSpan="1" rowSpan="1" value="Дата исполнения сделки (в части требований Банка)"/>
+        <cell alias="date4" colSpan="1" rowSpan="1" value="Дата исполнения сделки (в части обязательств Банка)"/>
+        <cell alias="dealType" colSpan="1" rowSpan="1" value="Тип сделки"/>
         <cell alias="dealPrice1" colSpan="1" rowSpan="1" value="Форвардный курс (цена)/ фиксированная ставка"/>
         <cell alias="dealPrice2" colSpan="1" rowSpan="1" value="Курс Банка России/ обменный курс/ плавающая ставка"/>
         <cell alias="costMin" colSpan="1" rowSpan="1" value="Минимальная расчетная стоимость"/>
