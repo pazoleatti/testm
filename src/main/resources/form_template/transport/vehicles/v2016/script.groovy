@@ -81,7 +81,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -176,6 +176,21 @@ void calc() {
 
         // графа 16
         row.pastYear = calc16(row)
+
+        // убираем стиль "Ошибка" со строки если графу 22 заполнили
+        repaintRow(row)
+    }
+}
+
+// убираем стиль "Ошибка" если графу 22 заполнили
+void repaintRow(def row) {
+    if (row.version != null && row.getCell("version").styleAlias == "Ошибка") {
+        editableColumns.each {
+            row.getCell(it).styleAlias = 'Редактируемая'
+        }
+        autoFillColumns.each {
+            row.getCell(it).styleAlias = 'Автозаполняемая'
+        }
     }
 }
 
@@ -288,6 +303,8 @@ def logicCheck() {
     def equalsRowsMap = [:]
     // для логической проверки 6
     def needValue = [:]
+    // для логической проверки 15
+    def identRowsMap = [identNumber: [:], regNumber: [:]]
 
     for (def row : dataRows) {
         def index = row.getIndex()
@@ -295,9 +312,9 @@ def logicCheck() {
         // 1. Проверка заполнения обязательных граф
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // 2. Проверка на наличие в форме строк с одинаковым значением граф 2, 4, 8, 12, 13, 14
+        // 2. Проверка на наличие в форме строк с одинаковым значением граф 2, 4, 8, 9, 13, 14
         // сбор данных
-        def columnsForEquals = ['codeOKATO', 'tsTypeCode', 'identNumber', 'taxBase', 'baseUnit', 'baseUnit']
+        def columnsForEquals = ['codeOKATO', 'tsTypeCode', 'identNumber', 'regNumber', 'taxBase', 'baseUnit']
         def keyValues = columnsForEquals.collect { row[it] }
         def key = keyValues.join('#')
         if (equalsRowsMap[key] == null) {
@@ -342,7 +359,7 @@ def logicCheck() {
             }
             if (!errorColumns.isEmpty()) {
                 def columnNames = errorColumns.join('», «')
-                logger.error("Строка %s: Графы «%s» заполнены неверно. Выполните расчет формы", index, columnNames)
+                logger.warn("Строка %s: Графы «%s» заполнены неверно. Выполните расчет формы", index, columnNames)
             }
         }
 
@@ -408,6 +425,26 @@ def logicCheck() {
             logger.warn("Строка %s: Значение графы «%s», указанное в киловаттах должно быть переведено в лошадиные силы и значение графы «%s» должно быть равно «251»",
                     index, columnName13, columnName14)
         }
+
+        // 14. Проверка наличия на форме строк, к которым применен стиль «Ошибка»
+        if (!isCalc && row.getCell("version").styleAlias == "Ошибка") {
+            def columnName22 = getColumnName(row, 'version')
+            logger.error("Строка %s: Графа «%s» должна быть заполнена", index, columnName22)
+        }
+
+        // 15. Проверка на наличие в форме строк с одинаковым значением граф 8, 9 и пересекающимися периодами владения
+        // сбор данных
+        def columnsIdent = ['identNumber', 'regNumber']
+        for (alias in columnsIdent) {
+            def indentKey = row[alias]
+            if (row.regDate == null || !indentKey) {
+                continue
+            }
+            if (identRowsMap[alias][indentKey] == null) {
+                identRowsMap[alias][indentKey] = []
+            }
+            identRowsMap[alias][indentKey].add(row)
+        }
     }
 
     // 2. Проверка на наличие в форме строк с одинаковым значением граф 2, 4, 8, 12, 13, 14
@@ -416,24 +453,7 @@ def logicCheck() {
         if (rows.size() < 2) {
             continue
         }
-        def hasCross = false
-        for (int i = 0; i < rows.size(); i++) {
-            def row1 = rows[i]
-            for (int j = i + 1; j < rows.size(); j++) {
-                def row2 = rows[j]
-                def start1 = row1.regDate
-                def start2 = row2.regDate
-                def end1 = row1.regDateEnd ?: getReportPeriodEndDate()
-                def end2 = row1.regDateEnd ?: getReportPeriodEndDate()
-                if (start1 <= start2 && end1 >= start2 || start2 <= start1 && end2 >= start1) {
-                    hasCross = true
-                    break
-                }
-            }
-            if (hasCross) {
-                break
-            }
-        }
+        def hasCross = checkHasCross(rows)
         def indexes = rows?.collect { it.getIndex() }
         def indexesInStr = indexes?.join(', ')
         if (hasCross) {
@@ -452,8 +472,51 @@ def logicCheck() {
         } else {
             logger.warn("Строки %s: На форме присутствуют несколько строк по одному ТС. Проверьте периоды регистрации ТС", indexesInStr)
         }
-
     }
+
+    // 15. Проверка на наличие в форме строк с одинаковым значением граф 8 (9) и пересекающимися периодами владения
+    identRowsMap.keySet().toList().each { alias ->
+        def identMap = identRowsMap[alias]
+        for (def key : identMap.keySet().toList()) {
+            def rows = identMap[key]
+            if (rows.size() < 2) {
+                continue
+            }
+            def hasCross = checkHasCross(rows)
+            if (hasCross) {
+                def indexes = rows?.collect { it.getIndex() }
+                def indexesInStr = indexes?.join(', ')
+                def row = rows[0]
+                def value2 = getColumnName(row, alias)
+                def value3 = row[alias]
+                logger.error("Строки %s: На форме не должно быть строк с одинаковым значением графы «%s» («%s») и пересекающимися периодами владения ТС",
+                        indexesInStr, value2, value3)
+            }
+        }
+    }
+}
+
+// проверка на наличие пересечений
+boolean checkHasCross(def rows) {
+    boolean hasCross = false
+    for (int i = 0; i < rows.size(); i++) {
+        def row1 = rows[i]
+        for (int j = i + 1; j < rows.size(); j++) {
+            def row2 = rows[j]
+            def start1 = row1.regDate
+            def start2 = row2.regDate
+            def end1 = row1.regDateEnd ?: getReportPeriodEndDate()
+            def end2 = row1.regDateEnd ?: getReportPeriodEndDate()
+            if (start1 <= start2 && end1 >= start2 || start2 <= start1 && end2 >= start1) {
+                hasCross = true
+                break
+            }
+        }
+        if (hasCross) {
+            break
+        }
+    }
+    return hasCross
 }
 
 /** Получить строки за предыдущий отчетный период. */
@@ -655,10 +718,9 @@ void importData() {
     }
 
     showMessages(rows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(rows)
-        formDataService.getDataRowHelper(formData).allCached = rows
-    }
+
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 /**
@@ -813,41 +875,50 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 22 - атрибут 2183 - MODEL - «Модель (версия)», справочник 218 «Средняя стоимость транспортных средств»
     colIndex++
-    if (!values[22]) {
-        // 1. Проверка заполнения средней стоимости
-        def columnName22 = getColumnName(newRow, 'version')
-        def columnName23 = getColumnName(newRow, 'averageCost')
-        logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. графа «%s» не заполнена",
-                fileRowIndex, getXLSColumnName(22), columnName22, columnName23)
-    } else {
-        def record211 = getAllRecords(211L)?.values()?.find { it?.NAME?.value == values[22] }
-        if (!record211) {
-            // 2. Проверка корректности заполнения средней стоимости
+    boolean repaint = false
+    // Если графа 22 заполнена, то
+    if (values[21]) {
+        // Если графа 23 не заполнена
+        if (!values[22]) {
+            // 1. Проверка заполнения средней стоимости
             def columnName22 = getColumnName(newRow, 'version')
-            logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», " +
-                    "т.к. в справочнике «Категории средней стоимости транспортных средств» " +
-                    "не найдена запись со значением поля «Наименование» равным «%s»",
-                    fileRowIndex, getXLSColumnName(22), columnName22, values[22])
+            def columnName23 = getColumnName(newRow, 'averageCost')
+            repaint = true
+            logger.error("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. графа «%s» не заполнена",
+                    fileRowIndex, getXLSColumnName(22), columnName22, columnName23)
         } else {
-            def records218 = getAllRecords(218L)?.values()?.findAll {
-                it?.AVG_COST?.value == record211?.record_id?.value && it?.MODEL?.value == values[colIndex]
-            }
-            if (records218 == null || records218?.isEmpty()) {
-                // 3. Проверка наличия информации о модели в справочнике «Средняя стоимость транспортных средств (с 2015)»
+            def record211 = getAllRecords(211L)?.values()?.find { it?.NAME?.value == values[22] }
+            if (!record211) {
+                // 2. Проверка корректности заполнения средней стоимости
                 def columnName22 = getColumnName(newRow, 'version')
-                logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
-                        "«Средняя стоимость транспортных средств (с 2015)» не найдена запись " +
-                        "со значением поля «Модель(версия)» равным «%s»",
-                        fileRowIndex, getXLSColumnName(22), columnName22, values[colIndex])
-            } else if (records218?.size() > 1) {
-                // 4. Проверка возможности однозначного выбора информации о модели в справочнике «Средняя стоимость транспортных средств (с 2015)»
-                def columnName22 = getColumnName(newRow, 'version')
-                logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
-                        "«Средняя стоимость транспортных средств (с 2015)» найдено несколько записей " +
-                        "со значением поля «Модель(версия)» равным «%s»",
-                        fileRowIndex, getXLSColumnName(22), columnName22, values[colIndex])
-            } else if (records218?.size() == 1) {
-                newRow.version = records218[0]?.record_id?.value
+                repaint = true
+                logger.error("Строка %s, столбец %s: Не удалось заполнить графу «%s», " +
+                        "т.к. в справочнике «Категории средней стоимости транспортных средств» " +
+                        "не найдена категория «%s»",
+                        fileRowIndex, getXLSColumnName(22), columnName22, values[22])
+            } else {
+                def records218 = getAllRecords(218L)?.values()?.findAll {
+                    it?.AVG_COST?.value == record211?.record_id?.value && it?.MODEL?.value == values[21]
+                }
+                if (records218 == null || records218?.isEmpty()) {
+                    // 3. Проверка наличия информации о модели в справочнике «Средняя стоимость транспортных средств (с 2015)»
+                    def columnName22 = getColumnName(newRow, 'version')
+                    repaint = true
+                    logger.error("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
+                            "«Средняя стоимость транспортных средств (с 2015)» не найдена запись " +
+                            "со значением поля «Модель(версия)» равным «%s» и значением поля «Средняя стоимость» равным «%s»",
+                            fileRowIndex, getXLSColumnName(22), columnName22, values[21], values[22])
+                } else if (records218?.size() > 1) {
+                    // 4. Проверка возможности однозначного выбора информации о модели в справочнике «Средняя стоимость транспортных средств (с 2015)»
+                    def columnName22 = getColumnName(newRow, 'version')
+                    repaint = true
+                    logger.error("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
+                            "«Средняя стоимость транспортных средств (с 2015)» найдено несколько записей " +
+                            "со значением поля «Модель(версия)» равным «%s» и значением поля «Средняя стоимость» равным «%s»",
+                            fileRowIndex, getXLSColumnName(22), columnName22, values[21], values[22])
+                } else if (records218?.size() == 1) {
+                    newRow.version = records218[0]?.record_id?.value
+                }
             }
         }
     }
@@ -863,6 +934,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     newRow.deduction = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
+    if (repaint) {
+        allColumns.each { alias ->
+            newRow.getCell(alias).styleAlias = "Ошибка"
+        }
+    }
     return newRow
 }
 
