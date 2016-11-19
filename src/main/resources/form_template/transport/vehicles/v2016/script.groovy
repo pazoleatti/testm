@@ -884,7 +884,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
             def columnName22 = getColumnName(newRow, 'version')
             def columnName23 = getColumnName(newRow, 'averageCost')
             repaint = true
-            logger.error("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. графа «%s» не заполнена",
+            logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. графа «%s» не заполнена",
                     fileRowIndex, getXLSColumnName(22), columnName22, columnName23)
         } else {
             def record211 = getAllRecords(211L)?.values()?.find { it?.NAME?.value == values[22] }
@@ -892,7 +892,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
                 // 2. Проверка корректности заполнения средней стоимости
                 def columnName22 = getColumnName(newRow, 'version')
                 repaint = true
-                logger.error("Строка %s, столбец %s: Не удалось заполнить графу «%s», " +
+                logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», " +
                         "т.к. в справочнике «Категории средней стоимости транспортных средств» " +
                         "не найдена категория «%s»",
                         fileRowIndex, getXLSColumnName(22), columnName22, values[22])
@@ -904,7 +904,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
                     // 3. Проверка наличия информации о модели в справочнике «Средняя стоимость транспортных средств (с 2015)»
                     def columnName22 = getColumnName(newRow, 'version')
                     repaint = true
-                    logger.error("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
+                    logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
                             "«Средняя стоимость транспортных средств (с 2015)» не найдена запись " +
                             "со значением поля «Модель(версия)» равным «%s» и значением поля «Средняя стоимость» равным «%s»",
                             fileRowIndex, getXLSColumnName(22), columnName22, values[21], values[22])
@@ -912,7 +912,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
                     // 4. Проверка возможности однозначного выбора информации о модели в справочнике «Средняя стоимость транспортных средств (с 2015)»
                     def columnName22 = getColumnName(newRow, 'version')
                     repaint = true
-                    logger.error("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
+                    logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
                             "«Средняя стоимость транспортных средств (с 2015)» найдено несколько записей " +
                             "со значением поля «Модель(версия)» равным «%s» и значением поля «Средняя стоимость» равным «%s»",
                             fileRowIndex, getXLSColumnName(22), columnName22, values[21], values[22])
