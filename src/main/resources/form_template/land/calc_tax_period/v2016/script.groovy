@@ -313,11 +313,11 @@ void logicCheck() {
             needValue.benefitPeriod = calc20(row)
             needValue.kv = calc22(row)
             needValue.kl = calc23(row)
-            needValue.sum = calc24(row, row.kv, row.kl)
-            needValue.q1 = calc25(row)
-            needValue.q2 = calc26(row)
-            needValue.q3 = calc27(row)
-            needValue.year = calc28(row)
+            needValue.sum = calc24(row, row.kv, row.kl, true)
+            needValue.q1 = calc25(row, true)
+            needValue.q2 = calc26(row, true)
+            needValue.q3 = calc27(row, true)
+            needValue.year = calc28(row, true)
             def errorColumns = []
             for (def alias : arithmeticCheckAlias) {
                 if (needValue[alias] == null && row[alias] == null) {
@@ -549,7 +549,6 @@ void calc() {
     refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
     sortRows(dataRows, groupColumns)
 
-    def showMsg = (formDataEvent == FormDataEvent.CALCULATE)
     for (def row : dataRows) {
         // графа 2
         row.department = calc2(row)
@@ -564,15 +563,15 @@ void calc() {
         // графа 23
         row.kl = calc23(row)
         // графа 24
-        row.sum = calc24(row, row.kv, row.kl, showMsg)
+        row.sum = calc24(row, row.kv, row.kl)
         // графа 25
-        row.q1 = calc25(row, showMsg)
+        row.q1 = calc25(row)
         // графа 26
-        row.q2 = calc26(row, showMsg)
+        row.q2 = calc26(row)
         // графа 27
-        row.q3 = calc27(row, showMsg)
+        row.q3 = calc27(row)
         // графа 28
-        row.year = calc28(row, showMsg)
+        row.year = calc28(row)
     }
 
     // добавить подитоги
@@ -887,10 +886,10 @@ def getN(def row, def periodOrder, def showMsg = false) {
     if (tmp < 0) {
         if (showMsg) {
             def columnName = getColumnName(row, alias25_28Map[periodOrder])
-            logger.error("Строка %s: Не удалось рассчитать графу «%s», сумма исчисленного налога должна быть " +
-                    "больше или равна сумме налоговой льготы. Проверьте исходные данные", row.getIndex(), columnName)
+            logger.error("Строка %s: Графа «%s», сумма налоговой льготы больше суммы исчисленного налога. Проверьте исходные данные",
+                    row.getIndex(), columnName)
         }
-        return null
+        tmp = BigDecimal.ZERO
     }
     return round(tmp, 0)
 }
