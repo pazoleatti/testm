@@ -229,7 +229,7 @@ def logicCheck() {
                 def value2 = getRefBookValue(96L, row.codeOKATO)?.CODE?.value
                 def columnName9 = getColumnName(row, 'taxBenefitCode')
                 def regionCode = getAllRecords(4L).get(value9RegionId)?.CODE?.value
-                logger.error("Строка %s: Значение графы «%s» (%s) должно относится к региону, " +
+                logger.error("Строка %s: Значение графы «%s» (%s) должно относиться к региону, " +
                         "в котором действует выбранная в графе «%s» льгота («%s»)",
                         index, columnName2, value2, columnName9, regionCode)
             }

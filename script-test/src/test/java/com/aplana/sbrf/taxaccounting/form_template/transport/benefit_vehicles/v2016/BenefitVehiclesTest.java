@@ -467,7 +467,7 @@ public class BenefitVehiclesTest extends ScriptTestBase {
         setDefaultValues201(row201, row);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
-        msg = String.format("Строка %s: Значение графы «%s» (%s) должно относится к региону, " +
+        msg = String.format("Строка %s: Значение графы «%s» (%s) должно относиться к региону, " +
                         "в котором действует выбранная в графе «%s» льгота («%s»)",
                 row.getIndex(), ScriptUtils.getColumnName(row, "codeOKATO"), "codeA96",
                 ScriptUtils.getColumnName(row, "taxBenefitCode"), "03");
