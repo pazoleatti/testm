@@ -506,7 +506,7 @@ boolean checkHasCross(def rows) {
             def start1 = row1.regDate
             def start2 = row2.regDate
             def end1 = row1.regDateEnd ?: getReportPeriodEndDate()
-            def end2 = row1.regDateEnd ?: getReportPeriodEndDate()
+            def end2 = row2.regDateEnd ?: getReportPeriodEndDate()
             if (start1 <= start2 && end1 >= start2 || start2 <= start1 && end2 >= start1) {
                 hasCross = true
                 break
