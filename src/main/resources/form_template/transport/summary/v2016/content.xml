@@ -244,8 +244,8 @@
         <name>Исчисленная сумма налога (руб.)</name>
         <order>23</order>
         <width>10</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>benefitMonths</alias>
@@ -297,8 +297,8 @@
         <name>Налоговая льгота. Сумма</name>
         <order>28</order>
         <width>10</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>deductionCode</alias>
@@ -319,8 +319,8 @@
         <name>Налоговый вычет. Сумма</name>
         <order>30</order>
         <width>12</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>taxSumToPay</alias>
@@ -329,8 +329,8 @@
         <name>Исчисленная сумма налога, подлежащая уплате в бюджет (руб.)</name>
         <order>31</order>
         <width>12</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>q1</alias>
@@ -339,8 +339,8 @@
         <name>Авансовый платеж за 1 кв. (руб.)</name>
         <order>32</order>
         <width>12</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>q2</alias>
@@ -349,8 +349,8 @@
         <name>Авансовый платеж за 2 кв. (руб.)</name>
         <order>33</order>
         <width>12</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>q3</alias>
@@ -359,8 +359,8 @@
         <name>Авансовый платеж за 3 кв. (руб.)</name>
         <order>34</order>
         <width>12</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>q4</alias>
@@ -369,8 +369,8 @@
         <name>Сумма налога, к уплате/уменьшению за 4 кв. (руб.)</name>
         <order>35</order>
         <width>12</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <styles>
         <alias>Сравнение</alias>

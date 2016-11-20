@@ -15,8 +15,7 @@ import groovy.transform.Field
  * TODO:
  *      - расчеты
  *      - проверить расчеты
- *      - логические проверки
- *      - проверить логические проверки
+ *      - логические проверки 3, 9, 11 - сделать после расчетов
  *      - добавить тесты
  *
  *      - переименовал taxAuthority в kno !!!!
@@ -268,7 +267,7 @@ def calc() {
     addAllStatic(dataRows)
 
     // добавить строку "итого"
-    dataRows.add(calcTotalRow(dataRows))
+    dataRows.add(calcTotalRow(dataRows, true))
     updateIndexes(dataRows)
 
     // сравение данных с предыдущей формой
@@ -330,7 +329,7 @@ def calc34(def row) {
         return null
     }
     BigDecimal tmp = null // TODO (Ramil Timerbaev)
-    return round(tmp, 2)
+    return round(tmp, 0)
 }
 
 // TODO (Ramil Timerbaev) убрать?
@@ -406,10 +405,16 @@ void logicCheck() {
     // для логической проверки 2
     def nonEmptyColumnsTmp = nonEmptyColumns + getTotalColumns()
 
-    // для логической проверки N
+    // для логической проверки 4
+    def needCheck4or5 = true
+
+    // для логической проверки 9
     def needValue = [:]
-    // графа ...
-    def arithmeticCheckAlias = []
+    // графа 2, 19, 20, 22, 24, 27, 30..34
+    def arithmeticCheckAlias = ['kno', 'coefKv', 'taxRate', 'calculatedTaxSum', 'coefKl', 'taxBenefitSum', 'taxSumToPay', 'q1', 'q2', 'q3', 'q4']
+
+    // для логической проверки 15
+    def rowsMap15 = [:]
 
     // 1. Проверка заполнения поля «Регион» справочника «Подразделения» для подразделения формы
     if (formDataDepartment.regionId == null) {
@@ -419,17 +424,15 @@ void logicCheck() {
 
     def onlySimpleRows = dataRows?.findAll { !it.getAlias() }
 
-    // для логической проверки 4
-    def needCheck4or5 = true
-
     for (def row : onlySimpleRows) {
        def index = row.getIndex()
 
         // 2. Проверка заполнения обязательных граф
         checkNonEmptyColumns(row, index, nonEmptyColumnsTmp, logger, true)
 
+        // TODO (Ramil Timerbaev) добавить эту проверку в расчет! расчеты пока не сделаны
         // 3. Проверка наличия параметров представления декларации для кода ОКТМО
-        // Выполняется при расчете, в методе calcN() // TODO (Ramil Timerbaev)
+        // Выполняется при расчете, в методе calc2()
 
         // 6. Проверка корректности заполнения даты регистрации ТС
         if (row.regDate && row.regDate > getReportPeriodEndDate()) {
@@ -457,9 +460,20 @@ void logicCheck() {
             logger.error("Строка %s: Значение графы «%s» должно быть меньше либо равно «%s»", index, columnName15, year)
         }
 
-        // N. Проверка корректности заполнения граф ...
-        if (!isCalc) {
-            // needValue.someName = calcN(row)
+        // 9. Проверка корректности заполнения расчетных граф 2, 19, 20, 22, 24, 27, 30-34
+        if (!isCalc && false) {
+            // TODO (Ramil Timerbaev) доделать после расчетов
+            // needValue.kno = calc2(row)
+            // needValue.coefKv = calc19(row)
+            // needValue.taxRate = calc20(row)
+            // needValue.calculatedTaxSum = calc22(row)
+            // needValue.coefKl = calc24(row)
+            // needValue.taxBenefitSum = calc27(row)
+            // needValue.taxSumToPay = calc30(row)
+            // needValue.q1 = calc31(row)
+            // needValue.q2 = calc32(row)
+            // needValue.q3 = calc33(row)
+            // needValue.q4 = calc34(row)
             def errorColumns = []
             for (def alias : arithmeticCheckAlias) {
                 if (needValue[alias] == null && row[alias] == null) {
@@ -474,10 +488,73 @@ void logicCheck() {
                 logger.error("Строка %s: Графы «%s» заполнены неверно. Выполните расчет формы", index, columnNames)
             }
         }
+
+        // 10. Проверка корректности заполнения доли налогоплательщика в праве на ТС
+        if (row.partRight != null) {
+            def partArray = row.partRight.split('/')
+            if (!(row.partRight ==~ /\d{1,10}\/\d{1,10}/) ||
+                    partArray[0].toString().startsWith('0') ||
+                    partArray[1].toString().startsWith('0') ||
+                    partArray[0].toBigDecimal() > partArray[1].toBigDecimal()) {
+                def columnName18 = getColumnName(row, 'partRight')
+                logger.error("Строка %s: Графа «%s» должна быть заполнена согласно формату: " +
+                        "«(от 1 до 10 числовых знаков)/(от 1 до 10 числовых знаков)», " +
+                        "числитель должен быть меньше либо равен знаменателю, " +
+                        "числитель и знаменатель не должны быть равны нулю",
+                        index, columnName18)
+            }
+        }
+
+        // TODO (Ramil Timerbaev) добавить эту проверку в расчет! расчеты пока не сделаны
+        // 11. Проверка наличия ставки ТС в справочнике
+        // Выполняется при расчете, в методе calc20()
+
+        // 13. Проверка одновременного заполнения данных о налоговой льготе
+        if (!isCalc) {
+            // графа 23..27
+            def columns = ['benefitMonths', 'coefKl', 'taxBenefitCode', /* 'taxBenefitBase', */ 'taxBenefitSum']
+            def hasValue = columns.find { row[it] }
+            def hasNull = columns.find { !row[it] }
+            if (hasValue && hasNull) {
+                logger.error("Строка %s: Данные о налоговой льготе указаны не полностью", index)
+            }
+        }
+
+        // 14. Проверка одновременного заполнения данных о налоговом вычете
+        // графа 28, 29
+        def columnsForCheck14 = ['deductionCode', 'deductionSum']
+        def hasValue = columnsForCheck14.find { row[it] }
+        def hasNull = columnsForCheck14.find { !row[it] }
+        if (hasValue && hasNull) {
+            logger.error("Строка %s: Данные о налоговом вычете указаны не полностью", index)
+        }
+
+        def record210 = getRefBookValue(210L, row.kno)
+
+        // 15. Проверка заполнения формы настроек подразделений
+        // сбор данных
+        def key = record210?.TAX_ORGAN_CODE?.value + '#' + record210?.KPP?.value
+        if (rowsMap15[key] == null) {
+            rowsMap15[key] = []
+        }
+        rowsMap15[key].add(row)
+
+        // 17. Проверка разрядности значений граф 30-34, рассчитываемых в итоговых строках
+        // Выполняется при расчете, в методе checkOverflowLocal()
+
+        // 18. Проверка корректности заполнения кода налогового органа
+        if (!isCalc && row.okato && row.kno) {
+            if (record210?.OKTMO?.value != row.okato || record210?.REGION_ID?.value != getRegion(row.okato)?.record_id?.value) {
+                def columnName4 = getColumnName(row, 'okato')
+                def value4 = getRefBookValue(96L, row.okato)?.CODE?.value
+                logger.error("Строка %s: значение графы «%s» (%s) должно быть равно значению поля «Код ОКТМО» и " +
+                        "соответствовать значению поля «Код региона РФ» записи справочника, выбранной в графе 2",
+                        index, columnName4, value4)
+            }
+        }
     }
 
     if (needCheck4or5) {
-        // TODO (Ramil Timerbaev) проверить
         // 4. Проверка на наличие в форме строк с одинаковым значением граф 9, 10 и пересекающимися периодами владения
         // сбор данных
         def map4 = [ vi : [:], regNumber : [:] ]
@@ -515,7 +592,6 @@ void logicCheck() {
             }
         }
 
-        // TODO (Ramil Timerbaev) проверить
         // 5. Проверка на наличие в форме строк с одинаковым значением граф 4, 5, 9, 10, 13, 14 и пересекающимися периодами владения
         // сбор данных
         def columns = ['okato', 'tsTypeCode', 'vi', 'regNumber', 'taxBase', 'taxBaseOkeiUnit']
@@ -558,13 +634,42 @@ void logicCheck() {
 
     }
 
-    // N. Проверка наличия формы предыдущего периода в состоянии «Принята»
-    // Выполняется после консолидации, перед копированием данных, в методе copyFromPrevForm()
-
     // 12. Проверка наличия формы предыдущего периода в состоянии «Принята»
-    // Выполняется после расчетов, перед сравнением данных, в методе comparePrevRows()
+    if (isCalc && !getPrevDataRows()) {
+        def tmpRow = (dataRows ? dataRows[0] : formData.createDataRow())
+        def columnName2 = getColumnName(tmpRow, 'kno')
+        def columnName3 = getColumnName(tmpRow, 'kpp')
+        def prevReportPeriod = getPrevReportPeriod()
+        def periodName = prevReportPeriod?.periodName
+        def tmpYear = prevReportPeriod?.year
+        logger.warn("Данные граф «%s», «%s» не были скопированы из формы предыдущего периода. " +
+                "В Системе отсутствует форма в состоянии «Принята» за период: «%s %s» для подразделения «%s»",
+                columnName2, columnName3, periodName, tmpYear, formDataDepartment.name)
+    }
 
-    // N. Проверка корректности значений итоговых строк (строка "итого")
+    // 15. Проверка заполнения формы настроек подразделений
+    for (def key : rowsMap15.keySet().toList()) {
+        def rows = rowsMap15[key]
+        def row = rows[0]
+        def record210 = getRefBookValue(210L, row.kno)
+        def kno = record210?.TAX_ORGAN_CODE?.value
+        def kpp = record210?.KPP?.value
+        def records310 = getAllRecords2(310L)
+        def find = records310?.find {
+            it?.DEPARTMENT_ID?.value == formDataDepartment.id &&
+                    it?.TAX_ORGAN_CODE?.value == kno &&
+                    it?.KPP?.value == kpp
+        }
+        if (!find) {
+            def indexes = rows?.collect { it.getIndex() }
+            def indexesInStr = indexes?.join(', ')
+            logger.error("Строки %s: На форме настроек подразделений для подразделения «%s» " +
+                    "отсутствует запись с «Код налогового органа (кон.) = %s» и «КПП = %s»",
+                    indexesInStr, formDataDepartment.name, kno, kpp)
+        }
+    }
+
+    // 16. Проверка корректности значений итоговых строк (строка "итого")
     if (!isCalc) {
         def lastSimpleRow = null
         def subTotalMap = [:]
@@ -2102,7 +2207,7 @@ def allRecordsMap = [:]
  */
 def getAllRecords(def refBookId) {
     if (allRecordsMap[refBookId] == null) {
-        def date = getReportPeriodEndDate()
+        def date = (refBookId == 310 ? getReportPeriodEndDate() - 1 : getReportPeriodEndDate())
         def provider = getProvider(refBookId)
         List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
         allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
@@ -2278,11 +2383,24 @@ def creatTotalRow() {
 }
 
 /** Получить итоговую строку с суммами. */
-def calcTotalRow(def dataRows) {
+def calcTotalRow(def dataRows, def showMsg = false) {
     def newRow = creatTotalRow()
     newRow.setAlias('total')
     newRow.fix = 'Итого'
-    calcTotalSum(dataRows, newRow, getTotalColumns())
+
+    for (def alias : getTotalColumns()) {
+        BigDecimal sum = BigDecimal.ZERO
+        for (def row : dataRows) {
+            if (!row.getAlias()) {
+                sum = sum + (row[alias] ?: BigDecimal.ZERO)
+            }
+        }
+        if (checkOverflowLocal(sum, newRow, alias, 15, dataRows.size() + 1, showMsg)) {
+            newRow[alias] = sum
+        } else {
+            newRow[alias] = null
+        }
+    }
     return newRow
 }
 
@@ -2300,7 +2418,7 @@ void addAllStatic(def dataRows) {
         def value2 = row?.getCell('okato')?.refBookDereference
         def nextValue2 = nextRow?.getCell('okato')?.refBookDereference
         if (row.getAlias() == null && nextRow == null || value2 != nextValue2) {
-            def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno, /* row.kpp, */ row.okato)
+            def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno, row.okato, true)
             j++
             dataRows.add(i + j, subTotalRow2)
         }
@@ -2312,11 +2430,11 @@ void addAllStatic(def dataRows) {
             // если все значения пустые, то подитог по 2 уровню группировки не добавится,
             // поэтому перед добавлением подитога по 1 уровню группировки, нужно добавить подитог с пустыми значениями по 2 уровню
             if (j == 0) {
-                def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno, row.okato)
+                def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno, row.okato, true)
                 j++
                 dataRows.add(i + j, subTotalRow2)
             }
-            def subTotalRow1 = calcSubTotalRow1(i, dataRows, row.kno)
+            def subTotalRow1 = calcSubTotalRow1(i, dataRows, row.kno, true)
             j++
             dataRows.add(i + j, subTotalRow1)
         }
@@ -2325,13 +2443,18 @@ void addAllStatic(def dataRows) {
 }
 
 /** Расчет итога 1 уровня группировки - по графе 2, 3 КНО/КПП. */
-def calcSubTotalRow1(int i, def dataRows, def kno) {
+def calcSubTotalRow1(int i, def dataRows, def kno, def showMsg = false) {
     def newRow = creatTotalRow()
     newRow.setAlias('total1#' + i)
     newRow.fix = 'Итого по КНО/КПП'
 
     // значения группы
     newRow.kno = kno
+
+    def sums = [:]
+    for (def alias : getTotalColumns()) {
+        sums[alias] = BigDecimal.ZERO
+    }
 
     for (int j = i; j >= 0; j--) {
         def srow = getRow(dataRows, j)
@@ -2343,15 +2466,24 @@ def calcSubTotalRow1(int i, def dataRows, def kno) {
         }
         for (def alias : getTotalColumns()) {
             if (srow[alias] != null) {
-                newRow[alias] = newRow[alias] + srow[alias]
+                sums[alias] = sums[alias] + srow[alias]
             }
         }
     }
+
+    for (def alias : getTotalColumns()) {
+        if (checkOverflowLocal(sums[alias], newRow, alias, 15, i + 3, showMsg)) {
+            newRow[alias] = sums[alias]
+        } else {
+            newRow[alias] = null
+        }
+    }
+
     return newRow
 }
 
 /** Расчет итога 2 уровня группировки - по графе 4 ОКТМО (группировка внутри группы по КНО/КПП). */
-def calcSubTotalRow2(int i, def dataRows, def kno, def okato) {
+def calcSubTotalRow2(int i, def dataRows, def kno, def okato, def showMsg = false) {
     def newRow = creatTotalRow()
     newRow.setAlias("total2#" + i)
     newRow.fix = 'ИТОГО по КНО/КПП/ОКТМО'
@@ -2359,6 +2491,11 @@ def calcSubTotalRow2(int i, def dataRows, def kno, def okato) {
     // значения группы
     newRow.kno = kno
     newRow.okato = okato
+
+    def sums = [:]
+    for (def alias : getTotalColumns()) {
+        sums[alias] = BigDecimal.ZERO
+    }
 
     // идем от текущей позиции вверх и ищем нужные строки
     for (int j = i; j >= 0; j--) {
@@ -2368,10 +2505,19 @@ def calcSubTotalRow2(int i, def dataRows, def kno, def okato) {
         }
         for (def alias : getTotalColumns()) {
             if (srow[alias] != null) {
-                newRow[alias] = newRow[alias] + srow[alias]
+                sums[alias] = sums[alias] + srow[alias]
             }
         }
     }
+
+    for (def alias : getTotalColumns()) {
+        if (checkOverflowLocal(sums[alias], newRow, alias, 15, i + 2, showMsg)) {
+            newRow[alias] = sums[alias]
+        } else {
+            newRow[alias] = null
+        }
+    }
+
     return newRow
 }
 
@@ -2479,7 +2625,8 @@ def allRecordsMap2 = [:]
 def getAllRecords2(def refbookId) {
     if (allRecordsMap2[refbookId] == null) {
         def provider = formDataService.getRefBookProvider(refBookFactory, refbookId, providerCache)
-        allRecordsMap2[refbookId] = provider.getRecords(getReportPeriodEndDate(), null, null, null)
+        def date = (refbookId == 310 ? getReportPeriodEndDate() - 1 : getReportPeriodEndDate())
+        allRecordsMap2[refbookId] = provider.getRecords(date, null, null, null)
     }
     return allRecordsMap2[refbookId]
 }
@@ -2579,4 +2726,22 @@ def getTotalColumns() {
         }
     }
     return totalColumns
+}
+
+def checkOverflowLocal(BigDecimal value, def row, def alias, def size, def index, def showMsg) {
+    if (value == null) {
+        return true
+    }
+    BigDecimal overpower = new BigDecimal("1E" + size)
+
+    if (value.abs().compareTo(overpower) != -1) {
+        if (showMsg) {
+            // Логическая проверка 17. Проверка разрядности значений граф 30-34, рассчитываемых в итоговых строках
+            String columnName = getColumnName(row, alias)
+            logger.error("Строка %s: Значение графы «%s» превышает допустимую разрядность (%s знаков)",
+                    index, columnName, size)
+        }
+        return false
+    }
+    return true
 }
