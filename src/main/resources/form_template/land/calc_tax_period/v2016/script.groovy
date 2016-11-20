@@ -308,29 +308,27 @@ void logicCheck() {
         }
 
         // 14. Проверка корректности заполнения граф 14, 20, 22-28
-        if (!isCalc) {
-            needValue.period = calc14(row)
-            needValue.benefitPeriod = calc20(row)
-            needValue.kv = calc22(row)
-            needValue.kl = calc23(row)
-            needValue.sum = calc24(row, row.kv, row.kl, true)
-            needValue.q1 = calc25(row, true)
-            needValue.q2 = calc26(row, true)
-            needValue.q3 = calc27(row, true)
-            needValue.year = calc28(row, true)
-            def errorColumns = []
-            for (def alias : arithmeticCheckAlias) {
-                if (needValue[alias] == null && row[alias] == null) {
-                    continue
-                }
-                if (needValue[alias] == null || row[alias] == null || needValue[alias].compareTo(row[alias]) != 0) {
-                    errorColumns.add(getColumnName(row, alias))
-                }
+        needValue.period = calc14(row)
+        needValue.benefitPeriod = calc20(row)
+        needValue.kv = calc22(row)
+        needValue.kl = calc23(row)
+        needValue.sum = calc24(row, row.kv, row.kl, true)
+        needValue.q1 = calc25(row, true)
+        needValue.q2 = calc26(row, true)
+        needValue.q3 = calc27(row, true)
+        needValue.year = calc28(row, true)
+        def errorColumns = []
+        for (def alias : arithmeticCheckAlias) {
+            if (needValue[alias] == null && row[alias] == null) {
+                continue
             }
-            if (!errorColumns.isEmpty()) {
-                def columnNames = errorColumns.join('», «')
-                logger.error("Строка %s: Графы «%s» заполнены неверно. Выполните расчет формы", rowIndex, columnNames)
+            if (needValue[alias] == null || row[alias] == null || needValue[alias].compareTo(row[alias]) != 0) {
+                errorColumns.add(getColumnName(row, alias))
             }
+        }
+        if (!errorColumns.isEmpty()) {
+            def columnNames = errorColumns.join('», «')
+            logger.error("Строка %s: Графы «%s» заполнены неверно. Выполните расчет формы", rowIndex, columnNames)
         }
 
         // 15. Проверка заполнения формы настроек подразделений
@@ -886,7 +884,7 @@ def getN(def row, def periodOrder, def showMsg = false) {
     if (tmp < 0) {
         if (showMsg) {
             def columnName = getColumnName(row, alias25_28Map[periodOrder])
-            logger.error("Строка %s: Графа «%s», сумма налоговой льготы больше суммы исчисленного налога. Проверьте исходные данные",
+            logger.warn("Строка %s: Графа «%s», сумма налоговой льготы больше суммы исчисленного налога. Проверьте исходные данные",
                     row.getIndex(), columnName)
         }
         tmp = BigDecimal.ZERO
