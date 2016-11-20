@@ -373,6 +373,13 @@
         <precision>2</precision>
     </columns>
     <styles>
+        <alias>Сравнение</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>

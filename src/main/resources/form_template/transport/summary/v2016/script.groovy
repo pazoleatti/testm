@@ -17,13 +17,7 @@ import groovy.transform.Field
  *      - проверить расчеты
  *      - логические проверки
  *      - проверить логические проверки
- *      - загрузка
- *      - проверить загрузку
  *      - добавить тесты
- *      - сравнение данных
- *
- *      - выполнять предрасчетную проверку только перед расчетом? или еще при принятии, проверке, консолидации?
- *      - переименовать taxBaseOkeiUnit в baseUnit как в сведениях о ТС ?
  *
  *      - переименовал taxAuthority в kno !!!!
  *      - переименовал coef362 в coefKv !!!!
@@ -58,7 +52,7 @@ import groovy.transform.Field
 // графа 23 - benefitMonths
 // графа 24 - coefKl
 // графа 25 - taxBenefitCode    - атрибут 19.15 - TAX_BENEFIT_ID.CODE - «Код налоговой льготы».«Код», справочник 7.6 «Параметры налоговых льгот транспортного налога».«Коды налоговых льгот и вычетов транспортного налога»
-// графа 26 - taxBenefitBase    - зависит от графы 9 - атрибут 702 - BASE - «Основание», справочник 7 «Параметры налоговых льгот транспортного налога»
+// графа 26 - taxBenefitBase    - зависит от графы 25 - атрибут 702 - BASE - «Основание», справочник 7 «Параметры налоговых льгот транспортного налога»
 // графа 27 - taxBenefitSum
 // графа 28 - deductionCode     - атрибут 15 - CODE - «Код», справочник 6 «Коды налоговых льгот и вычетов транспортного налога»
 // графа 29 - deductionSum
@@ -86,17 +80,14 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        checkRegionId()
         calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.CHECK:
-        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        checkRegionId()
         preConsolidationCheck()
         if (logger.containsLevel(LogLevel.ERROR)) {
             return
@@ -111,7 +102,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
-        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.IMPORT:
@@ -140,7 +130,7 @@ def allColumns = ['fix', 'rowNumber', 'kno', 'kpp', 'okato', 'tsTypeCode', 'tsTy
 
 // графа 30..34
 @Field
-def totalColumns = ['taxSumToPay', 'q1', 'q2', 'q3', 'q4']
+def totalColumns = null
 
 // графа 2
 @Field
@@ -150,11 +140,11 @@ def editableColumns = ['kno']
 @Field
 def autoFillColumns = allColumns - editableColumns - 'fix'
 
-// графа 1..7, 9..11, 13..20, 22, 30, 31 (графа 32..34 обязательны для некоторых периодов)
+// графа 1..7, 9..11, 13..20, 22, 30, 31 (графа 32..34 обязательны для некоторых периодов) - 30..34 убраны, добавляются в логической проверке 2
 @Field
 def nonEmptyColumns = ['kno', 'okato', 'tsTypeCode', 'model', 'vi', 'regNumber', 'regDate',
         'taxBase', 'taxBaseOkeiUnit', 'createYear', 'years', 'ownMonths', 'partRight', 'coefKv',
-        'taxRate', 'calculatedTaxSum', 'taxSumToPay', 'q1' /*, 'q2', 'q3', 'q4'*/ ]
+        'taxRate', 'calculatedTaxSum' /*, 'taxSumToPay', 'q1', 'q2', 'q3', 'q4'*/ ]
 
 // графа 2, 3, 4
 @Field
@@ -214,14 +204,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-// TODO (Ramil Timerbaev) удалить?
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecord(def Long refBookId, def String alias, def String value, def int rowIndex, def String columnName,
-              def Date date, boolean required = true) {
-    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, null, date,
-            rowIndex, columnName, logger, required)
-}
-
 def getProvider(def id) {
     return formDataService.getRefBookProvider(refBookFactory, id, providerCache)
 }
@@ -258,6 +240,28 @@ def calc() {
 
     for (def row : dataRows) {
         // TODO (Ramil Timerbaev) дополнить
+//        // графа 2
+//        row.kno = calc2(row)
+//        // графа 19
+//        row.coefKv = calc19(row)
+//        // графа 20
+//        row.taxRate = calc20(row)
+//        // графа 22
+//        row.calculatedTaxSum = calc22(row)
+//        // графа 24
+//        row.coefKl = calc24(row)
+//        // графа 27
+//        row.taxBenefitSum = calc27(row)
+//        // графа 30
+//        row.taxSumToPay = calc30(row)
+//        // графа 31
+//        row.q1 = calc31(row)
+//        // графа 32
+//        row.q2 = calc32(row)
+//        // графа 33
+//        row.q3 = calc33(row)
+//        // графа 34
+//        row.q4 = calc34(row)
     }
 
     // добавить подитоги
@@ -268,7 +272,65 @@ def calc() {
     updateIndexes(dataRows)
 
     // сравение данных с предыдущей формой
-    // comparePrevRows()
+    comparePrevRows()
+}
+
+def calc2(def row) {
+    BigDecimal tmp = null // TODO (Ramil Timerbaev)
+    return tmp
+}
+
+def calc19(def row) {
+    BigDecimal tmp = null // TODO (Ramil Timerbaev)
+    return tmp
+}
+
+def calc20(def row) {
+    BigDecimal tmp = null // TODO (Ramil Timerbaev)
+    return tmp
+}
+
+def calc22(def row) {
+    BigDecimal tmp = null // TODO (Ramil Timerbaev)
+    return tmp
+}
+
+def calc24(def row) {
+    BigDecimal tmp = null // TODO (Ramil Timerbaev)
+    return tmp
+}
+
+def calc27(def row) {
+    BigDecimal tmp = null // TODO (Ramil Timerbaev)
+    return tmp
+}
+
+def calc30(def row) {
+    BigDecimal tmp = null // TODO (Ramil Timerbaev)
+    return tmp
+}
+
+def calc31(def row) {
+    BigDecimal tmp = null // TODO (Ramil Timerbaev)
+    return tmp
+}
+
+def calc32(def row) {
+    BigDecimal tmp = null // TODO (Ramil Timerbaev)
+    return tmp
+}
+
+def calc33(def row) {
+    BigDecimal tmp = null // TODO (Ramil Timerbaev)
+    return tmp
+}
+
+def calc34(def row) {
+    if (getReportPeriod()?.order < 4 || row.taxSumToPay == null || row.q1) {
+        return null
+    }
+    BigDecimal tmp = null // TODO (Ramil Timerbaev)
+    return round(tmp, 2)
 }
 
 // TODO (Ramil Timerbaev) убрать?
@@ -332,37 +394,68 @@ def checkTaKpp(def row, def region, def rowIndex) {
 @Field
 def uniqueColumns = ['okato', 'tsTypeCode', 'vi', 'taxBase', 'taxBaseOkeiUnit']
 
-// TODO (Ramil Timerbaev) передалать/дополнить
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
 
+    def reportPeriod = getReportPeriod()
+    def year = reportPeriod.taxPeriod.year
+    def startYearDate = Date.parse('dd.MM.yyyy', '01.01.' + year)
     def isCalc = (formDataEvent == FormDataEvent.CALCULATE)
 
-    // TODO (Ramil Timerbaev) переделать аналогично SBRFACCTAX-17678
-    // для логической проверки 1
-    def nonEmptyColumnsTmp = nonEmptyColumns
-    if (getReportPeriod().order == 2) {
-        nonEmptyColumnsTmp = nonEmptyColumnsTmp + 'q2'
-    } else if (getReportPeriod().order == 3) {
-        nonEmptyColumnsTmp = nonEmptyColumnsTmp + 'q2' + 'q3'
-    } else if (getReportPeriod().order == 4) {
-        nonEmptyColumnsTmp = nonEmptyColumnsTmp + 'q2' + 'q3' + 'q4'
-    }
+    // для логической проверки 2
+    def nonEmptyColumnsTmp = nonEmptyColumns + getTotalColumns()
 
     // для логической проверки N
     def needValue = [:]
     // графа ...
     def arithmeticCheckAlias = []
 
-    for (def row : dataRows) {
-        if (row.getAlias()) {
-            continue
-        }
-        def rowIndex = row.getIndex()
+    // 1. Проверка заполнения поля «Регион» справочника «Подразделения» для подразделения формы
+    if (formDataDepartment.regionId == null) {
+        logger.error("В справочнике «Подразделения» не заполнено поле «Регион» для подразделения «%s»", formDataDepartment.name)
+        return
+    }
 
-        // N. Проверка обязательности заполнения граф
-        checkNonEmptyColumns(row, rowIndex, nonEmptyColumnsTmp, logger, true)
+    def onlySimpleRows = dataRows?.findAll { !it.getAlias() }
+
+    // для логической проверки 4
+    def needCheck4or5 = true
+
+    for (def row : onlySimpleRows) {
+       def index = row.getIndex()
+
+        // 2. Проверка заполнения обязательных граф
+        checkNonEmptyColumns(row, index, nonEmptyColumnsTmp, logger, true)
+
+        // 3. Проверка наличия параметров представления декларации для кода ОКТМО
+        // Выполняется при расчете, в методе calcN() // TODO (Ramil Timerbaev)
+
+        // 6. Проверка корректности заполнения даты регистрации ТС
+        if (row.regDate && row.regDate > getReportPeriodEndDate()) {
+            def columnName11 = getColumnName(row, 'regDate')
+            def dateInStr = getReportPeriodEndDate().format('dd.MM.yyyy')
+            logger.error("Строка %s: Значение графы «%s» должно быть меньше либо равно %s", index, columnName11, dateInStr)
+
+            needCheck4or5 = false
+        }
+
+        // 7. Проверка корректности заполнения даты снятия с регистрации ТС
+        if (row.regDateEnd && (row.regDateEnd < startYearDate || row.regDate && row.regDateEnd < row.regDate)) {
+            def columnName12 = getColumnName(row, 'regDateEnd')
+            def dateInStr = startYearDate?.format('dd.MM.yyyy')
+            def columnName11 = getColumnName(row, 'regDate')
+            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно %s, и больше либо равно значению графы «%s»",
+                    index, columnName12, dateInStr, columnName11)
+
+            needCheck4or5 = false
+        }
+
+        // 8. Проверка корректности заполнения года выпуска ТС
+        if (row.createYear && row.createYear?.format('yyyy')?.toInteger() > year) {
+            def columnName15 = getColumnName(row, 'createYear')
+            logger.error("Строка %s: Значение графы «%s» должно быть меньше либо равно «%s»", index, columnName15, year)
+        }
 
         // N. Проверка корректности заполнения граф ...
         if (!isCalc) {
@@ -378,15 +471,97 @@ void logicCheck() {
             }
             if (!errorColumns.isEmpty()) {
                 def columnNames = errorColumns.join('», «')
-                logger.error("Строка %s: Графы «%s» заполнены неверно. Выполните расчет формы", rowIndex, columnNames)
+                logger.error("Строка %s: Графы «%s» заполнены неверно. Выполните расчет формы", index, columnNames)
             }
         }
+    }
+
+    if (needCheck4or5) {
+        // TODO (Ramil Timerbaev) проверить
+        // 4. Проверка на наличие в форме строк с одинаковым значением граф 9, 10 и пересекающимися периодами владения
+        // сбор данных
+        def map4 = [ vi : [:], regNumber : [:] ]
+        for (def row : onlySimpleRows) {
+            def aliases = map4.keySet().toList()
+            for (def alias : aliases) {
+                def key = row[alias]
+                if (row.regDate == null || !key) {
+                    continue
+                }
+                if (map4[alias][key] == null) {
+                    map4[alias][key] = []
+                }
+                map4[alias][key].add(row)
+            }
+        }
+        // проверка совпадении
+        for (def alias : map4.keySet()) {
+            def rowsMap = map4[alias]
+            for (def key : rowsMap.keySet()) {
+                def rows = rowsMap[key]
+                if (rows.size() < 2) {
+                    continue
+                }
+                def hasCross = checkHasCross(rows)
+                if (hasCross) {
+                    def indexes = rows?.collect { it.getIndex() }
+                    def indexesInStr = indexes?.join(', ')
+                    def row = rows[0]
+                    def columnName = getColumnName(row, alias)
+                    def value = row[alias]
+                    logger.error("Строки %s: На форме не должно быть строк с одинаковым значением графы «%s» («%s») и пересекающимися периодами владения ТС",
+                            indexesInStr, columnName, value)
+                }
+            }
+        }
+
+        // TODO (Ramil Timerbaev) проверить
+        // 5. Проверка на наличие в форме строк с одинаковым значением граф 4, 5, 9, 10, 13, 14 и пересекающимися периодами владения
+        // сбор данных
+        def columns = ['okato', 'tsTypeCode', 'vi', 'regNumber', 'taxBase', 'taxBaseOkeiUnit']
+        def map5 = [:]
+        for (def row : onlySimpleRows) {
+            def key = getKey(row, columns)
+            if (map5[key] == null) {
+                map5[key] = []
+            }
+            map5[key].add(row)
+        }
+        // проверка совпадении
+        for (def key : map5.keySet().toList()) {
+            def rows = map5[key]
+            if (rows.size() < 2) {
+                continue
+            }
+            def hasCross = checkHasCross(rows)
+            def indexes = rows?.collect { it.getIndex() }
+            def indexesInStr = indexes?.join(', ')
+            if (hasCross) {
+                // сообщение a
+                def row = rows[0]
+                def value4 = getRefBookValue(96, row.okato)?.CODE?.value ?: ''
+                def value5 = getRefBookValue(42, row.tsTypeCode)?.CODE?.value ?: ''
+                def value9 = row.vi ?: ''
+                def value10 = row.regNumber ?: ''
+                def value13 = row.taxBase ?: ''
+                def value14 = getRefBookValue(12, row.taxBaseOkeiUnit)?.CODE?.value ?: ''
+                logger.error("Строки %s: Код ОКТМО «%s», Код вида ТС «%s», Идентификационный номер ТС «%s», " +
+                        "Регистрационный знак «%s», Налоговая база «%s», Единица измерения налоговой базы по ОКЕИ «%s»: " +
+                        "на форме не должно быть строк с одинаковым кодом ОКТМО, кодом вида ТС, идентификационным номером ТС, " +
+                        "регистрационным знаком ТС, налоговой базой, единицей измерения налоговой базы по ОКЕИ и пересекающимися периодами владения ТС",
+                        indexesInStr, value4, value5, value9, value10, value13, value14)
+            } else {
+                // сообщение b
+                logger.warn("Строки %s: На форме присутствуют несколько строк по одному ТС. Проверьте периоды регистрации ТС", indexesInStr)
+            }
+        }
+
     }
 
     // N. Проверка наличия формы предыдущего периода в состоянии «Принята»
     // Выполняется после консолидации, перед копированием данных, в методе copyFromPrevForm()
 
-    // N. Проверка наличия формы предыдущего периода в состоянии «Принята»
+    // 12. Проверка наличия формы предыдущего периода в состоянии «Принята»
     // Выполняется после расчетов, перед сравнением данных, в методе comparePrevRows()
 
     // N. Проверка корректности значений итоговых строк (строка "итого")
@@ -446,7 +621,7 @@ void logicCheck() {
                     continue
                 }
                 // проверка сумм
-                def srow = calcSubTotalRow2(dataRows.indexOf(row) - 1, dataRows, row.kno, /*, row.kpp,*/ row.okato)
+                def srow = calcSubTotalRow2(dataRows.indexOf(row) - 1, dataRows, row.kno, row.okato)
                 checkTotalRow(row, srow)
             } else if (row.getAlias() != null && row.getAlias().indexOf('total1') != -1) {
                 // подитог кно/кпп
@@ -457,7 +632,7 @@ void logicCheck() {
                     continue
                 }
                 // проверка сумм
-                def srow = calcSubTotalRow1(dataRows.indexOf(row) - 1, dataRows, row.kno /*, row.kpp*/ )
+                def srow = calcSubTotalRow1(dataRows.indexOf(row) - 1, dataRows, row.kno)
                 checkTotalRow(row, srow)
             }
             lastSubTotalRow = row
@@ -482,7 +657,7 @@ void logicCheck() {
  */
 void checkTotalRow(def row, def tmpRow) {
     def errorColumns = []
-    for (def column : totalColumns) {
+    for (def column : getTotalColumns()) {
         if (row[column] != tmpRow[column]) {
             errorColumns.add(getColumnName(row, column))
         }
@@ -516,34 +691,6 @@ def getOkato(def codeOkato) {
     }
     return codeOkato
 }
-
-// TODO (Ramil Timerbaev) удалить?
-/**
- * Получить "Код вида ТС" родителя.
- *
- * @param tsTypeCode id на справочник 42 «Коды видов транспортных средств»
- */
-def getParentTsTypeCode(def tsTypeCode) {
-    // справочник 42 «Коды видов транспортных средств»
-    def ids = getProvider(42L).getParentsHierarchy(tsTypeCode)
-    if (ids != null && !ids.isEmpty()) {
-        return getRefBookValue(42L, ids.get(0))?.CODE?.value
-    }
-    return null
-}
-
-// TODO (Ramil Timerbaev) удалить?
-@Field
-def tsCodeNamesMap = [:]
-
-def getSectionTsTypeName(def sectionTsTypeCode) {
-    if (tsCodeNamesMap[sectionTsTypeCode] == null) {
-        def record = getRecord(42, 'CODE', sectionTsTypeCode, -1, null, getReportPeriodEndDate(), true)
-        tsCodeNamesMap[sectionTsTypeCode] = record?.NAME?.value ?: ""
-    }
-    return tsCodeNamesMap[sectionTsTypeCode]
-}
-
 
 @Field
 def groupColumnsListListB = [
@@ -892,9 +1039,8 @@ def consolidation() {
                 findRowsB.add(rowB)
             }
         }
-        def newRow = null
         // шаг a и b
-        newRow = getNewRow(rowV, findRowsB, relationMap)
+        def newRow = getNewRow(rowV, findRowsB, relationMap)
         newRow.setIndex(rowIndex++)
         dataRows.add(newRow)
 
@@ -1062,6 +1208,7 @@ def getNewRow(def rowB) {
     return newRow
 }
 
+// TODO (Ramil Timerbaev) убрать?
 // Расчет графы 21
 int calc21(DataRow sRow, Date reportPeriodStartDate, Date reportPeriodEndDate) {
     // Дугона – дата угона
@@ -1175,6 +1322,7 @@ int calc21(DataRow sRow, Date reportPeriodStartDate, Date reportPeriodEndDate) {
     }
 }
 
+// TODO (Ramil Timerbaev) убрать?
 def calc26(def row, def reportPeriodStartDate, def reportPeriodEndDate) {
     if (row.benefitStartDate == null && row.benefitEndDate == null) {
         return null
@@ -1199,6 +1347,7 @@ def calc26(def row, def reportPeriodStartDate, def reportPeriodEndDate) {
 
 }
 
+// TODO (Ramil Timerbaev) убрать?
 /** Число полных месяцев в текущем периоде (либо отчетном либо налоговом). */
 def getMonthCount() {
     if (monthCountInPeriod == null) {
@@ -1218,56 +1367,61 @@ def getMonthCount() {
     return monthCountInPeriod
 }
 
-/**
- * Графа 24 (Налоговая ставка)
- * Скрипт для вычисления налоговой ставки
- */
-void calc24(def row, def region) {
-    if (row.tsTypeCode != null && row.years != null && row.taxBase != null) {
-        def regionId = region?.record_id?.value
-        def declarationRegionId = formDataDepartment.regionId
-        // справочник «Ставки транспортного налога»
-        def allRecords = getAllRecords(41L).values()
-        def records = allRecords.findAll { record ->
-            record.DECLARATION_REGION_ID.value == declarationRegionId &&
-                    record.DICT_REGION_ID.value == regionId &&
-                    record.CODE.value == row.tsTypeCode &&
-                    record.UNIT_OF_POWER.value == row.taxBaseOkeiUnit &&
-                    ((record.MIN_AGE.value == null) || (record.MIN_AGE.value < row.years)) &&
-                    ((record.MAX_AGE.value == null) || (record.MAX_AGE.value >= row.years)) &&
-                    ((record.MIN_POWER.value == null) || (record.MIN_POWER.value < row.taxBase)) &&
-                    ((record.MAX_POWER.value == null) || (record.MAX_POWER.value >= row.taxBase))
-        }
-
-        if (records != null && records.size() == 1) {
-            row.taxRate = records[0].record_id.value
-        } else if (formDataEvent == FormDataEvent.CALCULATE) { // выводим только при расчете
-            boolean isMany = records != null && records.size() > 1
-            def declarationRegionCode = getRefBookValue(4, declarationRegionId).CODE.value
-            def regionCode = region?.CODE?.value ?: ''
-            def tsTypeCode = getRefBookValue(42L, row.tsTypeCode).CODE.value
-            def taxBaseOkeiUnit = getRefBookValue(12L, row.taxBaseOkeiUnit).CODE.value
-            def okato = getRefBookValue(96L, row.okato).CODE.value
-            def msg1 = isMany ? "более одной записи, актуальной" : "отсутствует запись, актуальная"
-            logger.error("Строка %s. Графа «%s» = «%s», графа «%s» = «%s», графа «%s» = «%s»: В справочнике «Ставки транспортного налога» " +
-                    "%s на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
-                    "справочника «Подразделения» для подразделения «%s», поле «Код субъекта РФ» = «%s», поле «Код ТС» = «%s», поле «Ед. измерения мощности» = «%s». ",
-                    row.getIndex(), getColumnName(row, 'okato'), okato, getColumnName(row, 'tsTypeCode'), tsTypeCode, getColumnName(row, 'taxBaseOkeiUnit'), taxBaseOkeiUnit,
-                    msg1, getReportPeriodEndDate().format('dd.MM.yyyy'), declarationRegionCode,
-                    formDataDepartment.name, regionCode, tsTypeCode, taxBaseOkeiUnit
-            )
-        }
+def getRecord41(def row, def region) {
+    if (region == null || row.tsTypeCode == null || row.taxBase == null ||
+            row.taxBaseOkeiUnit == null || row.years == null) {
+        return null
     }
-}
 
-// Получение подитоговых строк
-def getTotalRow(def dataRows) {
-    return dataRows.find { it.getAlias() != null && it.getAlias().equals('total') }
-}
+    def regionId = region?.record_id?.value
+    def declarationRegionId = formDataDepartment.regionId
+    def allRecords = getAllRecords(41L).values()
+    def ecoClassCode = getRefBookValue(40L, row.ecoClass)?.CODE?.value
+    def records = allRecords.findAll { record ->
+        record.DECLARATION_REGION_ID.value == declarationRegionId &&
+                record.DICT_REGION_ID.value == regionId &&
+                record.CODE.value == row.tsTypeCode &&
+                record.UNIT_OF_POWER.value == row.taxBaseOkeiUnit &&
+                ((record.MIN_AGE.value == null) || (record.MIN_AGE.value < row.years)) &&
+                ((record.MAX_AGE.value == null) || (record.MAX_AGE.value >= row.years)) &&
+                ((record.MIN_POWER.value == null) || (record.MIN_POWER.value < row.taxBase)) &&
+                ((record.MAX_POWER.value == null) || (record.MAX_POWER.value >= row.taxBase)) &&
+                ((record.MIN_ECOCLASS.value == null) || (getRefBookValue(40L, record.MIN_ECOCLASS.value)?.CODE?.value < ecoClassCode)) &&
+                ((record.MAX_ECOCLASS.value == null) || (getRefBookValue(40L, record.MAX_ECOCLASS.value)?.CODE?.value >= ecoClassCode))
+    }
 
-def getBenefitCode(def parentRecordId) {
-    def recordId = getRefBookValue(7, parentRecordId).TAX_BENEFIT_ID.value
-    return getRefBookValue(6, recordId).CODE.value
+    if (records != null && records.size() == 1) {
+        return records[0].record_id.value
+    } else if (formDataEvent == FormDataEvent.CALCULATE) {
+        // TODO (Ramil Timerbaev) нужно ли это сообщение?
+        boolean isMany = records != null && records.size() > 1
+        def declarationRegionCode = getRefBookValue(4, declarationRegionId).CODE.value
+        def regionCode = region?.CODE?.value ?: ''
+        def tsTypeCode = getRefBookValue(42L, row.tsTypeCode).CODE.value
+        def taxBaseOkeiUnit = getRefBookValue(12L, row.taxBaseOkeiUnit).CODE.value
+        def okato = getRefBookValue(96L, row.okato).CODE.value
+        def msg1 = isMany ? "более одной записи, актуальной" : "отсутствует запись, актуальная"
+        logger.error("Строка %s. Графа «%s» = «%s», графа «%s» = «%s», графа «%s» = «%s»: В справочнике «Ставки транспортного налога» " +
+                "%s на дату %s, в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
+                "справочника «Подразделения» для подразделения «%s», поле «Код субъекта РФ» = «%s», поле «Код ТС» = «%s», поле «Ед. измерения мощности» = «%s». ",
+                row.getIndex(), getColumnName(row, 'okato'), okato, getColumnName(row, 'tsTypeCode'), tsTypeCode, getColumnName(row, 'taxBaseOkeiUnit'), taxBaseOkeiUnit,
+                msg1, getReportPeriodEndDate().format('dd.MM.yyyy'), declarationRegionCode,
+                formDataDepartment.name, regionCode, tsTypeCode, taxBaseOkeiUnit
+        )
+    }
+    if (records) {
+        def max = 0
+        def maxRecord = null
+        def checkAttributes = ['MIN_AGE', 'MAX_AGE', 'MIN_POWER', 'MAX_POWER', 'MIN_ECOCLASS', 'MAX_ECOCLASS']
+        for (def record : records) {
+            def fill = checkAttributes.sum { record[it] ? 1 : 0 }
+            if (max < fill) {
+                max = fill
+                maxRecord = record
+            }
+        }
+        return maxRecord
+    }
 }
 
 // Сортировка групп и строк
@@ -1331,15 +1485,6 @@ void sortAddRows(def addRows, def dataRows) {
     }
 }
 
-// TODO (Ramil Timerbaev) выполнять предрасчетную проверку только перед расчетом? или еще при принятии, проверке, консолидации?
-// Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
-void checkRegionId() {
-    if (formDataDepartment.regionId == null) {
-        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
-    }
-}
-
-// TODO (Ramil Timerbaev) переделать
 void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 35
@@ -1355,7 +1500,7 @@ void importData() {
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
     // проверка шапки
-    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
@@ -1374,12 +1519,15 @@ void importData() {
     def totalRowFromFileMap = [:]           // мапа для хранения строк итогов/подитогов со значениями из файла (стили простых строк)
     def totalRowMap = [:]                   // мапа для хранения строк итогов/подитогов нф с посчитанными значениями и со стилями
 
-    // TODO (Ramil Timerbaev) нужно ли это сообщение?
+    // графа 2, 3, 20, 25, 26
+    def columns = ['kno', 'kpp', 'taxRate', 'taxBenefitCode', 'taxBenefitBase']
+    def columnNames = columns.collect { getColumnName(tmpRow, it) }
+    def subMsg = columnNames.join('», «')
+
     // 1. Проверка заполнения поля «Регион» справочника «Подразделения» для подразделения формы
     def departmentRegionId = formDataDepartment.regionId
     if (!departmentRegionId) {
-        logger.warn("Ну удалось заполнить графу «%s», т.к. для подразделения формы не заполнено поле «Регион» справочника «Подразделения»",
-                getColumnName(tmpRow, 'taxBenefitCode'))
+        logger.warn("Не удалось заполнить графу «%s», т.к. для подразделения формы не заполнено поле «Регион» справочника «Подразделения»", subMsg)
     }
 
     // заполнить кэш данными из справочника ОКТМО
@@ -1411,20 +1559,20 @@ void importData() {
         }
         // пропуск подитоговых строк
         if (rowValues[INDEX_FOR_SKIP]?.trim()?.toLowerCase()?.contains("итого по ")) {
-            def record210 = getRecord210(rowValues[2], rowValues[3], rowValues[4], fileRowIndex, 2, colOffset)
-            knoId = record210?.record_id?.value
+            def subTotalRowFromFile = getNewTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            def knoId = subTotalRowFromFile.kno
             def subTotalRow
             // сформировать и подсчитать подитоги
             if (rowValues[INDEX_FOR_SKIP]?.trim()?.toLowerCase()?.contains("октмо")) {
-                // def oktmo = (rowValues[6] ? getRecordIdImport(96L, 'CODE', rowValues[6], fileRowIndex, 6 + colOffset) : null)
-                subTotalRow = calcSubTotalRow2(rowIndex - 1, rows, knoId /*, rowValues[3], oktmo*/)
+                def oktmo = (rowValues[4] ? getRecordIdImport(96L, 'CODE', rowValues[4], fileRowIndex, 4 + colOffset) : null)
+                subTotalRow = calcSubTotalRow2(rowIndex - 1, rows, knoId, oktmo)
             } else {
-                subTotalRow = calcSubTotalRow1(rowIndex - 1, rows, knoId /*, rowValues[3]*/ )
+                subTotalRow = calcSubTotalRow1(rowIndex - 1, rows, knoId)
             }
             rows.add(subTotalRow)
             // получить значения подитоговой строки из файла
             rowIndex++
-            totalRowFromFileMap[rowIndex] = getNewTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            totalRowFromFileMap[rowIndex] = subTotalRowFromFile
             totalRowMap[rowIndex] = subTotalRow
 
             allValues.remove(rowValues)
@@ -1433,7 +1581,7 @@ void importData() {
         }
         // простая строка
         rowIndex++
-        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, departmentRegionId)
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, departmentRegionId, subMsg)
         rows.add(newRow)
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
@@ -1452,10 +1600,10 @@ void importData() {
         totalRowFromFileMap.keySet().toArray().each { index ->
             def totalFromFile = totalRowFromFileMap[index]
             def total = totalRowMap[index]
-            compareTotalValues(totalFromFile, total, totalColumns, logger, 0, false)
+            compareTotalValues(totalFromFile, total, getTotalColumns(), logger, 0, false)
             // задание значении итоговой строке нф из итоговой строки файла (потому что в строках из файла стили для простых строк)
             total.setImportIndex(totalFromFile.getImportIndex())
-            (totalColumns + 'fix').each { alias ->
+            (getTotalColumns() + 'fix').each { alias ->
                 total[alias] = totalFromFile[alias]
             }
         }
@@ -1473,9 +1621,8 @@ void importData() {
  * @param headerRows строки шапки
  * @param colCount количество колонок в таблице
  * @param rowCount количество строк в таблице
- * @param tmpRow вспомогательная строка для получения названии графов
  */
-void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+void checkHeaderXls(def headerRows, def colCount, rowCount) {
     checkHeaderSize(headerRows, colCount, rowCount)
 
     def headers = formDataService.getFormTemplate(formData.formTemplateId).headers
@@ -1533,27 +1680,81 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
  * @param departmentRegionId регион подразделения
+ * @param subMsg список названии граф зависящих от регина формы
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def departmentRegionId) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def departmentRegionId, def subMsg) {
     def newRow = getNewRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
     def colIndex
 
-    // TODO (Ramil Timerbaev) как восстанавливать значение для подитога первого уровня? в не отображается только кно и кпп
+    // графа 4 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
+    colIndex = 4
+    def record96 = null
+    def region = null
+    if (values[colIndex]) {
+        record96 = getRecordImport(96, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+        newRow.okato = record96?.record_id?.value
+
+        lastImportOktmo = values[colIndex]
+        region = getRegion(newRow.okato)
+    }
+
     // графа 2 - атрибут 2102 - TAX_ORGAN_CODE - «Код налогового органа (кон.)», справочник 210 «Параметры представления деклараций по транспортному налогу»
     colIndex = 2
-    def record210 = getRecord210(values[colIndex], values[3], values[4], fileRowIndex, colIndex, colOffset)
-    newRow.kno = record210?.record_id?.value
+    if (!values[colIndex] || !values[colIndex + 1]) {
+        // 3.с В справочнике «Параметры представления декларации по транспортному налогу» не заполнены графы 2, 3 в файле
+        def columnName2 = getColumnName(newRow, 'kno')
+        def columnName3 = getColumnName(newRow, 'kpp')
+        def columnNames = []
+        if (!values[colIndex]) {
+            columnNames.add(columnName2)
+        }
+        if (!values[colIndex + 1]) {
+            columnNames.add(columnName3)
+        }
+        def subMsg2 = columnNames.join('», «')
+        logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», «%s», т.к. не заполнены графы «%s»",
+                fileRowIndex, getXLSColumnName(colIndex + 1), columnName2, columnName3, subMsg2)
+    } else if (departmentRegionId && region) {
+        def records210 = getRecords210(values[colIndex], values[3], values[4], fileRowIndex, colIndex, colOffset)
+        if (records210?.size() == 1) {
+            newRow.kno = records210[0]?.record_id?.value
+        } else if (records210 == null || records210?.isEmpty()) {
+            // 3.a В справочнике «Параметры представления декларации по транспортному налогу» не найдено ни одной записи
+            // 3.b В справочнике «Параметры представления декларации по транспортному налогу» найдено несколько записей
+            def columnName2 = getColumnName(newRow, 'kno')
+            def columnName3 = getColumnName(newRow, 'kpp')
+            def dateInStr = getReportPeriodEndDate()?.format('dd.MM.yyyy')
+            def subMsg2 = (records210?.size() > 1 ?
+                "найдено несколько записей, актуальных на дату %s, в которых" :
+                "отсутствует запись, актуальная на дату %s, в которой")
+            sunMsg2 = String.format(subMsg2, dateInStr)
+            def regionCode = getRefBookValue(4L, departmentRegionId)?.CODE?.value
+            def departmentName = formDataDepartment.name
+            def regionCodeOktmo = region?.CODE?.value
+            def value4 = record96?.CODE?.value
+            logger.warn("Строка %s, столбец %s: Не удалось заполнить графы: «%s», «%s», т.к. в справочнике " +
+                    "«Параметры представления деклараций по транспортному налогу» %s " +
+                    "поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
+                    "справочника «Подразделения» для подразделения «%s», " +
+                    "поле «Код региона РФ» = «%s», поле «Код ОКТМО» = «%s»",
+                    fileRowIndex, getXLSColumnName(colIndex + 1), columnName2, columnName3, sunMsg2,
+                    regionCode, departmentName, regionCodeOktmo, value4)
+        }
+    }
 
     // графа 3 - зависит от графы 2 - не проверяется, потому что используется для нахождения записи для графы 2
 
-    // графа 4 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
-    olIndex = 4
-    newRow.codeOKATO = getRecordIdImport(96, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // 2. Проверка заполнения кода ОКТМО - перенес сюда что б не нарушалась последовательность вывода сообщений
+    if (!values[4]) {
+        def columnName4 = getColumnName(newRow, 'okato')
+        logger.warn("Строка %s, столбец %s: Не удалось заполнить графы «%s», т.к. не заполнена графа «%s»",
+                fileRowIndex, getXLSColumnName(5), subMsg, columnName4)
+    }
 
     // графа 5 - атрибут 422 - CODE - «Код вида ТС», справочник 42 «Коды видов транспортных средств»
-    colIndex++
+    colIndex = 5
     def record42 = getRecordImport(42, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
     newRow.tsTypeCode = record42?.record_id?.value
 
@@ -1616,10 +1817,42 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     colIndex++
     newRow.coefKv = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
-    // TODO (Ramil Timerbaev) неуникальный атрибут
     // графа 20 - атрибут 416 - VALUE - «Ставка (руб.)», справочник 41 «Ставки транспортного налога»
     colIndex++
-    newRow.taxRate = getRecordIdImport(41L, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    if (departmentRegionId) {
+        // граф 4, 5, 13, 14, 16
+        def columns = ['okato', 'tsTypeCode', 'taxBase', 'taxBaseOkeiUnit', 'years']
+        def emptyColumns = columns.findAll { !newRow[it] }
+        if (emptyColumns) {
+            // 4.a Проверка заполнения обязательных граф для выбора налоговой ставки
+            def columnName20 = getColumnName(newRow, 'taxRate')
+            def columnNames = emptyColumns?.collect { getColumnName(newRow, it) }
+            def subMsg2 = columnNames?.join('», «')
+            logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. не заполнены графы «%s»",
+                    fileRowIndex, getXLSColumnName(colIndex + 1), columnName20, subMsg2)
+        } else {
+            newRow.taxRate = getRecord41(newRow, region)
+
+            if (!newRow.taxRate) {
+                // 4.b Нет записи в справочнике
+                def columnName20 = getColumnName(newRow, 'taxRate')
+                def dateInStr = getReportPeriodEndDate()?.format('dd.MM.yyyy')
+                def regionCode = getRefBookValue(4L, departmentRegionId)?.CODE?.value
+                def departmentName = formDataDepartment.name
+                def regionCodeOktmo = region?.CODE?.value
+                def value5 = getRefBookValue(42L, newRow.tsTypeCode)?.CODE?.value
+                def value14 = getRefBookValue(12L, newRow.taxBaseOkeiUnit)?.CODE?.value
+                logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
+                        "«Ставки транспортного налога» отсутствует запись, актуальная, на дату %s, в которой " +
+                        "поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
+                        "справочника «Подразделения» для подразделения «%s», " +
+                        "поле «Код региона РФ» = «%s», поле «Код вида ТС» = «%s», " +
+                        "поле «Ед. измерения мощности» = «%s»",
+                        fileRowIndex, getXLSColumnName(colIndex + 1), columnName20, dateInStr,
+                        regionCode, departmentName, regionCodeOktmo, value5, value14)
+            }
+        }
+    }
 
     // TODO (Ramil Timerbaev) неуникальный атрибут
     // графа 21 - атрибут 2093 - COEF - «Повышающий коэффициент», справочник 209 «Повышающие коэффициенты транспортного налога»
@@ -1638,12 +1871,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     colIndex++
     newRow.coefKl = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
-    // TODO (Ramil Timerbaev)
     // графа 25 - атрибут 19.15 - TAX_BENEFIT_ID.CODE - «Код налоговой льготы».«Код», справочник 7.6 «Параметры налоговых льгот транспортного налога».«Коды налоговых льгот и вычетов транспортного налога»
     colIndex++
-    if (departmentRegionId && record210?.OKTMO?.value) {
+    if (departmentRegionId && region) {
         def record6 = getAllRecords(6L)?.values()?.find { it?.CODE?.value == values[colIndex] }
-        def regionId = getRegion(record210?.OKTMO?.value)?.record_id?.value
+        def regionId = region?.record_id?.value
         def record7 = null
         if (record6) {
             record7 = getAllRecords(7L)?.values()?.find {
@@ -1656,12 +1888,22 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
         if (record7) {
             newRow.taxBenefitCode = record7?.record_id?.value
         } else {
-            // TODO (Ramil Timerbaev) нужно ли это сообщение?
-            // 3. Проверка наличия информации о налоговой льготе в справочнике «Параметры налоговых льгот транспортного налога»
-            def columnName9 = getColumnName(newRow, 'taxBenefitCode')
-            logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. в справочнике " +
-                    "«Параметры налоговых льгот транспортного налога» не найдена соответствующая запись",
-                    fileRowIndex, getXLSColumnName(colIndex + 1), columnName9)
+            // 5. Проверка наличия информации о налоговой льготе в справочнике «Параметры налоговых льгот транспортного налога»
+            def columnName25 = getColumnName(newRow, 'taxBenefitCode')
+            def columnName26 = getColumnName(newRow, 'taxBenefitBase')
+            def dateInStr = getReportPeriodEndDate()?.format('dd.MM.yyyy')
+            def regionCode = getRefBookValue(4L, departmentRegionId)?.CODE?.value
+            def departmentName = formDataDepartment.name
+            def regionCodeOktmo = region?.CODE?.value
+            def value25 = values[colIndex]
+            def value26 = values[colIndex + 1]
+            logger.warn("Строка %s, столбец %s: Не удалось заполнить графы «%s», «%s», т.к. в справочнике " +
+                    "«Параметры налоговых льгот транспортного налога» отсутствует запись, актуальная на дату %s, " +
+                    "в которой поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
+                    "справочника «Подразделения» для подразделения «%s», поле «Код региона РФ» = «%s», " +
+                    "поле «Код налоговой льготы» = «%s», поле «Основание» = «%s»",
+                    fileRowIndex, getXLSColumnName(colIndex + 1), columnName25, columnName26,
+                    dateInStr, regionCode, departmentName, regionCodeOktmo, value25, value26)
         }
     }
 
@@ -1686,7 +1928,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     return newRow
 }
 
-// TODO (Ramil Timerbaev)
+// для подитога первого уровня (Итого по КНО/КПП) не указывается октмо, необходимый для заполнения графы 2
+// поэтому используется октмо из последней предыдущией строки
+@Field
+def lastImportOktmo = null
+
 /**
  * Получить новую итоговую строку нф по значениям из экселя. Строка используется только для получения значении,
  * для вставки в бд сформируются другие строки с нормальными стилями и алиасами.
@@ -1705,15 +1951,15 @@ def getNewTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIn
     def int colIndex = 0
     newRow.fix = values[colIndex]
 
-    // TODO (Ramil Timerbaev) неуникальный атрибут!
     // графа 2
     colIndex = 2
-    def record210 = getRecord210(values[colIndex], values[3], values[4], fileRowIndex, colIndex, colOffset)
-    newRow.kno = record210?.record_id?.value
+    if (values[4]) {
+        lastImportOktmo = values[4]
+    }
+    def oktmo = lastImportOktmo
 
-//    // графа 3
-//    colIndex++
-//    newRow.kpp = values[colIndex]
+    def records210 = getRecords210(values[colIndex], values[3], oktmo, fileRowIndex, colIndex, colOffset)
+    newRow.kno = (records210?.size() == 1 ? records210[0]?.record_id?.value : null)
 
     // графа 4 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований (ОКТМО)»
     colIndex = 4
@@ -1721,7 +1967,7 @@ def getNewTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIn
 
     // графа 30..34
     colIndex = 29
-    ['taxSumToPay', 'q1', 'q2', 'q3', 'q4'].each { alias ->
+    getTotalColumns().each { alias ->
         colIndex++
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
@@ -1729,14 +1975,14 @@ def getNewTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIn
     return newRow
 }
 
-def getRecord210(def kno, def kpp, def oktmo, def fileRowIndex, def colIndex, def colOffset) {
-    def record210 = null
+def getRecords210(def kno, def kpp, def oktmo, def fileRowIndex, def colIndex, def colOffset) {
+    def records210 = null
     def record96 = getRecordImport(96, 'CODE', oktmo, fileRowIndex, colIndex + colOffset, false)
     if (record96) {
         def oktmoId = record96?.record_id?.value
         def declarationRegionId = formDataDepartment.regionId
         def regionId = getRegion(oktmoId)?.record_id?.value
-        record210 = getAllRecords(210L)?.values()?.find {
+        records210 = getAllRecords(210L)?.values()?.findAll {
             it?.DECLARATION_REGION_ID?.value == declarationRegionId &&
                     it?.REGION_ID?.value == regionId &&
                     it?.TAX_ORGAN_CODE?.value == kno &&
@@ -1744,9 +1990,10 @@ def getRecord210(def kno, def kpp, def oktmo, def fileRowIndex, def colIndex, de
                     it?.OKTMO?.value == oktmoId
         }
     }
-    return record210
+    return records210
 }
 
+// TODO (Ramil Timerbaev) убрать?
 // что бы восстановить значение графы 30 или 32 или 34, надо
 // 1. по надписи из эксельки найти запись для код льготы (из справочника 6)
 // 2. по окато из эксельки (графа 4) найти регион (из справочника 4)
@@ -1783,7 +2030,7 @@ def getTaxRateImport(def values, def rowIndex, def colIndex, def row) {
                     row.benefitCodeReduction = getTaxRate(regionId, okato, benefitCodeReduction, 'benefitCodeReduction', rowIndex, colIndex)
 
                     if (taxRate) {
-                        calc24(row, region)
+                        row.taxRate = getRecord41(row, region)
                         if (!row.taxRate) {
                             def tmpRow = formData.createDataRow()
                             def declarationRegionCode = getRefBookValue(4L, declarationRegionId)?.CODE?.value
@@ -1806,6 +2053,7 @@ def getTaxRateImport(def values, def rowIndex, def colIndex, def row) {
     return row
 }
 
+// TODO (Ramil Timerbaev) убрать?
 def getTaxRate(def regionId, def okato, def taxBenefitCode, def colname, def rowIndex, def colIndex) {
     if (!taxBenefitCode || !regionId) {
         return null
@@ -1862,18 +2110,16 @@ def getAllRecords(def refBookId) {
     return allRecordsMap[refBookId]
 }
 
-// TODO (Ramil Timerbaev) переделать
 // Сравнения данных с данными формы предыдущего периода
 void comparePrevRows() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
-    // TODO (Ramil Timerbaev) нужнали эта проверка?
-    // Логическая проверка 10. Проверка наличия формы предыдущего периода в состоянии «Принята»
     def prevDataRows = getPrevDataRows()
     if (!prevDataRows) {
         def prevReportPeriod = getPrevReportPeriod()
         def periodName = prevReportPeriod?.periodName
         def year = prevReportPeriod?.year
+        // Проверка при сравнении 1. Проверка наличия формы за предыдущий период в состоянии «Принята»
         logger.warn("Не удалось сравнить данные формы с данными формы за предыдущий период. " +
                 "В Системе отсутствует форма в состоянии «Принята» за период: %s %s для подразделения «%s»",
                 periodName, year, formDataDepartment.name)
@@ -1891,16 +2137,18 @@ void comparePrevRows() {
     def currentActualRowsMap = getActualRowsMap(dataRows)
     def prevActualRowsMap = getActualRowsMap(prevDataRows)
 
-    // графа 2..13, 15..19, 21 (25..27)
-    def compareColumns = ['department', 'kno', 'kpp', 'kbk', 'okato', 'cadastralNumber', 'landCategory',
-            'constructionPhase', 'cadastralCost', 'taxPart', 'ownershipDate', 'terminationDate',
-            'benefitCode', /* 'benefitBase', 'benefitParam', */ 'startDate', 'endDate', 'taxRate']
+    // графа 11, 12, 15, 16, 18..29 (31..33)
+    def compareColumns = ['regDate', 'regDateEnd', 'createYear', 'years', 'partRight', 'coefKv', 'taxRate',
+            'coefKp', 'calculatedTaxSum', 'benefitMonths', 'coefKl', 'taxBenefitCode', /* 'taxBenefitBase', */
+            'taxBenefitSum', 'deductionCode', 'deductionSum']
     def reportPeriod = getReportPeriod()
     switch (reportPeriod.order) {
         case 4: compareColumns.add('q3')
         case 3: compareColumns.add('q2')
         case 2: compareColumns.add('q1')
     }
+
+    def compareStyleName = 'Сравнение'
 
     // сравнение
     currentActualRowsMap.each { groupKey, row ->
@@ -1919,49 +2167,99 @@ void comparePrevRows() {
             }
 
             // сравнение зависимых граф
-            def record705 = getRefBookValue(705L, row.benefitCode)
-            def prevRecord705 = getRefBookValue(705L, prevRow.benefitCode)
-
-            // графа 16
-            def benefitBase1 = getRefBookValue(704L, record705?.TAX_BENEFIT_ID?.value)?.BASE?.value
-            def benefitBase2 = getRefBookValue(704L, prevRecord705?.TAX_BENEFIT_ID?.value)?.BASE?.value
-            if (benefitBase1 != benefitBase2) {
+            // графа 26
+            def taxBenefitBase1 = getRefBookValue(7L, row.taxBenefitBase)?.BASE?.value
+            def taxBenefitBase2 = getRefBookValue(7L, prevRow.taxBenefitBase)?.BASE?.value
+            if (taxBenefitBase1 != taxBenefitBase2) {
                 row.getCell('benefitBase').setStyleAlias(compareStyleName)
-            }
-
-            // графа 17
-            def benefitParam1 = record705?.REDUCTION_PARAMS?.value
-            def benefitParam2 = prevRecord705?.REDUCTION_PARAMS?.value
-            if (benefitParam1 != benefitParam2) {
-                row.getCell('benefitParam').setStyleAlias(compareStyleName)
             }
         }
     }
 }
 
-// Получить ключ группировки при копировании и сравнении данных из предыдущего периода (по графе 6, 7)
-def getGroupKey(def row) {
-    // TODO (Ramil Timerbaev)
-    return row.okato + '#' + row.cadastralNumber
+@Field
+def prevDataRows = null
+
+/** Получить строки за предыдущий отчетный период. */
+def getPrevDataRows() {
+    if (prevDataRows != null) {
+        return prevDataRows
+    }
+    if (getPrevReportPeriod()?.period == null) {
+        prevDataRows = []
+        return prevDataRows
+    }
+    def prevFormData = formDataService.getFormDataPrev(formData)
+    prevDataRows = (prevFormData?.state == WorkflowState.ACCEPTED ? formDataService.getDataRowHelper(prevFormData)?.allSaved : [])
+    return prevDataRows
+}
+
+@Field
+def prevReportPeriodMap = null
+
+/**
+ * Получить предыдущий отчетный период
+ *
+ * @return мапа с данными предыдущего периода:
+ *      period - период (может быть null, если предыдущего периода нет);
+ *      periodName - название;
+ *      year - год;
+ */
+def getPrevReportPeriod() {
+    if (prevReportPeriodMap != null) {
+        return prevReportPeriodMap
+    }
+    def reportPeriod = getReportPeriod()
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    def find = false
+    // предыдущий период в том же году, что и текущий, и номера периодов отличаются на единицу
+    if (prevReportPeriod && reportPeriod.order > 1 && reportPeriod.order - 1 == prevReportPeriod.order &&
+            reportPeriod.taxPeriod.year == prevReportPeriod.taxPeriod.year) {
+        find = true
+    }
+    // если текущий период первый в налоговом периоде, то предыдущий период должен быть последним, и года налоговых периодов должны отличаться на единицу
+    if (!find && prevReportPeriod && reportPeriod.order == 1 && prevReportPeriod.order == 4 &&
+            reportPeriod.taxPeriod.year - 1 == prevReportPeriod.taxPeriod.year) {
+        find = true
+    }
+    prevReportPeriodMap = [:]
+    if (find) {
+        prevReportPeriodMap.period = prevReportPeriod
+        prevReportPeriodMap.periodName = prevReportPeriod.name
+        prevReportPeriodMap.year = prevReportPeriod.taxPeriod.year
+    } else {
+        // получение названии периодов
+        def filter = 'T = 1'
+        def provider = formDataService.getRefBookProvider(refBookFactory, 8L, providerCache)
+        def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+        records?.sort { it?.END_DATE?.value }
+
+        prevReportPeriodMap.period = null
+        prevReportPeriodMap.periodName = records[reportPeriod.order - 2].NAME?.value
+        prevReportPeriodMap.year = (reportPeriod.order == 1 ? reportPeriod.taxPeriod.year - 1 : reportPeriod.taxPeriod.year)
+    }
+    return prevReportPeriodMap
 }
 
 // Получить ключ группировки 1ого уровня (по графе 3, 4)
 def getGroupL1Key(def row) {
-    return row?.kno + '#' + row?.kpp
+    return row?.getCell('kno')?.refBookDereference + '#' + row?.getCell('kpp')?.refBookDereference
 }
 
 /**
- * Получить мапу с актуальными строками. Ключ - графа 6 + графа 7, значение - актуальная строка.
- * Если строк несколько, то берется строка с большим значением в графе 12.
+ * Получить мапу с актуальными строками. Ключ - список значении граф, значение - актуальная строка.
+ * Если строк несколько, то берется строка с большим значением в графе 11.
  */
 def getActualRowsMap(def rows) {
+    // строки группировки (графа 4, 5, 9, 10)
+    def groupColumns = ['okato', 'tsTypeCode', 'vi', 'regNumber']
     def map = [:]
     for (def row : rows) {
         if (row.getAlias()) {
             continue
         }
-        def key = getGroupKey(row)
-        map[key] = (map[key] != null && map[key].ownershipDate > row.ownershipDate) ? map[key] : row
+        def key = getKey(row, groupColumns)
+        map[key] = (map[key] != null && map[key].regDate > row.regDate) ? map[key] : row
     }
     return map
 }
@@ -1973,7 +2271,7 @@ def creatTotalRow() {
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-    for (def alias : totalColumns) {
+    for (def alias : getTotalColumns()) {
         newRow[alias] = BigDecimal.ZERO
     }
     return newRow
@@ -1983,8 +2281,8 @@ def creatTotalRow() {
 def calcTotalRow(def dataRows) {
     def newRow = creatTotalRow()
     newRow.setAlias('total')
-    newRow.fix = 'итого'
-    calcTotalSum(dataRows, newRow, totalColumns)
+    newRow.fix = 'Итого'
+    calcTotalSum(dataRows, newRow, getTotalColumns())
     return newRow
 }
 
@@ -2014,11 +2312,11 @@ void addAllStatic(def dataRows) {
             // если все значения пустые, то подитог по 2 уровню группировки не добавится,
             // поэтому перед добавлением подитога по 1 уровню группировки, нужно добавить подитог с пустыми значениями по 2 уровню
             if (j == 0) {
-                def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno, /* row.kpp, */ row.okato)
+                def subTotalRow2 = calcSubTotalRow2(i, dataRows, row.kno, row.okato)
                 j++
                 dataRows.add(i + j, subTotalRow2)
             }
-            def subTotalRow1 = calcSubTotalRow1(i, dataRows, row.kno /*, row.kpp*/ )
+            def subTotalRow1 = calcSubTotalRow1(i, dataRows, row.kno)
             j++
             dataRows.add(i + j, subTotalRow1)
         }
@@ -2027,14 +2325,13 @@ void addAllStatic(def dataRows) {
 }
 
 /** Расчет итога 1 уровня группировки - по графе 2, 3 КНО/КПП. */
-def calcSubTotalRow1(int i, def dataRows, def kno /*, def kpp*/) {
+def calcSubTotalRow1(int i, def dataRows, def kno) {
     def newRow = creatTotalRow()
     newRow.setAlias('total1#' + i)
     newRow.fix = 'Итого по КНО/КПП'
 
     // значения группы
     newRow.kno = kno
-    // newRow.kpp = kpp
 
     for (int j = i; j >= 0; j--) {
         def srow = getRow(dataRows, j)
@@ -2044,7 +2341,7 @@ def calcSubTotalRow1(int i, def dataRows, def kno /*, def kpp*/) {
         if (newRow.kno != srow.kno || newRow.kpp != srow.kpp) {
             break
         }
-        for (def alias : totalColumns) {
+        for (def alias : getTotalColumns()) {
             if (srow[alias] != null) {
                 newRow[alias] = newRow[alias] + srow[alias]
             }
@@ -2054,14 +2351,13 @@ def calcSubTotalRow1(int i, def dataRows, def kno /*, def kpp*/) {
 }
 
 /** Расчет итога 2 уровня группировки - по графе 4 ОКТМО (группировка внутри группы по КНО/КПП). */
-def calcSubTotalRow2(int i, def dataRows, def kno, /* def kpp, */ def okato) {
+def calcSubTotalRow2(int i, def dataRows, def kno, def okato) {
     def newRow = creatTotalRow()
     newRow.setAlias("total2#" + i)
     newRow.fix = 'ИТОГО по КНО/КПП/ОКТМО'
 
     // значения группы
     newRow.kno = kno
-//    newRow.kpp = kpp
     newRow.okato = okato
 
     // идем от текущей позиции вверх и ищем нужные строки
@@ -2070,7 +2366,7 @@ def calcSubTotalRow2(int i, def dataRows, def kno, /* def kpp, */ def okato) {
         if (srow.getAlias() != null || srow.okato != newRow.okato) {
             break
         }
-        for (def alias : totalColumns) {
+        for (def alias : getTotalColumns()) {
             if (srow[alias] != null) {
                 newRow[alias] = newRow[alias] + srow[alias]
             }
@@ -2237,6 +2533,25 @@ def isCross(def start1, def end1, def start2, def end2, def useEndPeriodDate = f
     return false
 }
 
+// проверка на наличие пересечений
+boolean checkHasCross(def rows) {
+    boolean hasCross = false
+    for (int i = 0; i < rows.size(); i++) {
+        def row1 = rows[i]
+        for (int j = i + 1; j < rows.size(); j++) {
+            def row2 = rows[j]
+            if (isCross(row1.regDate, row1.regDateEnd, row2.regDate, row2.regDateEnd, true))  {
+                hasCross = true
+                break
+            }
+        }
+        if (hasCross) {
+            break
+        }
+    }
+    return hasCross
+}
+
 // Мапа для хранения типов форм (id типа формы -> тип формы)
 @Field
 def formTypeMap = [:]
@@ -2247,4 +2562,21 @@ def getFormTypeById(def id) {
         formTypeMap[id] = formTypeService.get(id)
     }
     return formTypeMap[id]
+}
+
+// графа 30..34
+def getTotalColumns() {
+    if (totalColumns == null) {
+        def order = getReportPeriod().order
+        if (order == 1) {
+            totalColumns = ['taxSumToPay', 'q1']
+        } else if (order == 2) {
+            totalColumns = ['taxSumToPay', 'q1', 'q2']
+        } else if (order == 3) {
+            totalColumns = ['taxSumToPay', 'q1', 'q2', 'q3']
+        } else if (order == 4) {
+            totalColumns = ['taxSumToPay', 'q1', 'q2', 'q3', 'q1']
+        }
+    }
+    return totalColumns
 }
