@@ -713,11 +713,13 @@ def calc24(def row, def value22, def value23, def showMsg = false) {
     if (taxPart == null) {
         return null
     }
+    // B = ОКРУГЛ(ОКРУГЛ(Графа 10;0) * Графа 11;0);
+    def b = round(round(row.cadastralCost, 0) * taxPart, 0)
     def k = getK(row)
-    int precision = 10 // точность при делении
+    int precision = 0 // точность при делении
     // A - сумма исчисленного налога (сумма налога без учета суммы льготы)
-    // A = Графа 10 * Графа 11 * Графа 21 * Графа 22 * К / 100
-    def a = row.cadastralCost.multiply(taxPart).multiply(row.taxRate).multiply(value22).multiply(k).divide(100, precision, BigDecimal.ROUND_HALF_UP)
+    // A = ОКРУГЛ(B * Графа 21 * Графа 22 * К / 100;0);
+    def a = b.multiply(row.taxRate).multiply(value22).multiply(k).divide(100, precision, BigDecimal.ROUND_HALF_UP)
 
     def record705 = getRefBookValue(705L, row.benefitCode)
     def record704Id = record705?.TAX_BENEFIT_ID?.value
@@ -734,11 +736,11 @@ def calc24(def row, def value22, def value23, def showMsg = false) {
     } else if (check15 == 2 && p != null) {
         def value23Year = calc23(row, 4)
         if (value23Year) {
-            // Графа 24 = Графа 10 * Графа 11 * Р * (1 – КлГод);
-            tmp = row.cadastralCost.multiply(taxPart).multiply(p).multiply(1 - value23Year)
+            // Графа 24 = ОКРУГЛ(B * Р * (1 – КлГод);0);
+            tmp = round(b.multiply(p).multiply(1 - value23Year), 0)
         }
     } else if (check15 == 3 && p != null) {
-        // Графа 24 = А * Р / 100
+        // Графа 24 = ОКРУГЛ(А * Р / 100;0);
         tmp = a.multiply(p).divide(100, precision, BigDecimal.ROUND_HALF_UP)
     } else if (check15 == 4 && p != null) {
         if (p >= row.taxRate) {
@@ -749,12 +751,12 @@ def calc24(def row, def value22, def value23, def showMsg = false) {
                         row.getIndex(), columnName21)
             }
         } else {
-            // Графа 24 = Графа 10 * Графа 11 * (Графа 21 – Р) / 100
-            tmp = row.cadastralCost.multiply(taxPart).multiply(row.taxRate - p).divide(100, precision, BigDecimal.ROUND_HALF_UP)
+            // Графа 24 = ОКРУГЛ(B * (Графа 21 – Р) / 100;0);
+            tmp = b.multiply(row.taxRate - p).divide(100, precision, BigDecimal.ROUND_HALF_UP)
         }
     } else if (check15 == 5 && value23 != null) {
-        // Графа 24 = A * (1 – Графа 23)
-        tmp = a * (1 - value23)
+        // Графа 24 = ОКРУГЛ(A * (1 – Графа 23);0)
+        tmp = round(a * (1 - value23), 0)
     }
     return round(tmp, 0)
 }
@@ -876,7 +878,7 @@ def getN(def row, def periodOrder, def showMsg = false) {
     if (b == null) {
         return null
     }
-    int precision = 10 // точность при делении
+    int precision = 0 // точность при делении
     // Н = В * Графа 21 * Графа 22 * К / 100 – Графа 24;
     def tmp = b.multiply(row.taxRate).multiply(value22).multiply(k).divide(100, precision, BigDecimal.ROUND_HALF_UP).subtract(value24)
 
@@ -889,7 +891,7 @@ def getN(def row, def periodOrder, def showMsg = false) {
         }
         tmp = BigDecimal.ZERO
     }
-    return round(tmp, 0)
+    return tmp
 }
 
 /** Налоговая база. */
@@ -909,7 +911,7 @@ def getB(def row, def value23, def alias, def showMsg = false) {
     def p = getP(code15, record705)
 
     BigDecimal tmp = null
-    BigDecimal defaultValue = row.cadastralCost * taxPart
+    BigDecimal defaultValue = round(row.cadastralCost, 0) * taxPart
     if (check15 == 1 && p != null && value23 != null) {
         tmp = defaultValue - p
         tmp = (tmp < 0 ? 0 : tmp)
@@ -931,7 +933,7 @@ def getB(def row, def value23, def alias, def showMsg = false) {
         }
         return null
     }
-    return round(tmp, 20)
+    return round(tmp, 0)
 }
 
 @Field
