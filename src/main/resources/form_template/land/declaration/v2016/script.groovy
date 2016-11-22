@@ -252,8 +252,6 @@ def generateXML() {
                             BigDecimal kolMesVlZU = row.period
                             // Кв
                             BigDecimal kv = row.kv
-                            // Кл
-                            BigDecimal kl = row.kl ?: empty
                             // Параметры налоговых льгот земельного налога
                             def landBenefit = null
                             String benefitCode = null
@@ -315,7 +313,9 @@ def generateXML() {
                             // СумНалУплат
                             BigDecimal sumNalUplat = getLong(sumNalIschisl - sumLg) // дорасчет
                             // КолМесЛьгот
-                            BigDecimal kolMesLgot = row.benefitPeriod
+                            BigDecimal kolMesLgot = isAcceptableCode(benefitCode) ? row.benefitPeriod : null
+                            // Кл
+                            BigDecimal kl = (kolMesLgot == null || row.kl == null) ? (new BigDecimal("1")) : row.kl
                             // 1..n
                             РасчПлатЗН(
                                     [НомКадастрЗУ: nomKadastrZU,
@@ -454,10 +454,15 @@ def generateXmlFileId(def departmentParam, def departmentParamRow) {
     }
     return null
 }
+
 // Получить округленное, целочисленное значение.
 def getLong(def value) {
     if (value == null) {
         return 0
     }
     return ((BigDecimal) value).setScale(0, BigDecimal.ROUND_HALF_UP)
+}
+
+boolean isAcceptableCode(String code) {
+    return code != null && (["3022100", "3022300", "3022400"].contains(code) || code.startsWith("30211") || code.startsWith("30212"))
 }
