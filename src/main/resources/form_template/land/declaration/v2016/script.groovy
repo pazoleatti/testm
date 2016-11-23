@@ -268,6 +268,10 @@ def generateXML() {
                             BigDecimal sumNeObl
                             // СумЛьг
                             BigDecimal sumLg = BigDecimal.ZERO
+                            // КолМесЛьгот
+                            BigDecimal kolMesLgot = isAcceptableCode(benefitCode) ? row.benefitPeriod : null
+                            // Кл
+                            BigDecimal kl = (kolMesLgot == null || row.kl == null) ? (new BigDecimal("1")) : row.kl
                             // ДоляПлЗУ
                             String dolyaPlZU
                             BigDecimal nalBazaMinus = BigDecimal.ZERO
@@ -312,10 +316,6 @@ def generateXML() {
                             }
                             // СумНалУплат
                             BigDecimal sumNalUplat = getLong(sumNalIschisl - sumLg) // дорасчет
-                            // КолМесЛьгот
-                            BigDecimal kolMesLgot = isAcceptableCode(benefitCode) ? row.benefitPeriod : null
-                            // Кл
-                            BigDecimal kl = (kolMesLgot == null || row.kl == null) ? (new BigDecimal("1")) : row.kl
                             // 1..n
                             РасчПлатЗН(
                                     [НомКадастрЗУ: nomKadastrZU,
