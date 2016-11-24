@@ -226,7 +226,7 @@ void generateXML() {
                         def code190 = row.saleCostB0 ?: empty
                         def code200 = row.vatSum18 ?: empty
                         def code210 = row.vatSum10 ?: empty
-                        def code220 = row.saleCostARub ?: empty
+                        def code220 = row.bonifSalesSum ?: empty
 
                         // различаем юр. и физ. лица в строках 100 и 110
                         def code100inn, code100kpp, code110inn, code110kpp
