@@ -574,10 +574,7 @@ def calc30(def row) {
     if (row.calculatedTaxSum == null) {
         return null
     }
-    if (row.taxBenefitSum == null || row.deductionSum == null) {
-        return BigDecimal.ZERO
-    }
-    BigDecimal tmp = row.calculatedTaxSum - row.taxBenefitSum - row.deductionSum
+    BigDecimal tmp = row.calculatedTaxSum - (row.taxBenefitSum ?: BigDecimal.ZERO) - (row.deductionSum ?: BigDecimal.ZERO)
     if (tmp < 0) {
         tmp = BigDecimal.ZERO
     }
@@ -2800,7 +2797,7 @@ def isCross(def start1, def end1, def start2, def end2, def useEndPeriodDate = f
     }
     def tmpEnd1 = end1 ?: (useEndPeriodDate ? getReportPeriodEndDate() : null)
     def tmpEnd2 = end2 ?: (useEndPeriodDate ? getReportPeriodEndDate() : null)
-    if (start1 <= start2 && (tmpEnd1 && start2 <= tmpEnd1) || start2 <= start1 && (tmpEnd2 && start1 <= tmpEnd2)) {
+    if (start1 <= start2 && (tmpEnd1 == null || start2 <= tmpEnd1) || start2 <= start1 && (tmpEnd2 == null || start1 <= tmpEnd2)) {
         return true
     }
     return false
@@ -2848,7 +2845,7 @@ def getTotalColumns() {
         } else if (order == 3) {
             totalColumns = ['taxSumToPay', 'q1', 'q2', 'q3']
         } else if (order == 4) {
-            totalColumns = ['taxSumToPay', 'q1', 'q2', 'q3', 'q1']
+            totalColumns = ['taxSumToPay', 'q1', 'q2', 'q3', 'q4']
         }
     }
     return totalColumns
