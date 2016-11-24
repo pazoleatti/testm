@@ -249,6 +249,8 @@ def calc() {
         row.q4 = calc34(row)
     }
 
+    // заполнить справочными значениями, т.к. после пересчета значения могли измениться
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
     // добавить подитоги
     addAllStatic(dataRows)
 
@@ -344,6 +346,9 @@ def getEqualsRowsFromBenefit(def row, def showMsg = false) {
  * @param showMsg признак показывать ли сообщения
  */
 def calc2(def row, def region, def showMsg = false) {
+    if (row.kno) {
+        return row.kno
+    }
     if (formDataDepartment.regionId == null || row.okato == null || region == null) {
         return
     }
@@ -899,11 +904,13 @@ void logicCheck() {
 
         // 15. Проверка заполнения формы настроек подразделений
         // сбор данных
-        def key = record210?.TAX_ORGAN_CODE?.value + '#' + record210?.KPP?.value
-        if (rowsMap15[key] == null) {
-            rowsMap15[key] = []
+        if (record210) {
+            def key = record210?.TAX_ORGAN_CODE?.value + '#' + record210?.KPP?.value
+            if (rowsMap15[key] == null) {
+                rowsMap15[key] = []
+            }
+            rowsMap15[key].add(row)
         }
-        rowsMap15[key].add(row)
 
         // 17. Проверка разрядности значений граф 30-34, рассчитываемых в итоговых строках
         // Выполняется при расчете, в методе checkOverflowLocal()
