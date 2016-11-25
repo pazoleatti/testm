@@ -270,7 +270,7 @@ def calc() {
  */
 def getEqualsRowFromVehicles(def row, showMsg = false) {
     if (getReportPeriod()?.order == 1) {
-        return
+        return null
     }
     def sourcerRowsMap = getSourceRowsMap()
 
@@ -529,6 +529,9 @@ def calc24(def row, def rowV, def rowsB, def periodOrder = null) {
 }
 
 def calc27(def row, def rowV, def rowsB, def periodOrder = null) {
+    if (row.regDate == null) {
+        return null
+    }
     def recordId7 = null
     if (row.taxBenefitCode) {
         recordId7 = row.taxBenefitCode
@@ -576,7 +579,7 @@ def calc27(def row, def rowV, def rowsB, def periodOrder = null) {
 }
 
 def calc30(def row) {
-    if (row.calculatedTaxSum == null) {
+    if (row.calculatedTaxSum == null || row.regDate == null) {
         return null
     }
     BigDecimal tmp = row.calculatedTaxSum - (row.taxBenefitSum ?: BigDecimal.ZERO) - (row.deductionSum ?: BigDecimal.ZERO)
@@ -599,7 +602,7 @@ def calc33(def row, def rowV, def rowsB) {
 }
 
 def calc31_33(def row, def rowV, def rowsB, def periodOrder) {
-    if (getReportPeriod()?.order < periodOrder) {
+    if (getReportPeriod()?.order < periodOrder || row.regDate == null) {
         return null
     }
 
@@ -646,7 +649,7 @@ def getRecord310(def row) {
 }
 
 def calc34(def row) {
-    if (getReportPeriod()?.order < 4) {
+    if (getReportPeriod()?.order < 4 || row.regDate == null) {
         return null
     }
     BigDecimal tmp = (row.taxSumToPay ?: BigDecimal.ZERO) - (row.q1 ?: BigDecimal.ZERO) -
