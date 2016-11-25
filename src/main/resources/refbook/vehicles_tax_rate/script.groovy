@@ -76,7 +76,7 @@ void save() {
         def boolean allRequired = declarationRegionId && dictRegionId && code && unitOfPower && value
 
         // 1. Проверка обязательности заполнения мощности
-        if (allRequired && minPower != null && maxPower != null) {
+        if (allRequired && minPower == null && maxPower == null) {
             logger.error("Поле «%s» или поле «%s» должно быть обязательно заполнено", refBook.getAttribute('MIN_POWER').name, refBook.getAttribute('MAX_POWER').name)
         }
 
