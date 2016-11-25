@@ -2195,9 +2195,15 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     }
 
     // TODO (Ramil Timerbaev) неуникальный атрибут
+    // TODO (Ramil Timerbaev) после пересохранения выгруженного файла, экселем значение сохраняется с погрешностями, поэтому добавил округление
     // графа 21 - атрибут 2093 - COEF - «Повышающий коэффициент», справочник 209 «Повышающие коэффициенты транспортного налога»
     colIndex++
-    newRow.coefKp = getRecordIdImport(209L, 'COEF', values[colIndex], fileRowIndex, colIndex + colOffset)
+    def tmp = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    if (tmp) {
+        tmp = round(tmp, 1)
+        newRow.coefKp = getRecordIdImport(209L, 'COEF', tmp.toString(), fileRowIndex, colIndex + colOffset)
+    }
+
 
     // графа 22
     colIndex++
