@@ -212,8 +212,12 @@ def calc() {
     deleteAllAliased(dataRows)
 
     // отсортировать/группировать
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
-    sortRows(dataRows, groupColumns)
+    if (dataRows) {
+        def firstRow = dataRows?.get(0)
+        def columnNameList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
+        refBookService.dataRowsDereference(logger, dataRows, columnNameList)
+        sortRowsSimple(dataRows)
+    }
 
     def showMsg = (formDataEvent == FormDataEvent.CALCULATE)
 
