@@ -887,8 +887,8 @@ void logicCheck() {
         if (!isCalc) {
             // графа 23..27
             def columns = ['benefitMonths', 'coefKl', 'taxBenefitCode', /* 'taxBenefitBase', */ 'taxBenefitSum']
-            def hasValue = columns.find { row[it] }
-            def hasNull = columns.find { !row[it] }
+            def hasValue = columns.find { row[it] != null }
+            def hasNull = columns.find { row[it] == null }
             if (hasValue && hasNull) {
                 logger.error("Строка %s: Данные о налоговой льготе указаны не полностью", index)
             }
@@ -897,8 +897,8 @@ void logicCheck() {
         // 14. Проверка одновременного заполнения данных о налоговом вычете
         // графа 28, 29
         def columnsForCheck14 = ['deductionCode', 'deductionSum']
-        def hasValue = columnsForCheck14.find { row[it] }
-        def hasNull = columnsForCheck14.find { !row[it] }
+        def hasValue = columnsForCheck14.find { row[it] != null }
+        def hasNull = columnsForCheck14.find { row[it] == null }
         if (hasValue && hasNull) {
             logger.error("Строка %s: Данные о налоговом вычете указаны не полностью", index)
         }
