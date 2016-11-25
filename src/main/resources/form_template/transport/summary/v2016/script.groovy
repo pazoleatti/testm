@@ -405,7 +405,7 @@ def calc18(def value) {
 
 def calc19(def row, def rowV, def periodOrder = null) {
     if (periodOrder == null || getReportPeriod()?.order == periodOrder) {
-        return row.ownMonths
+        return (row.ownMonths != null ? round(row.ownMonths / 12, 4) : null)
     }
     def tmp1 = subCalc19(row.regDate, row.regDateEnd, periodOrder)
     if (tmp1 == null) {
