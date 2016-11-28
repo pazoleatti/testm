@@ -615,8 +615,8 @@ def calc31_33(def row, def rowV, def rowsB, def periodOrder) {
         return round(tmp, 0)
     }
     def record310 = getRecord310(row)
-    def obUpl = (record310?.PREPAYMENT?.value ?: 1)
-    if (!obUpl) {
+    def obUpl = record310?.PREPAYMENT?.value
+    if (obUpl == 0) {
         return round(tmp, 0)
     }
     def value22 = row.calculatedTaxSum
@@ -640,15 +640,11 @@ def getRecord310(def row) {
     if (record310Map[row.kno] != null) {
         return record310Map[row.kno]
     }
+    def departmentParam = getDepartmentParam()
     def record210 = getRefBookValue(210L, row.kno)
     def kno = record210?.TAX_ORGAN_CODE?.value
     def kpp = record210?.KPP?.value
-    def records310 = getAllRecords2(310L)
-    record310Map[row.kno] = records310?.find {
-        it?.DEPARTMENT_ID?.value == formDataDepartment.id &&
-                it?.TAX_ORGAN_CODE?.value == kno &&
-                it?.KPP?.value == kpp
-    }
+    record310Map[row.kno] = (departmentParam ? getDepartmentParamTable(departmentParam?.record_id?.value, kno, kpp) : null)
     return record310Map[row.kno]
 }
 
@@ -2768,8 +2764,7 @@ def allRecordsMap2 = [:]
 def getAllRecords2(def refbookId) {
     if (allRecordsMap2[refbookId] == null) {
         def provider = formDataService.getRefBookProvider(refBookFactory, refbookId, providerCache)
-        def date = (refbookId == 310 ? getReportPeriodEndDate() - 1 : getReportPeriodEndDate())
-        allRecordsMap2[refbookId] = provider.getRecords(date, null, null, null)
+        allRecordsMap2[refbookId] = provider.getRecords(getReportPeriodEndDate(), null, null, null)
     }
     return allRecordsMap2[refbookId]
 }
@@ -2887,4 +2882,38 @@ def checkOverflowLocal(BigDecimal value, def row, def alias, def size, def index
         return false
     }
     return true
+}
+
+@Field
+def departmentParam = null
+
+// Получить параметры подразделения (из справочника 31)
+def getDepartmentParam() {
+    if (departmentParam == null) {
+        def departmentId = formDataDepartment.id
+        def provider = formDataService.getRefBookProvider(refBookFactory, 31L, providerCache)
+        def departmentParamList = provider.getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+        if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+            return null
+        }
+        departmentParam = departmentParamList?.get(0)
+    }
+    return departmentParam
+}
+
+@Field
+def departmentParamTableMap = [:]
+
+// Получить параметры подразделения (из справочника 310)
+def getDepartmentParamTable(def departmentParamId, def kno, def kpp) {
+    def key = departmentParamId + '#' + kno + '#' + kpp
+    if (departmentParamTableMap[key] == null) {
+        def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='$kno' and KPP ='$kpp'"
+        def departmentParamTableList = getProvider(310).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+        if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
+            return null
+        }
+        departmentParamTableMap[key] = departmentParamTableList.get(0)
+    }
+    return departmentParamTableMap[key]
 }
