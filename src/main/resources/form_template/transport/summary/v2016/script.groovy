@@ -528,7 +528,7 @@ def calc24(def row, def rowV, def rowsB, def periodOrder = null) {
             month = month + tmp
         }
     }
-    BigDecimal tmp = (month ? month / 12 : null)
+    BigDecimal tmp = (month != null ? month / 12 : null)
     return round(tmp, 4)
 }
 
