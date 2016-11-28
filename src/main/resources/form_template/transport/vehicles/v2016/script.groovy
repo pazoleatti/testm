@@ -444,6 +444,11 @@ def logicCheck() {
             }
             identRowsMap[alias][indentKey].add(row)
         }
+
+        // 16. Проверка одновременного заполнения данных о налоговом вычете
+        if (row.deductionCode != null && row.deduction == null || row.deductionCode == null && row.deduction != null) {
+            logger.error("Строка %s: Данные о налоговом вычете указаны не полностью", index)
+        }
     }
 
     // 2. Проверка на наличие в форме строк с одинаковым значением граф 2, 4, 8, 12, 13, 14
