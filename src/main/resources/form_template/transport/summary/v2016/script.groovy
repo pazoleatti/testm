@@ -2381,10 +2381,9 @@ void comparePrevRows() {
     def currentActualRowsMap = getActualRowsMap(dataRows)
     def prevActualRowsMap = getActualRowsMap(prevDataRows)
 
-    // графа 11, 12, 15, 16, 18..29 (31..33)
-    def compareColumns = ['regDate', 'regDateEnd', 'createYear', 'years', 'partRight', 'coefKv', 'taxRate',
-            'coefKp', 'calculatedTaxSum', 'benefitMonths', 'coefKl', 'taxBenefitCode', /* 'taxBenefitBase', */
-            'taxBenefitSum', 'deductionCode', 'deductionSum']
+    // графа 11, 12, 15, 16, 18, 20, 21, 25, 26, 28, 29 (31..33)
+    def compareColumns = ['regDate', 'regDateEnd', 'createYear', 'years', 'partRight', 'taxRate',
+            'coefKp', 'taxBenefitCode', /* 'taxBenefitBase', */ 'deductionCode', 'deductionSum']
     def reportPeriod = getReportPeriod()
     switch (reportPeriod.order) {
         case 4: compareColumns.add('q3')
