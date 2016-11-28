@@ -604,6 +604,16 @@ public class VehiclesTest extends ScriptTestBase {
         Assert.assertEquals(msg, entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
+
+        // 16. Проверка одновременного заполнения данных о налоговом вычете
+        setDefaultValues(row);
+        row.getCell("deductionCode").setValue(1L, row.getIndex());
+        testHelper.execute(FormDataEvent.CHECK);
+        i = 0;
+        msg = String.format("Строка %s: Данные о налоговом вычете указаны не полностью", row.getIndex());
+        Assert.assertEquals(msg, entries.get(i++).getMessage());
+        Assert.assertEquals(i, entries.size());
+        testHelper.getLogger().clear();
     }
 
     @Test
