@@ -103,6 +103,7 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
     public void check1Test() throws ParseException {
         mockProvider(96L);
         mockProvider(705L);
+        mockProvider(700L);
         mockProvider(710L);
 
         // текущий период
@@ -860,6 +861,7 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
     public void composeTest() throws ParseException {
         // провайдеры и получения записей для справочников
         mockProvider(8L);
+        mockProvider(700L);
         mockProvider(710L);
 
         int sourceFormTypeId = 912;
@@ -1070,8 +1072,29 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
                 any(RefBookAttribute.class))).thenAnswer(new Answer<PagingResult<Map<String, RefBookValue>>>() {
             @Override
             public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                String filter = (String) invocation.getArguments()[2];
                 PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-                result.addAll(testHelper.getRefBookAllRecords(refBookId).values());
+                Collection<Map<String, RefBookValue>> refBookValues = testHelper.getRefBookAllRecords(refBookId).values();
+                if (refBookId == 700L) {
+                    String[] parts = filter.split(" = ");
+                    Long departmentId = Long.valueOf(parts[1]);
+                    for (Map<String, RefBookValue> value : refBookValues) {
+                        if (departmentId.equals(value.get("DEPARTMENT_ID").getReferenceValue())) {
+                            result.add(value);
+                        }
+                    }
+                } else if (refBookId == 710L) {
+                    String[] parts = filter.split("'");
+                    String kno = parts[1];
+                    String kpp = parts[3];
+                    for (Map<String, RefBookValue> value : refBookValues) {
+                        if (kno.equals(value.get("TAX_ORGAN_CODE").getStringValue()) && kpp.equals(value.get("KPP").getStringValue())) {
+                            result.add(value);
+                        }
+                    }
+                } else {
+                    result.addAll(refBookValues);
+                }
                 return result;
             }
         });

@@ -393,12 +393,11 @@ void logicCheck() {
 
     // 15. Проверка заполнения формы настроек подразделений
     if (!knoKppMap.isEmpty()) {
-        def records710 = getRecords710()
         def groupKeys = knoKppMap.keySet().toList()
         for (def groupKey : groupKeys) {
             def rows = knoKppMap[groupKey]
-            row = rows[0]
-            def find = records710.find { it?.TAX_ORGAN_CODE?.value == row.kno && it?.KPP?.value == row.kpp }
+            def row = rows[0]
+            def find = getRecord710(row.kno, row.kpp)
             if (!find) {
                 def rowIndexes = rows?.collect { it.getIndex() }
                 def value3 = row.kno
@@ -778,8 +777,7 @@ def calc25_27(def row, def periodOrder, def showMsg = false) {
         return null
     }
 
-    def records710 = getRecords710()
-    def find = records710.find { it?.TAX_ORGAN_CODE?.value == row.kno && it?.KPP?.value == row.kpp }
+    def find = getRecord710(row.kno, row.kpp)
     if (find && getRefBookValue(38L, find?.PREPAYMENT?.value)?.CODE?.value == 0) {
         return round(BigDecimal.ZERO, 0)
     }
@@ -793,8 +791,7 @@ def calc28(def row, def showMsg = false) {
     }
     def n = getN(row, 4, showMsg)
 
-    def records710 = getRecords710()
-    def find = records710.find { it?.TAX_ORGAN_CODE?.value == row.kno && it?.KPP?.value == row.kpp }
+    def find = getRecord710(row.kno, row.kpp)
     if (find && getRefBookValue(38L, find?.PREPAYMENT?.value)?.CODE?.value == 0) {
         return n
     }
@@ -1858,17 +1855,9 @@ boolean isNumeric(String str) {
     return str.matches("-?\\d+(\\.\\d+)?")
 }
 
-@Field
-def records710 = null
-
-def getRecords710() {
-    if (records710 == null) {
-        records710 = getAllRecords2(710L)?.findAll { it?.DEPARTMENT_ID?.value == formData.departmentId }
-        if (records710 == null) {
-            records710 = []
-        }
-    }
-    return records710
+def getRecord710(def kno, def kpp) {
+    def departmentParam = getDepartmentParam()
+    return (departmentParam ? getDepartmentParamTable(departmentParam?.record_id?.value, kno, kpp) : null)
 }
 
 def getTotalColumns() {
@@ -1885,4 +1874,39 @@ def getTotalColumns() {
         }
     }
     return totalColumns
+}
+
+@Field
+def departmentParam = null
+
+// Получить параметры подразделения (из справочника 700)
+def getDepartmentParam() {
+    if (departmentParam == null) {
+        def departmentId = formDataDepartment.id
+        def provider = formDataService.getRefBookProvider(refBookFactory, 700L, providerCache)
+        def departmentParamList = provider.getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+        if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+            return null
+        }
+        departmentParam = departmentParamList?.get(0)
+    }
+    return departmentParam
+}
+
+@Field
+def departmentParamTableMap = [:]
+
+// Получить параметры подразделения (из справочника 710)
+def getDepartmentParamTable(def departmentParamId, def kno, def kpp) {
+    def key = departmentParamId + '#' + kno + '#' + kpp
+    if (departmentParamTableMap[key] == null) {
+        def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='$kno' and KPP ='$kpp'"
+        def provider = formDataService.getRefBookProvider(refBookFactory, 710L, providerCache)
+        def departmentParamTableList = provider.getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+        if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
+            return null
+        }
+        departmentParamTableMap[key] = departmentParamTableList.get(0)
+    }
+    return departmentParamTableMap[key]
 }
