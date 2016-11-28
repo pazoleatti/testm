@@ -236,7 +236,7 @@ def calc() {
         // графа 20
         row.taxRate = calc20(row, region, showMsg)
         // графа 22
-        row.calculatedTaxSum = calc22(row)
+        row.calculatedTaxSum = calc22(row, rowV)
         // графа 24
         row.coefKl = calc24(row, rowV, rowsB)
         // графа 27
@@ -480,12 +480,12 @@ def calc20(def row, def region, def showMsg = false) {
     return record41?.record_id?.value
 }
 
-def calc22(def row, def periodOrder = null) {
+def calc22(def row, def rowV, def periodOrder = null) {
     if (row.taxBase == null || row.partRight == null || row.taxRate == null) {
         return null
     }
     def period = (periodOrder ?: getReportPeriod()?.order)
-    def value19 = (getReportPeriod()?.order != period ? calc19(row, periodOrder) : row.coefKv)
+    def value19 = (getReportPeriod()?.order != period ? calc19(row, rowV, period) : row.coefKv)
     if (value19 == null) {
         return null
     }
@@ -622,7 +622,7 @@ def calc31_33(def row, def rowV, def rowsB, def periodOrder) {
     def value22 = row.calculatedTaxSum
     def value27 = row.taxBenefitSum
     if (getReportPeriod()?.order != periodOrder) {
-        value22 = calc22(row, periodOrder)
+        value22 = calc22(row, rowV, periodOrder)
         value27 = calc27(row, rowV, rowsB, periodOrder)
     }
 
@@ -846,7 +846,7 @@ void logicCheck() {
             // needValue.kno = calc2(row, region, showMsg)
             needValue.coefKv = calc19(row, rowV)
             needValue.taxRate = calc20(row, region, showMsg)
-            needValue.calculatedTaxSum = calc22(row)
+            needValue.calculatedTaxSum = calc22(row, rowV)
             needValue.coefKl = calc24(row, rowV, rowsB)
             needValue.taxBenefitSum = calc27(row, rowV, rowsB)
             needValue.taxSumToPay = calc30(row)
