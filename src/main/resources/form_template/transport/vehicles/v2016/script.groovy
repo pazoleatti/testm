@@ -196,8 +196,8 @@ void repaintRow(def row) {
 
 def calc12(def row) {
     def tmp1 = subCalc12(row, 'regDate', 'regDateEnd')
-    if (tmp1 == null) {
-        return null
+    if (tmp1 == null || tmp1 == BigDecimal.ZERO) {
+        return tmp1
     }
     def tmp2 = subCalc12(row, 'stealDateStart', 'stealDateEnd', true)
     if (tmp2 == null) {
@@ -224,7 +224,6 @@ def subCalc12(def row, def startAlias, def endAlias, def isSteal = false) {
     }
     def end = (row[endAlias] == null || row[endAlias] > getReportPeriodEndDate() ? getReportPeriodEndDate() : row[endAlias])
     def start = (row[startAlias] < getReportPeriodStartDate() ? getReportPeriodStartDate() : row[startAlias])
-
     // специфика
     BigDecimal tmp
     if (isSteal) {
