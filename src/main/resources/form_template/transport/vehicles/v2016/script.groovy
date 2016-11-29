@@ -390,7 +390,7 @@ def logicCheck() {
         }
 
         // 10. Проверка заполнения даты возврата ТС
-        if (row.regDateEnd && row.stealDateStart && row.stealDateEnd && row.regDateEnd < row.stealDateEnd) {
+        if (row.regDateEnd && row.stealDateStart && (row.stealDateEnd == null || row.regDateEnd < row.stealDateEnd)) {
             def columnName18 = getColumnName(row, 'stealDateEnd')
             def columnName11 = getColumnName(row, 'regDateEnd')
             def dateInStr = startYearDate?.format('dd.MM.yyyy')
