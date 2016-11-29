@@ -46,7 +46,7 @@ def getRecord(def refBookId, def recordId) {
 void addRow() {
     if (user?.departmentId) {
         regionId = departmentService.get(user.departmentId).getRegionId()
-        if (regionId) {
+        if (regionId != null) {
             record.put("DECLARATION_REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, regionId));
         }
     }
@@ -55,7 +55,6 @@ void addRow() {
 void save() {
     def refBook = refBookFactory.get(REF_BOOK_ID)
     provider = refBookFactory.getDataProvider(REF_BOOK_ID)
-    def Date start = Date.parse('dd.MM.yyyy', '01.01.2016')
 
     saveRecords.each {
         def declarationRegionId = it.DECLARATION_REGION_ID?.referenceValue // Код субъекта РФ представителя декларации
@@ -69,11 +68,11 @@ void save() {
         def maxPower = it.MAX_POWER?.numberValue
         def minEcoclass = it.MIN_ECOCLASS?.referenceValue
         def maxEcoclass = it.MAX_ECOCLASS?.referenceValue
-        def boolean has1 = minAge || maxAge
-        def boolean has2 = minPower || maxPower
-        def boolean has3 = minEcoclass || maxEcoclass
+        def boolean has1 = minAge != null || maxAge != null
+        def boolean has2 = minPower != null || maxPower != null
+        def boolean has3 = minEcoclass != null || maxEcoclass != null
 
-        def boolean allRequired = declarationRegionId && dictRegionId && code && unitOfPower && value
+        def boolean allRequired = declarationRegionId != null && dictRegionId != null && code != null && unitOfPower != null && value != null
 
         // 1. Проверка обязательности заполнения мощности
         if (allRequired && minPower == null && maxPower == null) {
@@ -81,21 +80,21 @@ void save() {
         }
 
         // 2. Проверка типов дифференциации ставок
-        if (allRequired && ((minAge || maxAge) && (minEcoclass || maxEcoclass) && (minPower || maxPower))) {
+        if (allRequired && (has1 && has2 && has3)) {
             logger.error("Ставка не может дифференцироваться по значениям мощности, срока использования и экологического класса одновременно")
-        } else if (allRequired && ((minAge || maxAge) && (minEcoclass || maxEcoclass))) {
+        } else if (allRequired && (has1 && has3)) {
             logger.error("Ставка не может дифференцироваться по значению срока использования и по значению экологического класса одновременно")
         }
 
         // 3. Проверка корректности задания границ интервалов
         def String errStr = "Значение поля «%s» должно быть меньше или равно значению поля «%s»"
-        if (minAge && maxAge && minAge > maxAge) {
+        if (minAge != null && maxAge != null && minAge > maxAge) {
             logger.error(errStr, refBook.getAttribute('MIN_AGE').name, refBook.getAttribute('MAX_AGE').name)
         }
-        if (minPower && maxPower && minPower > maxPower) {
+        if (minPower != null && maxPower != null && minPower > maxPower) {
             logger.error(errStr, refBook.getAttribute('MIN_POWER').name, refBook.getAttribute('MAX_POWER').name)
         }
-        if (minEcoclass && maxEcoclass && minEcoclass > maxEcoclass) {
+        if (minEcoclass != null && maxEcoclass != null && minEcoclass > maxEcoclass) {
             logger.error(errStr, refBook.getAttribute('MIN_ECOCLASS').name, refBook.getAttribute('MAX_ECOCLASS').name)
         }
 
@@ -107,10 +106,10 @@ void save() {
                     " and UNIT_OF_POWER = " + unitOfPower
             def pairs = provider.getRecordIdPairs(REF_BOOK_ID, null, false, filter)
             for (def pair : pairs) {
-                if (recordCommonId && pair.second == recordCommonId) {
+                if (recordCommonId != null && pair.second == recordCommonId) {
                     // проверка при создании новой версии, пропускаем элементы версии
                     continue
-                } else if (!recordCommonId && pair.first == uniqueRecordId) {
+                } else if (recordCommonId == null && pair.first == uniqueRecordId) {
                     // проверка при создания нового/сохранении существующего элемента
                     continue
                 }
@@ -126,15 +125,15 @@ void save() {
                     def maxPower1 = record.MAX_POWER?.numberValue
                     def minEcoclass1 = record.MIN_ECOCLASS?.referenceValue
                     def maxEcoclass1 = record.MAX_ECOCLASS?.referenceValue
-                    boolean recordHas1 = minAge1 || maxAge1
-                    boolean recordHas2 = minPower1 || maxPower1
-                    boolean recordHas3 = minEcoclass1 || maxEcoclass1
+                    boolean recordHas1 = minAge1 != null || maxAge1 != null
+                    boolean recordHas2 = minPower1 != null || maxPower1 != null
+                    boolean recordHas3 = minEcoclass1 != null || maxEcoclass1 != null
 
                     // 4. Проверка дифференциации ТС
-                    if ((minAge || maxAge) && (minEcoclass1 || maxEcoclass1)) {
+                    if (has1 && recordHas3) {
                         logger.error("Для вида ТС «%s» уже задана ставка, которая дифференцируется по мощности и экологическому классу", getRecord(42L, code)?.CODE.stringValue)
                     }
-                    if ((minEcoclass || maxEcoclass) && (minAge1 || maxAge1)) {
+                    if (has3 && recordHas1) {
                         logger.error("Для вида ТС «%s» уже задана ставка, которая дифференцируется по мощности и сроку использования", getRecord(42L, code)?.CODE.stringValue)
                     }
 
@@ -153,28 +152,28 @@ void save() {
                         if (group1) {
                             minAge1 = minAge1 ?: 0
                             maxAge1 = maxAge1 ?: 999
-                            minAgeC = minAge ?: 0
-                            maxAgeC = maxAge ?: 999
+                            def minAgeC = minAge ?: 0
+                            def maxAgeC = maxAge ?: 999
                             badAge = !((minAge1 < minAgeC && maxAge1 < minAgeC) || (minAge1 > maxAgeC && maxAge1 > maxAgeC))
                         }
                         boolean badPower = false
                         if (group2) {
                             minPower1 = minPower1 ?: 0
                             maxPower1 = maxPower1 ?: 9999999999999.99
-                            minPowerC = minPower ?: 0
-                            maxPowerC = maxPower ?: 9999999999999.99
+                            def minPowerC = minPower ?: 0
+                            def maxPowerC = maxPower ?: 9999999999999.99
                             badPower = !((minPower1 < minPowerC && maxPower1 < minPowerC) || (minPower1 > maxPowerC && maxPower1 > maxPowerC))
                         }
                         boolean badEcoclass = false
                         if (group3) {
                             minEcoclass1 = minEcoclass1 ? getRecord(REF_BOOK_ECO_ID, minEcoclass1.longValue())?.CODE.numberValue : 0
                             maxEcoclass1 = maxEcoclass1 ? getRecord(REF_BOOK_ECO_ID, maxEcoclass1.longValue())?.CODE.numberValue : 5
-                            minEcoclassC = minEcoclass ? getRecord(REF_BOOK_ECO_ID, minEcoclass.longValue())?.CODE.numberValue : 0
-                            maxEcoclassC = maxEcoclass ? getRecord(REF_BOOK_ECO_ID, maxEcoclass.longValue())?.CODE.numberValue : 5
+                            def minEcoclassC = minEcoclass ? getRecord(REF_BOOK_ECO_ID, minEcoclass.longValue())?.CODE.numberValue : 0
+                            def maxEcoclassC = maxEcoclass ? getRecord(REF_BOOK_ECO_ID, maxEcoclass.longValue())?.CODE.numberValue : 5
                             badEcoclass = !((minEcoclass1 < minEcoclassC && maxEcoclass1 < minEcoclassC) || (minEcoclass1 > maxEcoclassC && maxEcoclass1 > maxEcoclassC))
                         }
 
-                        error = false
+                        def error = false
                         if (group1 && group2) {
                             error = badAge && badPower
                         } else if (group1 && group3) {
