@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.refbook.tax_benefits_transport;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
@@ -20,6 +22,7 @@ import java.util.Map;
 
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 /**
@@ -47,6 +50,30 @@ public class TaxBenefitsTransportTest extends RefBookScriptTestBase {
                     }
                 }
         );
+        when(testHelper.getRefBookFactory().get(eq(7L))).thenReturn(new RefBook() {{
+            List<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();
+            attributes.add(new RefBookAttribute() {{
+                setAlias("SECTION");
+                setName("Основание - статья");
+            }});
+            attributes.add(new RefBookAttribute() {{
+                setAlias("ITEM");
+                setName("Основание - пункт");
+            }});
+            attributes.add(new RefBookAttribute() {{
+                setAlias("SUBITEM");
+                setName("Основание - подпункт");
+            }});
+            attributes.add(new RefBookAttribute() {{
+                setAlias("PERCENT");
+                setName("Уменьшающий процент, %");
+            }});
+            attributes.add(new RefBookAttribute() {{
+                setAlias("RATE");
+                setName("Пониженная ставка");
+            }});
+            setAttributes(attributes);
+        }});
     }
 
     @Test
@@ -141,8 +168,10 @@ public class TaxBenefitsTransportTest extends RefBookScriptTestBase {
         value.get("SUBITEM").setValue(null);
         value.get("TAX_BENEFIT_ID").setValue(20230L);
         testHelper.execute(FormDataEvent.SAVE);
-        Assert.assertEquals("Значения полей: «Основание - статья», «Основание - пункт», «Основание - подпункт» для выбранного кода льготы должны быть заполнены", entries.get(0).getMessage());
-        Assert.assertEquals(1, entries.size());
+        Assert.assertEquals("Для налоговой льготы «20230» поле «Основание - статья» является обязательным!", entries.get(0).getMessage());
+        Assert.assertEquals("Для налоговой льготы «20230» поле «Основание - подпункт» является обязательным!", entries.get(1).getMessage());
+        Assert.assertEquals("Значения полей: «Основание - статья», «Основание - пункт», «Основание - подпункт» для выбранного кода льготы должны быть заполнены", entries.get(2).getMessage());
+        Assert.assertEquals(3, entries.size());
         testHelper.getLogger().clear();
         value.get("SECTION").setValue("123-");
         value.get("ITEM").setValue("");
