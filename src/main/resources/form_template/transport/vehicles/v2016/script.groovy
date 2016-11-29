@@ -227,7 +227,9 @@ def subCalc12(def row, def startAlias, def endAlias, def isSteal = false) {
     // специфика
     BigDecimal tmp
     if (isSteal) {
-        tmp = end.format('M').toInteger() - start.format('M').toInteger() - 1
+        def mVozvr = end.format('M').toInteger() + (row[endAlias] == null || row[endAlias] > getReportPeriodEndDate() ? 1 : 0)
+        def mNachroz = start.format('M').toInteger() - (row[startAlias] < getReportPeriodStartDate() ? 1 : 0)
+        tmp = mVozvr - mNachroz - 1
         if (tmp < 0) {
             tmp = BigDecimal.ZERO
         }

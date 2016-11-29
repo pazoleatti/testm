@@ -445,7 +445,9 @@ def subCalc19(def dateStart, def dateEnd, def periodOrder, def isSteal = false) 
     // специфика
     BigDecimal tmp
     if (isSteal) {
-        tmp = end.format('M').toInteger() - start.format('M').toInteger() - 1
+        def mVozvr = end.format('M').toInteger() + (dateEnd == null || dateEnd > periodEnd ? 1 : 0)
+        def mNachroz = start.format('M').toInteger() - (dateStart < periodStart ? 1 : 0)
+        tmp = mVozvr - mNachroz - 1
         if (tmp < 0) {
             tmp = BigDecimal.ZERO
         }
