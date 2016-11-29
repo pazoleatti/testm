@@ -19,18 +19,57 @@ switch (formDataEvent) {
         break
 }
 
+def Long getRecordId(def Long refBookId, def String alias, def String value) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            validDateFrom, -1, null, logger, true)
+}
+
 //// Кэши и константы
+@Field
+def recordCache = [:]
+@Field
+def providerCache = [:]
 @Field
 def refBookCache = [:]
 
+@Field
+def refBookId = 7
+@Field
+def refBookTaxId = 6
+@Field
+def concatParamsCodes = ["20200", "20210", "20220", "20230"]
+@Field
+def benefitMap = [['SECTION', 'ITEM', 'SUBITEM'/*, 'REDUCTION_PARAMS'*/]: concatParamsCodes,
+                  ['PERCENT']                                 : ['20220'],
+                  ['RATE']                                    : ['20230']]
+
+@Field
+def recordIdMap = [:]
+
 void save() {
+    benefitMap.values().sum().unique().each { code ->
+        recordIdMap.put(code, getRecordId(refBookTaxId, 'CODE', code))
+    }
+    def refBook = refBookFactory.get(refBookId)
+    def String ERROR_EMPTY = "Для налоговой льготы «%s» поле «%s» является обязательным!"
     saveRecords.each {
-        def String tax = getRefBookValue(6, it.TAX_BENEFIT_ID.referenceValue)?.CODE?.stringValue
+        def benefitId = it.TAX_BENEFIT_ID.referenceValue
+        def String tax = getRefBookValue(6, benefitId)?.CODE?.stringValue
         def percent = it.PERCENT?.numberValue
         def rate = it.RATE?.numberValue
         def String section = it.SECTION?.stringValue
         def String item = it.ITEM?.stringValue
         def String subitem = it.SUBITEM?.stringValue
+
+        benefitMap.each { aliases, codes ->
+            def codeIds = codes.collect { recordIdMap[it] } as List<Long>
+            aliases.each { alias ->
+                if (it[alias].value == null && codeIds.contains(benefitId)) {
+                    def code = recordIdMap.find { it.value.equals(benefitId) }.key
+                    logger.error(ERROR_EMPTY, code, refBook.getAttribute(alias).name)
+                }
+            }
+        }
 
         // 1. Проверка корректности заполнения уменьшающего процента
         if (percent != null && !(percent > 0 && percent < 100)) {
@@ -46,7 +85,7 @@ void save() {
         }
         // 4. Проверка корректности заполнения основания
         def errorStr = []
-        if (!['20200', '20210', '20220', '20230'].contains(tax)) {
+        if (!concatParamsCodes.contains(tax)) {
             if (section) {
                 errorStr.add('«Основание - статья»')
             }
@@ -75,7 +114,7 @@ void save() {
         }
 
         // Заполнение поля "Основание"
-        if (!logger.containsLevel(LogLevel.ERROR) && ['20200', '20210', '20220', '20230'].contains(tax)) {
+        if (!logger.containsLevel(LogLevel.ERROR) && concatParamsCodes.contains(tax)) {
             it.BASE.value = fill(section) + fill(item) + fill(subitem)
         }
     }
