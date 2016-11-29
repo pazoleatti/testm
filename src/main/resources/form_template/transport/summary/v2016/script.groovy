@@ -2384,8 +2384,8 @@ void comparePrevRows() {
     def prevActualRowsMap = getActualRowsMap(prevDataRows)
 
     // графа 11, 12, 15, 16, 18, 20, 21, 25, 26, 28, 29 (31..33)
-    def compareColumns = ['regDate', 'regDateEnd', 'createYear', 'years', 'partRight', 'taxRate',
-            'coefKp', 'taxBenefitCode', /* 'taxBenefitBase', */ 'deductionCode', 'deductionSum']
+    def compareColumns = ['regDate', 'regDateEnd', 'createYear', 'years', 'partRight',
+            /* 'taxRate', 'coefKp', 'taxBenefitCode', 'taxBenefitBase', 'deductionCode', */ 'deductionSum']
     def reportPeriod = getReportPeriod()
     switch (reportPeriod.order) {
         case 4: compareColumns.add('q3')
@@ -2411,12 +2411,44 @@ void comparePrevRows() {
                 }
             }
 
-            // сравнение зависимых граф
+            // сравнение справочных и зависимых граф
+            // графа 20
+            def taxRate1 = getRefBookValue(41L, row.taxRate)?.VALUE?.value
+            def taxRate2 = getRefBookValue(41L, prevRow.taxRate)?.VALUE?.value
+            if (taxRate1 != taxRate2) {
+                row.getCell('taxRate').setStyleAlias(compareStyleName)
+            }
+
+            // графа 21
+            def coefKp1 = getRefBookValue(209L, row.coefKp)?.VALUE?.value
+            def coefKp2 = getRefBookValue(209L, prevRow.coefKp)?.VALUE?.value
+            if (coefKp1 != coefKp2) {
+                row.getCell('coefKp').setStyleAlias(compareStyleName)
+            }
+
+            // графа 25
+            def record7_1 = getRefBookValue(7L, row.taxBenefitCode)
+            def record7_2 = getRefBookValue(7L, prevRow.taxBenefitCode)
+            def taxBenefitId1 = record7_1?.TAX_BENEFIT_ID?.value
+            def taxBenefitId2 = record7_2?.TAX_BENEFIT_ID?.value
+            def taxBenefitCode1 = getRefBookValue(6L, taxBenefitId1)?.CODE?.value
+            def taxBenefitCode2 = getRefBookValue(6L, taxBenefitId2)?.CODE?.value
+            if (taxBenefitCode1 != taxBenefitCode2) {
+                row.getCell('taxBenefitCode').setStyleAlias(compareStyleName)
+            }
+
             // графа 26
-            def taxBenefitBase1 = getRefBookValue(7L, row.taxBenefitBase)?.BASE?.value
-            def taxBenefitBase2 = getRefBookValue(7L, prevRow.taxBenefitBase)?.BASE?.value
+            def taxBenefitBase1 = record7_1?.BASE?.value
+            def taxBenefitBase2 = record7_2?.BASE?.value
             if (taxBenefitBase1 != taxBenefitBase2) {
-                row.getCell('benefitBase').setStyleAlias(compareStyleName)
+                row.getCell('taxBenefitBase').setStyleAlias(compareStyleName)
+            }
+
+            // графа 28
+            def deductionCode1 = getRefBookValue(6L, row.deductionCode)?.CODE?.value
+            def deductionCode2 = getRefBookValue(6L, prevRow.deductionCode)?.CODE?.value
+            if (deductionCode1 != deductionCode2) {
+                row.getCell('deductionCode').setStyleAlias(compareStyleName)
             }
         }
     }
