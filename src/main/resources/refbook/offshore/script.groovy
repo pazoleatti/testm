@@ -59,8 +59,13 @@ void save() {
         it.CODE_3.setValue(code)
         if (code != null) {
             def record = getRecord(10L, code)
-            it.SHORTNAME.setValue(record?.NAME.stringValue)
-            it.NAME.setValue(record?.FULLNAME.stringValue)
+            def name = record?.NAME.stringValue
+            it.SHORTNAME.setValue(name)
+            if (record?.FULLNAME.stringValue != null) {
+                it.NAME.setValue(record?.FULLNAME.stringValue)
+            } else {
+                it.NAME.setValue(name)
+            }
         }
         it.OFFSHORE_NAME.setValue(offshoreCode)
     }
