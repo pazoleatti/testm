@@ -1,0 +1,56 @@
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+
+Logger newLogger = new Logger() {
+  public void info(String message, Object... args) {
+  log(LogLevel.INFO, message, args);
+ }
+  
+  public void log(LogLevel level, String message, Object...args) {
+ String extMessage = String.format(message, args);
+ if (messageDecorator != null) {
+   extMessage = messageDecorator.getDecoratedMessage(extMessage);
+ }
+ LogEntry entry = new LogEntry(level, extMessage);
+ entries.add(entry);
+  }
+};
+logger.entries = newLogger.entries
+
+try {
+    def connection = dataSource.connection
+    def stmt = connection.createStatement()
+	
+	def res = stmt.executeQuery("""
+						select r.id, r.record_id, r.version, r.status, v.string_value
+						from ref_book_record r
+						join ref_book_value v on r.id = v.record_id and v.attribute_id = 5201 and v.string_value = 'Troika Capital Partners Limited1'
+						join ref_book_value v_code on v_code.record_id = r.id and v_code.attribute_id = 5204
+						join ref_book_value code on code.record_id = v_code.reference_value and code.attribute_id = 50 and code.string_value = '196'
+						join ref_book_value regnum on regnum.record_id = r.id and regnum.attribute_id = 5209 and trim(regnum.string_value) = '184848'
+						where r.ref_book_id = 520 and r.status <> -1
+	""")
+	  	while (res.next()) {
+		  newLogger.info("Pre-Update: id = ${res.getInt(1)};record_id = ${res.getInt(2)}; version = ${res.getDate(3)}; status = ${res.getInt(4)}; name.string_value = '${res.getString(5)}'" 
+					 )
+	  	}
+  
+  def insert_res1 = stmt.executeUpdate("""
+			update ref_book_value
+			set string_value = 'Troika Capital Partners Limited'
+			where attribute_id = 5201 and record_id in (select r.id as record_id
+												from ref_book_record r
+												join ref_book_value v on r.id = v.record_id and v.attribute_id = 5201 and v.string_value = 'Troika Capital Partners Limited1'
+												join ref_book_value v_code on v_code.record_id = r.id and v_code.attribute_id = 5204
+												join ref_book_value code on code.record_id = v_code.reference_value and code.attribute_id = 50 and code.string_value = '196'
+												join ref_book_value regnum on regnum.record_id = r.id and regnum.attribute_id = 5209 and trim(regnum.string_value) = '184848'
+												where r.ref_book_id = 520 and status <> -1) 
+	""")
+	newLogger.info("Post-Update: ${insert_res1} row(s) updated") 
+		
+    connection.close()
+} catch (Exception ex) {
+    logger.error("Error: ${ex.getLocalizedMessage()}")
+}
+  
