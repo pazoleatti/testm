@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><rows>
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
     <row alias="">
         <cell alias="rowNumber" colSpan="4" rowSpan="1" value="Общая информация"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Общая информация"/>
@@ -11,6 +12,19 @@
         <cell alias="price" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
         <cell alias="cost" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
         <cell alias="dealDoneDate" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ п/п"/>
+        <cell alias="name" colSpan="1" rowSpan="2" value="Полное наименование юридического лица с указанием ОПФ"/>
+        <cell alias="iksr" colSpan="1" rowSpan="2" value="ИНН/ КИО"/>
+        <cell alias="countryCode" colSpan="1" rowSpan="2" value="Код страны по классификатору ОКСМ"/>
+        <cell alias="sum" colSpan="1" rowSpan="2" value="Сумма доходов Банка, руб."/>
+        <cell alias="docNumber" colSpan="1" rowSpan="2" value="Номер договора"/>
+        <cell alias="docDate" colSpan="1" rowSpan="2" value="Дата договора"/>
+        <cell alias="serviceType" colSpan="1" rowSpan="2" value="Вид услуг"/>
+        <cell alias="price" colSpan="1" rowSpan="2" value="Цена"/>
+        <cell alias="cost" colSpan="1" rowSpan="2" value="Стоимость"/>
+        <cell alias="dealDoneDate" colSpan="1" rowSpan="2" value="Дата совершения сделки"/>
     </row>
     <row alias="">
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
