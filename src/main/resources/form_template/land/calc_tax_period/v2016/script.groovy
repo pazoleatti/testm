@@ -1591,8 +1591,8 @@ void comparePrevRows() {
     def prevActualRowsMap = getActualRowsMap(prevDataRows)
 
     // графа 2..13, 15..19, 21 (25..27)
-    def compareColumns = ['department', 'kno', 'kpp', 'kbk', 'oktmo', 'cadastralNumber', 'landCategory',
-            'constructionPhase', 'cadastralCost', 'taxPart', 'ownershipDate', 'terminationDate',
+    def compareColumns = ['department', 'kno', 'kpp', /* 'kbk', 'oktmo', */ 'cadastralNumber',
+            /* 'landCategory', 'constructionPhase', */ 'cadastralCost', 'taxPart', 'ownershipDate', 'terminationDate',
             /* 'benefitCode', 'benefitBase', 'benefitParam', */ 'startDate', 'endDate', 'taxRate']
     def reportPeriod = getReportPeriod()
     switch (reportPeriod.order) {
@@ -1615,6 +1615,34 @@ void comparePrevRows() {
                 if (row[alias] != prevRow[alias]) {
                     row.getCell(alias).setStyleAlias(compareStyleName)
                 }
+            }
+
+            // графа 5
+            def kbk1 = getRefBookValue(703L, row.kbk)?.CODE?.value
+            def kbk2 = getRefBookValue(703L, prevRow.kbk)?.CODE?.value
+            if (kbk1 != kbk2) {
+                row.getCell('kbk').setStyleAlias(compareStyleName)
+            }
+
+            // графа 6
+            def oktmo1 = getRefBookValue(96L, row.oktmo)?.CODE?.value
+            def oktmo2 = getRefBookValue(96L, prevRow.oktmo)?.CODE?.value
+            if (oktmo1 != oktmo2) {
+                row.getCell('oktmo').setStyleAlias(compareStyleName)
+            }
+
+            // графа 8
+            def landCategory1 = getRefBookValue(702L, row.landCategory)?.CODE?.value
+            def landCategory2 = getRefBookValue(702L, prevRow.landCategory)?.CODE?.value
+            if (landCategory1 != landCategory2) {
+                row.getCell('landCategory').setStyleAlias(compareStyleName)
+            }
+
+            // графа 9
+            def constructionPhase1 = getRefBookValue(701L, row.constructionPhase)?.CODE?.value
+            def constructionPhase2 = getRefBookValue(701L, prevRow.constructionPhase)?.CODE?.value
+            if (constructionPhase1 != constructionPhase2) {
+                row.getCell('constructionPhase').setStyleAlias(compareStyleName)
             }
 
             // сравнение зависимых граф
