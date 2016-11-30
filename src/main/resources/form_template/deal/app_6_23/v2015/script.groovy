@@ -191,7 +191,7 @@ void calc() {
 void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 11
-    int HEADER_ROW_COUNT = 3
+    int HEADER_ROW_COUNT = 4
     String TABLE_START_VALUE = 'Общая информация'
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 0
@@ -273,7 +273,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][10]): tmpRow.getCell('dealDoneDate').column.name])
     ]
     (0..10).each{
-        headerMapping.add(([(headerRows[2][it]): 'гр. ' + (it + 1)]))
+        headerMapping.add(([(headerRows[3][it]): 'гр. ' + (it + 1)]))
     }
     checkHeaderEquals(headerMapping, logger)
 }
