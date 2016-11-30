@@ -1593,7 +1593,7 @@ void comparePrevRows() {
     // графа 2..13, 15..19, 21 (25..27)
     def compareColumns = ['department', 'kno', 'kpp', 'kbk', 'oktmo', 'cadastralNumber', 'landCategory',
             'constructionPhase', 'cadastralCost', 'taxPart', 'ownershipDate', 'terminationDate',
-            'benefitCode', /* 'benefitBase', 'benefitParam', */ 'startDate', 'endDate', 'taxRate']
+            /* 'benefitCode', 'benefitBase', 'benefitParam', */ 'startDate', 'endDate', 'taxRate']
     def reportPeriod = getReportPeriod()
     switch (reportPeriod.order) {
         case 4: compareColumns.add('q3')
@@ -1620,6 +1620,13 @@ void comparePrevRows() {
             // сравнение зависимых граф
             def record705 = getRefBookValue(705L, row.benefitCode)
             def prevRecord705 = getRefBookValue(705L, prevRow.benefitCode)
+
+            // графа 15
+            def benefitCode1 = getRefBookValue(704L, record705?.TAX_BENEFIT_ID?.value)?.CODE?.value
+            def benefitCode2 = getRefBookValue(704L, prevRecord705?.TAX_BENEFIT_ID?.value)?.CODE?.value
+            if (benefitCode1 != benefitCode2) {
+                row.getCell('benefitCode').setStyleAlias(compareStyleName)
+            }
 
             // графа 16
             def benefitBase1 = getRefBookValue(704L, record705?.TAX_BENEFIT_ID?.value)?.BASE?.value
