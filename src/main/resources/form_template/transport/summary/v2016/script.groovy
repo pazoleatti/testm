@@ -2159,7 +2159,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     if (departmentRegionId) {
         // граф 4, 5, 13, 14, 16
         def columns = ['okato', 'tsTypeCode', 'taxBase', 'taxBaseOkeiUnit', 'years']
-        def emptyColumns = columns.findAll { !newRow[it] }
+        def emptyColumns = columns.findAll { newRow[it] == null }
         if (emptyColumns) {
             // 4.a Проверка заполнения обязательных граф для выбора налоговой ставки
             def columnName20 = getColumnName(newRow, 'taxRate')
