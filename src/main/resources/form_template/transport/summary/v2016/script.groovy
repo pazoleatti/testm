@@ -51,26 +51,6 @@ import groovy.transform.Field
 // графа 33 - q3
 // графа 34 - q4
 
-// TODO (Ramil Timerbaev) отличия от предыдущей версии
-// удалены графы:
-//      - графа 17 - stealDateStart
-//      - графа 18 - stealDateEnd
-//      - графа 19 - periodStartCost
-//      - графа 20 - periodEndCost
-//      - графа 27 - benefitStartDate
-//      - графа 28 - benefitEndDate
-//      - графа 31 - benefitSum
-//      - графа 32 - taxBenefitCodeDecrease 7 19 TAX_BENEFIT_ID 6 16 NAME
-//      - графа 33 - benefitSumDecrease
-//      - графа 34 - benefitCodeReduction 7 19 TAX_BENEFIT_ID 6 16 NAME
-//      - графа 35 - benefitSumReduction
-// переименованы графа:
-//      - taxAuthority  -> kno
-//      - coef362       -> coefKv
-//      - coefKl        -> coefKp
-//      - koefKp        -> coefKl
-//      - benefitBase   -> taxBenefitBase
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
