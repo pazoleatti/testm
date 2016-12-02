@@ -1403,7 +1403,7 @@ def preConsolidationCheck() {
             if (!find) {
                 def formNameV = relationsV[0].formType.name
                 def formNameB = relation.formType.name
-                def departmentName = relationsV[0].department.name
+                def departmentName = relation.department.name
                 logger.error("Подразделения назначенных форм-источников вида «%s» и «%s» должны совпадать. " +
                         "В назначениях отсутствует форма вида «%s» для подразделения «%s»",
                         formNameV, formNameB, formNameV, departmentName)
