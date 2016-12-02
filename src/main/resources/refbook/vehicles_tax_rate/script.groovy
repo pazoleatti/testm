@@ -154,7 +154,7 @@ void save() {
                             maxAge1 = maxAge1 ?: 999
                             def minAgeC = minAge ?: 0
                             def maxAgeC = maxAge ?: 999
-                            badAge = !((minAge1 < minAgeC && maxAge1 < minAgeC) || (minAge1 > maxAgeC && maxAge1 > maxAgeC))
+                            badAge = !((minAge1 < minAgeC && maxAge1 <= minAgeC) || (minAge1 >= maxAgeC && maxAge1 > maxAgeC))
                         }
                         boolean badPower = false
                         if (group2) {
@@ -162,7 +162,7 @@ void save() {
                             maxPower1 = maxPower1 ?: 9999999999999.99
                             def minPowerC = minPower ?: 0
                             def maxPowerC = maxPower ?: 9999999999999.99
-                            badPower = !((minPower1 < minPowerC && maxPower1 < minPowerC) || (minPower1 > maxPowerC && maxPower1 > maxPowerC))
+                            badPower = !((minPower1 < minPowerC && maxPower1 <= minPowerC) || (minPower1 >= maxPowerC && maxPower1 > maxPowerC))
                         }
                         boolean badEcoclass = false
                         if (group3) {
@@ -170,7 +170,7 @@ void save() {
                             maxEcoclass1 = maxEcoclass1 ? getRecord(REF_BOOK_ECO_ID, maxEcoclass1.longValue())?.CODE.numberValue : 5
                             def minEcoclassC = minEcoclass ? getRecord(REF_BOOK_ECO_ID, minEcoclass.longValue())?.CODE.numberValue : 0
                             def maxEcoclassC = maxEcoclass ? getRecord(REF_BOOK_ECO_ID, maxEcoclass.longValue())?.CODE.numberValue : 5
-                            badEcoclass = !((minEcoclass1 < minEcoclassC && maxEcoclass1 < minEcoclassC) || (minEcoclass1 > maxEcoclassC && maxEcoclass1 > maxEcoclassC))
+                            badEcoclass = !((minEcoclass1 < minEcoclassC && maxEcoclass1 <= minEcoclassC) || (minEcoclass1 >= maxEcoclassC && maxEcoclass1 > maxEcoclassC))
                         }
 
                         def error = false
