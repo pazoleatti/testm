@@ -1189,8 +1189,8 @@ def groupColumnsListList = [
         ['codeOKATO'],
         // для предконсолидационной проверки 3
         ['codeOKATO', 'tsTypeCode', 'baseUnit'],
-        // для предконсолидационной проверки 4 (графа 2, 4, 8, 12, 13, 14)
-        ['codeOKATO', 'tsTypeCode', 'identNumber', 'taxBase', 'baseUnit', 'baseUnit']
+        // для предконсолидационной проверки 4 (графа 2, 4, 8, 9, 13, 14)
+        ['codeOKATO', 'tsTypeCode', 'identNumber', 'regNumber', 'taxBase', 'baseUnit']
 ]
 
 def preConsolidationCheck() {
