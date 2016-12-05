@@ -1302,7 +1302,7 @@ def preConsolidationCheck() {
     sourceRowsMap.each { Relation relation, rowsMap ->
         rowsMap.each { key, dataRows ->
             def row = dataRows[0]
-            if (row.codeOKATO != null && row.tsTypeCode != null && row.taxBase != null && row.pastYear != null && row.ecoClass != null) {
+            if (row.codeOKATO != null && row.tsTypeCode != null && row.taxBase != null && row.pastYear != null) {
                 def region = getRegion(row.codeOKATO)
                 def regionId = region?.record_id?.value
                 def declarationRegionId = formDataDepartment.regionId
@@ -2328,9 +2328,8 @@ def allRecordsMap = [:]
  */
 def getAllRecords(def refBookId) {
     if (allRecordsMap[refBookId] == null) {
-        def date = (refBookId == 310 ? getReportPeriodEndDate() - 1 : getReportPeriodEndDate())
         def provider = getProvider(refBookId)
-        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
+        List<Long> uniqueRecordIds = provider.getUniqueRecordIds(getReportPeriodEndDate(), null)
         allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
     }
     return allRecordsMap[refBookId]
