@@ -2197,7 +2197,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
 
     // графа 25 - атрибут 19.15 - TAX_BENEFIT_ID.CODE - «Код налоговой льготы».«Код», справочник 7.6 «Параметры налоговых льгот транспортного налога».«Коды налоговых льгот и вычетов транспортного налога»
     colIndex++
-    if (departmentRegionId && region) {
+    if (departmentRegionId && region && values[colIndex] && values[colIndex + 1]) {
         def record6 = getAllRecords(6L)?.values()?.find { it?.CODE?.value == values[colIndex] }
         def regionId = region?.record_id?.value
         def record7 = null
