@@ -132,19 +132,8 @@ void save() {
         }
 
         // 8. Заполнение обязательных полей для РОЗ
-        if (type == "РОЗ" && (!offshoreCode || !kio)) {
-            List<String> attributeNames = new ArrayList<String>();
-            if (!offshoreCode) {
-                attributeNames.add("«${getAttrName('OFFSHORE_CODE')}»")
-            }
-            if (!kio) {
-                attributeNames.add("«${getAttrName('KIO')}»")
-            }
-            if (attributeNames.size() == 1) {
-                logger.error('Для Резидента оффшорной зоны обязательно должно быть заполнено поле «%s»!', attributeNames.get(0))
-            } else {
-                logger.error('Для Резидента оффшорной зоны обязательно должны быть заполнены поля %s!', StringUtils.join(attributeNames.toArray(), ',' as char))
-            }
+        if (type == "РОЗ" && !offshoreCode) {
+            logger.error('Для Резидента оффшорной зоны обязательно должно быть заполнено поле «%s»!', getAttrName('OFFSHORE_CODE'))
         }
 
         // 9. Заполнение обязательных полей для российских ВЗЛ
