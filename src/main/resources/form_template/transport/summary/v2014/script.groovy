@@ -927,7 +927,7 @@ def formNewRow(def sRow) {
         def allRecords = getAllRecords(209L).values()
         def records = allRecords.findAll { record ->
             record.AVG_COST.value == avgPriceRecord.AVG_COST.value &&
-                    record.YEAR_FROM.value <= sRow.pastYear &&
+                    record.YEAR_FROM.value < sRow.pastYear &&
                     record.YEAR_TO.value >= sRow.pastYear
         }
         if (records.size() == 1) {
