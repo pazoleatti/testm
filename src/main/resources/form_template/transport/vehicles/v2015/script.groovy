@@ -303,7 +303,7 @@ def getAllRecords(def refBookId) {
         def date = getReportPeriodEndDate()
         def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
         List<Long> uniqueRecordIds = provider.getUniqueRecordIds(date, null)
-        allRecordsMap[refBookId] = provider.getRecordData(uniqueRecordIds)
+        allRecordsMap[refBookId] = (!uniqueRecordIds.isEmpty()) ? provider.getRecordData(uniqueRecordIds) : [:]
     }
     return allRecordsMap[refBookId]
 }
