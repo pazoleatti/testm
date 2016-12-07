@@ -307,7 +307,7 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         //7
         Assert.assertEquals("Для иностранной организации обязательно должно быть заполнено одно из следующих полей: «Код налогоплательщика в стране инкорпорации», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!", entries.get(i++).getMessage());
         Assert.assertEquals("Для иностранной организации нельзя указать «INN»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Для Резидента оффшорной зоны обязательно должны быть заполнены поля «OFFSHORE_CODE»,«KIO»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для Резидента оффшорной зоны обязательно должно быть заполнено поле «OFFSHORE_CODE»!", entries.get(i++).getMessage());
         Assert.assertEquals("Вычисленное контрольное число по полю \"ИНН\" некорректно (7707083894).", entries.get(i++).getMessage());
         Assert.assertNull(saveRecords.get(6).get("IKKSR").getStringValue());
         Assert.assertNull(saveRecords.get(6).get("IKSR").getStringValue());
