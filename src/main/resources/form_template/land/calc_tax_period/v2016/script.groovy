@@ -699,6 +699,17 @@ def calc23(def row, def periodOrder = null) {
     if (termUse == null) {
         return null
     }
+    def record705 = getRefBookValue(705L, row.benefitCode)
+    def record704Id = record705?.TAX_BENEFIT_ID?.value
+    def code15 = getRefBookValue(704L, record704Id)?.CODE?.value
+    if (code15 == '3022300' || code15 == '3022400' || code15 == '3029000') {
+        def value14 = (periodOrder != null && getReportPeriod()?.order != periodOrder ? calc14(row, periodOrder) : row.period)
+        if (value14 == null) {
+            return null
+        }
+        BigDecimal tmp = (value14 - termUse) / value14
+        return round(tmp, 4)
+    }
     def n = getMonthCount(periodOrder)
     BigDecimal tmp = (n - termUse) / n
     return round(tmp, 4)
@@ -733,10 +744,9 @@ def calc24(def row, def value22, def value23, def showMsg = false) {
     if (check15 == 1) {
         tmp = p
     } else if (check15 == 2 && p != null) {
-        def value23Year = calc23(row, 4)
-        if (value23Year) {
-            // Графа 24 = ОКРУГЛ(B * Р * (1 – КлГод);0);
-            tmp = round(b.multiply(p).multiply(1 - value23Year), 0)
+        if (value23) {
+            // Графа 24 = ОКРУГЛ(B * Р * (1 – Графа 23);0);
+            tmp = round(b.multiply(p).multiply(1 - value23), 0)
         }
     } else if (check15 == 3 && p != null) {
         // Графа 24 = ОКРУГЛ(А * Р / 100;0);
@@ -780,6 +790,37 @@ def calc25_27(def row, def periodOrder, def showMsg = false) {
     def find = getRecord710(row.kno, row.kpp)
     if (find && getRefBookValue(38L, find?.PREPAYMENT?.value)?.CODE?.value == 0) {
         return round(BigDecimal.ZERO, 0)
+    }
+
+    if (row.terminationDate && getReportPeriodStartDate() <= row.terminationDate &&
+            row.terminationDate <= getReportPeriodEndDate() && getReportPeriod()?.order != 4) {
+        // графа 25 - для всех периодов одинаково расчитывается
+        if (periodOrder == 1) {
+            return getN(row, periodOrder, showMsg)
+        }
+        // графа 26 - форма 2 кв
+        if (getReportPeriod()?.order == 2 && periodOrder == 2) {
+            def value25 = getN(row, 1, showMsg)
+            def nYear = getN(row, 4, showMsg)
+            if (nYear == null || value25 == null) {
+                return null
+            }
+            return nYear - value25
+        }
+        // графа 26 - форма 3 кв
+        if (getReportPeriod()?.order == 3 && periodOrder == 2) {
+            return getN(row, periodOrder, showMsg)
+        }
+        // графа 27 - форма 3 кв
+        if (getReportPeriod()?.order == 2 && periodOrder == 2) {
+            def value25 = getN(row, 1, showMsg)
+            def value26 = getN(row, 2, showMsg)
+            def nYear = getN(row, 4, showMsg)
+            if (nYear == null || value25 == null || value26 == null) {
+                return null
+            }
+            return nYear - value25 - value26
+        }
     }
 
     return getN(row, periodOrder, showMsg)
@@ -913,9 +954,8 @@ def getB(def row, def value23, def alias, def showMsg = false) {
         tmp = defaultValue - p
         tmp = (tmp < 0 ? 0 : tmp)
     } else if (check15 == 2 && p != null) {
-        def value23Year = calc23(row, 4)
-        if (value23Year) {
-            tmp = defaultValue - defaultValue * p * (1 - value23Year)
+        if (value23) {
+            tmp = defaultValue - defaultValue * p * (1 - value23)
         }
     } else if (check15 == 0 || check15 != 1 || check15 != 2) {
         tmp = defaultValue
@@ -942,7 +982,7 @@ def getCheckValue15(def code15) {
         return checkValue15Map[code15]
     }
     def tmp = 0
-    if (code15 == '3022100' || code15?.startsWith('30212')) {
+    if (code15 == '3022100') {
         tmp = 1
     } else if (code15 == '3022300') {
         tmp = 2
@@ -950,7 +990,7 @@ def getCheckValue15(def code15) {
         tmp = 3
     } else if (code15 == '3022500') {
         tmp = 4
-    } else if (code15 == '3022400' || code15?.startsWith('30211')) {
+    } else if (code15 == '3022400' || code15 == '3029000') {
         tmp = 5
     }
     checkValue15Map[code15] = tmp
@@ -1010,11 +1050,14 @@ void importData() {
     def totalRowFromFileMap = [:]           // мапа для хранения строк итогов/подитогов со значениями из файла (стили простых строк)
     def totalRowMap = [:]                   // мапа для хранения строк итогов/подитогов нф с посчитанными значениями и со стилями
 
+    // 1. Проверка заполнения поля «Регион» справочника «Подразделения» для подразделения формы
     def hasRegion = (formDataDepartment.regionId != null)
     if (!hasRegion) {
         def columnName15 = getColumnName(tmpRow, 'benefitCode')
-        logger.warn("Не удалось заполнить графу «%s», т.к. для подразделения формы не заполнено поле «Регион» справочника «Подразделения»",
-                columnName15)
+        def columnName16 = getColumnName(tmpRow, 'benefitBase')
+        def columnName17 = getColumnName(tmpRow, 'benefitParam')
+        logger.warn("Не удалось заполнить графы «%s», «%s», «%s», т.к. для подразделения формы не заполнено поле «Регион» справочника «Подразделения»",
+                columnName15, columnName16, columnName17)
     }
 
     // заполнить кэш данными из справочника ОКТМО
@@ -1186,12 +1229,15 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     if (values[colIndex]) {
         newRow.oktmo = getRecordIdImport(96L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
     } else {
+        // 2. Проверка заполнения кода ОКТМО
         // проверка графы 6
         def xlsColumnName6 = getXLSColumnName(colIndex + colOffset)
         def columnName15 = getColumnName(newRow, 'benefitCode')
+        def columnName16 = getColumnName(newRow, 'benefitBase')
+        def columnName17 = getColumnName(newRow, 'benefitParam')
         def columnName6 = getColumnName(newRow, 'oktmo')
-        logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. не заполнена графа «%s»",
-                fileRowIndex, xlsColumnName6, columnName15, columnName6)
+        logger.warn("Строка %s, столбец %s: Не удалось заполнить графы «%s», «%s», «%s», т.к. не заполнена графа «%s»",
+                fileRowIndex, xlsColumnName6, columnName15, columnName16, columnName17, columnName6)
     }
 
     // графа 7
@@ -1227,9 +1273,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     newRow.period = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     // графа 15, 16, 17
-    if (hasRegion) {
+    colIndex++
+    if (hasRegion && (values[colIndex] || values[colIndex + 1] || values[colIndex + 2])) {
         // графа 15 - атрибут 7053 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 705 «Параметры налоговых льгот земельного налога»
-        colIndex = 15
         def record704 = (values[6] ? getRecordImport(704, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false) : null)
         def code = record704?.record_id?.value
         def oktmo = newRow.oktmo
@@ -1237,6 +1283,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
         def record705 = getRecord705Import(code, oktmo, param)
         newRow.benefitCode = record705?.record_id?.value
         if (values[6] && record705 == null) {
+            // 3. Проверка наличия информации о налоговой льготе в  справочнике «Параметры налоговых льгот земельного налога»
             def xlsColumnName15 = getXLSColumnName(colIndex + colOffset)
             def columnName15 = getColumnName(newRow, 'benefitCode')
             def columnName16 = getColumnName(newRow, 'benefitBase')

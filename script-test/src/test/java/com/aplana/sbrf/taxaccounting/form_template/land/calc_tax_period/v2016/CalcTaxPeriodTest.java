@@ -744,8 +744,10 @@ public class CalcTaxPeriodTest extends ScriptTestBase {
         int i = 0;
         int fileRowIndex = 9;
         List<LogEntry> entries = testHelper.getLogger().getEntries();
-        String msg = String.format("Строка %s, столбец %s: Не удалось заполнить графу «%s», т.к. не заполнена графа «%s»",
-                fileRowIndex, ScriptUtils.getXLSColumnName(7), ScriptUtils.getColumnName(row, "benefitCode"), ScriptUtils.getColumnName(row, "oktmo"));
+        String msg = String.format("Строка %s, столбец %s: Не удалось заполнить графы «%s», «%s», «%s», т.к. не заполнена графа «%s»",
+                fileRowIndex, ScriptUtils.getXLSColumnName(7), ScriptUtils.getColumnName(row, "benefitCode"),
+                ScriptUtils.getColumnName(row, "benefitBase"), ScriptUtils.getColumnName(row, "benefitParam"),
+                ScriptUtils.getColumnName(row, "oktmo"));
         Assert.assertEquals(msg, entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
     }
