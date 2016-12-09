@@ -1,7 +1,9 @@
 package form_template.transport.benefit_vehicles.v2016
 
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
@@ -99,6 +101,10 @@ def nonEmptyColumns = ['codeOKATO', 'tsTypeCode', 'identNumber', 'regNumber', 'p
 @Field
 def sortColumns = ['codeOKATO'] + (allColumns - 'codeOKATO' - 'rowNumber')
 
+// дата начала отчетного периода
+@Field
+def startDate = null
+
 // дата окончания отчетного периода
 @Field
 def endDate = null
@@ -176,9 +182,9 @@ def logicCheck() {
         def reportPeriod = getReportPeriod()
         def periodName = reportPeriod?.name
         def year = reportPeriod.taxPeriod.year
-        logger.error("В Системе отсутствует форма «Сведения о транспортных средствах, по которым уплачивается налог» " +
-                "в состоянии «Принята» за период: «%s %s» для подразделения «%s»",
-                periodName, year, formDataDepartment.name)
+        logger.error("В назначенных источниках-приемниках формы отсутствует форма вида «Сведения о транспортных " +
+                "средствах, по которым уплачивается налог» в состоянии «Принята» за период: «%s %s»",
+                periodName, year)
     }
 
     for (def row : dataRows) {
@@ -195,11 +201,13 @@ def logicCheck() {
         }
 
         // 4. Проверка корректности заполнения даты окончания использования льготы
-        if (row.benefitStartDate && row.benefitEndDate && row.benefitStartDate > row.benefitEndDate) {
+        if (row.benefitStartDate && row.benefitEndDate &&
+                (row.benefitEndDate < row.benefitStartDate || row.benefitEndDate < getReportPeriodStartDate())) {
             def columnName12 = getColumnName(row, 'benefitEndDate')
             def columnName11 = getColumnName(row, 'benefitStartDate')
-            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s»",
-                    index, columnName12, columnName11)
+            def dateInStr = getReportPeriodEndDate().format('dd.MM.yyyy')
+            logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s» и больше либо равно %s",
+                    index, columnName12, columnName11, dateInStr)
         }
 
         // 5. Проверка на наличие в форме строк с одинаковым значением граф 2, 3, 5, 6, 7, 8 и пересекающимися периодами использования льготы
@@ -235,9 +243,9 @@ def logicCheck() {
             }
         }
 
-        // 10.b Проверка наличия сведений о ТС в форме «Сведения о транспортных средствах, по которым уплачивается транспортный налог»
+        // 10.b и 10.с Проверка наличия сведений о ТС в форме «Сведения о транспортных средствах, по которым уплачивается транспортный налог»
         if (rows201 != null) {
-            def hasRow = rows201.find {
+            def findRows = rows201.findAll {
                 // графа 2 = графа 2
                 row.codeOKATO == it.codeOKATO &&
                 // графа 3 = графа 4
@@ -251,7 +259,8 @@ def logicCheck() {
                 // графа 8 = графа 14
                 row.baseUnit == it.baseUnit
             }
-            if (!hasRow) {
+            if (!findRows) {
+                // 10.b
                 def value2 = getRefBookValue(96L, row.codeOKATO)?.CODE?.value ?: ''
                 def value3 = getRefBookValue(42L, row.tsTypeCode)?.CODE?.value ?: ''
                 def value5 = row.identNumber ?: ''
@@ -262,6 +271,29 @@ def logicCheck() {
                         "отсутствуют сведения о ТС с кодом ОКТМО «%s», кодом вида ТС «%s», идентификационным номером «%s», " +
                         "регистрационным знаком «%s», величиной мощности «%s» и единицей измерения мощности «%s»",
                         index, value2, value3, value5, value6, value7, value8)
+            } else {
+                // 10.с
+                for (def findRow : findRows) {
+                    if (isCross(row.benefitStartDate, row.benefitEndDate, findRow.regDate, findRow.regDateEnd, true)) {
+                        continue
+                    }
+                    def value2 = getRefBookValue(96L, row.codeOKATO)?.CODE?.value ?: ''
+                    def value3 = getRefBookValue(42L, row.tsTypeCode)?.CODE?.value ?: ''
+                    def value5 = row.identNumber ?: ''
+                    def value6 = row.regNumber ?: ''
+                    def value7 = row.powerVal ?: ''
+                    def value8 = getRefBookValue(12L, row.baseUnit)?.CODE?.value ?: ''
+                    def sourceValue10 = findRow?.regDate?.format('dd.MM.yyyy') ?: "не задано"
+                    def sourceValue11 = findRow?.regDateEnd?.format('dd.MM.yyyy') ?: "не задано"
+                    def value11 = row?.benefitStartDate?.format('dd.MM.yyyy') ?: "не задано"
+                    def value12 = row?.benefitEndDate?.format('dd.MM.yyyy') ?: "не задано"
+                    logger.error("Строка %s: На форме «Сведения о транспортных средствах, по которым уплачивается налог» " +
+                            "отсутствуют сведения о ТС с кодом ОКТМО «%s», кодом вида ТС «%s», идентификационным номером «%s», " +
+                            "регистрационным знаком «%s», величиной мощности «%s» и единицей измерения мощности «%s» " +
+                            "либо период владения ТС («%s» - «%s» формы-источника) " +
+                            "не пересекается с периодом использования льготы («%s» - «%s»)",
+                            index, value2, value3, value5, value6, value7, value8, sourceValue10, sourceValue11, value11, value12)
+                }
             }
         }
     }
@@ -329,6 +361,27 @@ def logicCheck() {
     }
 }
 
+/**
+ * Проверка пересечения диапозона дат.
+ *
+ * @param start1 дата начала 1
+ * @param end1 дата окончания 1
+ * @param start2 дата начала 2
+ * @param end2 дата окончания 2
+ * @param useEndPeriodDate признак использования даты окончания периода формы, если даты окончания не заданы
+ */
+def isCross(def start1, def end1, def start2, def end2, def useEndPeriodDate = false) {
+    if (start1 == null || start2 == null) {
+        return null
+    }
+    def tmpEnd1 = end1 ?: (useEndPeriodDate ? getReportPeriodEndDate() : null)
+    def tmpEnd2 = end2 ?: (useEndPeriodDate ? getReportPeriodEndDate() : null)
+    if (start1 <= start2 && (tmpEnd1 == null || start2 <= tmpEnd1) || start2 <= start1 && (tmpEnd2 == null || start1 <= tmpEnd2)) {
+        return true
+    }
+    return false
+}
+
 /** Получить строки за предыдущий отчетный период. */
 def getPrevDataRows() {
     if (formData.kind == FormDataKind.CONSOLIDATED || getPrevReportPeriod()?.period == null) {
@@ -390,12 +443,13 @@ void copyFromPrevForm() {
     // Логическая проверка 7 - нет формы предыдущего периода
     def prevDataRows = getPrevDataRows()
     if (prevDataRows == null) {
+        def formName = formData?.formType?.name
         def prevReportPeriod = getPrevReportPeriod()
         def periodName = prevReportPeriod?.periodName
         def year = prevReportPeriod?.year
-        logger.warn("Данные по транспортным средствам из формы предыдущего отчетного периода не были скопированы. " +
+        logger.warn("Данные по транспортным средствам из формы «%s» предыдущего отчетного периода не были скопированы. " +
                 "В Системе отсутствует форма в состоянии «Принята» за период: «%s %s» для подразделения «%s»",
-                periodName, year, formDataDepartment.name)
+                formName, periodName, year, formDataDepartment.name)
 
         copyFrom201()
         return
@@ -409,6 +463,7 @@ void copyFromPrevForm() {
     // 1 квартал - отбор подходящих строк
     // 2, 3, 4 квартал (год) - простое копирование всех строк
     def isFirstPeriod = (reportPeriod.order == 1)
+    def refBookColumns = [ 'codeOKATO', 'tsTypeCode', 'baseUnit', 'taxBenefitCode' ]
 
     for (def prevRow : prevDataRows) {
         def useRow = (isFirstPeriod ? prevRow.benefitStartDate <= endYearDate && (prevRow.benefitEndDate == null || prevRow.benefitEndDate >= startYearDate) : true)
@@ -419,11 +474,51 @@ void copyFromPrevForm() {
         copyColumns.each { alias ->
             newRow[alias] = prevRow[alias]
         }
+
+        // 1. Проверка актуальности записи справочника
+        for (def alias : refBookColumns) {
+            if (newRow[alias] == null) {
+                continue
+            }
+            def refBookId = newRow.getCell(alias)?.getColumn()?.refBookId
+            def provider = formDataService.getRefBookProvider(refBookFactory, refBookId, providerCache)
+            def version = provider.getRecordVersionInfo(newRow[alias])
+            if (version?.versionEnd && version?.versionEnd < getReportPeriodEndDate()) {
+                def columnName = getColumnName(prevRow, alias)
+                def refBookName = getRefBook(refBookId)?.name
+                def dateInStr = getReportPeriodEndDate()?.format('dd.MM.yyyy')
+                logger.warn("Строка %s: При копировании данных не удалось заполнить графу «%s», т.к. запись справочника «%s» не актуальна на %s",
+                        prevRow.getIndex(), columnName, refBookName, dateInStr)
+
+                newRow[alias] = null
+            }
+        }
+
         dataRows.add(newRow)
     }
 
+    // 2. Сообщение о копировании данных
+    def formName = formData.formType.name
+    def formKind = formData.kind.title
+    def departmentName = formDataDepartment.name
+    def prevReportPeriod = getPrevReportPeriod()
+    def prevPeriodName = prevReportPeriod?.periodName
+    def prevYear = prevReportPeriod?.year
+    logger.warn("В форму были скопированы данные из формы вида «%s», типа «%s», подразделения «%s» за период «%s %s»",
+            formName, formKind, departmentName, prevPeriodName, prevYear)
+
     updateIndexes(dataRows)
     formDataService.getDataRowHelper(formData).allCached = dataRows
+}
+
+@Field
+def refBookMap = [:]
+
+def getRefBook(def id) {
+    if (refBookMap[id] == null) {
+        refBookMap[id] = refBookFactory.get(id)
+    }
+    return refBookMap[id]
 }
 
 // Получить новую строку с заданными стилями.
@@ -437,6 +532,13 @@ def getNewRow() {
         newRow.getCell(it).styleAlias = 'Автозаполняемая'
     }
     return newRow
+}
+
+def getReportPeriodStartDate() {
+    if (!startDate) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
 }
 
 def getReportPeriodEndDate() {
@@ -733,16 +835,42 @@ void copyFrom201() {
         dataRows.add(newRow)
     }
 
+    // 2. Сообщение о копировании данных
+    for (def relation : getSourcesRelations()) {
+        def formName = relation?.formType?.name
+        def formKind = relation?.formDataKind?.title
+        def departmentName = relation?.department?.name
+        def periodName = getReportPeriod()?.name
+        def year = getReportPeriod()?.taxPeriod?.year
+        logger.warn("В форму были скопированы данные из формы вида «%s», типа «%s», подразделения «%s» за период «%s %s»",
+                formName, formKind, departmentName, periodName, year)
+    }
+
     updateIndexes(dataRows)
     formDataService.getDataRowHelper(formData).allCached = dataRows
 }
 
 def getDataRows201() {
-    def formData201 = formDataService.getLast(201, formData.kind, formDataDepartment.id, formData.reportPeriodId, null, formData.comparativePeriodId, formData.accruing)
-    if (formData201 != null && formData201.state == WorkflowState.ACCEPTED) {
-        return formDataService.getDataRowHelper(formData201).allSaved
+    def dataRows = []
+    def sourcesRelations = getSourcesRelations()
+    for (Relation relation : sourcesRelations) {
+        FormData sourceFormData = formDataService.get(relation.formDataId, null)
+        def sourceDataRows = formDataService.getDataRowHelper(sourceFormData).allSaved
+        dataRows.addAll(sourceDataRows)
     }
-    return null
+    return dataRows ?: null
+}
+
+@Field
+def sourcesRelations = null
+
+def getSourcesRelations() {
+    if (sourcesRelations == null) {
+        // получить источники
+        def sourcesInfo = formDataService.getSourcesInfo(formData, false, true, WorkflowState.ACCEPTED, userInfo, logger)
+        sourcesRelations = sourcesInfo?.findAll { it.formType.id == 201 }
+    }
+    return sourcesRelations
 }
 
 /**
