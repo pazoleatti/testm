@@ -9,6 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import groovy.transform.Field
 
+import java.sql.Connection
+import java.sql.Statement
+
 /**
  * Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог.
  *
@@ -440,6 +443,9 @@ def getPrevReportPeriod() {
 
 /** Копирование данных из форм предыдущего периода. */
 void copyFromPrevForm() {
+    // TODO (Ramil Timerbaev) костыль! необходим что бы можно было принять первичную форму у которой есть источники
+    insertSourceInFormDataConsolidation()
+
     // Логическая проверка 7 - нет формы предыдущего периода
     def prevDataRows = getPrevDataRows()
     if (prevDataRows == null) {
@@ -509,6 +515,29 @@ void copyFromPrevForm() {
 
     updateIndexes(dataRows)
     formDataService.getDataRowHelper(formData).allCached = dataRows
+}
+
+// TODO (Ramil Timerbaev) костыль! необходим что бы можно было принять первичную форму у которой есть источники
+// сделано аналогично SourceDaoImpl.addFormDataConsolidationInfo
+void insertSourceInFormDataConsolidation() {
+    def sourcesRelations = getSourcesRelations()
+    Connection connection = null
+    Statement stmt = null
+    try {
+        connection = dataSource?.getConnection()
+        stmt = connection?.createStatement()
+        def tgtFormDataId = formData.id
+        for (def relation : sourcesRelations) {
+            def sourceFormDataId = relation?.formDataId
+            def sql = String.format("insert into FORM_DATA_CONSOLIDATION (TARGET_FORM_DATA_ID, SOURCE_FORM_DATA_ID) values (%s, %s)",
+                    tgtFormDataId, sourceFormDataId)
+            stmt?.addBatch(sql)
+        }
+        stmt?.executeBatch()
+    } finally {
+        stmt?.close()
+        connection?.close()
+    }
 }
 
 @Field
