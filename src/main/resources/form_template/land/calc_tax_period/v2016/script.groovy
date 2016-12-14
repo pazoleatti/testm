@@ -744,7 +744,7 @@ def calc24(def row, def value22, def value23, def showMsg = false) {
     if (check15 == 1) {
         tmp = p
     } else if (check15 == 2 && p != null) {
-        if (value23) {
+        if (value23 != null) {
             // Графа 24 = ОКРУГЛ(B * Р * (1 – Графа 23);0);
             tmp = round(b.multiply(p).multiply(1 - value23), 0)
         }
@@ -950,11 +950,11 @@ def getB(def row, def value23, def alias, def showMsg = false) {
 
     BigDecimal tmp = null
     BigDecimal defaultValue = round(row.cadastralCost, 0) * taxPart
-    if (check15 == 1 && p != null && value23 != null) {
+    if (check15 == 1 && p != null) {
         tmp = defaultValue - p
         tmp = (tmp < 0 ? 0 : tmp)
     } else if (check15 == 2 && p != null) {
-        if (value23) {
+        if (value23 != null) {
             tmp = defaultValue - defaultValue * p * (1 - value23)
         }
     } else if (check15 == 0 || check15 != 1 || check15 != 2) {
