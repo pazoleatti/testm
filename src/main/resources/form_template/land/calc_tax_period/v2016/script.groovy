@@ -651,9 +651,37 @@ def calc20(def row, def periodOrder = null) {
     if (row.endDate && row.endDate < periodStart || row.startDate > periodEnd) {
         tmp = BigDecimal.ZERO
     } else {
-        def end = (row.endDate == null || row.endDate > periodEnd ? periodEnd : row.endDate)
-        def start = (row.startDate < periodStart ? periodStart : row.startDate)
-        tmp = end.format('M').toInteger() - start.format('M').toInteger() + 1
+        // 1
+        def a = row.ownershipDate?.format('M')?.toInteger()
+        if (row.ownershipDate < periodStart) {
+            a = periodStart.format('M').toInteger()
+        } else if (row.ownershipDate?.format('d')?.toInteger() > 15) {
+            a = a + 1
+        }
+        def b = row.terminationDate?.format('M')?.toInteger()
+        if (row.terminationDate != null && row.terminationDate < periodStart) {
+            b = periodStart.format('M').toInteger()
+        }
+        def c = periodStart.format('M').toInteger()
+        def startM = [a, b, c].max()
+
+        // 2
+        a = null
+        if (row.terminationDate == null || row.terminationDate > periodEnd) {
+            a = periodEnd.format('M').toInteger()
+        } else if (row.terminationDate?.format('d')?.toInteger() > 15) {
+            a = row.terminationDate.format('M').toInteger()
+        } else {
+            a = row.terminationDate.format('M').toInteger() - 1
+        }
+        b = row.endDate?.format('M')?.toInteger()
+        if (row.endDate == null || row.endDate > periodEnd) {
+            b = periodEnd.format('M').toInteger()
+        }
+        c = periodEnd.format('M').toInteger()
+        def endM = [a, b, c].grep().min()
+
+        tmp = endM - startM + 1
     }
     return round(tmp, 0)
 }
