@@ -256,7 +256,7 @@ def getEqualsRowFromVehicles(def row, showMsg = false) {
     if (getReportPeriod()?.order == 1) {
         return null
     }
-    def sourcerRowsMap = getSourceRowsMap()
+    def sourcerRowsMap = getSourceRowsMap(showMsg)
 
     // графа 9, 10, 11
     def columns = ['vi', 'regNumber', 'regDate']
@@ -290,7 +290,7 @@ def getEqualsRowsFromBenefit(def row, def showMsg = false) {
     if (row.taxBenefitCode == null || getReportPeriod()?.order == 1) {
         return null
     }
-    def sourcerRowsMap = getSourceRowsMap()
+    def sourcerRowsMap = getSourceRowsMap(showMsg)
 
     // графа 4, 5, 9, 10
     def columns = ['okato', 'tsTypeCode', 'vi', 'regNumber']
@@ -486,6 +486,82 @@ def calc22(def row, def rowV, def periodOrder = null) {
     return round(tmp, 0)
 }
 
+BigDecimal calc23(def rowV, def rowsB, def periodOrder) {
+    def dates = getPeriodDates(periodOrder)
+    def periodStart = dates?.get(0)
+    def periodEnd = dates?.get(1)
+
+    BigDecimal value23 = BigDecimal.ZERO
+    for (def rowB : rowsB) {
+        // 1
+        def a = rowV?.regDate?.format('M')?.toInteger()
+        if (rowV?.regDate < periodStart) {
+            a = periodStart.format('M').toInteger()
+        } else if (rowV?.regDate?.format('d')?.toInteger() > 15) {
+            a = a + 1
+        }
+        def b = rowB?.benefitStartDate?.format('M')?.toInteger()
+        if (rowB?.benefitStartDate != null && rowB?.benefitStartDate < periodStart) {
+            b = periodStart.format('M').toInteger()
+        }
+        def c = periodStart.format('M').toInteger()
+        def startM = [a, b, c].max()
+
+        // 2
+        if (rowV?.regDateEnd == null || rowV?.regDateEnd > periodEnd) {
+            a = periodEnd.format('M').toInteger()
+        } else if (rowV.regDateEnd.format('d')?.toInteger() > 15) {
+            a = rowV.regDateEnd.format('M').toInteger()
+        } else {
+            a = rowV.regDateEnd.format('M').toInteger() - 1
+        }
+        b = rowB?.benefitEndDate?.format('M')?.toInteger()
+        if (rowB?.benefitEndDate == null || rowB?.benefitEndDate > periodEnd) {
+            b = periodEnd.format('M').toInteger()
+        }
+        c = periodEnd.format('M').toInteger()
+        def endM = [a, b, c].grep().min()
+
+        // 3
+        def tmp = endM - startM + 1
+        if (tmp < 0) {
+            tmp = BigDecimal.ZERO
+        }
+
+        // 4
+        rowV.stealDateEnd
+        if (rowV?.stealDateStart != null) {
+            def stealStartM = rowV.stealDateStart.format('M').toInteger()
+            if (rowV.stealDateStart < periodEnd) {
+                stealStartM = stealStartM - 1
+            }
+            if (stealStartM < startM) {
+                stealStartM = startM - 1
+            }
+
+            def stealEndM = rowV?.stealDateEnd?.format('M')?.toInteger()
+            if (rowV?.stealDateEnd == null || rowV?.stealDateEnd > periodEnd) {
+                stealEndM = periodEnd.format('M')?.toInteger() + 1
+            }
+            if (stealEndM > endM) {
+                stealEndM = endM + 1
+            }
+            def periodSteal = stealEndM - stealStartM - 1
+            if (periodSteal < 0) {
+                periodSteal = BigDecimal.ZERO
+            }
+            tmp = tmp - periodSteal
+            if (tmp < 0) {
+                tmp = BigDecimal.ZERO
+            }
+        }
+
+        // 5
+        value23 = value23 + tmp
+    }
+    return round(value23, 0)
+}
+
 def calc24(def row, def rowV, def rowsB, def periodOrder = null) {
     if (row.benefitMonths == null) {
         return null
@@ -495,19 +571,9 @@ def calc24(def row, def rowV, def rowsB, def periodOrder = null) {
     if (getReportPeriod()?.order == period) {
         month = row.benefitMonths
     } else {
-        def dates = getPeriodDates(period)
-        def periodStart = dates?.get(0)
-        def periodEnd = dates?.get(1)
-
-        month = BigDecimal.ZERO
-        for (def rowB : rowsB) {
-            def start = [ rowV?.regDate, rowB?.benefitStartDate, periodStart ].max()
-            def end = [ rowV?.regDateEnd, rowB?.benefitEndDate, periodEnd ].min()
-            BigDecimal tmp = end.format('M').toInteger() - start.format('M').toInteger() + 1
-            if (tmp < 0) {
-                tmp = BigDecimal.ZERO
-            }
-            month = month + tmp
+        month = calc23(rowV, rowsB, period)
+        if (month <= 0) {
+            month = null
         }
     }
     BigDecimal tmp = (month != null ? month / 12 : null)
@@ -683,7 +749,7 @@ void fillRowsMap(def rows, def columns, def rowsMap) {
 def sourceRowsMap = null
 
 /** Получить сгруппированные строки исчтоников для расчетов. */
-def getSourceRowsMap() {
+def getSourceRowsMap(def showMsg) {
     if (sourceRowsMap != null) {
         return sourceRowsMap
     }
@@ -696,13 +762,13 @@ def getSourceRowsMap() {
 
     // сведения о ТС
     def dataRowsVehicles = getAllRowsSources(formTypeVehicleId)
-    if (!dataRowsVehicles) {
+    if (!dataRowsVehicles && showMsg) {
         logicCheck21or22(formTypeVehicleId)
     }
 
     // льготы ТС
     def dataRowsBenefit = getAllRowsSources(formTypeBenefitId)
-    if (!dataRowsBenefit) {
+    if (!dataRowsBenefit && showMsg) {
         logicCheck21or22(formTypeBenefitId)
     }
 
@@ -1631,18 +1697,7 @@ def getNewRow(def rowV, def rowsB, def relationMap) {
 
     if (rowsB) {
         // графа 23
-        def value23 = BigDecimal.ZERO
-        for (def rowB : rowsB) {
-            def start = [ rowV.regDate, rowB.benefitStartDate, getReportPeriodStartDate() ].max()
-            def end = [ (rowV.regDateEnd ?: getReportPeriodEndDate()),
-                    (rowB.benefitEndDate ?: getReportPeriodEndDate()), getReportPeriodEndDate() ].min()
-            def tmp = end.format('M').toInteger() - start.format('M').toInteger() + 1
-            if (tmp < 0) {
-                tmp = BigDecimal.ZERO
-            }
-            value23 = value23 + tmp
-        }
-        newRow.benefitMonths = round(value23, 0)
+        newRow.benefitMonths = calc23(rowV, rowsB, getReportPeriod()?.order)
 
         // графа 25 = графа 9 источника
         newRow.taxBenefitCode = rowsB[0].taxBenefitCode
@@ -2019,8 +2074,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
 
     // графа 2 - атрибут 2102 - TAX_ORGAN_CODE - «Код налогового органа (кон.)», справочник 210 «Параметры представления деклараций по транспортному налогу»
     colIndex = 2
-    if (!values[colIndex] || !values[colIndex + 1]) {
-        // 3.с В справочнике «Параметры представления декларации по транспортному налогу» не заполнены графы 2, 3 в файле
+    if (!values[colIndex] && !values[colIndex + 1]) {
+        // не заполнять и не выводить сообщения
+    } else if (!values[colIndex] || !values[colIndex + 1]) {
+        // 3.b В справочнике «Параметры представления декларации по транспортному налогу» не заполнены графы 2, 3 в файле
         def columnName2 = getColumnName(newRow, 'kno')
         def columnName3 = getColumnName(newRow, 'kpp')
         def columnNames = []
@@ -2031,33 +2088,30 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
             columnNames.add(columnName3)
         }
         def subMsg2 = columnNames.join('», «')
-        logger.warn("Строка %s, столбец %s: Не удалось заполнить графу «%s», «%s», т.к. не заполнены графы «%s»",
+        logger.warn("Строка %s, столбец %s: Не удалось заполнить графы «%s», «%s», т.к. не заполнены графы «%s»",
                 fileRowIndex, getXLSColumnName(colIndex + 1), columnName2, columnName3, subMsg2)
     } else if (departmentRegionId && region) {
         def records210 = getRecords210(values[colIndex], values[3], values[4], fileRowIndex, colIndex, colOffset)
         if (records210?.size() == 1) {
             newRow.kno = records210[0]?.record_id?.value
-        } else if (records210 == null || records210?.isEmpty()) {
-            // 3.a В справочнике «Параметры представления декларации по транспортному налогу» не найдено ни одной записи
-            // 3.b В справочнике «Параметры представления декларации по транспортному налогу» найдено несколько записей
+        } else {
+            // 3.a В справочнике «Параметры представления декларации по транспортному налогу» не найдена запись
             def columnName2 = getColumnName(newRow, 'kno')
             def columnName3 = getColumnName(newRow, 'kpp')
             def dateInStr = getReportPeriodEndDate()?.format('dd.MM.yyyy')
-            def subMsg2 = (records210?.size() > 1 ?
-                "найдено несколько записей, актуальных на дату %s, в которых" :
-                "отсутствует запись, актуальная на дату %s, в которой")
-            sunMsg2 = String.format(subMsg2, dateInStr)
             def regionCode = getRefBookValue(4L, departmentRegionId)?.CODE?.value
             def departmentName = formDataDepartment.name
             def regionCodeOktmo = region?.CODE?.value
             def value4 = record96?.CODE?.value
+            def value2 = values[colIndex]
+            def value3 = values[colIndex + 1]
             logger.warn("Строка %s, столбец %s: Не удалось заполнить графы: «%s», «%s», т.к. в справочнике " +
-                    "«Параметры представления деклараций по транспортному налогу» %s " +
+                    "«Параметры представления деклараций по транспортному налогу» отсутствует запись, актуальная на дату %s, в которой " +
                     "поле «Код субъекта РФ представителя декларации» равно значению поля «Регион» (%s) " +
-                    "справочника «Подразделения» для подразделения «%s», " +
-                    "поле «Код региона РФ» = «%s», поле «Код ОКТМО» = «%s»",
-                    fileRowIndex, getXLSColumnName(colIndex + 1), columnName2, columnName3, sunMsg2,
-                    regionCode, departmentName, regionCodeOktmo, value4)
+                    "справочника «Подразделения» для подразделения «%s», поле «Код региона РФ» = «%s», " +
+                    "поле «Код ОКТМО» = «%s», поле «Код налогового органа (кон.)» = «%s», поле «КПП» = «%s»",
+                    fileRowIndex, getXLSColumnName(colIndex + 1), columnName2, columnName3, dateInStr,
+                    regionCode, departmentName, regionCodeOktmo, value4, value2, value3)
         }
     }
 
@@ -2136,7 +2190,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
 
     // графа 20 - атрибут 416 - VALUE - «Ставка (руб.)», справочник 41 «Ставки транспортного налога»
     colIndex++
-    if (departmentRegionId) {
+    if (departmentRegionId && values[colIndex]) {
         // граф 4, 5, 13, 14, 16
         def columns = ['okato', 'tsTypeCode', 'taxBase', 'taxBaseOkeiUnit', 'years']
         def emptyColumns = columns.findAll { newRow[it] == null }
