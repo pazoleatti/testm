@@ -658,15 +658,14 @@ def calc20(def row, def periodOrder = null) {
         } else if (row.ownershipDate?.format('d')?.toInteger() > 15) {
             a = a + 1
         }
-        def b = row.terminationDate?.format('M')?.toInteger()
-        if (row.terminationDate != null && row.terminationDate < periodStart) {
+        def b = row.startDate?.format('M')?.toInteger()
+        if (row.startDate != null && row.startDate < periodStart) {
             b = periodStart.format('M').toInteger()
         }
         def c = periodStart.format('M').toInteger()
         def startM = [a, b, c].max()
 
         // 2
-        a = null
         if (row.terminationDate == null || row.terminationDate > periodEnd) {
             a = periodEnd.format('M').toInteger()
         } else if (row.terminationDate?.format('d')?.toInteger() > 15) {
