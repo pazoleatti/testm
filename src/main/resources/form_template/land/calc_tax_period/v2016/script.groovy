@@ -641,7 +641,7 @@ def calc14(def row, def periodOrder = null) {
 
 // метод взят из формы "Реестр земельных участков" (form_template.land.land_registry.v2016) - там это calc16()
 def calc20(def row, def periodOrder = null) {
-    if (row.startDate == null) {
+    if (row.startDate == null || row.benefitCode == null) {
         return null
     }
     def dates = getPeriodDates(periodOrder)
@@ -732,7 +732,7 @@ def calc23(def row, def periodOrder = null) {
     if (code15 == '3022300' || code15 == '3022400' || code15 == '3029000') {
         def value14 = (periodOrder != null && getReportPeriod()?.order != periodOrder ? calc14(row, periodOrder) : row.period)
         if (value14 == null || value14 == 0) {
-            return null
+            return round(value14, 4)
         }
         BigDecimal tmp = (value14 - termUse) / value14
         return round(tmp, 4)
