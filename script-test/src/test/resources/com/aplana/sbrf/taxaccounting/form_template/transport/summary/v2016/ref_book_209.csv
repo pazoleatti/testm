@@ -1,0 +1,4 @@
+record_id(N);YEAR_FROM(N);YEAR_TO(N);AVG_COST(R);COEF(N)
+1;0;99;1;4
+2;0;99;2;10
+3;0;99;3;10

@@ -1,0 +1,6 @@
+record_id(N);DECLARATION_REGION_ID(R);REGION_ID(R);OKTMO(R);TAX_ORGAN_CODE(S);KPP(S)
+1;1;1;1;taxOrganCodeA210;kppA210
+2;2;2;2;taxOrganCodeB210;kppB210
+3;3;3;3;taxOrganCodeC210;kppC210
+4;1;3;2;taxOrganCodeA210;kppA210
+5;1;3;2;taxOrganCodeA210;kppA210
