@@ -731,7 +731,7 @@ def calc23(def row, def periodOrder = null) {
     def code15 = getRefBookValue(704L, record704Id)?.CODE?.value
     if (code15 == '3022300' || code15 == '3022400' || code15 == '3029000') {
         def value14 = (periodOrder != null && getReportPeriod()?.order != periodOrder ? calc14(row, periodOrder) : row.period)
-        if (value14 == null) {
+        if (value14 == null || value14 == 0) {
             return null
         }
         BigDecimal tmp = (value14 - termUse) / value14
