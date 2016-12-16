@@ -190,6 +190,10 @@ def logicCheck() {
                 periodName, year)
     }
 
+    def reportPeriod = getReportPeriod()
+    def year = reportPeriod.taxPeriod.year
+    def startYearDate = Date.parse('dd.MM.yyyy', '01.01.' + year)
+
     for (def row : dataRows) {
         def index = row.getIndex()
 
@@ -205,10 +209,10 @@ def logicCheck() {
 
         // 4. Проверка корректности заполнения даты окончания использования льготы
         if (row.benefitStartDate && row.benefitEndDate &&
-                (row.benefitEndDate < row.benefitStartDate || row.benefitEndDate < getReportPeriodStartDate())) {
+                (row.benefitEndDate < row.benefitStartDate || row.benefitEndDate < startYearDate)) {
             def columnName12 = getColumnName(row, 'benefitEndDate')
             def columnName11 = getColumnName(row, 'benefitStartDate')
-            def dateInStr = getReportPeriodEndDate().format('dd.MM.yyyy')
+            def dateInStr = startYearDate.format('dd.MM.yyyy')
             logger.error("Строка %s: Значение графы «%s» должно быть больше либо равно значению графы «%s» и больше либо равно %s",
                     index, columnName12, columnName11, dateInStr)
         }
