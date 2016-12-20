@@ -90,6 +90,8 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
         Long refBookId = null;
         switch (action.getTaxType()) {
             case INCOME:
+            case NDFL:
+            case PFR:
                 refBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
                 formTypeIds.add(372L); // приложение 5
                 formTypeIds.add(500L); // сводная 5

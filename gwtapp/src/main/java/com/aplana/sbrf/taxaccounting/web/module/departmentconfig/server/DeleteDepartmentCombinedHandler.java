@@ -79,6 +79,8 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
             Long refBookId = null;
             switch (action.getTaxType()) {
                 case INCOME:
+                case NDFL:
+                case PFR:
                     refBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
                     break;
                 case TRANSPORT:

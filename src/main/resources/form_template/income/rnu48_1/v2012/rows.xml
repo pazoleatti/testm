@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><rows>
-  <row alias="total">
-    <cell alias="number" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-    <cell alias="fix" colSpan="2" rowSpan="1" stringValue="Итого" styleAlias="Контрольные суммы"/>
-    <cell alias="inventoryNumber" colSpan="1" rowSpan="1" stringValue="" styleAlias="Контрольные суммы"/>
-    <cell alias="usefulDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-    <cell alias="amount" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-  </row>
-</rows>

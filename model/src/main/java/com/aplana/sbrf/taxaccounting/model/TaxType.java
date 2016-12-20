@@ -35,7 +35,15 @@ public enum TaxType {
     /**
      * Земельный налог
      */
-    LAND('L', "Земельный налог", "NO_ZEMND");
+    LAND('L', "Земельный налог", "NO_ZEMND"),
+    /**
+     * НДФЛ
+     */
+    NDFL('N', "НДФЛ", "NO_NDFL"),
+    /**
+     * Сборы
+     */
+    PFR('p', "Сборы", "NO_PFR");
 
 	private final char code;
 	private final String name;

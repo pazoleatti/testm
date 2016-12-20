@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<declarationTemplateContent>
-    <type>
-        <id>2</id>
-        <name>Декларация по налогу на прибыль (Банк)</name>
-        <taxType>INCOME</taxType>
-    </type>
-    <version>0.20</version>
-</declarationTemplateContent>

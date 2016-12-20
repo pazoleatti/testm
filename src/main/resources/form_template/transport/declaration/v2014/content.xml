@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<declarationTemplateContent>
-    <type>
-        <id>1</id>
-        <name>Декларация по транспортному налогу</name>
-        <taxType>TRANSPORT</taxType>
-    </type>
-    <version>0.2</version>
-</declarationTemplateContent>

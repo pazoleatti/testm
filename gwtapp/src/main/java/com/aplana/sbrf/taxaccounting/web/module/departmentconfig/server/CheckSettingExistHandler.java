@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -40,6 +39,8 @@ public class CheckSettingExistHandler extends AbstractActionHandler<CheckSetting
         Long refBookId = null;
         switch (action.getTaxType()) {
             case INCOME:
+            case NDFL:
+            case PFR:
                 refBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
                 break;
             case TRANSPORT:

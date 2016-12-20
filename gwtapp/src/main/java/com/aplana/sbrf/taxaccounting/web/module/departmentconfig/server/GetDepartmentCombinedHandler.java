@@ -77,6 +77,8 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         switch (action.getTaxType()) {
             case INCOME:
+            case NDFL:
+            case PFR:
                 parentRefBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
                 provider = rbFactory.getDataProvider(parentRefBookId);
                 break;

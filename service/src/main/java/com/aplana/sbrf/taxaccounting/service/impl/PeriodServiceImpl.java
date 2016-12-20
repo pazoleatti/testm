@@ -502,6 +502,8 @@ public class PeriodServiceImpl implements PeriodService {
             case VAT:
             case MARKET:
             case ETR:
+            case NDFL:
+            case PFR:
                 departmentIds = departmentService.getBADepartmentIds(user.getUser());
                 break;
         }
@@ -638,8 +640,10 @@ public class PeriodServiceImpl implements PeriodService {
 				case VAT:
 				case DEAL:
 				case MARKET:
-                case ETR: //TODO
-					switch (operation) {
+                case ETR:
+                case NDFL:
+                case PFR:
+                    switch (operation) {
 						case FIND:
 							List<Integer> dep = new ArrayList<Integer>();
 							dep.add(departmentService.getBankDepartment().getId());
@@ -673,7 +677,9 @@ public class PeriodServiceImpl implements PeriodService {
 				case VAT:
 				case DEAL:
 				case MARKET:
-                case ETR: //TODO
+                case ETR:
+                case NDFL:
+                case PFR:
                     switch (operation) {
 						case FIND:
 							return departmentService.getTBDepartmentIds(user);

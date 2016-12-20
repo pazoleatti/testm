@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rows>
-    <row alias="R1">
-        <cell alias="sum1" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="sum2" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="taxBurden" colSpan="1" rowSpan="1"/>
-    </row>
-</rows>

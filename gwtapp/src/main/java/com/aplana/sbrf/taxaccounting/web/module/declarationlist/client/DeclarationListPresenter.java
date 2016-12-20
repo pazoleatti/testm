@@ -159,7 +159,7 @@ public class DeclarationListPresenter extends
     }
 
     private void updateTitle(TaxType taxType){
-		String description = "";
+		String description = "Список деклараций";
         String title = "Список деклараций";
         if (taxType != null) {
             switch (taxType) {

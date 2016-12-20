@@ -85,31 +85,15 @@ public class GetMainMenuActionHandler extends
                     || currentUser.hasRole(TARole.ROLE_CONTROL)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                taxMenu.getSubMenu().add(new MenuItem(TaxType.INCOME.getName(), "", TaxType.INCOME.name()));
-                taxMenu.getSubMenu().add(new MenuItem(TaxType.VAT.getName(), "", TaxType.VAT.name()));
-                taxMenu.getSubMenu().add(new MenuItem(TaxType.PROPERTY.getName(), "", TaxType.PROPERTY.name()));
-                taxMenu.getSubMenu().add(new MenuItem(TaxType.TRANSPORT.getName(), "", TaxType.TRANSPORT.name()));
-                taxMenu.getSubMenu().add(new MenuItem(TaxType.LAND.getName(), "", TaxType.LAND.name()));
-                taxMenu.getSubMenu().add(new MenuItem("Учет КС", "", TaxType.DEAL.name()));
-                taxMenu.getSubMenu().add(new MenuItem(TaxType.MARKET.getName(), "", TaxType.MARKET.name()));
-                taxMenu.getSubMenu().add(new MenuItem("ЭНС", "", TaxType.ETR.name()));
+                taxMenu.getSubMenu().add(new MenuItem(TaxType.NDFL.getName(), "", TaxType.NDFL.name()));
+                taxMenu.getSubMenu().add(new MenuItem(TaxType.PFR.getName(), "", TaxType.PFR.name()));
 
                 for (MenuItem menu : taxMenu.getSubMenu()) {
-                    boolean isDeal = menu.getMeta().equals(TaxType.DEAL.name());
-                    boolean isETR = menu.getMeta().equals(TaxType.ETR.name());
-                    boolean isMARKET = menu.getMeta().equals(TaxType.MARKET.name());
-                    String formItemName = (isDeal || isETR || isMARKET) ? "Список форм" : "Налоговые формы";
-                    String declarationItemName = isDeal ? "Уведомления" : "Декларации";
-
-                    // налоговые формы
-                    menu.getSubMenu().add(new MenuItem(formItemName, NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
-                            + ";" + TYPE + "=" + menu.getMeta()));
-
                     // декларации
-                    if (!isETR && !isMARKET && (currentUser.hasRole(TARole.ROLE_CONTROL)
+                    if (currentUser.hasRole(TARole.ROLE_CONTROL)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                            || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))) {
-                        menu.getSubMenu().add(new MenuItem(declarationItemName, NUMBER_SIGN
+                            || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        menu.getSubMenu().add(new MenuItem("Декларации", NUMBER_SIGN
                                 + DeclarationListNameTokens.DECLARATION_LIST + ";"
                                 + TYPE + "=" + menu.getMeta()));
                     }
@@ -127,44 +111,21 @@ public class GetMainMenuActionHandler extends
                     }
 
                     // настройки подразделений
-                    if (!isETR && !isMARKET && (currentUser.hasRole(TARole.ROLE_CONTROL)
+                    if (currentUser.hasRole(TARole.ROLE_CONTROL)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                            || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))) {
-                        if (!TaxType.PROPERTY.toString().equals(menu.getMeta())
-                                && !TaxType.TRANSPORT.toString().equals(menu.getMeta())
-                                && !TaxType.INCOME.toString().equals(menu.getMeta())
-                                && !TaxType.LAND.toString().equals(menu.getMeta())
-                                ) {
-                            menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
-                                    + DepartmentConfigTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
-                        } else {
-                            menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
-                                    + DepartmentConfigPropertyTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
-                        }
+                            || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
+                            + DepartmentConfigTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
                     }
 
                     // настройки форм и подразделений, назначение источников-приемников
                     if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                        if (isDeal) {
-                            menu.getSubMenu().add(
-                                    new MenuItem("Назначение форм и уведомлений",
-                                            NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
-                                                    + TYPE + "=" + menu.getMeta() + ";"
-                                                    + TaxFormNominationToken.isForm + "=" + true));
-                        } else if (isETR || isMARKET) {
-                            menu.getSubMenu().add(
-                                    new MenuItem("Назначение форм",
-                                            NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
-                                                    + TYPE + "=" + menu.getMeta() + ";"
-                                                    + TaxFormNominationToken.isForm + "=" + true));
-                        } else {
-                            menu.getSubMenu().add(
-                                    new MenuItem("Назначение форм и деклараций",
-                                            NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
-                                                    + TYPE + "=" + menu.getMeta() + ";"
-                                                    + TaxFormNominationToken.isForm + "=" + true));
-                        }
+                        menu.getSubMenu().add(
+                                new MenuItem("Назначение деклараций",
+                                        NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
+                                                + TYPE + "=" + menu.getMeta() + ";"
+                                                + TaxFormNominationToken.isForm + "=" + true));
 
                         menu.getSubMenu().add(
                                 new MenuItem("Назначение источников-приёмников",
@@ -172,13 +133,6 @@ public class GetMainMenuActionHandler extends
                                                 + TYPE + "=" + menu.getMeta()));
                     }
                 }
-            }
-
-            if (currentUser.hasRole(TARole.ROLE_GARANT)) {
-                MenuItem gar = new MenuItem("Гарантии", "", "Гарантии");
-                taxMenu.getSubMenu().add(gar);
-                String url = versionInfoProperties == null ? "#" : versionInfoProperties.getProperty("guarantee.url", "#");
-                gar.getSubMenu().add(new MenuItem("Ввод гарантий", url));
             }
 
             if (currentUser.hasRole(TARole.ROLE_OPER)
