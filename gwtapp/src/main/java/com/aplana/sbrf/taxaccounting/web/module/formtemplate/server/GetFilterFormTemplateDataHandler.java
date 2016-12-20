@@ -25,14 +25,8 @@ public class GetFilterFormTemplateDataHandler extends AbstractActionHandler<GetF
         GetFilterFormTemplateDataResult res = new GetFilterFormTemplateDataResult();
 	    
         List<TaxType> taxTypes = new ArrayList<TaxType>();
-        taxTypes.add(TaxType.VAT);
-        taxTypes.add(TaxType.DEAL);
-        taxTypes.add(TaxType.INCOME);
-        taxTypes.add(TaxType.PROPERTY);
-        taxTypes.add(TaxType.TRANSPORT);
-        taxTypes.add(TaxType.LAND);
-        taxTypes.add(TaxType.MARKET);
-        taxTypes.add(TaxType.ETR);
+        taxTypes.add(TaxType.NDFL);
+        taxTypes.add(TaxType.PFR);
 
         res.setTaxTypes(taxTypes);
         return res;
