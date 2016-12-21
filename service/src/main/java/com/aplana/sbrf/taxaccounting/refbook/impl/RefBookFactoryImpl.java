@@ -158,6 +158,11 @@ public class RefBookFactoryImpl implements RefBookFactory {
             return applicationContext.getBean("RefBookCurrencyMetals", RefBookCurrencyMetals.class);
         }  else if (RefBookCreditRatingsClasses.REF_BOOK_ID.equals(refBookId)) {
             return applicationContext.getBean("RefBookCreditRatingsClasses", RefBookCreditRatingsClasses.class);
+        }  else if (RefBookSimpleReadOnly.ASNU_REF_BOOK_ID.equals(refBookId)) {
+            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.ASNU_REF_BOOK_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.ASNU_TABLE_NAME);
+            return refBookSimple;
         } else {
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);
