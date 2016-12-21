@@ -1140,3 +1140,173 @@ comment on column department_change.code is 'Код подразделения';
 comment on column department_change.garant_use is 'Признак, что используется в модуле Гарантий (0 - не используется, 1 - используется)';
 comment on column department_change.sunr_use IS 'Признак, что используется в АС СУНР (0 - не используется, 1 - используется)';
 --------------------------------------------------------------------------------------------------------
+--                                      ФП "НДФЛ"
+--------------------------------------------------------------------------------------------------------
+create table ndfl_person (
+  id              number(18)   not null,
+  inp             number(18)   not null,
+  snils           varchar2(30),
+  last_name       varchar2(60) not null,
+  first_name      varchar2(60) not null,
+  middle_name     varchar2(60) not null,
+  birth_day       date         not null,
+  citizenship     varchar2(60) not null,
+  inn_np          varchar2(12 char),
+  inn_foreign     varchar2(12 char),
+  id_doc_type     varchar2(60) not null,
+  id_doc_number   varchar2(60) not null,
+  status          varchar2(60) not null,
+  post_index      varchar2(6),
+  region_code     varchar2(30),
+  area            varchar2(60),
+  city            varchar2(500),
+  locality        varchar2(500),
+  street          varchar2(500),
+  building        varchar2(10),
+  building_1      varchar2(10),
+  flat            varchar2(10),
+  country_code    varchar2(10),
+  address         varchar2(500),
+  additional_data varchar2(4000)
+);
+
+comment on table ndfl_person is 'Данные о физическом лице - получателе дохода';
+comment on column ndfl_person.id is 'Суррогатный ключ';
+comment on column ndfl_person.inp is 'Уникальный код клиента';
+comment on column ndfl_person.snils is 'Страховой номер индивидуального лицевого счёта';
+comment on column ndfl_person.last_name is 'Фамилия';
+comment on column ndfl_person.first_name is 'Имя';
+comment on column ndfl_person.middle_name is 'Отчество';
+comment on column ndfl_person.birth_day is 'Дата рождения';
+comment on column ndfl_person.citizenship is 'Гражданство (код страны)';
+comment on column ndfl_person.inn_np is 'ИНН  физического лица';
+comment on column ndfl_person.inn_foreign is 'ИНН  иностранного гражданина';
+comment on column ndfl_person.id_doc_type is 'Код вида документа';
+comment on column ndfl_person.id_doc_number is 'Серия и номер документа';
+comment on column ndfl_person.status is 'Статус';
+comment on column ndfl_person.post_index is 'Индекс';
+comment on column ndfl_person.region_code is 'Код Региона';
+comment on column ndfl_person.area is 'Район';
+comment on column ndfl_person.city is 'Город';
+comment on column ndfl_person.locality is 'Населенный пункт';
+comment on column ndfl_person.street is 'Улица';
+comment on column ndfl_person.building is 'Дом';
+comment on column ndfl_person.building_1 is 'Корпус';
+comment on column ndfl_person.flat is 'Квартира';
+comment on column ndfl_person.country_code is 'Код страны';
+comment on column ndfl_person.address is 'Адрес';
+comment on column ndfl_person.additional_data is 'Дополнительная информация';
+
+create sequence seq_ndfl_person start with 1000;
+------------------------------------------------------------------------------------------------------
+create table ndfl_person_income
+(
+  id                    number(18) not null,
+  ndfl_person_id        number(18) not null,
+  row_num               number(10) not null,
+  income_code           varchar2(100),
+  income_type           varchar2(100),
+  income_accrued_date   date,
+  income_payout_date    date,
+  income_accrued_summ   number(20, 2),
+  income_payout_summ    number(20, 2),
+  total_deductions_summ number(20, 2),
+  tax_base              number(20, 2),
+  tax_rate              number(2),
+  tax_date              date,
+  calculated_tax        number(10),
+  withholding_tax       number(10),
+  not_holding_tax       number(10),
+  overholding_tax       number(10),
+  refound_tax           number(10),
+  tax_transfer_date     date,
+  payment_date          date,
+  payment_number        varchar2(20 char),
+  tax_summ              number(10)
+);
+
+comment on table ndfl_person_income is 'Сведения о доходах физического лица';
+comment on column ndfl_person_income.row_num is 'Порядковый номер строки';
+comment on column ndfl_person_income.income_code is 'Код дохода';
+comment on column ndfl_person_income.income_type is 'Признак дохода';
+comment on column ndfl_person_income.income_accrued_date is 'Дата начисления дохода';
+comment on column ndfl_person_income.income_payout_date is 'Дата выплаты дохода';
+comment on column ndfl_person_income.income_accrued_summ is 'Сумма начисленного дохода';
+comment on column ndfl_person_income.income_payout_summ is 'Сумма выплаченного дохода';
+comment on column ndfl_person_income.total_deductions_summ is 'Общая сумма вычетов';
+comment on column ndfl_person_income.tax_base is 'Налоговая база';
+comment on column ndfl_person_income.tax_rate is 'Ставка налога';
+comment on column ndfl_person_income.tax_date is 'Дата налога';
+comment on column ndfl_person_income.calculated_tax is 'Сумма налога исчисленная';
+comment on column ndfl_person_income.withholding_tax is 'Сумма налога удержанная';
+comment on column ndfl_person_income.not_holding_tax is 'Сумма налога, не удержанная налоговым агентом';
+comment on column ndfl_person_income.overholding_tax is 'Сумма налога, излишне удержанная налоговым агентом';
+comment on column ndfl_person_income.refound_tax is 'Сумма возвращенного налога';
+comment on column ndfl_person_income.tax_transfer_date is 'Срок перечисления налога';
+comment on column ndfl_person_income.payment_date is 'Дата платежного поручения';
+comment on column ndfl_person_income.payment_number is 'Номер платежного поручения перечисления налога в бюджет';
+comment on column ndfl_person_income.tax_summ is 'Сумма налога перечисленная';
+
+create sequence seq_ndfl_person_income start with 1000;
+------------------------------------------------------------------------------------------------------
+create table ndfl_person_deduction
+(
+  id               number(18)        not null,
+  ndfl_person_id   number(18)        not null,
+  row_num          number(10)        not null,
+  type_code        varchar2(3 char)  not null,
+  notif_type       varchar2(2 char)  not null,
+  notif_date       date              not null,
+  notif_num        varchar2(20 char) not null,
+  notif_source     varchar2(20 char) not null,
+  notif_summ       number(20, 2),
+  income_accrued   date              not null,
+  income_code      varchar(4 char)   not null,
+  income_summ      number(20, 2)     not null,
+  period_prev_date date,
+  period_prev_summ number(20, 2),
+  period_curr_date date              not null,
+  period_curr_summ number(20, 2)     not null
+);
+
+comment on table ndfl_person_deduction is 'Стандартные, социальные и имущественные налоговые вычеты';
+comment on column ndfl_person_deduction.row_num is 'Порядковый номер строки';
+comment on column ndfl_person_deduction.type_code is 'Код вычета';
+
+comment on column ndfl_person_deduction.notif_type is 'Тип уведомления (Документа о праве на налоговый вычет)';
+comment on column ndfl_person_deduction.notif_date is 'Дата выдачи уведомления';
+comment on column ndfl_person_deduction.notif_num is 'Номер уведомления, подтверждающего право на имущественный налоговый вычет';
+comment on column ndfl_person_deduction.notif_source is 'Код налогового органа, выдавшего уведомление';
+comment on column ndfl_person_deduction.notif_summ is 'Сумма в соответствии с документом на вычет';
+
+comment on column ndfl_person_deduction.income_accrued is 'Дата начисления дохода';
+comment on column ndfl_person_deduction.income_code is 'Код дохода';
+comment on column ndfl_person_deduction.income_summ is 'Сумма начисленного дохода';
+
+comment on column ndfl_person_deduction.period_prev_date is 'Дата применения вычета в предыдущем периоде';
+comment on column ndfl_person_deduction.period_prev_summ is 'Сумма вычета применения вычета в предыдущем периоде';
+comment on column ndfl_person_deduction.period_curr_date is 'Дата применения вычета в текущем периоде';
+comment on column ndfl_person_deduction.period_curr_summ is 'Сумма вычета применения вычета в текущкм периоде';
+
+create sequence seq_ndfl_person_deduction start with 1000;
+------------------------------------------------------------------------------------------------------
+create table ndfl_person_prepayment
+(
+  id             number(18)        not null,
+  ndfl_person_id number(18)        not null,
+  row_num        number(10)        not null,
+  summ           number(18),
+  notif_num      varchar2(20 char) not null,
+  notif_date     date              not null,
+  notif_source   varchar2(20 char) not null
+);
+
+comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';
+comment on column ndfl_person_prepayment.row_num is 'Порядковый номер строки';
+comment on column ndfl_person_prepayment.summ is 'Сумма фиксированного авансового платежа';
+comment on column ndfl_person_prepayment.notif_num is 'Номер уведомления, подтверждающего право на имущественный налоговый вычет';
+comment on column ndfl_person_prepayment.notif_date is 'Дата выдачи уведомления';
+comment on column ndfl_person_prepayment.notif_source is 'Код налогового органа, выдавшего уведомление';
+
+create sequence seq_ndfl_person_prepayment start with 1000;
+------------------------------------------------------------------------------------------------------

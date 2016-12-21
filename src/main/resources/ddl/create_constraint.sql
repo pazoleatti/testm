@@ -314,6 +314,23 @@ alter table department_change add constraint dep_change_chk_op_type check ((oper
 alter table department_change add constraint dep_change_chk_is_active check (is_active in (0, 1));
 alter table department_change add constraint dep_change_chk_garant_use check (garant_use in (0, 1));
 alter table department_change add constraint dep_change_chk_sunr_use check (sunr_use in (0, 1));
+
+--------------------------------------------------------------------------------------------------------
+--                                      ФП "НДФЛ"
+--------------------------------------------------------------------------------------------------------
+
+alter table ndfl_person add constraint ndfl_person_pk primary key (id);
+--alter table ndfl_person add constraint ndfl_person_inp_unq unique (inp);
+
+alter table ndfl_person_income add constraint ndfl_person_income_pk primary key (id);
+alter table ndfl_person_income add constraint ndfl_person_income_fk_ndfl_person foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
+
+alter table ndfl_person_deduction add constraint ndfl_person_deduction_pk primary key (id);
+alter table ndfl_person_deduction add constraint ndfl_person_deduction_fk_ndfl_person foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
+
+alter table ndfl_person_prepayment add constraint ndfl_person_prepayment_pk primary key (id);
+alter table ndfl_person_prepayment add constraint ndfl_person_prepayment_fk_ndfl_person foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
+
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);

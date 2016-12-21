@@ -123,3 +123,18 @@ drop package body declaration_pckg;
 drop package declaration_pckg;
 drop package body form_data_pckg;
 drop package form_data_pckg;
+
+--------------------------------------------------------------------------------------------------------
+--                                      ФП "НДФЛ"
+--------------------------------------------------------------------------------------------------------
+drop table ndfl_person cascade constraints;
+drop sequence seq_ndfl_person;
+
+drop table ndfl_person_income;
+drop sequence seq_ndfl_person_income;
+
+drop table ndfl_person_deduction;
+drop sequence seq_ndfl_person_deduction;
+
+drop table ndfl_person_prepayment;
+drop sequence seq_ndfl_person_prepayment;
