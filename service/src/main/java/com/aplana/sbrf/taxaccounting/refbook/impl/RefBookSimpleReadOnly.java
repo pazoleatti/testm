@@ -44,6 +44,9 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 	// Справочник "Цвета"
 	public static final Long COLOR_REF_BOOK_ID = 1L;
 	public static final String COLOR_TABLE_NAME = "COLOR";
+    // Справочник "АСНУ"
+    public static final Long ASNU_REF_BOOK_ID = 900L;
+    public static final String ASNU_TABLE_NAME = "REF_BOOK_ASNU";
 
 	/** Название таблицы для запроса данных*/
 	private String tableName;
