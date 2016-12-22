@@ -971,7 +971,6 @@ comment on column form_data_ref_book.form_data_id is 'Идентификатор
 comment on column form_data_ref_book.ref_book_id is 'Идентификатор справочника';
 comment on column form_data_ref_book.record_id is 'Идентификатор записи справочники';
 
-alter table form_data_ref_book add constraint form_data_ref_book_pk primary key (form_data_id, ref_book_id, record_id);
 --------------------------------------------------------------------------------------------------------
 create sequence seq_form_data_nnn start with 10000;
 
@@ -1144,34 +1143,36 @@ comment on column department_change.sunr_use IS 'Признак, что испо
 --------------------------------------------------------------------------------------------------------
 create table ndfl_person (
   id              number(18)   not null,
+  declaration_data_id  number(18)   not null,
   inp             number(18)   not null,
-  snils           varchar2(30),
-  last_name       varchar2(60) not null,
-  first_name      varchar2(60) not null,
-  middle_name     varchar2(60) not null,
+  snils           varchar2(30 char),
+  last_name       varchar2(60 char) not null,
+  first_name      varchar2(60 char) not null,
+  middle_name     varchar2(60 char),
   birth_day       date         not null,
-  citizenship     varchar2(60) not null,
+  citizenship     varchar2(60 char) not null,
   inn_np          varchar2(12 char),
   inn_foreign     varchar2(12 char),
-  id_doc_type     varchar2(60) not null,
-  id_doc_number   varchar2(60) not null,
-  status          varchar2(60) not null,
-  post_index      varchar2(6),
-  region_code     varchar2(30),
-  area            varchar2(60),
-  city            varchar2(500),
-  locality        varchar2(500),
-  street          varchar2(500),
-  building        varchar2(10),
-  building_1      varchar2(10),
-  flat            varchar2(10),
-  country_code    varchar2(10),
-  address         varchar2(500),
-  additional_data varchar2(4000)
+  id_doc_type     varchar2(60 char) not null,
+  id_doc_number   varchar2(60 char) not null,
+  status          varchar2(60 char) not null,
+  post_index      varchar2(6 char),
+  region_code     varchar2(30 char),
+  area            varchar2(60 char),
+  city            varchar2(500 char),
+  locality        varchar2(500 char),
+  street          varchar2(500 char),
+  house           varchar2(10 char),
+  building        varchar2(10 char),
+  flat            varchar2(10 char),
+  country_code    varchar2(10 char),
+  address         varchar2(500 char),
+  additional_data varchar2(4000 char)
 );
 
 comment on table ndfl_person is 'Данные о физическом лице - получателе дохода';
 comment on column ndfl_person.id is 'Суррогатный ключ';
+comment on column ndfl_person.declaration_data_id is 'Идентификатор декларации к которой относятся данные';
 comment on column ndfl_person.inp is 'Уникальный код клиента';
 comment on column ndfl_person.snils is 'Страховой номер индивидуального лицевого счёта';
 comment on column ndfl_person.last_name is 'Фамилия';
@@ -1190,8 +1191,8 @@ comment on column ndfl_person.area is 'Район';
 comment on column ndfl_person.city is 'Город';
 comment on column ndfl_person.locality is 'Населенный пункт';
 comment on column ndfl_person.street is 'Улица';
-comment on column ndfl_person.building is 'Дом';
-comment on column ndfl_person.building_1 is 'Корпус';
+comment on column ndfl_person.house is 'Дом';
+comment on column ndfl_person.building is 'Корпус';
 comment on column ndfl_person.flat is 'Квартира';
 comment on column ndfl_person.country_code is 'Код страны';
 comment on column ndfl_person.address is 'Адрес';
@@ -1204,8 +1205,8 @@ create table ndfl_person_income
   id                    number(18) not null,
   ndfl_person_id        number(18) not null,
   row_num               number(10) not null,
-  income_code           varchar2(100),
-  income_type           varchar2(100),
+  income_code           varchar2(100 char),
+  income_type           varchar2(100 char),
   income_accrued_date   date,
   income_payout_date    date,
   income_accrued_summ   number(20, 2),
@@ -1261,7 +1262,7 @@ create table ndfl_person_deduction
   notif_source     varchar2(20 char) not null,
   notif_summ       number(20, 2),
   income_accrued   date              not null,
-  income_code      varchar(4 char)   not null,
+  income_code      varchar2(4 char)   not null,
   income_summ      number(20, 2)     not null,
   period_prev_date date,
   period_prev_summ number(20, 2),
