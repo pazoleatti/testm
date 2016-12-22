@@ -47,6 +47,8 @@ public class DeclarationListView extends
     public static final String TAX_ORGAN_CODE_TITLE_F = "Налоговый орган (кон.)";
     public static final String TAX_ORGAN_CODE_TITLE_FF = "Код налогового органа (кон.)";
     public static final String TAX_ORGAN_CODE_KPP_TITLE = "КПП";
+    public static final String ASNU_TITLE = "Наименование АСНУ";
+    public static final String GUID_TITLE = "GUID";
     public static final String STATE_TITLE = "Состояние";
     public static final String PERIOD_TITLE = "Период";
 
@@ -65,6 +67,7 @@ public class DeclarationListView extends
 	private boolean isAscSorting;
 
     private Map<Integer, String> departmentFullNames;
+    private Map<Long, String> asnuNames;
 
     private SingleSelectionModel<DeclarationDataSearchResultItem> selectionModel;
 
@@ -135,7 +138,7 @@ public class DeclarationListView extends
     @Override
     public void initTable(TaxType taxType) {
         Style tableStyle = tableWrapper.getElement().getStyle();
-        tableStyle.setProperty("top", (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY || taxType == TaxType.INCOME || taxType == TaxType.LAND) ?
+        tableStyle.setProperty("top", (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY || taxType == TaxType.INCOME || taxType == TaxType.LAND || taxType == TaxType.NDFL) ?
                 TABLE_TOP2 : TABLE_TOP1, Style.Unit.PX);
 
         clearTable();
@@ -228,6 +231,20 @@ public class DeclarationListView extends
             }
         };
 
+        TextColumn<DeclarationDataSearchResultItem> declarationAsnuColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.getAsnuId()!= null?asnuNames.get(object.getAsnuId()):null;
+            }
+        };
+
+        TextColumn<DeclarationDataSearchResultItem> declarationGuidColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.getGuid();
+            }
+        };
+
         TextColumn<DeclarationDataSearchResultItem> stateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
@@ -241,6 +258,8 @@ public class DeclarationListView extends
         declarationTypeColumn.setSortable(true);
         declarationTaxOrganColumn.setSortable(true);
         declarationTaxOrganKppColumn.setSortable(true);
+        declarationAsnuColumn.setSortable(true);
+        declarationGuidColumn.setSortable(true);
         stateColumn.setSortable(true);
 
         reportPeriodHeader = declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodColumn);
@@ -265,6 +284,12 @@ public class DeclarationListView extends
             } else if (taxType == TaxType.INCOME){
                 declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
             }
+
+            if (taxType == TaxType.NDFL) {
+                declarationTable.addColumn(declarationAsnuColumn, declarationTable.createResizableHeader(ASNU_TITLE, declarationAsnuColumn));
+                declarationTable.addColumn(declarationGuidColumn, declarationTable.createResizableHeader(GUID_TITLE, declarationGuidColumn));
+            }
+
             declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
             declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
         }
@@ -311,10 +336,11 @@ public class DeclarationListView extends
     }
 
     @Override
-    public void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Long selectedItemId) {
+    public void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Map<Long, String> asnuNames, Long selectedItemId) {
         declarationTable.setRowCount((int) totalCount);
         declarationTable.setRowData(start, records);
         this.departmentFullNames = departmentFullNames;
+        this.asnuNames = asnuNames;
         selectionModel.clear();
         if (selectedItemId != null) {
             for(DeclarationDataSearchResultItem item: records) {

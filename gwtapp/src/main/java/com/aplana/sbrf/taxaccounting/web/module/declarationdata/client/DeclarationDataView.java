@@ -72,11 +72,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @UiField
     Label taxOrganCode;
     @UiField
-    Label kpp;
+    Label kpp, asnu, guid;
     @UiField
     Label taxOrganCodeLabel;
     @UiField
-    Label kppLabel;
+    Label kppLabel, asnuLabel, guidLabel;
 
 	@UiField
 	PdfViewerView pdfViewer;
@@ -272,11 +272,29 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp, TaxType taxType) {
+    public void setGUID(String guid) {
+        this.guid.setText(guid);
+        this.guid.setTitle(guid);
+    }
+
+    @Override
+    public void setAsnuName(String asnuName) {
+        this.asnu.setText(asnuName);
+        this.asnu.setTitle(asnuName);
+    }
+
+    @Override
+    public void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp, boolean isVisibleAsnu, TaxType taxType) {
         taxOrganCode.setVisible(isVisibleTaxOrgan);
         taxOrganCodeLabel.setVisible(isVisibleTaxOrgan);
+
         kpp.setVisible(isVisibleKpp);
         kppLabel.setVisible(isVisibleKpp);
+
+        asnu.setVisible(isVisibleAsnu);
+        asnuLabel.setVisible(isVisibleAsnu);
+        guid.setVisible(isVisibleAsnu);
+        guidLabel.setVisible(isVisibleAsnu);
 
         if (taxType == TaxType.TRANSPORT) {
             taxOrganCodeLabel.setText("Налоговый орган (кон.):");

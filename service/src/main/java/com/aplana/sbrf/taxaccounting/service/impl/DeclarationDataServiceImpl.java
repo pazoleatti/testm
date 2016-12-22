@@ -172,7 +172,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp) {
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, Long asunId, String guid) {
         declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod,
                 FormDataEvent.CREATE, logger);
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -190,6 +190,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         newDeclaration.setDeclarationTemplateId(declarationTemplateId);
         newDeclaration.setTaxOrganCode(taxOrganCode);
         newDeclaration.setKpp(taxOrganKpp);
+        newDeclaration.setAsnuId(asunId);
+        newDeclaration.setGuid(guid);
 
         // Вызываем событие скрипта CREATE
         declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
@@ -899,8 +901,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, taxOrganCode);
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode, Long asnuId, String guid) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, taxOrganCode, asnuId, guid);
     }
 
     @Override

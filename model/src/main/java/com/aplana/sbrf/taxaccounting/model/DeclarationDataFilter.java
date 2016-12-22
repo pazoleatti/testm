@@ -36,7 +36,11 @@ public class DeclarationDataFilter implements Serializable {
 
     private String taxOrganKpp;
 
-	/*true, если сортируем по возрастанию, false - по убыванию*/
+    private Long asnuId;
+
+    private String guid;
+
+    /*true, если сортируем по возрастанию, false - по убыванию*/
 	private boolean ascSorting;
 
 	public TaxType getTaxType() {
@@ -153,5 +157,21 @@ public class DeclarationDataFilter implements Serializable {
      */
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
+    }
+
+    public Long getAsnuId() {
+        return asnuId;
+    }
+
+    public void setAsnuId(Long asnuId) {
+        this.asnuId = asnuId;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
     }
 }

@@ -24,7 +24,7 @@ public interface DeclarationService {
     /**
      * Поиск декларации в отчетном периоде подразделения + «КПП» и «Налоговый орган»
      */
-    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode);
+    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode, Long asnuId, String guid);
 
     /**
      * Декларация в последнем отчетном периоде подразделения

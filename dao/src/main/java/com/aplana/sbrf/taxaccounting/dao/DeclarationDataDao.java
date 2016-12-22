@@ -65,9 +65,9 @@ public interface DeclarationDataDao {
     List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);
 
     /**
-     * Декларация по типу и отчетному периоду подразделения + «КПП» и «Налоговый орган»
+     * Декларация по типу и отчетному периоду подразделения + «КПП» и «Налоговый орган» + АСНУ + GUID
      */
-    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode);
+    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode, Long asnuId, String guid);
 
 	/**
 	 * Получить количество записей, удовлетворяющих запросу

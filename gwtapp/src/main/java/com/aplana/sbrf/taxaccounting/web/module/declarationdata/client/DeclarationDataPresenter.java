@@ -89,7 +89,11 @@ public class DeclarationDataPresenter
 
         void setKpp(String kpp);
 
-        void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp, TaxType taxType);
+        void setAsnuName(String asnuName);
+
+        void setGUID(String guid);
+
+        void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp, boolean isVisibleAsnu, TaxType taxType);
 
         void startTimerReport(DeclarationDataReportType type);
 
@@ -181,14 +185,22 @@ public class DeclarationDataPresenter
                                 subreports = result.getSubreports();
                                 getView().setSubreports(result.getSubreports());
                                 if(taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.LAND)){
-                                    getView().setPropertyBlockVisible(true, true, taxType);
+                                    getView().setPropertyBlockVisible(true, true, false, taxType);
                                     getView().setTaxOrganCode(result.getTaxOrganCode());
                                     getView().setKpp(result.getKpp());
                                 } else if (taxType.equals(TaxType.INCOME)){
-                                    getView().setPropertyBlockVisible(false, true, taxType);
+                                    getView().setPropertyBlockVisible(false, true, false, taxType);
                                     getView().setKpp(result.getKpp());
+                                } else if (taxType.equals(TaxType.NDFL)){
+                                    if (result.getAsnuName() != null && !result.getAsnuName().isEmpty()) {
+                                        getView().setPropertyBlockVisible(false, false, true, taxType);
+                                        getView().setAsnuName(result.getAsnuName());
+                                        getView().setGUID(result.getGuid());
+                                    } else {
+                                        getView().setPropertyBlockVisible(false, false, false, taxType);
+                                    }
                                 } else {
-                                    getView().setPropertyBlockVisible(false, false, taxType);
+                                    getView().setPropertyBlockVisible(false, false, false, taxType);
                                 }
 								getView()
 										.setBackButton(

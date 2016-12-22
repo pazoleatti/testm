@@ -421,7 +421,9 @@ create table declaration_data (
   tax_organ_code          varchar2(4),
   kpp                     varchar2(9),
   is_accepted             number(1) not null,
-  department_report_period_id number(18) not null
+  department_report_period_id number(18) not null,
+ 	asnu_id                 number(9),
+	guid                    varchar2(32)
 );
 
 comment on table declaration_data is 'Налоговые декларации';
@@ -431,6 +433,8 @@ comment on column declaration_data.tax_organ_code is 'Налоговый орг�
 comment on column declaration_data.kpp is 'КПП';
 comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
 comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
+comment on column declaration_data.asnu_id is 'Идентификатор АСНУ';
+comment on column declaration_data.guid is 'GUID';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
@@ -1140,6 +1144,19 @@ comment on column department_change.code is 'Код подразделения';
 comment on column department_change.garant_use is 'Признак, что используется в модуле Гарантий (0 - не используется, 1 - используется)';
 comment on column department_change.sunr_use IS 'Признак, что используется в АС СУНР (0 - не используется, 1 - используется)';
 --------------------------------------------------------------------------------------------------------
+create table ref_book_asnu (
+  id       number(9) primary key,
+  code     varchar2(4) not null,
+  name     varchar2(100) not null,
+  type     varchar2(255) not null
+);
+
+comment on table ref_book_asnu is 'Справочник АСНУ';
+comment on column ref_book_asnu.id is 'Идентификатор';
+comment on column ref_book_asnu.code is 'Код АСНУ';
+comment on column ref_book_asnu.name is 'Наименование АСНУ';
+comment on column ref_book_asnu.type is 'Тип дохода';
+--------------------------------------------------------------------------------------------------------
 --                                      ФП "НДФЛ"
 --------------------------------------------------------------------------------------------------------
 create table ndfl_person (
@@ -1151,8 +1168,8 @@ create table ndfl_person (
   middle_name     varchar2(60) not null,
   birth_day       date         not null,
   citizenship     varchar2(60) not null,
-  inn_np          varchar2(12 char),
-  inn_foreign     varchar2(12 char),
+  inn_np          varchar2(12),
+  inn_foreign     varchar2(12),
   id_doc_type     varchar2(60) not null,
   id_doc_number   varchar2(60) not null,
   status          varchar2(60) not null,
@@ -1221,7 +1238,7 @@ create table ndfl_person_income
   refound_tax           number(10),
   tax_transfer_date     date,
   payment_date          date,
-  payment_number        varchar2(20 char),
+  payment_number        varchar2(20),
   tax_summ              number(10)
 );
 
@@ -1254,14 +1271,14 @@ create table ndfl_person_deduction
   id               number(18)        not null,
   ndfl_person_id   number(18)        not null,
   row_num          number(10)        not null,
-  type_code        varchar2(3 char)  not null,
-  notif_type       varchar2(2 char)  not null,
+  type_code        varchar2(3)  not null,
+  notif_type       varchar2(2)  not null,
   notif_date       date              not null,
-  notif_num        varchar2(20 char) not null,
-  notif_source     varchar2(20 char) not null,
+  notif_num        varchar2(20) not null,
+  notif_source     varchar2(20) not null,
   notif_summ       number(20, 2),
   income_accrued   date              not null,
-  income_code      varchar(4 char)   not null,
+  income_code      varchar(4)   not null,
   income_summ      number(20, 2)     not null,
   period_prev_date date,
   period_prev_summ number(20, 2),
@@ -1296,9 +1313,9 @@ create table ndfl_person_prepayment
   ndfl_person_id number(18)        not null,
   row_num        number(10)        not null,
   summ           number(18),
-  notif_num      varchar2(20 char) not null,
+  notif_num      varchar2(20) not null,
   notif_date     date              not null,
-  notif_source   varchar2(20 char) not null
+  notif_source   varchar2(20) not null
 );
 
 comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';

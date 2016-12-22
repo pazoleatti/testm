@@ -17,7 +17,9 @@ public class GetDeclarationDataResult implements Result {
 	private Date docDate;
     private String taxOrganCode;
     private String kpp;
-	private String uuid;
+    private String asnuName;
+    private String guid;
+    private String uuid;
     private List<DeclarationSubreport> subreports;
     private boolean isVisiblePDF;
 
@@ -119,6 +121,22 @@ public class GetDeclarationDataResult implements Result {
 
     public void setKpp(String kpp) {
         this.kpp = kpp;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public String getAsnuName() {
+        return asnuName;
+    }
+
+    public void setAsnuName(String asnuName) {
+        this.asnuName = asnuName;
     }
 
     public Date getCorrectionDate() {

@@ -97,7 +97,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
             //Если блокировка успешно установлена
             try {
 
-                DeclarationData declarationData = declarationDataService.find(declarationTypeId, departmentReportPeriod.getId(), command.getTaxOrganKpp(), command.getTaxOrganCode());
+                DeclarationData declarationData = declarationDataService.find(declarationTypeId, departmentReportPeriod.getId(), command.getTaxOrganKpp(), command.getTaxOrganCode(), null, null);
                 if (declarationData != null) {
                     String msg = (declarationType.getTaxType().equals(TaxType.DEAL) ?
                             "Уведомление с заданными параметрами уже существует" :
@@ -108,17 +108,12 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
                     return result;
                 }
 
-                /*if (declarationTemplateService.) {
-                    logger.error("Выбранный вид декларации не существует в выбранном периоде");
-                    return result;
-                }*/
-
                 int activeDeclarationTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId,
                         departmentReportPeriod.getReportPeriod().getId());
 
                 long declarationId = declarationDataService.create(logger, activeDeclarationTemplateId,
                         securityService.currentUserInfo(), departmentReportPeriod, command.getTaxOrganCode(),
-                        command.getTaxOrganKpp());
+                        command.getTaxOrganKpp(), null, null);
 
                 result.setDeclarationId(declarationId);
 
