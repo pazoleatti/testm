@@ -1147,7 +1147,7 @@ comment on column department_change.sunr_use is 'Признак, что испо
 create table ndfl_person (
   id                  number(18)        not null,
   declaration_data_id number(18)        not null,
-  inp                 number(18)        not null,
+  inp                 varchar2(30 char) not null,
   snils               varchar2(30 char),
   last_name           varchar2(60 char) not null,
   first_name          varchar2(60 char) not null,
@@ -1210,6 +1210,7 @@ create table ndfl_person_income
   row_num               number(10) not null,
   income_code           varchar2(100 char),
   income_type           varchar2(100 char),
+
   income_accrued_date   date,
   income_payout_date    date,
   income_accrued_summ   number(20, 2),

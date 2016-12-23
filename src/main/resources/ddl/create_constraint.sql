@@ -322,16 +322,16 @@ alter table department_change add constraint dep_change_chk_sunr_use check (sunr
 
 alter table ndfl_person add constraint ndfl_person_pk primary key (id);
 --alter table ndfl_person add constraint ndfl_person_inp_unq unique (inp);
-alter table ndfl_person add constraint ndfl_person_fk_declaration foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
+alter table ndfl_person add constraint ndfl_person_fk_d foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
 
-alter table ndfl_person_income add constraint ndfl_person_income_pk primary key (id);
-alter table ndfl_person_income add constraint ndfl_person_income_fk_ndfl_person foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
+alter table ndfl_person_income add constraint ndfl_person_i_pk primary key (id);
+alter table ndfl_person_income add constraint ndfl_person_i_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
 
-alter table ndfl_person_deduction add constraint ndfl_person_deduction_pk primary key (id);
-alter table ndfl_person_deduction add constraint ndfl_person_deduction_fk_ndfl_person foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
+alter table ndfl_person_deduction add constraint ndfl_pd_pk primary key (id);
+alter table ndfl_person_deduction add constraint ndfl_pd_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
 
-alter table ndfl_person_prepayment add constraint ndfl_person_prepayment_pk primary key (id);
-alter table ndfl_person_prepayment add constraint ndfl_person_prepayment_fk_ndfl_person foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
+alter table ndfl_person_prepayment add constraint ndfl_pp_pk primary key (id);
+alter table ndfl_person_prepayment add constraint ndfl_pp_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
 
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
