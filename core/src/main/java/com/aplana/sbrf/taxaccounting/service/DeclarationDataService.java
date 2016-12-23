@@ -293,4 +293,10 @@ public interface DeclarationDataService {
      * @return
      */
     boolean isVisiblePDF(DeclarationData declarationData, TAUserInfo userInfo);
+
+    /**
+     * Импорт ТФ Декларации
+     */
+    void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream is,
+                        String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger);
 }

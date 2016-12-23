@@ -285,7 +285,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     continue;
                 }
 
-                formTypeId = formType.getId();
+                //formTypeId = formType.getId();
 
                 // Указан недопустимый код периода
                 ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);

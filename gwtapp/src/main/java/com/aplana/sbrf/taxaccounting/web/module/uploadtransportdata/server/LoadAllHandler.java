@@ -69,6 +69,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
         int userId = userInfo.getUser().getId();
         String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
         BalancingVariants balancingVariant = BalancingVariants.SHORT;
+        /*
         if (!action.isForce()) {
             Logger localLogger = new Logger();
             List<TransportFileInfo> files = loadRefBookDataService.getRefBookTransportDataFiles(userInfo, localLogger);
@@ -108,7 +109,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
                     return result;
                 }
             }
-        }
+        }*/
         LockData lockData = lockDataService.lock(key, userId,
                 LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
                 LockData.State.IN_QUEUE.getText());

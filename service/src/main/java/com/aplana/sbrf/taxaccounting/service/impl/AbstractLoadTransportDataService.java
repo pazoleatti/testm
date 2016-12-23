@@ -43,7 +43,7 @@ public abstract class AbstractLoadTransportDataService {
     };
 
     protected Integer formDepartmentId = null;
-    protected Integer formTypeId = null;
+    //protected Integer formTypeId = null;
 
     // Сообщения при загрузке из каталогов http://conf.aplana.com/pages/viewpage.action?pageId=12324125
     protected enum LogData {
@@ -55,6 +55,7 @@ public abstract class AbstractLoadTransportDataService {
         L3("В каталоге загрузки для подразделения «%s» не найдены файлы!", LogLevel.ERROR, true, false),
         L4("Имя файла «%s» в каталоге «%s» не соответствует требованиям к имени транспортного файла. Файл не будет обработан.", LogLevel.ERROR, true, false),
         L5("В справочнике «%s» отсутствует подразделение, поле «%s» которого равно «%s»! Загрузка файла «%s» не выполнена.", LogLevel.ERROR, true, false),
+        L5_ASNU("В справочнике «%s» отсутствует код АСНУ, поле «%s» которого равно «%s»! Загрузка файла «%s» не выполнена.", LogLevel.ERROR, true, false),
         L6("В Системе отсутствует налоговая форма с кодом «%s»! Загрузка файла «%s» не выполнена.", LogLevel.ERROR, true, false),
         L7("Для вида налога «%s» в Системе не создан период с кодом «%s»%s, календарный год «%s»! Загрузка файла «%s» не выполнена.", LogLevel.ERROR, true, false),
         L8("Для налоговой формы «%s» открыт корректирующий период «%s»", LogLevel.INFO, false, true),
@@ -68,6 +69,7 @@ public abstract class AbstractLoadTransportDataService {
         L15_FD("Из наименования транспортного файла получены следующие данные:", LogLevel.INFO, true, true),
         L15_RP("Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s", LogLevel.INFO, true, true),
         L15_M("Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s, месяц: %s", LogLevel.INFO, true, true),
+        L15_DEC("Код подразделения: %s, код периода: %s, год: %s, код АСНУ: %s, GUID: %s", LogLevel.INFO, true, true),
         L15_1("ЭП файла «%s» проверять не требуется, начата загрузка данных файла.", LogLevel.INFO, true, true),
         //L16("ЭП файла «%s» не принята или отсутствует! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
         L17("Налоговая форма существует и находится в состоянии, отличном от «" + WorkflowState.CREATED.getTitle() + "»! Загрузка файла «%s» не выполнена.", LogLevel.ERROR, true, true),
@@ -83,7 +85,7 @@ public abstract class AbstractLoadTransportDataService {
         L27("Транспортный файл не записан в каталог ошибок! Загрузка файла не выполнена. %s.", LogLevel.ERROR, true, false),
         L28("Ошибка при удалении файла «%s» при перемещении в каталог ошибок! %s.", LogLevel.ERROR, true, false),
         L29("Ошибка при удалении файла «%s» при перемещении в каталог архива! %s.", LogLevel.ERROR, true, false),
-        L30("К каталогу загрузки для подразделения «%s» не указан корректный путь!", LogLevel.ERROR, true, false),
+        L30("Для подразделений %s не указаны корректные путу к каталогам загрузки!", LogLevel.ERROR, true, false),
         L31("В каталоге загрузки для %s не найдены файлы!", LogLevel.ERROR, true, false),
         L36("ЭП файла «%s» не принята. Код ошибки «%s».", LogLevel.ERROR, true, false),
         L37("Не указан путь к каталогу загрузки для %s!", LogLevel.ERROR, true, false),
@@ -135,7 +137,7 @@ public abstract class AbstractLoadTransportDataService {
     /**
      * Логгирование в области уведомлений и ЖА при импорте из ТФ
      */
-    protected final void log(TAUserInfo userInfo, LogData logData, Logger logger, String lockId, Object... args) {
+    protected final String log(TAUserInfo userInfo, LogData logData, Logger logger, String lockId, Object... args) {
         // Область уведомлений
         switch (logData.getLevel()) {
             case INFO:
@@ -157,9 +159,12 @@ public abstract class AbstractLoadTransportDataService {
                 prefix = "Событие инициировано Системой. ";
             }
             String lockInfo = String.format("Номер загрузки: %s. ", lockId);
+            String note = String.format(logData.getText(), args);
             auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, departmentId, null,
-                    null, null, null, prefix + lockInfo + String.format(logData.getText(), args), null);
+                    null, null, null, prefix + lockInfo + note, null);
+            return note;
         }
+        return null;
     }
 
     /**
