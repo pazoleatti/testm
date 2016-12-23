@@ -173,6 +173,7 @@ alter table form_data_file add constraint form_data_file_pk primary key (blob_da
 alter table form_data_file add constraint form_data_file_fk_form_data foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table form_data_file add constraint form_data_file_fk_blob_data foreign key (blob_data_id) references blob_data(id);
 
+alter table form_data_ref_book add constraint form_data_ref_book_pk primary key (form_data_id, ref_book_id, record_id);
 alter table form_data_ref_book add constraint form_data_ref_book_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table form_data_ref_book add constraint form_data_ref_book_fk_refbook foreign key (ref_book_id) references ref_book(id) on delete cascade;
 
@@ -322,6 +323,7 @@ alter table department_change add constraint dep_change_chk_sunr_use check (sunr
 
 alter table ndfl_person add constraint ndfl_person_pk primary key (id);
 --alter table ndfl_person add constraint ndfl_person_inp_unq unique (inp);
+alter table ndfl_person add constraint ndfl_person_fk_declaration foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
 
 alter table ndfl_person_income add constraint ndfl_person_income_pk primary key (id);
 alter table ndfl_person_income add constraint ndfl_person_income_fk_ndfl_person foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
