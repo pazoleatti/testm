@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataAction;
@@ -43,6 +45,9 @@ public class GetDeclarationDataHandler
 
     @Autowired
     private LogEntryService logEntryService;
+
+    @Autowired
+    private RefBookFactory rbFactory;
 
     public GetDeclarationDataHandler() {
         super(GetDeclarationDataAction.class);
@@ -87,6 +92,12 @@ public class GetDeclarationDataHandler
         result.setTaxOrganCode(declaration.getTaxOrganCode());
         result.setKpp(declaration.getKpp());
 
+        result.setGuid(declaration.getGuid());
+
+        if (declaration.getAsnuId() != null) {
+            RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
+            result.setAsnuName(asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue());
+        }
         result.setVisiblePDF(declarationDataService.isVisiblePDF(declaration, userInfo));
         //Проверка статуса макета декларации при открытиии экземпляра декларации.
         if (declarationTemplate.getStatus() == VersionedObjectStatus.DRAFT) {

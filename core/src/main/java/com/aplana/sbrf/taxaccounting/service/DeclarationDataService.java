@@ -31,7 +31,8 @@ public interface DeclarationDataService {
      * @return идентификатор созданной декларации
      */
     long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp);
+                DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp,
+                Long asunId, String guid);
 
 	/**
 	 * Рассчитать декларацию
@@ -163,7 +164,7 @@ public interface DeclarationDataService {
      * @param departmentReportPeriod Отчетный период подразделения
      * @return
      */
-    DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode);
+    DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode, Long asnuId, String guid);
 
     List<Long> getFormDataListInActualPeriodByTemplate(int declarationTemplateId, Date startDate);
 
@@ -292,4 +293,10 @@ public interface DeclarationDataService {
      * @return
      */
     boolean isVisiblePDF(DeclarationData declarationData, TAUserInfo userInfo);
+
+    /**
+     * Импорт ТФ Декларации
+     */
+    void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream is,
+                        String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger);
 }

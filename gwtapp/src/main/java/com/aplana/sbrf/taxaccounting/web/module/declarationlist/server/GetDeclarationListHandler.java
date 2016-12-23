@@ -3,6 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -37,6 +40,9 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 
     @Autowired
     private SecurityService securityService;
+
+    @Autowired
+    private RefBookFactory rbFactory;
 
 	@Override
 	public GetDeclarationListResult execute(GetDeclarationList action, ExecutionContext executionContext) throws ActionException {
@@ -88,12 +94,20 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 
 		PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(action.getDeclarationFilter());
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
+        Map<Long, String> asnuNames = new HashMap<Long, String>();
+        RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
         for(DeclarationDataSearchResultItem item: page) {
-            if (departmentFullNames.get(item.getDepartmentId()) == null) departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchyShortNames(item.getDepartmentId()));
+            if (departmentFullNames.get(item.getDepartmentId()) == null) {
+                departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchyShortNames(item.getDepartmentId()));
+            }
+            if (item.getAsnuId() != null && !asnuNames.containsKey(item.getAsnuId())) {
+                asnuNames.put(item.getAsnuId(), asnuProvider.getRecordData(item.getAsnuId()).get("NAME").getStringValue());
+            }
         }
 		result.setRecords(page);
         result.setDepartmentFullNames(departmentFullNames);
-		result.setTotalCountOfRecords(page.getTotalCount());
+        result.setAsnuNames(asnuNames);
+        result.setTotalCountOfRecords(page.getTotalCount());
 		return result;
 	}
 

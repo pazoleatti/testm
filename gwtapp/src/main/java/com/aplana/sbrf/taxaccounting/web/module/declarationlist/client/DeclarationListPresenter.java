@@ -151,7 +151,7 @@ public class DeclarationListPresenter extends
                             getView().setPage(result.getPage());
                         } else {
                             getView().setTableData(start, result.getTotalCountOfRecords(),
-                                result.getRecords(), result.getDepartmentFullNames(), selectedItemId);
+                                result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(), selectedItemId);
                             selectedItemId = null;
                         }
                     }

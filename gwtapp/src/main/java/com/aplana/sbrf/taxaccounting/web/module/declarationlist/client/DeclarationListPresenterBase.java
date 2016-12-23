@@ -23,7 +23,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	public interface MyView extends View, HasUiHandlers<DeclarationListUiHandlers> {
         void updateData(int pageNumber);
 
-        void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Long selectedItemId);
+        void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Map<Long, String> asnuNames, Long selectedItemId);
 
         void updateData();
 

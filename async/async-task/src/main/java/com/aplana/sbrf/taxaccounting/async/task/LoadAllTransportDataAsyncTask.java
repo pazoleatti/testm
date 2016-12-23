@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.LoadDeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -26,7 +27,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
 public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired
-    TAUserService userService;
+    private TAUserService userService;
 
     @Autowired
     private LockDataService lockDataService;
@@ -35,10 +36,7 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
     private LoadFormDataService loadFormDataService;
 
     @Autowired
-    private LoadRefBookDataService loadRefBookDataService;
-
-    @Autowired
-    private LockDataService lockService;
+    private LoadDeclarationDataService loadDeclarationDataService;
 
     @Override
     protected ReportType getReportType() {
@@ -63,11 +61,7 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
                 LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
         try {
             logger.info("Номер загрузки: %s", lock);
-            // Справочники
-            loadRefBookDataService.checkImportRefBookTransportData(userInfo, logger, lock, lockDate, true);
-            // НФ
-            lockService.updateState(lock, lockDate, "Импорт налоговых форм");
-            loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger), logger, lock, true);
+            loadDeclarationDataService.importDeclaration(userInfo, loadFormDataService.getTB(userInfo, logger), logger, lock, true);
         } finally {
             lockDataService.unlock(key, userInfo.getUser().getId());
         }

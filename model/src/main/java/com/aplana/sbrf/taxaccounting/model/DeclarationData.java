@@ -18,6 +18,14 @@ public class DeclarationData extends IdentityObject<Long> {
 	private boolean accepted;
     private String taxOrganCode;
     private String kpp;
+    /**
+     * Идентификатор АСНУ
+     */
+    private Long asnuId;
+    /**
+     * Уникальный идентификатор файла обмена РНУ НДФЛ
+     */
+    private String guid;
 
     /**
 	 * Получить идентификатор {@link DeclarationTemplate шаблона декларации}, по которому создана данная декларация
@@ -117,5 +125,21 @@ public class DeclarationData extends IdentityObject<Long> {
      */
     public void setTaxOrganCode(String taxOrganCode) {
         this.taxOrganCode = taxOrganCode;
+    }
+
+    public Long getAsnuId() {
+        return asnuId;
+    }
+
+    public void setAsnuId(Long asnuId) {
+        this.asnuId = asnuId;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
     }
 }

@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.design.JasperDesign;
@@ -172,7 +173,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp) {
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, Long asunId, String guid) {
         declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod,
                 FormDataEvent.CREATE, logger);
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -190,6 +191,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         newDeclaration.setDeclarationTemplateId(declarationTemplateId);
         newDeclaration.setTaxOrganCode(taxOrganCode);
         newDeclaration.setKpp(taxOrganKpp);
+        newDeclaration.setAsnuId(asunId);
+        newDeclaration.setGuid(guid);
 
         // Вызываем событие скрипта CREATE
         declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
@@ -899,8 +902,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, taxOrganCode);
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode, Long asnuId, String guid) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, taxOrganCode, asnuId, guid);
     }
 
     @Override
@@ -1304,6 +1307,105 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         } else {
             return true;
+        }
+    }
+
+    private static String getFileExtension(String filename){
+        int dotPos = filename.lastIndexOf('.') + 1;
+        return filename.substring(dotPos);
+    }
+
+    @Override
+    public void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger) {
+        String key = "key";
+
+        declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.CALCULATE);
+
+        File dataFile = null;
+        try {
+            LOG.info(String.format("Создание временного файла: %s", key));
+            if (stateLogger != null) {
+                stateLogger.updateState("Создание временного файла");
+            }
+            dataFile = File.createTempFile("dataFile", ".original");
+            OutputStream dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
+            try {
+                IOUtils.copy(inputStream, dataFileOutputStream);
+            } finally {
+                IOUtils.closeQuietly(dataFileOutputStream);
+            }
+
+            String ext = getFileExtension(fileName);
+
+            DeclarationData declarationData = get(declarationDataId, userInfo);
+
+            //Архивирование перед сохраннеием в базу
+            File zipOutFile = null;
+            try {
+                zipOutFile = File.createTempFile("xml", ".zip");
+                FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
+                ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
+                ZipEntry zipEntry = new ZipEntry(fileName);
+                zos.putNextEntry(zipEntry);
+                FileInputStream fi = new FileInputStream(dataFile);
+
+                try {
+                    IOUtils.copy(fi, zos);
+                } finally {
+                    IOUtils.closeQuietly(fi);
+                    IOUtils.closeQuietly(zos);
+                    IOUtils.closeQuietly(fileOutputStream);
+                }
+
+                LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
+                if (stateLogger != null) {
+                    stateLogger.updateState("Сохранение XML-файла в базе данных");
+                }
+
+                reportService.deleteDec(declarationData.getId());
+                reportService.createDec(declarationData.getId(),
+                        blobDataService.create(zipOutFile, ext + ".zip", new Date()),
+                        DeclarationDataReportType.XML_DEC);
+            } finally {
+                if (zipOutFile != null && !zipOutFile.delete()) {
+                    LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                }
+            }
+
+            InputStream dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+            try {
+                Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                additionalParameters.put("ImportInputStream", dataFileInputStream);
+                additionalParameters.put("UploadFileName", fileName);
+
+                if (stateLogger != null) {
+                    stateLogger.updateState("Импорт файла");
+                }
+                LOG.info(String.format("Выполнение скрипта: %s", key));
+                if (!declarationDataScriptingService.executeScript(userInfo, declarationData, formDataEvent, logger, additionalParameters)) {
+                    throw new ServiceException("Импорт данных не предусмотрен");
+                }
+                logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, null);
+                String note = "Загрузка данных из файла \"" + fileName + "\" в декларацию";
+                auditService.add(formDataEvent, userInfo, declarationData, null, note, null);
+            } finally {
+                IOUtils.closeQuietly(dataFileInputStream);
+            }
+
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                if (stateLogger != null) {
+                    stateLogger.updateState("Сохранение ошибок");
+                }
+                LOG.info(String.format("Сохранение ошибок: %s", key));
+                String uuid = logEntryService.save(logger.getEntries());
+                throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {
+            if (dataFile != null) {
+                dataFile.delete();
+            }
         }
     }
 }

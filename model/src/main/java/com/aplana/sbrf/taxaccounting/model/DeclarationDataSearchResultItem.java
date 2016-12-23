@@ -43,6 +43,14 @@ public class DeclarationDataSearchResultItem implements Serializable {
     private String taxOrganCode;
     // КПП
     private String taxOrganKpp;
+    /**
+     * Идентификатор АСНУ
+     */
+    private Long asnuId;
+    /**
+     * GUID
+     */
+    private String guid;
 
 	public Long getDeclarationDataId() {
 		return declarationDataId;
@@ -154,5 +162,21 @@ public class DeclarationDataSearchResultItem implements Serializable {
 
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
+    }
+
+    public Long getAsnuId() {
+        return asnuId;
+    }
+
+    public void setAsnuId(Long asnuId) {
+        this.asnuId = asnuId;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
     }
 }

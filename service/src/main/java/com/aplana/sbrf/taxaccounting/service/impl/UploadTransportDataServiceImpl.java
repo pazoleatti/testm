@@ -6,10 +6,13 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -27,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -40,15 +44,12 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 	private static final Log LOG = LogFactory.getLog(UploadTransportDataServiceImpl.class);
 
     //Добавил исключительно для записи в лог
-    private Integer formTypeId = null;
-    private String formTypeName = null;
+    private String declarationTypeName = null;
 
     @Autowired
     private ConfigurationDao configurationDao;
     @Autowired
     private RefBookDao refBookDao;
-    @Autowired
-    private FormDataDao formDataDao;
     @Autowired
     private AuditService auditService;
     @Autowired
@@ -60,11 +61,15 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private DepartmentFormTypeDao departmentFormTypeDao;
+    private DeclarationDataService declarationDataService;
     @Autowired
-    private FormTypeService formTypeService;
+    private RefBookFactory rbFactory;
     @Autowired
-    private FormTemplateService formTemplateService;
+    private DeclarationTypeService declarationTypeService;
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
+    @Autowired
+    private SourceService sourceService;
 
     private static final long REF_BOOK_DEPARTMENT = 30L; // Подразделения
     private static final long REF_BOOK_PERIOD_DICT = 8L; // Коды отчетных периодов
@@ -75,16 +80,16 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     static final String U2 = "Файл «%s» не загружен, так как:";
     static final String U2_0 = "Файл «%s» не загружен, т.к. имеет некорректный формат имени!";
     static final String U2_1 = "В справочнике «%s» отсутствует подразделение, поле «%s» которого равно «%s»!";
+    static final String U2_1_ASNU = "В справочнике «%s» отсутствует код АСНУ, поле «%s» которого равно «%s»!";
     static final String U2_2 = "В Системе отсутствует налоговая форма с кодом «%s»!";
     static final String U2_3 = "Для вида налога «%s» в Системе не создан период с кодом «%s»%s, календарный год «%s»!";
-    static final String U2_4 = "Файл имеет расширение отличное от «rnu»!";
     static final String U2_5 = "В наименовании файла должен быть указан код месяца, т.к. налоговая форма с кодом «%s» ежемесячная!";
     static final String U2_6 = "Код месяца «%s» не соответствует коду периода «%s»%s!";
     static final String U2_7 = "В наименовании файла не должно быть кода месяца, т.к. налоговая форма с кодом «%s» неежемесячная!";
     static final String U3 = "Файл «%s» не загружен, так как ";
     static final String U3_1 = "подразделение «%s» недоступно текущему пользователю!";
-    static final String U3_2 = "для подразделения «%s» не назначено первичной или выходной налоговой формы «%s»!";
     static final String U3_3 = "подразделение «%s» является недействующим (справочник «%s»)!";
+    static final String U3_6 = "для подразделения «%s» не назначено декларации «%s»!";
     static final String U3_4 = "для вида налога «%s» закрыт (либо еще не открыт) период с кодом «%s»%s, календарный год «%s»!";
     static final String U3_5 = "налоговая форма существует и находится в состоянии, отличном от «" + WorkflowState.CREATED.getTitle() + "»";
     static final String U4 = "Загружаемая налоговая форма «%s» подразделения «%s» не относится ни к одному ТБ, " +
@@ -94,6 +99,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     static final String U5_1 = "Из наименования транспортного файла получены следующие данные:";
     static final String U6_1 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s.";
     static final String U6_2 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s, месяц: %s";
+    static final String U6_3 = "Код подразделения: %s, код периода: %s, год: %s, код АСНУ: %s, GUID: %s";
 
     private static final String DIASOFT_NAME = "справочников Diasoft";
     private static final String AVG_COST_NAME = "справочника «Средняя стоимость транспортных средств»";
@@ -113,7 +119,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         L34_2_2("Нет доступа к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, true),
         L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true),
         L37("При загрузке файла «%s» произошла непредвиденная ошибка: %s.", LogLevel.ERROR, true),
-        L48("Для налоговой формы загружаемого файла «%s» не предусмотрена обработка транспортного файла! Загрузка не выполнена.", LogLevel.ERROR, true);
+        L48("Для деклараций загружаемого файла «%s» не предусмотрена обработка транспортного файла! Загрузка не выполнена.", LogLevel.ERROR, true);
 
         private LogLevel level;
         private String text;
@@ -145,7 +151,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     public UploadResult uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
         UploadResult uploadResult = new UploadResult();
         ImportCounter importCounter = uploadFileWithoutLog(userInfo, fileName, inputStream,
-                uploadResult.getDiasoftFileNameList(), uploadResult.getAvgCostFileNameList(),
                 uploadResult.getFormDataFileNameList(), uploadResult.getFormDataDepartmentList(), logger);
         log(userInfo, LogData.L35, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
         uploadResult.setSuccessCounter(importCounter.getSuccessCounter());
@@ -154,7 +159,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     }
 
     private ImportCounter uploadFileWithoutLog(TAUserInfo userInfo, String fileName, InputStream inputStream,
-                                               List<String> diasoftFileNameList, List<String> avgCostFileNameList,
                                                List<String> formDataFileNameList, List<Integer> formDataDepartmentList,
                                                Logger logger) {
         // Проверка прав
@@ -196,11 +200,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                             try {
                                 if (copyFileFromStream(userInfo, zais, checkResult, entry.getName(), logger)) {
                                     if (checkResult.isRefBook()) {
-                                        if (loadRefBookDataService.isDiasoftFile(entry.getName())) {
-                                            diasoftFileNameList.add(entry.getName());
-                                        } else {
-                                            avgCostFileNameList.add(entry.getName());
-                                        }
                                     } else {
                                         formDataFileNameList.add(entry.getName());
                                         formDataDepartmentList.add(checkResult.getDepartmentTbId());
@@ -243,11 +242,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                         if (copyFileFromStream(userInfo, inputStream, checkResult,
                                 fileName, logger)) {
                             if (checkResult.isRefBook()) {
-                                if (loadRefBookDataService.isDiasoftFile(fileName)) {
-                                    diasoftFileNameList.add(fileName);
-                                } else {
-                                    avgCostFileNameList.add(fileName);
-                                }
                             } else {
                                 formDataFileNameList.add(fileName);
                                 formDataDepartmentList.add(checkResult.getDepartmentTbId());
@@ -336,61 +330,38 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      */
     private CheckResult checkFileNameAccess(TAUserInfo userInfo, String fileName, Logger logger) {
         try {
-            boolean isDiasoftRefBook = loadRefBookDataService.isDiasoftFile(fileName);
-            boolean isFormData = TransportDataParam.isValidName(fileName);
-
-            CheckResult checkResult = new CheckResult();
-
-            if (isDiasoftRefBook) {
-                // Справочники не проверяем
-                checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0,
-                        DIASOFT_NAME, LogData.L34_1_1, logger));
-                checkResult.setRefBook(true);
-                checkResult.setRefBookName(DIASOFT_NAME);
-                return checkResult;
-            }
-
-            // Не справочники Diasoft и не ТФ НФ
-            if (!isFormData) {
+            // Не ТФ декларации
+            if (!TransportDataParam.isValidDecName(fileName)) {
                 logger.warn(U2_0, fileName);
                 return null;
             }
 
-            //// НФ
+            CheckResult checkResult = new CheckResult();
 
             // Параметры из имени файла
-            TransportDataParam transportDataParam = TransportDataParam.valueOf(fileName);
-            String formCode = transportDataParam.getFormCode();
+            TransportDataParam transportDataParam = TransportDataParam.valueOfDec(fileName);
             String reportPeriodCode = transportDataParam.getReportPeriodCode();
             Integer year = transportDataParam.getYear();
             String departmentCode = transportDataParam.getDepartmentCode();
-            Integer monthCode = transportDataParam.getMonth();
+            String asnuCode = transportDataParam.getAsnuCode();
+            String guid = transportDataParam.getGuid();
 
             // Вывод результата разбора имени файла
             logger.info(U5, fileName);
             logger.info(U5_1, fileName);
-            if (monthCode == null) {
-                logger.info(U6_1, getFileNamePart(formCode), getFileNamePart(departmentCode),
-                        getFileNamePart(reportPeriodCode), getFileNamePart(year));
-            } else {
-                logger.info(U6_2, getFileNamePart(formCode), getFileNamePart(departmentCode),
-                        getFileNamePart(reportPeriodCode), getFileNamePart(year),
-                        getFileNamePart(monthCode));
-            }
+            logger.info(U6_3, getFileNamePart(departmentCode),
+                    getFileNamePart(reportPeriodCode), getFileNamePart(year),
+                    getFileNamePart(asnuCode), getFileNamePart(guid));
 
             // Не задан код подразделения или код формы
-            if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
+            if (departmentCode == null || asnuCode == null || reportPeriodCode == null || year == null || guid == null) {
                 logger.warn(U2_0, fileName);
                 return null;
             }
 
             // Указан несуществующий код налоговой формы
-            FormType formType = formTypeService.getByCode(formCode);
-            if (formType == null) {
-                logger.warn(U2, fileName);
-                logger.warn(U2_2, formCode);
-                return null;
-            }
+            DeclarationType declarationType = declarationTypeService.get(100);
+            declarationTypeName = declarationType.getName();
 
             // Указан несуществующий код подразделения
             Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode, false);
@@ -401,8 +372,21 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 return null;
             }
 
+            // АСНУ
+            Long asnuId;
+            RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
+            List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '"+asnuCode+"'");
+            if (asnuIds.size() != 1) {
+                RefBook refBook = refBookDao.get(900L);
+                logger.warn(U2, fileName);
+                logger.warn(U2_1_ASNU, refBook.getName(), refBook.getAttribute("CODE").getName(), transportDataParam.getAsnuCode());
+                return null;
+            } else {
+                asnuId = asnuIds.get(0);
+            }
+
             String reportPeriodName = "";
-            String filter = "CODE='" + reportPeriodCode + "' AND " + formType.getTaxType().getCode() + "=1";
+            String filter = "CODE='" + reportPeriodCode + "' AND " + declarationType.getTaxType().getCode() + "=1";
             PagingResult<Map<String, RefBookValue>> reportPeriodDicts = refBookDao.getRecords(REF_BOOK_PERIOD_DICT, null, null, filter, null);
             if (reportPeriodDicts.size() == 1) {
                 reportPeriodName = reportPeriodDicts.get(0).get("NAME").getStringValue();
@@ -411,49 +395,31 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 }
             }
             // Указан недопустимый код периода
-            ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
+            ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(declarationType.getTaxType(), reportPeriodCode, year);
             if (reportPeriod == null) {
                 logger.warn(U2, fileName);
-                logger.warn(U2_3, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year);
+                logger.warn(U2_3, declarationType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year);
                 return null;
             }
 
-            // Ошибки ежемесячных форм
-            FormTemplate formTemplate = null;
-            if (formTemplateService.existFormTemplate(formType.getId(), reportPeriod.getId(), true)) {
-                formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId()), logger);
+            //
+            Integer declarationTemplateId;
+            try {
+                declarationTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationType.getId(), reportPeriod.getId());
+            } catch (Exception e) {
+                logger.warn(U3 + e.getMessage(), fileName);
+                return null;
             }
-            if (formTemplate != null) {
-                if (formTemplate.isMonthly()) {
-                    if (monthCode == null) {
-                        logger.warn(U2, fileName);
-                        logger.warn(U2_5, formCode);
-                        return null;
-                    } else {
-                        List<Months> availableMonthList = periodService.getAvailableMonthList(reportPeriod.getId());
-                        boolean foundMonth = false;
-                        for (Months month : availableMonthList) {
-                            if (month.getId() == monthCode) {
-                                foundMonth = true;
-                            }
-                        }
-                        if (!foundMonth) {
-                            logger.warn(U2, fileName);
-                            logger.warn(U2_6, monthCode, reportPeriodCode, reportPeriodName);
-                            return null;
-                        }
-                    }
-                } else if (monthCode != null) {
-                    logger.warn(U2, fileName);
-                    logger.warn(U2_7, formCode);
-                    return null;
-                }
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+
+            if (!TAAbstractScriptingServiceImpl.canExecuteScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId), FormDataEvent.IMPORT_TRANSPORT_FILE)) {
+                log(userInfo, LogData.L48, logger, fileName);
+                return null;
             }
 
             // 40 - Выборка для доступа к экземплярам НФ/деклараций
             List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    Arrays.asList(formType.getTaxType()), null, null);
-
+                    Arrays.asList(declarationType.getTaxType()), null, null);
             if (!departmentList.contains(formDepartment.getId())) {
                 logger.warn(U3 + U3_1, fileName, formDepartment.getName());
                 return null;
@@ -467,37 +433,31 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             }
 
             // Назначение подразделению типа и вида НФ
-            boolean assignedPrimaryForm = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY);
-            boolean assignedAdditionalForm = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL);
-            if (!assignedPrimaryForm && !assignedAdditionalForm) {
-                logger.warn(U3 + U3_2, fileName, formDepartment.getName(), formType.getName());
-                return null;
+            List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(formDepartment.getId(),
+                    declarationTemplate.getType().getTaxType(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+            boolean found = false;
+            for (DepartmentDeclarationType ddt : ddts) {
+                if (ddt.getDeclarationTypeId() == declarationType.getId()) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                logger.warn(U3 + U3_6, fileName, formDepartment.getName(), declarationType.getName());
             }
 
             // Период отсутствует либо закрыт
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(formDepartment.getId(), reportPeriod.getId());
             if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
-                logger.warn(U3 + U3_4, fileName, formType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year);
+                logger.warn(U3 + U3_4, fileName, declarationType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year);
                 return null;
             }
 
-            FormDataKind formDataKind = assignedPrimaryForm ? FormDataKind.PRIMARY : FormDataKind.ADDITIONAL;
-            FormData formData = formDataDao.find(formType.getId(), formDataKind, departmentReportPeriod.getId().intValue(), transportDataParam.getMonth(), null, false);
+            DeclarationData declarationData = declarationDataService.find(declarationTemplateId, departmentReportPeriod.getId(), null, null, asnuId, guid);
 
             // Экземпляр уже есть и не в статусе «Создана»
-            if (formData != null && formData.getState() != WorkflowState.CREATED) {
+            if (declarationData != null && declarationData.isAccepted()) {
                 logger.warn(U3 + U3_5, fileName);
-                return null;
-            }
-
-            if (formTemplateService.existFormTemplate(formType.getId(), reportPeriod.getId(), true)) {
-                formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId()), logger);
-                if (!TAAbstractScriptingServiceImpl.canExecuteScript(formTemplate.getScript(), FormDataEvent.IMPORT_TRANSPORT_FILE)) {
-                    log(userInfo, LogData.L48, logger, fileName);
-                    return null;
-                }
-            } else {
-                log(userInfo, LogData.L48, logger, formType.getName());
                 return null;
             }
 
@@ -506,7 +466,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             // ТБ, к которому относится подразделение, код которого содержится в имени ТФ
             Department parentTB = departmentService.getParentTB(formDepartment.getId());
             if (parentTB == null) {
-                logger.warn(U4, formType.getName(), formDepartment.getName());
+                logger.warn(U4, declarationType.getName(), formDepartment.getName());
                 return null;
             }
             Integer departmentTbId = parentTB.getId();
@@ -514,8 +474,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             checkResult.setDepartmentTbId(departmentTbId);
             checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentTbId,
                     null, LogData.L34_1_2, logger));
-            formTypeId = formType.getId();
-            formTypeName = formType.getName();
 
             return checkResult;
         } catch (Exception e) {
@@ -566,7 +524,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 }
             }
             auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, null, null,
-                    null, formTypeName, null, prefix + String.format(logData.getText(), args), null);
+                    declarationTypeName, null, null, prefix + String.format(logData.getText(), args), null);
         }
     }
 

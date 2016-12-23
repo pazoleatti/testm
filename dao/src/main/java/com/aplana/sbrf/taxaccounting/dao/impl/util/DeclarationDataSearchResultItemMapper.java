@@ -28,6 +28,8 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
         result.setCorrectionDate(rs.getDate("correction_date"));
         result.setTaxOrganCode(rs.getString("tax_organ_code"));
         result.setTaxOrganKpp(rs.getString("kpp"));
-		return result;
+        result.setAsnuId(SqlUtils.getLong(rs,"asnu_id"));
+        result.setGuid(rs.getString("guid"));
+        return result;
 	}
 }

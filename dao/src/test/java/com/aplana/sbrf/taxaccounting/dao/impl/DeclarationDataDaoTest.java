@@ -198,7 +198,7 @@ public class DeclarationDataDaoTest {
 
     @Test
     public void findTest() {
-        DeclarationData declaration = declarationDataDao.find(1, 204, null, null);
+        DeclarationData declaration = declarationDataDao.find(1, 204, null, null, null, null);
         assertEquals(2, declaration.getId().intValue());
     }
 
@@ -211,7 +211,7 @@ public class DeclarationDataDaoTest {
         declarationData.setTaxOrganCode("CD11");
         declarationDataDao.saveNew(declarationData);
 
-        DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", null);
+        DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", null, null, null);
         assertNotNull(declaration);
         assertEquals(1, declaration.getId().intValue());
     }
@@ -225,7 +225,7 @@ public class DeclarationDataDaoTest {
         declarationData.setTaxOrganCode("CD11");
         declarationDataDao.saveNew(declarationData);
 
-        DeclarationData declaration = declarationDataDao.find(1, 102, null, null);
+        DeclarationData declaration = declarationDataDao.find(1, 102, null, null, null, null);
         assertNotNull(declaration);
         assertEquals(1, declaration.getId().intValue());
     }
@@ -239,17 +239,17 @@ public class DeclarationDataDaoTest {
         declarationData.setTaxOrganCode("CD11");
         declarationDataDao.saveNew(declarationData);
 
-        DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", "CD12");
+        DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", "CD12", null, null);
         assertNotNull(declaration);
         assertEquals(1, declaration.getId().intValue());
-        declaration = declarationDataDao.find(1, 102, null, "CD12");
+        declaration = declarationDataDao.find(1, 102, null, "CD12", null, null);
         assertNotNull(declaration);
         assertEquals(1, declaration.getId().intValue());
     }
 
     @Test
     public void findEmptyResultTest() {
-        DeclarationData declaration = declarationDataDao.find(222, 222, null, null);
+        DeclarationData declaration = declarationDataDao.find(222, 222, null, null, null, null);
         assertNull(declaration);
     }
 

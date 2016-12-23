@@ -11,7 +11,8 @@ public class GetDeclarationListResult implements Result {
 
 	private List<DeclarationDataSearchResultItem> records;
 
-    Map<Integer, String> departmentFullNames;
+    private Map<Integer, String> departmentFullNames;
+    private Map<Long, String> asnuNames;
 
 	//общее количество записей (на всех страницах)
 	private long totalCountOfRecords;
@@ -36,6 +37,14 @@ public class GetDeclarationListResult implements Result {
 
     public void setDepartmentFullNames(Map<Integer, String> departmentFullNames) {
         this.departmentFullNames = departmentFullNames;
+    }
+
+    public Map<Long, String> getAsnuNames() {
+        return asnuNames;
+    }
+
+    public void setAsnuNames(Map<Long, String> asnuNames) {
+        this.asnuNames = asnuNames;
     }
 
     public long getTotalCountOfRecords() {

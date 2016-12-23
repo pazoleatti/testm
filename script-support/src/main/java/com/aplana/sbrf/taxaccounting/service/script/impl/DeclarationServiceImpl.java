@@ -78,8 +78,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kpp, taxOrganCode);
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode, Long asnuId, String guid) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kpp, taxOrganCode, asnuId, guid);
     }
 
     @Override
@@ -193,7 +193,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public boolean checkUnique(DeclarationData declarationData, Logger logger) {
         DeclarationTemplate template = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
         DeclarationData existingDeclarationData = declarationDataDao.find(template.getType().getId(),
-                declarationData.getDepartmentReportPeriodId(), declarationData.getKpp(), declarationData.getTaxOrganCode());
+                declarationData.getDepartmentReportPeriodId(), declarationData.getKpp(), declarationData.getTaxOrganCode(),
+                declarationData.getAsnuId(), declarationData.getGuid());
         // форма найдена
         if (existingDeclarationData != null) {
             logger.error(template.getType().getTaxType() == TaxType.DEAL ? CHECK_UNIQUE_NOTIFICATION_ERROR : CHECK_UNIQUE_ERROR);
