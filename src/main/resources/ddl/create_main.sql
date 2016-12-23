@@ -1314,3 +1314,140 @@ comment on column ndfl_person_prepayment.notif_source is 'Код налогов�
 
 create sequence seq_ndfl_person_prepayment start with 1000;
 ------------------------------------------------------------------------------------------------------
+create table raschsv_pers_sv_strah_lic
+(
+   id                 NUMBER(18)           not null,
+   nom_korr           NUMBER(3)            not null,
+   period             VARCHAR2(2),
+   otchet_god         VARCHAR2(4),
+   nomer              NUMBER(7),
+   sv_data            DATE,
+   constraint pk_raschsv_pers_sv_strah_lic primary key (id)
+);
+create sequence seq_raschsv_pers_sv_strah_lic start with 1;
+comment on table raschsv_pers_sv_strah_lic is 'Персонифицированные сведения о застрахованных лицах (ПерсСвСтрахЛиц)';
+comment on column raschsv_pers_sv_strah_lic.id is 'Идентификатор';
+comment on column raschsv_pers_sv_strah_lic.nom_korr is 'Номер корректировки (НомКорр)';
+comment on column raschsv_pers_sv_strah_lic.period is 'Расчетный (отчетный) период (код) (Период)';
+comment on column raschsv_pers_sv_strah_lic.otchet_god is 'Календарный год (ОтчетГод)';
+comment on column raschsv_pers_sv_strah_lic.nomer is 'Номер (Номер)';
+comment on column raschsv_pers_sv_strah_lic.sv_data is 'Дата (Дата)';
+------------------------------------------------------------------------------------------------------
+create table raschsv_dan_fl_poluch
+(
+   id                 NUMBER(18)           not null,
+   raschsv_pers_sv_strah_lic_id NUMBER(18),
+   innfl              VARCHAR2(12),
+   snils              VARCHAR2(14),
+   data_rozd          DATE,
+   grazd              VARCHAR2(3),
+   pol                VARCHAR2(1),
+   kod_vid_doc        VARCHAR2(2),
+   ser_nom_doc        VARCHAR2(25),
+   priz_ops           VARCHAR2(1),
+   priz_oms           VARCHAR2(1),
+   priz_oss           VARCHAR2(1),
+   familia            VARCHAR2(60),
+   imya               VARCHAR2(60),
+   otchestvo          VARCHAR2(60),
+   constraint pk_raschsv_dan_fl_poluch primary key (id),
+   constraint fk_raschsv_dan_fl_pol_pers_sv foreign key (raschsv_pers_sv_strah_lic_id) references raschsv_pers_sv_strah_lic (id)
+);
+create sequence seq_raschsv_dan_fl_poluch start with 1;
+comment on table raschsv_dan_fl_poluch is 'Данные о физическом лице - получателе дохода (ДанФЛПолуч)';
+comment on column raschsv_dan_fl_poluch.id is 'Идентификатор';
+comment on column raschsv_dan_fl_poluch.raschsv_pers_sv_strah_lic_id is 'Персонифицированные сведения о застрахованных лицах (ПерсСвСтрахЛиц)';
+comment on column raschsv_dan_fl_poluch.innfl is 'ИНН (ИННФЛ)';
+comment on column raschsv_dan_fl_poluch.snils is 'СНИЛС (СНИЛС)';
+comment on column raschsv_dan_fl_poluch.data_rozd is 'Дата рождения (ДатаРожд)';
+comment on column raschsv_dan_fl_poluch.grazd is 'Гражданство (код страны) (Гражд)';
+comment on column raschsv_dan_fl_poluch.pol is 'Пол (Пол)';
+comment on column raschsv_dan_fl_poluch.kod_vid_doc is 'Код вида документа, удостоверяющего личность (КодВидДок)';
+comment on column raschsv_dan_fl_poluch.ser_nom_doc is 'Серия и номер документа, удостоверяющего личность (СерНомДок)';
+comment on column raschsv_dan_fl_poluch.priz_ops is 'Признак застрахованного лица в системе обязательного пенсионного страхования (ПризОПС)';
+comment on column raschsv_dan_fl_poluch.priz_oms is 'Признак застрахованного лица в системе обязательного медицинского страхования (ПризОМС)';
+comment on column raschsv_dan_fl_poluch.priz_oss is 'Признак застрахованного лица в системе обязательного социального страхования (ПризОСС)';
+comment on column raschsv_dan_fl_poluch.familia is 'Фамилия (Фамилия)';
+comment on column raschsv_dan_fl_poluch.imya is 'Имя (Имя)';
+comment on column raschsv_dan_fl_poluch.otchestvo is 'Отчество (Отчество)';
+------------------------------------------------------------------------------------------------------
+create table raschsv_sv_vypl
+(
+   id                 NUMBER(18)           not null,
+   raschv_dan_fl_poluch_id NUMBER(18),
+   sum_vypl_vs3       NUMBER(17,2),
+   vypl_ops_vs3       NUMBER(17,2),
+   vypl_ops_dog_vs3   NUMBER(17,2),
+   nachisl_sv_vs3     NUMBER(17,2),
+   constraint pk_raschsv_sv_vypl primary key (id),
+   constraint fk_raschsv_sv_vypl_dan_fl_pol foreign key (raschv_dan_fl_poluch_id) references raschsv_dan_fl_poluch (id)
+);
+create sequence seq_raschsv_sv_vypl start with 1;
+comment on table raschsv_sv_vypl is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица (СвВыпл)';
+comment on column raschsv_sv_vypl.id is 'Идентификатор';
+comment on column raschsv_sv_vypl.raschv_dan_fl_poluch_id is 'Данные о физическом лице - получателе дохода (ДанФЛПолуч)';
+comment on column raschsv_sv_vypl.sum_vypl_vs3 is 'Сумма выплат и иных вознаграждений всего за последние три месяца расчетного (отчетного) периода (СумВыплВс3)';
+comment on column raschsv_sv_vypl.vypl_ops_vs3 is 'База для исчисления страховых взносов на обязательное пенсионное страхование в пределах предельной величины всего за последние три месяца расчетного (отчетного) периода (ВыплОПСВс3)';
+comment on column raschsv_sv_vypl.vypl_ops_dog_vs3 is 'База для исчисления страховых взносов на обязательное пенсионное страхование в пределах предельной величины, в том числе по гражданско-правовым договорам, всего за последние три месяца расчетного (отчетного) периода (ВыплОПСДогВс3)';
+comment on column raschsv_sv_vypl.nachisl_sv_vs3 is 'Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину всего за последние три месяца расчетного (отчетного) периода (НачислСВВс3)';
+------------------------------------------------------------------------------------------------------
+create table raschsv_sv_vypl_mk
+(
+   id                 NUMBER(18)           not null,
+   raschsv_sv_vypl_id NUMBER(18),
+   mesyac             VARCHAR2(2 CHAR),
+   kod_kat_lic        VARCHAR2(4 CHAR),
+   sum_vypl           NUMBER(17,2),
+   vypl_ops           NUMBER(17,2),
+   vypl_ops_dog       NUMBER(17,2),
+   nachisl_sv         NUMBER(17,2),
+   constraint pk_raschsv_vypl_mk primary key (id),
+   constraint fk_raschsv_sv_vypl_mk_sv_vypl foreign key (raschsv_sv_vypl_id) references raschsv_sv_vypl (id)
+);
+create sequence seq_raschsv_sv_vypl_mk start with 1;
+comment on table raschsv_sv_vypl_mk is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица (СвВыплМК)';
+comment on column raschsv_sv_vypl_mk.id is 'Идентификатор';
+comment on column raschsv_sv_vypl_mk.raschsv_sv_vypl_id is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица (СвВыпл)';
+comment on column raschsv_sv_vypl_mk.mesyac is 'Месяц (Месяц)';
+comment on column raschsv_sv_vypl_mk.kod_kat_lic is 'Код категории застрахованного лица (КодКатЛиц)';
+comment on column raschsv_sv_vypl_mk.sum_vypl is 'Сумма выплат и иных вознаграждений (СумВыпл)';
+comment on column raschsv_sv_vypl_mk.vypl_ops is 'База для исчисления страховых взносов на обязательное пенсионное страхование в пределах предельной величины (ВыплОПС)';
+comment on column raschsv_sv_vypl_mk.vypl_ops_dog is 'База для исчисления страховых взносов на обязательное пенсионное страхование в пределах предельной величины, в том числе по гражданско-правовым договорам (ВыплОПСДог)';
+comment on column raschsv_sv_vypl_mk.nachisl_sv is 'Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину (НачислСВ)';
+------------------------------------------------------------------------------------------------------
+create table raschsv_vypl_sv_dop
+(
+   id                 NUMBER(18)           not null,
+   raschsv_dan_fl_polush_id NUMBER(18),
+   vypl_sv_vs3        NUMBER(17,2),
+   nachisl_sv_vs3     NUMBER(17,2),
+   constraint pk_raschsv_vypl_sv_dop primary key (id),
+   constraint fk_raschsv_vsv_dop_dan_fl_pol foreign key (raschsv_dan_fl_polush_id) references raschsv_dan_fl_poluch (id)
+);
+create sequence seq_raschsv_vypl_sv_dop start with 1;
+comment on table raschsv_vypl_sv_dop is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу (ВыплСВДоп)';
+comment on column raschsv_vypl_sv_dop.id is 'Идентификатор';
+comment on column raschsv_vypl_sv_dop.raschv_dan_fl_poluch_id is 'Данные о физическом лице - получателе дохода (ДанФЛПолуч)';
+comment on column raschsv_vypl_sv_dop.vypl_sv_vs3 is 'Сумма выплат и иных вознаграждений, на которые исчислены страховые взносы, всего за последние три месяца расчетного (отчетного) периода (ВыплСВВс3)';
+comment on column raschsv_vypl_sv_dop.nachisl_sv_vs3 is 'Сумма исчисленных страховых взносов всего за последние три месяца расчетного (отчетного) периода (НачислСВВс3)';
+------------------------------------------------------------------------------------------------------
+create table raschsv_vypl_sv_dop_mt
+(
+   id                 NUMBER(18)           not null,
+   raschsv_vypl_sv_dop_id NUMBER(18),
+   mesyac             VARCHAR2(2 CHAR),
+   tariff             VARCHAR2(2 CHAR),
+   vypl_sv            NUMBER(17,2),
+   nachisl_sv         NUMBER(17,2),
+   constraint pk_raschsv_vypl_sv_dop_mt primary key (id),
+   constraint fk_raschsv_vsv_dop_mt_vsv_dop foreign key (raschsv_vypl_sv_dop_id) references raschsv_vypl_sv_dop (id)
+);
+create sequence seq_raschsv_vypl_sv_dop_mt start with 1;
+comment on table raschsv_vypl_sv_dop_mt is 'Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа (ВыплСВДопМТ)';
+comment on column raschsv_vypl_sv_dop_mt.id is 'Идентификатор';
+comment on column raschsv_vypl_sv_dop_mt.raschsv_vypl_sv_dop_id is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу (ВыплСВДоп)';
+comment on column raschsv_vypl_sv_dop_mt.mesyac is 'Месяц (Месяц)';
+comment on column raschsv_vypl_sv_dop_mt.tariff is 'Тариф (Тариф)';
+comment on column raschsv_vypl_sv_dop_mt.vypl_sv is 'Сумма выплат и иных вознаграждений, на которые исчислены страховые взносы (ВыплСВ)';
+comment on column raschsv_vypl_sv_dop_mt.nachisl_sv is 'Сумма исчисленных страховых взносов (НачислСВ)';
+------------------------------------------------------------------------------------------------------
