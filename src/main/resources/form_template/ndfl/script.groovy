@@ -4,70 +4,17 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
-import groovy.sql.Sql
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import groovy.util.slurpersupport.NodeChild
 
-//---- test ----
-def db = [url: 'jdbc:hsqldb:mem:testDB', user: 'sa', password: '', driver: 'org.hsqldb.jdbc.JDBCDriver']
-def sql = Sql.newInstance(db.url, db.user, db.password, db.driver)
-
-sql.execute '''
-    set database sql syntax ora true;
-    SET DATABASE EVENT LOG SQL LEVEL 3;
- '''
-
-String createMainSql = new File("../src/main/resources/ddl/create_main.sql").text
-sql.execute(createMainSql)
-
-String createConstraintSql = new File("../src/main/resources/ddl/create_constraint.sql").text
-sql.execute(createConstraintSql)
-//--------------
-
-//Now you can invoke sql, e.g. to create a table:
-/*sql.execute '''
-     create table PROJECT (
-         id integer not null,
-         name varchar(50),
-         url varchar(100),
-     )
- '''*/
-
-//Or insert a row using JDBC PreparedStatement inspired syntax:
-
-String insStr = "INSERT INTO NDFL_PERSON (id, declaration_data_id, inp, FIRST_NAME, LAST_NAME, BIRTH_DAY, CITIZENSHIP, ID_DOC_TYPE, ID_DOC_NUMBER, STATUS) VALUES (SEQ_NDFL_PERSON.nextVal, -1, 1234567890, 'Ivan', 'Ivanov', TO_DATE('01-01-1980', 'DD-MM-YYYY'),'Российская Федерация', '112233', '0000', '1515')"
-sql.execute(insStr);
-String insStr2 = "INSERT INTO NDFL_PERSON (id, declaration_data_id, inp, FIRST_NAME, LAST_NAME, BIRTH_DAY, CITIZENSHIP, ID_DOC_TYPE, ID_DOC_NUMBER, STATUS) VALUES (SEQ_NDFL_PERSON.nextVal, -1, 1234567890, 'Ivan', 'Ivanov', TO_DATE('01-01-1980', 'DD-MM-YYYY'),'Российская Федерация', '112233', '0000', '1515')"
-sql.execute(insStr2);
-
-//def params = [10, 'Groovy', 'http://groovy.codehaus.org']
-//sql.execute 'insert into PROJECT (id, name, url) values (?, ?, ?)', params
-
-//Or insert a row using GString syntax:
-//def map = [id:20, name:'Grails', url:'http://grails.codehaus.org']
-//sql.execute "insert into PROJECT (id, name, url) values ($map.id, $map.name, $map.url)"
-
-//Or a row update:
-//def newUrl = 'http://grails.org'
-//def project = 'Grails'
-//sql.executeUpdate "update PROJECT set url=$newUrl where name=$project"
-
-//Now try a query using eachRow:
-//        println 'Some GR8 projects:'
-sql.eachRow('select * from NDFL_PERSON') { row ->
-    println "$row.id | $row.birth_day | $row.citizenship"
-}
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        println "call create"
-        //formDataService.addRow(formData, null, [], [])
         break
     case FormDataEvent.CALCULATE:
-        println "call calculate"
-        //checkSourceForm()
         calc()
-        //logicCheck()
-        //updateHistoryOnCalcOrSave()
-        //formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -78,70 +25,137 @@ void calc() {
         return
     }
 
-    def root = new XmlParser().parse(xmlInputStream);
+    def root = new XmlSlurper().parse(xmlInputStream);
 
     if (root == null) {
         throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
 
-    def servicePart = root.get('СлЧасть')
+    def servicePart = root.'СлЧасть'
 
-    def infoParts = root.get('ИнфЧасть')
+    def infoParts = root.'ИнфЧасть'
 
     infoParts.each {
-        processInfoPart(it);
+        processInfoPart(it)
     }
 }
 
 void processInfoPart(infoPart) {
 
-    def ndflPerson = infoPart.get('ПолучДох')
-    processNdflPerson(ndflPerson);
+    def ndflPersonNode = infoPart.'ПолучДох'[0]
 
-    def ndflPersonOperations = infoPart.get('СведОпер')
+    NdflPerson ndflPerson = transformNdflPersonNode(ndflPersonNode)
+
+    def ndflPersonOperations = infoPart.'СведОпер'
     ndflPersonOperations.each {
-        processNdflPersonOperation(ndflPerson, it);
+        processNdflPersonOperation(ndflPerson, it)
+    }
+
+    ndflPersonDao.save(ndflPerson)
+}
+
+void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOperationsNode) {
+
+    ndflPerson.ndflPersonIncomes = ndflPersonOperationsNode.'СведДохНал'.collect {
+        transformNdflPersonIncome(it)
+    }
+
+    ndflPerson.ndflPersonDeductions = ndflPersonOperationsNode.'СведВыч'.collect {
+        transformNdflPersonDeduction(it)
+    }
+
+    ndflPerson.ndflPersonPrepayments = ndflPersonOperationsNode.'СведАванс'.collect {
+        transformNdflPersonPrepayment(it)
     }
 
 }
 
-void processNdflPerson(ndflPerson) {
-    println "processNdflPerson " + ndflPerson
+NdflPerson transformNdflPersonNode(NodeChild node) {
+    NdflPerson ndflPerson = new NdflPerson()
+    //uses some Groovy magic
+    ndflPerson.inp = node.'@ИНП'
+    ndflPerson.snils = node.'@СНИЛС'
+    ndflPerson.lastName = node.'@ФамФЛ'
+    ndflPerson.firstName = node.'@ИмяФЛ'
+    ndflPerson.middleName = node.'@ОтчФЛ'
+    ndflPerson.birthDay = parseDate(node.'@ДатаРожд')
+    ndflPerson.citizenship = node.'@Гражд'
+    ndflPerson.innNp = node.'@ИННФЛ'
+    ndflPerson.innForeign = node.'@ИННИно'
+    ndflPerson.idDocType = node.'@УдЛичнФЛКод'
+    ndflPerson.idDocNumber = node.'@УдЛичнФЛНом'
+    ndflPerson.status = node.'@СтатусФЛ'
+    ndflPerson.postIndex = node.'@Индекс'
+    ndflPerson.regionCode = node.'@КодРегион'
+    ndflPerson.area = node.'@Район'
+    ndflPerson.city = node.'@Город'
+    ndflPerson.locality = node.'@НаселПункт'
+    ndflPerson.street = node.'@Улица'
+    ndflPerson.house = node.'@Дом'
+    ndflPerson.building = node.'@Корпус'
+    ndflPerson.flat = node.'@Кварт'
+    ndflPerson.countryCode = node.'@КодСтрИно'
+    ndflPerson.address = node.'@АдресИно'
+    ndflPerson.additionalData = node.'@ДопИнф'
+    return ndflPerson
 }
 
-
-void processNdflPersonOperation(ndflPerson, ndflPersonOperation) {
-
-
-    def ndflPersonIncomes = ndflPersonOperation.get('СведДохНал'); //1..n
-
-    def ndflPersonDeductions = ndflPersonOperation.get('СведВыч'); //0..n
-
-
-    def ndflPersonPrepayments = ndflPersonOperation.get('СведАванс'); //0..n
-
-
-
-    println "processNdflPersonOperation " + ndflPersonOperation
-
+NdflPersonIncome transformNdflPersonIncome(NodeChild node) {
+    NdflPersonIncome personIncome = new NdflPersonIncome()
+    personIncome.rowNum = node.'@НомСтр'.toInteger()
+    personIncome.incomeCode = node.'@КодДох'
+    personIncome.incomeType = node.'@ТипДох'
+    personIncome.incomeAccruedDate = parseDate(node.'@ДатаДохНач')
+    personIncome.incomePayoutDate = parseDate(node.'@ДатаДохВыпл')
+    personIncome.incomeAccruedSumm = node.'@СуммДохНач'.toBigDecimal()
+    personIncome.incomePayoutSumm = node.'@СуммДохВыпл'.toBigDecimal()
+    personIncome.totalDeductionsSumm = node.'@СумВыч'.toBigDecimal()
+    personIncome.taxBase = node.'@НалБаза'.toBigDecimal()
+    personIncome.taxRate = node.'@Ставка'.toInteger()
+    personIncome.taxDate = parseDate(node.'@ДатаНалог')
+    personIncome.calculatedTax = node.'@НИ'.toInteger()
+    personIncome.withholdingTax = node.'@НУ'.toInteger()
+    personIncome.notHoldingTax = node.'@ДолгНП'.toInteger()
+    personIncome.overholdingTax = node.'@ДолгНА'.toInteger()
+    personIncome.refoundTax = node.'@ВозврНал'.toInteger()
+    personIncome.taxTransferDate = parseDate(node.'@СрокПрчслНал')
+    personIncome.paymentDate = parseDate(node.'@ПлПоручДат')
+    personIncome.paymentNumber = node.'@ПлатПоручНом'
+    personIncome.taxSumm = node.'@НалПерСумм'.toInteger()
+    return personIncome
 }
 
-void processNdflPersonIncome(ndflPerson, ndflPersonOperation, ndflPersonIncome) {
-
-
+NdflPersonDeduction transformNdflPersonDeduction(NodeChild node) {
+    NdflPersonDeduction personDeduction = new NdflPersonDeduction()
+    personDeduction.rowNum = node.'@НомСтр'.toInteger()
+    personDeduction.typeCode = node.'@ВычетКод'
+    personDeduction.notifType = node.'@УведТип'
+    personDeduction.notifDate = parseDate(node.'@УведДата')
+    personDeduction.notifNum = node.'@УведНом'
+    personDeduction.notifSource = node.'@УведИФНС'
+    personDeduction.notifSumm = node.'@УведСум'.toBigDecimal()
+    personDeduction.incomeAccrued = parseDate(node.'@ДатаДохНач')
+    personDeduction.incomeCode = node.'@КодДох'
+    personDeduction.incomeSumm = node.'@СуммДохНач'.toBigDecimal()
+    personDeduction.periodPrevDate = parseDate(node.'@ДатаПредВыч')
+    personDeduction.periodPrevSumm = node.'@СумПредВыч'.toBigDecimal()
+    personDeduction.periodCurrDate = parseDate(node.'@ДатаТекВыч')
+    personDeduction.periodCurrSumm = node.'@СумТекВыч'.toBigDecimal()
+    return personDeduction
 }
 
-void ndflPersonDeduction(ndflPersonOperation) {
+NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node) {
 
+    NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
+    personPrepayment.rowNum = node.'@НомСтр'.toInteger()
+    personPrepayment.summ = node.'@Аванс'.toBigDecimal()
+    personPrepayment.notifNum = node.'@УведНом'
+    personPrepayment.notifDate = parseDate(node.'@УведДата')
+    personPrepayment.notifSource = node.'@УведИФНС'
 
+    return personPrepayment;
 }
 
-void ndflPersonPrepayment(ndflPersonOperation) {
-
-
+Date parseDate(xmlDate) {
+    return new java.text.SimpleDateFormat('dd.MM.yyyy').parse(xmlDate.text())
 }
-
-
-
-
-

@@ -226,10 +226,10 @@ public class NdflPersonDaoTest {
 
         personDeduction.setIncomeAccrued(toDate("01.01.2016"));
         personDeduction.setIncomeCode("1234");
-        personDeduction.setIncomeSumm(new BigDecimal("999999.99"));
+        personDeduction.setIncomeSumm(new BigDecimal("999999.99")); //123456789123456789.12
 
         personDeduction.setPeriodPrevDate(toDate("01.01.2016"));
-        personDeduction.setPeriodPrevSumm(new BigDecimal("999999.99"));
+        personDeduction.setPeriodPrevSumm(new BigDecimal("999999.99")); //123456789123456789.12
         personDeduction.setPeriodCurrDate(toDate("01.01.2016"));
         personDeduction.setPeriodCurrSumm(new BigDecimal("999999.99"));
 
