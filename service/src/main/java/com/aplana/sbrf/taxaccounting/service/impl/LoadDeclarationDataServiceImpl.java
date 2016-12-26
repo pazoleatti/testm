@@ -125,7 +125,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         return importCounter;
     }
 
-    @Override
+    /*@Override
     public List<TransportFileInfo> getFormDataFiles(TAUserInfo userInfo, Logger logger) {
         List<TransportFileInfo> fileList = new ArrayList<TransportFileInfo>();
         Map<Integer, List<TaxType>> departmentTaxMap = getTB(userInfo, logger);
@@ -139,8 +139,9 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             }
         }
         return fileList;
-    }
+    }*/
 
+    /*
     @Override
     public Map<Integer, List<TaxType>> getTB(TAUserInfo userInfo, Logger logger) {
         Map<Integer, List<TaxType>> departmentTaxMap = new HashMap<Integer, List<TaxType>>();
@@ -188,7 +189,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         }
 
         return departmentTaxMap;
-    }
+    }*/
 
     @Override
     public ImportCounter importDeclaration(TAUserInfo userInfo, Logger logger, String lock, boolean isAsync) {
@@ -277,7 +278,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             try {
                 List<LogEntry> logs;
                 try {
-                    logs = fileLoad(userInfo, departmentId, fileName, currentFile.getInputStream(), logger, lockId);
+                    logs = loadDeclartionDataFile(userInfo, departmentId, fileName, currentFile.getInputStream(), logger, lockId);
                 } finally {
                     IOUtils.closeQuietly(inputStream);
                 }
@@ -306,20 +307,22 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         return new ImportCounter(success, fail + wrongImportCounter.getFailCounter());
     }
 
-    private List<LogEntry> fileLoad(TAUserInfo userInfo, Integer departmentId, String fileName, InputStream inputStream, Logger logger, String lockId) {
+    private List<LogEntry> loadDeclartionDataFile(TAUserInfo userInfo, Integer departmentId, String fileName, InputStream inputStream, Logger logger, String lockId) {
         TransportDataParam transportDataParam = TransportDataParam.valueOfDec(fileName);
         String reportPeriodCode = transportDataParam.getReportPeriodCode();
         Integer year = transportDataParam.getYear();
         String departmentCode = transportDataParam.getDepartmentCode();
         String asnuCode = transportDataParam.getAsnuCode();
         String guid = transportDataParam.getGuid();
+        String kpp = transportDataParam.getKpp();
+        Integer declarationTypeId = transportDataParam.getDeclarationTypeId();
 
         // Подразделение НФ
         Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode, false);
         formDepartmentId = formDepartment != null ? formDepartment.getId(): null;
 
         // Указан несуществующий код налоговой формы
-        DeclarationType declarationType = declarationTypeService.get(100);
+        DeclarationType declarationType = declarationTypeService.get(declarationTypeId);
 
         // Указан недопустимый код периода
         ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(declarationType.getTaxType(), reportPeriodCode, year);
@@ -355,7 +358,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         }
 
         // Не задан код подразделения или код формы
-        if (departmentCode == null || asnuCode == null || reportPeriodCode == null || year == null || guid == null) {
+        if (departmentCode == null || reportPeriodCode == null) {
             return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.L4, logger, lockId, fileName, "path")));
         }
 
@@ -371,15 +374,17 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         }
 
         // АСНУ
-        Long asnuId;
-        RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
-        List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '"+asnuCode+"'");
-        if (asnuIds.size() != 1) {
-            RefBook refBook = refBookDao.get(900L);
-            log(userInfo, LogData.L5_ASNU, logger, lockId, refBook.getName(), refBook.getAttribute("CODE").getName(), asnuCode, fileName);
-            return Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), asnuCode, fileName)));
-        } else {
-            asnuId = asnuIds.get(0);
+        Long asnuId = null;
+        if (asnuCode != null) {
+            RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
+            List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '" + asnuCode + "'");
+            if (asnuIds.size() != 1) {
+                RefBook refBook = refBookDao.get(900L);
+                log(userInfo, LogData.L5_ASNU, logger, lockId, refBook.getName(), refBook.getAttribute("CODE").getName(), asnuCode, fileName);
+                return Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), lockId, refBook.getName(), refBook.getAttribute(SBRF_CODE_ATTR_NAME).getName(), asnuCode, fileName)));
+            } else {
+                asnuId = asnuIds.get(0);
+            }
         }
 
         // Назначение подразделению Декларации
@@ -409,10 +414,10 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         }
 
         // Поиск экземпляра декларации
-        DeclarationData declarationData = declarationDataService.find(declarationTemplateId, departmentReportPeriod.getId(), null, null, asnuId, guid);
+        DeclarationData declarationData = declarationDataService.find(declarationTemplateId, departmentReportPeriod.getId(), null, kpp, asnuId, guid);
 
         // Экземпляр уже есть и не в статусе «Создана»
-        if (declarationData != null && declarationData.isAccepted()) {
+        if (declarationData != null) {
             // Сообщение об ошибке в общий лог и в файл со списком ошибок
             return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.L17, logger, lockId, declarationType.getName(), formDepartment.getName(), fileName)));
         }
@@ -420,7 +425,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         log(userInfo, LogData.L15_FD, logger, lockId, fileName);
         log(userInfo, LogData.L15_DEC, logger, lockId, getFileNamePart(departmentCode),
                 getFileNamePart(reportPeriodCode), getFileNamePart(year),
-                getFileNamePart(asnuCode), getFileNamePart(guid));
+                getFileNamePart(kpp), getFileNamePart(asnuCode), getFileNamePart(guid));
 
         // Загрузка данных в НФ (скрипт)
         Logger localLogger = new Logger();
@@ -447,6 +452,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         }
     }
 
+    /*
     private void getFormDataTBFiles(List<TransportFileInfo> fileList, TAUserInfo userInfo, ConfigurationParam param, Integer departmentId,
                                     List<TaxType> taxTypes, Logger logger, String lockId) {
         String path = getUploadPath(userInfo, param, departmentId, logger, lockId);
@@ -474,7 +480,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
             fileList.add(new TransportFileInfo(currentFile.getName(), path, currentFile.length() / 1024));
         }
-    }
+    }*/
 
     private boolean checkPath(String path) {
         if (path == null || !FileWrapper.canReadFolder(path + "/") || !FileWrapper.canWriteFolder(path + "/"))
@@ -503,13 +509,10 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         boolean formWasCreated = declarationData != null;
         // Если формы нет, то создаем
         if (declarationData == null) {
-            // Если форма не ежемесячная, то месяц при созданнии не указывается
             int declarationTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationType.getId(),
                     departmentReportPeriod.getReportPeriod().getId());
-            long declarationDataId = declarationDataService.create(localLogger, declarationTemplateId, userInfo, departmentReportPeriod, null, null, asnuId, transportDataParam.getGuid());
+            long declarationDataId = declarationDataService.create(localLogger, declarationTemplateId, userInfo, departmentReportPeriod, null, transportDataParam.getKpp(), asnuId, transportDataParam.getGuid());
             declarationData = declarationDataService.get(declarationDataId, userInfo);
-        } else {
-
         }
 
         // Блокировка

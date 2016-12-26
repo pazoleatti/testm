@@ -91,7 +91,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     static final String U3_3 = "подразделение «%s» является недействующим (справочник «%s»)!";
     static final String U3_6 = "для подразделения «%s» не назначено декларации «%s»!";
     static final String U3_4 = "для вида налога «%s» закрыт (либо еще не открыт) период с кодом «%s»%s, календарный год «%s»!";
-    static final String U3_5 = "налоговая форма существует и находится в состоянии, отличном от «" + WorkflowState.CREATED.getTitle() + "»";
+    static final String U3_5 = "налоговая форма уже существует";
     static final String U4 = "Загружаемая налоговая форма «%s» подразделения «%s» не относится ни к одному ТБ, " +
             "в связи с чем для нее не существует каталог загрузки в конфигурационных параметрах АС «Учет налогов»!";
 
@@ -99,7 +99,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     static final String U5_1 = "Из наименования транспортного файла получены следующие данные:";
     static final String U6_1 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s.";
     static final String U6_2 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s, месяц: %s";
-    static final String U6_3 = "Код подразделения: %s, код периода: %s, год: %s, код АСНУ: %s, GUID: %s";
+    static final String U6_3 = "Код подразделения: %s, код периода: %s, год: %s, КПП: %s, код АСНУ: %s, GUID: %s";
 
     private static final String DIASOFT_NAME = "справочников Diasoft";
     private static final String AVG_COST_NAME = "справочника «Средняя стоимость транспортных средств»";
@@ -345,22 +345,23 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             String departmentCode = transportDataParam.getDepartmentCode();
             String asnuCode = transportDataParam.getAsnuCode();
             String guid = transportDataParam.getGuid();
+            String kpp = transportDataParam.getKpp();
 
             // Вывод результата разбора имени файла
             logger.info(U5, fileName);
             logger.info(U5_1, fileName);
             logger.info(U6_3, getFileNamePart(departmentCode),
                     getFileNamePart(reportPeriodCode), getFileNamePart(year),
-                    getFileNamePart(asnuCode), getFileNamePart(guid));
+                    getFileNamePart(kpp), getFileNamePart(asnuCode), getFileNamePart(guid));
 
             // Не задан код подразделения или код формы
-            if (departmentCode == null || asnuCode == null || reportPeriodCode == null || year == null || guid == null) {
+            if (departmentCode == null || reportPeriodCode == null) {
                 logger.warn(U2_0, fileName);
                 return null;
             }
 
             // Указан несуществующий код налоговой формы
-            DeclarationType declarationType = declarationTypeService.get(100);
+            DeclarationType declarationType = declarationTypeService.get(transportDataParam.getDeclarationTypeId());
             declarationTypeName = declarationType.getName();
 
             // Указан несуществующий код подразделения
@@ -373,16 +374,18 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             }
 
             // АСНУ
-            Long asnuId;
-            RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
-            List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '"+asnuCode+"'");
-            if (asnuIds.size() != 1) {
-                RefBook refBook = refBookDao.get(900L);
-                logger.warn(U2, fileName);
-                logger.warn(U2_1_ASNU, refBook.getName(), refBook.getAttribute("CODE").getName(), transportDataParam.getAsnuCode());
-                return null;
-            } else {
-                asnuId = asnuIds.get(0);
+            Long asnuId = null;
+            if (asnuCode != null) {
+                RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
+                List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '" + asnuCode + "'");
+                if (asnuIds.size() != 1) {
+                    RefBook refBook = refBookDao.get(900L);
+                    logger.warn(U2, fileName);
+                    logger.warn(U2_1_ASNU, refBook.getName(), refBook.getAttribute("CODE").getName(), transportDataParam.getAsnuCode());
+                    return null;
+                } else {
+                    asnuId = asnuIds.get(0);
+                }
             }
 
             String reportPeriodName = "";
@@ -453,10 +456,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 return null;
             }
 
-            DeclarationData declarationData = declarationDataService.find(declarationTemplateId, departmentReportPeriod.getId(), null, null, asnuId, guid);
+            DeclarationData declarationData = declarationDataService.find(declarationTemplateId, departmentReportPeriod.getId(), null, kpp, asnuId, guid);
 
             // Экземпляр уже есть и не в статусе «Создана»
-            if (declarationData != null && declarationData.isAccepted()) {
+            if (declarationData != null) {
                 logger.warn(U3 + U3_5, fileName);
                 return null;
             }

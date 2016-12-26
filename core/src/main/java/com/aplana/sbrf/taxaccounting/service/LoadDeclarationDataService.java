@@ -27,10 +27,10 @@ public interface LoadDeclarationDataService {
      */
     ImportCounter importDeclaration(TAUserInfo userInfo, Map<Integer, List<TaxType>> departmentTaxMap, Logger logger, String lock, boolean isAsync);
 
-    List<TransportFileInfo> getFormDataFiles(TAUserInfo userInfo, Logger logger);
+    //List<TransportFileInfo> getFormDataFiles(TAUserInfo userInfo, Logger logger);
 
     /**
      * Карта: Доступные ТБ -> доступные виды налогов
      */
-    Map<Integer, List<TaxType>> getTB(TAUserInfo userInfo, Logger logger);
+   // Map<Integer, List<TaxType>> getTB(TAUserInfo userInfo, Logger logger);
 }
