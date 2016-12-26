@@ -12,7 +12,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.design.JasperDesign;
@@ -118,6 +119,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private FormTemplateService formTemplateService;
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
+    @Autowired
+    private RefBookFactory rbFactory;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -172,49 +175,90 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
-    public long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
+    public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                        DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, Long asunId, String guid) {
-        declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod,
-                FormDataEvent.CREATE, logger);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
-            throw new ServiceLoggerException(
-                    (declarationTemplate.getType().getTaxType().equals(TaxType.DEAL) ? "Уведомление не создано" : "Декларация не создана"),
-                    logEntryService.save(logger.getEntries()));
+        String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode;
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+        RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
+        if (lockDataService.lock(key, userInfo.getUser().getId(),
+                String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
+                        String.format("Создание %s", declarationTemplate.getType().getTaxType().getDeclarationShortName()),
+                        departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        departmentReportPeriod.getCorrectionDate() != null
+                                ? " с датой сдачи корректировки " + sdf.get().format(departmentReportPeriod.getCorrectionDate())
+                                : "",
+                        department.getName(),
+                        declarationTemplate.getType().getName(),
+                        taxOrganCode != null
+                                ? ", Налоговый орган: \"" + taxOrganCode + "\""
+                                : "",
+                        taxOrganKpp != null
+                                ? ", КПП: \"" + taxOrganKpp + "\""
+                                : "",
+                        asunId != null
+                                ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(asunId).get("NAME").getStringValue() + "\""
+                                : "",
+                        guid != null
+                                ? ", GUID: \"" + guid + "\""
+                                : "")
+                ) == null) {
+            //Если блокировка успешно установлена
+            try {
+                DeclarationData declarationData = find(declarationTemplate.getType().getId(), departmentReportPeriod.getId(), taxOrganKpp, taxOrganCode, null, null);
+                if (declarationData != null) {
+                    String msg = (declarationTemplate.getType().getTaxType().equals(TaxType.DEAL) ?
+                            "Уведомление с заданными параметрами уже существует" :
+                            "Декларация с заданными параметрами уже существует");
+                    throw new ServiceLoggerException(msg, null);
+                }
+
+                declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod,
+                        FormDataEvent.CREATE, logger);
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceLoggerException(
+                            (declarationTemplate.getType().getTaxType().equals(TaxType.DEAL) ? "Уведомление не создано" : "Декларация не создана"),
+                            logEntryService.save(logger.getEntries()));
+                }
+
+                DeclarationData newDeclaration = new DeclarationData();
+                newDeclaration.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+                newDeclaration.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
+                newDeclaration.setDepartmentId(departmentReportPeriod.getDepartmentId());
+                newDeclaration.setAccepted(false);
+                newDeclaration.setDeclarationTemplateId(declarationTemplateId);
+                newDeclaration.setTaxOrganCode(taxOrganCode);
+                newDeclaration.setKpp(taxOrganKpp);
+                newDeclaration.setAsnuId(asunId);
+                newDeclaration.setGuid(guid);
+
+                // Вызываем событие скрипта CREATE
+                declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceLoggerException(
+                            "Произошли ошибки в скрипте создания декларации",
+                            logEntryService.save(logger.getEntries()));
+                }
+
+                // Вызываем событие скрипта AFTER_CREATE
+                declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.AFTER_CREATE, logger, null);
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceLoggerException(
+                            "Произошли ошибки в скрипте после создания декларации",
+                            logEntryService.save(logger.getEntries()));
+                }
+
+                long id = declarationDataDao.saveNew(newDeclaration);
+
+                logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
+                auditService.add(FormDataEvent.CREATE, userInfo, newDeclaration, null, "Декларация создана", null);
+                return id;
+            } finally {
+                lockDataService.unlock(key, userInfo.getUser().getId());
+            }
+        } else {
+            throw new ServiceException("Создание декларации с указанными параметрами уже выполняется!");
         }
-
-        DeclarationData newDeclaration = new DeclarationData();
-        newDeclaration.setDepartmentReportPeriodId(departmentReportPeriod.getId());
-        newDeclaration.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
-        newDeclaration.setDepartmentId(departmentReportPeriod.getDepartmentId());
-        newDeclaration.setAccepted(false);
-        newDeclaration.setDeclarationTemplateId(declarationTemplateId);
-        newDeclaration.setTaxOrganCode(taxOrganCode);
-        newDeclaration.setKpp(taxOrganKpp);
-        newDeclaration.setAsnuId(asunId);
-        newDeclaration.setGuid(guid);
-
-        // Вызываем событие скрипта CREATE
-        declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-                    "Произошли ошибки в скрипте создания декларации",
-                    logEntryService.save(logger.getEntries()));
-        }
-
-        // Вызываем событие скрипта AFTER_CREATE
-        declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.AFTER_CREATE, logger, null);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-                    "Произошли ошибки в скрипте после создания декларации",
-                    logEntryService.save(logger.getEntries()));
-        }
-
-        long id = declarationDataDao.saveNew(newDeclaration);
-
-        logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
-        auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration, null, "Декларация создана", null);
-        return id;
     }
 
     @Override

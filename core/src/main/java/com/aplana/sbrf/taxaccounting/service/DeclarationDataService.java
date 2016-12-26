@@ -30,7 +30,7 @@ public interface DeclarationDataService {
      * @param taxOrganKpp КПП (для налога на имущество)
      * @return идентификатор созданной декларации
      */
-    long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
+    Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                 DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp,
                 Long asunId, String guid);
 

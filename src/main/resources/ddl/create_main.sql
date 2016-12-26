@@ -1445,7 +1445,7 @@ create table raschsv_vypl_sv_dop
 create sequence seq_raschsv_vypl_sv_dop start with 1;
 comment on table raschsv_vypl_sv_dop is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу (ВыплСВДоп)';
 comment on column raschsv_vypl_sv_dop.id is 'Идентификатор';
---comment on column raschsv_vypl_sv_dop.raschv_dan_fl_poluch_id is 'Данные о физическом лице - получателе дохода (ДанФЛПолуч)';
+comment on column raschsv_vypl_sv_dop.raschsv_dan_fl_polush_id is 'Данные о физическом лице - получателе дохода (ДанФЛПолуч)';
 comment on column raschsv_vypl_sv_dop.vypl_sv_vs3 is 'Сумма выплат и иных вознаграждений, на которые исчислены страховые взносы, всего за последние три месяца расчетного (отчетного) периода (ВыплСВВс3)';
 comment on column raschsv_vypl_sv_dop.nachisl_sv_vs3 is 'Сумма исчисленных страховых взносов всего за последние три месяца расчетного (отчетного) периода (НачислСВВс3)';
 ------------------------------------------------------------------------------------------------------
@@ -1463,6 +1463,7 @@ create table raschsv_vypl_sv_dop_mt
 create sequence seq_raschsv_vypl_sv_dop_mt start with 1;
 comment on table raschsv_vypl_sv_dop_mt is 'Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа (ВыплСВДопМТ)';
 comment on column raschsv_vypl_sv_dop_mt.id is 'Идентификатор';
+comment on column raschsv_vypl_sv_dop_mt.raschsv_vypl_sv_dop_id is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу (ВыплСВДоп)';
 comment on column raschsv_vypl_sv_dop_mt.raschsv_vypl_sv_dop_id is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу (ВыплСВДоп)';
 comment on column raschsv_vypl_sv_dop_mt.mesyac is 'Месяц (Месяц)';
 comment on column raschsv_vypl_sv_dop_mt.tariff is 'Тариф (Тариф)';
