@@ -1,10 +1,10 @@
-create table form_kind (
+п»їcreate table form_kind (
   id   number(18)    not null,
   name varchar2(100) not null
 );
-comment on table form_kind is 'Тип налоговой формы';
-comment on column form_kind.id is 'Идентификатор записи';
-comment on column form_kind.name is 'Наименование';
+comment on table form_kind is 'РўРёРї РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_kind.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column form_kind.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ';
 --------------------------------------------------------------------------------------------------------------
 create table ref_book_oktmo (
   id        number(18)     not null,
@@ -15,14 +15,14 @@ create table ref_book_oktmo (
   status    number(1)      not null,
   record_id number(9)      not null
 );
-comment on table ref_book_oktmo is 'ОКТМО';
-comment on column ref_book_oktmo.id is 'Идентификатор записи';
-comment on column ref_book_oktmo.code is 'Код';
-comment on column ref_book_oktmo.name is 'Наименование';
-comment on column ref_book_oktmo.parent_id is 'Идентификатор родительской записи';
-comment on column ref_book_oktmo.version is 'Версия. Дата актуальности записи';
-comment on column ref_book_oktmo.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
-comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on table ref_book_oktmo is 'РћРљРўРњРћ';
+comment on column ref_book_oktmo.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column ref_book_oktmo.code is 'РљРѕРґ';
+comment on column ref_book_oktmo.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ';
+comment on column ref_book_oktmo.parent_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРѕРґРёС‚РµР»СЊСЃРєРѕР№ Р·Р°РїРёСЃРё';
+comment on column ref_book_oktmo.version is 'Р’РµСЂСЃРёСЏ. Р”Р°С‚Р° Р°РєС‚СѓР°Р»СЊРЅРѕСЃС‚Рё Р·Р°РїРёСЃРё';
+comment on column ref_book_oktmo.status is 'РЎС‚Р°С‚СѓСЃ Р·Р°РїРёСЃРё(0-РѕР±С‹С‡РЅР°СЏ Р·Р°РїРёСЃСЊ, -1-СѓРґР°Р»РµРЅРЅР°СЏ, 1-С‡РµСЂРЅРѕРІРёРє, 2-С„РёРєС‚РёРІРЅР°СЏ)';
+comment on column ref_book_oktmo.record_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚СЂРѕРєРё СЃРїСЂР°РІРѕС‡РЅРёРєР°. РњРѕР¶РµС‚ РїРѕРІС‚РѕСЂСЏС‚СЊСЃСЏ Сѓ СЂР°Р·РЅС‹С… РІРµСЂСЃРёР№';
 
 create sequence seq_ref_book_oktmo start with 300000 increment by 100;
 create sequence seq_ref_book_oktmo_record_id start with 1000000;
@@ -32,10 +32,10 @@ create table configuration (
   value         clob,
   department_id number(9)    not null
 );
-comment on table configuration is 'Настройки приложения, конфигурация';
-comment on column configuration.code is 'Код параметра';
-comment on column configuration.value is 'Значение параметра';
-comment on column configuration.department_id is 'ТБ';
+comment on table configuration is 'РќР°СЃС‚СЂРѕР№РєРё РїСЂРёР»РѕР¶РµРЅРёСЏ, РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ';
+comment on column configuration.code is 'РљРѕРґ РїР°СЂР°РјРµС‚СЂР°';
+comment on column configuration.value is 'Р—РЅР°С‡РµРЅРёРµ РїР°СЂР°РјРµС‚СЂР°';
+comment on column configuration.department_id is 'РўР‘';
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table form_type (
   id        number(9)           not null,
@@ -46,14 +46,14 @@ create table form_type (
   is_ifrs   number(1) default 0 not null,
   ifrs_name varchar2(200)
 );
-comment on table form_type is 'Типы налоговых форм (названия)';
-comment on column form_type.id is 'Идентификатор';
-comment on column form_type.name is 'Наименование';
-comment on column form_type.tax_type is 'Вид налога';
-comment on column form_type.status is 'Статус версии (0 - действующая версия; -1 - удаленная версия, 1 - черновик версии, 2 - фиктивная версия)';
-comment on column form_type.code is 'Номер формы';
-comment on column form_type.is_ifrs is 'Отчетность для МСФО" (0 - не отчетность МСФО, 1 - отчетность МСФО)';
-comment on column form_type.ifrs_name is 'Наименование формы для файла данного макета, включаемого в архив с отчетностью для МСФО';
+comment on table form_type is 'РўРёРїС‹ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј (РЅР°Р·РІР°РЅРёСЏ)';
+comment on column form_type.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ';
+comment on column form_type.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ';
+comment on column form_type.tax_type is 'Р’РёРґ РЅР°Р»РѕРіР°';
+comment on column form_type.status is 'РЎС‚Р°С‚СѓСЃ РІРµСЂСЃРёРё (0 - РґРµР№СЃС‚РІСѓСЋС‰Р°СЏ РІРµСЂСЃРёСЏ; -1 - СѓРґР°Р»РµРЅРЅР°СЏ РІРµСЂСЃРёСЏ, 1 - С‡РµСЂРЅРѕРІРёРє РІРµСЂСЃРёРё, 2 - С„РёРєС‚РёРІРЅР°СЏ РІРµСЂСЃРёСЏ)';
+comment on column form_type.code is 'РќРѕРјРµСЂ С„РѕСЂРјС‹';
+comment on column form_type.is_ifrs is 'РћС‚С‡РµС‚РЅРѕСЃС‚СЊ РґР»СЏ РњРЎР¤Рћ" (0 - РЅРµ РѕС‚С‡РµС‚РЅРѕСЃС‚СЊ РњРЎР¤Рћ, 1 - РѕС‚С‡РµС‚РЅРѕСЃС‚СЊ РњРЎР¤Рћ)';
+comment on column form_type.ifrs_name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С„РѕСЂРјС‹ РґР»СЏ С„Р°Р№Р»Р° РґР°РЅРЅРѕРіРѕ РјР°РєРµС‚Р°, РІРєР»СЋС‡Р°РµРјРѕРіРѕ РІ Р°СЂС…РёРІ СЃ РѕС‚С‡РµС‚РЅРѕСЃС‚СЊСЋ РґР»СЏ РњРЎР¤Рћ';
 
 create sequence seq_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -62,10 +62,10 @@ create table tax_period (
   tax_type char(1)   not null,
   year     number(4) not null
 );
-comment on table tax_period is 'Налоговые периоды';
-comment on column tax_period.id is 'Идентификатор (первичный ключ)';
-comment on column tax_period.tax_type is 'Вид налога';
-comment on column tax_period.year is 'Год';
+comment on table tax_period is 'РќР°Р»РѕРіРѕРІС‹Рµ РїРµСЂРёРѕРґС‹';
+comment on column tax_period.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ (РїРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡)';
+comment on column tax_period.tax_type is 'Р’РёРґ РЅР°Р»РѕРіР°';
+comment on column tax_period.year is 'Р“РѕРґ';
 
 create sequence seq_tax_period start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -86,22 +86,22 @@ create table form_template (
   accruing     number(1) default 0,
   updating     number(1) default 0
 );
-comment on table form_template is 'Описания шаблонов налоговых форм';
-comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
-comment on column form_template.id is 'Первичный ключ';
-comment on column form_template.type_id is 'Идентификатор вида налоговой формы';
-comment on column form_template.version is 'Версия формы (уникально в рамках типа)';
-comment on column form_template.fixed_rows is 'Признак использования фиксированных строк: 0 - используется фиксированный набор строк, 1 - есть возможность добавлять и удалять строки из формы.';
-comment on column form_template.name is 'Наименование формы';
-comment on column form_template.fullname is 'Полное наименование формы';
-comment on column form_template.script is 'Скрипт, реализующий бизнес-логику налоговой формы';
-comment on column form_template.data_headers is 'Описание заголовка таблицы';
-comment on column form_template.status is 'Статус версии (0 - действующая версия; -1 - удаленная версия, 1 - черновик версии, 2 - фиктивная версия)';
-comment on column form_template.monthly is 'Признак ежемесячной формы (0 - не ежемесячная, 1 - ежемесячная)';
-comment on column form_template.header is 'Верхний колонтитул печатной формы';
-comment on column form_template.comparative is '"Признак использования периода сравнения (0 - не используется, 1 - используется)';
-comment on column form_template.accruing is 'Признак расчета нарастающим итогом (0 - не используется, 1 - используется)';
-comment on column form_template.updating is 'Отображать кнопку "Обновить" (0 - нет, 1 - да)';
+comment on table form_template is 'РћРїРёСЃР°РЅРёСЏ С€Р°Р±Р»РѕРЅРѕРІ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј';
+comment on column form_template.data_rows is 'РџСЂРµРґРѕРїСЂРµРґРµР»С‘РЅРЅС‹Рµ СЃС‚СЂРѕРєРё С„РѕСЂРјС‹ РІ С„РѕСЂРјР°С‚Рµ XML';
+comment on column form_template.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column form_template.type_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РІРёРґР° РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_template.version is 'Р’РµСЂСЃРёСЏ С„РѕСЂРјС‹ (СѓРЅРёРєР°Р»СЊРЅРѕ РІ СЂР°РјРєР°С… С‚РёРїР°)';
+comment on column form_template.fixed_rows is 'РџСЂРёР·РЅР°Рє РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ С„РёРєСЃРёСЂРѕРІР°РЅРЅС‹С… СЃС‚СЂРѕРє: 0 - РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ С„РёРєСЃРёСЂРѕРІР°РЅРЅС‹Р№ РЅР°Р±РѕСЂ СЃС‚СЂРѕРє, 1 - РµСЃС‚СЊ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РґРѕР±Р°РІР»СЏС‚СЊ Рё СѓРґР°Р»СЏС‚СЊ СЃС‚СЂРѕРєРё РёР· С„РѕСЂРјС‹.';
+comment on column form_template.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С„РѕСЂРјС‹';
+comment on column form_template.fullname is 'РџРѕР»РЅРѕРµ РЅР°РёРјРµРЅРѕРІР°РЅРёРµ С„РѕСЂРјС‹';
+comment on column form_template.script is 'РЎРєСЂРёРїС‚, СЂРµР°Р»РёР·СѓСЋС‰РёР№ Р±РёР·РЅРµСЃ-Р»РѕРіРёРєСѓ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_template.data_headers is 'РћРїРёСЃР°РЅРёРµ Р·Р°РіРѕР»РѕРІРєР° С‚Р°Р±Р»РёС†С‹';
+comment on column form_template.status is 'РЎС‚Р°С‚СѓСЃ РІРµСЂСЃРёРё (0 - РґРµР№СЃС‚РІСѓСЋС‰Р°СЏ РІРµСЂСЃРёСЏ; -1 - СѓРґР°Р»РµРЅРЅР°СЏ РІРµСЂСЃРёСЏ, 1 - С‡РµСЂРЅРѕРІРёРє РІРµСЂСЃРёРё, 2 - С„РёРєС‚РёРІРЅР°СЏ РІРµСЂСЃРёСЏ)';
+comment on column form_template.monthly is 'РџСЂРёР·РЅР°Рє РµР¶РµРјРµСЃСЏС‡РЅРѕР№ С„РѕСЂРјС‹ (0 - РЅРµ РµР¶РµРјРµСЃСЏС‡РЅР°СЏ, 1 - РµР¶РµРјРµСЃСЏС‡РЅР°СЏ)';
+comment on column form_template.header is 'Р’РµСЂС…РЅРёР№ РєРѕР»РѕРЅС‚РёС‚СѓР» РїРµС‡Р°С‚РЅРѕР№ С„РѕСЂРјС‹';
+comment on column form_template.comparative is '"РџСЂРёР·РЅР°Рє РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РїРµСЂРёРѕРґР° СЃСЂР°РІРЅРµРЅРёСЏ (0 - РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, 1 - РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ)';
+comment on column form_template.accruing is 'РџСЂРёР·РЅР°Рє СЂР°СЃС‡РµС‚Р° РЅР°СЂР°СЃС‚Р°СЋС‰РёРј РёС‚РѕРіРѕРј (0 - РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, 1 - РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ)';
+comment on column form_template.updating is 'РћС‚РѕР±СЂР°Р¶Р°С‚СЊ РєРЅРѕРїРєСѓ "РћР±РЅРѕРІРёС‚СЊ" (0 - РЅРµС‚, 1 - РґР°)';
 
 create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -114,14 +114,14 @@ create table form_style (
   italic           number(1)    not null,
   bold             number(1)    not null
 );
-comment on table form_style is 'Стили ячеек в налоговой форме';
-comment on column form_style.id is 'Первичный ключ';
-comment on column form_style.alias is 'Алиас стиля';
-comment on column form_style.form_template_id is 'Идентификатор шаблона налоговой формы';
-comment on column form_style.font_color is 'Код цвета шрифта';
-comment on column form_style.back_color is 'Код цвета фона';
-comment on column form_style.italic is 'Признак использования курсива';
-comment on column form_style.bold is 'Признак жирного шрифта';
+comment on table form_style is 'РЎС‚РёР»Рё СЏС‡РµРµРє РІ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјРµ';
+comment on column form_style.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column form_style.alias is 'РђР»РёР°СЃ СЃС‚РёР»СЏ';
+comment on column form_style.form_template_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С€Р°Р±Р»РѕРЅР° РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_style.font_color is 'РљРѕРґ С†РІРµС‚Р° С€СЂРёС„С‚Р°';
+comment on column form_style.back_color is 'РљРѕРґ С†РІРµС‚Р° С„РѕРЅР°';
+comment on column form_style.italic is 'РџСЂРёР·РЅР°Рє РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РєСѓСЂСЃРёРІР°';
+comment on column form_style.bold is 'РџСЂРёР·РЅР°Рє Р¶РёСЂРЅРѕРіРѕ С€СЂРёС„С‚Р°';
 
 create sequence seq_form_style start with 10000;
 ------------------------------------------------------------------------------------------------------
@@ -131,11 +131,11 @@ create table blob_data (
   data          blob          not null,
   creation_date date          not null
 );
-comment on table blob_data is 'Файловое хранилище';
-comment on column blob_data.id is 'Уникальный идентификатор';
-comment on column blob_data.name is 'Название файла';
-comment on column blob_data.data is 'Бинарные данные';
-comment on column blob_data.creation_date is 'Дата создания';
+comment on table blob_data is 'Р¤Р°Р№Р»РѕРІРѕРµ С…СЂР°РЅРёР»РёС‰Рµ';
+comment on column blob_data.id is 'РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ';
+comment on column blob_data.name is 'РќР°Р·РІР°РЅРёРµ С„Р°Р№Р»Р°';
+comment on column blob_data.data is 'Р‘РёРЅР°СЂРЅС‹Рµ РґР°РЅРЅС‹Рµ';
+comment on column blob_data.creation_date is 'Р”Р°С‚Р° СЃРѕР·РґР°РЅРёСЏ';
 ----------------------------------------------------------------------------------------------------
 create table ref_book (
   id                  number(18, 0)       not null,
@@ -149,16 +149,16 @@ create table ref_book (
   is_versioned        number(1) default 1 not null
 );
 
-comment on table ref_book is 'Справочник';
-comment on column ref_book.id is 'Уникальный идентификатор';
-comment on column ref_book.name is 'Название справочника';
-comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
-comment on column ref_book.visible is 'Признак видимости';
-comment on column ref_book.type is 'Тип справочника (0 - Линейный, 1 - Иерархический)';
-comment on column ref_book.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
-comment on column ref_book.region_attribute_id is 'При его наличии справочник считается региональным. Указывает на атрибут, по которому определяется принадлежность к региону';
-comment on column ref_book.table_name is 'Название таблицы БД, в которой хранятся данные';
-comment on column ref_book.is_versioned is 'Версионный справочник (0 - нет, 1 - да)';
+comment on table ref_book is 'РЎРїСЂР°РІРѕС‡РЅРёРє';
+comment on column ref_book.id is 'РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ';
+comment on column ref_book.name is 'РќР°Р·РІР°РЅРёРµ СЃРїСЂР°РІРѕС‡РЅРёРєР°';
+comment on column ref_book.script_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРІСЏР·Р°РЅРЅРѕРіРѕ СЃРєСЂРёРїС‚Р°';
+comment on column ref_book.visible is 'РџСЂРёР·РЅР°Рє РІРёРґРёРјРѕСЃС‚Рё';
+comment on column ref_book.type is 'РўРёРї СЃРїСЂР°РІРѕС‡РЅРёРєР° (0 - Р›РёРЅРµР№РЅС‹Р№, 1 - РРµСЂР°СЂС…РёС‡РµСЃРєРёР№)';
+comment on column ref_book.read_only is 'РўРѕР»СЊРєРѕ РґР»СЏ С‡С‚РµРЅРёСЏ (0 - СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РґРѕСЃС‚СѓРїРЅРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ; 1 - СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РЅРµРґРѕСЃС‚СѓРїРЅРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ)';
+comment on column ref_book.region_attribute_id is 'РџСЂРё РµРіРѕ РЅР°Р»РёС‡РёРё СЃРїСЂР°РІРѕС‡РЅРёРє СЃС‡РёС‚Р°РµС‚СЃСЏ СЂРµРіРёРѕРЅР°Р»СЊРЅС‹Рј. РЈРєР°Р·С‹РІР°РµС‚ РЅР° Р°С‚СЂРёР±СѓС‚, РїРѕ РєРѕС‚РѕСЂРѕРјСѓ РѕРїСЂРµРґРµР»СЏРµС‚СЃСЏ РїСЂРёРЅР°РґР»РµР¶РЅРѕСЃС‚СЊ Рє СЂРµРіРёРѕРЅСѓ';
+comment on column ref_book.table_name is 'РќР°Р·РІР°РЅРёРµ С‚Р°Р±Р»РёС†С‹ Р‘Р”, РІ РєРѕС‚РѕСЂРѕР№ С…СЂР°РЅСЏС‚СЃСЏ РґР°РЅРЅС‹Рµ';
+comment on column ref_book.is_versioned is 'Р’РµСЂСЃРёРѕРЅРЅС‹Р№ СЃРїСЂР°РІРѕС‡РЅРёРє (0 - РЅРµС‚, 1 - РґР°)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id           number(18)           not null,
@@ -179,24 +179,24 @@ create table ref_book_attribute (
   read_only    number(1) default 0  not null,
   max_length   number(4)
 );
-comment on table ref_book_attribute is 'Атрибут справочника';
-comment on column ref_book_attribute.id is 'Уникальный идентификатор';
-comment on column ref_book_attribute.ref_book_id is 'Ссылка на справочник';
-comment on column ref_book_attribute.name is 'Название';
-comment on column ref_book_attribute.alias is 'Псевдоним. Используется для обращения из скриптов бизнес-логики';
-comment on column ref_book_attribute.type is 'Типа атрибута (1-строка; 2-число; 3-дата-время; 4-ссылка)';
-comment on column ref_book_attribute.ord is 'Порядок следования';
-comment on column ref_book_attribute.reference_id is 'Ссылка на справочник, на элемент которого ссылаемся. Только для атрибутов-ссылок';
-comment on column ref_book_attribute.attribute_id is 'Код отображаемого атрибута. Только для атрибутов-ссылок';
-comment on column ref_book_attribute.visible is 'Признак видимости';
-comment on column ref_book_attribute.precision is 'Точность, количество знаков после запятой. Только для атрибутов-чисел';
-comment on column ref_book_attribute.width is 'Ширина столбца. Используется при отображении справочника в виде таблицы';
-comment on column ref_book_attribute.required is 'Признак обязательности поля (1 - обязательно; 0 - нет)';
-comment on column ref_book_attribute.is_unique is 'Признак уникальности значения атрибута справочника (1 - должно быть уникальным; 0 - нет)';
-comment on column ref_book_attribute.sort_order is 'Определяет порядок сортировки по умолчанию';
-comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM"; Для чисел: 6 - чекбокс)';
-comment on column ref_book_attribute.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
-comment on column ref_book_attribute.max_length is 'Максимальная длина строки/Максимальное количество цифр без учета знака и десятичного разделителя';
+comment on table ref_book_attribute is 'РђС‚СЂРёР±СѓС‚ СЃРїСЂР°РІРѕС‡РЅРёРєР°';
+comment on column ref_book_attribute.id is 'РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ';
+comment on column ref_book_attribute.ref_book_id is 'РЎСЃС‹Р»РєР° РЅР° СЃРїСЂР°РІРѕС‡РЅРёРє';
+comment on column ref_book_attribute.name is 'РќР°Р·РІР°РЅРёРµ';
+comment on column ref_book_attribute.alias is 'РџСЃРµРІРґРѕРЅРёРј. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РѕР±СЂР°С‰РµРЅРёСЏ РёР· СЃРєСЂРёРїС‚РѕРІ Р±РёР·РЅРµСЃ-Р»РѕРіРёРєРё';
+comment on column ref_book_attribute.type is 'РўРёРїР° Р°С‚СЂРёР±СѓС‚Р° (1-СЃС‚СЂРѕРєР°; 2-С‡РёСЃР»Рѕ; 3-РґР°С‚Р°-РІСЂРµРјСЏ; 4-СЃСЃС‹Р»РєР°)';
+comment on column ref_book_attribute.ord is 'РџРѕСЂСЏРґРѕРє СЃР»РµРґРѕРІР°РЅРёСЏ';
+comment on column ref_book_attribute.reference_id is 'РЎСЃС‹Р»РєР° РЅР° СЃРїСЂР°РІРѕС‡РЅРёРє, РЅР° СЌР»РµРјРµРЅС‚ РєРѕС‚РѕСЂРѕРіРѕ СЃСЃС‹Р»Р°РµРјСЃСЏ. РўРѕР»СЊРєРѕ РґР»СЏ Р°С‚СЂРёР±СѓС‚РѕРІ-СЃСЃС‹Р»РѕРє';
+comment on column ref_book_attribute.attribute_id is 'РљРѕРґ РѕС‚РѕР±СЂР°Р¶Р°РµРјРѕРіРѕ Р°С‚СЂРёР±СѓС‚Р°. РўРѕР»СЊРєРѕ РґР»СЏ Р°С‚СЂРёР±СѓС‚РѕРІ-СЃСЃС‹Р»РѕРє';
+comment on column ref_book_attribute.visible is 'РџСЂРёР·РЅР°Рє РІРёРґРёРјРѕСЃС‚Рё';
+comment on column ref_book_attribute.precision is 'РўРѕС‡РЅРѕСЃС‚СЊ, РєРѕР»РёС‡РµСЃС‚РІРѕ Р·РЅР°РєРѕРІ РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№. РўРѕР»СЊРєРѕ РґР»СЏ Р°С‚СЂРёР±СѓС‚РѕРІ-С‡РёСЃРµР»';
+comment on column ref_book_attribute.width is 'РЁРёСЂРёРЅР° СЃС‚РѕР»Р±С†Р°. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РїСЂРё РѕС‚РѕР±СЂР°Р¶РµРЅРёРё СЃРїСЂР°РІРѕС‡РЅРёРєР° РІ РІРёРґРµ С‚Р°Р±Р»РёС†С‹';
+comment on column ref_book_attribute.required is 'РџСЂРёР·РЅР°Рє РѕР±СЏР·Р°С‚РµР»СЊРЅРѕСЃС‚Рё РїРѕР»СЏ (1 - РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ; 0 - РЅРµС‚)';
+comment on column ref_book_attribute.is_unique is 'РџСЂРёР·РЅР°Рє СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚Рё Р·РЅР°С‡РµРЅРёСЏ Р°С‚СЂРёР±СѓС‚Р° СЃРїСЂР°РІРѕС‡РЅРёРєР° (1 - РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ СѓРЅРёРєР°Р»СЊРЅС‹Рј; 0 - РЅРµС‚)';
+comment on column ref_book_attribute.sort_order is 'РћРїСЂРµРґРµР»СЏРµС‚ РїРѕСЂСЏРґРѕРє СЃРѕСЂС‚РёСЂРѕРІРєРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ';
+comment on column ref_book_attribute.format is 'Р¤РѕСЂРјР°С‚. (Р”Р»СЏ РґР°С‚: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM"; Р”Р»СЏ С‡РёСЃРµР»: 6 - С‡РµРєР±РѕРєСЃ)';
+comment on column ref_book_attribute.read_only is 'РўРѕР»СЊРєРѕ РґР»СЏ С‡С‚РµРЅРёСЏ (0 - СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РґРѕСЃС‚СѓРїРЅРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ; 1 - СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РЅРµРґРѕСЃС‚СѓРїРЅРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ)';
+comment on column ref_book_attribute.max_length is 'РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР° СЃС‚СЂРѕРєРё/РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ С†РёС„СЂ Р±РµР· СѓС‡РµС‚Р° Р·РЅР°РєР° Рё РґРµСЃСЏС‚РёС‡РЅРѕРіРѕ СЂР°Р·РґРµР»РёС‚РµР»СЏ';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id          number(18)          not null,
@@ -205,12 +205,12 @@ create table ref_book_record (
   version     date                not null,
   status      number(1) default 0 not null
 );
-comment on table ref_book_record is 'Запись справочника';
-comment on column ref_book_record.id is 'Уникальный идентификатор';
-comment on column ref_book_record.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
-comment on column ref_book_record.ref_book_id is 'Ссылка на справочник, к которому относится запись';
-comment on column ref_book_record.version is 'Версия. Дата актуальности записи';
-comment on column ref_book_record.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on table ref_book_record is 'Р—Р°РїРёСЃСЊ СЃРїСЂР°РІРѕС‡РЅРёРєР°';
+comment on column ref_book_record.id is 'РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ';
+comment on column ref_book_record.record_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚СЂРѕРєРё СЃРїСЂР°РІРѕС‡РЅРёРєР°. РњРѕР¶РµС‚ РїРѕРІС‚РѕСЂСЏС‚СЊСЃСЏ Сѓ СЂР°Р·РЅС‹С… РІРµСЂСЃРёР№';
+comment on column ref_book_record.ref_book_id is 'РЎСЃС‹Р»РєР° РЅР° СЃРїСЂР°РІРѕС‡РЅРёРє, Рє РєРѕС‚РѕСЂРѕРјСѓ РѕС‚РЅРѕСЃРёС‚СЃСЏ Р·Р°РїРёСЃСЊ';
+comment on column ref_book_record.version is 'Р’РµСЂСЃРёСЏ. Р”Р°С‚Р° Р°РєС‚СѓР°Р»СЊРЅРѕСЃС‚Рё Р·Р°РїРёСЃРё';
+comment on column ref_book_record.status is 'РЎС‚Р°С‚СѓСЃ Р·Р°РїРёСЃРё (0 - РѕР±С‹С‡РЅР°СЏ Р·Р°РїРёСЃСЊ, -1 - СѓРґР°Р»РµРЅРЅР°СЏ, 1 - С‡РµСЂРЅРѕРІРёРє, 2 - С„РёРєС‚РёРІРЅР°СЏ)';
 
 create sequence seq_ref_book_record start with 100000 increment by 100;
 create sequence seq_ref_book_record_row_id start with 100000;
@@ -223,13 +223,13 @@ create table ref_book_value (
   date_value      date,
   reference_value number(18)
 );
-comment on table ref_book_value is 'Значение записи справочника';
-comment on column ref_book_value.record_id is 'Ссылка на запись справочника';
-comment on column ref_book_value.attribute_id is 'Ссылка на атрибут справочника';
-comment on column ref_book_value.string_value is 'Строковое значение';
-comment on column ref_book_value.number_value is 'Численное значение';
-comment on column ref_book_value.date_value is 'Значение даты';
-comment on column ref_book_value.reference_value is 'Значение ссылки';
+comment on table ref_book_value is 'Р—РЅР°С‡РµРЅРёРµ Р·Р°РїРёСЃРё СЃРїСЂР°РІРѕС‡РЅРёРєР°';
+comment on column ref_book_value.record_id is 'РЎСЃС‹Р»РєР° РЅР° Р·Р°РїРёСЃСЊ СЃРїСЂР°РІРѕС‡РЅРёРєР°';
+comment on column ref_book_value.attribute_id is 'РЎСЃС‹Р»РєР° РЅР° Р°С‚СЂРёР±СѓС‚ СЃРїСЂР°РІРѕС‡РЅРёРєР°';
+comment on column ref_book_value.string_value is 'РЎС‚СЂРѕРєРѕРІРѕРµ Р·РЅР°С‡РµРЅРёРµ';
+comment on column ref_book_value.number_value is 'Р§РёСЃР»РµРЅРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ';
+comment on column ref_book_value.date_value is 'Р—РЅР°С‡РµРЅРёРµ РґР°С‚С‹';
+comment on column ref_book_value.reference_value is 'Р—РЅР°С‡РµРЅРёРµ СЃСЃС‹Р»РєРё';
 ------------------------------------------------------------------------------------------------------
 create table form_column (
   id               number(9)           not null,
@@ -250,24 +250,24 @@ create table form_column (
   numeration_row   number(9),
   short_name       varchar2(1000)
 );
-comment on table form_column is 'Описания столбцов налоговых форм';
-comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
-comment on column form_column.form_template_id is 'Идентификатор шаблона налоговой формы';
-comment on column form_column.id is 'Первичный ключ';
-comment on column form_column.name is 'Название столбца';
-comment on column form_column.ord is 'Порядковый номер';
-comment on column form_column.precision is 'Количество знаков после запятой (только для числовых столбцов)';
-comment on column form_column.type is 'Тип столбца (S - строка, N – число, D – дата, R - ссылка, A - автонумеруемая графа)';
-comment on column form_column.width is 'Ширина (в символах)';
-comment on column form_column.checking is 'Признак проверочного столбца';
-comment on column form_column.attribute_id is 'Код отображаемого атрибута для столбцов-ссылок';
-comment on column form_column.format is 'Формат';
-comment on column form_column.filter is 'Условие фильтрации элементов справочника';
-comment on column form_column.max_length is 'Максимальная длина строки';
-comment on column form_column.parent_column_id is 'Ссылка на родительскую графу';
-comment on column form_column.attribute_id2 is 'Код отображаемого атрибута для столбцов-ссылок второго уровня';
-comment on column form_column.numeration_row is 'Тип нумерации строк для автонумеруемой графы (0 - последовательная, 1 - сквозная)';
-comment on column form_column.short_name is 'Краткое наименование';
+comment on table form_column is 'РћРїРёСЃР°РЅРёСЏ СЃС‚РѕР»Р±С†РѕРІ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј';
+comment on column form_column.alias is 'РљРѕРґ СЃС‚РѕР»Р±С†Р°, РёСЃРїРѕР»СЊР·СѓРµРјС‹Р№ РІ СЃРєСЂРёРїС‚РёРЅРіРµ';
+comment on column form_column.form_template_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С€Р°Р±Р»РѕРЅР° РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_column.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column form_column.name is 'РќР°Р·РІР°РЅРёРµ СЃС‚РѕР»Р±С†Р°';
+comment on column form_column.ord is 'РџРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ';
+comment on column form_column.precision is 'РљРѕР»РёС‡РµСЃС‚РІРѕ Р·РЅР°РєРѕРІ РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№ (С‚РѕР»СЊРєРѕ РґР»СЏ С‡РёСЃР»РѕРІС‹С… СЃС‚РѕР»Р±С†РѕРІ)';
+comment on column form_column.type is 'РўРёРї СЃС‚РѕР»Р±С†Р° (S - СЃС‚СЂРѕРєР°, N вЂ“ С‡РёСЃР»Рѕ, D вЂ“ РґР°С‚Р°, R - СЃСЃС‹Р»РєР°, A - Р°РІС‚РѕРЅСѓРјРµСЂСѓРµРјР°СЏ РіСЂР°С„Р°)';
+comment on column form_column.width is 'РЁРёСЂРёРЅР° (РІ СЃРёРјРІРѕР»Р°С…)';
+comment on column form_column.checking is 'РџСЂРёР·РЅР°Рє РїСЂРѕРІРµСЂРѕС‡РЅРѕРіРѕ СЃС‚РѕР»Р±С†Р°';
+comment on column form_column.attribute_id is 'РљРѕРґ РѕС‚РѕР±СЂР°Р¶Р°РµРјРѕРіРѕ Р°С‚СЂРёР±СѓС‚Р° РґР»СЏ СЃС‚РѕР»Р±С†РѕРІ-СЃСЃС‹Р»РѕРє';
+comment on column form_column.format is 'Р¤РѕСЂРјР°С‚';
+comment on column form_column.filter is 'РЈСЃР»РѕРІРёРµ С„РёР»СЊС‚СЂР°С†РёРё СЌР»РµРјРµРЅС‚РѕРІ СЃРїСЂР°РІРѕС‡РЅРёРєР°';
+comment on column form_column.max_length is 'РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР° СЃС‚СЂРѕРєРё';
+comment on column form_column.parent_column_id is 'РЎСЃС‹Р»РєР° РЅР° СЂРѕРґРёС‚РµР»СЊСЃРєСѓСЋ РіСЂР°С„Сѓ';
+comment on column form_column.attribute_id2 is 'РљРѕРґ РѕС‚РѕР±СЂР°Р¶Р°РµРјРѕРіРѕ Р°С‚СЂРёР±СѓС‚Р° РґР»СЏ СЃС‚РѕР»Р±С†РѕРІ-СЃСЃС‹Р»РѕРє РІС‚РѕСЂРѕРіРѕ СѓСЂРѕРІРЅСЏ';
+comment on column form_column.numeration_row is 'РўРёРї РЅСѓРјРµСЂР°С†РёРё СЃС‚СЂРѕРє РґР»СЏ Р°РІС‚РѕРЅСѓРјРµСЂСѓРµРјРѕР№ РіСЂР°С„С‹ (0 - РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅР°СЏ, 1 - СЃРєРІРѕР·РЅР°СЏ)';
+comment on column form_column.short_name is 'РљСЂР°С‚РєРѕРµ РЅР°РёРјРµРЅРѕРІР°РЅРёРµ';
 
 create sequence seq_form_column start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -285,19 +285,19 @@ create table department (
   garant_use number(1) default 0    not null,
   sunr_use   number(1) default 0    not null
 );
-comment on table department is 'Подразделения банка';
-comment on column department.id is 'Идентификатор записи';
-comment on column department.name is 'Наименование подразделения';
-comment on column department.parent_id is 'Идентификатор родительского подразделения';
-comment on column department.type is 'Тип подразделения (1 - Банк, 2- ТБ, 3- ЦСКО, ПЦП, 4- Управление, 5- Не передается в СУДИР)';
-comment on column department.shortname is 'Сокращенное наименование подразделения';
-comment on column department.tb_index is 'Индекс территориального банка';
-comment on column department.sbrf_code is 'Код подразделения в нотации Сбербанка';
-comment on column department.region_id is 'Код региона';
-comment on column department.is_active is 'Действующее подразделение (0 - не действующее, 1 - действующее)';
-comment on column department.code is 'Код подразделения';
-comment on column department.garant_use is 'Признак, что используется в модуле Гарантий';
-comment on column department.sunr_use is 'Признак, что используется в АС СУНР';
+comment on table department is 'РџРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ Р±Р°РЅРєР°';
+comment on column department.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column department.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department.parent_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department.type is 'РўРёРї РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ (1 - Р‘Р°РЅРє, 2- РўР‘, 3- Р¦РЎРљРћ, РџР¦Рџ, 4- РЈРїСЂР°РІР»РµРЅРёРµ, 5- РќРµ РїРµСЂРµРґР°РµС‚СЃСЏ РІ РЎРЈР”РР )';
+comment on column department.shortname is 'РЎРѕРєСЂР°С‰РµРЅРЅРѕРµ РЅР°РёРјРµРЅРѕРІР°РЅРёРµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department.tb_index is 'РРЅРґРµРєСЃ С‚РµСЂСЂРёС‚РѕСЂРёР°Р»СЊРЅРѕРіРѕ Р±Р°РЅРєР°';
+comment on column department.sbrf_code is 'РљРѕРґ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ РІ РЅРѕС‚Р°С†РёРё РЎР±РµСЂР±Р°РЅРєР°';
+comment on column department.region_id is 'РљРѕРґ СЂРµРіРёРѕРЅР°';
+comment on column department.is_active is 'Р”РµР№СЃС‚РІСѓСЋС‰РµРµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёРµ (0 - РЅРµ РґРµР№СЃС‚РІСѓСЋС‰РµРµ, 1 - РґРµР№СЃС‚РІСѓСЋС‰РµРµ)';
+comment on column department.code is 'РљРѕРґ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department.garant_use is 'РџСЂРёР·РЅР°Рє, С‡С‚Рѕ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ РјРѕРґСѓР»Рµ Р“Р°СЂР°РЅС‚РёР№';
+comment on column department.sunr_use is 'РџСЂРёР·РЅР°Рє, С‡С‚Рѕ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ РђРЎ РЎРЈРќР ';
 
 create sequence seq_department start with 1000;
 ---------------------------------------------------------------------------------------------------
@@ -310,14 +310,14 @@ create table report_period (
   end_date            date          not null,
   calendar_start_date date          not null
 );
-comment on table report_period is 'Отчетные периоды';
-comment on column report_period.id is 'Первичный ключ';
-comment on column report_period.name is 'Наименование периода';
-comment on column report_period.tax_period_id is 'Налоговый период';
-comment on column report_period.dict_tax_period_id is 'Ссылка на справочник отчетных периодов';
-comment on column report_period.start_date is 'Дата начала отчетного периода';
-comment on column report_period.end_date is 'Дата окончания отчетного периода';
-comment on column report_period.calendar_start_date is 'Календарная дата начала отчетного периода';
+comment on table report_period is 'РћС‚С‡РµС‚РЅС‹Рµ РїРµСЂРёРѕРґС‹';
+comment on column report_period.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column report_period.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РїРµСЂРёРѕРґР°';
+comment on column report_period.tax_period_id is 'РќР°Р»РѕРіРѕРІС‹Р№ РїРµСЂРёРѕРґ';
+comment on column report_period.dict_tax_period_id is 'РЎСЃС‹Р»РєР° РЅР° СЃРїСЂР°РІРѕС‡РЅРёРє РѕС‚С‡РµС‚РЅС‹С… РїРµСЂРёРѕРґРѕРІ';
+comment on column report_period.start_date is 'Р”Р°С‚Р° РЅР°С‡Р°Р»Р° РѕС‚С‡РµС‚РЅРѕРіРѕ РїРµСЂРёРѕРґР°';
+comment on column report_period.end_date is 'Р”Р°С‚Р° РѕРєРѕРЅС‡Р°РЅРёСЏ РѕС‚С‡РµС‚РЅРѕРіРѕ РїРµСЂРёРѕРґР°';
+comment on column report_period.calendar_start_date is 'РљР°Р»РµРЅРґР°СЂРЅР°СЏ РґР°С‚Р° РЅР°С‡Р°Р»Р° РѕС‚С‡РµС‚РЅРѕРіРѕ РїРµСЂРёРѕРґР°';
 
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
@@ -333,17 +333,17 @@ create table income_101 (
   account_name           varchar2(255 char),
   account_period_id      number(9)          not null
 );
-comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
-comment on column income_101.id is 'Код записи';
-comment on column income_101.account is 'Номер счета';
-comment on column income_101.income_debet_remains is 'Входящие остатки по дебету';
-comment on column income_101.income_credit_remains is 'Входящие остатки по кредиту';
-comment on column income_101.debet_rate is 'Обороты по дебету';
-comment on column income_101.credit_rate is 'Обороты по кредиту';
-comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
-comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
-comment on column income_101.account_name is 'Название счёта';
-comment on column income_101.account_period_id is 'Идентификатор периода и подразделения БО';
+comment on table income_101 is 'РћР±РѕСЂРѕС‚РЅР°СЏ РІРµРґРѕРјРѕСЃС‚СЊ (Р¤РѕСЂРјР° 0409101-РЎР‘)';
+comment on column income_101.id is 'РљРѕРґ Р·Р°РїРёСЃРё';
+comment on column income_101.account is 'РќРѕРјРµСЂ СЃС‡РµС‚Р°';
+comment on column income_101.income_debet_remains is 'Р’С…РѕРґСЏС‰РёРµ РѕСЃС‚Р°С‚РєРё РїРѕ РґРµР±РµС‚Сѓ';
+comment on column income_101.income_credit_remains is 'Р’С…РѕРґСЏС‰РёРµ РѕСЃС‚Р°С‚РєРё РїРѕ РєСЂРµРґРёС‚Сѓ';
+comment on column income_101.debet_rate is 'РћР±РѕСЂРѕС‚С‹ РїРѕ РґРµР±РµС‚Сѓ';
+comment on column income_101.credit_rate is 'РћР±РѕСЂРѕС‚С‹ РїРѕ РєСЂРµРґРёС‚Сѓ';
+comment on column income_101.outcome_debet_remains is 'РСЃС…РѕРґСЏС‰РёРµ РѕСЃС‚Р°С‚РєРё РїРѕ РґРµР±РµС‚Сѓ';
+comment on column income_101.outcome_credit_remains is 'РСЃС…РѕРґСЏС‰РёРµ РѕСЃС‚Р°С‚РєРё РїРѕ РєСЂРµРґРёС‚Сѓ';
+comment on column income_101.account_name is 'РќР°Р·РІР°РЅРёРµ СЃС‡С‘С‚Р°';
+comment on column income_101.account_period_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРµСЂРёРѕРґР° Рё РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ Р‘Рћ';
 
 create sequence seq_income_101 start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
@@ -354,12 +354,12 @@ create table income_102 (
   item_name         varchar2(255 char),
   account_period_id number(9)         not null
 );
-comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
-comment on column income_102.id is 'Код записи';
-comment on column income_102.opu_code is 'Код ОПУ';
-comment on column income_102.total_sum is 'Сумма';
-comment on column income_102.item_name is 'Наименование статьи';
-comment on column income_102.account_period_id is 'Идентификатор периода и подразделения БО';
+comment on table income_102 is 'РћС‚С‡РµС‚ Рѕ РїСЂРёР±С‹Р»СЏС… Рё СѓР±С‹С‚РєР°С… (Р¤РѕСЂРјР° 0409102-РЎР‘)';
+comment on column income_102.id is 'РљРѕРґ Р·Р°РїРёСЃРё';
+comment on column income_102.opu_code is 'РљРѕРґ РћРџРЈ';
+comment on column income_102.total_sum is 'РЎСѓРјРјР°';
+comment on column income_102.item_name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ СЃС‚Р°С‚СЊРё';
+comment on column income_102.account_period_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРµСЂРёРѕРґР° Рё РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ Р‘Рћ';
 
 create sequence seq_income_102 start with 100;
 ---------------------------------------------------------------------------------------------------
@@ -371,13 +371,13 @@ create table declaration_type (
   is_ifrs   number(1) default 0 not null,
   ifrs_name varchar2(200)
 );
-comment on table declaration_type is ' Виды деклараций';
-comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
-comment on column declaration_type.tax_type is 'Вид налога';
-comment on column declaration_type.name is 'Наименование';
-comment on column declaration_type.status is 'Статус версии (-1 -удаленная версия, 0 -действующая версия, 1 - черновик версии, 2 - фиктивная версия)';
-comment on column declaration_type.is_ifrs is 'Отчетность для МСФО" (0 - не отчетность МСФО, 1 - отчетность МСФО)';
-comment on column declaration_type.ifrs_name is 'Наименование формы для файла данного макета, включаемого в архив с отчетностью для МСФО';
+comment on table declaration_type is ' Р’РёРґС‹ РґРµРєР»Р°СЂР°С†РёР№';
+comment on column declaration_type.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ (РїРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡)';
+comment on column declaration_type.tax_type is 'Р’РёРґ РЅР°Р»РѕРіР°';
+comment on column declaration_type.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ';
+comment on column declaration_type.status is 'РЎС‚Р°С‚СѓСЃ РІРµСЂСЃРёРё (-1 -СѓРґР°Р»РµРЅРЅР°СЏ РІРµСЂСЃРёСЏ, 0 -РґРµР№СЃС‚РІСѓСЋС‰Р°СЏ РІРµСЂСЃРёСЏ, 1 - С‡РµСЂРЅРѕРІРёРє РІРµСЂСЃРёРё, 2 - С„РёРєС‚РёРІРЅР°СЏ РІРµСЂСЃРёСЏ)';
+comment on column declaration_type.is_ifrs is 'РћС‚С‡РµС‚РЅРѕСЃС‚СЊ РґР»СЏ РњРЎР¤Рћ" (0 - РЅРµ РѕС‚С‡РµС‚РЅРѕСЃС‚СЊ РњРЎР¤Рћ, 1 - РѕС‚С‡РµС‚РЅРѕСЃС‚СЊ РњРЎР¤Рћ)';
+comment on column declaration_type.ifrs_name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С„РѕСЂРјС‹ РґР»СЏ С„Р°Р№Р»Р° РґР°РЅРЅРѕРіРѕ РјР°РєРµС‚Р°, РІРєР»СЋС‡Р°РµРјРѕРіРѕ РІ Р°СЂС…РёРІ СЃ РѕС‚С‡РµС‚РЅРѕСЃС‚СЊСЋ РґР»СЏ РњРЎР¤Рћ';
 
 create sequence seq_declaration_type start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -386,10 +386,10 @@ create table department_declaration_type (
   department_id       number(9) not null,
   declaration_type_id number(9) not null
 );
-comment on table department_declaration_type is 'Сведения о декларациях, с которыми можно работать в подразделении';
-comment on column department_declaration_type.id is 'Идентификатор (первичный ключ)';
-comment on column department_declaration_type.department_id is 'Идентификатор подразделения';
-comment on column department_declaration_type.declaration_type_id is 'Вид декларации';
+comment on table department_declaration_type is 'РЎРІРµРґРµРЅРёСЏ Рѕ РґРµРєР»Р°СЂР°С†РёСЏС…, СЃ РєРѕС‚РѕСЂС‹РјРё РјРѕР¶РЅРѕ СЂР°Р±РѕС‚Р°С‚СЊ РІ РїРѕРґСЂР°Р·РґРµР»РµРЅРёРё';
+comment on column department_declaration_type.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ (РїРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡)';
+comment on column department_declaration_type.department_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department_declaration_type.declaration_type_id is 'Р’РёРґ РґРµРєР»Р°СЂР°С†РёРё';
 
 create sequence seq_dept_declaration_type start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -403,15 +403,15 @@ create table declaration_template (
   declaration_type_id number(9) not null,
   XSD varchar2(36) 
 );
-comment on table declaration_template is 'Шаблоны налоговых деклараций';
-comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
-comment on column declaration_template.version is 'Версия';
-comment on column declaration_template.name is 'Наименование версии макета';
-comment on column declaration_template.create_script is 'Скрипт формирования декларации';
-comment on column declaration_template.jrxml is 'Макет JasperReports для формирования печатного представления формы';
-comment on column declaration_template.declaration_type_id is 'Вид деклараций';
-comment on column declaration_template.XSD is 'XSD-схема';
-comment on column declaration_template.status is 'Статус версии (значения (-1, 0, 1, 2))';
+comment on table declaration_template is 'РЁР°Р±Р»РѕРЅС‹ РЅР°Р»РѕРіРѕРІС‹С… РґРµРєР»Р°СЂР°С†РёР№';
+comment on column declaration_template.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ (РїРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡)';
+comment on column declaration_template.version is 'Р’РµСЂСЃРёСЏ';
+comment on column declaration_template.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РІРµСЂСЃРёРё РјР°РєРµС‚Р°';
+comment on column declaration_template.create_script is 'РЎРєСЂРёРїС‚ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РґРµРєР»Р°СЂР°С†РёРё';
+comment on column declaration_template.jrxml is 'РњР°РєРµС‚ JasperReports РґР»СЏ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РїРµС‡Р°С‚РЅРѕРіРѕ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЏ С„РѕСЂРјС‹';
+comment on column declaration_template.declaration_type_id is 'Р’РёРґ РґРµРєР»Р°СЂР°С†РёР№';
+comment on column declaration_template.XSD is 'XSD-СЃС…РµРјР°';
+comment on column declaration_template.status is 'РЎС‚Р°С‚СѓСЃ РІРµСЂСЃРёРё (Р·РЅР°С‡РµРЅРёСЏ (-1, 0, 1, 2))';
 
 create sequence seq_declaration_template start with 10000;
 
@@ -427,14 +427,14 @@ create table declaration_data (
   guid                        varchar2(32)
 );
 
-comment on table declaration_data is 'Налоговые декларации';
-comment on column declaration_data.id is 'Идентификатор (первичный ключ)';
-comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
-comment on column declaration_data.tax_organ_code is 'Налоговый орган';
-comment on column declaration_data.kpp is 'КПП';
-comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
-comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
-comment on column declaration_data.asnu_id is 'Идентификатор АСНУ';
+comment on table declaration_data is 'РќР°Р»РѕРіРѕРІС‹Рµ РґРµРєР»Р°СЂР°С†РёРё';
+comment on column declaration_data.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ (РїРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡)';
+comment on column declaration_data.declaration_template_id is 'РЎСЃС‹Р»РєР° РЅР° С€Р°Р±Р»РѕРЅ РґРµРєР»Р°СЂР°С†РёРё';
+comment on column declaration_data.tax_organ_code is 'РќР°Р»РѕРіРѕРІС‹Р№ РѕСЂРіР°РЅ';
+comment on column declaration_data.kpp is 'РљРџРџ';
+comment on column declaration_data.is_accepted is 'РџСЂРёР·РЅР°Рє С‚РѕРіРѕ, С‡С‚Рѕ РґРµРєР»Р°СЂР°С†РёСЏ РїСЂРёРЅСЏС‚Р°';
+comment on column declaration_data.department_report_period_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РѕС‚С‡РµС‚РЅРѕРіРѕ РїРµСЂРёРѕРґР° РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column declaration_data.asnu_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РђРЎРќРЈ';
 comment on column declaration_data.guid is 'GUID';
 
 create sequence seq_declaration_data start with 10000;
@@ -457,23 +457,23 @@ create table form_data (
   edited                      number(1) default 0 not null,
   note                        varchar2(512)
 );
-comment on table form_data is 'Данные по налоговым формам';
-comment on column form_data.id is 'Первичный ключ';
-comment on column form_data.form_template_id is 'Идентификатор шаблона формы';
-comment on column form_data.state is 'Код состояния (1 - Создана, 2 - Подготовлена; 3 - Утверждена; 4 - Принята)';
-comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
-comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
-comment on column form_data.period_order is 'Указывает на очередность налоговой формы в рамках налогового периода. Необходимо для, например, месячных форм в рамках квартального отчетного периода';
-comment on column form_data.number_previous_row is 'Номер последней строки предыдущей НФ';
-comment on column form_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
-comment on column form_data.manual is 'Режим ввода данных (0 - не содержит версию ручного ввода; 1 - содержит)';
-comment on column form_data.sorted is 'Признак актуальности сортировки';
-comment on column form_data.number_current_row is 'Количество пронумерованных строк текущей НФ';
-comment on column form_data.comparative_dep_rep_per_id is 'Период сравнения';
-comment on column form_data.accruing is 'Признак расчета значений нарастающим итогом (0 - не нарастающим итогом, 1 - нарастающим итогом)';
-comment on column form_data.sorted_backup is 'Статус актуальности сортировки НФ для резервного среза (0 - Сортировка неактуальна; 1 - Сортировка актуальна)';
-comment on column form_data.edited is 'Признак изменения данных НФ в режиме редактирования (0 - Нет изменений; 1 - Есть изменения)';
-comment on column form_data.note is 'Комментарий к НФ, вводимый в модальном окне "Файлы и комментарии"';
+comment on table form_data is 'Р”Р°РЅРЅС‹Рµ РїРѕ РЅР°Р»РѕРіРѕРІС‹Рј С„РѕСЂРјР°Рј';
+comment on column form_data.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column form_data.form_template_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С€Р°Р±Р»РѕРЅР° С„РѕСЂРјС‹';
+comment on column form_data.state is 'РљРѕРґ СЃРѕСЃС‚РѕСЏРЅРёСЏ (1 - РЎРѕР·РґР°РЅР°, 2 - РџРѕРґРіРѕС‚РѕРІР»РµРЅР°; 3 - РЈС‚РІРµСЂР¶РґРµРЅР°; 4 - РџСЂРёРЅСЏС‚Р°)';
+comment on column form_data.kind is 'РўРёРї РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹ (1 - РџРµСЂРІРёС‡РЅР°СЏ, 2 - РљРѕРЅСЃРѕР»РёРґРёСЂРѕРІР°РЅРЅР°СЏ, 3 - РЎРІРѕРґРЅР°СЏ, 4 - Р¤РѕСЂРјР° РЈРќРџ, 5 - Р’С‹С…РѕРґРЅР°СЏ)';
+comment on column form_data.return_sign is 'Р¤Р»Р°Рі РІРѕР·РІСЂР°С‚Р° (0 - РѕР±С‹С‡РЅС‹Р№ СЂРµР¶РёРј; 1 - С„РѕСЂРјР° РІРѕР·РІСЂР°С‰РµРЅР° РёР· РІС‹С€РµСЃС‚РѕСЏС‰РµРіРѕ СЃС‚Р°С‚СѓСЃР°)';
+comment on column form_data.period_order is 'РЈРєР°Р·С‹РІР°РµС‚ РЅР° РѕС‡РµСЂРµРґРЅРѕСЃС‚СЊ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹ РІ СЂР°РјРєР°С… РЅР°Р»РѕРіРѕРІРѕРіРѕ РїРµСЂРёРѕРґР°. РќРµРѕР±С…РѕРґРёРјРѕ РґР»СЏ, РЅР°РїСЂРёРјРµСЂ, РјРµСЃСЏС‡РЅС‹С… С„РѕСЂРј РІ СЂР°РјРєР°С… РєРІР°СЂС‚Р°Р»СЊРЅРѕРіРѕ РѕС‚С‡РµС‚РЅРѕРіРѕ РїРµСЂРёРѕРґР°';
+comment on column form_data.number_previous_row is 'РќРѕРјРµСЂ РїРѕСЃР»РµРґРЅРµР№ СЃС‚СЂРѕРєРё РїСЂРµРґС‹РґСѓС‰РµР№ РќР¤';
+comment on column form_data.department_report_period_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РѕС‚С‡РµС‚РЅРѕРіРѕ РїРµСЂРёРѕРґР° РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column form_data.manual is 'Р РµР¶РёРј РІРІРѕРґР° РґР°РЅРЅС‹С… (0 - РЅРµ СЃРѕРґРµСЂР¶РёС‚ РІРµСЂСЃРёСЋ СЂСѓС‡РЅРѕРіРѕ РІРІРѕРґР°; 1 - СЃРѕРґРµСЂР¶РёС‚)';
+comment on column form_data.sorted is 'РџСЂРёР·РЅР°Рє Р°РєС‚СѓР°Р»СЊРЅРѕСЃС‚Рё СЃРѕСЂС‚РёСЂРѕРІРєРё';
+comment on column form_data.number_current_row is 'РљРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕРЅСѓРјРµСЂРѕРІР°РЅРЅС‹С… СЃС‚СЂРѕРє С‚РµРєСѓС‰РµР№ РќР¤';
+comment on column form_data.comparative_dep_rep_per_id is 'РџРµСЂРёРѕРґ СЃСЂР°РІРЅРµРЅРёСЏ';
+comment on column form_data.accruing is 'РџСЂРёР·РЅР°Рє СЂР°СЃС‡РµС‚Р° Р·РЅР°С‡РµРЅРёР№ РЅР°СЂР°СЃС‚Р°СЋС‰РёРј РёС‚РѕРіРѕРј (0 - РЅРµ РЅР°СЂР°СЃС‚Р°СЋС‰РёРј РёС‚РѕРіРѕРј, 1 - РЅР°СЂР°СЃС‚Р°СЋС‰РёРј РёС‚РѕРіРѕРј)';
+comment on column form_data.sorted_backup is 'РЎС‚Р°С‚СѓСЃ Р°РєС‚СѓР°Р»СЊРЅРѕСЃС‚Рё СЃРѕСЂС‚РёСЂРѕРІРєРё РќР¤ РґР»СЏ СЂРµР·РµСЂРІРЅРѕРіРѕ СЃСЂРµР·Р° (0 - РЎРѕСЂС‚РёСЂРѕРІРєР° РЅРµР°РєС‚СѓР°Р»СЊРЅР°; 1 - РЎРѕСЂС‚РёСЂРѕРІРєР° Р°РєС‚СѓР°Р»СЊРЅР°)';
+comment on column form_data.edited is 'РџСЂРёР·РЅР°Рє РёР·РјРµРЅРµРЅРёСЏ РґР°РЅРЅС‹С… РќР¤ РІ СЂРµР¶РёРјРµ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ (0 - РќРµС‚ РёР·РјРµРЅРµРЅРёР№; 1 - Р•СЃС‚СЊ РёР·РјРµРЅРµРЅРёСЏ)';
+comment on column form_data.note is 'РљРѕРјРјРµРЅС‚Р°СЂРёР№ Рє РќР¤, РІРІРѕРґРёРјС‹Р№ РІ РјРѕРґР°Р»СЊРЅРѕРј РѕРєРЅРµ "Р¤Р°Р№Р»С‹ Рё РєРѕРјРјРµРЅС‚Р°СЂРёРё"';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -484,12 +484,12 @@ create table form_data_signer (
   position     varchar2(200) not null,
   ord          number(3)     not null
 );
-comment on table form_data_signer is 'Подписанты налоговых форм';
-comment on column form_data_signer.id is 'Идентфикатор записи (первичный ключ)';
-comment on column form_data_signer.form_data_id is 'Идентификатор налоговой формы';
-comment on column form_data_signer.name is 'ФИО';
-comment on column form_data_signer.position is 'Должность';
-comment on column form_data_signer.ord is 'Номер подписанта по порядку';
+comment on table form_data_signer is 'РџРѕРґРїРёСЃР°РЅС‚С‹ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј';
+comment on column form_data_signer.id is 'РРґРµРЅС‚С„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё (РїРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡)';
+comment on column form_data_signer.form_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_data_signer.name is 'Р¤РРћ';
+comment on column form_data_signer.position is 'Р”РѕР»Р¶РЅРѕСЃС‚СЊ';
+comment on column form_data_signer.ord is 'РќРѕРјРµСЂ РїРѕРґРїРёСЃР°РЅС‚Р° РїРѕ РїРѕСЂСЏРґРєСѓ';
 
 create sequence seq_form_data_signer start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -500,12 +500,12 @@ create table form_data_performer (
   print_department_id    number(9),
   report_department_name varchar2(4000 byte)
 );
-comment on table form_data_performer is 'Исполнитель налоговой формы';
-comment on column form_data_performer.form_data_id is 'Первичный ключ';
-comment on column form_data_performer.name is 'ФИО исполнителя';
-comment on column form_data_performer.phone is 'Телефон';
-comment on column form_data_performer.print_department_id is 'Подразделение, которое печатает налоговую форму';
-comment on column form_data_performer.report_department_name is 'Наименование подразделения, которое должно быть использовано в печатной форме';
+comment on table form_data_performer is 'РСЃРїРѕР»РЅРёС‚РµР»СЊ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_data_performer.form_data_id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column form_data_performer.name is 'Р¤РРћ РёСЃРїРѕР»РЅРёС‚РµР»СЏ';
+comment on column form_data_performer.phone is 'РўРµР»РµС„РѕРЅ';
+comment on column form_data_performer.print_department_id is 'РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ, РєРѕС‚РѕСЂРѕРµ РїРµС‡Р°С‚Р°РµС‚ РЅР°Р»РѕРіРѕРІСѓСЋ С„РѕСЂРјСѓ';
+comment on column form_data_performer.report_department_name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ, РєРѕС‚РѕСЂРѕРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅРѕ РІ РїРµС‡Р°С‚РЅРѕР№ С„РѕСЂРјРµ';
 ---------------------------------------------------------------------------------------------------
 create table department_form_type (
   id            number(9) not null,
@@ -513,11 +513,11 @@ create table department_form_type (
   form_type_id  number(9) not null,
   kind          number(9) not null
 );
-comment on table department_form_type is 'Связь подразделения банка с формой';
-comment on column department_form_type.id is 'Первичный ключ';
-comment on column department_form_type.department_id is 'Идентификатор подразделения';
-comment on column department_form_type.form_type_id is 'Идентификатор вида налоговой формы';
-comment on column department_form_type.kind is 'Тип налоговой формы (1-Первичная, 2-Консолидированная, 3-Сводная, 4-Форма УНП, 5-Выходная)';
+comment on table department_form_type is 'РЎРІСЏР·СЊ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ Р±Р°РЅРєР° СЃ С„РѕСЂРјРѕР№';
+comment on column department_form_type.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column department_form_type.department_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department_form_type.form_type_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РІРёРґР° РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column department_form_type.kind is 'РўРёРї РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹ (1-РџРµСЂРІРёС‡РЅР°СЏ, 2-РљРѕРЅСЃРѕР»РёРґРёСЂРѕРІР°РЅРЅР°СЏ, 3-РЎРІРѕРґРЅР°СЏ, 4-Р¤РѕСЂРјР° РЈРќРџ, 5-Р’С‹С…РѕРґРЅР°СЏ)';
 
 create sequence seq_department_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -527,11 +527,11 @@ create table declaration_source (
   period_start                   date      not null,
   period_end                     date      null
 );
-comment on table declaration_source is 'Информация о формах-источниках данных для деклараций разных видов';
-comment on column declaration_source.department_declaration_type_id is 'Иденфтикиатор сочетания вида декларации и подразделения, для которого задаётся источник';
-comment on column declaration_source.src_department_form_type_id is 'Идентификатор сочетания типа и вида формы, а также подразделения, которые являются источников данных для деклараций';
-comment on column declaration_source.period_start is 'Дата начала действия назначения';
-comment on column declaration_source.period_end is 'Дата окончания действия назначения';
+comment on table declaration_source is 'РРЅС„РѕСЂРјР°С†РёСЏ Рѕ С„РѕСЂРјР°С…-РёСЃС‚РѕС‡РЅРёРєР°С… РґР°РЅРЅС‹С… РґР»СЏ РґРµРєР»Р°СЂР°С†РёР№ СЂР°Р·РЅС‹С… РІРёРґРѕРІ';
+comment on column declaration_source.department_declaration_type_id is 'РРґРµРЅС„С‚РёРєРёР°С‚РѕСЂ СЃРѕС‡РµС‚Р°РЅРёСЏ РІРёРґР° РґРµРєР»Р°СЂР°С†РёРё Рё РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ, РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ Р·Р°РґР°С‘С‚СЃСЏ РёСЃС‚РѕС‡РЅРёРє';
+comment on column declaration_source.src_department_form_type_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРѕС‡РµС‚Р°РЅРёСЏ С‚РёРїР° Рё РІРёРґР° С„РѕСЂРјС‹, Р° С‚Р°РєР¶Рµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ, РєРѕС‚РѕСЂС‹Рµ СЏРІР»СЏСЋС‚СЃСЏ РёСЃС‚РѕС‡РЅРёРєРѕРІ РґР°РЅРЅС‹С… РґР»СЏ РґРµРєР»Р°СЂР°С†РёР№';
+comment on column declaration_source.period_start is 'Р”Р°С‚Р° РЅР°С‡Р°Р»Р° РґРµР№СЃС‚РІРёСЏ РЅР°Р·РЅР°С‡РµРЅРёСЏ';
+comment on column declaration_source.period_end is 'Р”Р°С‚Р° РѕРєРѕРЅС‡Р°РЅРёСЏ РґРµР№СЃС‚РІРёСЏ РЅР°Р·РЅР°С‡РµРЅРёСЏ';
 ----------------------------------------------------------------------------------------------------
 create table form_data_source (
   department_form_type_id     number(9) not null,
@@ -539,11 +539,11 @@ create table form_data_source (
   period_start                date      not null,
   period_end                  date      null
 );
-comment on table form_data_source is 'Информация об источниках данных для формирования консолидированных и сводных налоговоых форм';
-comment on column form_data_source.department_form_type_id is 'Идентификатор сочетания вида, типа формы и подразделения, для которого задётся источник данных';
-comment on column form_data_source.src_department_form_type_id is 'Идентификатор сочетания вида, типа формы и подразделения, которое является источником данных';
-comment on column form_data_source.period_start is 'Дата начала действия назначения';
-comment on column form_data_source.period_end is 'Дата окончания действия назначения';
+comment on table form_data_source is 'РРЅС„РѕСЂРјР°С†РёСЏ РѕР± РёСЃС‚РѕС‡РЅРёРєР°С… РґР°РЅРЅС‹С… РґР»СЏ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РєРѕРЅСЃРѕР»РёРґРёСЂРѕРІР°РЅРЅС‹С… Рё СЃРІРѕРґРЅС‹С… РЅР°Р»РѕРіРѕРІРѕС‹С… С„РѕСЂРј';
+comment on column form_data_source.department_form_type_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРѕС‡РµС‚Р°РЅРёСЏ РІРёРґР°, С‚РёРїР° С„РѕСЂРјС‹ Рё РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ, РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ Р·Р°РґС‘С‚СЃСЏ РёСЃС‚РѕС‡РЅРёРє РґР°РЅРЅС‹С…';
+comment on column form_data_source.src_department_form_type_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРѕС‡РµС‚Р°РЅРёСЏ РІРёРґР°, С‚РёРїР° С„РѕСЂРјС‹ Рё РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ, РєРѕС‚РѕСЂРѕРµ СЏРІР»СЏРµС‚СЃСЏ РёСЃС‚РѕС‡РЅРёРєРѕРј РґР°РЅРЅС‹С…';
+comment on column form_data_source.period_start is 'Р”Р°С‚Р° РЅР°С‡Р°Р»Р° РґРµР№СЃС‚РІРёСЏ РЅР°Р·РЅР°С‡РµРЅРёСЏ';
+comment on column form_data_source.period_end is 'Р”Р°С‚Р° РѕРєРѕРЅС‡Р°РЅРёСЏ РґРµР№СЃС‚РІРёСЏ РЅР°Р·РЅР°С‡РµРЅРёСЏ';
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 create table sec_user (
   id            number(9)     not null,
@@ -553,13 +553,13 @@ create table sec_user (
   is_active     number(1)     not null,
   email         varchar2(128)
 );
-comment on table sec_user is 'Пользователи системы';
-comment on column sec_user.id is 'Первичный ключ';
-comment on column sec_user.login is 'Логин пользователя';
-comment on column sec_user.name is 'Полное имя пользователя';
-comment on column sec_user.department_id is 'Идентификатор подразделения';
-comment on column sec_user.is_active is 'Признак активности пользователя (0 - заблокирован; 1 - активен)';
-comment on column sec_user.email is 'Адрес электронной почты';
+comment on table sec_user is 'РџРѕР»СЊР·РѕРІР°С‚РµР»Рё СЃРёСЃС‚РµРјС‹';
+comment on column sec_user.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column sec_user.login is 'Р›РѕРіРёРЅ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column sec_user.name is 'РџРѕР»РЅРѕРµ РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column sec_user.department_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column sec_user.is_active is 'РџСЂРёР·РЅР°Рє Р°РєС‚РёРІРЅРѕСЃС‚Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ (0 - Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅ; 1 - Р°РєС‚РёРІРµРЅ)';
+comment on column sec_user.email is 'РђРґСЂРµСЃ СЌР»РµРєС‚СЂРѕРЅРЅРѕР№ РїРѕС‡С‚С‹';
 
 create sequence seq_sec_user start with 10000;
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -568,18 +568,18 @@ create table sec_role (
   alias varchar2(20) not null,
   name  varchar2(50) not null
 );
-comment on table sec_role is 'Системные роли';
-comment on column sec_role.id is 'Первичный ключ';
-comment on column sec_role.alias is 'Код роли (мнемонический идентификатор)';
-comment on column sec_role.name is 'Наименование роли';
+comment on table sec_role is 'РЎРёСЃС‚РµРјРЅС‹Рµ СЂРѕР»Рё';
+comment on column sec_role.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column sec_role.alias is 'РљРѕРґ СЂРѕР»Рё (РјРЅРµРјРѕРЅРёС‡РµСЃРєРёР№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ)';
+comment on column sec_role.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ СЂРѕР»Рё';
 ---------------------------------------------------------------------------------------------------
 create table sec_user_role (
   user_id number(9) not null,
   role_id number(9) not null
 );
-comment on table sec_user_role is 'Привязка ролей к пользователям';
-comment on column sec_user_role.user_id is 'Идентификатор пользователя';
-comment on column sec_user_role.role_id is 'Идентификатор роли';
+comment on table sec_user_role is 'РџСЂРёРІСЏР·РєР° СЂРѕР»РµР№ Рє РїРѕР»СЊР·РѕРІР°С‚РµР»СЏРј';
+comment on column sec_user_role.user_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column sec_user_role.role_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРѕР»Рё';
 ----------------------------------------------------------------------------------------------------
 create table log_business (
   id                   number(18, 0) primary key,
@@ -592,16 +592,16 @@ create table log_business (
   note                 varchar2(510),
   user_department_name varchar2(4000) not null
 );
-comment on table log_business is 'Журнал событий налоговых форм\деклараций';
-comment on column log_business.id is 'Код записи';
-comment on column log_business.log_date is 'Дата события';
-comment on column log_business.event_id is 'Код события (1 - создать,2 - удалить,3 - рассчитать,4 - обобщить,5 - проверить,6 - сохранить,7 - импорт данных,101 - утвердить,102 - вернуть из \утверждена\ в \создана\,103 - принять из \утверждена\,104 - вернуть из \принята\ в \утверждена\,105 - принять из \создана\,106 - вернуть из \принята\ в \создана\,107 - подготовить,108, вернуть из \подготовлена\ в \создана\,109, принять из \подготовлена\,110, вернуть из \принята\ в \подготовлена\,203 - после принять из \утверждена\,204 - после вернуть из \принята\ в \утверждена\,205 - после принять из \создана\,206 - после вернуть из \принята\ в \создана\,207 - после принять из \"подготовлена\,301 - добавить строку,303 - удалить строку,302 - загрузка)';
-comment on column log_business.user_login is 'Логин пользователя';
-comment on column log_business.roles is 'Список ролей пользователя';
-comment on column log_business.declaration_data_id is 'Код декларации';
-comment on column log_business.form_data_id is 'Код налоговой формы';
-comment on column log_business.note is 'Текст сообщения';
-comment on column log_business.user_department_name is 'Подразделение пользователя';
+comment on table log_business is 'Р–СѓСЂРЅР°Р» СЃРѕР±С‹С‚РёР№ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј\РґРµРєР»Р°СЂР°С†РёР№';
+comment on column log_business.id is 'РљРѕРґ Р·Р°РїРёСЃРё';
+comment on column log_business.log_date is 'Р”Р°С‚Р° СЃРѕР±С‹С‚РёСЏ';
+comment on column log_business.event_id is 'РљРѕРґ СЃРѕР±С‹С‚РёСЏ (1 - СЃРѕР·РґР°С‚СЊ,2 - СѓРґР°Р»РёС‚СЊ,3 - СЂР°СЃСЃС‡РёС‚Р°С‚СЊ,4 - РѕР±РѕР±С‰РёС‚СЊ,5 - РїСЂРѕРІРµСЂРёС‚СЊ,6 - СЃРѕС…СЂР°РЅРёС‚СЊ,7 - РёРјРїРѕСЂС‚ РґР°РЅРЅС‹С…,101 - СѓС‚РІРµСЂРґРёС‚СЊ,102 - РІРµСЂРЅСѓС‚СЊ РёР· \СѓС‚РІРµСЂР¶РґРµРЅР°\ РІ \СЃРѕР·РґР°РЅР°\,103 - РїСЂРёРЅСЏС‚СЊ РёР· \СѓС‚РІРµСЂР¶РґРµРЅР°\,104 - РІРµСЂРЅСѓС‚СЊ РёР· \РїСЂРёРЅСЏС‚Р°\ РІ \СѓС‚РІРµСЂР¶РґРµРЅР°\,105 - РїСЂРёРЅСЏС‚СЊ РёР· \СЃРѕР·РґР°РЅР°\,106 - РІРµСЂРЅСѓС‚СЊ РёР· \РїСЂРёРЅСЏС‚Р°\ РІ \СЃРѕР·РґР°РЅР°\,107 - РїРѕРґРіРѕС‚РѕРІРёС‚СЊ,108, РІРµСЂРЅСѓС‚СЊ РёР· \РїРѕРґРіРѕС‚РѕРІР»РµРЅР°\ РІ \СЃРѕР·РґР°РЅР°\,109, РїСЂРёРЅСЏС‚СЊ РёР· \РїРѕРґРіРѕС‚РѕРІР»РµРЅР°\,110, РІРµСЂРЅСѓС‚СЊ РёР· \РїСЂРёРЅСЏС‚Р°\ РІ \РїРѕРґРіРѕС‚РѕРІР»РµРЅР°\,203 - РїРѕСЃР»Рµ РїСЂРёРЅСЏС‚СЊ РёР· \СѓС‚РІРµСЂР¶РґРµРЅР°\,204 - РїРѕСЃР»Рµ РІРµСЂРЅСѓС‚СЊ РёР· \РїСЂРёРЅСЏС‚Р°\ РІ \СѓС‚РІРµСЂР¶РґРµРЅР°\,205 - РїРѕСЃР»Рµ РїСЂРёРЅСЏС‚СЊ РёР· \СЃРѕР·РґР°РЅР°\,206 - РїРѕСЃР»Рµ РІРµСЂРЅСѓС‚СЊ РёР· \РїСЂРёРЅСЏС‚Р°\ РІ \СЃРѕР·РґР°РЅР°\,207 - РїРѕСЃР»Рµ РїСЂРёРЅСЏС‚СЊ РёР· \"РїРѕРґРіРѕС‚РѕРІР»РµРЅР°\,301 - РґРѕР±Р°РІРёС‚СЊ СЃС‚СЂРѕРєСѓ,303 - СѓРґР°Р»РёС‚СЊ СЃС‚СЂРѕРєСѓ,302 - Р·Р°РіСЂСѓР·РєР°)';
+comment on column log_business.user_login is 'Р›РѕРіРёРЅ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column log_business.roles is 'РЎРїРёСЃРѕРє СЂРѕР»РµР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column log_business.declaration_data_id is 'РљРѕРґ РґРµРєР»Р°СЂР°С†РёРё';
+comment on column log_business.form_data_id is 'РљРѕРґ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column log_business.note is 'РўРµРєСЃС‚ СЃРѕРѕР±С‰РµРЅРёСЏ';
+comment on column log_business.user_department_name is 'РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
 
 create sequence seq_log_business;
 ------------------------------------------------------------------------------------------------------
@@ -611,9 +611,9 @@ create table audit_form_type
   name varchar2(1000) not null
 );
 
-comment on table audit_form_type is 'Типы форм для журнала аудита';
-comment on column audit_form_type.id is 'Код записи';
-comment on column audit_form_type.name is 'Наименование типа';
+comment on table audit_form_type is 'РўРёРїС‹ С„РѕСЂРј РґР»СЏ Р¶СѓСЂРЅР°Р»Р° Р°СѓРґРёС‚Р°';
+comment on column audit_form_type.id is 'РљРѕРґ Р·Р°РїРёСЃРё';
+comment on column audit_form_type.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С‚РёРїР°';
 ------------------------------------------------------------------------------------------------------
 create table log_system (
   id                    number(18, 0) primary key,
@@ -636,26 +636,26 @@ create table log_system (
   audit_form_type_id    number(9, 0),
   server                varchar2(200)
 );
-comment on table log_system is 'Системный журнал';
-comment on column log_system.id is 'Код записи';
-comment on column log_system.log_date is 'Дата события';
-comment on column log_system.ip is 'IP-адрес пользователя';
-comment on column log_system.event_id is 'Код события (1 - Создать,2 - Удалить,3 - Рассчитать,4 - Обобщить,5 - Проверить,6 - Сохранить,7 - Импорт данных,101 - Утвердить,102 - Вернуть из \Утверждена\ в \Создана\,103 - Принять из \Утверждена\,104 - Вернуть из \Принята\ в \Утверждена\,105 - Принять из \Создана\,106 - Вернуть из \Принята\ в \Создана\,107 - Подготовить,108 - Вернуть из \Подготовлена\ в \Создана\,109 - Принять из \Подготовлена\,110 - Вернуть из \Принята\ в \Подготовлена\,203 - После принять из \Утверждена\,204 - После вернуть из \Принята\ в \Утверждена\,205 - После принять из \Создана\,206 - После вернуть из \Принята\ в \Создана\,207 - После принять из \"Подготовлена\,301 - Добавить строку,303 - Удалить строку,302 - Загрузка)';
-comment on column log_system.user_login is 'Логин пользователя';
-comment on column log_system.roles is 'Список ролей пользователя';
-comment on column log_system.department_name is 'Наименование подразделения НФ\декларации';
-comment on column log_system.report_period_name is 'Наименование отчетного периода';
-comment on column log_system.form_kind_id is 'Код типа налоговой формы (1,2,3,4,5)';
-comment on column log_system.note is 'Текст сообщения';
-comment on column log_system.user_department_name is 'Наименование подразделения пользователя';
-comment on column log_system.declaration_type_name is 'Вид декларации';
-comment on column log_system.form_type_name is 'Вид налоговой формы';
-comment on column log_system.form_department_id is 'Идентификатор подразделения налоговой формы/декларации';
-comment on column log_system.blob_data_id is 'Ссылка на логи';
-comment on column log_system.form_type_id is 'Идентификатор вида НФ';
-comment on column log_system.is_error is 'Признак ошибки';
-comment on column log_system.audit_form_type_id is 'Тип формы';
-comment on column log_system.server is 'Сервер';
+comment on table log_system is 'РЎРёСЃС‚РµРјРЅС‹Р№ Р¶СѓСЂРЅР°Р»';
+comment on column log_system.id is 'РљРѕРґ Р·Р°РїРёСЃРё';
+comment on column log_system.log_date is 'Р”Р°С‚Р° СЃРѕР±С‹С‚РёСЏ';
+comment on column log_system.ip is 'IP-Р°РґСЂРµСЃ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column log_system.event_id is 'РљРѕРґ СЃРѕР±С‹С‚РёСЏ (1 - РЎРѕР·РґР°С‚СЊ,2 - РЈРґР°Р»РёС‚СЊ,3 - Р Р°СЃСЃС‡РёС‚Р°С‚СЊ,4 - РћР±РѕР±С‰РёС‚СЊ,5 - РџСЂРѕРІРµСЂРёС‚СЊ,6 - РЎРѕС…СЂР°РЅРёС‚СЊ,7 - РРјРїРѕСЂС‚ РґР°РЅРЅС‹С…,101 - РЈС‚РІРµСЂРґРёС‚СЊ,102 - Р’РµСЂРЅСѓС‚СЊ РёР· \РЈС‚РІРµСЂР¶РґРµРЅР°\ РІ \РЎРѕР·РґР°РЅР°\,103 - РџСЂРёРЅСЏС‚СЊ РёР· \РЈС‚РІРµСЂР¶РґРµРЅР°\,104 - Р’РµСЂРЅСѓС‚СЊ РёР· \РџСЂРёРЅСЏС‚Р°\ РІ \РЈС‚РІРµСЂР¶РґРµРЅР°\,105 - РџСЂРёРЅСЏС‚СЊ РёР· \РЎРѕР·РґР°РЅР°\,106 - Р’РµСЂРЅСѓС‚СЊ РёР· \РџСЂРёРЅСЏС‚Р°\ РІ \РЎРѕР·РґР°РЅР°\,107 - РџРѕРґРіРѕС‚РѕРІРёС‚СЊ,108 - Р’РµСЂРЅСѓС‚СЊ РёР· \РџРѕРґРіРѕС‚РѕРІР»РµРЅР°\ РІ \РЎРѕР·РґР°РЅР°\,109 - РџСЂРёРЅСЏС‚СЊ РёР· \РџРѕРґРіРѕС‚РѕРІР»РµРЅР°\,110 - Р’РµСЂРЅСѓС‚СЊ РёР· \РџСЂРёРЅСЏС‚Р°\ РІ \РџРѕРґРіРѕС‚РѕРІР»РµРЅР°\,203 - РџРѕСЃР»Рµ РїСЂРёРЅСЏС‚СЊ РёР· \РЈС‚РІРµСЂР¶РґРµРЅР°\,204 - РџРѕСЃР»Рµ РІРµСЂРЅСѓС‚СЊ РёР· \РџСЂРёРЅСЏС‚Р°\ РІ \РЈС‚РІРµСЂР¶РґРµРЅР°\,205 - РџРѕСЃР»Рµ РїСЂРёРЅСЏС‚СЊ РёР· \РЎРѕР·РґР°РЅР°\,206 - РџРѕСЃР»Рµ РІРµСЂРЅСѓС‚СЊ РёР· \РџСЂРёРЅСЏС‚Р°\ РІ \РЎРѕР·РґР°РЅР°\,207 - РџРѕСЃР»Рµ РїСЂРёРЅСЏС‚СЊ РёР· \"РџРѕРґРіРѕС‚РѕРІР»РµРЅР°\,301 - Р”РѕР±Р°РІРёС‚СЊ СЃС‚СЂРѕРєСѓ,303 - РЈРґР°Р»РёС‚СЊ СЃС‚СЂРѕРєСѓ,302 - Р—Р°РіСЂСѓР·РєР°)';
+comment on column log_system.user_login is 'Р›РѕРіРёРЅ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column log_system.roles is 'РЎРїРёСЃРѕРє СЂРѕР»РµР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column log_system.department_name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ РќР¤\РґРµРєР»Р°СЂР°С†РёРё';
+comment on column log_system.report_period_name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РѕС‚С‡РµС‚РЅРѕРіРѕ РїРµСЂРёРѕРґР°';
+comment on column log_system.form_kind_id is 'РљРѕРґ С‚РёРїР° РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹ (1,2,3,4,5)';
+comment on column log_system.note is 'РўРµРєСЃС‚ СЃРѕРѕР±С‰РµРЅРёСЏ';
+comment on column log_system.user_department_name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column log_system.declaration_type_name is 'Р’РёРґ РґРµРєР»Р°СЂР°С†РёРё';
+comment on column log_system.form_type_name is 'Р’РёРґ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column log_system.form_department_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹/РґРµРєР»Р°СЂР°С†РёРё';
+comment on column log_system.blob_data_id is 'РЎСЃС‹Р»РєР° РЅР° Р»РѕРіРё';
+comment on column log_system.form_type_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РІРёРґР° РќР¤';
+comment on column log_system.is_error is 'РџСЂРёР·РЅР°Рє РѕС€РёР±РєРё';
+comment on column log_system.audit_form_type_id is 'РўРёРї С„РѕСЂРјС‹';
+comment on column log_system.server is 'РЎРµСЂРІРµСЂ';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
@@ -667,13 +667,13 @@ create table department_report_period (
   is_balance_period number(1) default 0 not null,
   correction_date   date
 );
-comment on table department_report_period is 'Привязка отчетных периодов к подразделениям';
-comment on column department_report_period.id is 'Идентификатор записи';
-comment on column department_report_period.department_id is 'Код подразделения';
-comment on column department_report_period.report_period_id is 'Код отчетного периода';
-comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
-comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
-comment on column department_report_period.correction_date is 'Период сдачи корректировки';
+comment on table department_report_period is 'РџСЂРёРІСЏР·РєР° РѕС‚С‡РµС‚РЅС‹С… РїРµСЂРёРѕРґРѕРІ Рє РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏРј';
+comment on column department_report_period.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column department_report_period.department_id is 'РљРѕРґ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department_report_period.report_period_id is 'РљРѕРґ РѕС‚С‡РµС‚РЅРѕРіРѕ РїРµСЂРёРѕРґР°';
+comment on column department_report_period.is_active is 'РџСЂРёР·РЅР°Рє Р°РєС‚РёРІРЅРѕСЃС‚Рё (0 - РїРµСЂРёРѕРґ Р·Р°РєСЂС‹С‚, 1 - РїРµСЂРёРѕРґ РѕС‚РєСЂС‹С‚)';
+comment on column department_report_period.is_balance_period is 'РџСЂРёР·РЅР°Рє С‚РѕРіРѕ, С‡С‚Рѕ РїРµСЂРёРѕРґ СЏРІР»СЏРµС‚СЃСЏ РїРµСЂРёРѕРґРѕРј РІРІРѕРґР° РѕСЃС‚Р°С‚РєРѕРІ (0 - РѕР±С‹С‡РЅС‹Р№ РїРµСЂРёРѕРґ, 1 - РїРµСЂРёРѕРґ РІРІРѕРґР° РѕСЃС‚Р°С‚РєРѕРІ)';
+comment on column department_report_period.correction_date is 'РџРµСЂРёРѕРґ СЃРґР°С‡Рё РєРѕСЂСЂРµРєС‚РёСЂРѕРІРєРё';
 
 create sequence seq_department_report_period start with 1000;
 ------------------------------------------------------------------------------------------------------
@@ -687,15 +687,15 @@ create table task_context (
   serialized_params   blob          null,
   user_id             number(9)     not null
 );
-comment on table task_context is 'Контекст пользовательских задач планировщика';
-comment on column task_context.id is 'Уникальный идентификатор записи';
-comment on column task_context.task_id is 'Идентификатор задачи планировщика websphere';
-comment on column task_context.task_name is 'Название задачи';
-comment on column task_context.user_task_jndi is 'JNDI-имя класса-обработчика задачи';
-comment on column task_context.custom_params_exist is 'Признак наличия пользовательских параметров';
-comment on column task_context.serialized_params is 'Сериализованные пользователькие параметры';
-comment on column task_context.modification_date is 'Дата последнего редактирования задачи';
-comment on column task_context.user_id is 'Идентификатор пользователя';
+comment on table task_context is 'РљРѕРЅС‚РµРєСЃС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёС… Р·Р°РґР°С‡ РїР»Р°РЅРёСЂРѕРІС‰РёРєР°';
+comment on column task_context.id is 'РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column task_context.task_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РґР°С‡Рё РїР»Р°РЅРёСЂРѕРІС‰РёРєР° websphere';
+comment on column task_context.task_name is 'РќР°Р·РІР°РЅРёРµ Р·Р°РґР°С‡Рё';
+comment on column task_context.user_task_jndi is 'JNDI-РёРјСЏ РєР»Р°СЃСЃР°-РѕР±СЂР°Р±РѕС‚С‡РёРєР° Р·Р°РґР°С‡Рё';
+comment on column task_context.custom_params_exist is 'РџСЂРёР·РЅР°Рє РЅР°Р»РёС‡РёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёС… РїР°СЂР°РјРµС‚СЂРѕРІ';
+comment on column task_context.serialized_params is 'РЎРµСЂРёР°Р»РёР·РѕРІР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊРєРёРµ РїР°СЂР°РјРµС‚СЂС‹';
+comment on column task_context.modification_date is 'Р”Р°С‚Р° РїРѕСЃР»РµРґРЅРµРіРѕ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ Р·Р°РґР°С‡Рё';
+comment on column task_context.user_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
 
 create sequence seq_task_context start with 100;
 ------------------------------------------------------------------------------------------------------
@@ -715,20 +715,20 @@ create table notification (
   report_id              varchar2(36)
 );
 
-comment on table notification is 'Оповещения';
-comment on column notification.id is 'Уникальный идентификатор оповещения';
-comment on column notification.report_period_id is 'идентификатор отчетного периода';
-comment on column notification.sender_department_id is 'идентификатор подразделения-отправителя';
-comment on column notification.receiver_department_id is 'идентификатор подразделения-получателя';
-comment on column notification.text is 'текст оповещения';
-comment on column notification.create_date is 'дата создания оповещения';
-comment on column notification.deadline is 'дата сдачи отчетности';
-comment on column notification.user_id is 'Идентификатор пользователя, который получит оповещение';
-comment on column notification.role_id is 'Идентификатор роли пользователя, который получит оповещение';
-comment on column notification.is_read is 'Признак прочтения';
-comment on column notification.blob_data_id is 'Ссылка на логи';
-comment on column notification.type is 'Тип оповещения (0 - обычное оповещение, 1 - содержит ссылку на отчет справочника)';
-comment on column notification.report_id is 'Идентификатор отчета';
+comment on table notification is 'РћРїРѕРІРµС‰РµРЅРёСЏ';
+comment on column notification.id is 'РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РѕРїРѕРІРµС‰РµРЅРёСЏ';
+comment on column notification.report_period_id is 'РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РѕС‚С‡РµС‚РЅРѕРіРѕ РїРµСЂРёРѕРґР°';
+comment on column notification.sender_department_id is 'РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ-РѕС‚РїСЂР°РІРёС‚РµР»СЏ';
+comment on column notification.receiver_department_id is 'РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ-РїРѕР»СѓС‡Р°С‚РµР»СЏ';
+comment on column notification.text is 'С‚РµРєСЃС‚ РѕРїРѕРІРµС‰РµРЅРёСЏ';
+comment on column notification.create_date is 'РґР°С‚Р° СЃРѕР·РґР°РЅРёСЏ РѕРїРѕРІРµС‰РµРЅРёСЏ';
+comment on column notification.deadline is 'РґР°С‚Р° СЃРґР°С‡Рё РѕС‚С‡РµС‚РЅРѕСЃС‚Рё';
+comment on column notification.user_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РєРѕС‚РѕСЂС‹Р№ РїРѕР»СѓС‡РёС‚ РѕРїРѕРІРµС‰РµРЅРёРµ';
+comment on column notification.role_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРѕР»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РєРѕС‚РѕСЂС‹Р№ РїРѕР»СѓС‡РёС‚ РѕРїРѕРІРµС‰РµРЅРёРµ';
+comment on column notification.is_read is 'РџСЂРёР·РЅР°Рє РїСЂРѕС‡С‚РµРЅРёСЏ';
+comment on column notification.blob_data_id is 'РЎСЃС‹Р»РєР° РЅР° Р»РѕРіРё';
+comment on column notification.type is 'РўРёРї РѕРїРѕРІРµС‰РµРЅРёСЏ (0 - РѕР±С‹С‡РЅРѕРµ РѕРїРѕРІРµС‰РµРЅРёРµ, 1 - СЃРѕРґРµСЂР¶РёС‚ СЃСЃС‹Р»РєСѓ РЅР° РѕС‚С‡РµС‚ СЃРїСЂР°РІРѕС‡РЅРёРєР°)';
+comment on column notification.report_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РѕС‚С‡РµС‚Р°';
 
 create sequence seq_notification start with 10000;
 
@@ -744,14 +744,14 @@ create table template_changes (
   ref_book_id             number(9)
 );
 
-comment on table template_changes is 'Изменение версий налоговых шаблонов';
-comment on column template_changes.id is 'Уникальный идентификатор записи';
-comment on column template_changes.form_template_id is 'Идентификатор налогового шаблона';
-comment on column template_changes.declaration_template_id is 'Идентификатор шаблона декларации';
-comment on column template_changes.event is 'Событие версии';
-comment on column template_changes.author is 'Автор изменения';
-comment on column template_changes.date_event is 'Дата изменения';
-comment on column template_changes.ref_book_id is 'Идентификатор справочника';
+comment on table template_changes is 'РР·РјРµРЅРµРЅРёРµ РІРµСЂСЃРёР№ РЅР°Р»РѕРіРѕРІС‹С… С€Р°Р±Р»РѕРЅРѕРІ';
+comment on column template_changes.id is 'РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column template_changes.form_template_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РЅР°Р»РѕРіРѕРІРѕРіРѕ С€Р°Р±Р»РѕРЅР°';
+comment on column template_changes.declaration_template_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С€Р°Р±Р»РѕРЅР° РґРµРєР»Р°СЂР°С†РёРё';
+comment on column template_changes.event is 'РЎРѕР±С‹С‚РёРµ РІРµСЂСЃРёРё';
+comment on column template_changes.author is 'РђРІС‚РѕСЂ РёР·РјРµРЅРµРЅРёСЏ';
+comment on column template_changes.date_event is 'Р”Р°С‚Р° РёР·РјРµРЅРµРЅРёСЏ';
+comment on column template_changes.ref_book_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРїСЂР°РІРѕС‡РЅРёРєР°';
 --------------------------------------------------------------------------------------------------------
 create table event
 (
@@ -759,9 +759,9 @@ create table event
   name varchar2(510) not null
 );
 
-comment on table event is 'Справочник событий в системе';
-comment on column event.id is 'Идентификатор события';
-comment on column event.name is 'Наименование события';
+comment on table event is 'РЎРїСЂР°РІРѕС‡РЅРёРє СЃРѕР±С‹С‚РёР№ РІ СЃРёСЃС‚РµРјРµ';
+comment on column event.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРѕР±С‹С‚РёСЏ';
+comment on column event.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ СЃРѕР±С‹С‚РёСЏ';
 
 create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------
@@ -769,9 +769,9 @@ create table role_event (
   event_id number(9) not null,
   role_id  number(9) not null
 );
-comment on table role_event is 'Настройка прав доступа к событиям журнала аудита по ролям';
-comment on column role_event.event_id is 'Идентификатор события';
-comment on column role_event.role_id is 'Идентификатор роли';
+comment on table role_event is 'РќР°СЃС‚СЂРѕР№РєР° РїСЂР°РІ РґРѕСЃС‚СѓРїР° Рє СЃРѕР±С‹С‚РёСЏРј Р¶СѓСЂРЅР°Р»Р° Р°СѓРґРёС‚Р° РїРѕ СЂРѕР»СЏРј';
+comment on column role_event.event_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРѕР±С‹С‚РёСЏ';
+comment on column role_event.role_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРѕР»Рё';
 --------------------------------------------------------------------------------------------------------
 create table lock_data
 (
@@ -785,15 +785,15 @@ create table lock_data
   server_node varchar2(100)
 );
 
-comment on table lock_data is 'Информация о блокировках';
-comment on column lock_data.key is 'Код блокировки';
-comment on column lock_data.user_id is 'Идентификатор пользователя, установившего блокировку';
-comment on column lock_data.date_lock is 'Дата установки блокировки';
-comment on column lock_data.state is 'Статус выполнения асинхронной задачи, связанной с блокировкой';
-comment on column lock_data.state_date is 'Дата последнего изменения статуса';
-comment on column lock_data.description is 'Описание блокировки';
-comment on column lock_data.queue is 'Очередь, в которой находится связанная асинхронная задача';
-comment on column lock_data.server_node is 'Наименование узла кластера, на котором выполняется связанная асинхронная задача';
+comment on table lock_data is 'РРЅС„РѕСЂРјР°С†РёСЏ Рѕ Р±Р»РѕРєРёСЂРѕРІРєР°С…';
+comment on column lock_data.key is 'РљРѕРґ Р±Р»РѕРєРёСЂРѕРІРєРё';
+comment on column lock_data.user_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, СѓСЃС‚Р°РЅРѕРІРёРІС€РµРіРѕ Р±Р»РѕРєРёСЂРѕРІРєСѓ';
+comment on column lock_data.date_lock is 'Р”Р°С‚Р° СѓСЃС‚Р°РЅРѕРІРєРё Р±Р»РѕРєРёСЂРѕРІРєРё';
+comment on column lock_data.state is 'РЎС‚Р°С‚СѓСЃ РІС‹РїРѕР»РЅРµРЅРёСЏ Р°СЃРёРЅС…СЂРѕРЅРЅРѕР№ Р·Р°РґР°С‡Рё, СЃРІСЏР·Р°РЅРЅРѕР№ СЃ Р±Р»РѕРєРёСЂРѕРІРєРѕР№';
+comment on column lock_data.state_date is 'Р”Р°С‚Р° РїРѕСЃР»РµРґРЅРµРіРѕ РёР·РјРµРЅРµРЅРёСЏ СЃС‚Р°С‚СѓСЃР°';
+comment on column lock_data.description is 'РћРїРёСЃР°РЅРёРµ Р±Р»РѕРєРёСЂРѕРІРєРё';
+comment on column lock_data.queue is 'РћС‡РµСЂРµРґСЊ, РІ РєРѕС‚РѕСЂРѕР№ РЅР°С…РѕРґРёС‚СЃСЏ СЃРІСЏР·Р°РЅРЅР°СЏ Р°СЃРёРЅС…СЂРѕРЅРЅР°СЏ Р·Р°РґР°С‡Р°';
+comment on column lock_data.server_node is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ СѓР·Р»Р° РєР»Р°СЃС‚РµСЂР°, РЅР° РєРѕС‚РѕСЂРѕРј РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ СЃРІСЏР·Р°РЅРЅР°СЏ Р°СЃРёРЅС…СЂРѕРЅРЅР°СЏ Р·Р°РґР°С‡Р°';
 --------------------------------------------------------------------------------------------------------
 create table department_type
 (
@@ -801,9 +801,9 @@ create table department_type
   name varchar2(50)
 );
 
-comment on table department_type is 'Типы подразделений банка';
-comment on column department_type.id is 'Идентификатор типа';
-comment on column department_type.name is 'Наименование типа';
+comment on table department_type is 'РўРёРїС‹ РїРѕРґСЂР°Р·РґРµР»РµРЅРёР№ Р±Р°РЅРєР°';
+comment on column department_type.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С‚РёРїР°';
+comment on column department_type.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С‚РёРїР°';
 
 --------------------------------------------------------------------------------------------------------
 create table async_task_type
@@ -817,14 +817,14 @@ create table async_task_type
   dev_mode          number(1) default 0 not null
 );
 
-comment on table async_task_type is 'Типы асинхронных задач';
-comment on column async_task_type.id is 'Идентификатор строки';
-comment on column async_task_type.name is 'Название типа задачи';
-comment on column async_task_type.handler_jndi is 'JNDI имя класса-обработчика';
-comment on column async_task_type.task_limit is 'Ограничение на выполнение задачи';
-comment on column async_task_type.short_queue_limit is 'Ограничение на выполнение задачи в очереди быстрых задач';
-comment on column async_task_type.limit_kind is 'Вид ограничения';
-comment on column async_task_type.dev_mode is 'Признак задачи для dev-мода';
+comment on table async_task_type is 'РўРёРїС‹ Р°СЃРёРЅС…СЂРѕРЅРЅС‹С… Р·Р°РґР°С‡';
+comment on column async_task_type.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚СЂРѕРєРё';
+comment on column async_task_type.name is 'РќР°Р·РІР°РЅРёРµ С‚РёРїР° Р·Р°РґР°С‡Рё';
+comment on column async_task_type.handler_jndi is 'JNDI РёРјСЏ РєР»Р°СЃСЃР°-РѕР±СЂР°Р±РѕС‚С‡РёРєР°';
+comment on column async_task_type.task_limit is 'РћРіСЂР°РЅРёС‡РµРЅРёРµ РЅР° РІС‹РїРѕР»РЅРµРЅРёРµ Р·Р°РґР°С‡Рё';
+comment on column async_task_type.short_queue_limit is 'РћРіСЂР°РЅРёС‡РµРЅРёРµ РЅР° РІС‹РїРѕР»РЅРµРЅРёРµ Р·Р°РґР°С‡Рё РІ РѕС‡РµСЂРµРґРё Р±С‹СЃС‚СЂС‹С… Р·Р°РґР°С‡';
+comment on column async_task_type.limit_kind is 'Р’РёРґ РѕРіСЂР°РЅРёС‡РµРЅРёСЏ';
+comment on column async_task_type.dev_mode is 'РџСЂРёР·РЅР°Рє Р·Р°РґР°С‡Рё РґР»СЏ dev-РјРѕРґР°';
 
 --------------------------------------------------------------------------------------------------------
 create table form_data_report
@@ -837,13 +837,13 @@ create table form_data_report
   absolute     number(1)         not null
 );
 
-comment on table form_data_report is 'Отчет';
-comment on column form_data_report.form_data_id is 'Идентификатор налоговой формы';
-comment on column form_data_report.blob_data_id is 'Идентификатор отчета';
-comment on column form_data_report.type is 'Тип отчета (Excel/CSV/Специфичный отчет)';
-comment on column form_data_report.manual is 'Режим ввода данных (0 - обычная версия; 1 - версия ручного ввода)';
-comment on column form_data_report.checking is 'Типы столбцов (0 - только обычные, 1 - вместе с контрольными)';
-comment on column form_data_report.absolute is 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
+comment on table form_data_report is 'РћС‚С‡РµС‚';
+comment on column form_data_report.form_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_data_report.blob_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РѕС‚С‡РµС‚Р°';
+comment on column form_data_report.type is 'РўРёРї РѕС‚С‡РµС‚Р° (Excel/CSV/РЎРїРµС†РёС„РёС‡РЅС‹Р№ РѕС‚С‡РµС‚)';
+comment on column form_data_report.manual is 'Р РµР¶РёРј РІРІРѕРґР° РґР°РЅРЅС‹С… (0 - РѕР±С‹С‡РЅР°СЏ РІРµСЂСЃРёСЏ; 1 - РІРµСЂСЃРёСЏ СЂСѓС‡РЅРѕРіРѕ РІРІРѕРґР°)';
+comment on column form_data_report.checking is 'РўРёРїС‹ СЃС‚РѕР»Р±С†РѕРІ (0 - С‚РѕР»СЊРєРѕ РѕР±С‹С‡РЅС‹Рµ, 1 - РІРјРµСЃС‚Рµ СЃ РєРѕРЅС‚СЂРѕР»СЊРЅС‹РјРё)';
+comment on column form_data_report.absolute is 'Р РµР¶РёРј РІС‹РІРѕРґР° РґР°РЅРЅС‹С… (0 - С‚РѕР»СЊРєРѕ РґРµР»СЊС‚С‹, 1 - Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ)';
 
 --------------------------------------------------------------------------------------------------------
 create table declaration_report
@@ -854,11 +854,11 @@ create table declaration_report
   subreport_id        number(9)
 );
 
-comment on table declaration_report is 'Отчеты по декларациям';
-comment on column declaration_report.declaration_data_id is 'Идентификатор декларации';
-comment on column declaration_report.blob_data_id is 'Идентификатор отчета';
-comment on column declaration_report.type is 'Тип отчета (0 - Excel, 1 - XML, 2 - PDF, 3 - Jasper, 4 - Спец.отчет)';
-comment on column declaration_report.subreport_id is 'Идентификатор спец. отчета';
+comment on table declaration_report is 'РћС‚С‡РµС‚С‹ РїРѕ РґРµРєР»Р°СЂР°С†РёСЏРј';
+comment on column declaration_report.declaration_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РґРµРєР»Р°СЂР°С†РёРё';
+comment on column declaration_report.blob_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РѕС‚С‡РµС‚Р°';
+comment on column declaration_report.type is 'РўРёРї РѕС‚С‡РµС‚Р° (0 - Excel, 1 - XML, 2 - PDF, 3 - Jasper, 4 - РЎРїРµС†.РѕС‚С‡РµС‚)';
+comment on column declaration_report.subreport_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРїРµС†. РѕС‚С‡РµС‚Р°';
 
 create sequence seq_declaration_subreport start with 100;
 --------------------------------------------------------------------------------------------------------
@@ -872,14 +872,14 @@ create table declaration_subreport
   blob_data_id            varchar2(36)
 );
 
-comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
-comment on column declaration_subreport.id is 'Идентификатор отчета';
-comment on column declaration_subreport.declaration_template_id is 'Идентификатор шаблона декларации';
-comment on column declaration_subreport.name is 'Наименование спец. отчета';
-comment on column declaration_subreport.ord is 'Порядковый номер';
-comment on column declaration_subreport.alias is 'Код спец. отчета';
-comment on column declaration_subreport.blob_data_id is 'Макет JasperReports для формирования печатного представления формы';
-comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
+comment on table declaration_subreport is 'РЎРїРµС†. РѕС‚С‡РµС‚С‹ РІРµСЂСЃРёРё РјР°РєРµС‚Р° РґРµРєР»Р°СЂР°С†РёРё';
+comment on column declaration_subreport.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РѕС‚С‡РµС‚Р°';
+comment on column declaration_subreport.declaration_template_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С€Р°Р±Р»РѕРЅР° РґРµРєР»Р°СЂР°С†РёРё';
+comment on column declaration_subreport.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ СЃРїРµС†. РѕС‚С‡РµС‚Р°';
+comment on column declaration_subreport.ord is 'РџРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ';
+comment on column declaration_subreport.alias is 'РљРѕРґ СЃРїРµС†. РѕС‚С‡РµС‚Р°';
+comment on column declaration_subreport.blob_data_id is 'РњР°РєРµС‚ JasperReports РґР»СЏ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РїРµС‡Р°С‚РЅРѕРіРѕ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЏ С„РѕСЂРјС‹';
+comment on table declaration_subreport is 'РЎРїРµС†. РѕС‚С‡РµС‚С‹ РІРµСЂСЃРёРё РјР°РєРµС‚Р° РґРµРєР»Р°СЂР°С†РёРё';
 
 --------------------------------------------------------------------------------------------------------
 create table lock_data_subscribers
@@ -888,9 +888,9 @@ create table lock_data_subscribers
   user_id  number(9)           not null
 );
 
-comment on table lock_data_subscribers is 'Cписок пользователей, ожидающих выполнения операций над объектом блокировки';
-comment on column lock_data_subscribers.lock_key is 'Ключ блокировки объекта, после завершения операции над которым, будет выполнено оповещение';
-comment on column lock_data_subscribers.user_id is 'Идентификатор пользователя, который получит оповещение';
+comment on table lock_data_subscribers is 'CРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№, РѕР¶РёРґР°СЋС‰РёС… РІС‹РїРѕР»РЅРµРЅРёСЏ РѕРїРµСЂР°С†РёР№ РЅР°Рґ РѕР±СЉРµРєС‚РѕРј Р±Р»РѕРєРёСЂРѕРІРєРё';
+comment on column lock_data_subscribers.lock_key is 'РљР»СЋС‡ Р±Р»РѕРєРёСЂРѕРІРєРё РѕР±СЉРµРєС‚Р°, РїРѕСЃР»Рµ Р·Р°РІРµСЂС€РµРЅРёСЏ РѕРїРµСЂР°С†РёРё РЅР°Рґ РєРѕС‚РѕСЂС‹Рј, Р±СѓРґРµС‚ РІС‹РїРѕР»РЅРµРЅРѕ РѕРїРѕРІРµС‰РµРЅРёРµ';
+comment on column lock_data_subscribers.user_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РєРѕС‚РѕСЂС‹Р№ РїРѕР»СѓС‡РёС‚ РѕРїРѕРІРµС‰РµРЅРёРµ';
 
 --------------------------------------------------------------------------------------------------------
 create table ifrs_data
@@ -899,9 +899,9 @@ create table ifrs_data
   blob_data_id     varchar2(36)
 );
 
-comment on table ifrs_data is 'Отчетность для МСФО';
-comment on column ifrs_data.report_period_id is 'Отчетный период';
-comment on column ifrs_data.blob_data_id is 'Файл архива с отчетностью для МСФО';
+comment on table ifrs_data is 'РћС‚С‡РµС‚РЅРѕСЃС‚СЊ РґР»СЏ РњРЎР¤Рћ';
+comment on column ifrs_data.report_period_id is 'РћС‚С‡РµС‚РЅС‹Р№ РїРµСЂРёРѕРґ';
+comment on column ifrs_data.blob_data_id is 'Р¤Р°Р№Р» Р°СЂС…РёРІР° СЃ РѕС‚С‡РµС‚РЅРѕСЃС‚СЊСЋ РґР»СЏ РњРЎР¤Рћ';
 --------------------------------------------------------------------------------------------------------
 create table configuration_email
 (
@@ -911,11 +911,11 @@ create table configuration_email
   description varchar2(1000)
 );
 
-comment on table configuration_email is 'Настройки почты';
-comment on column configuration_email.id is 'Идентификатор записи';
-comment on column configuration_email.name is 'Код параметра';
-comment on column configuration_email.value is 'Значение параметра';
-comment on column configuration_email.description is 'Описание параметра';
+comment on table configuration_email is 'РќР°СЃС‚СЂРѕР№РєРё РїРѕС‡С‚С‹';
+comment on column configuration_email.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column configuration_email.name is 'РљРѕРґ РїР°СЂР°РјРµС‚СЂР°';
+comment on column configuration_email.value is 'Р—РЅР°С‡РµРЅРёРµ РїР°СЂР°РјРµС‚СЂР°';
+comment on column configuration_email.description is 'РћРїРёСЃР°РЅРёРµ РїР°СЂР°РјРµС‚СЂР°';
 
 --------------------------------------------------------------------------------------------------------
 create table form_data_consolidation
@@ -924,9 +924,9 @@ create table form_data_consolidation
   target_form_data_id number(9) not null
 );
 
-comment on table form_data_consolidation is 'Сведения о консолидации налоговых форм в налоговые формы';
-comment on column form_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
-comment on column form_data_consolidation.target_form_data_id is 'Идентификатор НФ приемника';
+comment on table form_data_consolidation is 'РЎРІРµРґРµРЅРёСЏ Рѕ РєРѕРЅСЃРѕР»РёРґР°С†РёРё РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј РІ РЅР°Р»РѕРіРѕРІС‹Рµ С„РѕСЂРјС‹';
+comment on column form_data_consolidation.source_form_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РќР¤ РёСЃС‚РѕС‡РЅРёРєР°';
+comment on column form_data_consolidation.target_form_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РќР¤ РїСЂРёРµРјРЅРёРєР°';
 --------------------------------------------------------------------------------------------------------
 
 create table declaration_data_consolidation
@@ -935,9 +935,9 @@ create table declaration_data_consolidation
   target_declaration_data_id number(9) not null
 );
 
-comment on table declaration_data_consolidation is 'Сведения о консолидации налоговых форм в декларации';
-comment on column declaration_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
-comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор декларации приемника';
+comment on table declaration_data_consolidation is 'РЎРІРµРґРµРЅРёСЏ Рѕ РєРѕРЅСЃРѕР»РёРґР°С†РёРё РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј РІ РґРµРєР»Р°СЂР°С†РёРё';
+comment on column declaration_data_consolidation.source_form_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РќР¤ РёСЃС‚РѕС‡РЅРёРєР°';
+comment on column declaration_data_consolidation.target_declaration_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РґРµРєР»Р°СЂР°С†РёРё РїСЂРёРµРјРЅРёРєР°';
 
 --------------------------------------------------------------------------------------------------------
 create table log_system_report
@@ -947,10 +947,10 @@ create table log_system_report
   sec_user_id  number(9)
 );
 
-comment on table log_system_report is 'Выгрузки журнала аудита';
-comment on column log_system_report.blob_data_id is 'Идентификатор таблицы BLOB_DATA, в которой хранятся файлы';
-comment on column log_system_report.type is 'Тип выгрузки (0 - архивация журнала аудита, 1 - генерация zip-файла для журнала аудита)';
-comment on column log_system_report.sec_user_id is 'Идентификатор пользователя, инициировавшего выгрузку типа 1';
+comment on table log_system_report is 'Р’С‹РіСЂСѓР·РєРё Р¶СѓСЂРЅР°Р»Р° Р°СѓРґРёС‚Р°';
+comment on column log_system_report.blob_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С‚Р°Р±Р»РёС†С‹ BLOB_DATA, РІ РєРѕС‚РѕСЂРѕР№ С…СЂР°РЅСЏС‚СЃСЏ С„Р°Р№Р»С‹';
+comment on column log_system_report.type is 'РўРёРї РІС‹РіСЂСѓР·РєРё (0 - Р°СЂС…РёРІР°С†РёСЏ Р¶СѓСЂРЅР°Р»Р° Р°СѓРґРёС‚Р°, 1 - РіРµРЅРµСЂР°С†РёСЏ zip-С„Р°Р№Р»Р° РґР»СЏ Р¶СѓСЂРЅР°Р»Р° Р°СѓРґРёС‚Р°)';
+comment on column log_system_report.sec_user_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РёРЅРёС†РёРёСЂРѕРІР°РІС€РµРіРѕ РІС‹РіСЂСѓР·РєСѓ С‚РёРїР° 1';
 
 --------------------------------------------------------------------------------------------------------
 create table tax_type
@@ -959,9 +959,9 @@ create table tax_type
   name varchar2(256) not null
 );
 
-comment on table tax_type is 'Справочник типов налогов';
-comment on column tax_type.id is 'Символьный идентификатор типа налога';
-comment on column tax_type.name is 'Тип налога';
+comment on table tax_type is 'РЎРїСЂР°РІРѕС‡РЅРёРє С‚РёРїРѕРІ РЅР°Р»РѕРіРѕРІ';
+comment on column tax_type.id is 'РЎРёРјРІРѕР»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С‚РёРїР° РЅР°Р»РѕРіР°';
+comment on column tax_type.name is 'РўРёРї РЅР°Р»РѕРіР°';
 
 --------------------------------------------------------------------------------------------------------
 create table form_data_ref_book
@@ -971,10 +971,10 @@ create table form_data_ref_book
   record_id    number(18) not null
 );
 
-comment on table form_data_ref_book is 'Связь экземпляров НФ с элементами справочников';
-comment on column form_data_ref_book.form_data_id is 'Идентификатор экземляра налоговой формы';
-comment on column form_data_ref_book.ref_book_id is 'Идентификатор справочника';
-comment on column form_data_ref_book.record_id is 'Идентификатор записи справочники';
+comment on table form_data_ref_book is 'РЎРІСЏР·СЊ СЌРєР·РµРјРїР»СЏСЂРѕРІ РќР¤ СЃ СЌР»РµРјРµРЅС‚Р°РјРё СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ';
+comment on column form_data_ref_book.form_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЌРєР·РµРјР»СЏСЂР° РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_data_ref_book.ref_book_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРїСЂР°РІРѕС‡РЅРёРєР°';
+comment on column form_data_ref_book.record_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё СЃРїСЂР°РІРѕС‡РЅРёРєРё';
 
 --------------------------------------------------------------------------------------------------------
 create sequence seq_form_data_nnn start with 10000;
@@ -990,13 +990,13 @@ create table log_clob_query
   session_id       number(18) default 0                   not null
 );
 
-comment on table log_clob_query is 'Логирование DDL/DML запросов из ХП';
-comment on column log_clob_query.id is 'Идентификатор записи (seq_log_query)';
-comment on column log_clob_query.form_template_id is 'Идентификатор шаблона';
+comment on table log_clob_query is 'Р›РѕРіРёСЂРѕРІР°РЅРёРµ DDL/DML Р·Р°РїСЂРѕСЃРѕРІ РёР· РҐРџ';
+comment on column log_clob_query.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё (seq_log_query)';
+comment on column log_clob_query.form_template_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С€Р°Р±Р»РѕРЅР°';
 comment on column log_clob_query.sql_mode is 'DDL/DML';
-comment on column log_clob_query.text_query is 'Текст запроса';
-comment on column log_clob_query.log_date is 'Дата/время начала обработки запроса';
-comment on column log_clob_query.session_id is 'Идентификатор сессии (seq_log_query_session)';
+comment on column log_clob_query.text_query is 'РўРµРєСЃС‚ Р·Р°РїСЂРѕСЃР°';
+comment on column log_clob_query.log_date is 'Р”Р°С‚Р°/РІСЂРµРјСЏ РЅР°С‡Р°Р»Р° РѕР±СЂР°Р±РѕС‚РєРё Р·Р°РїСЂРѕСЃР°';
+comment on column log_clob_query.session_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРµСЃСЃРёРё (seq_log_query_session)';
 
 create sequence seq_log_query start with 1;
 create sequence seq_log_query_session start with 1;
@@ -1011,12 +1011,12 @@ create table form_data_file
   note                 varchar2(512)
 );
 
-comment on table form_data_file is 'Файлы налоговой формы';
-comment on column form_data_file.form_data_id is 'Идентификатор экземпляра налоговой формы';
-comment on column form_data_file.blob_data_id is 'Файл налоговой формы';
-comment on column form_data_file.user_name is 'Полное имя пользователя, прикрепившего файл';
-comment on column form_data_file.user_department_name is 'Наименование подразделения пользователя, прикрепившего файл';
-comment on column form_data_file.note is 'Комментарий к файлу';
+comment on table form_data_file is 'Р¤Р°Р№Р»С‹ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_data_file.form_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЌРєР·РµРјРїР»СЏСЂР° РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_data_file.blob_data_id is 'Р¤Р°Р№Р» РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_data_file.user_name is 'РџРѕР»РЅРѕРµ РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РїСЂРёРєСЂРµРїРёРІС€РµРіРѕ С„Р°Р№Р»';
+comment on column form_data_file.user_department_name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РїСЂРёРєСЂРµРїРёРІС€РµРіРѕ С„Р°Р№Р»';
+comment on column form_data_file.note is 'РљРѕРјРјРµРЅС‚Р°СЂРёР№ Рє С„Р°Р№Р»Сѓ';
 
 --------------------------------------------------------------------------------------------------------
 create table color
@@ -1029,9 +1029,9 @@ create table color
   hex  varchar2(7)   not null
 );
 
-comment on table color is 'Справочник цветов';
-comment on column color.id is 'Идентификатор записи';
-comment on column color.name is 'Наименование цвета';
+comment on table color is 'РЎРїСЂР°РІРѕС‡РЅРёРє С†РІРµС‚РѕРІ';
+comment on column color.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column color.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С†РІРµС‚Р°';
 comment on column color.r is 'R';
 comment on column color.g is 'G';
 comment on column color.b is 'B';
@@ -1043,9 +1043,9 @@ create table department_form_type_performer
   performer_dep_id        number(9) not null
 );
 
-comment on table department_form_type_performer is 'Назначения нескольких исполнителей для связки НФ-подразделение';
-comment on column department_form_type_performer.department_form_type_id is 'Идентификатор связи подразделения с формой';
-comment on column department_form_type_performer.performer_dep_id is 'Исполнитель';
+comment on table department_form_type_performer is 'РќР°Р·РЅР°С‡РµРЅРёСЏ РЅРµСЃРєРѕР»СЊРєРёС… РёСЃРїРѕР»РЅРёС‚РµР»РµР№ РґР»СЏ СЃРІСЏР·РєРё РќР¤-РїРѕРґСЂР°Р·РґРµР»РµРЅРёРµ';
+comment on column department_form_type_performer.department_form_type_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРІСЏР·Рё РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ СЃ С„РѕСЂРјРѕР№';
+comment on column department_form_type_performer.performer_dep_id is 'РСЃРїРѕР»РЅРёС‚РµР»СЊ';
 --------------------------------------------------------------------------------------------------------
 create table ref_book_vzl_history
 (
@@ -1057,13 +1057,13 @@ create table ref_book_vzl_history
   state        number(9)  not null
 );
 
-comment on table ref_book_vzl_history is 'История изменения категории ВЗЛ';
-comment on column ref_book_vzl_history.id is 'Идентификатор записи';
-comment on column ref_book_vzl_history.jur_person is 'ВЗЛ';
-comment on column ref_book_vzl_history.category is 'Категория ВЗЛ';
-comment on column ref_book_vzl_history.form_data_id is 'Код формы';
-comment on column ref_book_vzl_history.change_date is 'Дата изменения';
-comment on column ref_book_vzl_history.state is 'Код состояния';
+comment on table ref_book_vzl_history is 'РСЃС‚РѕСЂРёСЏ РёР·РјРµРЅРµРЅРёСЏ РєР°С‚РµРіРѕСЂРёРё Р’Р—Р›';
+comment on column ref_book_vzl_history.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column ref_book_vzl_history.jur_person is 'Р’Р—Р›';
+comment on column ref_book_vzl_history.category is 'РљР°С‚РµРіРѕСЂРёСЏ Р’Р—Р›';
+comment on column ref_book_vzl_history.form_data_id is 'РљРѕРґ С„РѕСЂРјС‹';
+comment on column ref_book_vzl_history.change_date is 'Р”Р°С‚Р° РёР·РјРµРЅРµРЅРёСЏ';
+comment on column ref_book_vzl_history.state is 'РљРѕРґ СЃРѕСЃС‚РѕСЏРЅРёСЏ';
 
 create sequence seq_ref_book_vzl_history start with 1;
 --------------------------------------------------------------------------------------------------------
@@ -1077,11 +1077,11 @@ create table form_search_result
   "ROWS_COUNT"   number(9, 0)
 );
 
-comment on column form_search_result."ID" is 'Идентификатор результата поиска';
-comment on column form_search_result."SESSION_ID" is 'Идентификатор сессии в которой выполнялся поиск';
-comment on column form_search_result."FORM_DATA_ID" is 'Идентификатор формы в которой выполнялся поиск';
-comment on column form_search_result."DATE" is 'Дата выполнения поиска';
-comment on column form_search_result."KEY" is 'Строка поиска';
+comment on column form_search_result."ID" is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРµР·СѓР»СЊС‚Р°С‚Р° РїРѕРёСЃРєР°';
+comment on column form_search_result."SESSION_ID" is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРµСЃСЃРёРё РІ РєРѕС‚РѕСЂРѕР№ РІС‹РїРѕР»РЅСЏР»СЃСЏ РїРѕРёСЃРє';
+comment on column form_search_result."FORM_DATA_ID" is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С„РѕСЂРјС‹ РІ РєРѕС‚РѕСЂРѕР№ РІС‹РїРѕР»РЅСЏР»СЃСЏ РїРѕРёСЃРє';
+comment on column form_search_result."DATE" is 'Р”Р°С‚Р° РІС‹РїРѕР»РЅРµРЅРёСЏ РїРѕРёСЃРєР°';
+comment on column form_search_result."KEY" is 'РЎС‚СЂРѕРєР° РїРѕРёСЃРєР°';
 
 create sequence seq_form_search_result start with 1;
 --------------------------------------------------------------------------------------------------------
@@ -1097,12 +1097,12 @@ create table FORM_SEARCH_DATA_RESULT
 /*PARTITION BY LIST ("SESSION_ID")
 (PARTITION "P0"  VALUES (0))*/;
 
-comment on column form_search_data_result."ID" is 'Идентификатор результата поиска';
-comment on column form_search_data_result."SESSION_ID" is 'Идентификатор сессии в которой выполнялся поиск';
-comment on column form_search_data_result."ROW_INDEX" is 'Номер строки в форме';
-comment on column form_search_data_result."COLUMN_INDEX" is 'Номер столбца в форме';
-comment on column form_search_data_result."RAW_VALUE" is 'Значение в ячейке формы';
-comment on column form_search_data_result."ORD" is 'Порядковый номер';
+comment on column form_search_data_result."ID" is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРµР·СѓР»СЊС‚Р°С‚Р° РїРѕРёСЃРєР°';
+comment on column form_search_data_result."SESSION_ID" is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРµСЃСЃРёРё РІ РєРѕС‚РѕСЂРѕР№ РІС‹РїРѕР»РЅСЏР»СЃСЏ РїРѕРёСЃРє';
+comment on column form_search_data_result."ROW_INDEX" is 'РќРѕРјРµСЂ СЃС‚СЂРѕРєРё РІ С„РѕСЂРјРµ';
+comment on column form_search_data_result."COLUMN_INDEX" is 'РќРѕРјРµСЂ СЃС‚РѕР»Р±С†Р° РІ С„РѕСЂРјРµ';
+comment on column form_search_data_result."RAW_VALUE" is 'Р—РЅР°С‡РµРЅРёРµ РІ СЏС‡РµР№РєРµ С„РѕСЂРјС‹';
+comment on column form_search_data_result."ORD" is 'РџРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ';
 --------------------------------------------------------------------------------------------------------
 create global temporary table form_search_data_result_tmp
 (
@@ -1129,22 +1129,22 @@ create table department_change (
   sunr_use      number(1)
 );
 
-comment on table department_change is 'Изменения справочника "Подразделения"';
-comment on column department_change.department_id is 'Идентификатор подразделения';
-comment on column department_change.log_date is 'Дата/время изменения данных';
-comment on column department_change.operationType is 'Тип операции (0 - создание, 1 - изменение, 2 - удаление)';
-comment on column department_change.hier_level is 'Уровень записи в иерархии';
-comment on column department_change.name is 'Наименование подразделения';
-comment on column department_change.parent_id is 'Идентификатор родительского подразделения';
-comment on column department_change.type is 'Тип подразделения (1 - Банк, 2 - ТБ, 3 - ЦСКО, ПЦП, 4 - Управление, 5 - Не передается в СУДИР)';
-comment on column department_change.shortname is 'Сокращенное наименование подразделения';
-comment on column department_change.tb_index is 'Индекс территориального банка';
-comment on column department_change.sbrf_code is 'Код подразделения в нотации Сбербанка';
-comment on column department_change.region is 'Регион';
-comment on column department_change.is_active is 'Действующее подразделение (0 - не действующее, 1 - действующее)';
-comment on column department_change.code is 'Код подразделения';
-comment on column department_change.garant_use is 'Признак, что используется в модуле Гарантий (0 - не используется, 1 - используется)';
-comment on column department_change.sunr_use is 'Признак, что используется в АС СУНР (0 - не используется, 1 - используется)';
+comment on table department_change is 'РР·РјРµРЅРµРЅРёСЏ СЃРїСЂР°РІРѕС‡РЅРёРєР° "РџРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ"';
+comment on column department_change.department_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department_change.log_date is 'Р”Р°С‚Р°/РІСЂРµРјСЏ РёР·РјРµРЅРµРЅРёСЏ РґР°РЅРЅС‹С…';
+comment on column department_change.operationType is 'РўРёРї РѕРїРµСЂР°С†РёРё (0 - СЃРѕР·РґР°РЅРёРµ, 1 - РёР·РјРµРЅРµРЅРёРµ, 2 - СѓРґР°Р»РµРЅРёРµ)';
+comment on column department_change.hier_level is 'РЈСЂРѕРІРµРЅСЊ Р·Р°РїРёСЃРё РІ РёРµСЂР°СЂС…РёРё';
+comment on column department_change.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department_change.parent_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department_change.type is 'РўРёРї РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ (1 - Р‘Р°РЅРє, 2 - РўР‘, 3 - Р¦РЎРљРћ, РџР¦Рџ, 4 - РЈРїСЂР°РІР»РµРЅРёРµ, 5 - РќРµ РїРµСЂРµРґР°РµС‚СЃСЏ РІ РЎРЈР”РР )';
+comment on column department_change.shortname is 'РЎРѕРєСЂР°С‰РµРЅРЅРѕРµ РЅР°РёРјРµРЅРѕРІР°РЅРёРµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department_change.tb_index is 'РРЅРґРµРєСЃ С‚РµСЂСЂРёС‚РѕСЂРёР°Р»СЊРЅРѕРіРѕ Р±Р°РЅРєР°';
+comment on column department_change.sbrf_code is 'РљРѕРґ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ РІ РЅРѕС‚Р°С†РёРё РЎР±РµСЂР±Р°РЅРєР°';
+comment on column department_change.region is 'Р РµРіРёРѕРЅ';
+comment on column department_change.is_active is 'Р”РµР№СЃС‚РІСѓСЋС‰РµРµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёРµ (0 - РЅРµ РґРµР№СЃС‚РІСѓСЋС‰РµРµ, 1 - РґРµР№СЃС‚РІСѓСЋС‰РµРµ)';
+comment on column department_change.code is 'РљРѕРґ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department_change.garant_use is 'РџСЂРёР·РЅР°Рє, С‡С‚Рѕ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ РјРѕРґСѓР»Рµ Р“Р°СЂР°РЅС‚РёР№ (0 - РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, 1 - РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ)';
+comment on column department_change.sunr_use is 'РџСЂРёР·РЅР°Рє, С‡С‚Рѕ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ РђРЎ РЎРЈРќР  (0 - РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, 1 - РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ)';
 --------------------------------------------------------------------------------------------------------
 create table ref_book_asnu (
   id       number(9) primary key,
@@ -1153,13 +1153,13 @@ create table ref_book_asnu (
   type     varchar2(255) not null
 );
 
-comment on table ref_book_asnu is 'Справочник АСНУ';
-comment on column ref_book_asnu.id is 'Идентификатор';
-comment on column ref_book_asnu.code is 'Код АСНУ';
-comment on column ref_book_asnu.name is 'Наименование АСНУ';
-comment on column ref_book_asnu.type is 'Тип дохода';
+comment on table ref_book_asnu is 'РЎРїСЂР°РІРѕС‡РЅРёРє РђРЎРќРЈ';
+comment on column ref_book_asnu.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ';
+comment on column ref_book_asnu.code is 'РљРѕРґ РђРЎРќРЈ';
+comment on column ref_book_asnu.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РђРЎРќРЈ';
+comment on column ref_book_asnu.type is 'РўРёРї РґРѕС…РѕРґР°';
 --------------------------------------------------------------------------------------------------------
---                                      ФП "НДФЛ"
+--                                      Р¤Рџ "РќР”Р¤Р›"
 --------------------------------------------------------------------------------------------------------
 create table ndfl_person (
   id                  number(18)        not null,
@@ -1190,33 +1190,33 @@ create table ndfl_person (
   additional_data     varchar2(4000 char)
 );
 
-comment on table ndfl_person is 'Данные о физическом лице - получателе дохода';
-comment on column ndfl_person.id is 'Суррогатный ключ';
-comment on column ndfl_person.declaration_data_id is 'Идентификатор декларации к которой относятся данные';
-comment on column ndfl_person.inp is 'Уникальный код клиента';
-comment on column ndfl_person.snils is 'Страховой номер индивидуального лицевого счёта';
-comment on column ndfl_person.last_name is 'Фамилия';
-comment on column ndfl_person.first_name is 'Имя';
-comment on column ndfl_person.middle_name is 'Отчество';
-comment on column ndfl_person.birth_day is 'Дата рождения';
-comment on column ndfl_person.citizenship is 'Гражданство (код страны)';
-comment on column ndfl_person.inn_np is 'ИНН  физического лица';
-comment on column ndfl_person.inn_foreign is 'ИНН  иностранного гражданина';
-comment on column ndfl_person.id_doc_type is 'Код вида документа';
-comment on column ndfl_person.id_doc_number is 'Серия и номер документа';
-comment on column ndfl_person.status is 'Статус';
-comment on column ndfl_person.post_index is 'Индекс';
-comment on column ndfl_person.region_code is 'Код Региона';
-comment on column ndfl_person.area is 'Район';
-comment on column ndfl_person.city is 'Город';
-comment on column ndfl_person.locality is 'Населенный пункт';
-comment on column ndfl_person.street is 'Улица';
-comment on column ndfl_person.house is 'Дом';
-comment on column ndfl_person.building is 'Корпус';
-comment on column ndfl_person.flat is 'Квартира';
-comment on column ndfl_person.country_code is 'Код страны';
-comment on column ndfl_person.address is 'Адрес';
-comment on column ndfl_person.additional_data is 'Дополнительная информация';
+comment on table ndfl_person is 'Р”Р°РЅРЅС‹Рµ Рѕ С„РёР·РёС‡РµСЃРєРѕРј Р»РёС†Рµ - РїРѕР»СѓС‡Р°С‚РµР»Рµ РґРѕС…РѕРґР°';
+comment on column ndfl_person.id is 'РЎСѓСЂСЂРѕРіР°С‚РЅС‹Р№ РєР»СЋС‡';
+comment on column ndfl_person.declaration_data_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РґРµРєР»Р°СЂР°С†РёРё Рє РєРѕС‚РѕСЂРѕР№ РѕС‚РЅРѕСЃСЏС‚СЃСЏ РґР°РЅРЅС‹Рµ';
+comment on column ndfl_person.inp is 'РЈРЅРёРєР°Р»СЊРЅС‹Р№ РєРѕРґ РєР»РёРµРЅС‚Р°';
+comment on column ndfl_person.snils is 'РЎС‚СЂР°С…РѕРІРѕР№ РЅРѕРјРµСЂ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅРѕРіРѕ Р»РёС†РµРІРѕРіРѕ СЃС‡С‘С‚Р°';
+comment on column ndfl_person.last_name is 'Р¤Р°РјРёР»РёСЏ';
+comment on column ndfl_person.first_name is 'РРјСЏ';
+comment on column ndfl_person.middle_name is 'РћС‚С‡РµСЃС‚РІРѕ';
+comment on column ndfl_person.birth_day is 'Р”Р°С‚Р° СЂРѕР¶РґРµРЅРёСЏ';
+comment on column ndfl_person.citizenship is 'Р“СЂР°Р¶РґР°РЅСЃС‚РІРѕ (РєРѕРґ СЃС‚СЂР°РЅС‹)';
+comment on column ndfl_person.inn_np is 'РРќРќ  С„РёР·РёС‡РµСЃРєРѕРіРѕ Р»РёС†Р°';
+comment on column ndfl_person.inn_foreign is 'РРќРќ  РёРЅРѕСЃС‚СЂР°РЅРЅРѕРіРѕ РіСЂР°Р¶РґР°РЅРёРЅР°';
+comment on column ndfl_person.id_doc_type is 'РљРѕРґ РІРёРґР° РґРѕРєСѓРјРµРЅС‚Р°';
+comment on column ndfl_person.id_doc_number is 'РЎРµСЂРёСЏ Рё РЅРѕРјРµСЂ РґРѕРєСѓРјРµРЅС‚Р°';
+comment on column ndfl_person.status is 'РЎС‚Р°С‚СѓСЃ';
+comment on column ndfl_person.post_index is 'РРЅРґРµРєСЃ';
+comment on column ndfl_person.region_code is 'РљРѕРґ Р РµРіРёРѕРЅР°';
+comment on column ndfl_person.area is 'Р Р°Р№РѕРЅ';
+comment on column ndfl_person.city is 'Р“РѕСЂРѕРґ';
+comment on column ndfl_person.locality is 'РќР°СЃРµР»РµРЅРЅС‹Р№ РїСѓРЅРєС‚';
+comment on column ndfl_person.street is 'РЈР»РёС†Р°';
+comment on column ndfl_person.house is 'Р”РѕРј';
+comment on column ndfl_person.building is 'РљРѕСЂРїСѓСЃ';
+comment on column ndfl_person.flat is 'РљРІР°СЂС‚РёСЂР°';
+comment on column ndfl_person.country_code is 'РљРѕРґ СЃС‚СЂР°РЅС‹';
+comment on column ndfl_person.address is 'РђРґСЂРµСЃ';
+comment on column ndfl_person.additional_data is 'Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ';
 
 create sequence seq_ndfl_person start with 1000;
 ------------------------------------------------------------------------------------------------------
@@ -1247,27 +1247,27 @@ create table ndfl_person_income
   tax_summ              number(10)
 );
 
-comment on table ndfl_person_income is 'Сведения о доходах физического лица';
-comment on column ndfl_person_income.row_num is 'Порядковый номер строки';
-comment on column ndfl_person_income.income_code is 'Код дохода';
-comment on column ndfl_person_income.income_type is 'Признак дохода';
-comment on column ndfl_person_income.income_accrued_date is 'Дата начисления дохода';
-comment on column ndfl_person_income.income_payout_date is 'Дата выплаты дохода';
-comment on column ndfl_person_income.income_accrued_summ is 'Сумма начисленного дохода';
-comment on column ndfl_person_income.income_payout_summ is 'Сумма выплаченного дохода';
-comment on column ndfl_person_income.total_deductions_summ is 'Общая сумма вычетов';
-comment on column ndfl_person_income.tax_base is 'Налоговая база';
-comment on column ndfl_person_income.tax_rate is 'Ставка налога';
-comment on column ndfl_person_income.tax_date is 'Дата налога';
-comment on column ndfl_person_income.calculated_tax is 'Сумма налога исчисленная';
-comment on column ndfl_person_income.withholding_tax is 'Сумма налога удержанная';
-comment on column ndfl_person_income.not_holding_tax is 'Сумма налога, не удержанная налоговым агентом';
-comment on column ndfl_person_income.overholding_tax is 'Сумма налога, излишне удержанная налоговым агентом';
-comment on column ndfl_person_income.refound_tax is 'Сумма возвращенного налога';
-comment on column ndfl_person_income.tax_transfer_date is 'Срок перечисления налога';
-comment on column ndfl_person_income.payment_date is 'Дата платежного поручения';
-comment on column ndfl_person_income.payment_number is 'Номер платежного поручения перечисления налога в бюджет';
-comment on column ndfl_person_income.tax_summ is 'Сумма налога перечисленная';
+comment on table ndfl_person_income is 'РЎРІРµРґРµРЅРёСЏ Рѕ РґРѕС…РѕРґР°С… С„РёР·РёС‡РµСЃРєРѕРіРѕ Р»РёС†Р°';
+comment on column ndfl_person_income.row_num is 'РџРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ СЃС‚СЂРѕРєРё';
+comment on column ndfl_person_income.income_code is 'РљРѕРґ РґРѕС…РѕРґР°';
+comment on column ndfl_person_income.income_type is 'РџСЂРёР·РЅР°Рє РґРѕС…РѕРґР°';
+comment on column ndfl_person_income.income_accrued_date is 'Р”Р°С‚Р° РЅР°С‡РёСЃР»РµРЅРёСЏ РґРѕС…РѕРґР°';
+comment on column ndfl_person_income.income_payout_date is 'Р”Р°С‚Р° РІС‹РїР»Р°С‚С‹ РґРѕС…РѕРґР°';
+comment on column ndfl_person_income.income_accrued_summ is 'РЎСѓРјРјР° РЅР°С‡РёСЃР»РµРЅРЅРѕРіРѕ РґРѕС…РѕРґР°';
+comment on column ndfl_person_income.income_payout_summ is 'РЎСѓРјРјР° РІС‹РїР»Р°С‡РµРЅРЅРѕРіРѕ РґРѕС…РѕРґР°';
+comment on column ndfl_person_income.total_deductions_summ is 'РћР±С‰Р°СЏ СЃСѓРјРјР° РІС‹С‡РµС‚РѕРІ';
+comment on column ndfl_person_income.tax_base is 'РќР°Р»РѕРіРѕРІР°СЏ Р±Р°Р·Р°';
+comment on column ndfl_person_income.tax_rate is 'РЎС‚Р°РІРєР° РЅР°Р»РѕРіР°';
+comment on column ndfl_person_income.tax_date is 'Р”Р°С‚Р° РЅР°Р»РѕРіР°';
+comment on column ndfl_person_income.calculated_tax is 'РЎСѓРјРјР° РЅР°Р»РѕРіР° РёСЃС‡РёСЃР»РµРЅРЅР°СЏ';
+comment on column ndfl_person_income.withholding_tax is 'РЎСѓРјРјР° РЅР°Р»РѕРіР° СѓРґРµСЂР¶Р°РЅРЅР°СЏ';
+comment on column ndfl_person_income.not_holding_tax is 'РЎСѓРјРјР° РЅР°Р»РѕРіР°, РЅРµ СѓРґРµСЂР¶Р°РЅРЅР°СЏ РЅР°Р»РѕРіРѕРІС‹Рј Р°РіРµРЅС‚РѕРј';
+comment on column ndfl_person_income.overholding_tax is 'РЎСѓРјРјР° РЅР°Р»РѕРіР°, РёР·Р»РёС€РЅРµ СѓРґРµСЂР¶Р°РЅРЅР°СЏ РЅР°Р»РѕРіРѕРІС‹Рј Р°РіРµРЅС‚РѕРј';
+comment on column ndfl_person_income.refound_tax is 'РЎСѓРјРјР° РІРѕР·РІСЂР°С‰РµРЅРЅРѕРіРѕ РЅР°Р»РѕРіР°';
+comment on column ndfl_person_income.tax_transfer_date is 'РЎСЂРѕРє РїРµСЂРµС‡РёСЃР»РµРЅРёСЏ РЅР°Р»РѕРіР°';
+comment on column ndfl_person_income.payment_date is 'Р”Р°С‚Р° РїР»Р°С‚РµР¶РЅРѕРіРѕ РїРѕСЂСѓС‡РµРЅРёСЏ';
+comment on column ndfl_person_income.payment_number is 'РќРѕРјРµСЂ РїР»Р°С‚РµР¶РЅРѕРіРѕ РїРѕСЂСѓС‡РµРЅРёСЏ РїРµСЂРµС‡РёСЃР»РµРЅРёСЏ РЅР°Р»РѕРіР° РІ Р±СЋРґР¶РµС‚';
+comment on column ndfl_person_income.tax_summ is 'РЎСѓРјРјР° РЅР°Р»РѕРіР° РїРµСЂРµС‡РёСЃР»РµРЅРЅР°СЏ';
 
 create sequence seq_ndfl_person_income start with 1000;
 ------------------------------------------------------------------------------------------------------
@@ -1291,24 +1291,24 @@ create table ndfl_person_deduction
   period_curr_summ number(20, 2)     not null
 );
 
-comment on table ndfl_person_deduction is 'Стандартные, социальные и имущественные налоговые вычеты';
-comment on column ndfl_person_deduction.row_num is 'Порядковый номер строки';
-comment on column ndfl_person_deduction.type_code is 'Код вычета';
+comment on table ndfl_person_deduction is 'РЎС‚Р°РЅРґР°СЂС‚РЅС‹Рµ, СЃРѕС†РёР°Р»СЊРЅС‹Рµ Рё РёРјСѓС‰РµСЃС‚РІРµРЅРЅС‹Рµ РЅР°Р»РѕРіРѕРІС‹Рµ РІС‹С‡РµС‚С‹';
+comment on column ndfl_person_deduction.row_num is 'РџРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ СЃС‚СЂРѕРєРё';
+comment on column ndfl_person_deduction.type_code is 'РљРѕРґ РІС‹С‡РµС‚Р°';
 
-comment on column ndfl_person_deduction.notif_type is 'Тип уведомления (Документа о праве на налоговый вычет)';
-comment on column ndfl_person_deduction.notif_date is 'Дата выдачи уведомления';
-comment on column ndfl_person_deduction.notif_num is 'Номер уведомления, подтверждающего право на имущественный налоговый вычет';
-comment on column ndfl_person_deduction.notif_source is 'Код налогового органа, выдавшего уведомление';
-comment on column ndfl_person_deduction.notif_summ is 'Сумма в соответствии с документом на вычет';
+comment on column ndfl_person_deduction.notif_type is 'РўРёРї СѓРІРµРґРѕРјР»РµРЅРёСЏ (Р”РѕРєСѓРјРµРЅС‚Р° Рѕ РїСЂР°РІРµ РЅР° РЅР°Р»РѕРіРѕРІС‹Р№ РІС‹С‡РµС‚)';
+comment on column ndfl_person_deduction.notif_date is 'Р”Р°С‚Р° РІС‹РґР°С‡Рё СѓРІРµРґРѕРјР»РµРЅРёСЏ';
+comment on column ndfl_person_deduction.notif_num is 'РќРѕРјРµСЂ СѓРІРµРґРѕРјР»РµРЅРёСЏ, РїРѕРґС‚РІРµСЂР¶РґР°СЋС‰РµРіРѕ РїСЂР°РІРѕ РЅР° РёРјСѓС‰РµСЃС‚РІРµРЅРЅС‹Р№ РЅР°Р»РѕРіРѕРІС‹Р№ РІС‹С‡РµС‚';
+comment on column ndfl_person_deduction.notif_source is 'РљРѕРґ РЅР°Р»РѕРіРѕРІРѕРіРѕ РѕСЂРіР°РЅР°, РІС‹РґР°РІС€РµРіРѕ СѓРІРµРґРѕРјР»РµРЅРёРµ';
+comment on column ndfl_person_deduction.notif_summ is 'РЎСѓРјРјР° РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ РґРѕРєСѓРјРµРЅС‚РѕРј РЅР° РІС‹С‡РµС‚';
 
-comment on column ndfl_person_deduction.income_accrued is 'Дата начисления дохода';
-comment on column ndfl_person_deduction.income_code is 'Код дохода';
-comment on column ndfl_person_deduction.income_summ is 'Сумма начисленного дохода';
+comment on column ndfl_person_deduction.income_accrued is 'Р”Р°С‚Р° РЅР°С‡РёСЃР»РµРЅРёСЏ РґРѕС…РѕРґР°';
+comment on column ndfl_person_deduction.income_code is 'РљРѕРґ РґРѕС…РѕРґР°';
+comment on column ndfl_person_deduction.income_summ is 'РЎСѓРјРјР° РЅР°С‡РёСЃР»РµРЅРЅРѕРіРѕ РґРѕС…РѕРґР°';
 
-comment on column ndfl_person_deduction.period_prev_date is 'Дата применения вычета в предыдущем периоде';
-comment on column ndfl_person_deduction.period_prev_summ is 'Сумма вычета применения вычета в предыдущем периоде';
-comment on column ndfl_person_deduction.period_curr_date is 'Дата применения вычета в текущем периоде';
-comment on column ndfl_person_deduction.period_curr_summ is 'Сумма вычета применения вычета в текущкм периоде';
+comment on column ndfl_person_deduction.period_prev_date is 'Р”Р°С‚Р° РїСЂРёРјРµРЅРµРЅРёСЏ РІС‹С‡РµС‚Р° РІ РїСЂРµРґС‹РґСѓС‰РµРј РїРµСЂРёРѕРґРµ';
+comment on column ndfl_person_deduction.period_prev_summ is 'РЎСѓРјРјР° РІС‹С‡РµС‚Р° РїСЂРёРјРµРЅРµРЅРёСЏ РІС‹С‡РµС‚Р° РІ РїСЂРµРґС‹РґСѓС‰РµРј РїРµСЂРёРѕРґРµ';
+comment on column ndfl_person_deduction.period_curr_date is 'Р”Р°С‚Р° РїСЂРёРјРµРЅРµРЅРёСЏ РІС‹С‡РµС‚Р° РІ С‚РµРєСѓС‰РµРј РїРµСЂРёРѕРґРµ';
+comment on column ndfl_person_deduction.period_curr_summ is 'РЎСѓРјРјР° РІС‹С‡РµС‚Р° РїСЂРёРјРµРЅРµРЅРёСЏ РІС‹С‡РµС‚Р° РІ С‚РµРєСѓС‰РєРј РїРµСЂРёРѕРґРµ';
 
 create sequence seq_ndfl_person_deduction start with 1000;
 ------------------------------------------------------------------------------------------------------
@@ -1323,16 +1323,16 @@ create table ndfl_person_prepayment
   notif_source   varchar2(20 char) not null
 );
 
-comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';
-comment on column ndfl_person_prepayment.row_num is 'Порядковый номер строки';
-comment on column ndfl_person_prepayment.summ is 'Сумма фиксированного авансового платежа';
-comment on column ndfl_person_prepayment.notif_num is 'Номер уведомления, подтверждающего право на имущественный налоговый вычет';
-comment on column ndfl_person_prepayment.notif_date is 'Дата выдачи уведомления';
-comment on column ndfl_person_prepayment.notif_source is 'Код налогового органа, выдавшего уведомление';
+comment on table ndfl_person_prepayment is 'CРІРµРґРµРЅРёСЏ Рѕ РґРѕС…РѕРґР°С… РІ РІРёРґРµ Р°РІР°РЅСЃРѕРІС‹С… РїР»Р°С‚РµР¶РµР№';
+comment on column ndfl_person_prepayment.row_num is 'РџРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ СЃС‚СЂРѕРєРё';
+comment on column ndfl_person_prepayment.summ is 'РЎСѓРјРјР° С„РёРєСЃРёСЂРѕРІР°РЅРЅРѕРіРѕ Р°РІР°РЅСЃРѕРІРѕРіРѕ РїР»Р°С‚РµР¶Р°';
+comment on column ndfl_person_prepayment.notif_num is 'РќРѕРјРµСЂ СѓРІРµРґРѕРјР»РµРЅРёСЏ, РїРѕРґС‚РІРµСЂР¶РґР°СЋС‰РµРіРѕ РїСЂР°РІРѕ РЅР° РёРјСѓС‰РµСЃС‚РІРµРЅРЅС‹Р№ РЅР°Р»РѕРіРѕРІС‹Р№ РІС‹С‡РµС‚';
+comment on column ndfl_person_prepayment.notif_date is 'Р”Р°С‚Р° РІС‹РґР°С‡Рё СѓРІРµРґРѕРјР»РµРЅРёСЏ';
+comment on column ndfl_person_prepayment.notif_source is 'РљРѕРґ РЅР°Р»РѕРіРѕРІРѕРіРѕ РѕСЂРіР°РЅР°, РІС‹РґР°РІС€РµРіРѕ СѓРІРµРґРѕРјР»РµРЅРёРµ';
 
 create sequence seq_ndfl_person_prepayment start with 1000;
 ------------------------------------------------------------------------------------------------------
---  Расчет по страховым взносам 1151111
+--  Р Р°СЃС‡РµС‚ РїРѕ СЃС‚СЂР°С…РѕРІС‹Рј РІР·РЅРѕСЃР°Рј 1151111
 ------------------------------------------------------------------------------------------------------
 create table raschsv_kol_lic_tip
 (
@@ -1644,10 +1644,10 @@ create table declaration_subreport_params
   type                     char(1) not null,
   filter                   varchar2(1000 char)
 );
-comment on table declaration_subreport_params is 'Параметры спец. отчетов деклараций';
-comment on column declaration_subreport_params.name is 'Наименование параметра';
-comment on column declaration_subreport_params.alias is 'Псевдоним параметры для доступа из скрипта';
-comment on column declaration_subreport_params.ord is 'Порядковый номер параметра';
-comment on column declaration_subreport_params.type is 'Тип столбца (S - строка, N - число, D - дата, R - ссылка)';
-comment on column declaration_subreport_params.filter is 'Условие фильтрации элементов справочника';
+comment on table declaration_subreport_params is 'РџР°СЂР°РјРµС‚СЂС‹ СЃРїРµС†. РѕС‚С‡РµС‚РѕРІ РґРµРєР»Р°СЂР°С†РёР№' ;
+comment on column declaration_subreport_params.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РїР°СЂР°РјРµС‚СЂР°' ;
+comment on column declaration_subreport_params.alias is 'РџСЃРµРІРґРѕРЅРёРј РїР°СЂР°РјРµС‚СЂС‹ РґР»СЏ РґРѕСЃС‚СѓРїР° РёР· СЃРєСЂРёРїС‚Р°' ;
+comment on column declaration_subreport_params.ord is 'РџРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ РїР°СЂР°РјРµС‚СЂР°' ;
+comment on column declaration_subreport_params.type is 'РўРёРї СЃС‚РѕР»Р±С†Р° (S - СЃС‚СЂРѕРєР°, N - С‡РёСЃР»Рѕ, D - РґР°С‚Р°, R - СЃСЃС‹Р»РєР°)' ;
+comment on column declaration_subreport_params.filter is 'РЈСЃР»РѕРІРёРµ С„РёР»СЊС‚СЂР°С†РёРё СЌР»РµРјРµРЅС‚РѕРІ СЃРїСЂР°РІРѕС‡РЅРёРєР°' ;
 ------------------------------------------------------------------------------------------------------
