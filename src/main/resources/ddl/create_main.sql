@@ -1276,11 +1276,11 @@ create table ndfl_person_deduction
   id               number(18)        not null,
   ndfl_person_id   number(18)        not null,
   row_num          number(10)        not null,
-  type_code        varchar2(3)  not null,
-  notif_type       varchar2(2)  not null,
+  type_code        varchar2(3 char)  not null,
+  notif_type       varchar2(2 char)  not null,
   notif_date       date              not null,
-  notif_num        varchar2(20) not null,
-  notif_source     varchar2(20) not null,
+  notif_num        varchar2(20 char) not null,
+  notif_source     varchar2(20 char) not null,
   notif_summ       number(20, 2),
   income_accrued   date              not null,
   income_code      varchar2(4 char)  not null,
@@ -1318,9 +1318,9 @@ create table ndfl_person_prepayment
   ndfl_person_id number(18)        not null,
   row_num        number(10)        not null,
   summ           number(18),
-  notif_num      varchar2(20) not null,
+  notif_num      varchar2(20 char) not null,
   notif_date     date              not null,
-  notif_source   varchar2(20) not null
+  notif_source   varchar2(20 char) not null
 );
 
 comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';
@@ -1445,7 +1445,7 @@ create table raschsv_vypl_sv_dop
 create sequence seq_raschsv_vypl_sv_dop start with 1;
 comment on table raschsv_vypl_sv_dop is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу (ВыплСВДоп)';
 comment on column raschsv_vypl_sv_dop.id is 'Идентификатор';
-comment on column raschsv_vypl_sv_dop.raschv_dan_fl_poluch_id is 'Данные о физическом лице - получателе дохода (ДанФЛПолуч)';
+--comment on column raschsv_vypl_sv_dop.raschv_dan_fl_poluch_id is 'Данные о физическом лице - получателе дохода (ДанФЛПолуч)';
 comment on column raschsv_vypl_sv_dop.vypl_sv_vs3 is 'Сумма выплат и иных вознаграждений, на которые исчислены страховые взносы, всего за последние три месяца расчетного (отчетного) периода (ВыплСВВс3)';
 comment on column raschsv_vypl_sv_dop.nachisl_sv_vs3 is 'Сумма исчисленных страховых взносов всего за последние три месяца расчетного (отчетного) периода (НачислСВВс3)';
 ------------------------------------------------------------------------------------------------------

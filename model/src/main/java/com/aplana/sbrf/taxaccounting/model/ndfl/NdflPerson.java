@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -43,23 +44,26 @@ public class NdflPerson extends IdentityObject<Long> {
 
     public NdflPerson() {
         super();
+        ndflPersonIncomes = new ArrayList<NdflPersonIncome>();
+        ndflPersonDeductions = new ArrayList<NdflPersonDeduction>();
+        ndflPersonPrepayments = new ArrayList<NdflPersonPrepayment>();
     }
 
-    /**
-     * Конструктор с обязательными для заполнения полями
-     */
-    public NdflPerson(Long id, String inp, Long declarationDataId, String firstName, String lastName, Date birthDay, String citizenship, String idDocType, String idDocNumber, String status) {
-        this.id = id;
-        this.inp = inp;
-        this.declarationDataId = declarationDataId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.citizenship = citizenship;
-        this.idDocType = idDocType;
-        this.status = status;
-        this.birthDay = birthDay;
-        this.idDocNumber = idDocNumber;
-    }
+//    /**
+//     * Конструктор с обязательными для заполнения полями
+//     */
+//    public NdflPerson(Long id, String inp, Long declarationDataId, String firstName, String lastName, Date birthDay, String citizenship, String idDocType, String idDocNumber, String status) {
+//        this.id = id;
+//        this.inp = inp;
+//        this.declarationDataId = declarationDataId;
+//        this.firstName = firstName;
+//        this.lastName = lastName;
+//        this.citizenship = citizenship;
+//        this.idDocType = idDocType;
+//        this.status = status;
+//        this.birthDay = birthDay;
+//        this.idDocNumber = idDocNumber;
+//    }
 
     public static final String SEQ = "seq_ndfl_person";
 
