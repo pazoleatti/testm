@@ -1,4 +1,4 @@
-﻿create table form_kind (
+create table form_kind (
   id   number(18)    not null,
   name varchar2(100) not null
 );
@@ -1634,6 +1634,7 @@ create table raschsv_vyplat_it_422
    raschsv_sv_sum1_tip_id NUMBER(18)           not null
 );
 ------------------------------------------------------------------------------------------------------
+-- Параметры спец. отчетов деклараций
 create table declaration_subreport_params
 (
   id                       number(9) not null,
@@ -1644,10 +1645,10 @@ create table declaration_subreport_params
   type                     char(1) not null,
   filter                   varchar2(1000 char)
 );
-comment on table declaration_subreport_params is 'Параметры спец. отчетов деклараций' ;
-comment on column declaration_subreport_params.name is 'Наименование параметра' ;
-comment on column declaration_subreport_params.alias is 'Псевдоним параметры для доступа из скрипта' ;
-comment on column declaration_subreport_params.ord is 'Порядковый номер параметра' ;
-comment on column declaration_subreport_params.type is 'Тип столбца (S - строка, N - число, D - дата, R - ссылка)' ;
-comment on column declaration_subreport_params.filter is 'Условие фильтрации элементов справочника' ;
+comment on table declaration_subreport_params is 'Параметры спец. отчетов деклараций';
+comment on column declaration_subreport_params.name is 'Наименование параметра';
+comment on column declaration_subreport_params.alias is 'Псевдоним параметры для доступа из скрипта';
+comment on column declaration_subreport_params.ord is 'Порядковый номер параметра';
+comment on column declaration_subreport_params.type is 'Тип столбца (S - строка, N - число, D - дата, R - ссылка)';
+comment on column declaration_subreport_params.filter is 'Условие фильтрации элементов справочника';
 ------------------------------------------------------------------------------------------------------
