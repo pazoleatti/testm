@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import groovy.util.slurpersupport.NodeChild
 
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         break
@@ -17,7 +16,6 @@ switch (formDataEvent) {
         calc()
         break
 }
-
 
 void calc() {
 
@@ -50,8 +48,9 @@ void processInfoPart(infoPart) {
     ndflPersonOperations.each {
         processNdflPersonOperation(ndflPerson, it)
     }
+    Long result = ndflPersonService.save(ndflPerson)
 
-    ndflPersonDao.save(ndflPerson)
+    println "save " + ndflPerson + ": result=" + result
 }
 
 void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOperationsNode) {

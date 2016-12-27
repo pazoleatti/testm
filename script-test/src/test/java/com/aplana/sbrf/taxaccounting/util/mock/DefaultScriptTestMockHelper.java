@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.util.mock;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -291,6 +292,13 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     @Override
     public TransactionHelper mockTransactionHelper() {
         return mock(TransactionHelper.class);
+    }
+
+    @Override
+    public NdflPersonService mockNdflPersonService() {
+        NdflPersonService ndflPersonService = mock(NdflPersonService.class);
+        when(ndflPersonService.save(any(NdflPerson.class))).thenReturn(1243L);
+        return ndflPersonService;
     }
 
     /**

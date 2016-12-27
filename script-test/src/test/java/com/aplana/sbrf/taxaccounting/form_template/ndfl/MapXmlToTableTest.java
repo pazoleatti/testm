@@ -2,19 +2,15 @@ package com.aplana.sbrf.taxaccounting.form_template.ndfl;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.apache.commons.collections4.map.HashedMap;
-import org.apache.commons.io.IOUtils;
+import org.junit.Before;
 import org.junit.Test;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -67,65 +63,46 @@ public class MapXmlToTableTest extends ScriptTestBase {
     }
 
 
-  /*  public void f(){
-
-        File xmlFile = null;
-        Writer fileWriter = null;
-
-
-            try {
-                LOG.info(String.format("Создание временного файла для записи расчета для декларации %s", declarationData.getId()));
-                stateLogger.updateState("Создание временного файла для записи расчета");
-                try {
-                    xmlFile = File.createTempFile("file_for_validate", ".xml");
-                    fileWriter = new FileWriter(xmlFile);
-                    fileWriter.write(XML_HEADER);
-                } catch (IOException e) {
-                    throw new ServiceException("Ошибка при формировании временного файла для XML", e);
-                }
-                exchangeParams.put(DeclarationDataScriptParams.XML, fileWriter);
-                LOG.info(String.format("Формирование XML-файла декларации %s", declarationData.getId()));
-                stateLogger.updateState("Формирование XML-файла");
-                declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
-                if (logger.containsLevel(LogLevel.ERROR)) {
-                    throw new ServiceException();
-                }
-            } finally {
-                IOUtils.closeQuietly(fileWriter);
+    /**
+     * Инициализация перед каждым отдельным тестом
+     */
+    @Before
+    public void init() {
+        // Хэлпер хранится статично для оптимизации, чтобы он был один для всех тестов отдельного скрипта
+        if (testHelper == null) {
+            String path = getFolderPath();
+            if (path == null) {
+                throw new ServiceException("Test folder path is null!");
             }
+            testHelper = new TestScriptHelper(path, getFormData(), getMockHelper()) {
+                @Override
+                protected void initFormTemplate() {
+                    //do nothing...
+                }
 
-
-    }*/
+                @Override
+                public void initRowData() {
+                    //do nothing...
+                }
+            };
+        }
+        testHelper.reset();
+    }
 
 
     @Test
     public void create() throws IOException {
-
-        System.out.println("run test");
 
         InputStream xmlInputStream = MapXmlToTableTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/rnu_ndfl.xml");
         //String xml = IOUtils.toString(xmlInputStream, "windows-1251");
 
         Map<String, Object> param = new HashedMap<String, Object>();
         param.put("xmlInputStream", xmlInputStream);
+
         testHelper.execute(FormDataEvent.CALCULATE, param);
 
-
-
-       /// while (xmlStreamReader.hasNext()) {
-       //     xmlStreamReader.next();
-       // }
-
-
-
         //Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
-        //checkLogger();
+        checkLogger();
     }
-
-
-    //public getXml
-
-
-
 
 }

@@ -21,6 +21,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +70,10 @@ public class TestScriptHelper {
     private DeclarationService declarationService;
     private TransactionHelper transactionHelper;
 
+    //Сервисы НДФЛ
+    private NdflPersonService ndflPersonService;
+
+
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
     // Заданы константно
@@ -88,8 +93,8 @@ public class TestScriptHelper {
     /**
      * Сервис работы со скриптами НФ в тестовом режиме
      *
-     * @param path Относительный путь к каталогу со скриптом
-     * @param formData Экземпляр НФ
+     * @param path       Относительный путь к каталогу со скриптом
+     * @param formData   Экземпляр НФ
      * @param mockHelper Хэлпер с заглушками других сервисов, можно переопределить
      */
     public TestScriptHelper(String path, FormData formData, ScriptTestMockHelper mockHelper) {
@@ -102,7 +107,7 @@ public class TestScriptHelper {
         userDepartment.setName(DEPARTMENT_NAME);
         // Шаблон НФ из файла
         FormType formType = formData.getFormType();
-        formData.initFormTemplateParams(getTemplate(SCRIPT_PATH_PREFIX + path, true));
+        initFormTemplate();
         formData.setFormType(formType); // Сбрасывается в FormData#initFormTemplateParams
         this.path = SCRIPT_PATH_PREFIX + path + SCRIPT_PATH_FILE_NAME;
         try {
@@ -112,6 +117,13 @@ public class TestScriptHelper {
         }
         // Моск сервисов
         initMock();
+    }
+
+    /**
+     * Для переопределения метода
+     */
+    protected void initFormTemplate() {
+        formData.initFormTemplateParams(getTemplate(SCRIPT_PATH_PREFIX + path, true));
     }
 
     /**
@@ -130,6 +142,8 @@ public class TestScriptHelper {
         formTypeService = mockHelper.mockFormTypeService();
         declarationService = mockHelper.mockDeclarationService();
         transactionHelper = mockHelper.mockTransactionHelper();
+        ndflPersonService = mockHelper.mockNdflPersonService();
+
     }
 
     /**
@@ -147,7 +161,7 @@ public class TestScriptHelper {
      * Получение шаблона НФ из файлов content.xml, headers.xml, rows.xml
      * Затратная по времени операция, выполняется один раз для одного скрипта.
      *
-     * @param path путь к каталогу макета
+     * @param path         путь к каталогу макета
      * @param isUsedInside используется внутри тестового хеллпера (задавать ли значение для внутреннего шаблона или только вернуть загруженный)
      */
     private FormTemplate getTemplate(String path, boolean isUsedInside) {
@@ -219,10 +233,15 @@ public class TestScriptHelper {
         getLogger().clear();
     }
 
+    public void execute(FormDataEvent formDataEvent) {
+        execute(formDataEvent, Collections.<String, Object>emptyMap());
+    }
+
+
     /**
      * Выполнение части скрипта, связанного с указанным событием
      */
-    public void execute(FormDataEvent formDataEvent) {
+    public void execute(FormDataEvent formDataEvent, Map<String, Object> paramMap) {
         Bindings bindings = scriptingService.getEngine().createBindings();
         bindings.put("formDataEvent", formDataEvent);
         bindings.put("formDataService", formDataService);
@@ -244,6 +263,14 @@ public class TestScriptHelper {
         bindings.put("userDepartment", userDepartment);
         bindings.put("currentDataRow", currentDataRow);
         bindings.put("scriptStatusHolder", scriptStatusHolder);
+
+        //ndfl
+        bindings.put("ndflPersonService", ndflPersonService);
+
+
+        for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
+            bindings.put(entry.getKey(), entry.getValue());
+        }
 
         if (formDataEvent == FormDataEvent.IMPORT || formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE) {
             bindings.put("ImportInputStream", importFileInputStream);

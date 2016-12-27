@@ -43,9 +43,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         try {
             NdflPerson ndflPerson = getJdbcTemplate().queryForObject("select * from ndfl_person np where np.id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonRowMapper());
 
-            List<NdflPersonIncome> ndflPersonIncomes = findNdflPersonIncomes(ndflPersonId);
-            List<NdflPersonDeduction> ndflPersonDeductions = findNdflPersonDeduction(ndflPersonId);
-            List<NdflPersonPrepayment> ndflPersonPrepayments = findNdflPersonPrepayment(ndflPersonId);
+            List<NdflPersonIncome> ndflPersonIncomes = findNdflPersonIncomesByNdfPersonId(ndflPersonId);
+            List<NdflPersonDeduction> ndflPersonDeductions = findNdflPersonDeductionByNdfPersonId(ndflPersonId);
+            List<NdflPersonPrepayment> ndflPersonPrepayments = findNdflPersonPrepaymentByNdfPersonId(ndflPersonId);
 
             ndflPerson.setNdflPersonIncomes(ndflPersonIncomes);
             ndflPerson.setNdflPersonDeductions(ndflPersonDeductions);
@@ -57,8 +57,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
-
-    public List<NdflPersonIncome> findNdflPersonIncomes(long ndflPersonId) {
+    @Override
+    public List<NdflPersonIncome> findNdflPersonIncomesByNdfPersonId(long ndflPersonId) {
         try {
             return getJdbcTemplate().query("select * from ndfl_person_income npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -66,7 +66,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
-    public List<NdflPersonDeduction> findNdflPersonDeduction(long ndflPersonId) {
+    @Override
+    public List<NdflPersonDeduction> findNdflPersonDeductionByNdfPersonId(long ndflPersonId) {
         try {
             return getJdbcTemplate().query("select * from ndfl_person_deduction npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -74,7 +75,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
-    public List<NdflPersonPrepayment> findNdflPersonPrepayment(long ndflPersonId) {
+    @Override
+    public List<NdflPersonPrepayment> findNdflPersonPrepaymentByNdfPersonId(long ndflPersonId) {
         try {
             return getJdbcTemplate().query("select * from ndfl_person_prepayment npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -114,7 +116,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         return ndflPerson.getId();
     }
 
-    private void saveNdflPersonDetail(JdbcTemplate jdbcTemplate, String query, String seq,  NdflPerson ndflPerson, List<? extends NdflPersonDetail> details) {
+    private void saveNdflPersonDetail(JdbcTemplate jdbcTemplate, String query, String seq, NdflPerson ndflPerson, List<? extends NdflPersonDetail> details) {
         for (NdflPersonDetail detail : details) {
             if (detail.getId() != null) {
                 throw new DaoException(DUPLICATE_ERORR_MSG);
@@ -139,7 +141,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPerson> findNdflPersonByDeclarationDataId(Long declarationDataId) {
+    public List<NdflPerson> findNdflPersonByDeclarationDataId(long declarationDataId) {
         //TODO
         return null;
     }

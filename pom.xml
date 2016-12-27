@@ -431,6 +431,11 @@
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.aplana.taxaccounting</groupId>
+			<artifactId>model</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 
 
