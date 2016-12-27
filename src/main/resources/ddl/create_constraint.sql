@@ -1,4 +1,4 @@
---! Все закомментированные ограничения актуальны, но имеют Oracle-специфику, поэтому не могут быть использованы в unit-тестах.
+--! Р’СЃРµ Р·Р°РєРѕРјРјРµРЅС‚РёСЂРѕРІР°РЅРЅС‹Рµ РѕРіСЂР°РЅРёС‡РµРЅРёСЏ Р°РєС‚СѓР°Р»СЊРЅС‹, РЅРѕ РёРјРµСЋС‚ Oracle-СЃРїРµС†РёС„РёРєСѓ, РїРѕСЌС‚РѕРјСѓ РЅРµ РјРѕРіСѓС‚ Р±С‹С‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅС‹ РІ unit-С‚РµСЃС‚Р°С….
 
 alter table form_kind add constraint form_kind_pk primary key (id);
 
@@ -318,7 +318,7 @@ alter table department_change add constraint dep_change_chk_garant_use check (ga
 alter table department_change add constraint dep_change_chk_sunr_use check (sunr_use in (0, 1));
 
 --------------------------------------------------------------------------------------------------------
---                                      ФП "НДФЛ"
+--                                      Р¤Рџ "РќР”Р¤Р›"
 --------------------------------------------------------------------------------------------------------
 
 alter table ndfl_person add constraint ndfl_person_pk primary key (id);
@@ -364,7 +364,7 @@ create unique index i_search_data_result on form_search_data_result (session_id,
 create index i_form_search_result_formdata on form_search_result(form_data_id);
 
 ------------------------------------------------------------------------------------------------------
---      Расчет по страховым взносам 1151111
+--      Р Р°СЃС‡РµС‚ РїРѕ СЃС‚СЂР°С…РѕРІС‹Рј РІР·РЅРѕСЃР°Рј 1151111
 ------------------------------------------------------------------------------------------------------
 alter table raschsv_kol_lic_tip add constraint pk_rasch_kol_lic_tip primary key (id);
 alter table raschsv_sv_sum1_tip add constraint pk_rasch_sv_sum1_tip primary key (id);
@@ -463,6 +463,20 @@ alter table raschsv_sved_obuch add constraint fk_raschsv_sved_obuch_sum foreign 
 alter table raschsv_vyplat_it_422 add constraint pk_raschsv_vyplat_it_422 primary key (raschsv_sv_prim_tarif1_422_id, raschsv_sv_sum1_tip_id);
 alter table raschsv_vyplat_it_422 add constraint fk_raschsv_vyplat_it_422_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum1_tip (id);
 alter table raschsv_vyplat_it_422 add constraint fk_raschsv_vyplat_tarif3_422 foreign key (raschsv_sv_prim_tarif1_422_id) references raschsv_sv_prim_tarif1_3_422 (id);
+
+alter table raschsv_pers_sv_strah_lic add constraint pk_pers_sv_strah_face primary key (id);
+
+alter table raschsv_sv_vypl add constraint pk_raschsv_sv_vypl primary key (id);
+alter table raschsv_sv_vypl add constraint fk_raschsv_sv_vypl_strah_lic foreign key (raschsv_pers_sv_strah_lic_id) references raschsv_pers_sv_strah_lic (id);
+
+alter table raschsv_sv_vypl_mk add constraint pk_raschv_vypl_mk primary key (id);
+alter table raschsv_sv_vypl_mk add constraint fk_raschsv_sv_vypl_mk_sv_vypl foreign key (raschsv_sv_vypl_id) references raschsv_sv_vypl (id);
+
+alter table raschsv_vypl_sv_dop add constraint pk_raschv_vypl_sv_dop primary key (id);
+alter table raschsv_vypl_sv_dop add constraint fk_raschsv_vypl_sv_drop_lic foreign key (raschsv_pers_sv_strah_lic_id) references raschsv_pers_sv_strah_lic (id);
+
+alter table raschsv_vypl_sv_dop_mt add constraint pk_raschv_vypl_sv_dop_mt primary key (id);
+alter table raschsv_vypl_sv_dop_mt add constraint fk_raschsv_vsv_dop_mt_vsv_dop foreign key (raschsv_vypl_sv_dop_id) references raschsv_vypl_sv_dop (id);
 
 alter table declaration_subreport_params add constraint pk_decl_subrep_params primary key (id);
 alter table declaration_subreport_params add constraint fk_decl_subrep_pars_subrep_id foreign key (declaration_subreport_id) references declaration_subreport (id);

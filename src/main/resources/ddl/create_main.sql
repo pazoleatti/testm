@@ -1634,6 +1634,74 @@ create table raschsv_vyplat_it_422
    raschsv_sv_sum1_tip_id NUMBER(18)           not null
 );
 ------------------------------------------------------------------------------------------------------
+create table raschsv_pers_sv_strah_lic
+(
+   id                 NUMBER(18)           not null,
+   nom_korr           NUMBER(3)            not null,
+   period             VARCHAR2(2 CHAR),
+   otchet_god         VARCHAR2(4 CHAR),
+   nomer              NUMBER(7),
+   sv_data            DATE,
+   innfl              VARCHAR2(12 CHAR),
+   snils              VARCHAR2(14 CHAR),
+   data_rozd          DATE,
+   grazd              VARCHAR2(3 CHAR),
+   pol                VARCHAR2(1 CHAR),
+   kod_vid_doc        VARCHAR2(2 CHAR),
+   ser_nom_doc        VARCHAR2(25 CHAR),
+   priz_ops           VARCHAR2(1 CHAR),
+   priz_oms           VARCHAR2(1 CHAR),
+   priz_oss           VARCHAR2(1 CHAR),
+   familia            VARCHAR2(60 CHAR),
+   imya               VARCHAR2(60 CHAR),
+   otchestvo          VARCHAR2(60 CHAR)
+);
+create sequence seq_raschsv_pers_sv_strah_lic start with 1;
+------------------------------------------------------------------------------------------------------
+create table raschsv_sv_vypl
+(
+   id                 NUMBER(18)           not null,
+   raschsv_pers_sv_strah_lic_id NUMBER(18)           not null,
+   sum_vypl_vs3       NUMBER(17,2),
+   vypl_ops_vs3       NUMBER(17,2),
+   vypl_ops_dog_vs3   NUMBER(17,2),
+   nachisl_sv_vs3     NUMBER(17,2)
+);
+create sequence seq_raschsv_sv_vypl start with 1;
+------------------------------------------------------------------------------------------------------
+create table raschsv_sv_vypl_mk
+(
+   id                 NUMBER(18)           not null,
+   raschsv_sv_vypl_id NUMBER(18),
+   mesyac             VARCHAR2(2 CHAR),
+   kod_kat_lic        VARCHAR2(4 CHAR),
+   sum_vypl           NUMBER(17,2),
+   vypl_ops           NUMBER(17,2),
+   vypl_ops_dog       NUMBER(17,2),
+   nachisl_sv         NUMBER(17,2)
+);
+create sequence seq_raschsv_sv_vypl_mk start with 1;
+------------------------------------------------------------------------------------------------------
+create table raschsv_vypl_sv_dop
+(
+   id                 NUMBER(18)           not null,
+   raschsv_pers_sv_strah_lic_id NUMBER(18)           not null,
+   vypl_sv_vs3        NUMBER(17,2),
+   nachisl_sv_vs3     NUMBER(17,2)
+);
+create sequence seq_raschsv_vypl_sv_dop start with 1;
+------------------------------------------------------------------------------------------------------
+create table raschsv_vypl_sv_dop_mt
+(
+   id                 NUMBER(18)           not null,
+   raschsv_vypl_sv_dop_id NUMBER(18),
+   mesyac             VARCHAR2(2 CHAR),
+   tariff             VARCHAR2(2 CHAR),
+   vypl_sv            NUMBER(17,2),
+   nachisl_sv         NUMBER(17,2)
+);
+create sequence seq_raschsv_vypl_sv_dop_mt start with 1;
+------------------------------------------------------------------------------------------------------
 -- Параметры спец. отчетов деклараций
 create table declaration_subreport_params
 (
