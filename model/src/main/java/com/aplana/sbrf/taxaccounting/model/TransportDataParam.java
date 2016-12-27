@@ -127,9 +127,8 @@ public class TransportDataParam {
             }
         } else if (pattern.matcher(name).matches()) {
             declarationTypeId = 200;
-            departmentCode = "18_0000_00";
-            reportPeriodCode = "21";
-            year = 2016;
+            departmentCode = null;
+            reportPeriodCode = null;
             kpp = name.replaceAll(NO_RASCHSV_PATTERN, "$4");
         } else {
             throw new IllegalArgumentException(String.format(NAME_FORMAT_ERROR_DEC, name));

@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -25,14 +22,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.*;
+import java.util.*;
+
+import static com.aplana.sbrf.taxaccounting.service.impl.LoadDeclarationDataServiceImpl.*;
 
 /**
  * @author Dmitriy Levykin
@@ -45,6 +45,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
     //Добавил исключительно для записи в лог
     private String declarationTypeName = null;
+    public static final String TAG_DOCUMENT = "Документ";
+    public static final String ATTR_PERIOD = "Период";
+    public static final String ATTR_YEAR = "ОтчетГод";
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -195,29 +198,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 ArchiveEntry entry;
                 try {
                     while ((entry = zais.getNextEntry()) != null) {
-                        CheckResult checkResult = checkFileNameAccess(userInfo, entry.getName(), logger);
-                        if (checkResult != null) {
-                            try {
-                                if (copyFileFromStream(userInfo, zais, checkResult, entry.getName(), logger)) {
-                                    if (checkResult.isRefBook()) {
-                                    } else {
-                                        formDataFileNameList.add(entry.getName());
-                                        formDataDepartmentList.add(checkResult.getDepartmentTbId());
-                                    }
-                                    success++;
-                                } else {
-                                    fail++;
-                                }
-                            } catch (IOException e) {
-                                // Ошибка копирования сущности из архива
-                                log(userInfo, LogData.L33, logger, entry.getName(), e.getMessage());
-                                fail++;
-								LOG.error(e.getMessage(), e);
-                            }  catch (ServiceException se) {
-                                log(userInfo, LogData.L33, logger, entry.getName(), se.getMessage());
-                                fail++;
-								LOG.error(se.getMessage(), se);
-                            }
+                        if (copyFile(zais, entry.getName(), formDataFileNameList, formDataDepartmentList, userInfo, logger)) {
+                            success++;
                         } else {
                             fail++;
                         }
@@ -235,39 +217,81 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                     IOUtils.closeQuietly(zais);
                 }
             } else {
-                // Не архив
-                CheckResult checkResult = checkFileNameAccess(userInfo, fileName, logger);
-                if (checkResult != null) {
-                    try {
-                        if (copyFileFromStream(userInfo, inputStream, checkResult,
-                                fileName, logger)) {
-                            if (checkResult.isRefBook()) {
-                            } else {
-                                formDataFileNameList.add(fileName);
-                                formDataDepartmentList.add(checkResult.getDepartmentTbId());
-                            }
-                            success++;
-                        } else {
-                            fail++;
-                        }
-                    } catch (IOException e) {
-                        // Ошибка копирования файла
-                        log(userInfo, LogData.L33, logger, fileName, e.getMessage());
+                try {
+                    if (copyFile(inputStream, fileName, formDataFileNameList, formDataDepartmentList, userInfo, logger)) {
+                        success++;
+                    } else {
                         fail++;
-						LOG.error(e.getMessage(), e);
-                    } catch (ServiceException se) {
-                        log(userInfo, LogData.L33, logger, fileName, se.getMessage());
-                        fail++;
-						LOG.error(se.getMessage(), se);
                     }
-                } else {
+                } catch (IOException e) {
+                    // Ошибка копирования файла
+                    log(userInfo, LogData.L33, logger, fileName, e.getMessage());
                     fail++;
+                    LOG.error(e.getMessage(), e);
+                } catch (ServiceException se) {
+                    log(userInfo, LogData.L33, logger, fileName, se.getMessage());
+                    fail++;
+                    LOG.error(se.getMessage(), se);
                 }
             }
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
         return new ImportCounter(success, fail);
+    }
+
+    private boolean copyFile(InputStream inputStream, String fileName, List<String> formDataFileNameList, List<Integer> formDataDepartmentList, TAUserInfo userInfo, Logger logger) throws IOException {
+        File dataFile = null;
+        try {
+            dataFile = File.createTempFile("dataFile", ".original");
+            OutputStream dataFileOutputStream = new FileOutputStream(dataFile);
+            try {
+                IOUtils.copy(inputStream, dataFileOutputStream);
+            } finally {
+                IOUtils.closeQuietly(dataFileOutputStream);
+            }
+
+            CheckResult checkResult;
+            InputStream checkFileIS = null;
+            try {
+                checkFileIS = new FileInputStream(dataFile);
+                checkResult = checkFileNameAccess(userInfo, checkFileIS, fileName, logger);
+            } finally {
+                IOUtils.closeQuietly(checkFileIS);
+            }
+            if (checkResult != null) {
+                InputStream copyFileIS = null;
+                try {
+                    copyFileIS = new FileInputStream(dataFile);
+                    if (copyFileFromStream(userInfo, copyFileIS, checkResult, fileName, logger)) {
+                        if (!checkResult.isRefBook()) {
+                            formDataFileNameList.add(fileName);
+                            formDataDepartmentList.add(checkResult.getDepartmentTbId());
+                        }
+                    } else {
+                        return false;
+                    }
+                } catch (IOException e) {
+                    // Ошибка копирования сущности из архива
+                    log(userInfo, LogData.L33, logger, fileName, e.getMessage());
+                    LOG.error(e.getMessage(), e);
+                    return false;
+                } catch (ServiceException se) {
+                    log(userInfo, LogData.L33, logger, fileName, se.getMessage());
+                    LOG.error(se.getMessage(), se);
+                    return false;
+                } finally {
+                    IOUtils.closeQuietly(copyFileIS);
+                }
+            } else {
+                return false;
+            }
+        } finally {
+            if (dataFile != null) {
+                dataFile.delete();
+            }
+        }
+        return true;
     }
 
     private boolean checkPath(String path) {
@@ -328,7 +352,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * http://conf.aplana.com/pages/viewpage.action?pageId=13111363
      * Возвращает путь к каталогу, если проверка прошла.
      */
-    private CheckResult checkFileNameAccess(TAUserInfo userInfo, String fileName, Logger logger) {
+    private CheckResult checkFileNameAccess(TAUserInfo userInfo, InputStream inputStream, String fileName, Logger logger) {
         try {
             // Не ТФ декларации
             if (!TransportDataParam.isValidDecName(fileName)) {
@@ -346,6 +370,34 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             String asnuCode = transportDataParam.getAsnuCode();
             String guid = transportDataParam.getGuid();
             String kpp = transportDataParam.getKpp();
+            Integer declarationTypeId = transportDataParam.getDeclarationTypeId();
+
+            if (declarationTypeId == 200) {
+                departmentCode = "18_0000_00"; // ToDo нужно определять по КПП
+                try {
+                    SAXParserFactory factory = SAXParserFactory.newInstance();
+                    SAXParser saxParser = factory.newSAXParser();
+                    LoadDeclarationDataServiceImpl.SAXHandler handler = new LoadDeclarationDataServiceImpl.SAXHandler(new HashMap<String, List<String>>(){{
+                        put(TAG_DOCUMENT, Arrays.asList(ATTR_PERIOD, ATTR_YEAR));
+                    }});
+                    saxParser.parse(inputStream, handler);
+                    reportPeriodCode = handler.getValues().get(TAG_DOCUMENT).get(ATTR_PERIOD);
+                    try {
+                        year = Integer.parseInt(handler.getValues().get(TAG_DOCUMENT).get(ATTR_YEAR));
+                    } catch (NumberFormatException nfe) {
+                        // Ignore
+                    }
+                } catch (IOException e) {
+                    LOG.error("", e);
+                    throw new ServiceException("", e);
+                } catch (ParserConfigurationException e) {
+                    LOG.error("Ошибка при парсинге xml", e);
+                    throw new ServiceException("", e);
+                } catch (SAXException e) {
+                    LOG.error("", e);
+                    throw new ServiceException("", e);
+                }
+            }
 
             // Вывод результата разбора имени файла
             logger.info(U5, fileName);
@@ -354,14 +406,14 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                     getFileNamePart(reportPeriodCode), getFileNamePart(year),
                     getFileNamePart(kpp), getFileNamePart(asnuCode), getFileNamePart(guid));
 
-            // Не задан код подразделения или код формы
-            if (departmentCode == null || reportPeriodCode == null) {
+            // Не задан код подразделения/период/год
+            if (departmentCode == null || reportPeriodCode == null || year == null) {
                 logger.warn(U2_0, fileName);
                 return null;
             }
 
             // Указан несуществующий код налоговой формы
-            DeclarationType declarationType = declarationTypeService.get(transportDataParam.getDeclarationTypeId());
+            DeclarationType declarationType = declarationTypeService.get(declarationTypeId);
             declarationTypeName = declarationType.getName();
 
             // Указан несуществующий код подразделения
