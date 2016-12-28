@@ -1334,6 +1334,12 @@ create sequence seq_ndfl_person_prepayment start with 1000;
 ------------------------------------------------------------------------------------------------------
 --  Расчет по страховым взносам 1151111
 ------------------------------------------------------------------------------------------------------
+create table raschsv_file
+(
+   id                 NUMBER(18)           not null,
+   id_file            VARCHAR2(255 CHAR)   not null
+);
+------------------------------------------------------------------------------------------------------
 create table raschsv_kol_lic_tip
 (
    id                 NUMBER(18)           not null,
@@ -1359,6 +1365,7 @@ create sequence seq_raschsv_sv_sum1_tip start with 1;
 create table raschsv_obyaz_plat_sv
 (
    id                 NUMBER(18)           not null,
+   raschsv_file_id    NUMBER(18)           not null,
    oktmo              VARCHAR2(11 CHAR)
 );
 create sequence seq_raschsv_obyaz_plat_sv start with 1;
@@ -1637,6 +1644,7 @@ create table raschsv_vyplat_it_422
 create table raschsv_pers_sv_strah_lic
 (
    id                 NUMBER(18)           not null,
+   raschsv_file_id    NUMBER(18)           not null,
    nom_korr           NUMBER(3)            not null,
    period             VARCHAR2(2 CHAR),
    otchet_god         VARCHAR2(4 CHAR),
