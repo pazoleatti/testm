@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.service.script.RaschsvFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("ndflPersonService")
+@Service("ndflPersonService1")
 public class RaschsvFileServiceImpl implements RaschsvFileService {
 
     @Autowired

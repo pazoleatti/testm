@@ -49,16 +49,18 @@ public class NdflPersonDaoTest {
     private NdflPersonDao ndflPersonDao;
 
     @Test
-    @Ignore
     public void testGet() {
         NdflPerson ndflPerson = ndflPersonDao.get(1);
         assertNotNull(ndflPerson);
     }
 
-
+    @Test
+    public void testFindNdflPerson() {
+        List<NdflPerson> result = ndflPersonDao.findNdflPerson(1);
+        Assert.assertEquals(2, result.size());
+    }
 
     @Test
-    @Ignore
     public void testGoodSave() {
 
         NdflPerson goodNdflPerson = createGoodNdflPerson();
@@ -115,7 +117,6 @@ public class NdflPersonDaoTest {
     }
 
     @Test(expected = DaoException.class)
-    @Ignore
     public void testBadSave() {
         NdflPerson person = createGoodNdflPerson();
         person.setInp(null);
@@ -124,7 +125,6 @@ public class NdflPersonDaoTest {
 
 
     @Test(expected = DaoException.class)
-    @Ignore
     public void testDelete() {
         NdflPerson goodNdflPerson = createGoodNdflPerson();
         Long id = ndflPersonDao.save(goodNdflPerson);
@@ -136,7 +136,6 @@ public class NdflPersonDaoTest {
         ndflPersonDao.delete(id);
         NdflPerson deleted = ndflPersonDao.get(id);
         assertNull(deleted);
-
         //test cascade delete
     }
 

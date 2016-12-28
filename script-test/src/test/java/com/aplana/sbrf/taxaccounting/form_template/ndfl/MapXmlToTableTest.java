@@ -93,13 +93,18 @@ public class MapXmlToTableTest extends ScriptTestBase {
     @Test
     public void create() throws IOException {
 
-        InputStream xmlInputStream = MapXmlToTableTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/rnu_ndfl.xml");
+        InputStream inputStream = MapXmlToTableTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/rnu_ndfl.xml");
         //String xml = IOUtils.toString(xmlInputStream, "windows-1251");
 
         Map<String, Object> param = new HashedMap<String, Object>();
-        param.put("xmlInputStream", xmlInputStream);
 
-        testHelper.execute(FormDataEvent.CALCULATE, param);
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setId(1L);
+
+        param.put("declarationData", declarationData);
+
+        testHelper.setImportFileInputStream(inputStream);
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE, param);
 
         //Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
         checkLogger();

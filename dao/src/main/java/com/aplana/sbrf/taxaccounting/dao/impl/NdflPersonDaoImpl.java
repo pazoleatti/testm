@@ -35,7 +35,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public NdflPerson get(long ndflPersonId) {
         try {
-            NdflPerson ndflPerson = getJdbcTemplate().queryForObject("select * from ndfl_person np where np.id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonRowMapper());
+            NdflPerson ndflPerson = getJdbcTemplate().queryForObject("select " + createColumns(NdflPerson.COLUMNS, "np") + " from ndfl_person np where np.id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonRowMapper());
 
             List<NdflPersonIncome> ndflPersonIncomes = findIncomes(ndflPersonId);
             List<NdflPersonDeduction> ndflPersonDeductions = findDeductions(ndflPersonId);
@@ -53,13 +53,17 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPerson> findNdflPerson(long declarationDataId) {
-        return null;
+        try {
+            return getJdbcTemplate().query("select " + createColumns(NdflPerson.COLUMNS, "np") + " from ndfl_person np where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPerson>();
+        }
     }
 
     @Override
     public List<NdflPersonIncome> findIncomes(long ndflPersonId) {
         try {
-            return getJdbcTemplate().query("select * from ndfl_person_income npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+            return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " from ndfl_person_income npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonIncome>();
         }
@@ -68,7 +72,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPersonDeduction> findDeductions(long ndflPersonId) {
         try {
-            return getJdbcTemplate().query("select * from ndfl_person_deduction npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
+            return getJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npi") + " from ndfl_person_deduction npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonDeduction>();
         }
@@ -77,7 +81,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPersonPrepayment> findPrepayments(long ndflPersonId) {
         try {
-            return getJdbcTemplate().query("select * from ndfl_person_prepayment npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
+            return getJdbcTemplate().query("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npi") + " from ndfl_person_prepayment npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonPrepayment>();
         }
@@ -144,6 +148,15 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
         }
         return result;
+    }
+
+    private static String createColumns(String[] columns, String alias) {
+        List<String> list = new ArrayList<String>();
+        for (String col : columns) {
+            list.add(alias + "." + col);
+        }
+        String columnsNames = toSqlString(list.toArray());
+        return columnsNames.replace("(", "").replace(")", "");
     }
 
     private static String createInsert(String table, String seq, String[] columns, String[] fields) {

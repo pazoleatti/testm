@@ -10,20 +10,18 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import groovy.util.slurpersupport.NodeChild
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE:
-        break
-    case FormDataEvent.CALCULATE:
-        calc()
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importData()
         break
 }
 
-void calc() {
+void importData() {
 
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
 
-    def root = new XmlSlurper().parse(xmlInputStream);
+    def root = new XmlSlurper().parse(ImportInputStream)
 
     if (root == null) {
         throw new ServiceException('Отсутствие значения после обработки потока данных')
@@ -48,9 +46,10 @@ void processInfoPart(infoPart) {
     ndflPersonOperations.each {
         processNdflPersonOperation(ndflPerson, it)
     }
-    Long result = ndflPersonService.save(ndflPerson)
 
-    println "save " + ndflPerson + ": result=" + result
+    //Идентификатор декларации для которой загружаются данные
+    ndflPerson.declarationDataId = declarationData.getId()
+    ndflPersonService.save(ndflPerson)
 }
 
 void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOperationsNode) {
@@ -100,10 +99,16 @@ NdflPerson transformNdflPersonNode(NodeChild node) {
 }
 
 NdflPersonIncome transformNdflPersonIncome(NodeChild node) {
+    def operationNode = node.parent();
     NdflPersonIncome personIncome = new NdflPersonIncome()
     personIncome.rowNum = node.'@НомСтр'.toInteger()
     personIncome.incomeCode = node.'@КодДох'
     personIncome.incomeType = node.'@ТипДох'
+
+    personIncome.operationId = operationNode.'@ИдОпер'.toBigDecimal()
+    personIncome.oktmo = operationNode.'@ОКТМО'
+    personIncome.kpp = operationNode.'@КПП'
+
     personIncome.incomeAccruedDate = parseDate(node.'@ДатаДохНач')
     personIncome.incomePayoutDate = parseDate(node.'@ДатаДохВыпл')
     personIncome.incomeAccruedSumm = node.'@СуммДохНач'.toBigDecimal()
@@ -125,8 +130,10 @@ NdflPersonIncome transformNdflPersonIncome(NodeChild node) {
 }
 
 NdflPersonDeduction transformNdflPersonDeduction(NodeChild node) {
+
     NdflPersonDeduction personDeduction = new NdflPersonDeduction()
     personDeduction.rowNum = node.'@НомСтр'.toInteger()
+    personDeduction.operationId = node.parent().'@ИдОпер'.toBigDecimal()
     personDeduction.typeCode = node.'@ВычетКод'
     personDeduction.notifType = node.'@УведТип'
     personDeduction.notifDate = parseDate(node.'@УведДата')
@@ -147,6 +154,7 @@ NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node) {
 
     NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
     personPrepayment.rowNum = node.'@НомСтр'.toInteger()
+    personPrepayment.operationId = node.parent().'@ИдОпер'.toBigDecimal()
     personPrepayment.summ = node.'@Аванс'.toBigDecimal()
     personPrepayment.notifNum = node.'@УведНом'
     personPrepayment.notifDate = parseDate(node.'@УведДата')

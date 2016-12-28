@@ -1418,7 +1418,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 Map<String, Object> additionalParameters = new HashMap<String, Object>();
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
-
                 if (stateLogger != null) {
                     stateLogger.updateState("Импорт файла");
                 }
