@@ -486,4 +486,7 @@ alter table raschsv_vypl_sv_dop_mt add constraint fk_raschsv_vsv_dop_mt_vsv_dop 
 alter table declaration_subreport_params add constraint pk_decl_subrep_params primary key (id);
 alter table declaration_subreport_params add constraint fk_decl_subrep_pars_subrep_id foreign key (declaration_subreport_id) references declaration_subreport (id);
 alter table declaration_subreport_params add constraint chk_decl_subrep_pars_type check (type in ('S','N','D','R'));
+
+alter table declaration_subreport_params drop constraint fk_decl_subrep_pars_subrep_id;
+alter table declaration_subreport_params add constraint fk_decl_subrep_pars_subrep_id foreign key (declaration_subreport_id) references declaration_subreport (id) on delete cascade;
 ------------------------------------------------------------------------------------------------------
