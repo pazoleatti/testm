@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,17 +20,14 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
 
     @Override
     public RaschsvPersSvStrahLic get(long raschsvPersSvStrahLicId) {
-        RaschsvPersSvStrahLic raschsvPersSvStrahLic = getJdbcTemplate().queryForObject(
+        return getJdbcTemplate().queryForObject(
                 "select * from " + RaschsvPersSvStrahLic.TABLE_NAME + " sl where sl." + RaschsvPersSvStrahLic.COL_ID + " = ?",
                 new Object[]{raschsvPersSvStrahLicId},
                 new RaschsvPersSvStrahLicDaoImpl.RaschsvPersSvStrahLicRowMapper());
-
-        return raschsvPersSvStrahLic;
     }
 
     @Override
     public Integer insert(final List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList) {
-        JdbcTemplate jdbcTemplate = getJdbcTemplate();
         String sql = "INSERT INTO " + RaschsvPersSvStrahLic.TABLE_NAME +
                 " (" + RaschsvPersSvStrahLic.COL_ID + ", " + RaschsvPersSvStrahLic.COL_RASCHSV_FILE_ID + ", " + RaschsvPersSvStrahLic.COL_NOM_KORR + ", " +
                 RaschsvPersSvStrahLic.COL_PERIOD + ", " + RaschsvPersSvStrahLic.COL_OTCHET_GOD + ", " +
@@ -44,11 +40,16 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 RaschsvPersSvStrahLic.COL_FAMILIA + ", " + RaschsvPersSvStrahLic.COL_IMYA + ", " +
                 RaschsvPersSvStrahLic.COL_OTCHESTVO + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+        // Генерация идентификаторов
+        for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
+            raschsvPersSvStrahLic.setId(generateId(RaschsvPersSvStrahLic.SEQ, Long.class));
+        }
+
         int [] res = getJdbcTemplate().batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 RaschsvPersSvStrahLic raschsvPersSvStrahLic = raschsvPersSvStrahLicList.get(i);
-                ps.setLong(1, generateId(RaschsvPersSvStrahLic.SEQ, Long.class));
+                ps.setLong(1, raschsvPersSvStrahLic.getId());
                 ps.setLong(2, raschsvPersSvStrahLic.getRaschsvFileId());
                 ps.setInt(3, raschsvPersSvStrahLic.getNomKorr());
                 ps.setString(4, raschsvPersSvStrahLic.getPeriod());
@@ -81,7 +82,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     private static final class RaschsvPersSvStrahLicRowMapper implements RowMapper<RaschsvPersSvStrahLic> {
         @Override
         public RaschsvPersSvStrahLic mapRow(ResultSet rs, int index) throws SQLException {
-
             RaschsvPersSvStrahLic raschsvPersSvStrahLic = new RaschsvPersSvStrahLic();
             raschsvPersSvStrahLic.setId(SqlUtils.getLong(rs, RaschsvPersSvStrahLic.COL_ID));
             raschsvPersSvStrahLic.setNomKorr(SqlUtils.getInteger(rs, RaschsvPersSvStrahLic.COL_NOM_KORR));

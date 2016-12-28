@@ -6,11 +6,11 @@ import com.aplana.sbrf.taxaccounting.service.script.RaschsvFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("ndflPersonService1")
+@Service("raschsvFileService")
 public class RaschsvFileServiceImpl implements RaschsvFileService {
 
     @Autowired
-    RaschsvFileDao raschsvFileDao;
+    private RaschsvFileDao raschsvFileDao;
 
     @Override
     public Integer insert(RaschsvFile raschsvFile) {
