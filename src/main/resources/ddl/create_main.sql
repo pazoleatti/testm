@@ -1339,6 +1339,7 @@ create table raschsv_file
    id                 NUMBER(18)           not null,
    id_file            VARCHAR2(255 CHAR)   not null
 );
+create sequence seq_raschsv_file start with 1;
 ------------------------------------------------------------------------------------------------------
 create table raschsv_kol_lic_tip
 (
