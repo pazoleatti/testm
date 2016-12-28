@@ -10,6 +10,9 @@ public class NdflPersonIncome extends NdflPersonDetail {
 
     private String incomeCode;
     private String incomeType;
+    private String oktmo;
+    private String kpp;
+
     private Date incomeAccruedDate;
     private Date incomePayoutDate;
     private BigDecimal incomeAccruedSumm;
@@ -30,15 +33,34 @@ public class NdflPersonIncome extends NdflPersonDetail {
 
     public static final String TABLE_NAME = "ndfl_person_income";
     public static final String SEQ = "seq_ndfl_person_income";
-    public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "income_code", "income_type",
+    public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "operation_id", "oktmo", "kpp", "income_code", "income_type",
             "income_accrued_date", "income_payout_date", "income_accrued_summ", "income_payout_summ", "total_deductions_summ",
             "tax_base", "tax_rate", "tax_date", "calculated_tax", "withholding_tax", "not_holding_tax", "overholding_tax",
             "refound_tax", "tax_transfer_date", "payment_date", "payment_number", "tax_summ"};
 
-    public Object[] createPreparedStatementArgs() {
-        return new Object[]{id, ndflPersonId, rowNum, incomeCode, incomeType, incomeAccruedDate, incomePayoutDate,
-                incomeAccruedSumm, incomePayoutSumm, totalDeductionsSumm, taxBase, taxRate, taxDate, calculatedTax,
-                withholdingTax, notHoldingTax, overholdingTax, refoundTax, taxTransferDate, paymentDate, paymentNumber, taxSumm};
+    public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "oktmo", "kpp", "incomeCode", "incomeType",
+            "incomeAccruedDate", "incomePayoutDate", "incomeAccruedSumm", "incomePayoutSumm", "totalDeductionsSumm",
+            "taxBase", "taxRate", "taxDate", "calculatedTax", "withholdingTax", "notHoldingTax", "overholdingTax",
+            "refoundTax", "taxTransferDate", "paymentDate", "paymentNumber", "taxSumm"};
+
+    @Override
+    public String getTableName() {
+        return TABLE_NAME;
+    }
+
+    @Override
+    public String getSeq() {
+        return SEQ;
+    }
+
+    @Override
+    public String[] getColumns() {
+        return COLUMNS;
+    }
+
+    @Override
+    public String[] getFields() {
+        return FIELDS;
     }
 
     public String getIncomeCode() {
@@ -55,6 +77,23 @@ public class NdflPersonIncome extends NdflPersonDetail {
 
     public void setIncomeType(String incomeType) {
         this.incomeType = incomeType;
+    }
+
+
+    public String getOktmo() {
+        return oktmo;
+    }
+
+    public void setOktmo(String oktmo) {
+        this.oktmo = oktmo;
+    }
+
+    public String getKpp() {
+        return kpp;
+    }
+
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
     }
 
     public Date getIncomeAccruedDate() {

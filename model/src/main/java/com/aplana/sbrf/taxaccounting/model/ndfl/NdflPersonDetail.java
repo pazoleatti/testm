@@ -9,6 +9,8 @@ public abstract class NdflPersonDetail extends IdentityObject<Long> {
 
     protected Integer rowNum;
 
+    protected Long operationId;
+
     protected Long ndflPersonId;
 
     public Long getNdflPersonId() {
@@ -27,6 +29,19 @@ public abstract class NdflPersonDetail extends IdentityObject<Long> {
         this.rowNum = rowNum;
     }
 
-    public abstract Object[] createPreparedStatementArgs();
+    public Long getOperationId() {
+        return operationId;
+    }
 
+    public void setOperationId(Long operationId) {
+        this.operationId = operationId;
+    }
+
+    public abstract String getTableName();
+
+    public abstract String getSeq();
+
+    public abstract String[] getColumns();
+
+    public abstract String[] getFields();
 }

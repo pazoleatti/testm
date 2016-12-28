@@ -15,13 +15,31 @@ public class NdflPersonPrepayment extends NdflPersonDetail {
 
     public static final String TABLE_NAME = "ndfl_person_prepayment";
     public static final String SEQ = "seq_ndfl_person_prepayment";
-    public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "summ", "notif_num", "notif_date", "notif_source"};
+    public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "operation_id", "summ", "notif_num", "notif_date", "notif_source"};
+    public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "summ", "notifNum", "notifDate", "notifSource"};
 
-    public Object[] createPreparedStatementArgs() {
-        return new Object[]{id, ndflPersonId, rowNum, summ, notifNum, notifDate, notifSource};
+    @Override
+    public String getTableName() {
+        return TABLE_NAME;
+    }
+
+    @Override
+    public String getSeq() {
+        return SEQ;
+    }
+
+    @Override
+    public String[] getColumns() {
+        return COLUMNS;
+    }
+
+    @Override
+    public String[] getFields() {
+        return FIELDS;
     }
 
     public BigDecimal getSumm() {
+
         return summ;
     }
 

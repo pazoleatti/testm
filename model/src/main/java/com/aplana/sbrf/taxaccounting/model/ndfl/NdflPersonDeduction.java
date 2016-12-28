@@ -24,19 +24,36 @@ public class NdflPersonDeduction extends NdflPersonDetail {
 
     public static final String TABLE_NAME = "ndfl_person_deduction";
     public static final String SEQ = "seq_ndfl_person_deduction";
-    public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "type_code",
+    public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "operation_id", "type_code",
             "notif_type", "notif_date", "notif_num", "notif_source",
             "notif_summ", "income_accrued", "income_code", "income_summ",
             "period_prev_date", "period_prev_summ",
             "period_curr_date", "period_curr_summ"};
 
-    public Object[] createPreparedStatementArgs() {
-        return new Object[]{id, ndflPersonId, rowNum, typeCode,
-                notifType, notifDate, notifNum, notifSource,
-                notifSumm, incomeAccrued, incomeCode, incomeSumm,
-                periodPrevDate, periodPrevSumm,
-                periodCurrDate, periodCurrSumm
-        };
+    public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "typeCode",
+            "notifType", "notifDate", "notifNum", "notifSource",
+            "notifSumm", "incomeAccrued", "incomeCode", "incomeSumm",
+            "periodPrevDate", "periodPrevSumm",
+            "periodCurrDate", "periodCurrSumm"};
+
+    @Override
+    public String getTableName() {
+        return TABLE_NAME;
+    }
+
+    @Override
+    public String getSeq() {
+        return SEQ;
+    }
+
+    @Override
+    public String[] getColumns() {
+        return COLUMNS;
+    }
+
+    @Override
+    public String[] getFields() {
+        return FIELDS;
     }
 
     public String getTypeCode() {

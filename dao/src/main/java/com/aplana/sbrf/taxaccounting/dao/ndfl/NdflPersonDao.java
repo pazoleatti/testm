@@ -14,21 +14,25 @@ import java.util.List;
  */
 public interface NdflPersonDao {
 
-    NdflPerson get(long ndflPersonData);
+    /**
+     * Найти NdflPerson по идентификатору, метод используется для тестирования
+     */
+    NdflPerson get(long ndflPersonId);
 
-    public Long save(NdflPerson ndflPerson);
+    Long save(NdflPerson ndflPerson);
 
-    public void delete(Long id);
+    void delete(Long ndflPersonId);
 
-    public List<NdflPerson> findAll();
+    /**
+     * Найти все данные о доходах физ лица привязанные к декларации
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPerson> findNdflPerson(long declarationDataId);
 
-    public List<NdflPerson> findNdflPersonByDeclarationDataId(long declarationDataId);
+    List<NdflPersonIncome> findIncomes(long ndflPersonId);
 
-    public List<NdflPersonIncome> findNdflPersonIncomesByNdfPersonId(long ndflPersonId);
+    List<NdflPersonDeduction> findDeductions(long ndflPersonId);
 
-    public List<NdflPersonDeduction> findNdflPersonDeductionByNdfPersonId(long ndflPersonId);
-
-    public List<NdflPersonPrepayment> findNdflPersonPrepaymentByNdfPersonId(long ndflPersonId);
-
+    List<NdflPersonPrepayment> findPrepayments(long ndflPersonId);
 
 }

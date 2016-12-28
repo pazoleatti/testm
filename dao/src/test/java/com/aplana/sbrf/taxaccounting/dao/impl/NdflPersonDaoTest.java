@@ -29,7 +29,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Andrey Drunk
@@ -47,7 +48,6 @@ public class NdflPersonDaoTest {
     @Autowired
     private NdflPersonDao ndflPersonDao;
 
-
     @Test
     @Ignore
     public void testGet() {
@@ -55,10 +55,7 @@ public class NdflPersonDaoTest {
         assertNotNull(ndflPerson);
     }
 
-    public void findAllTest() {
-        List<NdflPerson> result = ndflPersonDao.findAll();
-        assertEquals(1, result.size());
-    }
+
 
     @Test
     @Ignore

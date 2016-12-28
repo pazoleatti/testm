@@ -2,12 +2,11 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
+ * Данные о физическом лице - получателе дохода
+ *
  * @author Andrey Drunk
  */
 public class NdflPerson extends IdentityObject<Long> {
@@ -49,37 +48,82 @@ public class NdflPerson extends IdentityObject<Long> {
         ndflPersonPrepayments = new ArrayList<NdflPersonPrepayment>();
     }
 
-//    /**
-//     * Конструктор с обязательными для заполнения полями
-//     */
-//    public NdflPerson(Long id, String inp, Long declarationDataId, String firstName, String lastName, Date birthDay, String citizenship, String idDocType, String idDocNumber, String status) {
-//        this.id = id;
-//        this.inp = inp;
-//        this.declarationDataId = declarationDataId;
-//        this.firstName = firstName;
-//        this.lastName = lastName;
-//        this.citizenship = citizenship;
-//        this.idDocType = idDocType;
-//        this.status = status;
-//        this.birthDay = birthDay;
-//        this.idDocNumber = idDocNumber;
-//    }
-
+    public static final String TABLE_NAME = "ndfl_person";
     public static final String SEQ = "seq_ndfl_person";
-
-    /**
-     * Вспомогательное поле для построения запросов
-     */
-    public static final String[] COLUMNS = {"id", "declaration_data_id", "inp", "snils", "last_name", "first_name", "middle_name", "birth_day", "citizenship",
-            "inn_np", "inn_foreign", "id_doc_type", "id_doc_number", "status", "post_index", "region_code", "area", "city",
-            "locality", "street", "house", "building", "flat", "country_code", "address", "additional_data"};
+    public static final String[] COLUMNS = {"id", "declaration_data_id", "inp", "snils", "last_name", "first_name", "middle_name", "birth_day", "citizenship", "inn_np", "inn_foreign", "id_doc_type", "id_doc_number", "status", "post_index", "region_code", "area", "city", "locality", "street", "house", "building", "flat", "country_code", "address", "additional_data"};
+    public static final String[] FIELDS = {"id", "declarationDataId", "inp", "snils", "lastName", "firstName", "middleName", "birthDay", "citizenship", "innNp", "innForeign", "idDocType", "idDocNumber", "status", "postIndex", "regionCode", "area", "city", "locality", "street", "house", "building", "flat", "countryCode", "address", "additionalData"};
 
     public Object[] createPreparedStatementArgs() {
-        return new Object[]{id, declarationDataId, inp, snils, lastName, firstName, middleName, birthDay, citizenship,
+        return new Object[]{declarationDataId, inp, snils, lastName, firstName, middleName, birthDay, citizenship,
                 innNp, innForeign, idDocType, idDocNumber, status, postIndex, regionCode, area, city,
                 locality, street, house, building, flat, countryCode, address, additionalData
         };
     }
+
+
+    public Map<String, String> getSqlParameterSource() {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        map.put("id", "id");
+        map.put("declarationDataId", "declaration_data_id");
+        map.put("inp", "inp");
+        map.put("snils", "snils");
+        map.put("lastName", "last_name");
+        map.put("firstName", "first_name");
+        map.put("middleName", "middle_name");
+        map.put("birthDay", "birth_day");
+        map.put("citizenship", "citizenship");
+        map.put("innNp", "inn_np");
+        map.put("innForeign", "inn_foreign");
+        map.put("idDocType", "id_doc_type");
+        map.put("idDocNumber", "id_doc_number");
+        map.put("status", "status");
+        map.put("postIndex", "post_index");
+        map.put("regionCode", "region_code");
+        map.put("area", "area");
+        map.put("city", "city");
+        map.put("locality", "locality");
+        map.put("street", "street");
+        map.put("house", "house");
+        map.put("building", "building");
+        map.put("flat", "flat");
+        map.put("countryCode", "country_code");
+        map.put("address", "address");
+        map.put("additionalData", "additional_data");
+        return map;
+    }
+
+
+    public Map<String, String> getColumns() {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        map.put("id", "id");
+        map.put("declarationDataId", "declaration_data_id");
+        map.put("inp", "inp");
+        map.put("snils", "snils");
+        map.put("lastName", "last_name");
+        map.put("firstName", "first_name");
+        map.put("middleName", "middle_name");
+        map.put("birthDay", "birth_day");
+        map.put("citizenship", "citizenship");
+        map.put("innNp", "inn_np");
+        map.put("innForeign", "inn_foreign");
+        map.put("idDocType", "id_doc_type");
+        map.put("idDocNumber", "id_doc_number");
+        map.put("status", "status");
+        map.put("postIndex", "post_index");
+        map.put("regionCode", "region_code");
+        map.put("area", "area");
+        map.put("city", "city");
+        map.put("locality", "locality");
+        map.put("street", "street");
+        map.put("house", "house");
+        map.put("building", "building");
+        map.put("flat", "flat");
+        map.put("countryCode", "country_code");
+        map.put("address", "address");
+        map.put("additionalData", "additional_data");
+        return map;
+    }
+
 
     public Long getDeclarationDataId() {
         return declarationDataId;

@@ -2,21 +2,24 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Andrey Drunk
@@ -30,22 +33,13 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     private static final String DUPLICATE_ERORR_MSG = "Попытка перезаписать уже сохранённые данные!";
 
     @Override
-    public List<NdflPerson> findAll() {
-        try {
-            return getJdbcTemplate().query("select * from ndfl_person np", new NdflPersonDaoImpl.NdflPersonRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return Collections.emptyList();
-        }
-    }
-
-    @Override
     public NdflPerson get(long ndflPersonId) {
         try {
             NdflPerson ndflPerson = getJdbcTemplate().queryForObject("select * from ndfl_person np where np.id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonRowMapper());
 
-            List<NdflPersonIncome> ndflPersonIncomes = findNdflPersonIncomesByNdfPersonId(ndflPersonId);
-            List<NdflPersonDeduction> ndflPersonDeductions = findNdflPersonDeductionByNdfPersonId(ndflPersonId);
-            List<NdflPersonPrepayment> ndflPersonPrepayments = findNdflPersonPrepaymentByNdfPersonId(ndflPersonId);
+            List<NdflPersonIncome> ndflPersonIncomes = findIncomes(ndflPersonId);
+            List<NdflPersonDeduction> ndflPersonDeductions = findDeductions(ndflPersonId);
+            List<NdflPersonPrepayment> ndflPersonPrepayments = findPrepayments(ndflPersonId);
 
             ndflPerson.setNdflPersonIncomes(ndflPersonIncomes);
             ndflPerson.setNdflPersonDeductions(ndflPersonDeductions);
@@ -58,7 +52,12 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> findNdflPersonIncomesByNdfPersonId(long ndflPersonId) {
+    public List<NdflPerson> findNdflPerson(long declarationDataId) {
+        return null;
+    }
+
+    @Override
+    public List<NdflPersonIncome> findIncomes(long ndflPersonId) {
         try {
             return getJdbcTemplate().query("select * from ndfl_person_income npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -67,7 +66,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonDeduction> findNdflPersonDeductionByNdfPersonId(long ndflPersonId) {
+    public List<NdflPersonDeduction> findDeductions(long ndflPersonId) {
         try {
             return getJdbcTemplate().query("select * from ndfl_person_deduction npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -76,7 +75,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonPrepayment> findNdflPersonPrepaymentByNdfPersonId(long ndflPersonId) {
+    public List<NdflPersonPrepayment> findPrepayments(long ndflPersonId) {
         try {
             return getJdbcTemplate().query("select * from ndfl_person_prepayment npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -84,52 +83,46 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
-
     @Override
-    public Long save(NdflPerson ndflPerson) {
-        JdbcTemplate jdbcTemplate = getJdbcTemplate();
+    public Long save(final NdflPerson ndflPerson) {
 
         if (ndflPerson.getId() != null) {
             throw new DaoException(DUPLICATE_ERORR_MSG);
         }
 
-        ndflPerson.setId(generateId(NdflPerson.SEQ, Long.class));
-        jdbcTemplate.update("insert into ndfl_person " + createColumnsAndSource(NdflPerson.COLUMNS), ndflPerson.createPreparedStatementArgs());
+        saveObject(ndflPerson, NdflPerson.TABLE_NAME, NdflPerson.SEQ, NdflPerson.COLUMNS, NdflPerson.FIELDS);
 
-        //
         List<NdflPersonIncome> ndflPersonIncomes = ndflPerson.getNdflPersonIncomes();
-
         if (ndflPersonIncomes == null || ndflPersonIncomes.isEmpty()) {
             throw new DaoException("Пропущены обязательные данные о доходах!");
         }
-
-        saveNdflPersonDetail(jdbcTemplate, insert(NdflPersonIncome.TABLE_NAME, NdflPersonIncome.COLUMNS), NdflPersonIncome.SEQ, ndflPerson, ndflPersonIncomes);
-
+        saveDetails(ndflPerson, ndflPersonIncomes);
 
         List<NdflPersonDeduction> ndflPersonDeductions = ndflPerson.getNdflPersonDeductions();
-        saveNdflPersonDetail(jdbcTemplate, insert(NdflPersonDeduction.TABLE_NAME, NdflPersonDeduction.COLUMNS), NdflPersonDeduction.SEQ, ndflPerson, ndflPersonDeductions);
-
+        saveDetails(ndflPerson, ndflPersonDeductions);
 
         List<NdflPersonPrepayment> ndflPersonPrepayments = ndflPerson.getNdflPersonPrepayments();
-        saveNdflPersonDetail(jdbcTemplate, insert(NdflPersonPrepayment.TABLE_NAME, NdflPersonPrepayment.COLUMNS), NdflPersonPrepayment.SEQ, ndflPerson, ndflPersonPrepayments);
+        saveDetails(ndflPerson, ndflPersonPrepayments);
 
         return ndflPerson.getId();
     }
 
-    private void saveNdflPersonDetail(JdbcTemplate jdbcTemplate, String query, String seq, NdflPerson ndflPerson, List<? extends NdflPersonDetail> details) {
+    private void saveDetails(NdflPerson ndflPerson, List<? extends NdflPersonDetail> details) {
         for (NdflPersonDetail detail : details) {
             if (detail.getId() != null) {
                 throw new DaoException(DUPLICATE_ERORR_MSG);
             }
-            detail.setId(generateId(seq, Long.class));
             detail.setNdflPersonId(ndflPerson.getId());
-            jdbcTemplate.update(query, detail.createPreparedStatementArgs());
+            saveObject(detail, detail.getTableName(), detail.getSeq(), detail.getColumns(), detail.getFields());
         }
     }
 
-    private static String insert(String table, String[] columns) {
-        StringBuilder sb = new StringBuilder();
-        return sb.append("insert into ").append(table).append(" ").append(createColumnsAndSource(columns)).toString();
+    private <E extends IdentityObject> void saveObject(E identityObject, String table, String seq, String[] columns, String[] fields) {
+        String insert = createInsert(table, seq, columns, fields);
+        NamedParameterJdbcTemplate jdbcTemplate = getNamedParameterJdbcTemplate();
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(insert, prepareParameters(identityObject, fields), keyHolder, new String[]{"ID"});
+        identityObject.setId(keyHolder.getKey().longValue());
     }
 
     @Override
@@ -140,32 +133,63 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
-    @Override
-    public List<NdflPerson> findNdflPersonByDeclarationDataId(long declarationDataId) {
-        //TODO
-        return null;
+    private <E> MapSqlParameterSource prepareParameters(E entity, String[] fields) {
+        MapSqlParameterSource result = new MapSqlParameterSource();
+        BeanPropertySqlParameterSource defaultSource = new BeanPropertySqlParameterSource(entity);
+        Set fieldsSet = new HashSet<String>();
+        fieldsSet.addAll(Arrays.asList(fields));
+        for (String paramName : defaultSource.getReadablePropertyNames()) {
+            if (fieldsSet.contains(paramName)) {
+                result.addValue(paramName, defaultSource.getValue(paramName));
+            }
+        }
+        return result;
     }
 
-    public static String createColumnsAndSource(String[] columnDescriptors) {
-        int iMax = columnDescriptors.length - 1;
-        StringBuilder columns = new StringBuilder();
-        StringBuilder source = new StringBuilder();
-        columns.append(" (");
-        source.append(" VALUES (");
+    private static String createInsert(String table, String seq, String[] columns, String[] fields) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("insert into ").append(table);
+        sb.append(toSqlString(columns));
+        sb.append(" VALUES ");
+        sb.append(toSqlParameters(fields, seq));
+        return sb.toString();
+    }
 
+    /**
+     * Метод преобразует массив {"a", "b", "c"} в строку "(a, b, c)"
+     *
+     * @param a исходный массив
+     * @return строка
+     */
+    public static String toSqlString(Object[] a) {
+        if (a == null) {
+            return "";
+        }
+        int iMax = a.length - 1;
         if (iMax == -1) {
             return "";
         }
-
+        StringBuilder b = new StringBuilder();
+        b.append('(');
         for (int i = 0; ; i++) {
-            columns.append(columnDescriptors[i]);
-            source.append("?");
+            b.append(a[i]);
             if (i == iMax) {
-                return columns.append(')').toString() + source.append(')').toString();
+                return b.append(')').toString();
             }
-            columns.append(", ");
-            source.append(", ");
+            b.append(", ");
         }
+    }
+
+    public static String toSqlParameters(String[] fields, String seq) {
+        List<String> result = new ArrayList<String>();
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i].equals("id")) {
+                result.add(seq + ".nextval");
+            } else {
+                result.add(":" + fields[i]);
+            }
+        }
+        return toSqlString(result.toArray());
     }
 
     //>-------------------------<The DAO row mappers>-----------------------------<
@@ -177,6 +201,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             NdflPerson person = new NdflPerson();
             person.setId(SqlUtils.getLong(rs, "id"));
             person.setDeclarationDataId(SqlUtils.getLong(rs, "declaration_data_id"));
+
             person.setInp(rs.getString("inp"));
             person.setSnils(rs.getString("snils"));
             person.setLastName(rs.getString("last_name"));
@@ -216,8 +241,12 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             NdflPersonIncome personIncome = new NdflPersonIncome();
 
             personIncome.setId(SqlUtils.getLong(rs, "id"));
-            personIncome.setNdflPersonId(SqlUtils.getLong(rs, "ndfl_person_id"));
             personIncome.setRowNum(rs.getInt("row_num"));
+            personIncome.setNdflPersonId(SqlUtils.getLong(rs, "ndfl_person_id"));
+
+            personIncome.setOperationId(SqlUtils.getLong(rs, "operation_id"));
+            personIncome.setOktmo(rs.getString("oktmo"));
+            personIncome.setKpp(rs.getString("kpp"));
 
             personIncome.setIncomeCode(rs.getString("income_code"));
             personIncome.setIncomeType(rs.getString("income_type"));
@@ -254,6 +283,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personDeduction.setId(SqlUtils.getLong(rs, "id"));
             personDeduction.setNdflPersonId(SqlUtils.getLong(rs, "ndfl_person_id"));
             personDeduction.setRowNum(rs.getInt("row_num"));
+            personDeduction.setOperationId(SqlUtils.getLong(rs, "operation_id"));
 
             personDeduction.setTypeCode(rs.getString("type_code"));
 
@@ -285,6 +315,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setId(SqlUtils.getLong(rs, "id"));
             personPrepayment.setNdflPersonId(SqlUtils.getLong(rs, "ndfl_person_id"));
             personPrepayment.setRowNum(rs.getInt("row_num"));
+            personPrepayment.setOperationId(SqlUtils.getLong(rs, "operation_id"));
 
             personPrepayment.setSumm(rs.getBigDecimal("summ"));
             personPrepayment.setNotifNum(rs.getString("notif_num"));
