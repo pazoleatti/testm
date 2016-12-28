@@ -322,7 +322,6 @@ alter table department_change add constraint dep_change_chk_sunr_use check (sunr
 --------------------------------------------------------------------------------------------------------
 
 alter table ndfl_person add constraint ndfl_person_pk primary key (id);
---alter table ndfl_person add constraint ndfl_person_inp_unq unique (inp);
 alter table ndfl_person add constraint ndfl_person_fk_d foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
 
 alter table ndfl_person_income add constraint ndfl_person_i_pk primary key (id);

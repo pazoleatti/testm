@@ -1227,7 +1227,9 @@ create table ndfl_person_income
   row_num               number(10) not null,
   income_code           varchar2(100 char),
   income_type           varchar2(100 char),
-
+  operation_id          number(18) not null,
+  oktmo                 varchar2(20 char),
+  kpp                   varchar2(20 char),
   income_accrued_date   date,
   income_payout_date    date,
   income_accrued_summ   number(20, 2),
@@ -1243,14 +1245,18 @@ create table ndfl_person_income
   refound_tax           number(10),
   tax_transfer_date     date,
   payment_date          date,
-  payment_number        varchar2(20),
+  payment_number        varchar2(20 char),
   tax_summ              number(10)
 );
+
 
 comment on table ndfl_person_income is 'Сведения о доходах физического лица';
 comment on column ndfl_person_income.row_num is 'Порядковый номер строки';
 comment on column ndfl_person_income.income_code is 'Код дохода';
 comment on column ndfl_person_income.income_type is 'Признак дохода';
+comment on column ndfl_person_income.operation_id is 'Номер операции';
+comment on column ndfl_person_income.oktmo is 'ОКТМО';
+comment on column ndfl_person_income.kpp is 'КПП';
 comment on column ndfl_person_income.income_accrued_date is 'Дата начисления дохода';
 comment on column ndfl_person_income.income_payout_date is 'Дата выплаты дохода';
 comment on column ndfl_person_income.income_accrued_summ is 'Сумма начисленного дохода';
@@ -1276,6 +1282,7 @@ create table ndfl_person_deduction
   id               number(18)        not null,
   ndfl_person_id   number(18)        not null,
   row_num          number(10)        not null,
+  operation_id     number(18)        not null,
   type_code        varchar2(3 char)  not null,
   notif_type       varchar2(2 char)  not null,
   notif_date       date              not null,
@@ -1293,6 +1300,7 @@ create table ndfl_person_deduction
 
 comment on table ndfl_person_deduction is 'Стандартные, социальные и имущественные налоговые вычеты';
 comment on column ndfl_person_deduction.row_num is 'Порядковый номер строки';
+comment on column ndfl_person_deduction.operation_id is 'Номер операции';
 comment on column ndfl_person_deduction.type_code is 'Код вычета';
 
 comment on column ndfl_person_deduction.notif_type is 'Тип уведомления (Документа о праве на налоговый вычет)';
@@ -1317,6 +1325,7 @@ create table ndfl_person_prepayment
   id             number(18)        not null,
   ndfl_person_id number(18)        not null,
   row_num        number(10)        not null,
+  operation_id   number(18)        not null,
   summ           number(18),
   notif_num      varchar2(20 char) not null,
   notif_date     date              not null,
@@ -1325,6 +1334,7 @@ create table ndfl_person_prepayment
 
 comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';
 comment on column ndfl_person_prepayment.row_num is 'Порядковый номер строки';
+comment on column ndfl_person_prepayment.operation_id is 'Номер операции';
 comment on column ndfl_person_prepayment.summ is 'Сумма фиксированного авансового платежа';
 comment on column ndfl_person_prepayment.notif_num is 'Номер уведомления, подтверждающего право на имущественный налоговый вычет';
 comment on column ndfl_person_prepayment.notif_date is 'Дата выдачи уведомления';
