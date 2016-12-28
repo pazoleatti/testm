@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvFile;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -19,10 +20,7 @@ import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Map;
+import java.util.*;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
@@ -299,6 +297,20 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         NdflPersonService ndflPersonService = mock(NdflPersonService.class);
         when(ndflPersonService.save(any(NdflPerson.class))).thenReturn(1243L);
         return ndflPersonService;
+    }
+
+    @Override
+    public RaschsvFileService mockRaschsvFileService() {
+        RaschsvFileService raschsvFileService = mock(RaschsvFileService.class);
+        when(raschsvFileService.insert(any(RaschsvFile.class))).thenReturn(1);
+        return raschsvFileService;
+    }
+
+    @Override
+    public RaschsvPersSvStrahLicService mockRaschsvPersSvStrahLicService() {
+        RaschsvPersSvStrahLicService raschsvPersSvStrahLicService = mock(RaschsvPersSvStrahLicService.class);
+        when(raschsvPersSvStrahLicService.insert(any(List.class))).thenReturn(1);
+        return raschsvPersSvStrahLicService;
     }
 
     /**

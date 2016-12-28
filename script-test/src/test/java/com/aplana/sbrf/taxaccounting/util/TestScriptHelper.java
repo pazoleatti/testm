@@ -70,6 +70,10 @@ public class TestScriptHelper {
     private DeclarationService declarationService;
     private TransactionHelper transactionHelper;
 
+    //Сервисы по расчеты страховых выплат
+    private RaschsvFileService raschsvFileService;
+    private RaschsvPersSvStrahLicService raschsvPersSvStrahLicService;
+
     //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
 
@@ -143,7 +147,8 @@ public class TestScriptHelper {
         declarationService = mockHelper.mockDeclarationService();
         transactionHelper = mockHelper.mockTransactionHelper();
         ndflPersonService = mockHelper.mockNdflPersonService();
-
+        raschsvFileService = mockHelper.mockRaschsvFileService();
+        raschsvPersSvStrahLicService = mockHelper.mockRaschsvPersSvStrahLicService();
     }
 
     /**
@@ -263,6 +268,10 @@ public class TestScriptHelper {
         bindings.put("userDepartment", userDepartment);
         bindings.put("currentDataRow", currentDataRow);
         bindings.put("scriptStatusHolder", scriptStatusHolder);
+
+        //Расчеты страховых выплат
+        bindings.put("raschsvFileService", raschsvFileService);
+        bindings.put("raschsvPersSvStrahLicService", raschsvPersSvStrahLicService);
 
         //ndfl
         bindings.put("ndflPersonService", ndflPersonService);
