@@ -3,9 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -15,14 +13,12 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.digester.plugins.Declaration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -31,7 +27,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -59,6 +62,42 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
     private static final long REF_BOOK_DEPARTMENT = 30L; // Подразделения
     private static final long REF_BOOK_PERIOD_DICT = 8L; // Коды отчетных периодов
     private static final String SBRF_CODE_ATTR_NAME = "SBRF_CODE";
+
+    public static final String TAG_DOCUMENT = "Документ";
+    public static final String ATTR_PERIOD = "Период";
+    public static final String ATTR_YEAR = "ОтчетГод";
+
+    public static class SAXHandler extends DefaultHandler {
+        private Map<String, Map<String, String>> values;
+        private Map<String, List<String>> tagAttrNames;
+
+        public SAXHandler(Map<String, List<String>> tagAttrNames) {
+            this.tagAttrNames = tagAttrNames;
+        }
+
+        public Map<String, Map<String, String>> getValues() {
+            return values;
+        }
+
+        @Override
+        public void startDocument() throws SAXException {
+            values = new HashMap<String, Map<String, String>>();
+            for (Map.Entry<String, List<String>> entry : tagAttrNames.entrySet()) {
+                values.put(entry.getKey(), new HashMap<String, String>());
+            }
+        }
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            for (Map.Entry<String, List<String>> entry : tagAttrNames.entrySet()) {
+                if (entry.getKey().equals(qName)) {
+                    for (String attrName: entry.getValue()) {
+                        values.get(qName).put(attrName, attributes.getValue(attrName));
+                    }
+                }
+            }
+        }
+    }
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -278,7 +317,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             try {
                 List<LogEntry> logs;
                 try {
-                    logs = loadDeclartionDataFile(userInfo, departmentId, fileName, currentFile.getInputStream(), logger, lockId);
+                    logs = loadDeclarationDataFile(userInfo, departmentId, fileName, currentFile, logger, lockId);
                 } finally {
                     IOUtils.closeQuietly(inputStream);
                 }
@@ -307,7 +346,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         return new ImportCounter(success, fail + wrongImportCounter.getFailCounter());
     }
 
-    private List<LogEntry> loadDeclartionDataFile(TAUserInfo userInfo, Integer departmentId, String fileName, InputStream inputStream, Logger logger, String lockId) {
+    private List<LogEntry> loadDeclarationDataFile(TAUserInfo userInfo, Integer departmentId, String fileName, FileWrapper currentFile, Logger logger, String lockId) {
         TransportDataParam transportDataParam = TransportDataParam.valueOfDec(fileName);
         String reportPeriodCode = transportDataParam.getReportPeriodCode();
         Integer year = transportDataParam.getYear();
@@ -316,6 +355,43 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         String guid = transportDataParam.getGuid();
         String kpp = transportDataParam.getKpp();
         Integer declarationTypeId = transportDataParam.getDeclarationTypeId();
+
+        // для 1151111 парсим файл для определения периода
+        if (declarationTypeId == 200) {
+            departmentCode = "18_0000_00"; // ToDo нужно определять по КПП
+            InputStream inputStream = currentFile.getInputStream();
+            try {
+                SAXParserFactory factory = SAXParserFactory.newInstance();
+                SAXParser saxParser = factory.newSAXParser();
+                SAXHandler handler = new SAXHandler(new HashMap<String, List<String>>(){{
+                    put(TAG_DOCUMENT, Arrays.asList(ATTR_PERIOD, ATTR_YEAR));
+                }});
+                saxParser.parse(inputStream, handler);
+                reportPeriodCode = handler.getValues().get(TAG_DOCUMENT).get(ATTR_PERIOD);
+                try {
+                    year = Integer.parseInt(handler.getValues().get(TAG_DOCUMENT).get(ATTR_YEAR));
+                } catch (NumberFormatException nfe) {
+                    // Ignore
+                }
+            } catch (IOException e) {
+                LOG.error("", e);
+                throw new ServiceException("", e);
+            } catch (ParserConfigurationException e) {
+                LOG.error("Ошибка при парсинге xml", e);
+                throw new ServiceException("", e);
+            } catch (SAXException e) {
+                LOG.error("", e);
+                throw new ServiceException("", e);
+            } finally {
+                IOUtils.closeQuietly(inputStream);
+            }
+        }
+
+
+        // Не задан код подразделения/период/год
+        if (departmentCode == null || reportPeriodCode == null || year == null) {
+            return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.L4, logger, lockId, fileName, "path")));
+        }
 
         // Подразделение НФ
         Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode, false);
@@ -357,10 +433,6 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             return Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.L48.getText(), logger, lockId, fileName)));
         }
 
-        // Не задан код подразделения или код формы
-        if (departmentCode == null || reportPeriodCode == null) {
-            return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.L4, logger, lockId, fileName, "path")));
-        }
 
         // Указан несуществующий код подразделения
         if (formDepartment == null) {
@@ -430,6 +502,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         // Загрузка данных в НФ (скрипт)
         Logger localLogger = new Logger();
         boolean result;
+        InputStream inputStream = currentFile.getInputStream();
         try {
             // Загрузка
             result = importDeclarationData(userInfo, inputStream, fileName, declarationData, declarationType,
@@ -443,6 +516,8 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             // Вывод в область уведомленеий и ЖА
             log(userInfo, LogData.L21, logger, lockId, e.getMessage());
             return localLogger.getEntries();
+        } finally {
+            IOUtils.closeQuietly(inputStream);
         }
 
         if (result) {
@@ -533,7 +608,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             // 15 Скрипт
             try {
                 declarationDataService.importDeclarationData(localLogger, userInfo, declarationData.getId(), inputStream,
-                        fileName, FormDataEvent.IMPORT_TRANSPORT_FILE, null);
+                        fileName, FormDataEvent.IMPORT_TRANSPORT_FILE, null, lock);
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }
@@ -548,22 +623,6 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                     auditService.add(FormDataEvent.CREATE, userInfo, declarationData, null, "Декларация создана", null);
                 }
             }
-
-            //Department formDepartment = departmentDao.getDepartment(departmentReportPeriod.getDepartmentId());
-
-            // 22-23 если форма не была создана
-            /*
-            if (!formWasCreated) {
-                log(userInfo, LogData.L18, localLogger, lock, formDataKind.getTitle(), formType.getName(), formDepartment.getName(), reportPeriodName);
-            } else {
-                log(userInfo, LogData.L13, localLogger, lock);
-                if (departmentReportPeriod.getCorrectionDate() != null) {
-                    log(userInfo, LogData.L8, localLogger, lock, formType.getName(), reportPeriodName);
-                }
-                // 22Б.2 НФ корректно заполнена значениями из ТФ.
-                log(userInfo, LogData.L19, localLogger, lock, formDataKind.getTitle(), formType.getName(), formDepartment.getName(), reportPeriodName);
-            }
-            */
         } finally {
             // Снимаем блокировку
             lockDataService.unlock(declarationDataService.generateAsyncTaskKey(declarationData.getId(), DeclarationDataReportType.IMPORT_TF_DEC), userInfo.getUser().getId());

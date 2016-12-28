@@ -146,7 +146,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         CALENDAR.clear();
     }
 
-
     private class SAXHandler extends DefaultHandler {
         private Map<String, String> values;
         private Map<String, String> tagAttrNames;
@@ -1360,14 +1359,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger) {
-        String key = "key";
-
+    public void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, String lock) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.CALCULATE);
 
         File dataFile = null;
         try {
-            LOG.info(String.format("Создание временного файла: %s", key));
+            LOG.info(String.format("Создание временного файла: %s", lock));
             if (stateLogger != null) {
                 stateLogger.updateState("Создание временного файла");
             }
@@ -1425,7 +1422,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (stateLogger != null) {
                     stateLogger.updateState("Импорт файла");
                 }
-                LOG.info(String.format("Выполнение скрипта: %s", key));
+                LOG.info(String.format("Выполнение скрипта: %s", lock));
                 if (!declarationDataScriptingService.executeScript(userInfo, declarationData, formDataEvent, logger, additionalParameters)) {
                     throw new ServiceException("Импорт данных не предусмотрен");
                 }
@@ -1440,7 +1437,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (stateLogger != null) {
                     stateLogger.updateState("Сохранение ошибок");
                 }
-                LOG.info(String.format("Сохранение ошибок: %s", key));
+                LOG.info(String.format("Сохранение ошибок: %s", lock));
                 String uuid = logEntryService.save(logger.getEntries());
                 throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
             }

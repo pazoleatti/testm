@@ -298,5 +298,5 @@ public interface DeclarationDataService {
      * Импорт ТФ Декларации
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream is,
-                        String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger);
+                        String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, String lock);
 }
