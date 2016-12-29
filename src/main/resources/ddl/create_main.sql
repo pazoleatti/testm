@@ -1731,4 +1731,149 @@ comment on column declaration_subreport_params.alias is 'Псевдоним па
 comment on column declaration_subreport_params.ord is 'Порядковый номер параметра';
 comment on column declaration_subreport_params.type is 'Тип столбца (S - строка, N - число, D - дата, R - ссылка)';
 comment on column declaration_subreport_params.filter is 'Условие фильтрации элементов справочника';
-------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+-- Таблицы для справочника ФИАС
+--------------------------------------------------------------------------------------------------------------------------
+-- Справочники
+create table fias_operstat
+(
+    operstatid number(10) not null,
+    name       varchar2(100 char) not null
+);
+comment on table fias_operstat  is 'Справочник "Статус действия"';
+comment on column fias_operstat.operstatid  is 'Идентификатор статуса (ключ)';
+comment on column fias_operstat.name  is 'Наименование (см. таблицу OperationStatuses)';
+
+create table fias_socrbase
+(
+    scname   varchar2(10 char),
+    socrname varchar2(60 char) not null,
+    kod_t_st varchar2(4 char) not null
+);
+comment on table fias_socrbase  is 'Справочник "Типы адресных объектов"';
+comment on column fias_socrbase.scname  is 'Краткое наименование типа объекта';
+comment on column fias_socrbase.socrname  is 'Полное наименование типа объекта';
+comment on column fias_socrbase.kod_t_st  is 'Ключевое поле';
+
+
+
+-- Сведения
+create table fias_addrobj
+(
+    aoguid varchar2(36 char) not null,
+    formalname varchar2(120 char) not null,
+    regioncode varchar2(2 char) not null,
+    autocode varchar2(1 char) not null,
+    areacode varchar2(3 char) not null,
+    citycode varchar2(3 char) not null,
+    ctarcode varchar2(3 char) not null,
+    placecode varchar2(3 char) not null,
+    plancode varchar2(4 char) not null,
+    streetcode varchar2(4 char) not null,
+    extrcode varchar2(4 char) not null,
+    sextcode varchar2(3 char) not null,
+    livestatus number(1) not null,
+    centstatus number(2) not null,
+    operstatus number(2) not null,
+    currstatus number(2) not null,
+    divtype number(1) not null,
+    offname varchar2(120 char),
+    postalcode varchar2(6 char),
+    parentguid varchar2(36 char)
+);
+
+comment on column fias_addrobj.aoguid is 'Глобальный уникальный идентификатор адресного объекта';
+comment on column fias_addrobj.formalname is 'Формализованное наименование';
+comment on column fias_addrobj.regioncode is 'Код региона';
+comment on column fias_addrobj.autocode is 'Код автономии';
+comment on column fias_addrobj.areacode is 'Код района';
+comment on column fias_addrobj.citycode is 'Код города';
+comment on column fias_addrobj.ctarcode is 'Код внутригородского района';
+comment on column fias_addrobj.placecode is 'Код населенного пункта';
+comment on column fias_addrobj.plancode is 'Код элемента планировочной структуры';
+comment on column fias_addrobj.streetcode is 'Код улицы';
+comment on column fias_addrobj.extrcode is 'Код дополнительного адресообразующего элемента';
+comment on column fias_addrobj.sextcode is 'Код подчиненного дополнительного адресообразующего элемента';
+comment on column fias_addrobj.livestatus is 'Статус актуальности адресного объекта ФИАС на текущую дату: 0 – Не актуальный, 1 - Актуальный';
+comment on column fias_addrobj.centstatus is 'Статус центра: 0 – объект не является центром административно-территориального образования; 1 – объект является центром района; 2 – объект является центром (столицей) региона; 3 – объект является одновременно и центром района и центром региона.';
+comment on column fias_addrobj.operstatus is 'Статус действия над записью – причина появления записи (см. fias_operstat)';
+comment on column fias_addrobj.currstatus is 'Статус актуальности КЛАДР 4 (последние две цифры в коде)';
+comment on column fias_addrobj.startdate is 'Начало действия записи';
+comment on column fias_addrobj.enddate is 'Окончание действия записи';
+comment on column fias_addrobj.divtype is 'Тип деления: 0 – не определено, 1 – муниципальное, 2 – административное';
+comment on column fias_addrobj.offname is 'Официальное наименование';
+comment on column fias_addrobj.postalcode is 'Почтовый индекс';
+comment on column fias_addrobj.parentguid is 'Идентификатор объекта родительского объекта';
+comment on column fias_addrobj.cadnum is 'Кадастровый номер';
+
+create table fias_house
+(
+    houseguid  varchar2(36 char) not null,
+    aoguid     varchar2(36 char) not null,
+    eststatus  number(1) not null,
+    strstatus  number(1) not null,
+    statstatus number(2) not null,
+    divtype    number(1) not null,
+    postalcode varchar2(6 char),
+    housenum   varchar2(20 char),
+    buildnum   varchar2(10 char),
+    strucnum   varchar2(10 char)
+
+);
+comment on table fias_house  is 'Сведения по отдельным зданиям, сооружениям';
+comment on column fias_house.houseguid is 'Глобальный уникальный идентификатор дома';
+comment on column fias_house.aoguid is 'Guid записи родительского объекта (улицы, города, населенного пункта и т.п.)';
+comment on column fias_house.eststatus is 'Признак владения: 0 – Не определено, 1 – Владение, 2 – Дом, 3 – Домовладение';
+comment on column fias_house.strstatus is 'Признак строения: 0 – Не определено, 1 – Строение, 2 – Сооружение, 3 – Литер';
+comment on column fias_house.statstatus is 'Состояние дома (???)';
+comment on column fias_house.divtype is 'Тип деления: 0 – не определено, 1 – муниципальное, 2 – административное';
+comment on column fias_house.postalcode is 'Почтовый индекс';
+comment on column fias_house.housenum is 'Номер дома';
+comment on column fias_house.buildnum is 'Номер корпуса';
+comment on column fias_house.strucnum is 'Номер строения';
+
+create table fias_houseint
+(
+    intguid    varchar2(36 char) not null,
+    aoguid     varchar2(36 char) not null,
+    intstart   number(10) not null,
+    intend     number(10) not null,
+    intstatus  number(1) not null,
+    counter    number(10) not null,
+    postalcode varchar2(6 char)
+);
+comment on table fias_houseint  is 'Интервалы домов';
+comment on column fias_houseint.intstart is 'Значение начала интервала';
+comment on column fias_houseint.intend is 'Значение окончания интервала';
+comment on column fias_houseint.intguid is 'Глобальный уникальный идентификатор интервала домов';
+comment on column fias_houseint.aoguid is 'Идентификатор объекта родительского объекта (улицы, города, населенного пункта и т.п.)';
+comment on column fias_houseint.intstatus is 'Статус интервала: 0 – Не определено, 1 – Обычный, 2 – Четный, 3 – Нечетный';
+comment on column fias_houseint.counter is 'Счетчик записей по интервалам зданий, сооружений для формирования классификационного кода';
+comment on column fias_houseint.postalcode is 'Почтовый индекс';
+
+
+create table fias_room
+(
+    roomguid   varchar2(36 char) not null,
+    houseguid  varchar2(36 char) not null,
+    regioncode varchar2(2 char) not null,
+    flatnumber varchar2(50 char) not null,
+    flattype   number(10) not null,
+    livestatus number(1) not null,
+    roomnumber varchar2(50 char),
+    roomtypeid number(2),
+    postalcode varchar2(6 char)
+);
+comment on table fias_room  is 'Сведения по помещениям';
+comment on column fias_room.roomguid is 'Глобальный уникальный идентификатор помещения';
+comment on column fias_room.houseguid is 'Глобальный уникальный идентификатор родительского объекта (дома)';
+comment on column fias_room.regioncode is 'Код региона';
+comment on column fias_room.flatnumber is 'Номер квартиры, офиса и прочего';
+comment on column fias_room.flattype is 'Тип квартиры';
+comment on column fias_room.livestatus is 'Статус актуальности адресного объекта ФИАС на текущую дату: 0 – Не актуальный, 1 - Актуальный';
+comment on column fias_room.roomnumber is 'Номер комнаты или помещения';
+comment on column fias_room.roomtypeid is 'Тип комнаты (???)';
+comment on column fias_room.postalcode is 'Почтовый индекс';
+--------------------------------------------------------------------------------------------------------------------------
+
+
