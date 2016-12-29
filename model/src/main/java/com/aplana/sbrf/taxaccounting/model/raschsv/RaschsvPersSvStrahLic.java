@@ -12,7 +12,6 @@ import java.util.List;
  */
 public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
 
-    private Long raschsvFileId;
     private Integer nomKorr;
     private String period;
     private String otchetGod;
@@ -43,7 +42,6 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public static final String SEQ = "seq_raschsv_pers_sv_strah_lic";
     public static final String TABLE_NAME = "raschsv_pers_sv_strah_lic";
     public static final String COL_ID = "id";
-    public static final String COL_RASCHSV_FILE_ID = "raschsv_file_id";
     public static final String COL_NOM_KORR = "nom_korr";
     public static final String COL_PERIOD = "period";
     public static final String COL_OTCHET_GOD = "otchet_god";
@@ -62,9 +60,6 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public static final String COL_FAMILIA = "familia";
     public static final String COL_IMYA = "imya";
     public static final String COL_OTCHESTVO = "otchestvo";
-
-    public Long getRaschsvFileId() { return raschsvFileId; }
-    public void setRaschsvFileId(Long raschsvFileId) { this.raschsvFileId = raschsvFileId; }
 
     public Integer getNomKorr() { return nomKorr; }
     public void setNomKorr(Integer nomKorr) { this.nomKorr = nomKorr; }

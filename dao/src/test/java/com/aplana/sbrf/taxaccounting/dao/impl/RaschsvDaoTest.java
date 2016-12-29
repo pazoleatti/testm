@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvFileDao;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvFile;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl;
 import org.junit.Test;
@@ -26,32 +24,7 @@ import static org.junit.Assert.assertFalse;
 public class RaschsvDaoTest {
 
     @Autowired
-    private RaschsvFileDao raschsvFileDao;
-
-    @Autowired
     private RaschsvPersSvStrahLicDao raschsvPersSvStrahLicDao;
-
-    // Идентификатор записи в таблице "Файл обмена"
-    private static final Long RASCHSV_FILE_ID = 111L;
-
-    /**
-     * Тестирование выборки данных из таблицы "Файл обмена"
-     */
-    @Test
-    public void testGetRaschsvFile() {
-        RaschsvFile raschsvFile = raschsvFileDao.get(RASCHSV_FILE_ID);
-        assertNotNull(raschsvFile);
-    }
-
-    /**
-     * Тестирование сохранения данных в таблицу "Файл обмена"
-     */
-    @Test
-    public void testSaveRaschsvFile() {
-        RaschsvFile raschsvFile = new RaschsvFile();
-        raschsvFile.setIdFile("1");
-        assertNotNull(raschsvFileDao.insert(raschsvFile));
-    }
 
     /**
      * Тестирование сохранения данных в таблицу "Персонифицированные сведения о застрахованных лицах"
@@ -85,13 +58,11 @@ public class RaschsvDaoTest {
         RaschsvPersSvStrahLic raschsvPersSvStrahLic1 = new RaschsvPersSvStrahLic();
         raschsvPersSvStrahLic1.setNomKorr(1);
         raschsvPersSvStrahLic1.setNomer(1);
-        raschsvPersSvStrahLic1.setRaschsvFileId(RASCHSV_FILE_ID);
         raschsvPersSvStrahLic1.setRaschsvSvVyplList(raschsvSvVyplList);
 
         RaschsvPersSvStrahLic raschsvPersSvStrahLic2 = new RaschsvPersSvStrahLic();
         raschsvPersSvStrahLic2.setNomKorr(2);
         raschsvPersSvStrahLic2.setNomer(2);
-        raschsvPersSvStrahLic2.setRaschsvFileId(RASCHSV_FILE_ID);
 
         List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic1);

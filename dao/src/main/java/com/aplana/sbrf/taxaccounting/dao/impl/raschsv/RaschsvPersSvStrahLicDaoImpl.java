@@ -50,7 +50,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     @Override
     public Integer insert(final List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList) {
         String sql = "INSERT INTO " + RaschsvPersSvStrahLic.TABLE_NAME +
-                " (" + RaschsvPersSvStrahLic.COL_ID + ", " + RaschsvPersSvStrahLic.COL_RASCHSV_FILE_ID + ", " + RaschsvPersSvStrahLic.COL_NOM_KORR + ", " +
+                " (" + RaschsvPersSvStrahLic.COL_ID + ", " + RaschsvPersSvStrahLic.COL_NOM_KORR + ", " +
                 RaschsvPersSvStrahLic.COL_PERIOD + ", " + RaschsvPersSvStrahLic.COL_OTCHET_GOD + ", " +
                 RaschsvPersSvStrahLic.COL_NOMER + ", " + RaschsvPersSvStrahLic.COL_SV_DATA + ", " +
                 RaschsvPersSvStrahLic.COL_INNFL + ", " + RaschsvPersSvStrahLic.COL_SNILS + ", " +
@@ -59,7 +59,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 RaschsvPersSvStrahLic.COL_SER_NOM_DOC + ", " + RaschsvPersSvStrahLic.COL_PRIZ_OPS + ", " +
                 RaschsvPersSvStrahLic.COL_PRIZ_OMS + ", " + RaschsvPersSvStrahLic.COL_PRIZ_OSS + ", " +
                 RaschsvPersSvStrahLic.COL_FAMILIA + ", " + RaschsvPersSvStrahLic.COL_IMYA + ", " +
-                RaschsvPersSvStrahLic.COL_OTCHESTVO + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                RaschsvPersSvStrahLic.COL_OTCHESTVO + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         // Генерация идентификаторов
         for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
@@ -71,25 +71,24 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 RaschsvPersSvStrahLic raschsvPersSvStrahLic = raschsvPersSvStrahLicList.get(i);
                 ps.setLong(1, raschsvPersSvStrahLic.getId());
-                ps.setLong(2, raschsvPersSvStrahLic.getRaschsvFileId());
-                ps.setInt(3, raschsvPersSvStrahLic.getNomKorr());
-                ps.setString(4, raschsvPersSvStrahLic.getPeriod());
-                ps.setString(5, raschsvPersSvStrahLic.getOtchetGod());
-                ps.setInt(6, raschsvPersSvStrahLic.getNomer());
-                ps.setDate(7, raschsvPersSvStrahLic.getSvData());
-                ps.setString(8, raschsvPersSvStrahLic.getInnfl());
-                ps.setString(9, raschsvPersSvStrahLic.getSnils());
-                ps.setDate(10, raschsvPersSvStrahLic.getDataRozd());
-                ps.setString(11, raschsvPersSvStrahLic.getGrazd());
-                ps.setString(12, raschsvPersSvStrahLic.getPol());
-                ps.setString(13, raschsvPersSvStrahLic.getKodVidDoc());
-                ps.setString(14, raschsvPersSvStrahLic.getSerNomDoc());
-                ps.setString(15, raschsvPersSvStrahLic.getPrizOps());
-                ps.setString(16, raschsvPersSvStrahLic.getPrizOms());
-                ps.setString(17, raschsvPersSvStrahLic.getPrizOss());
-                ps.setString(18, raschsvPersSvStrahLic.getFamilia());
-                ps.setString(19, raschsvPersSvStrahLic.getImya());
-                ps.setString(20, raschsvPersSvStrahLic.getOtchestvo());
+                ps.setInt(2, raschsvPersSvStrahLic.getNomKorr());
+                ps.setString(3, raschsvPersSvStrahLic.getPeriod());
+                ps.setString(4, raschsvPersSvStrahLic.getOtchetGod());
+                ps.setInt(5, raschsvPersSvStrahLic.getNomer());
+                ps.setDate(6, raschsvPersSvStrahLic.getSvData());
+                ps.setString(7, raschsvPersSvStrahLic.getInnfl());
+                ps.setString(8, raschsvPersSvStrahLic.getSnils());
+                ps.setDate(9, raschsvPersSvStrahLic.getDataRozd());
+                ps.setString(10, raschsvPersSvStrahLic.getGrazd());
+                ps.setString(11, raschsvPersSvStrahLic.getPol());
+                ps.setString(12, raschsvPersSvStrahLic.getKodVidDoc());
+                ps.setString(13, raschsvPersSvStrahLic.getSerNomDoc());
+                ps.setString(14, raschsvPersSvStrahLic.getPrizOps());
+                ps.setString(15, raschsvPersSvStrahLic.getPrizOms());
+                ps.setString(16, raschsvPersSvStrahLic.getPrizOss());
+                ps.setString(17, raschsvPersSvStrahLic.getFamilia());
+                ps.setString(18, raschsvPersSvStrahLic.getImya());
+                ps.setString(19, raschsvPersSvStrahLic.getOtchestvo());
             }
 
             @Override

@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvFile;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -297,13 +296,6 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         NdflPersonService ndflPersonService = mock(NdflPersonService.class);
         when(ndflPersonService.save(any(NdflPerson.class))).thenReturn(1243L);
         return ndflPersonService;
-    }
-
-    @Override
-    public RaschsvFileService mockRaschsvFileService() {
-        RaschsvFileService raschsvFileService = mock(RaschsvFileService.class);
-        when(raschsvFileService.insert(any(RaschsvFile.class))).thenReturn(1);
-        return raschsvFileService;
     }
 
     @Override

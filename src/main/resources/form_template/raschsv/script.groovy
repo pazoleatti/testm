@@ -3,7 +3,6 @@ package form_template.raschsv
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvFile
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
 import groovy.transform.Field
@@ -19,9 +18,6 @@ import groovy.transform.Field
 @Field final NODE_NAME_FIO = "ФИО"
 @Field final NODE_NAME_SV_VYPL_SVOPS = "СвВыплСВОПС"
 @Field final NODE_NAME_SV_VYPL = "СвВыпл"
-
-// Атрибут узла Файл
-@Field final DOCUMENT_ID_FILE = "@ИдФайл"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -54,7 +50,7 @@ import groovy.transform.Field
 @Field final SV_VYPL_NACHISL_SV_VS3 = "НачислСВВс3"
 
 switch (formDataEvent) {
-    case FormDataEvent.IMPORT:
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
         parseRaschsv()
         break
     default:
@@ -67,7 +63,7 @@ void parseRaschsv() {
         return
     }
 
-    def fileNode = new XmlSlurper().parse(xmlInputStream);
+    def fileNode = new XmlSlurper().parse(ImportInputStream);
     if (fileNode == null) {
         throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
@@ -75,9 +71,8 @@ void parseRaschsv() {
     // Набор объектов ПерсСвСтрахЛиц
     def raschsvPersSvStrahLicList = []
 
-    RaschsvFile raschsvFile = new RaschsvFile()
-    raschsvFile.idFile = fileNode.DOCUMENT_ID_FILE
-    Long raschsvFileId = raschsvFileService.insert(raschsvFile)
+    // Идентификатор декларации для которой загружаются данные
+    declarationDataId = declarationData.getId()
 
     fileNode.childNodes().each { documentNode ->
         if (documentNode.name == NODE_NAME_DOCUMENT) {
@@ -88,7 +83,7 @@ void parseRaschsv() {
                             // Разбор узла ОбязПлатСВ
                         } else if (node.name == NODE_NAME_PERV_SV_STRAH_LIC) {
                             // Разбор узла ПерсСвСтрахЛиц
-                            raschsvPersSvStrahLicList.add(parseRaschsvPersSvStrahLic(node, raschsvFileId))
+                            raschsvPersSvStrahLicList.add(parseRaschsvPersSvStrahLic(node, declarationDataId))
                         }
                     }
                 }
@@ -102,16 +97,15 @@ void parseRaschsv() {
 /**
  * Разбор узла ПерсСвСтрахЛиц
  * @param node - узел для разбора
- * @param raschsvFileId - значение атрибута "ИдФайл" узла "Файл"
+ * @param declarationDataId - идентификатор декларации для которой загружаются данные
  * @return
  */
-RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long raschsvFileId) {
+RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long declarationDataId) {
     RaschsvPersSvStrahLic raschsvPersSvStrahLic = new RaschsvPersSvStrahLic()
 
     // Набор объектов СвВыпл
     def raschsvSvVyplList = []
 
-    raschsvPersSvStrahLic.raschsvFileId = raschsvFileId
     raschsvPersSvStrahLic.nomKorr = getInteger(persSvStrahLicNode.attributes()[PERV_SV_STRAH_LIC_NOM_KORR])
     raschsvPersSvStrahLic.period = persSvStrahLicNode.attributes()[PERV_SV_STRAH_LIC_PERIOD]
     raschsvPersSvStrahLic.otchetGod = persSvStrahLicNode.attributes()[PERV_SV_STRAH_LIC_OTCHET_GOD]
@@ -155,7 +149,7 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
         }
     }
     raschsvPersSvStrahLic.raschsvSvVyplList = raschsvSvVyplList
-    println(raschsvPersSvStrahLic.raschsvSvVyplList.size)
+    println(raschsvPersSvStrahLic.period)
 
     return raschsvPersSvStrahLic
 }
