@@ -1723,7 +1723,9 @@ create table declaration_subreport_params
   alias                    varchar2(255 char) not null,
   ord                      number(9) not null,
   type                     char(1) not null,
-  filter                   varchar2(1000 char)
+  filter                   varchar2(1000 char),
+  attribute_id             number(18),
+  required                 number(1) default 0 not null 
 );
 comment on table declaration_subreport_params is 'Параметры спец. отчетов деклараций';
 comment on column declaration_subreport_params.name is 'Наименование параметра';
@@ -1731,6 +1733,8 @@ comment on column declaration_subreport_params.alias is 'Псевдоним па
 comment on column declaration_subreport_params.ord is 'Порядковый номер параметра';
 comment on column declaration_subreport_params.type is 'Тип столбца (S - строка, N - число, D - дата, R - ссылка)';
 comment on column declaration_subreport_params.filter is 'Условие фильтрации элементов справочника';
+comment on column declaration_subreport_params.attribute_id is 'Код отображаемого атрибута для параметров-ссылок';
+comment on column declaration_subreport_params.required is 'Признак обязательности параметра (1 - обязательно; 0 - нет)';
 ------------------------------------------------------------------------------------------------------------------------------
 -- Таблицы для справочника ФИАС
 --------------------------------------------------------------------------------------------------------------------------
@@ -1742,7 +1746,7 @@ create table fias_operstat
 );
 comment on table fias_operstat  is 'Справочник "Статус действия"';
 comment on column fias_operstat.operstatid  is 'Идентификатор статуса (ключ)';
-comment on column fias_operstat.name  is 'Наименование (см. таблицу OperationStatuses)';
+comment on column fias_operstat.name  is 'Наименование';
 
 create table fias_socrbase
 (
@@ -1798,13 +1802,10 @@ comment on column fias_addrobj.livestatus is 'Статус актуальнос�
 comment on column fias_addrobj.centstatus is 'Статус центра: 0 – объект не является центром административно-территориального образования; 1 – объект является центром района; 2 – объект является центром (столицей) региона; 3 – объект является одновременно и центром района и центром региона.';
 comment on column fias_addrobj.operstatus is 'Статус действия над записью – причина появления записи (см. fias_operstat)';
 comment on column fias_addrobj.currstatus is 'Статус актуальности КЛАДР 4 (последние две цифры в коде)';
-comment on column fias_addrobj.startdate is 'Начало действия записи';
-comment on column fias_addrobj.enddate is 'Окончание действия записи';
 comment on column fias_addrobj.divtype is 'Тип деления: 0 – не определено, 1 – муниципальное, 2 – административное';
 comment on column fias_addrobj.offname is 'Официальное наименование';
 comment on column fias_addrobj.postalcode is 'Почтовый индекс';
 comment on column fias_addrobj.parentguid is 'Идентификатор объекта родительского объекта';
-comment on column fias_addrobj.cadnum is 'Кадастровый номер';
 
 create table fias_house
 (
@@ -1825,7 +1826,7 @@ comment on column fias_house.houseguid is 'Глобальный уникальн
 comment on column fias_house.aoguid is 'Guid записи родительского объекта (улицы, города, населенного пункта и т.п.)';
 comment on column fias_house.eststatus is 'Признак владения: 0 – Не определено, 1 – Владение, 2 – Дом, 3 – Домовладение';
 comment on column fias_house.strstatus is 'Признак строения: 0 – Не определено, 1 – Строение, 2 – Сооружение, 3 – Литер';
-comment on column fias_house.statstatus is 'Состояние дома (???)';
+comment on column fias_house.statstatus is 'Состояние дома';
 comment on column fias_house.divtype is 'Тип деления: 0 – не определено, 1 – муниципальное, 2 – административное';
 comment on column fias_house.postalcode is 'Почтовый индекс';
 comment on column fias_house.housenum is 'Номер дома';
@@ -1872,7 +1873,7 @@ comment on column fias_room.flatnumber is 'Номер квартиры, офис
 comment on column fias_room.flattype is 'Тип квартиры';
 comment on column fias_room.livestatus is 'Статус актуальности адресного объекта ФИАС на текущую дату: 0 – Не актуальный, 1 - Актуальный';
 comment on column fias_room.roomnumber is 'Номер комнаты или помещения';
-comment on column fias_room.roomtypeid is 'Тип комнаты (???)';
+comment on column fias_room.roomtypeid is 'Тип комнаты';
 comment on column fias_room.postalcode is 'Почтовый индекс';
 --------------------------------------------------------------------------------------------------------------------------
 
