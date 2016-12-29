@@ -369,6 +369,7 @@ alter table raschsv_kol_lic_tip add constraint pk_rasch_kol_lic_tip primary key 
 alter table raschsv_sv_sum1_tip add constraint pk_rasch_sv_sum1_tip primary key (id);
 
 alter table raschsv_obyaz_plat_sv add constraint pk_raschsv_obyaz_plat_sv primary key (id);
+alter table raschsv_obyaz_plat_sv add constraint fk_raschsv_obyaz_plat_declarat foreign key (declaration_data_id) references declaration_data (id);
 
 alter table raschsv_upl_per add constraint pk_raschsv_upl_per primary key (id);
 alter table raschsv_upl_per add constraint fk_raschsv_upl_per_ob_plat_sv foreign key (raschsv_obyaz_plat_sv_id) references raschsv_obyaz_plat_sv (id);
@@ -465,6 +466,7 @@ alter table raschsv_vyplat_it_422 add constraint fk_raschsv_vyplat_it_422_sum fo
 alter table raschsv_vyplat_it_422 add constraint fk_raschsv_vyplat_tarif3_422 foreign key (raschsv_sv_prim_tarif1_422_id) references raschsv_sv_prim_tarif1_3_422 (id);
 
 alter table raschsv_pers_sv_strah_lic add constraint pk_pers_sv_strah_face primary key (id);
+alter table raschsv_pers_sv_strah_lic add constraint fk_pers_sv_strah_face_declarat foreign key (declaration_data_id) references declaration_data (id);
 
 alter table raschsv_sv_vypl add constraint pk_raschsv_sv_vypl primary key (id);
 alter table raschsv_sv_vypl add constraint fk_raschsv_sv_vypl_strah_lic foreign key (raschsv_pers_sv_strah_lic_id) references raschsv_pers_sv_strah_lic (id);
