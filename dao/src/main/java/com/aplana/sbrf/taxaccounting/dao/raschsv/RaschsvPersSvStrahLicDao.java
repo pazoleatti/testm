@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface RaschsvPersSvStrahLicDao {
 
-    RaschsvPersSvStrahLic get(long raschsvPersSvStrahLicId);
+    List<RaschsvPersSvStrahLic> findAll();
 
     Integer insert(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLic);
 }

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"RaschsvDaoTest.xml"})
@@ -57,8 +58,8 @@ public class RaschsvDaoTest {
      */
     @Test
     public void testGetRaschsvPersSvStrahLic() {
-        RaschsvPersSvStrahLic raschsvPersSvStrahLic = raschsvPersSvStrahLicDao.get(RASCHSV_FILE_ID);
-        assertNotNull(raschsvPersSvStrahLic);
+        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = raschsvPersSvStrahLicDao.findAll();
+        assertNotNull(raschsvPersSvStrahLicList);
     }
 
     /**
@@ -95,6 +96,7 @@ public class RaschsvDaoTest {
         List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic1);
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic2);
-        assertNotNull(raschsvPersSvStrahLicDao.insert(raschsvPersSvStrahLicList));
+        raschsvPersSvStrahLicDao.insert(raschsvPersSvStrahLicList);
+        assertFalse(raschsvPersSvStrahLicDao.findAll().isEmpty());
     }
 }

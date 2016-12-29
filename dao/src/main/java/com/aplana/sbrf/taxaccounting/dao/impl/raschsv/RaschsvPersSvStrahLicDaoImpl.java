@@ -3,10 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
-import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvSvVyplDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -22,15 +20,31 @@ import java.util.List;
 @Transactional
 public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements RaschsvPersSvStrahLicDao {
 
-    @Autowired
-    private RaschsvSvVyplDao raschsvSvVyplDao;
-
     @Override
-    public RaschsvPersSvStrahLic get(long raschsvPersSvStrahLicId) {
-        return getJdbcTemplate().queryForObject(
-                "select * from " + RaschsvPersSvStrahLic.TABLE_NAME + " sl where sl." + RaschsvPersSvStrahLic.COL_ID + " = ?",
+    public List<RaschsvPersSvStrahLic> findAll() {
+        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = getJdbcTemplate().query(
+                "select * from " + RaschsvPersSvStrahLic.TABLE_NAME,
+                new RaschsvPersSvStrahLicRowMapper());
+
+        for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
+
+            // Выгрузка "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+            raschsvPersSvStrahLic.setRaschsvSvVyplList(getRaschsvSvVypl(raschsvPersSvStrahLic.getId()));
+        }
+        return raschsvPersSvStrahLicList;
+    }
+
+    /**
+     * Выгрузка из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+     * по идентификатору "Персонифицированные сведения о застрахованных лицах"
+     * @param raschsvPersSvStrahLicId
+     * @return
+     */
+    private List<RaschsvSvVypl> getRaschsvSvVypl(long raschsvPersSvStrahLicId){
+        return getJdbcTemplate().query(
+                "select * from " + RaschsvSvVypl.TABLE_NAME + " svSl where svSl." + RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + " = ?",
                 new Object[]{raschsvPersSvStrahLicId},
-                new RaschsvPersSvStrahLicDaoImpl.RaschsvPersSvStrahLicRowMapper());
+                new RaschsvSvVyplRowMapper());
     }
 
     @Override
@@ -95,12 +109,51 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
 
         // Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
         if (!raschsvSvVyplList.isEmpty()) {
-            raschsvSvVyplDao.insert(raschsvSvVyplList);
+            insertRaschsvSvVypl(raschsvSvVyplList);
         }
 
         return res.length;
     }
 
+    /**
+     * Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+     * @param raschsvSvVyplList - перечень сведений о сумме выплат
+     * @return
+     */
+    private Integer insertRaschsvSvVypl(final List<RaschsvSvVypl> raschsvSvVyplList) {
+        String sql = "INSERT INTO " + RaschsvSvVypl.TABLE_NAME +
+                " (" + RaschsvSvVypl.COL_ID + ", " + RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + ", " +
+                RaschsvSvVypl.COL_SUM_VYPL_VS3 + ", " + RaschsvSvVypl.COL_VYPL_OPS_VS3 + ", " +
+                RaschsvSvVypl.COL_VYPL_OPS_DOG_VS3 + ", " + RaschsvSvVypl.COL_NACHISL_SV_VS3 + ") VALUES (?, ?, ?, ?, ?, ?)";
+
+        // Генерация идентификаторов
+        for (RaschsvSvVypl raschsvSvVypl : raschsvSvVyplList) {
+            raschsvSvVypl.setId(generateId(RaschsvSvVypl.SEQ, Long.class));
+        }
+
+        int [] res = getJdbcTemplate().batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                RaschsvSvVypl raschsvSvVypl = raschsvSvVyplList.get(i);
+                ps.setLong(1, raschsvSvVypl.getId());
+                ps.setLong(2, raschsvSvVypl.getRaschsvPersSvStrahLicId());
+                ps.setDouble(3, raschsvSvVypl.getSumVyplVs3());
+                ps.setDouble(4, raschsvSvVypl.getVyplOpsVs3());
+                ps.setDouble(5, raschsvSvVypl.getVyplOpsDogVs3());
+                ps.setDouble(6, raschsvSvVypl.getNachislSvVs3());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return raschsvSvVyplList.size();
+            }
+        });
+        return res.length;
+    }
+
+    /**
+     * Маппинг для "Персонифицированные сведения о застрахованных лицах"
+     */
     private static final class RaschsvPersSvStrahLicRowMapper implements RowMapper<RaschsvPersSvStrahLic> {
         @Override
         public RaschsvPersSvStrahLic mapRow(ResultSet rs, int index) throws SQLException {
@@ -126,6 +179,24 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             raschsvPersSvStrahLic.setOtchestvo(rs.getString(RaschsvPersSvStrahLic.COL_OTCHESTVO));
 
             return raschsvPersSvStrahLic;
+        }
+    }
+
+    /**
+     * Маппинг для "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+     */
+    private static final class RaschsvSvVyplRowMapper implements RowMapper<RaschsvSvVypl> {
+        @Override
+        public RaschsvSvVypl mapRow(ResultSet rs, int index) throws SQLException {
+            RaschsvSvVypl raschsvSvVypl = new RaschsvSvVypl();
+            raschsvSvVypl.setId(SqlUtils.getLong(rs, RaschsvSvVypl.COL_ID));
+            raschsvSvVypl.setRaschsvPersSvStrahLicId(SqlUtils.getLong(rs, RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID));
+            raschsvSvVypl.setSumVyplVs3(rs.getDouble(RaschsvSvVypl.COL_SUM_VYPL_VS3));
+            raschsvSvVypl.setVyplOpsVs3(rs.getDouble(RaschsvSvVypl.COL_VYPL_OPS_VS3));
+            raschsvSvVypl.setVyplOpsDogVs3(rs.getDouble(RaschsvSvVypl.COL_VYPL_OPS_DOG_VS3));
+            raschsvSvVypl.setNachislSvVs3(rs.getDouble(RaschsvSvVypl.COL_NACHISL_SV_VS3));
+
+            return raschsvSvVypl;
         }
     }
 }
