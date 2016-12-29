@@ -3,7 +3,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
+import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvSvVyplDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -12,11 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 @Transactional
 public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements RaschsvPersSvStrahLicDao {
+
+    @Autowired
+    private RaschsvSvVyplDao raschsvSvVyplDao;
 
     @Override
     public RaschsvPersSvStrahLic get(long raschsvPersSvStrahLicId) {
@@ -76,6 +83,21 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 return raschsvPersSvStrahLicList.size();
             }
         });
+
+        // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
+        List<RaschsvSvVypl> raschsvSvVyplList = new ArrayList<RaschsvSvVypl>();
+        for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
+            for (RaschsvSvVypl raschsvSvVypl : raschsvPersSvStrahLic.getRaschsvSvVyplList()) {
+                raschsvSvVypl.setRaschsvPersSvStrahLicId(raschsvPersSvStrahLic.getId());
+                raschsvSvVyplList.add(raschsvSvVypl);
+            }
+        }
+
+        // Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+        if (!raschsvSvVyplList.isEmpty()) {
+            raschsvSvVyplDao.insert(raschsvSvVyplList);
+        }
+
         return res.length;
     }
 

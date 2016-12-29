@@ -3,11 +3,14 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Персонифицированные сведения о застрахованных лицах
  */
-public class RaschsvPersSvStrahLic  extends IdentityObject<Long> {
+public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
 
     private Long raschsvFileId;
     private Integer nomKorr;
@@ -29,8 +32,12 @@ public class RaschsvPersSvStrahLic  extends IdentityObject<Long> {
     private String imya;
     private String otchestvo;
 
+    // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
+    private List<RaschsvSvVypl> raschsvSvVyplList;
+
     public RaschsvPersSvStrahLic() {
         super();
+        raschsvSvVyplList = new ArrayList<RaschsvSvVypl>();
     }
 
     public static final String SEQ = "seq_raschsv_pers_sv_strah_lic";
@@ -112,4 +119,9 @@ public class RaschsvPersSvStrahLic  extends IdentityObject<Long> {
 
     public String getOtchestvo() { return otchestvo; }
     public void setOtchestvo(String otchestvo) { this.otchestvo = otchestvo; }
+
+    public List<RaschsvSvVypl> getRaschsvSvVyplList() {
+        return raschsvSvVyplList != null ? raschsvSvVyplList : Collections.<RaschsvSvVypl>emptyList();
+    }
+    public void setRaschsvSvVyplList(List<RaschsvSvVypl> raschsvSvVyplList) { this.raschsvSvVyplList = raschsvSvVyplList; }
 }

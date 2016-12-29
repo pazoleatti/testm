@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvFileDao;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvFile;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class RaschsvDaoTest {
     private RaschsvPersSvStrahLicDao raschsvPersSvStrahLicDao;
 
     // Идентификатор записи в таблице "Файл обмена"
-    public static final Long RASCHSV_FILE_ID = 111L;
+    private static final Long RASCHSV_FILE_ID = 111L;
 
     /**
      * Тестирование выборки данных из таблицы "Файл обмена"
@@ -65,19 +66,33 @@ public class RaschsvDaoTest {
      */
     @Test
     public void testInsertRaschsvPersSvStrahLic() {
+        List<RaschsvSvVypl> raschsvSvVyplList = new ArrayList<RaschsvSvVypl>();
+        RaschsvSvVypl raschsvSvVypl1 = new RaschsvSvVypl();
+        raschsvSvVypl1.setSumVyplVs3(1.1);
+        raschsvSvVypl1.setVyplOpsVs3(1.1);
+        raschsvSvVypl1.setVyplOpsDogVs3(1.1);
+        raschsvSvVypl1.setNachislSvVs3(1.1);
+        raschsvSvVyplList.add(raschsvSvVypl1);
+
+        RaschsvSvVypl raschsvSvVypl2 = new RaschsvSvVypl();
+        raschsvSvVypl2.setSumVyplVs3(2.1);
+        raschsvSvVypl2.setVyplOpsVs3(2.1);
+        raschsvSvVypl2.setVyplOpsDogVs3(2.1);
+        raschsvSvVypl2.setNachislSvVs3(2.1);
+        raschsvSvVyplList.add(raschsvSvVypl2);
+
         RaschsvPersSvStrahLic raschsvPersSvStrahLic1 = new RaschsvPersSvStrahLic();
-        raschsvPersSvStrahLic1.setId(1L);
         raschsvPersSvStrahLic1.setNomKorr(1);
         raschsvPersSvStrahLic1.setNomer(1);
         raschsvPersSvStrahLic1.setRaschsvFileId(RASCHSV_FILE_ID);
+        raschsvPersSvStrahLic1.setRaschsvSvVyplList(raschsvSvVyplList);
 
         RaschsvPersSvStrahLic raschsvPersSvStrahLic2 = new RaschsvPersSvStrahLic();
-        raschsvPersSvStrahLic2.setId(2L);
         raschsvPersSvStrahLic2.setNomKorr(2);
         raschsvPersSvStrahLic2.setNomer(2);
         raschsvPersSvStrahLic2.setRaschsvFileId(RASCHSV_FILE_ID);
 
-        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList();
+        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic1);
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic2);
         assertNotNull(raschsvPersSvStrahLicDao.insert(raschsvPersSvStrahLicList));
