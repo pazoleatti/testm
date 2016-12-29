@@ -56,11 +56,13 @@ public class RaschsvDaoTest {
         raschsvSvVyplList.add(raschsvSvVypl2);
 
         RaschsvPersSvStrahLic raschsvPersSvStrahLic1 = new RaschsvPersSvStrahLic();
+        raschsvPersSvStrahLic1.setDeclarationDataId(1L);
         raschsvPersSvStrahLic1.setNomKorr(1);
         raschsvPersSvStrahLic1.setNomer(1);
         raschsvPersSvStrahLic1.setRaschsvSvVyplList(raschsvSvVyplList);
 
         RaschsvPersSvStrahLic raschsvPersSvStrahLic2 = new RaschsvPersSvStrahLic();
+        raschsvPersSvStrahLic2.setDeclarationDataId(1L);
         raschsvPersSvStrahLic2.setNomKorr(2);
         raschsvPersSvStrahLic2.setNomer(2);
 
