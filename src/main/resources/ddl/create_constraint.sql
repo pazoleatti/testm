@@ -488,7 +488,7 @@ alter table declaration_subreport_params drop constraint fk_decl_subrep_pars_sub
 alter table declaration_subreport_params add constraint fk_decl_subrep_pars_attrib_id foreign key (attribute_id) references ref_book_attribute (id);
 
 alter table declaration_subreport_params add constraint chk_decl_subrep_pars__attr_r  check ((type<>'R' and attribute_id is null) or (type='R' and attribute_id is not null));
-alter table declaration_subreport_params add constraint chk_decl_subrep_pars_filter_r check ((type<>'R' and filter is null) or (type='R' and filter is not null));
+alter table declaration_subreport_params add constraint chk_decl_subrep_pars_filter_r check ((type<>'R' and filter is null) or (type='R'));
 alter table declaration_subreport_params add constraint fk_decl_subrep_pars_subrep_id foreign key (declaration_subreport_id) references declaration_subreport (id) on delete cascade;
 ------------------------------------------------------------------------------------------------------------------------------
 -- ФИАС

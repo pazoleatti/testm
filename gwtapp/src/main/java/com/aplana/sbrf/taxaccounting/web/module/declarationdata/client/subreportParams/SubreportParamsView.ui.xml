@@ -1,0 +1,50 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:t="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:dw="urn:import:com.aplana.gwt.client">
+
+    <ui:style>
+        .content {
+            margin: 10px;
+        }
+
+        .footerPanel {
+            background-color: #E8E1CF;
+            width: 100%;
+            height: 38px;
+        }
+
+        .footerButton {
+            margin: 8px 10px 8px 0 !important;
+            width: 108px;
+        }
+
+        .table {
+            border: 1px solid #aeaeac;
+            border-top: 0;
+        }
+
+        .btns {
+            margin-left: 5px;
+        }
+
+    </ui:style>
+
+    <dw:ModalWindow ui:field="modalWindow" iconUrl="resources/img/printer-16.png" title="Формирование отчетов">
+        <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
+            <g:cell height="100%">
+                <g:VerticalPanel spacing="10" ui:field="editPanel" width="100%"/>
+            </g:cell>
+
+            <g:cell horizontalAlignment="ALIGN_RIGHT">
+                <g:FlowPanel addStyleNames="{style.footerPanel}">
+                    <g:Button addStyleNames="{style.footerButton}" text="Сформировать" ui:field="createButton"/>
+                    <g:Button addStyleNames="{style.footerButton}" text="Отмена" ui:field="cancelButton"/>
+                </g:FlowPanel>
+            </g:cell>
+        </g:VerticalPanel>
+    </dw:ModalWindow>
+
+</ui:UiBinder> 

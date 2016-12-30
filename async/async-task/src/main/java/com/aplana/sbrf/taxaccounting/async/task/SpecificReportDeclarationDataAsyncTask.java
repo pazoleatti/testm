@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,6 +34,12 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
 
     @Autowired
     private LockDataService lockService;
+
+    @Autowired
+    private ReportService reportService;
+
+    @Autowired
+    private RefBookHelper refBookHelper;
 
     @Override
     protected ReportType getReportType() {
@@ -74,13 +81,24 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
+
+        Map<String, Object> subreportParamValues = null;
+        if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
+            subreportParamValues = (Map<String, Object>)params.get("subreportParamValues");
+        }
+
         if (declarationData != null) {
-            declarationDataService.createSpecificReport(logger, declarationData, ddReportType, userInfo, new LockStateLogger() {
+            String uuid = declarationDataService.createSpecificReport(logger, declarationData, ddReportType, subreportParamValues, userInfo, new LockStateLogger() {
                 @Override
                 public void updateState(String state) {
                     lockService.updateState(lock, lockDate, state);
                 }
             });
+            if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
+                return new TaskStatus(true, NotificationType.REF_BOOK_REPORT, uuid);
+            } else {
+                reportService.createDec(declarationData.getId(), uuid, ddReportType);
+            }
         }
         return new TaskStatus(true, null);
     }
@@ -105,10 +123,40 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias);
         String str, strCorrPeriod = "";
+        StringBuilder strSubreportParamValues = new StringBuilder(", ");
+        if (!subreport.getDeclarationSubreportParams().isEmpty()) {
+            Map<String, Object> subreportParamValues = (Map<String, Object>)params.get("subreportParamValues");
+            for(DeclarationSubreportParam declarationSubreportParam: subreport.getDeclarationSubreportParams()) {
+                strSubreportParamValues.append(declarationSubreportParam.getName()).append(": ");
+                Object value = subreportParamValues.get(declarationSubreportParam.getAlias());
+                strSubreportParamValues.append("\"");
+                switch (declarationSubreportParam.getType()) {
+                    case STRING:
+                        strSubreportParamValues.append(value!= null?value.toString():"");
+                        break;
+                    case NUMBER:
+                        strSubreportParamValues.append(value!= null?value.toString():"");
+                        break;
+                    case DATE:
+                        strSubreportParamValues.append(value!= null?SDF_DD_MM_YYYY.get().format((Date)value):"");
+                        break;
+                    case REFBOOK:
+                        String strVal = "";
+                        if (value != null) {
+                            strVal = refBookHelper.dereferenceValue((Long)value, declarationSubreportParam.getRefBookAttributeId());
+                        }
+                        strSubreportParamValues.append(strVal);
+                        break;
+                }
+                strSubreportParamValues.append("\"");
+                strSubreportParamValues.append(", ");
+            }
+            strSubreportParamValues = strSubreportParamValues.delete(strSubreportParamValues.length() - 2, strSubreportParamValues.length());
+        }
         if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
-            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
+            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\", %s.", declaration.getTaxOrganCode(), declaration.getKpp(), strSubreportParamValues.toString());
         } else {
-            str = ".";
+            str = strSubreportParamValues.toString()+".";
         }
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
@@ -133,10 +181,40 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias);
         String str, strCorrPeriod = "";
+        StringBuilder strSubreportParamValues = new StringBuilder(", ");
+        if (!subreport.getDeclarationSubreportParams().isEmpty()) {
+            Map<String, Object> subreportParamValues = (Map<String, Object>)params.get("subreportParamValues");
+            for(DeclarationSubreportParam declarationSubreportParam: subreport.getDeclarationSubreportParams()) {
+                strSubreportParamValues.append(declarationSubreportParam.getName()).append(": ");
+                Object value = subreportParamValues.get(declarationSubreportParam.getAlias());
+                strSubreportParamValues.append("\"");
+                switch (declarationSubreportParam.getType()) {
+                    case STRING:
+                        strSubreportParamValues.append(value.toString());
+                        break;
+                    case NUMBER:
+                        strSubreportParamValues.append(value.toString());
+                        break;
+                    case DATE:
+                        strSubreportParamValues.append(SDF_DD_MM_YYYY.get().format((Date)value));
+                        break;
+                    case REFBOOK:
+                        String strVal = "";
+                        if (value != null) {
+                            strVal = refBookHelper.dereferenceValue((Long)value, declarationSubreportParam.getRefBookAttributeId());
+                        }
+                        strSubreportParamValues.append(strVal);
+                        break;
+                }
+                strSubreportParamValues.append("\"");
+                strSubreportParamValues.append(", ");
+            }
+            strSubreportParamValues = strSubreportParamValues.delete(strSubreportParamValues.length() - 2, strSubreportParamValues.length());
+        }
         if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
-            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
+            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\"%s.", declaration.getTaxOrganCode(), declaration.getKpp(), strSubreportParamValues.toString());
         } else {
-            str = ".";
+            str = strSubreportParamValues.toString()+".";
         }
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());

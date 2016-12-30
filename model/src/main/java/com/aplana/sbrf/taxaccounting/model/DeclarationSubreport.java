@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Модельный класс для спец отчетов
@@ -15,6 +16,7 @@ public class DeclarationSubreport implements Ordered, Serializable{
     private String name;
     private int order;
     private String blobDataId;
+    private List<DeclarationSubreportParam> declarationSubreportParams;
 
     public long getId() {
         return id;
@@ -55,5 +57,13 @@ public class DeclarationSubreport implements Ordered, Serializable{
 
     public void setBlobDataId(String blobDataId) {
         this.blobDataId = blobDataId;
+    }
+
+    public List<DeclarationSubreportParam> getDeclarationSubreportParams() {
+        return declarationSubreportParams;
+    }
+
+    public void setDeclarationSubreportParams(List<DeclarationSubreportParam> declarationSubreportParams) {
+        this.declarationSubreportParams = declarationSubreportParams;
     }
 }

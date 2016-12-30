@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportParamDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
@@ -52,6 +53,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     private ReportPeriodDao reportPeriodDao;
     @Autowired
     private DeclarationSubreportDao declarationSubreportDao;
+    @Autowired
+    private DeclarationSubreportParamDao declarationSubreportParamDao;
 
 	private final class DeclarationTemplateRowMapper implements RowMapper<DeclarationTemplate> {
 		@Override
@@ -157,6 +160,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             }
 
             declarationSubreportDao.updateDeclarationSubreports(declarationTemplate);
+            declarationSubreportParamDao.updateDeclarationSubreports(declarationTemplate);
 
             return declarationTemplate.getId();
         } catch (DataAccessException e) {
@@ -192,6 +196,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             );
             declarationTemplate.setId(declarationTemplateId);
             declarationSubreportDao.updateDeclarationSubreports(declarationTemplate);
+            declarationSubreportParamDao.updateDeclarationSubreports(declarationTemplate);
+            declarationSubreportParamDao.updateDeclarationSubreports(declarationTemplate);
 
             return declarationTemplateId;
         } catch (DataAccessException e){

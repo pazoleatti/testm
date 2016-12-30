@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<DeclarationTemplateSubreportUiHandlers>
@@ -271,7 +272,7 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
         newSubreport.setName("Новый отчет");
         newSubreport.setAlias("псевдоним");
         newSubreport.setOrder(subreports.size() + 1);
-        newSubreport.setAlias("псевдоним");
+        newSubreport.setDeclarationSubreportParams(new ArrayList<DeclarationSubreportParam>());
         getUiHandlers().addSubreport(newSubreport);
         setupColumns(subreports.size() - 1);
         onSubreportChanged();

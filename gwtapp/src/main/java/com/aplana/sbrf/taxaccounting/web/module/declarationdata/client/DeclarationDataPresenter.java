@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.sources.SourcesPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subreportParams.SubreportParamsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
@@ -122,6 +123,7 @@ public class DeclarationDataPresenter
 	private final TaPlaceManager placeManager;
 	private final DialogPresenter dialogPresenter;
 	private final HistoryPresenter historyPresenter;
+    private final SubreportParamsPresenter subreportParamsPresenter;
 	private long declarationId;
 	private String taxName;
     private TaxType taxType;
@@ -132,7 +134,7 @@ public class DeclarationDataPresenter
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view,
 									final MyProxy proxy, DispatchAsync dispatcher,
 									PlaceManager placeManager, DialogPresenter dialogPresenter,
-									HistoryPresenter historyPresenter,
+									HistoryPresenter historyPresenter, SubreportParamsPresenter subreportParamsPresenter,
                                     SourcesPresenter sourcesPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
@@ -140,6 +142,7 @@ public class DeclarationDataPresenter
 		this.placeManager = (TaPlaceManager) placeManager;
 		this.dialogPresenter = dialogPresenter;
         this.sourcesPresenter = sourcesPresenter;
+        this.subreportParamsPresenter = subreportParamsPresenter;
 		getView().setUiHandlers(this);
 	}
 
@@ -525,6 +528,10 @@ public class DeclarationDataPresenter
         return taxType;
     }
 
+    public long getDeclarationId() {
+        return declarationId;
+    }
+
     @Override
     protected void onHide() {
         super.onHide();
@@ -537,56 +544,63 @@ public class DeclarationDataPresenter
 
     @Override
     public void viewReport(final boolean force, final DeclarationDataReportType type) {
-        CreateReportAction action = new CreateReportAction();
-        action.setDeclarationDataId(declarationId);
-        action.setForce(force);
-        action.setTaxType(taxType);
-        action.setType(type.getReportAlias());
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<CreateReportResult>() {
-                    @Override
-                    public void onSuccess(CreateReportResult result) {
-                        LogCleanEvent.fire(DeclarationDataPresenter.this);
-                        LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
-                        if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
-                            Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + DeclarationDataReportType.PDF_DEC.getReportType().getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
-                        } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
-                            Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
-                                @Override
-                                public void yes() {
-                                    viewReport(true, type);
+        if (type.isSubreport() && !type.getSubreport().getDeclarationSubreportParams().isEmpty()) {
+            // Открываем форму со списком параметров для спец. отчета
+            subreportParamsPresenter.setSubreport(type.getSubreport());
+            subreportParamsPresenter.setDeclarationDataPresenter(this);
+            addToPopupSlot(subreportParamsPresenter);
+        } else {
+            CreateReportAction action = new CreateReportAction();
+            action.setDeclarationDataId(declarationId);
+            action.setForce(force);
+            action.setTaxType(taxType);
+            action.setType(type.getReportAlias());
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<CreateReportResult>() {
+                        @Override
+                        public void onSuccess(CreateReportResult result) {
+                            LogCleanEvent.fire(DeclarationDataPresenter.this);
+                            LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
+                            if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
+                                Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + DeclarationDataReportType.PDF_DEC.getReportType().getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
+                            } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
+                                Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
+                                    @Override
+                                    public void yes() {
+                                        viewReport(true, type);
+                                    }
+                                });
+                            } else if (CreateAsyncTaskStatus.EXIST.equals(result.getStatus())) {
+                                switch (type.getReportType()) {
+                                    case EXCEL_DEC:
+                                        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
+                                                + declarationId);
+                                        break;
+                                    case SPECIFIC_REPORT_DEC:
+                                        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/declarationData/specific/"
+                                                + type.getSubreport().getAlias() + "/" + declarationId);
+                                        break;
+                                    default:
+                                        break;
                                 }
-                            });
-                        } else if (CreateAsyncTaskStatus.EXIST.equals(result.getStatus())) {
-                            switch (type.getReportType()) {
-                                case EXCEL_DEC:
-                                    DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
-                                            + declarationId);
-                                    break;
-                                case SPECIFIC_REPORT_DEC:
-                                    DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/declarationData/specific/"
-                                            + type.getSubreport().getAlias() + "/" + declarationId);
-                                    break;
-                                default:
-                                    break;
-                            }
                                 //DeclarationDataReportType.EXCEL_DEC.equals(type))
+                            }
+                            if (!type.isSubreport())
+                                onTimerReport(type, false);
+                            else
+                                onTimerSubsreport(false);
                         }
-                        if (!type.isSubreport())
-                            onTimerReport(type, false);
-                        else
-                            onTimerSubsreport(false);
-                    }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        super.onFailure(caught);
-                        if (type.getReportType().equals(ReportType.SPECIFIC_REPORT_DEC))
-                            onTimerReport(type, false);
-                        else
-                            onTimerSubsreport(false);
-                    }
-                }, this));
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            super.onFailure(caught);
+                            if (type.getReportType().equals(ReportType.SPECIFIC_REPORT_DEC))
+                                onTimerReport(type, false);
+                            else
+                                onTimerSubsreport(false);
+                        }
+                    }, this));
+        }
     }
 
     private void getPdf() {

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportParamDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -30,7 +31,10 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
     @Autowired
     private BDUtils bdUtils;
 
-	private class DeclarationSubreportMapper implements RowMapper<DeclarationSubreport> {
+    @Autowired
+    private DeclarationSubreportParamDao declarationSubreportParamDao;
+
+    private class DeclarationSubreportMapper implements RowMapper<DeclarationSubreport> {
 		@Override
         public DeclarationSubreport mapRow(ResultSet rs, int index) throws SQLException {
 			final DeclarationSubreport result = new DeclarationSubreport();
@@ -39,7 +43,8 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
             result.setName(rs.getString("name"));
             result.setOrder(SqlUtils.getInteger(rs, "ord"));
             result.setBlobDataId(rs.getString("blob_data_id"));
-			return result;
+            result.setDeclarationSubreportParams(declarationSubreportParamDao.getDeclarationSubreportParams(result.getId()));
+            return result;
 		}
 	}
 

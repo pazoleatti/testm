@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -126,4 +125,12 @@ public interface RefBookHelper {
      * @return
      */
     Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValuesAttributes(RefBook refBook, List<Map<String, RefBookValue>> refBookPage);
+
+    /**
+     * Разыменовать значение атрибута записи
+     * @param recordId
+     * @param attributeId
+     * @return
+     */
+    String dereferenceValue(long recordId, Long attributeId);
 }

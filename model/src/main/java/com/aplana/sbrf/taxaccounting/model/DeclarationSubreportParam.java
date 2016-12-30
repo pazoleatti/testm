@@ -1,0 +1,165 @@
+package com.aplana.sbrf.taxaccounting.model;
+
+import javax.xml.bind.annotation.XmlTransient;
+import java.io.Serializable;
+
+
+/**
+ * Столбец таблицы в объявлении налоговой формы
+ * В объявлении столбца задаются параметры отображения, тип данных и другие свойства, которые необходимы при
+ * построении интерфейса налоговой формы.
+ * 
+ * Даный класс является абстрактным и содержит параметры, общие для всех столбцов. Для каждого типа данных, которые могут 
+ * встречаться в налоговых формах создаётся класс-наследник, в котором могут быть добавлены дополнительные свойства, специфичные для
+ * данного типа данных.
+ * 
+ * @author dsultanbekov
+ */
+public class DeclarationSubreportParam implements Ordered, Serializable {
+	private static final long serialVersionUID = 1L;
+
+	private long id;
+    private DeclarationSubreportParamType type;
+	private String name;
+	private String alias;
+	private int order;
+    private String filter;
+    private long declarationSubreportId;
+    private Long refBookAttributeId;
+    /** Обязательность заполнения */
+    private boolean required;
+
+	/**
+	 * Идентификатор столбца в БД
+	 * Если значение == null, то считается, что столбец новый и при его сохранении будет сгенерирован новый идентификатор
+	 * @return идентификатор столбца
+	 */
+    @XmlTransient
+	public long getId() {
+		return id;
+	}
+	
+	/**
+	 * Задать значение идентификатора параметра.
+	 * У новых параметров нужно задавать id = null
+	 * @param id значение идентификатора, для новых столбцов задавать не нужно, т.к. по умолчанию null.
+	 */
+	public void setId(long id) {
+		this.id = id;
+	}
+	
+	/**
+	 * Возвращает наименование параметра
+	 * @return наименование столбца
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Задаёт наименование параметра
+	 * @param name желаемое значение наименования столбца
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * Возвращает алиас параметра. Алиас - это строковый псевдоним, который используется для доступа
+	 * к данным параметра из скриптов.
+	 * @return алиас столбца
+	 */
+	public String getAlias() {
+		return alias;
+	}
+	
+	/**
+	 * Задать алиас параметра
+	 * @param alias желаемое значение алиаса
+	 */
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+	
+	/**
+	 * Возвращает порядковый номер параметра в форме
+	 * @return порядковый номер столбца
+	 */
+	@Override
+	public int getOrder() {
+		return order;
+	}
+
+	/**
+	 * Задать порядковый номер параметра
+	 * @param order желаемое значение номера столбца
+	 */
+	@Override
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+    /**
+     * Возвразщает тип параметра
+     * @return
+     */
+    public DeclarationSubreportParamType getType() {
+        return type;
+    }
+
+    /**
+     * Задает тип параметра
+     * @param type
+     */
+    public void setType(DeclarationSubreportParamType type) {
+        this.type = type;
+    }
+
+    /**
+     * Возвращает фильтр для ссылочных параметроа
+     * @return
+     */
+    public String getFilter() {
+        return filter;
+    }
+
+    /**
+     * Задает фильтр для ссылочных параметроа
+     * @param filter
+     */
+    public void setFilter(String filter) {
+        this.filter = filter;
+    }
+
+    /**
+     * Возвращает идентификатор спец. отчета
+     * @return
+     */
+    public long getDeclarationSubreportId() {
+        return declarationSubreportId;
+    }
+
+    /**
+     * Задает идентификатор спец. отчета
+     * @param declarationSubreportId
+     */
+    public void setDeclarationSubreportId(long declarationSubreportId) {
+        this.declarationSubreportId = declarationSubreportId;
+    }
+
+    public Long getRefBookAttributeId() {
+        return refBookAttributeId;
+    }
+
+    public void setRefBookAttributeId(Long refBookAttributeId) {
+        this.refBookAttributeId = refBookAttributeId;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+}

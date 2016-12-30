@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
+
+import java.util.Map;
 
 /**
  * Запуск асинх задачи формирования отчетов
@@ -16,6 +17,7 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
     private boolean isForce;
     private TaxType taxType;
     private String type;
+    private Map<String, Object> subreportParamValues;
 
     public long getDeclarationDataId() {
         return declarationDataId;
@@ -47,6 +49,14 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Map<String, Object> getSubreportParamValues() {
+        return subreportParamValues;
+    }
+
+    public void setSubreportParamValues(Map<String, Object> subreportParamValues) {
+        this.subreportParamValues = subreportParamValues;
     }
 
     @Override

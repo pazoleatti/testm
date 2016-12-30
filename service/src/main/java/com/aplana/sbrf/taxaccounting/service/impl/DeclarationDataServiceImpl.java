@@ -630,7 +630,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, TAUserInfo userInfo, LockStateLogger stateLogger) {
+    public String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo, LockStateLogger stateLogger) {
         Map<String, Object> params = new HashMap<String, Object>();
         ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
         File reportFile = null;
@@ -646,6 +646,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 scriptSpecificReportHolder.setFileOutputStream(outputStream);
                 scriptSpecificReportHolder.setFileInputStream(inputStream);
                 scriptSpecificReportHolder.setFileName(ddReportType.getSubreport().getAlias());
+                scriptSpecificReportHolder.setSubreportParamValues(subreportParamValues);
                 params.put(DeclarationDataScriptParams.DOC_DATE, new Date());
                 params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
                 stateLogger.updateState("Формирование отчета");
@@ -660,7 +661,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 IOUtils.closeQuietly(inputStream);
             }
             stateLogger.updateState("Сохранение отчета в базе данных");
-            reportService.createDec(declarationData.getId(), blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName()), ddReportType);
+            return blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName());
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {
@@ -985,8 +986,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type) {
         if (type == null) {
             return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId;
+        } else if (!type.isSubreport() || type.getSubreport().getDeclarationSubreportParams().isEmpty()) {
+            return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + type.getReportAlias().toUpperCase();
+        } else {
+            return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + type.getReportAlias().toUpperCase() + "_" + UUID.randomUUID();
         }
-        return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + type.getReportAlias().toUpperCase();
     }
 
     @Override

@@ -84,6 +84,9 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                     params.put("declarationDataId", action.getDeclarationDataId());
                     if (ddReportType.isSubreport()) {
                         params.put("alias", ddReportType.getReportAlias());
+                        if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
+                            params.put("subreportParamValues", action.getSubreportParamValues());
+                        }
                     }
                     asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
                         @Override

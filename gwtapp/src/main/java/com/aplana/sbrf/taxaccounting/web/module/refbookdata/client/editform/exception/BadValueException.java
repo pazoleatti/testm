@@ -34,7 +34,11 @@ public class BadValueException extends Exception implements Iterable<String> {
 
 	public BadValueException(Map<String, String> descriptionMap) {
         for (Map.Entry<String, String> entry : descriptionMap.entrySet()){
-            strings.add("Атрибут \"" + entry.getKey() + "\": " + entry.getValue());
+            if (entry.getKey().isEmpty()) {
+                strings.add(entry.getValue());
+            } else {
+                strings.add("Атрибут \"" + entry.getKey() + "\": " + entry.getValue());
+            }
         }
 	}
 

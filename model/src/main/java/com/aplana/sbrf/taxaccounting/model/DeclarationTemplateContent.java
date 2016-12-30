@@ -41,6 +41,7 @@ public class DeclarationTemplateContent {
             declarationSubreport.setName(declarationSubreportContent.getName());
             declarationSubreport.setOrder(declarationSubreportContent.getOrder());
             declarationSubreport.setBlobDataId(declarationSubreportContent.getBlobDataId());
+            declarationSubreport.setDeclarationSubreportParams(new ArrayList<DeclarationSubreportParam>());
             declarationTemplate.getSubreports().add(declarationSubreport);
         }
     }

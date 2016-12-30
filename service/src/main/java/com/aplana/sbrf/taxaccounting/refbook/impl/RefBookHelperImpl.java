@@ -672,4 +672,57 @@ public class RefBookHelperImpl implements RefBookHelper {
         }
         return dereferenceValues;
     }
+
+    public String dereferenceValue(long recordId, Long attributeId) {
+        RefBook refBook = refBookFactory.getByAttribute(attributeId);
+        RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
+        RefBookAttribute attribute = refBook.getAttribute(attributeId);
+        Map<String, RefBookValue> refBookValueMap = refBookDataProvider.getRecordData(recordId);
+        Map<Long, Map<Long, String>> dereferenceValues = null;
+        if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+            dereferenceValues = dereferenceValues(refBook, Arrays.asList(refBookValueMap), true);
+        }
+        return dereferenceValue(refBookValueMap, dereferenceValues, attribute);
+    }
+
+    private String dereferenceValue(Map<String, RefBookValue> record, Map<Long, Map<Long, String>> dereferenceValues, RefBookAttribute attribute) {
+        RefBookValue value = record.get(attribute.getAlias());
+        String dereferenceValue;
+        if (value == null) {
+            dereferenceValue = "";
+        } else {
+            switch (value.getAttributeType()) {
+                case NUMBER:
+                    if (value.getNumberValue() == null) dereferenceValue = "";
+                    else dereferenceValue = value.getNumberValue().toString();
+                    break;
+                case DATE:
+                    if (value.getDateValue() == null) dereferenceValue = "";
+                    else {
+                        if (attribute.getFormat() != null) {
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
+                                    attribute.getFormat().getFormat());
+                            dereferenceValue = simpleDateFormat.format(value.getDateValue());
+                        } else {
+                            dereferenceValue = value.getDateValue().toString();
+                        }
+                    }
+                    break;
+                case STRING:
+                    if (value.getStringValue() == null) dereferenceValue = "";
+                    else dereferenceValue = value.getStringValue();
+                    break;
+                case REFERENCE:
+                    if (value.getReferenceValue() == null) dereferenceValue = "";
+                    else {
+                        dereferenceValue = dereferenceValues.get(attribute.getId()).get(value.getReferenceValue());
+                    }
+                    break;
+                default:
+                    dereferenceValue = "undefined";
+                    break;
+            }
+        }
+        return dereferenceValue;
+    }
 }
