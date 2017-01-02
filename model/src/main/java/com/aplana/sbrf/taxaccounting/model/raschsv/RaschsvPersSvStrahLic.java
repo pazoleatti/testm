@@ -30,7 +30,7 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     private String prizOss;
     private String familia;
     private String imya;
-    private String otchestvo;
+    private String middleName;
 
     // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
     private List<RaschsvSvVypl> raschsvSvVyplList;
@@ -61,7 +61,7 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public static final String COL_PRIZ_OSS = "priz_oss";
     public static final String COL_FAMILIA = "familia";
     public static final String COL_IMYA = "imya";
-    public static final String COL_OTCHESTVO = "otchestvo";
+    public static final String COL_MIDDLE_NAME = "middle_name";
 
     public Long getDeclarationDataId() { return declarationDataId; }
     public void setDeclarationDataId(Long declarationDataId) { this.declarationDataId = declarationDataId; }
@@ -117,8 +117,8 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public String getImya() { return imya; }
     public void setImya(String imya) { this.imya = imya; }
 
-    public String getOtchestvo() { return otchestvo; }
-    public void setOtchestvo(String otchestvo) { this.otchestvo = otchestvo; }
+    public String getMiddleName() { return middleName; }
+    public void setMiddleName(String middleName) { this.middleName = middleName; }
 
     public List<RaschsvSvVypl> getRaschsvSvVyplList() {
         return raschsvSvVyplList != null ? raschsvSvVyplList : Collections.<RaschsvSvVypl>emptyList();

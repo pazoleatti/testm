@@ -41,7 +41,7 @@ import groovy.transform.Field
 // Атрибуты узла ФИО
 @Field final FIO_FAMILIA = 'Фамилия'
 @Field final FIO_IMYA = 'Имя'
-@Field final FIO_OTCHESTVO = 'Отчество'
+@Field final FIO_MIDDLE_NAME = 'Отчество'
 
 // Атрибуты узла СвВыпл
 @Field final SV_VYPL_SUM_VYPL_VS3 = "СумВыплВс3"
@@ -130,7 +130,7 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
                     // Разбор узла ФИО
                     raschsvPersSvStrahLic.familia = fioNode.attributes()[FIO_FAMILIA]
                     raschsvPersSvStrahLic.imya = fioNode.attributes()[FIO_IMYA]
-                    raschsvPersSvStrahLic.otchestvo = fioNode.attributes()[FIO_OTCHESTVO]
+                    raschsvPersSvStrahLic.middleName = fioNode.attributes()[FIO_MIDDLE_NAME]
                 }
             }
         } else if (persSvStrahLicChildNode.name == NODE_NAME_SV_VYPL_SVOPS) {
@@ -149,7 +149,7 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
         }
     }
     raschsvPersSvStrahLic.raschsvSvVyplList = raschsvSvVyplList
-    println(raschsvPersSvStrahLic.period)
+    println(raschsvPersSvStrahLic.middleName)
 
     return raschsvPersSvStrahLic
 }

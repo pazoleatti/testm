@@ -59,7 +59,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 RaschsvPersSvStrahLic.COL_SER_NOM_DOC + ", " + RaschsvPersSvStrahLic.COL_PRIZ_OPS + ", " +
                 RaschsvPersSvStrahLic.COL_PRIZ_OMS + ", " + RaschsvPersSvStrahLic.COL_PRIZ_OSS + ", " +
                 RaschsvPersSvStrahLic.COL_FAMILIA + ", " + RaschsvPersSvStrahLic.COL_IMYA + ", " +
-                RaschsvPersSvStrahLic.COL_OTCHESTVO + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                RaschsvPersSvStrahLic.COL_MIDDLE_NAME + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         // Генерация идентификаторов
         for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
@@ -89,7 +89,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 ps.setString(17, raschsvPersSvStrahLic.getPrizOss());
                 ps.setString(18, raschsvPersSvStrahLic.getFamilia());
                 ps.setString(19, raschsvPersSvStrahLic.getImya());
-                ps.setString(20, raschsvPersSvStrahLic.getOtchestvo());
+                ps.setString(20, raschsvPersSvStrahLic.getMiddleName());
             }
 
             @Override
@@ -177,7 +177,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             raschsvPersSvStrahLic.setPrizOss(rs.getString(RaschsvPersSvStrahLic.COL_PRIZ_OSS));
             raschsvPersSvStrahLic.setFamilia(rs.getString(RaschsvPersSvStrahLic.COL_FAMILIA));
             raschsvPersSvStrahLic.setImya(rs.getString(RaschsvPersSvStrahLic.COL_IMYA));
-            raschsvPersSvStrahLic.setOtchestvo(rs.getString(RaschsvPersSvStrahLic.COL_OTCHESTVO));
+            raschsvPersSvStrahLic.setMiddleName(rs.getString(RaschsvPersSvStrahLic.COL_MIDDLE_NAME));
 
             return raschsvPersSvStrahLic;
         }

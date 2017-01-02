@@ -1605,7 +1605,7 @@ create table raschsv_sv_ino_grazd
    grazd              VARCHAR2(3 CHAR),
    familia            VARCHAR2(60 CHAR),
    imya               VARCHAR2(60 CHAR),
-   otchestvo          VARCHAR2(60 CHAR)
+   middle_name          VARCHAR2(60 CHAR)
 );
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_prim_tarif1_3_422
@@ -1623,7 +1623,7 @@ create table raschsv_sved_obuch
    unik_nomer         VARCHAR2(3 CHAR),
    familia            VARCHAR2(60 CHAR),
    imya               VARCHAR2(60 CHAR),
-   otchestvo          VARCHAR2(60 CHAR),
+   middle_name          VARCHAR2(60 CHAR),
    sprav_nomer        VARCHAR2(10 CHAR),
    sprav_data         DATE,
    sprav_node_name    VARCHAR2(20 CHAR)
@@ -1666,7 +1666,7 @@ create table raschsv_pers_sv_strah_lic
    priz_oss           VARCHAR2(1 CHAR),
    familia            VARCHAR2(60 CHAR),
    imya               VARCHAR2(60 CHAR),
-   otchestvo          VARCHAR2(60 CHAR)
+   middle_name          VARCHAR2(60 CHAR)
 );
 create sequence seq_raschsv_pers_sv_strah_lic start with 1;
 ------------------------------------------------------------------------------------------------------
