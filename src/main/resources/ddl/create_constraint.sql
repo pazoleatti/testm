@@ -368,6 +368,9 @@ create index i_form_search_result_formdata on form_search_result(form_data_id);
 alter table raschsv_kol_lic_tip add constraint pk_rasch_kol_lic_tip primary key (id);
 alter table raschsv_sv_sum1_tip add constraint pk_rasch_sv_sum1_tip primary key (id);
 
+alter table raschsv_svnp_podpisant add constraint pk_raschsv_svnp_podpisant primary key (id);
+alter table raschsv_svnp_podpisant add constraint fk_raschsv_svnp_podp_declarat foreign key (declaration_data_id) references declaration_data (id);
+
 alter table raschsv_obyaz_plat_sv add constraint pk_raschsv_obyaz_plat_sv primary key (id);
 alter table raschsv_obyaz_plat_sv add constraint fk_raschsv_obyaz_plat_declarat foreign key (declaration_data_id) references declaration_data (id);
 

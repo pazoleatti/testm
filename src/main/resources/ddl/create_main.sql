@@ -1344,6 +1344,27 @@ create sequence seq_ndfl_person_prepayment start with 1000;
 ------------------------------------------------------------------------------------------------------
 --  Расчет по страховым взносам 1151111
 ------------------------------------------------------------------------------------------------------
+create table raschsv_svnp_podpisant
+(
+   id                 NUMBER(18)           not null,
+   declaration_data_id NUMBER(18)          not null,
+   svnp_okved         VARCHAR2(8 CHAR),
+   svnp_tlph          VARCHAR2(20 CHAR),
+   svnp_naim_org      VARCHAR2(1000 CHAR),
+   svnp_innyl         VARCHAR2(10 CHAR),
+   svnp_kpp           VARCHAR2(9 CHAR),
+   svnp_sv_reorg_form VARCHAR2(1 CHAR),
+   svnp_sv_reorg_innyl VARCHAR2(10 CHAR),
+   svnp_sv_reorg_kpp  VARCHAR2(9 CHAR),
+   familia            VARCHAR2(60 CHAR),
+   imya               VARCHAR2(60 CHAR),
+   middle_name        VARCHAR2(60 CHAR),
+   podpisant_pr_podp  VARCHAR2(1 CHAR),
+   podpisant_naim_doc VARCHAR2(120 CHAR),
+   podpisant_naim_org VARCHAR2(1000 CHAR)
+);
+create sequence seq_raschsv_svnp_podpisant start with 1;
+------------------------------------------------------------------------------------------------------
 create table raschsv_kol_lic_tip
 (
    id                 NUMBER(18)           not null,
