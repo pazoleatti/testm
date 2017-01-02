@@ -216,4 +216,22 @@ public final class SqlUtils {
         Integer ret = resultSet.getInt(columnIndex);
         return resultSet.wasNull()?null:ret;
     }
+
+	/**
+	 * Возвращает строку наименований столбцов на основании их массива
+	 * @param columns - массив наименований столбцов
+	 * @param prefix - символ, который необходимо вставить перед именем столбца
+	 * @return
+     */
+	public static String getColumnsToString(String [] columns, String prefix) {
+		StringBuilder sb = new StringBuilder();
+		int cntCol = columns.length - 1;
+		for (int i = 0; ; i++) {
+			sb.append(prefix != null ? prefix + columns[i] : columns[i]);
+			if (i == cntCol) {
+				return sb.toString();
+			}
+			sb.append(", ");
+		}
+	}
 }

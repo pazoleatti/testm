@@ -35,6 +35,9 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
     private List<RaschsvSvVypl> raschsvSvVyplList;
 
+    // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу
+    private List<RaschsvVyplSvDop> raschsvVyplSvDopList;
+
     public RaschsvPersSvStrahLic() {
         super();
         raschsvSvVyplList = new ArrayList<RaschsvSvVypl>();
@@ -62,6 +65,11 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public static final String COL_FAMILIA = "familia";
     public static final String COL_IMYA = "imya";
     public static final String COL_MIDDLE_NAME = "middle_name";
+
+    public static final String[] COLUMNS = {COL_ID, COL_DECLARATION_DATA_ID, COL_NOM_KORR, COL_PERIOD, COL_OTCHET_GOD,
+            COL_NOMER, COL_SV_DATA, COL_INNFL, COL_SNILS, COL_DATA_ROZD, COL_GRAZD, COL_POL, COL_KOD_VID_DOC, COL_SER_NOM_DOC,
+            COL_PRIZ_OPS, COL_PRIZ_OMS, COL_PRIZ_OSS, COL_FAMILIA, COL_IMYA, COL_MIDDLE_NAME
+    };
 
     public Long getDeclarationDataId() { return declarationDataId; }
     public void setDeclarationDataId(Long declarationDataId) { this.declarationDataId = declarationDataId; }
@@ -124,4 +132,9 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
         return raschsvSvVyplList != null ? raschsvSvVyplList : Collections.<RaschsvSvVypl>emptyList();
     }
     public void setRaschsvSvVyplList(List<RaschsvSvVypl> raschsvSvVyplList) { this.raschsvSvVyplList = raschsvSvVyplList; }
+
+    public List<RaschsvVyplSvDop> getRaschsvVyplSvDopList() {
+        return raschsvVyplSvDopList != null ? raschsvVyplSvDopList : Collections.<RaschsvVyplSvDop>emptyList();
+    }
+    public void setRaschsvVyplSvDopList(List<RaschsvVyplSvDop> raschsvVyplSvDopList) { this.raschsvVyplSvDopList = raschsvVyplSvDopList; }
 }

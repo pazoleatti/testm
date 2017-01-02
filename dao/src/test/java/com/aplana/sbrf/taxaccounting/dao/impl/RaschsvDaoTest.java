@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl;
+import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +39,47 @@ public class RaschsvDaoTest {
      */
     @Test
     public void testInsertRaschsvPersSvStrahLic() {
+        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
         List<RaschsvSvVypl> raschsvSvVyplList = new ArrayList<RaschsvSvVypl>();
+        List<RaschsvSvVyplMt> raschsvSvVyplMtList = new ArrayList<RaschsvSvVyplMt>();
+        List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList = new ArrayList<RaschsvVyplSvDopMt>();
+        List<RaschsvVyplSvDop> raschsvVyplSvDopList = new ArrayList<RaschsvVyplSvDop>();
+
+        // Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа
+        RaschsvVyplSvDopMt raschsvVyplSvDopMt = new RaschsvVyplSvDopMt();
+        raschsvVyplSvDopMt.setMesyac("01");
+        raschsvVyplSvDopMt.setTarif("1");
+        raschsvVyplSvDopMt.setVyplSv(1.1);
+        raschsvVyplSvDopMt.setNachislSv(1.1);
+        raschsvVyplSvDopMtList.add(raschsvVyplSvDopMt);
+
+        // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу
+        RaschsvVyplSvDop raschsvVyplSvDop = new RaschsvVyplSvDop();
+        raschsvVyplSvDop.setVyplSvVs3(1.1);
+        raschsvVyplSvDop.setNachislSvVs3(1.1);
+        raschsvVyplSvDop.setRaschsvVyplSvDopMtList(raschsvVyplSvDopMtList);
+        raschsvVyplSvDopList.add(raschsvVyplSvDop);
+
+        // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица
+        RaschsvSvVyplMt raschsvSvVyplMt1 = new RaschsvSvVyplMt();
+        raschsvSvVyplMt1.setMesyac("01");
+        raschsvSvVyplMt1.setKodKatLic("1");
+        raschsvSvVyplMt1.setSumVypl(1.1);
+        raschsvSvVyplMt1.setVyplOps(1.1);
+        raschsvSvVyplMt1.setVyplOpsDog(1.1);
+        raschsvSvVyplMt1.setNachislSv(1.1);
+        raschsvSvVyplMtList.add(raschsvSvVyplMt1);
+
+        // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
         RaschsvSvVypl raschsvSvVypl1 = new RaschsvSvVypl();
         raschsvSvVypl1.setSumVyplVs3(1.1);
         raschsvSvVypl1.setVyplOpsVs3(1.1);
         raschsvSvVypl1.setVyplOpsDogVs3(1.1);
         raschsvSvVypl1.setNachislSvVs3(1.1);
+        raschsvSvVypl1.setRaschsvSvVyplMtList(raschsvSvVyplMtList);
         raschsvSvVyplList.add(raschsvSvVypl1);
 
+        // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
         RaschsvSvVypl raschsvSvVypl2 = new RaschsvSvVypl();
         raschsvSvVypl2.setSumVyplVs3(2.1);
         raschsvSvVypl2.setVyplOpsVs3(2.1);
@@ -55,18 +87,18 @@ public class RaschsvDaoTest {
         raschsvSvVypl2.setNachislSvVs3(2.1);
         raschsvSvVyplList.add(raschsvSvVypl2);
 
+        // Персонифицированные сведения о застрахованных лицах
         RaschsvPersSvStrahLic raschsvPersSvStrahLic1 = new RaschsvPersSvStrahLic();
         raschsvPersSvStrahLic1.setDeclarationDataId(1L);
         raschsvPersSvStrahLic1.setNomKorr(1);
-        raschsvPersSvStrahLic1.setNomer(1);
         raschsvPersSvStrahLic1.setRaschsvSvVyplList(raschsvSvVyplList);
+        raschsvPersSvStrahLic1.setRaschsvVyplSvDopList(raschsvVyplSvDopList);
 
+        // Персонифицированные сведения о застрахованных лицах
         RaschsvPersSvStrahLic raschsvPersSvStrahLic2 = new RaschsvPersSvStrahLic();
         raschsvPersSvStrahLic2.setDeclarationDataId(1L);
         raschsvPersSvStrahLic2.setNomKorr(2);
-        raschsvPersSvStrahLic2.setNomer(2);
 
-        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic1);
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic2);
         raschsvPersSvStrahLicDao.insert(raschsvPersSvStrahLicList);

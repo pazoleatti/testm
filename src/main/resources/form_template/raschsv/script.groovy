@@ -5,6 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMt
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDop
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDopMt
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -18,6 +21,9 @@ import groovy.transform.Field
 @Field final NODE_NAME_FIO = "ФИО"
 @Field final NODE_NAME_SV_VYPL_SVOPS = "СвВыплСВОПС"
 @Field final NODE_NAME_SV_VYPL = "СвВыпл"
+@Field final NODE_NAME_SV_VYPL_MT = "СвВыплМК"
+@Field final NODE_NAME_VYPL_SV_DOP = "ВыплСВДоп"
+@Field final NODE_NAME_VYPL_SV_DOP_MT = "ВыплСВДопМТ"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -48,6 +54,24 @@ import groovy.transform.Field
 @Field final SV_VYPL_VYPL_OPS_VS3 = "ВыплОПСВс3"
 @Field final SV_VYPL_VYPL_OPS_DOG_VS3 = "ВыплОПСДогВс3"
 @Field final SV_VYPL_NACHISL_SV_VS3 = "НачислСВВс3"
+
+// Атрибуты узла СвВыплМК
+@Field final SV_VYPL_MT_MESYAC = "Месяц"
+@Field final SV_VYPL_MT_KOD_KAT_LIC = "КодКатЛиц"
+@Field final SV_VYPL_MT_SUM_VYPL = "СумВыпл"
+@Field final SV_VYPL_MT_VYPL_OPS = "ВыплОПС"
+@Field final SV_VYPL_MT_VYPL_OPS_DOG = "ВыплОПСДог"
+@Field final SV_VYPL_MT_NACHISL_SV = "НачислСВ"
+
+// Атрибуты узла ВыплСВДоп
+@Field final VYPL_SV_DOP_VYPL_SV_VS3 = "ВыплСВВс3"
+@Field final VYPL_SV_DOP_NACHISL_SV_VS3 = "НачислСВВс3"
+
+// Атрибуты узла ВыплСВДопМТ
+@Field final VYPL_SV_DOP_MT_MESYAC = "Месяц"
+@Field final VYPL_SV_DOP_MT_TARIF = "Тариф"
+@Field final VYPL_SV_DOP_MT_VYPL_SV = "ВыплСВ"
+@Field final VYPL_SV_DOP_MT_NACHISL_SV = "НачислСВ"
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -105,6 +129,8 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
 
     // Набор объектов СвВыпл
     def raschsvSvVyplList = []
+    // Набор объектов ВыплСВДопМТ
+    def raschsvVyplSvDopList = []
 
     raschsvPersSvStrahLic.nomKorr = getInteger(persSvStrahLicNode.attributes()[PERV_SV_STRAH_LIC_NOM_KORR])
     raschsvPersSvStrahLic.period = persSvStrahLicNode.attributes()[PERV_SV_STRAH_LIC_PERIOD]
@@ -143,13 +169,54 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
                     raschsvSvVypl.vyplOpsVs3 = getDouble(svVyplSvopsChildNode.attributes()[SV_VYPL_VYPL_OPS_VS3])
                     raschsvSvVypl.vyplOpsDogVs3 = getDouble(svVyplSvopsChildNode.attributes()[SV_VYPL_VYPL_OPS_DOG_VS3])
                     raschsvSvVypl.nachislSvVs3 = getDouble(svVyplSvopsChildNode.attributes()[SV_VYPL_NACHISL_SV_VS3])
+
+                    // Набор объектов СвВыплМК
+                    def raschsvSvVyplMtList = []
+                    svVyplSvopsChildNode.childNodes().each { svVyplMkNode ->
+                        if (svVyplMkNode.name == NODE_NAME_SV_VYPL_MT) {
+                            // Разбор узла СвВыплМК
+                            RaschsvSvVyplMt raschsvSvVyplMt = new RaschsvSvVyplMt()
+                            raschsvSvVyplMt.mesyac = svVyplMkNode.attributes()[SV_VYPL_MT_MESYAC]
+                            raschsvSvVyplMt.kodKatLic = svVyplMkNode.attributes()[SV_VYPL_MT_KOD_KAT_LIC]
+                            raschsvSvVyplMt.sumVypl = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_SUM_VYPL])
+                            raschsvSvVyplMt.vyplOps = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_VYPL_OPS])
+                            raschsvSvVyplMt.vyplOpsDog = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_VYPL_OPS_DOG])
+                            raschsvSvVyplMt.nachislSv = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_NACHISL_SV])
+
+                            raschsvSvVyplMtList.add(raschsvSvVyplMt)
+                        }
+                    }
+                    raschsvSvVypl.raschsvSvVyplMtList = raschsvSvVyplMtList
                     raschsvSvVyplList.add(raschsvSvVypl)
+                } else if (svVyplSvopsChildNode.name == NODE_NAME_VYPL_SV_DOP) {
+                    // Разбор узла ВыплСВДоп
+                    RaschsvVyplSvDop raschsvVyplSvDop = new RaschsvVyplSvDop()
+                    raschsvVyplSvDop.vyplSvVs3 = getDouble(svVyplSvopsChildNode.attributes()[VYPL_SV_DOP_VYPL_SV_VS3])
+                    raschsvVyplSvDop.nachislSvVs3 = getDouble(svVyplSvopsChildNode.attributes()[VYPL_SV_DOP_NACHISL_SV_VS3])
+
+                    // Набор объектов ВыплСВДопМТ
+                    def raschsvVyplSvDopMtList = []
+                    svVyplSvopsChildNode.childNodes().each { vyplSvDopMtNode ->
+                        if (vyplSvDopMtNode.name == NODE_NAME_VYPL_SV_DOP_MT) {
+                            // Разбор узла ВыплСВДопМТ
+                            RaschsvVyplSvDopMt raschsvVyplSvDopMt = new RaschsvVyplSvDopMt()
+                            raschsvVyplSvDopMt.mesyac = vyplSvDopMtNode.attributes()[VYPL_SV_DOP_MT_MESYAC]
+                            raschsvVyplSvDopMt.tarif = vyplSvDopMtNode.attributes()[VYPL_SV_DOP_MT_TARIF]
+                            raschsvVyplSvDopMt.vyplSv = getDouble(vyplSvDopMtNode.attributes()[VYPL_SV_DOP_MT_VYPL_SV])
+                            raschsvVyplSvDopMt.nachislSv = getDouble(vyplSvDopMtNode.attributes()[VYPL_SV_DOP_MT_NACHISL_SV])
+
+                            raschsvVyplSvDopMtList.add(raschsvVyplSvDopMt)
+                            println(raschsvVyplSvDopMt.nachislSv)
+                        }
+                    }
+                    raschsvVyplSvDop.raschsvVyplSvDopMtList = raschsvVyplSvDopMtList
+                    raschsvVyplSvDopList.add(raschsvVyplSvDop)
                 }
             }
         }
     }
     raschsvPersSvStrahLic.raschsvSvVyplList = raschsvSvVyplList
-    println(raschsvPersSvStrahLic.middleName)
+    raschsvPersSvStrahLic.raschsvVyplSvDopList = raschsvVyplSvDopList
 
     return raschsvPersSvStrahLic
 }

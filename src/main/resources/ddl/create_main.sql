@@ -1729,7 +1729,7 @@ create table raschsv_vypl_sv_dop_mt
    id                 NUMBER(18)           not null,
    raschsv_vypl_sv_dop_id NUMBER(18),
    mesyac             VARCHAR2(2 CHAR),
-   tariff             VARCHAR2(2 CHAR),
+   tarif             VARCHAR2(2 CHAR),
    vypl_sv            NUMBER(17,2),
    nachisl_sv         NUMBER(17,2)
 );
