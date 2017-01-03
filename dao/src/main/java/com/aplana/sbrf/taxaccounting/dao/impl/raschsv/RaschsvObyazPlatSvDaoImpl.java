@@ -23,17 +23,6 @@ public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvOby
     private static final StringBuilder OBYAZ_PLAT_SV_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvObyazPlatSv.COLUMNS, ":"));
 
     /**
-     * Выгрузка всех записей из "Сводные данные об обязательствах плательщика страховых взносов"
-     * @return
-     */
-    @Override
-    public List<RaschsvObyazPlatSv> findAll() {
-        return getJdbcTemplate().query(
-                "SELECT " + OBYAZ_PLAT_SV_COLS + " FROM " + RaschsvObyazPlatSv.TABLE_NAME,
-                new RaschsvObyazPlatSvRowMapper());
-    }
-
-    /**
      * Сохранение "Сводные данные об обязательствах плательщика страховых взносов"
      * @return
      */

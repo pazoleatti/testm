@@ -43,24 +43,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     private static final StringBuilder VYPL_SV_DOP_MT_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvVyplSvDopMt.COLUMNS, ":"));
 
     /**
-     * Выгрузка всех записей из "Персонифицированные сведения о застрахованных лицах"
-     * @return
-     */
-    @Override
-    public List<RaschsvPersSvStrahLic> findAll() {
-        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = getJdbcTemplate().query(
-                "select " + PERS_SV_STRAH_LIC_COLS + " from " + RaschsvPersSvStrahLic.TABLE_NAME,
-                new RaschsvPersSvStrahLicRowMapper());
-
-        for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
-
-            // Выгрузка "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
-            raschsvPersSvStrahLic.setRaschsvSvVyplList(getRaschsvSvVypl(raschsvPersSvStrahLic.getId()));
-        }
-        return raschsvPersSvStrahLicList;
-    }
-
-    /**
      * Выгрузка из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
      * @param raschsvPersSvStrahLicId - идентификатор "Персонифицированные сведения о застрахованных лицах"
      * @return

@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPrevOss;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -15,6 +16,10 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ReportPeriodServiceImpl;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvObyazPlatSvService;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvPersSvStrahLicService;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvUplPerService;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvUplPrevOssService;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import org.mockito.invocation.InvocationOnMock;
@@ -313,6 +318,22 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         RaschsvObyazPlatSvService raschsvObyazPlatSvService = mock(RaschsvObyazPlatSvService.class);
         when(raschsvObyazPlatSvService.insertObyazPlatSv(any(RaschsvObyazPlatSv.class))).thenReturn(1L);
         return raschsvObyazPlatSvService;
+    }
+
+    // "Сумма страховых взносов на пенсионное, медицинское, социальное страхование"
+    @Override
+    public RaschsvUplPerService mockRaschsvUplPerService() {
+        RaschsvUplPerService raschsvObyazPlatSvService = mock(RaschsvUplPerService.class);
+        when(raschsvObyazPlatSvService.insertUplPer(any(List.class))).thenReturn(1);
+        return raschsvObyazPlatSvService;
+    }
+
+    // "Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
+    @Override
+    public RaschsvUplPrevOssService mockRaschsvUplPrevOssService() {
+        RaschsvUplPrevOssService raschsvUplPrevOssService = mock(RaschsvUplPrevOssService.class);
+        when(raschsvUplPrevOssService.insertUplPrevOss(any(RaschsvUplPrevOss.class))).thenReturn(1L);
+        return raschsvUplPrevOssService;
     }
 
     /**

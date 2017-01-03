@@ -13,6 +13,10 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvObyazPlatSvService;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvPersSvStrahLicService;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvUplPerService;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvUplPrevOssService;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 
 import javax.script.Bindings;
@@ -74,6 +78,10 @@ public class TestScriptHelper {
     private RaschsvPersSvStrahLicService raschsvPersSvStrahLicService;
     // Сервисы "Сводные данные об обязательствах плательщика страховых взносов"
     private RaschsvObyazPlatSvService raschsvObyazPlatSvService;
+    // Сервисы "Сумма страховых взносов на пенсионное, медицинское, социальное страхование"
+    private RaschsvUplPerService raschsvUplPerService;
+    // Сервисы "Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
+    private RaschsvUplPrevOssService raschsvUplPrevOssService;
 
     //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
@@ -150,6 +158,8 @@ public class TestScriptHelper {
         ndflPersonService = mockHelper.mockNdflPersonService();
         raschsvPersSvStrahLicService = mockHelper.mockRaschsvPersSvStrahLicService();
         raschsvObyazPlatSvService = mockHelper.mockRaschsvObyazPlatSvService();
+        raschsvUplPerService = mockHelper.mockRaschsvUplPerService();
+        raschsvUplPrevOssService = mockHelper.mockRaschsvUplPrevOssService();
     }
 
     /**
@@ -274,6 +284,10 @@ public class TestScriptHelper {
         bindings.put("raschsvPersSvStrahLicService", raschsvPersSvStrahLicService);
         // Сводные данные об обязательствах плательщика страховых взносов
         bindings.put("raschsvObyazPlatSvService", raschsvObyazPlatSvService);
+        // Сумма страховых взносов на пенсионное, медицинское, социальное страхование
+        bindings.put("raschsvUplPerService", raschsvUplPerService);
+        // Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
+        bindings.put("raschsvUplPrevOssService", raschsvUplPrevOssService);
 
         //ndfl
         bindings.put("ndflPersonService", ndflPersonService);

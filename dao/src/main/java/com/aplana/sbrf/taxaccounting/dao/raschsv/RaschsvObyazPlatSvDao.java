@@ -10,12 +10,6 @@ import java.util.List;
 public interface RaschsvObyazPlatSvDao {
 
     /**
-     * Выгрузка всех записей из "Персонифицированные сведения о застрахованных лицах"
-     * @return
-     */
-    List<RaschsvObyazPlatSv> findAll();
-
-    /**
      * Сохранение "Сводные данные об обязательствах плательщика страховых взносов"
      * @param raschsvObyazPlatSv - Сводные данные об обязательствах плательщика страховых взносов
      * @return

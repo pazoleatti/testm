@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvObyazPlatSvDao;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
+import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvUplPerDao;
+import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvUplPrevOssDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertFalse;
 
@@ -29,26 +32,73 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvObyazPlatSvDao raschsvObyazPlatSvDao;
 
-    /**
-     * Тестирование выборки данных из таблицы "Персонифицированные сведения о застрахованных лицах"
-     */
-    @Test
-    public void testGetRaschsvPersSvStrahLic() {
-        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = raschsvPersSvStrahLicDao.findAll();
-        assertNotNull(raschsvPersSvStrahLicList);
-    }
+    @Autowired
+    private RaschsvUplPerDao raschsvUplPerDao;
+
+    @Autowired
+    private RaschsvUplPrevOssDao raschsvUplPrevOssDao;
 
     /**
-     * Тестирование сохранения данных в таблицу "Сводные данные об обязательствах плательщика страховых взносов"
+     * Добавление записи в таблицу ОбязПлатСВ
+     * @return
      */
-    @Test
-    public void testInsertRaschsvObyazPlatSv() {
+    private Long createRaschsvObyazPlatSv() {
         RaschsvObyazPlatSv raschsvObyazPlatSv = new RaschsvObyazPlatSv();
         raschsvObyazPlatSv.setDeclarationDataId(1L);
         raschsvObyazPlatSv.setOktmo("1");
 
-        raschsvObyazPlatSvDao.insertObyazPlatSv(raschsvObyazPlatSv);
-        assertFalse(raschsvObyazPlatSvDao.findAll().isEmpty());
+        return raschsvObyazPlatSvDao.insertObyazPlatSv(raschsvObyazPlatSv).longValue();
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
+     */
+    @Test
+    public void testInsertRaschsvUplPrevOss() {
+        RaschsvUplPrevOss raschsvUplPrevOss1 = new RaschsvUplPrevOss();
+        raschsvUplPrevOss1.setRaschsvObyazPlatSvId(createRaschsvObyazPlatSv());
+        raschsvUplPrevOss1.setKbk("1");
+        raschsvUplPrevOss1.setPrevRashSv1m(1.1);
+        raschsvUplPrevOss1.setPrevRashSv2m(1.1);
+        raschsvUplPrevOss1.setPrevRashSv3m(1.1);
+        raschsvUplPrevOss1.setPrevRashSvPer(1.1);
+        raschsvUplPrevOss1.setSumSbUpl1m(2.1);
+        raschsvUplPrevOss1.setSumSbUpl2m(2.1);
+        raschsvUplPrevOss1.setSumSbUpl3m(2.1);
+        raschsvUplPrevOss1.setSumSbUplPer(2.1);
+
+        assertEquals(raschsvUplPrevOssDao.insertUplPrevOss(raschsvUplPrevOss1).intValue(), 1);
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Сумма страховых взносов на пенсионное, медицинское, социальное страхование"
+     */
+    @Test
+    public void testInsertRaschsvUplPer() {
+        Long raschsvObyazPlatSvId = createRaschsvObyazPlatSv();
+        List<RaschsvUplPer> raschsvUplPerList = new ArrayList<RaschsvUplPer>();
+
+        RaschsvUplPer raschsvUplPer1 = new RaschsvUplPer();
+        raschsvUplPer1.setRaschsvObyazPlatSvId(raschsvObyazPlatSvId);
+        raschsvUplPer1.setNodeName("УплПерОПС");
+        raschsvUplPer1.setKbk("1");
+        raschsvUplPer1.setSumSbUplPer(1.1);
+        raschsvUplPer1.setSumSbUpl1m(1.1);
+        raschsvUplPer1.setSumSbUpl2m(1.1);
+        raschsvUplPer1.setSumSbUpl3m(1.1);
+        raschsvUplPerList.add(raschsvUplPer1);
+
+        RaschsvUplPer raschsvUplPer2 = new RaschsvUplPer();
+        raschsvUplPer2.setRaschsvObyazPlatSvId(raschsvObyazPlatSvId);
+        raschsvUplPer2.setNodeName("УплПерОМС");
+        raschsvUplPer2.setKbk("2");
+        raschsvUplPer2.setSumSbUplPer(2.1);
+        raschsvUplPer2.setSumSbUpl1m(2.1);
+        raschsvUplPer2.setSumSbUpl2m(2.1);
+        raschsvUplPer2.setSumSbUpl3m(2.1);
+        raschsvUplPerList.add(raschsvUplPer2);
+
+        assertEquals(raschsvUplPerDao.insertUplPer(raschsvUplPerList).intValue(), raschsvUplPerList.size());
     }
 
     /**
@@ -118,7 +168,6 @@ public class RaschsvDaoTest {
 
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic1);
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic2);
-        raschsvPersSvStrahLicDao.insertPersSvStrahLic(raschsvPersSvStrahLicList);
-        assertFalse(raschsvPersSvStrahLicDao.findAll().isEmpty());
+        assertEquals(raschsvPersSvStrahLicDao.insertPersSvStrahLic(raschsvPersSvStrahLicList).intValue(), raschsvPersSvStrahLicList.size());
     }
 }

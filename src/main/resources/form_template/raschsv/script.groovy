@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMt
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDop
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDopMt
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPer
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPrevOss
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -25,6 +27,13 @@ import groovy.transform.Field
 @Field final NODE_NAME_SV_VYPL_MT = "СвВыплМК"
 @Field final NODE_NAME_VYPL_SV_DOP = "ВыплСВДоп"
 @Field final NODE_NAME_VYPL_SV_DOP_MT = "ВыплСВДопМТ"
+@Field final NODE_NAME_UPL_PER_OPS = "УплПерОПС"
+@Field final NODE_NAME_UPL_PER_OMS = "УплПерОМС"
+@Field final NODE_NAME_UPL_PER_OPS_DOP = "УплПерОПСДоп"
+@Field final NODE_NAME_UPL_PER_DSO = "УплПерДСО"
+@Field final NODE_NAME_UPL_PREV_OSS = "УплПревОСС"
+@Field final NODE_NAME_UPL_PER_OSS = "УплПерОСС"
+@Field final NODE_NAME_PREV_RASH_OSS = "ПревРасхОСС"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -73,6 +82,20 @@ import groovy.transform.Field
 @Field final VYPL_SV_DOP_MT_TARIF = "Тариф"
 @Field final VYPL_SV_DOP_MT_VYPL_SV = "ВыплСВ"
 @Field final VYPL_SV_DOP_MT_NACHISL_SV = "НачислСВ"
+
+// Атрибуты узлов УплПерОПС, УплПерОМС, УплПерОПСДоп, УплПерДСО, УплПерОСС
+@Field final UPL_PER_KBK = "КБК"
+@Field final UPL_PER_SUM_SV_UPL_PER = "СумСВУплПер"
+@Field final UPL_PER_SUM_SV_UPL_1M = "СумСВУпл1М"
+@Field final UPL_PER_SUM_SV_UPL_2M = "СумСВУпл2М"
+@Field final UPL_PER_SUM_SV_UPL_3M = "СумСВУпл3М"
+
+// Атрибуты узла ПревРасхОСС
+@Field final PREV_RASH_KBK = "КБК"
+@Field final PREV_RASH_PREV_RASH_SV_PER = "ПревРасхСВПер"
+@Field final PREV_RASH_PREV_RASH_SV_1M = "ПревРасхСВ1М"
+@Field final PREV_RASH_PREV_RASH_SV_2M = "ПревРасхСВ2М"
+@Field final PREV_RASH_PREV_RASH_SV_3M = "ПревРасхСВ3М"
 
 // Атрибуты узла ОбязПлатСВ
 @Field final OBYAZ_PLAT_SV_OKTMO = "ОКТМО"
@@ -136,9 +159,61 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
     raschsvObyazPlatSv.declarationDataId = declarationDataId
     raschsvObyazPlatSv.oktmo = obyazPlatSvNode.attributes()[OBYAZ_PLAT_SV_OKTMO]
 
-    def obyazPlatSvId = raschsvObyazPlatSvService.insertObyazPlatSv(raschsvObyazPlatSv)
-    println(obyazPlatSvId)
-    return obyazPlatSvId
+    // Сохранение ОбязПлатСВ
+    def raschsvObyazPlatSvId = raschsvObyazPlatSvService.insertObyazPlatSv(raschsvObyazPlatSv)
+
+    // Набор объектов УплПер
+    def raschsvUplPerList = []
+
+    obyazPlatSvNode.childNodes().each { obyazPlatSvChildNode ->
+        if (obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_OPS ||
+                obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_OMS ||
+                obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_OPS_DOP ||
+                obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_DSO) {
+            // Разбор узлов УплПерОПС, УплПерОМС, УплПерОПСДоп, УплПерДСО
+            RaschsvUplPer raschsvUplPer = new RaschsvUplPer()
+            raschsvUplPer.raschsvObyazPlatSvId = raschsvObyazPlatSvId
+            raschsvUplPer.nodeName = obyazPlatSvChildNode.name
+            raschsvUplPer.kbk = obyazPlatSvChildNode.attributes()[UPL_PER_KBK]
+            raschsvUplPer.sumSbUplPer = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_PER])
+            raschsvUplPer.sumSbUpl1m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_1M])
+            raschsvUplPer.sumSbUpl2m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_2M])
+            raschsvUplPer.sumSbUpl3m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_3M])
+            println(raschsvUplPer.kbk)
+
+            raschsvUplPerList.add(raschsvUplPer)
+
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_UPL_PREV_OSS) {
+            // Разбор узла УплПревОСС
+            RaschsvUplPrevOss raschsvUplPrevOss = new RaschsvUplPrevOss()
+            raschsvUplPrevOss.raschsvObyazPlatSvId = raschsvObyazPlatSvId
+            raschsvUplPrevOss.kbk = obyazPlatSvChildNode.attributes()[PREV_RASH_KBK]
+
+            obyazPlatSvChildNode.childNodes().each { uplPrevOssChildNode ->
+                if (uplPrevOssChildNode.name == NODE_NAME_UPL_PER_OSS) {
+                    // Разбор узла УплПерОСС
+                    raschsvUplPrevOss.sumSbUplPer = getDouble(uplPrevOssChildNode.attributes()[UPL_PER_SUM_SV_UPL_PER])
+                    raschsvUplPrevOss.sumSbUpl1m = getDouble(uplPrevOssChildNode.attributes()[UPL_PER_SUM_SV_UPL_1M])
+                    raschsvUplPrevOss.sumSbUpl2m = getDouble(uplPrevOssChildNode.attributes()[UPL_PER_SUM_SV_UPL_2M])
+                    raschsvUplPrevOss.sumSbUpl3m = getDouble(uplPrevOssChildNode.attributes()[UPL_PER_SUM_SV_UPL_3M])
+                } else if (uplPrevOssChildNode.name == NODE_NAME_PREV_RASH_OSS) {
+                    // Разбор узла ПревРасхОСС
+                    raschsvUplPrevOss.prevRashSvPer = getDouble(uplPrevOssChildNode.attributes()[PREV_RASH_PREV_RASH_SV_PER])
+                    raschsvUplPrevOss.prevRashSv1m = getDouble(uplPrevOssChildNode.attributes()[PREV_RASH_PREV_RASH_SV_1M])
+                    raschsvUplPrevOss.prevRashSv2m = getDouble(uplPrevOssChildNode.attributes()[PREV_RASH_PREV_RASH_SV_2M])
+                    raschsvUplPrevOss.prevRashSv3m = getDouble(uplPrevOssChildNode.attributes()[PREV_RASH_PREV_RASH_SV_3M])
+                }
+            }
+
+            // Сохранение УплПревОСС
+            raschsvUplPrevOssService.insertUplPrevOss(raschsvUplPrevOss)
+        }
+    }
+
+    // Сохранение УплПер
+    raschsvUplPerService.insertUplPer(raschsvUplPerList)
+
+    return raschsvObyazPlatSvId
 }
 
 /**

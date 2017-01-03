@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.service.script;
+package com.aplana.sbrf.taxaccounting.service.script.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
 

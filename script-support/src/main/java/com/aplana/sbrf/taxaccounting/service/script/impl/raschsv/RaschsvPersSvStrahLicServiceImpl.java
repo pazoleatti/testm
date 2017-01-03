@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.impl.raschsv;
 
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
-import com.aplana.sbrf.taxaccounting.service.script.RaschsvPersSvStrahLicService;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvPersSvStrahLicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -10,12 +10,6 @@ import java.util.List;
 public interface RaschsvPersSvStrahLicDao {
 
     /**
-     * Выгрузка всех записей из "Персонифицированные сведения о застрахованных лицах"
-     * @return
-     */
-    List<RaschsvPersSvStrahLic> findAll();
-
-    /**
      * Сохранение "Персонифицированные сведения о застрахованных лицах"
      * @param raschsvPersSvStrahLicList - перечень "Персонифицированные сведения о застрахованных лицах"
      * @return
