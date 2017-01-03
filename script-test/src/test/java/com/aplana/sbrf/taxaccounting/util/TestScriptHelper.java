@@ -13,10 +13,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvObyazPlatSvService;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvPersSvStrahLicService;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvUplPerService;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvUplPrevOssService;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.*;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 
 import javax.script.Bindings;
@@ -82,6 +79,8 @@ public class TestScriptHelper {
     private RaschsvUplPerService raschsvUplPerService;
     // Сервисы "Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
     private RaschsvUplPrevOssService raschsvUplPrevOssService;
+    // Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование
+    private RaschsvSvOpsOmsService raschsvSvOpsOmsService;
 
     //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
@@ -160,6 +159,7 @@ public class TestScriptHelper {
         raschsvObyazPlatSvService = mockHelper.mockRaschsvObyazPlatSvService();
         raschsvUplPerService = mockHelper.mockRaschsvUplPerService();
         raschsvUplPrevOssService = mockHelper.mockRaschsvUplPrevOssService();
+        raschsvSvOpsOmsService = mockHelper.mockRaschsvSvOpsOmsService();
     }
 
     /**
@@ -288,6 +288,8 @@ public class TestScriptHelper {
         bindings.put("raschsvUplPerService", raschsvUplPerService);
         // Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
         bindings.put("raschsvUplPrevOssService", raschsvUplPrevOssService);
+        // Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование
+        bindings.put("raschsvSvOpsOmsService", raschsvSvOpsOmsService);
 
         //ndfl
         bindings.put("ndflPersonService", ndflPersonService);

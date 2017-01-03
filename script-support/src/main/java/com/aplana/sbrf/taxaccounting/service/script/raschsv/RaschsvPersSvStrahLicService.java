@@ -11,7 +11,7 @@ public interface RaschsvPersSvStrahLicService {
 
     /**
      * Сохраняет перечень записей "Персонифицированные сведения о застрахованных лицах"
-     * @param raschsvPersSvStrahLicList - перечень записей "Персонифицированные сведения о застрахованных лицах"
+     * @param raschsvPersSvStrahLicList
      * @return
      */
     Integer insertPersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList);

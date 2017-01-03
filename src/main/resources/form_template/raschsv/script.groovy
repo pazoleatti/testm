@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDopMt
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPer
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPrevOss
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOms
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -34,6 +35,7 @@ import groovy.transform.Field
 @Field final NODE_NAME_UPL_PREV_OSS = "УплПревОСС"
 @Field final NODE_NAME_UPL_PER_OSS = "УплПерОСС"
 @Field final NODE_NAME_PREV_RASH_OSS = "ПревРасхОСС"
+@Field final NODE_NAME_SV_OPS_OMS = "РасчСВ_ОПС_ОМС"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -100,6 +102,9 @@ import groovy.transform.Field
 // Атрибуты узла ОбязПлатСВ
 @Field final OBYAZ_PLAT_SV_OKTMO = "ОКТМО"
 
+// Атрибуты узла РасчСВ_ОПС_ОМС
+@Field final SV_OPS_OMS_TARIF_PLAT = "ТарифПлат"
+
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         parseRaschsv()
@@ -165,12 +170,17 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
     // Набор объектов УплПер
     def raschsvUplPerList = []
 
+    // Набор объектов РасчСВ_ОПС_ОМС
+    def raschsvSvOpsOmsList = []
+
     obyazPlatSvNode.childNodes().each { obyazPlatSvChildNode ->
         if (obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_OPS ||
                 obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_OMS ||
                 obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_OPS_DOP ||
                 obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_DSO) {
+            //----------------------------------------------------------------------------------------------------------
             // Разбор узлов УплПерОПС, УплПерОМС, УплПерОПСДоп, УплПерДСО
+            //----------------------------------------------------------------------------------------------------------
             RaschsvUplPer raschsvUplPer = new RaschsvUplPer()
             raschsvUplPer.raschsvObyazPlatSvId = raschsvObyazPlatSvId
             raschsvUplPer.nodeName = obyazPlatSvChildNode.name
@@ -179,12 +189,13 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             raschsvUplPer.sumSbUpl1m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_1M])
             raschsvUplPer.sumSbUpl2m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_2M])
             raschsvUplPer.sumSbUpl3m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_3M])
-            println(raschsvUplPer.kbk)
 
             raschsvUplPerList.add(raschsvUplPer)
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_UPL_PREV_OSS) {
+            //----------------------------------------------------------------------------------------------------------
             // Разбор узла УплПревОСС
+            //----------------------------------------------------------------------------------------------------------
             RaschsvUplPrevOss raschsvUplPrevOss = new RaschsvUplPrevOss()
             raschsvUplPrevOss.raschsvObyazPlatSvId = raschsvObyazPlatSvId
             raschsvUplPrevOss.kbk = obyazPlatSvChildNode.attributes()[PREV_RASH_KBK]
@@ -207,11 +218,26 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
 
             // Сохранение УплПревОСС
             raschsvUplPrevOssService.insertUplPrevOss(raschsvUplPrevOss)
+
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_SV_OPS_OMS) {
+            //----------------------------------------------------------------------------------------------------------
+            // Разбор узла РасчСВ_ОПС_ОМС
+            //----------------------------------------------------------------------------------------------------------
+            RaschsvSvOpsOms raschsvSvOpsOms = new RaschsvSvOpsOms()
+            raschsvSvOpsOms.raschsvObyazPlatSvId = raschsvObyazPlatSvId
+            raschsvSvOpsOms.tarifPlat = obyazPlatSvChildNode.attributes()[SV_OPS_OMS_TARIF_PLAT]
+
+            println(raschsvSvOpsOms.tarifPlat)
+
+            raschsvSvOpsOmsList.add(raschsvSvOpsOms)
         }
     }
 
     // Сохранение УплПер
     raschsvUplPerService.insertUplPer(raschsvUplPerList)
+
+    // Сохранение РасчСВ_ОПС_ОМС
+    raschsvSvOpsOmsService.insertRaschsvSvOpsOms(raschsvSvOpsOmsList)
 
     return raschsvObyazPlatSvId
 }

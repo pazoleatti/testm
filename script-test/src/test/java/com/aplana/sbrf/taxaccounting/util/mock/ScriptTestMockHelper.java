@@ -5,10 +5,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvObyazPlatSvService;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvPersSvStrahLicService;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvUplPerService;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvUplPrevOssService;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 
 import java.util.Map;
@@ -41,4 +38,5 @@ public interface ScriptTestMockHelper {
     RaschsvObyazPlatSvService mockRaschsvObyazPlatSvService();
     RaschsvUplPerService mockRaschsvUplPerService();
     RaschsvUplPrevOssService mockRaschsvUplPrevOssService();
+    RaschsvSvOpsOmsService mockRaschsvSvOpsOmsService();
 }

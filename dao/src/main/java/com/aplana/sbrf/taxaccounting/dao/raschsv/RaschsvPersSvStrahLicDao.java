@@ -11,7 +11,7 @@ public interface RaschsvPersSvStrahLicDao {
 
     /**
      * Сохранение "Персонифицированные сведения о застрахованных лицах"
-     * @param raschsvPersSvStrahLicList - перечень "Персонифицированные сведения о застрахованных лицах"
+     * @param raschsvPersSvStrahLicList
      * @return
      */
     Integer insertPersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList);

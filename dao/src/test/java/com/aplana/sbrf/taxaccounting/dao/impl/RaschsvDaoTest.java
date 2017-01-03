@@ -40,6 +40,9 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvKolLicTipDao raschsvKolLicTipDao;
 
+    @Autowired
+    private RaschsvSvOpsOmsDao raschsvSvOpsOmsDao;
+
     /**
      * Добавление записи в таблицу ОбязПлатСВ
      * @return
@@ -201,5 +204,26 @@ public class RaschsvDaoTest {
         raschsvKolLicTip.setKol3mPosl3m(1);
 
         assertNotNull(raschsvKolLicTipDao.insertRaschsvKolLicTip(raschsvKolLicTip));
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование"
+     */
+    @Test
+    public void testInsertRaschsvSvOpsOms() {
+        Long raschsvObyazPlatSvId = createRaschsvObyazPlatSv();
+        List<RaschsvSvOpsOms> raschsvSvOpsOmsList = new ArrayList<RaschsvSvOpsOms>();
+
+        RaschsvSvOpsOms raschsvSvOpsOms1 = new RaschsvSvOpsOms();
+        raschsvSvOpsOms1.setRaschsvObyazPlatSvId(raschsvObyazPlatSvId);
+        raschsvSvOpsOms1.setTarifPlat("1");
+        raschsvSvOpsOmsList.add(raschsvSvOpsOms1);
+
+        RaschsvSvOpsOms raschsvSvOpsOms2 = new RaschsvSvOpsOms();
+        raschsvSvOpsOms2.setRaschsvObyazPlatSvId(raschsvObyazPlatSvId);
+        raschsvSvOpsOms2.setTarifPlat("2");
+        raschsvSvOpsOmsList.add(raschsvSvOpsOms2);
+
+        assertEquals(raschsvSvOpsOmsDao.insertRaschsvSvOpsOms(raschsvSvOpsOmsList).intValue(), raschsvSvOpsOmsList.size());
     }
 }

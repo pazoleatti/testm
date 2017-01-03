@@ -16,10 +16,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ReportPeriodServiceImpl;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvObyazPlatSvService;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvPersSvStrahLicService;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvUplPerService;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvUplPrevOssService;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.*;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import org.mockito.invocation.InvocationOnMock;
@@ -334,6 +331,14 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         RaschsvUplPrevOssService raschsvUplPrevOssService = mock(RaschsvUplPrevOssService.class);
         when(raschsvUplPrevOssService.insertUplPrevOss(any(RaschsvUplPrevOss.class))).thenReturn(1L);
         return raschsvUplPrevOssService;
+    }
+
+    // "Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование"
+    @Override
+    public RaschsvSvOpsOmsService mockRaschsvSvOpsOmsService() {
+        RaschsvSvOpsOmsService raschsvSvOpsOmsService = mock(RaschsvSvOpsOmsService.class);
+        when(raschsvSvOpsOmsService.insertRaschsvSvOpsOms(any(List.class))).thenReturn(1);
+        return raschsvSvOpsOmsService;
     }
 
     /**
