@@ -219,19 +219,18 @@ public final class SqlUtils {
 
 	/**
 	 * Возвращает строку наименований столбцов на основании их массива
-	 * @param columns - массив наименований столбцов
+	 * @param columnNames - массив наименований столбцов
 	 * @param prefix - символ, который необходимо вставить перед именем столбца
 	 * @return
      */
-	public static String getColumnsToString(String [] columns, String prefix) {
+	public static String getColumnsToString(String [] columnNames, String prefix) {
 		StringBuilder sb = new StringBuilder();
-		int cntCol = columns.length - 1;
-		for (int i = 0; ; i++) {
-			sb.append(prefix != null ? prefix + columns[i] : columns[i]);
-			if (i == cntCol) {
-				return sb.toString();
+		for (int i = 0; i < columnNames.length; i++) {
+			sb.append(prefix != null ? prefix + columnNames[i] : columnNames[i]);
+			if (i < columnNames.length - 1) {
+				sb.append(", ");
 			}
-			sb.append(", ");
 		}
+		return sb.toString();
 	}
 }

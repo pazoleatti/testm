@@ -28,9 +28,11 @@ public interface ScriptTestMockHelper {
     DeclarationService mockDeclarationService();
     TransactionHelper mockTransactionHelper();
     NdflPersonService mockNdflPersonService();
-    RaschsvPersSvStrahLicService mockRaschsvPersSvStrahLicService();
     DataRowHelper getDataRowHelper();
     RefBookDataProvider getRefBookDataProvider();
     DeclarationService getDeclarationService();
     Map<Long, Map<String, RefBookValue>> getRefBookAllRecords(Long refBookId);
+
+    RaschsvPersSvStrahLicService mockRaschsvPersSvStrahLicService();
+    RaschsvObyazPlatSvService mockRaschsvObyazPlatSvService();
 }

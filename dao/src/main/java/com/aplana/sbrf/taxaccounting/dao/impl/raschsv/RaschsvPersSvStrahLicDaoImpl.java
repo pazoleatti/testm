@@ -43,7 +43,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     private static final StringBuilder VYPL_SV_DOP_MT_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvVyplSvDopMt.COLUMNS, ":"));
 
     /**
-     * Выгрузка всех сведений о застрахованных лицах
+     * Выгрузка всех записей из "Персонифицированные сведения о застрахованных лицах"
      * @return
      */
     @Override
@@ -90,7 +90,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
      * @return
      */
     @Override
-    public Integer insert(final List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList) {
+    public Integer insertPersSvStrahLic(final List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList) {
         String sql = "INSERT INTO " + RaschsvPersSvStrahLic.TABLE_NAME +
                 " (" + PERS_SV_STRAH_LIC_COLS + ") VALUES (" + PERS_SV_STRAH_LIC_FIELDS + ")";
 

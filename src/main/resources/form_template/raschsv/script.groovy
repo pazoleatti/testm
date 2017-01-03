@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMt
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDop
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDopMt
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -73,6 +74,9 @@ import groovy.transform.Field
 @Field final VYPL_SV_DOP_MT_VYPL_SV = "ВыплСВ"
 @Field final VYPL_SV_DOP_MT_NACHISL_SV = "НачислСВ"
 
+// Атрибуты узла ОбязПлатСВ
+@Field final OBYAZ_PLAT_SV_OKTMO = "ОКТМО"
+
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         parseRaschsv()
@@ -102,25 +106,44 @@ void parseRaschsv() {
         if (documentNode.name == NODE_NAME_DOCUMENT) {
             documentNode.childNodes().each { raschetSvNode ->
                 if (raschetSvNode.name == NODE_NAME_RASCHET_SV) {
-                    raschetSvNode.childNodes().each { node ->
-                        if (node.name == NODE_NAME_OBYAZ_PLAT_SV) {
+                    raschetSvNode.childNodes().each { raschetSvChildNode ->
+                        if (raschetSvChildNode.name == NODE_NAME_OBYAZ_PLAT_SV) {
                             // Разбор узла ОбязПлатСВ
-                        } else if (node.name == NODE_NAME_PERV_SV_STRAH_LIC) {
+                            parseRaschsvObyazPlatSv(raschetSvChildNode, declarationDataId)
+                        } else if (raschetSvChildNode.name == NODE_NAME_PERV_SV_STRAH_LIC) {
                             // Разбор узла ПерсСвСтрахЛиц
-                            raschsvPersSvStrahLicList.add(parseRaschsvPersSvStrahLic(node, declarationDataId))
+                            raschsvPersSvStrahLicList.add(parseRaschsvPersSvStrahLic(raschetSvChildNode, declarationDataId))
                         }
                     }
                 }
             }
         }
     }
-    println(raschsvPersSvStrahLicService.insert(raschsvPersSvStrahLicList))
+
+    // Сохранение коллекции объектов ПерсСвСтрахЛиц
+    raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
+
 //    logger.error("Запись не может быть добавлена!")
 }
 
 /**
+ * Разбор узла ОбязПлатСВ
+ * @param obyazPlatSvNode - узел ОбязПлатСВ
+ * @param declarationDataId - идентификатор декларации для которой загружаются данные
+ */
+Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
+    RaschsvObyazPlatSv raschsvObyazPlatSv = new RaschsvObyazPlatSv()
+    raschsvObyazPlatSv.declarationDataId = declarationDataId
+    raschsvObyazPlatSv.oktmo = obyazPlatSvNode.attributes()[OBYAZ_PLAT_SV_OKTMO]
+
+    def obyazPlatSvId = raschsvObyazPlatSvService.insertObyazPlatSv(raschsvObyazPlatSv)
+    println(obyazPlatSvId)
+    return obyazPlatSvId
+}
+
+/**
  * Разбор узла ПерсСвСтрахЛиц
- * @param node - узел для разбора
+ * @param persSvStrahLicNode - узел ПерсСвСтрахЛиц
  * @param declarationDataId - идентификатор декларации для которой загружаются данные
  * @return
  */
@@ -206,7 +229,6 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
                             raschsvVyplSvDopMt.nachislSv = getDouble(vyplSvDopMtNode.attributes()[VYPL_SV_DOP_MT_NACHISL_SV])
 
                             raschsvVyplSvDopMtList.add(raschsvVyplSvDopMt)
-                            println(raschsvVyplSvDopMt.nachislSv)
                         }
                     }
                     raschsvVyplSvDop.raschsvVyplSvDopMtList = raschsvVyplSvDopMtList

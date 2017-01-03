@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -298,11 +299,20 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         return ndflPersonService;
     }
 
+    // "Персонифицированные сведения о застрахованных лицах"
     @Override
     public RaschsvPersSvStrahLicService mockRaschsvPersSvStrahLicService() {
         RaschsvPersSvStrahLicService raschsvPersSvStrahLicService = mock(RaschsvPersSvStrahLicService.class);
-        when(raschsvPersSvStrahLicService.insert(any(List.class))).thenReturn(1);
+        when(raschsvPersSvStrahLicService.insertPersSvStrahLic(any(List.class))).thenReturn(1);
         return raschsvPersSvStrahLicService;
+    }
+
+    // "Сводные данные об обязательствах плательщика страховых взносов"
+    @Override
+    public RaschsvObyazPlatSvService mockRaschsvObyazPlatSvService() {
+        RaschsvObyazPlatSvService raschsvObyazPlatSvService = mock(RaschsvObyazPlatSvService.class);
+        when(raschsvObyazPlatSvService.insertObyazPlatSv(any(RaschsvObyazPlatSv.class))).thenReturn(1L);
+        return raschsvObyazPlatSvService;
     }
 
     /**

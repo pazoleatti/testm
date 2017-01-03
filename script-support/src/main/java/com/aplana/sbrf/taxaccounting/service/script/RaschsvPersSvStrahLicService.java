@@ -10,9 +10,9 @@ import java.util.List;
 public interface RaschsvPersSvStrahLicService {
 
     /**
-     * Сохраняет перечень записей
-     * @param raschsvPersSvStrahLic
+     * Сохраняет перечень записей "Персонифицированные сведения о застрахованных лицах"
+     * @param raschsvPersSvStrahLicList - перечень записей "Персонифицированные сведения о застрахованных лицах"
      * @return
      */
-    Integer insert(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLic);
+    Integer insertPersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList);
 }

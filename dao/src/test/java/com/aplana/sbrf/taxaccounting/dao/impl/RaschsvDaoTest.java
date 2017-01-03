@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvObyazPlatSvDao;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import org.junit.Test;
@@ -25,13 +26,29 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvPersSvStrahLicDao raschsvPersSvStrahLicDao;
 
+    @Autowired
+    private RaschsvObyazPlatSvDao raschsvObyazPlatSvDao;
+
     /**
-     * Тестирование сохранения данных в таблицу "Персонифицированные сведения о застрахованных лицах"
+     * Тестирование выборки данных из таблицы "Персонифицированные сведения о застрахованных лицах"
      */
     @Test
     public void testGetRaschsvPersSvStrahLic() {
         List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = raschsvPersSvStrahLicDao.findAll();
         assertNotNull(raschsvPersSvStrahLicList);
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Сводные данные об обязательствах плательщика страховых взносов"
+     */
+    @Test
+    public void testInsertRaschsvObyazPlatSv() {
+        RaschsvObyazPlatSv raschsvObyazPlatSv = new RaschsvObyazPlatSv();
+        raschsvObyazPlatSv.setDeclarationDataId(1L);
+        raschsvObyazPlatSv.setOktmo("1");
+
+        raschsvObyazPlatSvDao.insertObyazPlatSv(raschsvObyazPlatSv);
+        assertFalse(raschsvObyazPlatSvDao.findAll().isEmpty());
     }
 
     /**
@@ -101,7 +118,7 @@ public class RaschsvDaoTest {
 
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic1);
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic2);
-        raschsvPersSvStrahLicDao.insert(raschsvPersSvStrahLicList);
+        raschsvPersSvStrahLicDao.insertPersSvStrahLic(raschsvPersSvStrahLicList);
         assertFalse(raschsvPersSvStrahLicDao.findAll().isEmpty());
     }
 }
