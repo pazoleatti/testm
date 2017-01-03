@@ -1376,7 +1376,7 @@ create table raschsv_kol_lic_tip
 );
 create sequence seq_raschsv_kol_lic_tip start with 1;
 ------------------------------------------------------------------------------------------------------
-create table raschsv_sv_sum1_tip
+create table raschsv_sv_sum_1tip
 (
    id                 NUMBER(18)           not null,
    sum_vsego_per      NUMBER(17,2),
@@ -1385,7 +1385,7 @@ create table raschsv_sv_sum1_tip
    sum_2m_posl_3m     NUMBER(17,2),
    sum_3m_posl_3m     NUMBER(17,2)
 );
-create sequence seq_raschsv_sv_sum1_tip start with 1;
+create sequence seq_raschsv_sv_sum_1tip start with 1;
 ------------------------------------------------------------------------------------------------------
 create table raschsv_obyaz_plat_sv
 (

@@ -366,7 +366,7 @@ create index i_form_search_result_formdata on form_search_result(form_data_id);
 --      Расчет по страховым взносам 1151111
 ------------------------------------------------------------------------------------------------------
 alter table raschsv_kol_lic_tip add constraint pk_rasch_kol_lic_tip primary key (id);
-alter table raschsv_sv_sum1_tip add constraint pk_rasch_sv_sum1_tip primary key (id);
+alter table raschsv_sv_sum_1tip add constraint pk_rasch_sv_sum1_tip primary key (id);
 
 alter table raschsv_svnp_podpisant add constraint pk_raschsv_svnp_podpisant primary key (id);
 alter table raschsv_svnp_podpisant add constraint fk_raschsv_svnp_podp_declarat foreign key (declaration_data_id) references declaration_data (id);
@@ -387,7 +387,7 @@ alter table raschsv_sv_ops_oms_rasch add constraint pk_raschsv_sv_ops_oms_rasch 
 alter table raschsv_sv_ops_oms_rasch add constraint fk_raschsv_sv_ops_oms_rasch foreign key (raschsv_sv_ops_oms_id) references raschsv_sv_ops_oms (id);
 
 alter table raschsv_ops_oms_rasch_sum add constraint pk_raschsv_ops_oms_rasch_sum primary key (raschsv_ops_oms_rasch_sum_id, raschsv_sv_sum1_tip_id);
-alter table raschsv_ops_oms_rasch_sum add constraint fk_raschsv_ops_oms_r_sum_tip foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum1_tip (id);
+alter table raschsv_ops_oms_rasch_sum add constraint fk_raschsv_ops_oms_r_sum_tip foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum_1tip (id);
 alter table raschsv_ops_oms_rasch_sum add constraint fk_raschsv_sv_ops_oms_sum foreign key (raschsv_ops_oms_rasch_sum_id) references raschsv_sv_ops_oms_rasch (id);
 
 alter table raschsv_ops_oms_rasch_kol add constraint pk_raschsv_ops_oms_rasch_kol primary key (raschsv_ops_oms_rasch_kol_id, raschsv_kol_lic_tip_id);
@@ -406,7 +406,7 @@ alter table raschsv_oss_vnm_kol add constraint fk_raschsv_oss_vnm_kol_tip foreig
 
 alter table raschsv_oss_vnm_sum add constraint pk_raschsv_oss_vnm_sum primary key (raschsv_oss_vnm_id, raschsv_sv_sum1_tip_id);
 alter table raschsv_oss_vnm_sum add constraint fk_raschsv_oss_vnm_sum_oss foreign key (raschsv_oss_vnm_id) references raschsv_oss_vnm (id);
-alter table raschsv_oss_vnm_sum add constraint fk_raschsv_oss_vnm_sum_tip foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum1_tip (id);
+alter table raschsv_oss_vnm_sum add constraint fk_raschsv_oss_vnm_sum_tip foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum_1tip (id);
 
 alter table raschsv_rash_oss_zak add constraint pk_raschsv_rash_oss_zak primary key (id);
 alter table raschsv_rash_oss_zak add constraint fk_raschsv_oss_zak_ob_plat_sv foreign key (raschsv_obyaz_plat_sv_id) references raschsv_obyaz_plat_sv (id);
@@ -436,36 +436,36 @@ alter table raschsv_sv_prim_tarif9_1_427 add constraint pk_raschsv_prim_tarif9_1
 alter table raschsv_sv_prim_tarif9_1_427 add constraint fk_raschsv_tarif9_427 foreign key (raschsv_obyaz_plat_sv_id) references raschsv_obyaz_plat_sv (id);
 
 alter table raschsv_vyplat_it_427 add constraint pk_raschsv_vyplat_it_427 primary key (raschsv_sv_prim_tarif9_427_id, raschsv_sv_sum1_tip_id);
-alter table raschsv_vyplat_it_427 add constraint fk_raschsv_vyplat_it_427_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum1_tip (id);
+alter table raschsv_vyplat_it_427 add constraint fk_raschsv_vyplat_it_427_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum_1tip (id);
 alter table raschsv_vyplat_it_427 add constraint fk_raschsv_vyplat_tarif9_427 foreign key (raschsv_sv_prim_tarif9_427_id) references raschsv_sv_prim_tarif9_1_427 (id);
 
 alter table raschsv_sved_patent add constraint pk_raschsv_sved_patent primary key (raschsv_sv_prim_tarif9_427_id, raschsv_sv_sum1_tip_id);
 alter table raschsv_sved_patent add constraint fk_raschsv_sved_p_tarif9_427 foreign key (raschsv_sv_prim_tarif9_427_id) references raschsv_sv_prim_tarif9_1_427 (id);
-alter table raschsv_sved_patent add constraint fk_raschsv_sved_patent_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum1_tip (id);
+alter table raschsv_sved_patent add constraint fk_raschsv_sved_patent_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum_1tip (id);
 
 alter table raschsv_sv_prim_tarif2_2_425 add constraint pk_raschsv_sv_prim_tarif2_425 primary key (id);
 alter table raschsv_sv_prim_tarif2_2_425 add constraint fk_raschsv_tarif2_425_ob_pl foreign key (raschsv_obyaz_plat_sv_id) references raschsv_obyaz_plat_sv (id);
 
 alter table raschsv_vyplat_it_425 add constraint pk_raschsv_vyplat_it_425 primary key (raschsv_sv_prim_tarif2_425_id, raschsv_sv_sum1_tip_id);
-alter table raschsv_vyplat_it_425 add constraint fk_raschsv_vyplat_it_425_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum1_tip (id);
+alter table raschsv_vyplat_it_425 add constraint fk_raschsv_vyplat_it_425_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum_1tip (id);
 alter table raschsv_vyplat_it_425 add constraint fk_raschsv_vyplat_tarif2_425 foreign key (raschsv_sv_prim_tarif2_425_id) references raschsv_sv_prim_tarif2_2_425 (id);
 
 alter table raschsv_sv_ino_grazd add constraint pk_raschsv_sv_ino_grazd primary key (raschsv_sv_prim_tarif2_425_id, raschsv_sv_sum1_tip_id);
 alter table raschsv_sv_ino_grazd add constraint fk_raschsv_i_grazd_tarif2_425 foreign key (raschsv_sv_prim_tarif2_425_id) references raschsv_sv_prim_tarif2_2_425 (id);
-alter table raschsv_sv_ino_grazd add constraint fk_raschsv_sv_ino_grazd_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum1_tip (id);
+alter table raschsv_sv_ino_grazd add constraint fk_raschsv_sv_ino_grazd_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum_1tip (id);
 
 alter table raschsv_sv_prim_tarif1_3_422 add constraint pk_raschsv_prim_tarif1_3_422 primary key (id);
 alter table raschsv_sv_prim_tarif1_3_422 add constraint fk_raschsv_tarif1_3_422_ob_pl foreign key (raschsv_obyaz_plat_sv_id) references raschsv_obyaz_plat_sv (id);
 
 alter table raschsv_sved_obuch add constraint pk_raschsv_sved_obuch primary key (id);
 alter table raschsv_sved_obuch add constraint fk_raschsv_sved_ob_tarif1_422 foreign key (raschsv_sv_prim_tarif1_422_id) references raschsv_sv_prim_tarif1_3_422 (id);
-alter table raschsv_sved_obuch add constraint fk_raschsv_sved_obuch_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum1_tip (id);
+alter table raschsv_sved_obuch add constraint fk_raschsv_sved_obuch_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum_1tip (id);
 
 alter table raschsv_sv_reestr_mdo add constraint pk_raschsv_sv_reestr_mdo primary key (id);
 alter table raschsv_sv_reestr_mdo add constraint fk_raschsv_sv_reestr_mdo_ob foreign key (raschsv_sved_obuch_id) references raschsv_sved_obuch (id);
 
 alter table raschsv_vyplat_it_422 add constraint pk_raschsv_vyplat_it_422 primary key (raschsv_sv_prim_tarif1_422_id, raschsv_sv_sum1_tip_id);
-alter table raschsv_vyplat_it_422 add constraint fk_raschsv_vyplat_it_422_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum1_tip (id);
+alter table raschsv_vyplat_it_422 add constraint fk_raschsv_vyplat_it_422_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum_1tip (id);
 alter table raschsv_vyplat_it_422 add constraint fk_raschsv_vyplat_tarif3_422 foreign key (raschsv_sv_prim_tarif1_422_id) references raschsv_sv_prim_tarif1_3_422 (id);
 
 alter table raschsv_pers_sv_strah_lic add constraint pk_pers_sv_strah_face primary key (id);

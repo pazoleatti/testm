@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvObyazPlatSvDao;
-import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
-import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvUplPerDao;
-import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvUplPrevOssDao;
+import com.aplana.sbrf.taxaccounting.dao.raschsv.*;
 import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +15,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertFalse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"RaschsvDaoTest.xml"})
@@ -37,6 +33,12 @@ public class RaschsvDaoTest {
 
     @Autowired
     private RaschsvUplPrevOssDao raschsvUplPrevOssDao;
+
+    @Autowired
+    private RaschsvSvSum1TipDao raschsvSvSum1TipDao;
+
+    @Autowired
+    private RaschsvKolLicTipDao raschsvKolLicTipDao;
 
     /**
      * Добавление записи в таблицу ОбязПлатСВ
@@ -67,7 +69,7 @@ public class RaschsvDaoTest {
         raschsvUplPrevOss1.setSumSbUpl3m(2.1);
         raschsvUplPrevOss1.setSumSbUplPer(2.1);
 
-        assertEquals(raschsvUplPrevOssDao.insertUplPrevOss(raschsvUplPrevOss1).intValue(), 1);
+        assertNotNull(raschsvUplPrevOssDao.insertUplPrevOss(raschsvUplPrevOss1));
     }
 
     /**
@@ -169,5 +171,35 @@ public class RaschsvDaoTest {
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic1);
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic2);
         assertEquals(raschsvPersSvStrahLicDao.insertPersSvStrahLic(raschsvPersSvStrahLicList).intValue(), raschsvPersSvStrahLicList.size());
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Сведения по суммам (тип 1)"
+     */
+    @Test
+    public void testInsertRaschsvSvSum1Tip() {
+        RaschsvSvSum1Tip raschsvSvSum1Tip = new RaschsvSvSum1Tip();
+        raschsvSvSum1Tip.setSumVsegoPer(1.1);
+        raschsvSvSum1Tip.setSumVsegoPosl3m(1.1);
+        raschsvSvSum1Tip.setSum1mPosl3m(1.1);
+        raschsvSvSum1Tip.setSum2mPosl3m(1.1);
+        raschsvSvSum1Tip.setSum3mPosl3m(1.1);
+
+        assertNotNull(raschsvSvSum1TipDao.insertRaschsvSvSum1Tip(raschsvSvSum1Tip));
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Сведения по количеству физических лиц"
+     */
+    @Test
+    public void testInsertRaschsvKolLicTip() {
+        RaschsvKolLicTip raschsvKolLicTip = new RaschsvKolLicTip();
+        raschsvKolLicTip.setKolVsegoPer(1);
+        raschsvKolLicTip.setKolVsegoPosl3m(1);
+        raschsvKolLicTip.setKol1mPosl3m(1);
+        raschsvKolLicTip.setKol2mPosl3m(1);
+        raschsvKolLicTip.setKol3mPosl3m(1);
+
+        assertNotNull(raschsvKolLicTipDao.insertRaschsvKolLicTip(raschsvKolLicTip));
     }
 }
