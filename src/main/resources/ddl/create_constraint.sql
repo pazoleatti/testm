@@ -528,6 +528,27 @@ alter table fias_house add constraint chk_fias_house_strstatus check (strstatus 
 alter table fias_houseint add constraint chk_fias_houseint_intstatus check (intstatus between 0 and 3);
 
 alter table fias_room add constraint chk_fias_room_livestatus check (livestatus in (0,1));
-------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
+-- Справочники физических лиц и статусов налогоплательщиков
+--------------------------------------------------------------------------------------------------------------------------
+alter table ref_book_taxpayer_state add constraint pk_ref_book_taxpayer_state primary key (id);
+alter table ref_book_person add constraint pk_ref_book_person primary key (id);
+alter table ref_book_id_doc add constraint pk_ref_book_id_doc primary key (id);
+alter table ref_book_address add constraint pk_ref_book_address primary key (id);
 
-------------------------------------------------------------------------------------------------------
+alter table ref_book_person add constraint fk_ref_book_person_address foreign key (address) references ref_book_address(id);
+alter table ref_book_person add constraint fk_ref_book_person_taxpayer_st foreign key (taxpayer_state) references ref_book_taxpayer_state(id);
+alter table ref_book_person add constraint fk_ref_book_person_citizenship foreign key (citizenship) references ref_book_record(id);
+alter table ref_book_id_doc add constraint fk_ref_book_id_doc_doc_id foreign key (doc_id) references ref_book_record(id);
+alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
+alter table ref_book_address add constraint fk_ref_book_address_country foreign key (country_id) references ref_book_record(id);
+
+alter table ref_book_person add constraint chk_ref_book_person_pension check (pension in (1,2));
+alter table ref_book_person add constraint chk_ref_book_person_medical check (medical in(1,2));
+alter table ref_book_person add constraint chk_ref_book_person_social check (social in (1,2));
+alter table ref_book_person add constraint chk_ref_book_person_sex check (sex in (1,2));
+alter table ref_book_person add constraint chk_ref_book_person_employee check (employee in (1,2));
+alter table ref_book_person add constraint chk_ref_book_person_status check (status between -1 and 2);
+alter table ref_book_address add constraint chk_ref_book_address_type check (address_type in (0,1));
+alter table ref_book_address add constraint chk_ref_book_address_addr_n_rf check ((address_type=1 and region_code is null and country_id is not null) or (address_type=0));
+alter table ref_book_address add constraint chk_ref_book_address_addr_rf check ((address_type=0 and region_code is not null and country_id is null) or (address_type=1));

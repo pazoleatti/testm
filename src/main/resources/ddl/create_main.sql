@@ -1897,5 +1897,114 @@ comment on column fias_room.roomnumber is 'Номер комнаты или по
 comment on column fias_room.roomtypeid is 'Тип комнаты';
 comment on column fias_room.postalcode is 'Почтовый индекс';
 --------------------------------------------------------------------------------------------------------------------------
+-- Справочники физических лиц и статусов налогоплательщиков
+--------------------------------------------------------------------------------------------------------------------------
+create table ref_book_taxpayer_state
+(
+  id number(18) not null,
+  code varchar2(1 char) not null,
+  name varchar2(1000 char) not null
+);
 
+comment on table ref_book_taxpayer_state is 'Статусы налогоплательщиков';
+comment on column ref_book_taxpayer_state.id is 'Уникальный идентификатор';
+comment on column ref_book_taxpayer_state.code is 'Код';
+comment on column ref_book_taxpayer_state.name is 'Наименование';
+
+create table ref_book_person
+(
+  id number(18) not null,
+  last_name varchar2(60 char) not null,
+  first_name varchar2(60 char) not null,
+  middle_name varchar2(60 char),
+  sex number(1) not null,
+  inn varchar2(12 char),
+  inn_foreign varchar2(50 char),
+  snils varchar2(14 char),
+  taxpayer_state number(18),
+  inp varchar2(14 char),
+  birth_date date not null,
+  birth_place varchar2(255 char) not null,
+  citizenship number(18),
+  address number(18),
+  pension number(1) default 2 not null,
+  medical number(1) default 2 not null,
+  social number(1) default 2 not null,
+  employee number(1) default 2 not null,
+  record_id number(18) not null,
+  version date not null,
+  status number(1) default 0 not null
+);
+
+comment on table ref_book_person is 'Физические лица';
+comment on column ref_book_person.id is 'Уникальный идентификатор';
+comment on column ref_book_person.last_name is 'Фамилия';
+comment on column ref_book_person.first_name is 'Имя';
+comment on column ref_book_person.middle_name is 'Отчество';
+comment on column ref_book_person.sex is 'Пол';
+comment on column ref_book_person.inn is 'ИНН в Российской Федерации';
+comment on column ref_book_person.inn_foreign is 'ИНН в стране гражданства';
+comment on column ref_book_person.snils is 'СНИЛС';
+comment on column ref_book_person.taxpayer_state is '  Статус налогоплательщика';
+comment on column ref_book_person.inp is 'ИНП (Уникальный неизменяемый цифровой идентификатор налогоплательщика)';
+comment on column ref_book_person.birth_date is 'Дата рождения';
+comment on column ref_book_person.birth_place is 'Место рождения';
+comment on column ref_book_person.citizenship is 'Гражданство';
+comment on column ref_book_person.address is 'Место жительства';
+comment on column ref_book_person.pension is '  Признак застрахованного лица в системе обязательного пенсионного страхования. Возможные значения: 1 - да; 2 - нет';
+comment on column ref_book_person.medical is 'Признак застрахованного лица в системе обязательного медицинского страхования. Возможные значения: 1 - да; 2 - нет';
+comment on column ref_book_person.social is 'Признак застрахованного лица в системе обязательного социального страхования. Возможные значения: 1 - да; 2 - нет';
+comment on column ref_book_person.employee is 'Признак, показывающий, является ли ФЛ сотрудником Сбербанка. Возможные значения: 1 - является; 2 - не является';
+comment on column ref_book_person.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+comment on column ref_book_person.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_person.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+
+create table ref_book_id_doc
+(
+  id number(18) not null,
+  person_id number(18),
+  doc_id number(18) not null,
+  doc_number varchar2(25 char),
+  issued_by varchar2(255 char),
+  issued_date date not null
+);
+
+comment on table ref_book_id_doc is 'Документ, удостоверяющий личность';
+comment on column ref_book_id_doc.id is 'Уникальный идентификатор';
+comment on column ref_book_id_doc.person_id is 'Физическое лицо';
+comment on column ref_book_id_doc.doc_id is 'Вид документа';
+comment on column ref_book_id_doc.doc_number is 'Серия и номер документа';
+comment on column ref_book_id_doc.issued_by is 'Кем выдан документ';
+comment on column ref_book_id_doc.issued_date is 'Дата выдачи';
+
+create table ref_book_address
+(
+  id number(18) not null,
+  address_type number(1) not null,
+  country_id number(18),
+  region_code varchar2(2 char),
+  postal_code varchar2(6 char),
+  district varchar2(50 char),
+  city varchar2(50 char),
+  locality varchar2(50 char),
+  street varchar2(50 char),
+  house varchar2(20 char),
+  build varchar2(20 char),
+  appartment varchar2(20 char)
+);
+
+comment on table ref_book_address is 'Адрес места жительства';
+comment on column ref_book_address.id is 'Уникальный идентификатор';
+comment on column ref_book_address.address_type is 'Тип адреса. Значения: 0 - в РФ 1 - вне РФ';
+comment on column ref_book_address.country_id is 'Страна';
+comment on column ref_book_address.region_code is 'Код региона';
+comment on column ref_book_address.postal_code is 'Почтовый индекс';
+comment on column ref_book_address.district is 'Район';
+comment on column ref_book_address.city is 'Город';
+comment on column ref_book_address.locality is 'Населенный пункт (село, поселок)';
+comment on column ref_book_address.street is 'Улица (проспект, переулок)';
+comment on column ref_book_address.house is 'Номер дома (владения)';
+comment on column ref_book_address.build is 'Номер корпуса (строения)';
+comment on column ref_book_address.appartment is 'Номер квартиры';
+--------------------------------------------------------------------------------------------------------------------------
 
