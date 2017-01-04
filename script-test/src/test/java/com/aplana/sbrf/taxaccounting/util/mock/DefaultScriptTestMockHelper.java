@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnm;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPrevOss;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -339,6 +340,14 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         RaschsvSvOpsOmsService raschsvSvOpsOmsService = mock(RaschsvSvOpsOmsService.class);
         when(raschsvSvOpsOmsService.insertRaschsvSvOpsOms(any(List.class))).thenReturn(1);
         return raschsvSvOpsOmsService;
+    }
+
+    // "Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
+    @Override
+    public RaschsvOssVnmService mockRaschsvOssVnmService() {
+        RaschsvOssVnmService raschsvOssVnmService = mock(RaschsvOssVnmService.class);
+        when(raschsvOssVnmService.insertRaschsvOssVnm(any(RaschsvOssVnm.class))).thenReturn(1L);
+        return raschsvOssVnmService;
     }
 
     /**

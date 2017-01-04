@@ -29,6 +29,7 @@ public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvOby
     public Long insertObyazPlatSv(RaschsvObyazPlatSv raschsvObyazPlatSv) {
         String sql = "INSERT INTO " + RaschsvObyazPlatSv.TABLE_NAME +
                 " (" + OBYAZ_PLAT_SV_COLS + ") VALUES (" + OBYAZ_PLAT_SV_FIELDS + ")";
+
         raschsvObyazPlatSv.setId(generateId(RaschsvObyazPlatSv.SEQ, Long.class));
 
         SqlParameterSource params = new MapSqlParameterSource()

@@ -79,8 +79,10 @@ public class TestScriptHelper {
     private RaschsvUplPerService raschsvUplPerService;
     // Сервисы "Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
     private RaschsvUplPrevOssService raschsvUplPrevOssService;
-    // Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование
+    // Сервисы "Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование"
     private RaschsvSvOpsOmsService raschsvSvOpsOmsService;
+    // Сервисы "Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
+    private RaschsvOssVnmService raschsvOssVnmService;
 
     //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
@@ -160,6 +162,7 @@ public class TestScriptHelper {
         raschsvUplPerService = mockHelper.mockRaschsvUplPerService();
         raschsvUplPrevOssService = mockHelper.mockRaschsvUplPrevOssService();
         raschsvSvOpsOmsService = mockHelper.mockRaschsvSvOpsOmsService();
+        raschsvOssVnmService = mockHelper.mockRaschsvOssVnmService();
     }
 
     /**
@@ -290,6 +293,8 @@ public class TestScriptHelper {
         bindings.put("raschsvUplPrevOssService", raschsvUplPrevOssService);
         // Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование
         bindings.put("raschsvSvOpsOmsService", raschsvSvOpsOmsService);
+        // Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
+        bindings.put("raschsvOssVnmService", raschsvOssVnmService);
 
         //ndfl
         bindings.put("ndflPersonService", ndflPersonService);

@@ -43,6 +43,9 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvSvOpsOmsDao raschsvSvOpsOmsDao;
 
+    @Autowired
+    private RaschsvOssVnmDao raschsvOssVnmDao;
+
     /**
      * Добавление записи в таблицу ОбязПлатСВ
      * @return
@@ -51,8 +54,35 @@ public class RaschsvDaoTest {
         RaschsvObyazPlatSv raschsvObyazPlatSv = new RaschsvObyazPlatSv();
         raschsvObyazPlatSv.setDeclarationDataId(1L);
         raschsvObyazPlatSv.setOktmo("1");
-
         return raschsvObyazPlatSvDao.insertObyazPlatSv(raschsvObyazPlatSv).longValue();
+    }
+
+    /**
+     * Добавление записи в таблицу "Сведения по суммам (тип 1)"
+     * @return
+     */
+    private RaschsvSvSum1Tip createRaschsvSvSum1Tip() {
+        RaschsvSvSum1Tip raschsvSvSum1Tip = new RaschsvSvSum1Tip();
+        raschsvSvSum1Tip.setSumVsegoPer(1.1);
+        raschsvSvSum1Tip.setSumVsegoPosl3m(1.1);
+        raschsvSvSum1Tip.setSum1mPosl3m(1.1);
+        raschsvSvSum1Tip.setSum2mPosl3m(1.1);
+        raschsvSvSum1Tip.setSum3mPosl3m(1.1);
+        return raschsvSvSum1Tip;
+    }
+
+    /**
+     * Добавление записи в таблицу "Сведения по количеству физических лиц"
+     * @return
+     */
+    private RaschsvKolLicTip createRaschsvKolLicTip() {
+        RaschsvKolLicTip raschsvKolLicTip = new RaschsvKolLicTip();
+        raschsvKolLicTip.setKolVsegoPer(1);
+        raschsvKolLicTip.setKolVsegoPosl3m(1);
+        raschsvKolLicTip.setKol1mPosl3m(1);
+        raschsvKolLicTip.setKol2mPosl3m(1);
+        raschsvKolLicTip.setKol3mPosl3m(1);
+        return raschsvKolLicTip;
     }
 
     /**
@@ -177,36 +207,6 @@ public class RaschsvDaoTest {
     }
 
     /**
-     * Тестирование сохранения данных в таблицу "Сведения по суммам (тип 1)"
-     */
-    @Test
-    public void testInsertRaschsvSvSum1Tip() {
-        RaschsvSvSum1Tip raschsvSvSum1Tip = new RaschsvSvSum1Tip();
-        raschsvSvSum1Tip.setSumVsegoPer(1.1);
-        raschsvSvSum1Tip.setSumVsegoPosl3m(1.1);
-        raschsvSvSum1Tip.setSum1mPosl3m(1.1);
-        raschsvSvSum1Tip.setSum2mPosl3m(1.1);
-        raschsvSvSum1Tip.setSum3mPosl3m(1.1);
-
-        assertNotNull(raschsvSvSum1TipDao.insertRaschsvSvSum1Tip(raschsvSvSum1Tip));
-    }
-
-    /**
-     * Тестирование сохранения данных в таблицу "Сведения по количеству физических лиц"
-     */
-    @Test
-    public void testInsertRaschsvKolLicTip() {
-        RaschsvKolLicTip raschsvKolLicTip = new RaschsvKolLicTip();
-        raschsvKolLicTip.setKolVsegoPer(1);
-        raschsvKolLicTip.setKolVsegoPosl3m(1);
-        raschsvKolLicTip.setKol1mPosl3m(1);
-        raschsvKolLicTip.setKol2mPosl3m(1);
-        raschsvKolLicTip.setKol3mPosl3m(1);
-
-        assertNotNull(raschsvKolLicTipDao.insertRaschsvKolLicTip(raschsvKolLicTip));
-    }
-
-    /**
      * Тестирование сохранения данных в таблицу "Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование"
      */
     @Test
@@ -218,20 +218,10 @@ public class RaschsvDaoTest {
         List<RaschsvSvOpsOmsRasch> raschsvSvOpsOmsRaschList = new ArrayList<RaschsvSvOpsOmsRasch>();
 
         // Сведения по суммам (тип 1)
-        RaschsvSvSum1Tip raschsvSvSum1Tip = new RaschsvSvSum1Tip();
-        raschsvSvSum1Tip.setSumVsegoPer(1.1);
-        raschsvSvSum1Tip.setSumVsegoPosl3m(1.1);
-        raschsvSvSum1Tip.setSum1mPosl3m(1.1);
-        raschsvSvSum1Tip.setSum2mPosl3m(1.1);
-        raschsvSvSum1Tip.setSum3mPosl3m(1.1);
+        RaschsvSvSum1Tip raschsvSvSum1Tip = createRaschsvSvSum1Tip();
 
         // Сведения по количеству физических лиц
-        RaschsvKolLicTip raschsvKolLicTip = new RaschsvKolLicTip();
-        raschsvKolLicTip.setKolVsegoPer(1);
-        raschsvKolLicTip.setKolVsegoPosl3m(1);
-        raschsvKolLicTip.setKol1mPosl3m(1);
-        raschsvKolLicTip.setKol2mPosl3m(1);
-        raschsvKolLicTip.setKol3mPosl3m(1);
+        RaschsvKolLicTip raschsvKolLicTip = createRaschsvKolLicTip();
 
         // Сумма для расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование
         RaschsvSvOpsOmsRaschSum raschsvSvOpsOmsRaschSum1 = new RaschsvSvOpsOmsRaschSum();
@@ -265,5 +255,45 @@ public class RaschsvDaoTest {
         raschsvSvOpsOmsList.add(raschsvSvOpsOms2);
 
         assertEquals(raschsvSvOpsOmsDao.insertRaschsvSvOpsOms(raschsvSvOpsOmsList).intValue(), raschsvSvOpsOmsList.size());
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
+     */
+    @Test
+    public void testInsertRaschsvOssVnm() {
+        List<RaschsvUplSvPrev> raschsvUplSvPrevList = new ArrayList<RaschsvUplSvPrev>();
+        List<RaschsvOssVnmKol> raschsvOssVnmKolList = new ArrayList<RaschsvOssVnmKol>();
+        List<RaschsvOssVnmSum> raschsvOssVnmSumList = new ArrayList<RaschsvOssVnmSum>();
+
+        // Сумма страховых взносов, подлежащая к уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами)
+        RaschsvUplSvPrev raschsvUplSvPrev1 = new RaschsvUplSvPrev();
+        raschsvUplSvPrev1.setNodeName("NodeName");
+        raschsvUplSvPrev1.setPriznak("1");
+        raschsvUplSvPrev1.setSvSum(1.1);
+        raschsvUplSvPrevList.add(raschsvUplSvPrev1);
+
+        // Сведения по количеству физических лиц
+        RaschsvKolLicTip raschsvKolLicTip = createRaschsvKolLicTip();
+        RaschsvOssVnmKol raschsvOssVnmKol1 = new RaschsvOssVnmKol();
+        raschsvOssVnmKol1.setRaschsvKolLicTip(raschsvKolLicTip);
+        raschsvOssVnmKol1.setNodeName("NodeName");
+        raschsvOssVnmKolList.add(raschsvOssVnmKol1);
+
+        // Сведения по суммам (тип 1)
+        RaschsvSvSum1Tip raschsvSvSum1Tip = createRaschsvSvSum1Tip();
+        RaschsvOssVnmSum raschsvOssVnmSum1 = new RaschsvOssVnmSum();
+        raschsvOssVnmSum1.setRaschsvSvSum1Tip(raschsvSvSum1Tip);
+        raschsvOssVnmSum1.setNodeName("NodeName");
+        raschsvOssVnmSumList.add(raschsvOssVnmSum1);
+
+        RaschsvOssVnm raschsvOssVnm = new RaschsvOssVnm();
+        raschsvOssVnm.setRaschsvObyazPlatSvId(createRaschsvObyazPlatSv());
+        raschsvOssVnm.setRaschsvUplSvPrevList(raschsvUplSvPrevList);
+        raschsvOssVnm.setRaschsvOssVnmKolList(raschsvOssVnmKolList);
+        raschsvOssVnm.setRaschsvOssVnmSumList(raschsvOssVnmSumList);
+        raschsvOssVnm.setPrizVypl("1");
+
+        assertNotNull(raschsvOssVnmDao.insertRaschsvOssVnm(raschsvOssVnm));
     }
 }

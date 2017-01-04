@@ -17,6 +17,10 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRaschSum
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRaschKol
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvSum1Tip
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvKolLicTip
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnm
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnmSum
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnmKol
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplSvPrev
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -63,6 +67,16 @@ import groovy.transform.Field
 @Field final NODE_NAME_KOL_LIC_NACH_SV = "КолЛицНачСВ"
 @Field final NODE_NAME_BAZ_NACHISL_SVDSO = "БазНачислСВДСО"
 @Field final NODE_NAME_NACHISL_SVDSO = "НачислСВДСО"
+
+@Field final NODE_NAME_RASCH_SV_OSS_VNM = "РасчСВ_ОСС.ВНМ"
+@Field final NODE_NAME_BAZ_PREVYSH_SV = "БазПревышСВ"
+@Field final NODE_NAME_BAZ_NACH_SV_FARM = "БазНачСВФарм"
+@Field final NODE_NAME_BAZ_NACH_SV_CHL_ES = "БазНачСВЧлЭС"
+@Field final NODE_NAME_BAZ_NACH_SV_PAT = "БазНачСВПат"
+@Field final NODE_NAME_BAZ_NACH_SV_IN_LIC = "БазНачСВИнЛиц"
+@Field final NODE_NAME_PROIZV_RASH_SO = "ПроизвРасхСО"
+@Field final NODE_NAME_VOSM_RASH_SO = "ВозмРасхСО"
+@Field final NODE_NAME_UPL_SV_PREV = "УплСВПрев"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -137,6 +151,9 @@ import groovy.transform.Field
 @Field final RASCH_SV_OPS428_3_KLAS_USL_TRUD = "КласУслТруд"
 @Field final RASCH_SV_DSO_PR_RASCH_SUM = "ПрРасчСум"
 
+// Атрибуты узла РасчСВ_ОСС.ВНМ
+@Field final RASCH_SV_OSS_VNM_PRIZ_VYPL = "ПризВыпл"
+
 // Атрибуты типа КолЛицТип
 @Field final KOL_LIC_TIP_KOL_VSEGO_PER = "КолВсегоПер"
 @Field final KOL_LIC_TIP_KOL_VSEGO_POSL3M = "КолВсегоПосл3М"
@@ -150,6 +167,10 @@ import groovy.transform.Field
 @Field final SV_SUM_1TIP_SUM1_POSL3M = "Сум1Посл3М"
 @Field final SV_SUM_1TIP_SUM2_POSL3M = "Сум2Посл3М"
 @Field final SV_SUM_1TIP_SUM3_POSL3M = "Сум3Посл3М"
+
+// Атрибуты узла УплСВПревТип
+@Field final UPL_SV_PREV_PRIZNAK = "Признак"
+@Field final UPL_SV_PREV_SUMMA = "Сумма"
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -376,6 +397,50 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             }
             raschsvSvOpsOms.raschsvSvOpsOmsRaschList = raschsvSvOpsOmsRaschList
             raschsvSvOpsOmsList.add(raschsvSvOpsOms)
+
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_RASCH_SV_OSS_VNM) {
+            //----------------------------------------------------------------------------------------------------------
+            // Разбор узла РасчСВ_ОСС.ВНМ
+            //----------------------------------------------------------------------------------------------------------
+            RaschsvOssVnm raschsvOssVnm = new RaschsvOssVnm()
+            raschsvOssVnm.raschsvObyazPlatSvId = raschsvObyazPlatSvId
+            raschsvOssVnm.prizVypl = obyazPlatSvChildNode.attributes()[RASCH_SV_OSS_VNM_PRIZ_VYPL]
+
+            // Набор сумм страховых взносов к уплате
+            def raschsvUplSvPrevList = []
+
+            // Набор сведений о сумме
+            def raschsvOssVnmSumList = []
+
+            // Набор сведений о количестве
+            def raschsvOssVnmKolList = []
+
+            obyazPlatSvChildNode.childNodes().each { raschSvOssVnmChildNode ->
+                if (raschSvOssVnmChildNode.name == NODE_NAME_UPL_SV_PREV) {
+                    // Разбор узла УплСВПрев
+                    raschSvOssVnmChildNode.childNodes().each { uplSvPrevNode ->
+                        RaschsvUplSvPrev raschsvUplSvPrev = parseRaschsvUplSvPrev(uplSvPrevNode)
+                        raschsvUplSvPrevList.add(raschsvUplSvPrev)
+                    }
+                } else {
+                    if (raschSvOssVnmChildNode.name == NODE_NAME_KOL_STRAH_LIC_VS) {
+                        // Разбор узла КолСтрахЛицВс
+                        RaschsvOssVnmKol raschsvOssVnmKol = new RaschsvOssVnmKol()
+                        raschsvOssVnmKol.nodeName = raschSvOssVnmChildNode.name
+                        raschsvOssVnmKol.raschsvKolLicTip = parseRaschsvKolLicTip(raschSvOssVnmChildNode)
+                        raschsvOssVnmKolList.add(raschsvOssVnmKol)
+                    } else {
+                        // Разбор остальных узлов
+                        RaschsvOssVnmSum raschsvOssVnmSum = new RaschsvOssVnmSum()
+                        raschsvOssVnmSum.nodeName = raschSvOssVnmChildNode.name
+                        raschsvOssVnmSum.raschsvSvSum1Tip = parseRaschsvSvSum1Tip(raschSvOssVnmChildNode)
+                        raschsvOssVnmSumList.add(raschsvOssVnmSum)
+                    }
+                }
+            }
+
+            raschsvOssVnm.raschsvUplSvPrevList = raschsvUplSvPrevList
+            raschsvOssVnm.raschsvOssVnmKolList = raschsvOssVnmKolList
         }
     }
 
@@ -386,6 +451,20 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
     raschsvSvOpsOmsService.insertRaschsvSvOpsOms(raschsvSvOpsOmsList)
 
     return raschsvObyazPlatSvId
+}
+
+/**
+ * Разбор узла УплСВПревТип
+ * @param uplSvPrevNode
+ * @return
+ */
+RaschsvUplSvPrev parseRaschsvUplSvPrev(Object uplSvPrevNode) {
+    RaschsvUplSvPrev raschsvUplSvPrev = new RaschsvUplSvPrev()
+    raschsvUplSvPrev.nodeName = uplSvPrevNode.name
+    raschsvUplSvPrev.priznak = uplSvPrevNode.attributes()[UPL_SV_PREV_PRIZNAK]
+    raschsvUplSvPrev.svSum = getDouble(uplSvPrevNode.attributes()[UPL_SV_PREV_SUMMA])
+
+    return raschsvUplSvPrev
 }
 
 /**
