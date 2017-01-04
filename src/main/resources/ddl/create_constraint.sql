@@ -509,10 +509,7 @@ alter table fias_room add constraint pk_fias_room primary key (roomguid);
 alter table fias_addrobj add constraint fk_fias_addrobj_parentid foreign key (parentguid) references fias_addrobj (aoguid) on delete cascade;
 alter table fias_addrobj add constraint fk_fias_addrobj_operstatus foreign key (operstatus) references fias_operstat (operstatid);
 alter table fias_house add constraint fk_fias_house_aoguid foreign key (aoguid) references fias_addrobj (aoguid) on delete cascade;
-
 alter table fias_houseint add constraint fk_fias_houseint_aoguid foreign key (aoguid) references fias_addrobj (aoguid) on delete cascade;
---alter table fias_houseint add constraint fk_fias_houseint_intstatus foreign key (intstatus) references fias_intvstat (housestid);
-
 alter table fias_room add constraint fk_fias_room_houseguid foreign key (houseguid) references fias_house (houseguid) on delete cascade;
 
 -- проверки
