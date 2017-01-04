@@ -10,11 +10,11 @@ public class RaschsvSvOpsOms extends IdentityObject<Long> {
     private Long raschsvObyazPlatSvId;
     private String tarifPlat;
 
-    public static final String SEQ = "seq_raschsv_upl_per";
-    public static final String TABLE_NAME = "raschsv_upl_per";
+    public static final String SEQ = "seq_raschsv_sv_ops_oms";
+    public static final String TABLE_NAME = "raschsv_sv_ops_oms";
     public static final String COL_ID = "id";
     public static final String COL_RASCHSV_OBYAZ_PLAT_SV_ID = "raschsv_obyaz_plat_sv_id";
-    public static final String COL_TARIF_PLAT = "node_name";
+    public static final String COL_TARIF_PLAT = "tarif_plat";
 
     public static final String[] COLUMNS = {COL_ID, COL_RASCHSV_OBYAZ_PLAT_SV_ID, COL_TARIF_PLAT};
 
