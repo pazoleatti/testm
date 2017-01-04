@@ -12,6 +12,11 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPer
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPrevOss
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOms
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRasch
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRaschSum
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRaschKol
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvSum1Tip
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvKolLicTip
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -35,7 +40,29 @@ import groovy.transform.Field
 @Field final NODE_NAME_UPL_PREV_OSS = "УплПревОСС"
 @Field final NODE_NAME_UPL_PER_OSS = "УплПерОСС"
 @Field final NODE_NAME_PREV_RASH_OSS = "ПревРасхОСС"
-@Field final NODE_NAME_SV_OPS_OMS = "РасчСВ_ОПС_ОМС"
+
+@Field final NODE_NAME_RASCH_SV_OPS_OMS = "РасчСВ_ОПС_ОМС"
+@Field final NODE_NAME_RASCH_SV_OPS = "РасчСВ_ОПС"
+@Field final NODE_NAME_RASCH_SV_OMS = "РасчСВ_ОМС"
+@Field final NODE_NAME_RASCH_SV_OPS428 = "РасчСВ_ОПС428"
+@Field final NODE_NAME_RASCH_SV_OPS428_12 = "РасчСВ_428.1-2"
+@Field final NODE_NAME_RASCH_SV_OPS428_3 = "РасчСВ_428.3"
+@Field final NODE_NAME_RASCH_SV_DSO = "РасчСВ_ДСО"
+@Field final NODE_NAME_KOL_STRAH_LIC_VS = "КолСтрахЛицВс"
+@Field final NODE_NAME_KOL_LIC_NACH_SV_VS = "КолЛицНачСВВс"
+@Field final NODE_NAME_PREV_BAZ_OPS = "ПревБазОПС"
+@Field final NODE_NAME_VYPL_NACHISL_FL = "ВыплНачислФЛ"
+@Field final NODE_NAME_NE_OBLOZEN_SV = "НеОбложенСВ"
+@Field final NODE_NAME_BAZ_NACHISL_SV = "БазНачислСВ"
+@Field final NODE_NAME_BAZ_PREVYSH_OPS = "БазПревышОПС"
+@Field final NODE_NAME_NACHISL_SV = "НачислСВ"
+@Field final NODE_NAME_NACHISL_SV_NE_PREV = "НачислСВНеПрев"
+@Field final NODE_NAME_NACHISL_SV_PREV = "НачислСВПрев"
+@Field final NODE_NAME_BAZ_NACHISL_SV_DOP = "БазНачислСВДоп"
+@Field final NODE_NAME_NACHISL_SV_DOP = "НачислСВДоп"
+@Field final NODE_NAME_KOL_LIC_NACH_SV = "КолЛицНачСВ"
+@Field final NODE_NAME_BAZ_NACHISL_SVDSO = "БазНачислСВДСО"
+@Field final NODE_NAME_NACHISL_SVDSO = "НачислСВДСО"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -103,7 +130,26 @@ import groovy.transform.Field
 @Field final OBYAZ_PLAT_SV_OKTMO = "ОКТМО"
 
 // Атрибуты узла РасчСВ_ОПС_ОМС
-@Field final SV_OPS_OMS_TARIF_PLAT = "ТарифПлат"
+@Field final RASCH_SV_OPS_OMS_TARIF_PLAT = "ТарифПлат"
+@Field final RASCH_SV_OPS428_12_PR_OSN_SV_DOP = "ПрОснСВДоп"
+@Field final RASCH_SV_OPS428_3_KOD_OSNOV = "КодОснов"
+@Field final RASCH_SV_OPS428_3_OSNOV_ZAP = "ОсновЗап"
+@Field final RASCH_SV_OPS428_3_KLAS_USL_TRUD = "КласУслТруд"
+@Field final RASCH_SV_DSO_PR_RASCH_SUM = "ПрРасчСум"
+
+// Атрибуты типа КолЛицТип
+@Field final KOL_LIC_TIP_KOL_VSEGO_PER = "КолВсегоПер"
+@Field final KOL_LIC_TIP_KOL_VSEGO_POSL3M = "КолВсегоПосл3М"
+@Field final KOL_LIC_TIP_KOL1_POSL3M = "Кол1Посл3М"
+@Field final KOL_LIC_TIP_KOL2_POSL3M = "Кол2Посл3М"
+@Field final KOL_LIC_TIP_KOL3_POSL3M = "Кол3Посл3М"
+
+// Атрибуты типа СвСум1Тип
+@Field final SV_SUM_1TIP_SUM_VSEGO_PER = "СумВсегоПер"
+@Field final SV_SUM_1TIP_SUM_VSEGO_POSL3M = "СумВсегоПосл3М"
+@Field final SV_SUM_1TIP_SUM1_POSL3M = "Сум1Посл3М"
+@Field final SV_SUM_1TIP_SUM2_POSL3M = "Сум2Посл3М"
+@Field final SV_SUM_1TIP_SUM3_POSL3M = "Сум3Посл3М"
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -219,16 +265,116 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             // Сохранение УплПревОСС
             raschsvUplPrevOssService.insertUplPrevOss(raschsvUplPrevOss)
 
-        } else if (obyazPlatSvChildNode.name == NODE_NAME_SV_OPS_OMS) {
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_RASCH_SV_OPS_OMS) {
             //----------------------------------------------------------------------------------------------------------
             // Разбор узла РасчСВ_ОПС_ОМС
             //----------------------------------------------------------------------------------------------------------
             RaschsvSvOpsOms raschsvSvOpsOms = new RaschsvSvOpsOms()
             raschsvSvOpsOms.raschsvObyazPlatSvId = raschsvObyazPlatSvId
-            raschsvSvOpsOms.tarifPlat = obyazPlatSvChildNode.attributes()[SV_OPS_OMS_TARIF_PLAT]
+            raschsvSvOpsOms.tarifPlat = obyazPlatSvChildNode.attributes()[RASCH_SV_OPS_OMS_TARIF_PLAT]
 
-            println(raschsvSvOpsOms.tarifPlat)
+            // Набор дочерних узлов РасчСВ_ОПС_ОМС
+            def raschsvSvOpsOmsRaschList = []
 
+            obyazPlatSvChildNode.childNodes().each { raschSvOpsOmsChildNode ->
+
+                RaschsvSvOpsOmsRasch raschsvSvOpsOmsRasch = new RaschsvSvOpsOmsRasch()
+                raschsvSvOpsOmsRasch.nodeName = raschSvOpsOmsChildNode.name
+
+                // Набор сведений о сумме
+                def raschsvSvOpsOmsRaschSumList = []
+                // Набор сведений о количестве
+                def raschsvSvOpsOmsRaschKolList = []
+
+                if (raschSvOpsOmsChildNode.name == NODE_NAME_RASCH_SV_OPS ||
+                        raschSvOpsOmsChildNode.name == NODE_NAME_RASCH_SV_OMS) {
+                    // Разбор узлов РасчСВ_ОПС и РасчСВ_ОМС
+                    raschSvOpsOmsChildNode.childNodes().each { raschSvOpsOmsChildChildNode ->
+                        if (raschSvOpsOmsChildChildNode.name == NODE_NAME_KOL_STRAH_LIC_VS ||
+                                raschSvOpsOmsChildChildNode.name == NODE_NAME_KOL_LIC_NACH_SV_VS ||
+                                raschSvOpsOmsChildChildNode.name == NODE_NAME_PREV_BAZ_OPS) {
+                            // Разбор узлов КолСтрахЛицВс, КолЛицНачСВВс, ПревБазОПС
+                            RaschsvSvOpsOmsRaschKol raschsvSvOpsOmsRaschKol = new RaschsvSvOpsOmsRaschKol()
+                            raschsvSvOpsOmsRaschKol.nodeName = raschSvOpsOmsChildChildNode.name
+                            raschsvSvOpsOmsRaschKol.raschsvKolLicTip = parseRaschsvKolLicTip(raschSvOpsOmsChildChildNode)
+
+                            raschsvSvOpsOmsRaschKolList.add(raschsvSvOpsOmsRaschKol)
+                        } else if (raschSvOpsOmsChildChildNode.name == NODE_NAME_VYPL_NACHISL_FL ||
+                            raschSvOpsOmsChildChildNode.name == NODE_NAME_NE_OBLOZEN_SV ||
+                            raschSvOpsOmsChildChildNode.name == NODE_NAME_BAZ_NACHISL_SV ||
+                            raschSvOpsOmsChildChildNode.name == NODE_NAME_BAZ_PREVYSH_OPS ||
+                            raschSvOpsOmsChildChildNode.name == NODE_NAME_NACHISL_SV ||
+                            raschSvOpsOmsChildChildNode.name == NODE_NAME_NACHISL_SV_NE_PREV ||
+                            raschSvOpsOmsChildChildNode.name == NODE_NAME_NACHISL_SV_PREV) {
+                            // Разбор узлов ВыплНачислФЛ, НеОбложенСВ, БазНачислСВ, БазПревышОПС, НачислСВ, НачислСВНеПрев, НачислСВПрев
+                            RaschsvSvOpsOmsRaschSum raschsvSvOpsOmsRaschSum = new RaschsvSvOpsOmsRaschSum()
+                            raschsvSvOpsOmsRaschSum.nodeName = raschSvOpsOmsChildChildNode.name
+                            raschsvSvOpsOmsRaschSum.raschsvSvSum1Tip = parseRaschsvSvSum1Tip(raschSvOpsOmsChildChildNode)
+
+                            raschsvSvOpsOmsRaschSumList.add(raschsvSvOpsOmsRaschSum)
+                        }
+                    }
+                } else if (raschSvOpsOmsChildNode.name == NODE_NAME_RASCH_SV_OPS428) {
+                    // Разбор узла РасчСВ_ОПС428
+                    raschSvOpsOmsChildNode.childNodes().each { raschSvOps428ChildNode ->
+                        // Разбор узлов РасчСВ_428.1-2, РасчСВ_428.3
+                        raschsvSvOpsOmsRasch.prOsnSvDop = raschSvOpsOmsChildNode.attributes()[RASCH_SV_OPS428_12_PR_OSN_SV_DOP]
+                        raschsvSvOpsOmsRasch.kodOsnov = raschSvOpsOmsChildNode.attributes()[RASCH_SV_OPS428_3_KOD_OSNOV]
+                        raschsvSvOpsOmsRasch.osnovZap = raschSvOpsOmsChildNode.attributes()[RASCH_SV_OPS428_3_OSNOV_ZAP]
+                        raschsvSvOpsOmsRasch.klasUslTrud = raschSvOpsOmsChildNode.attributes()[RASCH_SV_OPS428_3_KLAS_USL_TRUD]
+
+                        raschSvOps428ChildNode.childNodes().each { raschSvOps428ChildChildNode ->
+                            if (raschSvOps428ChildChildNode.name == NODE_NAME_KOL_LIC_NACH_SV) {
+                                // Разбор узла КолЛицНачСВ
+                                RaschsvSvOpsOmsRaschKol raschsvSvOpsOmsRaschKol = new RaschsvSvOpsOmsRaschKol()
+                                raschsvSvOpsOmsRaschKol.nodeName = raschSvOps428ChildChildNode.name
+                                raschsvSvOpsOmsRaschKol.raschsvKolLicTip = parseRaschsvKolLicTip(raschSvOps428ChildChildNode)
+
+                                raschsvSvOpsOmsRaschKolList.add(raschsvSvOpsOmsRaschKol)
+
+                            } else if (raschSvOps428ChildChildNode.name == NODE_NAME_VYPL_NACHISL_FL ||
+                                    raschSvOps428ChildChildNode.name == NODE_NAME_NE_OBLOZEN_SV ||
+                                    raschSvOps428ChildChildNode.name == NODE_NAME_BAZ_NACHISL_SV_DOP ||
+                                    raschSvOps428ChildChildNode.name == NODE_NAME_NACHISL_SV_DOP) {
+                                // Разбор узлов ВыплНачислФЛ, НеОбложенСВ, БазНачислСВДоп, НачислСВДоп
+                                RaschsvSvOpsOmsRaschSum raschsvSvOpsOmsRaschSum = new RaschsvSvOpsOmsRaschSum()
+                                raschsvSvOpsOmsRaschSum.nodeName = raschSvOps428ChildChildNode.name
+                                raschsvSvOpsOmsRaschSum.raschsvSvSum1Tip = parseRaschsvSvSum1Tip(raschSvOps428ChildChildNode)
+
+                                raschsvSvOpsOmsRaschSumList.add(raschsvSvOpsOmsRaschSum)
+                            }
+                        }
+                    }
+                } else if (raschSvOpsOmsChildNode.name == NODE_NAME_RASCH_SV_DSO) {
+                    // Разбор узла РасчСВ_ДСО
+                    raschsvSvOpsOmsRasch.prRaschSum = raschSvOpsOmsChildNode.attributes()[RASCH_SV_DSO_PR_RASCH_SUM]
+
+                    raschSvOpsOmsChildNode.childNodes().each { raschSvOpsOmsChildChildNode ->
+                        if (raschSvOpsOmsChildChildNode.name == NODE_NAME_KOL_LIC_NACH_SV) {
+                            // Разбор узла КолЛицНачСВ
+                            RaschsvSvOpsOmsRaschKol raschsvSvOpsOmsRaschKol = new RaschsvSvOpsOmsRaschKol()
+                            raschsvSvOpsOmsRaschKol.nodeName = raschSvOpsOmsChildChildNode.name
+                            raschsvSvOpsOmsRaschKol.raschsvKolLicTip = parseRaschsvKolLicTip(raschSvOpsOmsChildChildNode)
+
+                            raschsvSvOpsOmsRaschKolList.add(raschsvSvOpsOmsRaschKol)
+                        } else if (raschSvOpsOmsChildChildNode.name == NODE_NAME_VYPL_NACHISL_FL ||
+                                raschSvOpsOmsChildChildNode.name == NODE_NAME_NE_OBLOZEN_SV ||
+                                raschSvOpsOmsChildChildNode.name == NODE_NAME_BAZ_NACHISL_SVDSO ||
+                                raschSvOpsOmsChildChildNode.name == NODE_NAME_NACHISL_SVDSO) {
+                            // Разбор узлов ВыплНачислФЛ, НеОбложенСВ, БазНачислСВДоп, НачислСВДоп
+                            RaschsvSvOpsOmsRaschSum raschsvSvOpsOmsRaschSum = new RaschsvSvOpsOmsRaschSum()
+                            raschsvSvOpsOmsRaschSum.nodeName = raschSvOpsOmsChildChildNode.name
+                            raschsvSvOpsOmsRaschSum.raschsvSvSum1Tip = parseRaschsvSvSum1Tip(raschSvOpsOmsChildChildNode)
+
+                            raschsvSvOpsOmsRaschSumList.add(raschsvSvOpsOmsRaschSum)
+                        }
+                    }
+                }
+                raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList = raschsvSvOpsOmsRaschSumList
+                raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList = raschsvSvOpsOmsRaschKolList
+                raschsvSvOpsOmsRaschList.add(raschsvSvOpsOmsRasch)
+            }
+            raschsvSvOpsOms.raschsvSvOpsOmsRaschList = raschsvSvOpsOmsRaschList
             raschsvSvOpsOmsList.add(raschsvSvOpsOms)
         }
     }
@@ -240,6 +386,38 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
     raschsvSvOpsOmsService.insertRaschsvSvOpsOms(raschsvSvOpsOmsList)
 
     return raschsvObyazPlatSvId
+}
+
+/**
+ * Разбор узла СвСум1Тип
+ * @param svSum1TipNode
+ * @return
+ */
+RaschsvSvSum1Tip parseRaschsvSvSum1Tip(Object svSum1TipNode) {
+    RaschsvSvSum1Tip raschsvSvSum1Tip = new RaschsvSvSum1Tip()
+    raschsvSvSum1Tip.sumVsegoPer = getDouble(svSum1TipNode.attributes()[SV_SUM_1TIP_SUM_VSEGO_PER])
+    raschsvSvSum1Tip.sumVsegoPosl3m = getDouble(svSum1TipNode.attributes()[SV_SUM_1TIP_SUM_VSEGO_POSL3M])
+    raschsvSvSum1Tip.sum1mPosl3m = getDouble(svSum1TipNode.attributes()[SV_SUM_1TIP_SUM1_POSL3M])
+    raschsvSvSum1Tip.sum2mPosl3m = getDouble(svSum1TipNode.attributes()[SV_SUM_1TIP_SUM2_POSL3M])
+    raschsvSvSum1Tip.sum3mPosl3m = getDouble(svSum1TipNode.attributes()[SV_SUM_1TIP_SUM3_POSL3M])
+
+    return raschsvSvSum1Tip
+}
+
+/**
+ * Разбор узла КолЛицТип
+ * @param kolLicTip
+ * @return
+ */
+RaschsvKolLicTip parseRaschsvKolLicTip(Object kolLicTip) {
+    RaschsvKolLicTip raschsvKolLicTip = new RaschsvKolLicTip()
+    raschsvKolLicTip.kolVsegoPer = getInteger(kolLicTip.attributes()[KOL_LIC_TIP_KOL_VSEGO_PER])
+    raschsvKolLicTip.kolVsegoPosl3m = getInteger(kolLicTip.attributes()[KOL_LIC_TIP_KOL_VSEGO_POSL3M])
+    raschsvKolLicTip.kol1mPosl3m = getInteger(kolLicTip.attributes()[KOL_LIC_TIP_KOL1_POSL3M])
+    raschsvKolLicTip.kol2mPosl3m = getInteger(kolLicTip.attributes()[KOL_LIC_TIP_KOL2_POSL3M])
+    raschsvKolLicTip.kol3mPosl3m = getInteger(kolLicTip.attributes()[KOL_LIC_TIP_KOL3_POSL3M])
+
+    return raschsvKolLicTip
 }
 
 /**

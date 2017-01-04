@@ -213,10 +213,50 @@ public class RaschsvDaoTest {
     public void testInsertRaschsvSvOpsOms() {
         Long raschsvObyazPlatSvId = createRaschsvObyazPlatSv();
         List<RaschsvSvOpsOms> raschsvSvOpsOmsList = new ArrayList<RaschsvSvOpsOms>();
+        List<RaschsvSvOpsOmsRaschSum> raschsvSvOpsOmsRaschSumList = new ArrayList<RaschsvSvOpsOmsRaschSum>();
+        List<RaschsvSvOpsOmsRaschKol> raschsvSvOpsOmsRaschKolList = new ArrayList<RaschsvSvOpsOmsRaschKol>();
+        List<RaschsvSvOpsOmsRasch> raschsvSvOpsOmsRaschList = new ArrayList<RaschsvSvOpsOmsRasch>();
 
+        // Сведения по суммам (тип 1)
+        RaschsvSvSum1Tip raschsvSvSum1Tip = new RaschsvSvSum1Tip();
+        raschsvSvSum1Tip.setSumVsegoPer(1.1);
+        raschsvSvSum1Tip.setSumVsegoPosl3m(1.1);
+        raschsvSvSum1Tip.setSum1mPosl3m(1.1);
+        raschsvSvSum1Tip.setSum2mPosl3m(1.1);
+        raschsvSvSum1Tip.setSum3mPosl3m(1.1);
+
+        // Сведения по количеству физических лиц
+        RaschsvKolLicTip raschsvKolLicTip = new RaschsvKolLicTip();
+        raschsvKolLicTip.setKolVsegoPer(1);
+        raschsvKolLicTip.setKolVsegoPosl3m(1);
+        raschsvKolLicTip.setKol1mPosl3m(1);
+        raschsvKolLicTip.setKol2mPosl3m(1);
+        raschsvKolLicTip.setKol3mPosl3m(1);
+
+        // Сумма для расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование
+        RaschsvSvOpsOmsRaschSum raschsvSvOpsOmsRaschSum1 = new RaschsvSvOpsOmsRaschSum();
+        raschsvSvOpsOmsRaschSum1.setNodeName("NodeName");
+        raschsvSvOpsOmsRaschSum1.setRaschsvSvSum1Tip(raschsvSvSum1Tip);
+        raschsvSvOpsOmsRaschSumList.add(raschsvSvOpsOmsRaschSum1);
+
+        // Количество для расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование
+        RaschsvSvOpsOmsRaschKol raschsvSvOpsOmsRaschKol1 = new RaschsvSvOpsOmsRaschKol();
+        raschsvSvOpsOmsRaschKol1.setNodeName("NodeName");
+        raschsvSvOpsOmsRaschKol1.setRaschsvKolLicTip(raschsvKolLicTip);
+        raschsvSvOpsOmsRaschKolList.add(raschsvSvOpsOmsRaschKol1);
+
+        // Вид расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование
+        RaschsvSvOpsOmsRasch raschsvSvOpsOmsRasch1 = new RaschsvSvOpsOmsRasch();
+        raschsvSvOpsOmsRasch1.setNodeName("NodeName");
+        raschsvSvOpsOmsRasch1.setRaschsvSvOpsOmsRaschSumList(raschsvSvOpsOmsRaschSumList);
+        raschsvSvOpsOmsRasch1.setRaschsvSvOpsOmsRaschKolList(raschsvSvOpsOmsRaschKolList);
+        raschsvSvOpsOmsRaschList.add(raschsvSvOpsOmsRasch1);
+
+        // Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование
         RaschsvSvOpsOms raschsvSvOpsOms1 = new RaschsvSvOpsOms();
         raschsvSvOpsOms1.setRaschsvObyazPlatSvId(raschsvObyazPlatSvId);
         raschsvSvOpsOms1.setTarifPlat("1");
+        raschsvSvOpsOms1.setRaschsvSvOpsOmsRaschList(raschsvSvOpsOmsRaschList);
         raschsvSvOpsOmsList.add(raschsvSvOpsOms1);
 
         RaschsvSvOpsOms raschsvSvOpsOms2 = new RaschsvSvOpsOms();

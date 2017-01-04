@@ -20,6 +20,7 @@ public class RaschsvSvSum1TipDaoImpl extends AbstractDao implements RaschsvSvSum
     public Long insertRaschsvSvSum1Tip(RaschsvSvSum1Tip raschsvSvSum1Tip) {
         String sql = "INSERT INTO " + RaschsvSvSum1Tip.TABLE_NAME +
                 " (" + SV_SUM_1TIP_COLS + ") VALUES (" + SV_SUM_1TIP_FIELDS + ")";
+
         raschsvSvSum1Tip.setId(generateId(RaschsvSvSum1Tip.SEQ, Long.class));
 
         SqlParameterSource params = new MapSqlParameterSource()
