@@ -27,6 +27,7 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplFinFb
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplPrichina
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashVypl
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif31427
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif51427
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -80,6 +81,8 @@ import groovy.transform.Field
 @Field final NODE_NAME_VYPL_FIN_FB = "ВыплФинФБ"
 
 @Field final NODE_NAME_PRAV_TARIF3_1_427 = "ПравТариф3.1.427"
+
+@Field final NODE_NAME_PRAV_TARIF5_1_427 = "ПравТариф5.1.427"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -169,6 +172,11 @@ import groovy.transform.Field
 @Field final PRAV_TARIF3_1_427_DOH_KR5_427_PER = "ДохКр5.427_Пер"
 @Field final PRAV_TARIF3_1_427_DOH_DOH5_427_9MPR = "ДолДох5.427_9МПр"
 @Field final PRAV_TARIF3_1_427_DOH_DOH5_427_PER = "ДолДох5.427_Пер"
+
+// Атрибуты узла ПравТариф5.1.427
+@Field final PRAV_TARIF5_1_427_DOH346_15VS = "Дох346.15Вс"
+@Field final PRAV_TARIF5_1_427_DOH6_427 = "Дох6.427"
+@Field final PRAV_TARIF5_1_427_DOL_DOH6_427 = "ДолДох6.427"
 
 // Атрибуты узла СвРеестрАкОрг
 @Field final SV_REESTR_AK_ORG_DATA = "ДатаЗапАкОрг"
@@ -554,6 +562,19 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             }
 
             raschsvPravTarif31427Service.insertRaschsvPravTarif31427(raschsvPravTarif31427)
+
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_PRAV_TARIF5_1_427) {
+            //----------------------------------------------------------------------------------------------------------
+            // Разбор узла ПравТариф5.1.427
+            //----------------------------------------------------------------------------------------------------------
+            RaschsvPravTarif51427 raschsvPravTarif51427 = new RaschsvPravTarif51427()
+            raschsvPravTarif51427.raschsvObyazPlatSvId = raschsvObyazPlatSvId
+
+            raschsvPravTarif51427.doh346_15vs = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF5_1_427_DOH346_15VS])
+            raschsvPravTarif51427.doh6_427 = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF5_1_427_DOH6_427])
+            raschsvPravTarif51427.dolDoh6_427 = getDouble(obyazPlatSvChildNode.attributes()[PRAV_TARIF5_1_427_DOL_DOH6_427])
+
+            raschsvPravTarif51427Service.insertRaschsvPravTarif51427(raschsvPravTarif51427)
         }
     }
 

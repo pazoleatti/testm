@@ -56,6 +56,9 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvPravTarif31427Dao raschsvPravTarif31427Dao;
 
+    @Autowired
+    private RaschsvPravTarif51427Dao raschsvPravTarif51427Dao;
+
     /**
      * Добавление записи в таблицу ОбязПлатСВ
      * @return
@@ -376,5 +379,19 @@ public class RaschsvDaoTest {
         raschsvPravTarif31427.setNomZapAkOrg("nom");
 
         assertNotNull(raschsvPravTarif31427Dao.insertRaschsvPravTarif31427(raschsvPravTarif31427));
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 5 пункта 1 статьи 427"
+     */
+    @Test
+    public void testInsertRaschsvPravTarif51427() {
+        RaschsvPravTarif51427 raschsvPravTarif51427 = new RaschsvPravTarif51427();
+        raschsvPravTarif51427.setRaschsvObyazPlatSvId(createRaschsvObyazPlatSv());
+        raschsvPravTarif51427.setDoh346_15vs(1L);
+        raschsvPravTarif51427.setDoh6_427(1L);
+        raschsvPravTarif51427.setDolDoh6_427(1.1);
+
+        assertNotNull(raschsvPravTarif51427Dao.insertRaschsvPravTarif51427(raschsvPravTarif51427));
     }
 }
