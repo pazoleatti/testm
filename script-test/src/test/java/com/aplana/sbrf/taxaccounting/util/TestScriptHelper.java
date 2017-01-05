@@ -86,6 +86,8 @@ public class TestScriptHelper {
     private RaschsvOssVnmService raschsvOssVnmService;
     // Сервисы "Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации"
     private RaschsvRashOssZakService raschsvRashOssZakService;
+    // Сервисы "Выплаты, произведенные за счет средств, финансируемых из федерального бюджета"
+    private RaschsvVyplFinFbService raschsvVyplFinFbService;
 
     //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
@@ -167,6 +169,7 @@ public class TestScriptHelper {
         raschsvSvOpsOmsService = mockHelper.mockRaschsvSvOpsOmsService();
         raschsvOssVnmService = mockHelper.mockRaschsvOssVnmService();
         raschsvRashOssZakService = mockHelper.mockRaschsvRashOssZakService();
+        raschsvVyplFinFbService = mockHelper.mockRaschsvVyplFinFbService();
     }
 
     /**
@@ -301,6 +304,8 @@ public class TestScriptHelper {
         bindings.put("raschsvOssVnmService", raschsvOssVnmService);
         // Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации
         bindings.put("raschsvRashOssZakService", raschsvRashOssZakService);
+        // Выплаты, произведенные за счет средств, финансируемых из федерального бюджета
+        bindings.put("raschsvVyplFinFbService", raschsvVyplFinFbService);
 
         //ndfl
         bindings.put("ndflPersonService", ndflPersonService);

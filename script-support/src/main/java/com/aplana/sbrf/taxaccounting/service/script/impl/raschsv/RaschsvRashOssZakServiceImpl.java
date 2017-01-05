@@ -2,11 +2,12 @@ package com.aplana.sbrf.taxaccounting.service.script.impl.raschsv;
 
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvRashOssZakDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZak;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvRashOssZakService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("raschsvRashOssZakService")
-public class RaschsvRashOssZakServiceImpl {
+public class RaschsvRashOssZakServiceImpl implements RaschsvRashOssZakService {
 
     @Autowired
     private RaschsvRashOssZakDao raschsvRashOssZakDao;

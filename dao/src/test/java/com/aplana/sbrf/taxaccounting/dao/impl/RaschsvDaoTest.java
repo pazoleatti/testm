@@ -49,6 +49,9 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvRashOssZakDao raschsvRashOssZakDao;
 
+    @Autowired
+    private RaschsvVyplFinFbDao raschsvVyplFinFbDao;
+
     /**
      * Добавление записи в таблицу ОбязПлатСВ
      * @return
@@ -301,7 +304,7 @@ public class RaschsvDaoTest {
     }
 
     /**
-     * Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации
+     * Тестирование сохранения данных в таблицу "Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации"
      */
     @Test
     public void testInsertRaschsvRashOssZak() {
@@ -320,5 +323,33 @@ public class RaschsvDaoTest {
         raschsvRashOssZak.setRaschsvRashOssZakRashList(raschsvRashOssZakRashList);
 
         assertNotNull(raschsvRashOssZakDao.insertRaschsvRashOssZak(raschsvRashOssZak));
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Выплаты, произведенные за счет средств, финансируемых из федерального бюджета"
+     */
+    @Test
+    public void testInsertRaschsvVyplFinFb() {
+        List<RaschsvRashVypl> raschsvRashVyplList = new ArrayList<RaschsvRashVypl>();
+        List<RaschsvVyplPrichina> raschsvVyplPrichinaList = new ArrayList<RaschsvVyplPrichina>();
+
+        RaschsvRashVypl raschsvRashVypl1 = new RaschsvRashVypl();
+        raschsvRashVypl1.setNodeName("NodeName");
+        raschsvRashVypl1.setKolVypl(1);
+        raschsvRashVypl1.setChislPoluch(1);
+        raschsvRashVypl1.setRashod(1.1);
+        raschsvRashVyplList.add(raschsvRashVypl1);
+
+        RaschsvVyplPrichina raschsvVyplPrichina1 = new RaschsvVyplPrichina();
+        raschsvVyplPrichina1.setNodeName("NodeName");
+        raschsvVyplPrichina1.setSvVnfUhodInv(1.1);
+        raschsvVyplPrichina1.setRaschsvRashVyplList(raschsvRashVyplList);
+        raschsvVyplPrichinaList.add(raschsvVyplPrichina1);
+
+        RaschsvVyplFinFb raschsvVyplFinFb = new RaschsvVyplFinFb();
+        raschsvVyplFinFb.setRaschsvObyazPlatSvId(createRaschsvObyazPlatSv());
+        raschsvVyplFinFb.setRaschsvVyplPrichinaList(raschsvVyplPrichinaList);
+
+        assertNotNull(raschsvVyplFinFbDao.insertRaschsvVyplFinFb(raschsvVyplFinFb));
     }
 }

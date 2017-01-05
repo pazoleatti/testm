@@ -23,6 +23,9 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnmKol
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplSvPrev
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZak
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZakRash
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplFinFb
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplPrichina
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashVypl
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -72,6 +75,8 @@ import groovy.transform.Field
 @Field final NODE_NAME_UPL_SV_PREV = "УплСВПрев"
 
 @Field final NODE_NAME_RASH_OSS_ZAK = "РасхОССЗак"
+
+@Field final NODE_NAME_VYPL_FIN_FB = "ВыплФинФБ"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -149,6 +154,9 @@ import groovy.transform.Field
 // Атрибуты узла РасчСВ_ОСС.ВНМ
 @Field final RASCH_SV_OSS_VNM_PRIZ_VYPL = "ПризВыпл"
 
+// Атрибуты узла ВыплФинФБ
+@Field final VYPL_FIN_FB_SV_VNF_UHOD_INV = "СВВнФУходИнв"
+
 // Атрибуты типа КолЛицТип
 @Field final KOL_LIC_TIP_KOL_VSEGO_PER = "КолВсегоПер"
 @Field final KOL_LIC_TIP_KOL_VSEGO_POSL3M = "КолВсегоПосл3М"
@@ -172,6 +180,11 @@ import groovy.transform.Field
 @Field final RASH_OSS_TIP_KOL_VYPL = "КолВыпл"
 @Field final RASH_OSS_TIP_RASH_VSEGO = "РасхВсего"
 @Field final RASH_OSS_TIP_RASH_FIN_FB = "РасхФинФБ"
+
+// Атрибуты типа РасхВыплТип
+@Field final RASH_VYPL_TIP_CHISL_POLUCH = "ЧислПолуч"
+@Field final RASH_VYPL_TIP_KOL_VYPL = "КолВыпл"
+@Field final RASH_VYPL_TIP_RASHOD = "Расход"
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -466,6 +479,40 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             }
             raschsvRashOssZak.raschsvRashOssZakRashList = raschsvRashOssZakRashList
             raschsvRashOssZakService.insertRaschsvRashOssZak(raschsvRashOssZak)
+
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_VYPL_FIN_FB) {
+            //----------------------------------------------------------------------------------------------------------
+            // Разбор узла ВыплФинФБ
+            //----------------------------------------------------------------------------------------------------------
+            RaschsvVyplFinFb raschsvVyplFinFb = new RaschsvVyplFinFb()
+            raschsvVyplFinFb.raschsvObyazPlatSvId = raschsvObyazPlatSvId
+
+            // Набор оснований выплат
+            def raschsvVyplPrichinaList = []
+
+            obyazPlatSvChildNode.childNodes().each { raschsvVyplPrichinaNode ->
+                // Разбор узлов оснований выплат
+                RaschsvVyplPrichina raschsvVyplPrichina = new RaschsvVyplPrichina()
+                raschsvVyplPrichina.nodeName = raschsvVyplPrichinaNode.name
+                raschsvVyplPrichina.svVnfUhodInv = getDouble(raschsvVyplPrichinaNode.attributes()[VYPL_FIN_FB_SV_VNF_UHOD_INV])
+
+                // Набор произведенных выплат
+                def raschsvRashVyplList = []
+                raschsvVyplPrichinaNode.childNodes().each { raschsvRashVyplNode ->
+                    // Разбор узлов информации о выплатах
+                    RaschsvRashVypl raschsvRashVypl = new RaschsvRashVypl()
+                    raschsvRashVypl.nodeName = raschsvRashVyplNode.name
+                    raschsvRashVypl.chislPoluch = getInteger(raschsvRashVyplNode.attributes()[RASH_VYPL_TIP_CHISL_POLUCH])
+                    raschsvRashVypl.kolVypl = getInteger(raschsvRashVyplNode.attributes()[RASH_VYPL_TIP_KOL_VYPL])
+                    raschsvRashVypl.rashod = getDouble(raschsvRashVyplNode.attributes()[RASH_VYPL_TIP_RASHOD])
+
+                    raschsvRashVyplList.add(raschsvRashVypl)
+                }
+                raschsvVyplPrichina.raschsvRashVyplList = raschsvRashVyplList
+
+                raschsvVyplPrichinaList.add(raschsvVyplPrichina)
+            }
+            raschsvVyplFinFbService.insertRaschsvVyplFinFb(raschsvVyplFinFb)
         }
     }
 

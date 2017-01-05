@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnm;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZak;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPrevOss;
+import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -357,6 +354,14 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         RaschsvRashOssZakService raschsvRashOssZakService = mock(RaschsvRashOssZakService.class);
         when(raschsvRashOssZakService.insertRaschsvRashOssZak(any(RaschsvRashOssZak.class))).thenReturn(1L);
         return raschsvRashOssZakService;
+    }
+
+    // "Выплаты, произведенные за счет средств, финансируемых из федерального бюджета"
+    @Override
+    public RaschsvVyplFinFbService mockRaschsvVyplFinFbService() {
+        RaschsvVyplFinFbService raschsvVyplFinFbService = mock(RaschsvVyplFinFbService.class);
+        when(raschsvVyplFinFbService.insertRaschsvVyplFinFb(any(RaschsvVyplFinFb.class))).thenReturn(1L);
+        return raschsvVyplFinFbService;
     }
 
     /**
