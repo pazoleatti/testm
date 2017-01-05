@@ -28,6 +28,7 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplPrichina
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashVypl
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif31427
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif51427
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif71427
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -83,6 +84,8 @@ import groovy.transform.Field
 @Field final NODE_NAME_PRAV_TARIF3_1_427 = "ПравТариф3.1.427"
 
 @Field final NODE_NAME_PRAV_TARIF5_1_427 = "ПравТариф5.1.427"
+
+@Field final NODE_NAME_PRAV_TARIF7_1_427 = "ПравТариф7.1.427"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -177,6 +180,18 @@ import groovy.transform.Field
 @Field final PRAV_TARIF5_1_427_DOH346_15VS = "Дох346.15Вс"
 @Field final PRAV_TARIF5_1_427_DOH6_427 = "Дох6.427"
 @Field final PRAV_TARIF5_1_427_DOL_DOH6_427 = "ДолДох6.427"
+
+// Атрибуты узла ПравТариф7.1.427
+@Field final PRAV_TARIF7_1_427_DOH_VS_PRED = "ДохВсПред"
+@Field final PRAV_TARIF7_1_427_DOH_VS_PER = "ДохВсПер"
+@Field final PRAV_TARIF7_1_427_DOH_CEL_POST_PRED = "ДохЦелПостПред"
+@Field final PRAV_TARIF7_1_427_DOH_CEL_POST_PER = "ДохЦелПостПер"
+@Field final PRAV_TARIF7_1_427_DOH_GRANT_PRED = "ДохГрантПред"
+@Field final PRAV_TARIF7_1_427_DOH_GRANT_PER = "ДохГрантПер"
+@Field final PRAV_TARIF7_1_427_DOH_EK_DEYAT_PRED = "ДохЭкДеятПред"
+@Field final PRAV_TARIF7_1_427_DOH_EK_DEYAT_PER = "ДохЭкДеятПер"
+@Field final PRAV_TARIF7_1_427_DOL_DOH_PRED = "ДолДохПред"
+@Field final PRAV_TARIF7_1_427_DOL_DOH_PER = "ДолДохПер"
 
 // Атрибуты узла СвРеестрАкОрг
 @Field final SV_REESTR_AK_ORG_DATA = "ДатаЗапАкОрг"
@@ -575,6 +590,26 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             raschsvPravTarif51427.dolDoh6_427 = getDouble(obyazPlatSvChildNode.attributes()[PRAV_TARIF5_1_427_DOL_DOH6_427])
 
             raschsvPravTarif51427Service.insertRaschsvPravTarif51427(raschsvPravTarif51427)
+
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_PRAV_TARIF7_1_427) {
+            //----------------------------------------------------------------------------------------------------------
+            // Разбор узла ПравТариф5.1.427
+            //----------------------------------------------------------------------------------------------------------
+            RaschsvPravTarif71427 raschsvPravTarif71427 = new RaschsvPravTarif71427()
+            raschsvPravTarif71427.raschsvObyazPlatSvId = raschsvObyazPlatSvId
+
+            raschsvPravTarif71427.dohVsPred = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOH_VS_PRED])
+            raschsvPravTarif71427.dohVsPer = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOH_VS_PER])
+            raschsvPravTarif71427.dohCelPostPred = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOH_CEL_POST_PRED])
+            raschsvPravTarif71427.dohCelPostPer = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOH_CEL_POST_PER])
+            raschsvPravTarif71427.dohGrantPred = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOH_GRANT_PRED])
+            raschsvPravTarif71427.dohGrantPer = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOH_GRANT_PER])
+            raschsvPravTarif71427.dohEkDeyatPred = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOH_EK_DEYAT_PRED])
+            raschsvPravTarif71427.dohEkDeyatPer = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOH_EK_DEYAT_PER])
+            raschsvPravTarif71427.dolDohPred = getDouble(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOL_DOH_PRED])
+            raschsvPravTarif71427.dolDohPer = getDouble(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOL_DOH_PER])
+
+            raschsvPravTarif71427Service.insertRaschsvPravTarif71427(raschsvPravTarif71427)
         }
     }
 
