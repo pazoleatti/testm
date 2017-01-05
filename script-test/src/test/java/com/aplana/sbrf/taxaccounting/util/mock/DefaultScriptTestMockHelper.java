@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnm;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZak;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPrevOss;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -348,6 +349,14 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         RaschsvOssVnmService raschsvOssVnmService = mock(RaschsvOssVnmService.class);
         when(raschsvOssVnmService.insertRaschsvOssVnm(any(RaschsvOssVnm.class))).thenReturn(1L);
         return raschsvOssVnmService;
+    }
+
+    // "Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации"
+    @Override
+    public RaschsvRashOssZakService mockRaschsvRashOssZakService() {
+        RaschsvRashOssZakService raschsvRashOssZakService = mock(RaschsvRashOssZakService.class);
+        when(raschsvRashOssZakService.insertRaschsvRashOssZak(any(RaschsvRashOssZak.class))).thenReturn(1L);
+        return raschsvRashOssZakService;
     }
 
     /**

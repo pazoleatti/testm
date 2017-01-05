@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZak;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
@@ -83,6 +84,8 @@ public class TestScriptHelper {
     private RaschsvSvOpsOmsService raschsvSvOpsOmsService;
     // Сервисы "Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
     private RaschsvOssVnmService raschsvOssVnmService;
+    // Сервисы "Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации"
+    private RaschsvRashOssZakService raschsvRashOssZakService;
 
     //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
@@ -163,6 +166,7 @@ public class TestScriptHelper {
         raschsvUplPrevOssService = mockHelper.mockRaschsvUplPrevOssService();
         raschsvSvOpsOmsService = mockHelper.mockRaschsvSvOpsOmsService();
         raschsvOssVnmService = mockHelper.mockRaschsvOssVnmService();
+        raschsvRashOssZakService = mockHelper.mockRaschsvRashOssZakService();
     }
 
     /**
@@ -295,6 +299,8 @@ public class TestScriptHelper {
         bindings.put("raschsvSvOpsOmsService", raschsvSvOpsOmsService);
         // Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
         bindings.put("raschsvOssVnmService", raschsvOssVnmService);
+        // Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации
+        bindings.put("raschsvRashOssZakService", raschsvRashOssZakService);
 
         //ndfl
         bindings.put("ndflPersonService", ndflPersonService);

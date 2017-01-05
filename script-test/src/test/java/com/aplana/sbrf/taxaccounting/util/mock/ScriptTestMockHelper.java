@@ -40,4 +40,5 @@ public interface ScriptTestMockHelper {
     RaschsvUplPrevOssService mockRaschsvUplPrevOssService();
     RaschsvSvOpsOmsService mockRaschsvSvOpsOmsService();
     RaschsvOssVnmService mockRaschsvOssVnmService();
+    RaschsvRashOssZakService mockRaschsvRashOssZakService();
 }

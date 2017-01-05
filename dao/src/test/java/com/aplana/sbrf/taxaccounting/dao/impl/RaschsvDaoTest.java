@@ -46,6 +46,9 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvOssVnmDao raschsvOssVnmDao;
 
+    @Autowired
+    private RaschsvRashOssZakDao raschsvRashOssZakDao;
+
     /**
      * Добавление записи в таблицу ОбязПлатСВ
      * @return
@@ -295,5 +298,27 @@ public class RaschsvDaoTest {
         raschsvOssVnm.setPrizVypl("1");
 
         assertNotNull(raschsvOssVnmDao.insertRaschsvOssVnm(raschsvOssVnm));
+    }
+
+    /**
+     * Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации
+     */
+    @Test
+    public void testInsertRaschsvRashOssZak() {
+        List<RaschsvRashOssZakRash> raschsvRashOssZakRashList = new ArrayList<RaschsvRashOssZakRash>();
+
+        RaschsvRashOssZakRash raschsvRashOssZakRash1 = new RaschsvRashOssZakRash();
+        raschsvRashOssZakRash1.setNodeName("NodeName");
+        raschsvRashOssZakRash1.setChislSluch(1);
+        raschsvRashOssZakRash1.setKolVypl(1);
+        raschsvRashOssZakRash1.setPashVsego(1.1);
+        raschsvRashOssZakRash1.setRashFinFb(1.1);
+        raschsvRashOssZakRashList.add(raschsvRashOssZakRash1);
+
+        RaschsvRashOssZak raschsvRashOssZak = new RaschsvRashOssZak();
+        raschsvRashOssZak.setRaschsvObyazPlatSvId(createRaschsvObyazPlatSv());
+        raschsvRashOssZak.setRaschsvRashOssZakRashList(raschsvRashOssZakRashList);
+
+        assertNotNull(raschsvRashOssZakDao.insertRaschsvRashOssZak(raschsvRashOssZak));
     }
 }

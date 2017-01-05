@@ -21,6 +21,8 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnm
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnmSum
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnmKol
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplSvPrev
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZak
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZakRash
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -49,8 +51,6 @@ import groovy.transform.Field
 @Field final NODE_NAME_RASCH_SV_OPS = "РасчСВ_ОПС"
 @Field final NODE_NAME_RASCH_SV_OMS = "РасчСВ_ОМС"
 @Field final NODE_NAME_RASCH_SV_OPS428 = "РасчСВ_ОПС428"
-@Field final NODE_NAME_RASCH_SV_OPS428_12 = "РасчСВ_428.1-2"
-@Field final NODE_NAME_RASCH_SV_OPS428_3 = "РасчСВ_428.3"
 @Field final NODE_NAME_RASCH_SV_DSO = "РасчСВ_ДСО"
 @Field final NODE_NAME_KOL_STRAH_LIC_VS = "КолСтрахЛицВс"
 @Field final NODE_NAME_KOL_LIC_NACH_SV_VS = "КолЛицНачСВВс"
@@ -69,14 +69,9 @@ import groovy.transform.Field
 @Field final NODE_NAME_NACHISL_SVDSO = "НачислСВДСО"
 
 @Field final NODE_NAME_RASCH_SV_OSS_VNM = "РасчСВ_ОСС.ВНМ"
-@Field final NODE_NAME_BAZ_PREVYSH_SV = "БазПревышСВ"
-@Field final NODE_NAME_BAZ_NACH_SV_FARM = "БазНачСВФарм"
-@Field final NODE_NAME_BAZ_NACH_SV_CHL_ES = "БазНачСВЧлЭС"
-@Field final NODE_NAME_BAZ_NACH_SV_PAT = "БазНачСВПат"
-@Field final NODE_NAME_BAZ_NACH_SV_IN_LIC = "БазНачСВИнЛиц"
-@Field final NODE_NAME_PROIZV_RASH_SO = "ПроизвРасхСО"
-@Field final NODE_NAME_VOSM_RASH_SO = "ВозмРасхСО"
 @Field final NODE_NAME_UPL_SV_PREV = "УплСВПрев"
+
+@Field final NODE_NAME_RASH_OSS_ZAK = "РасхОССЗак"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -168,9 +163,15 @@ import groovy.transform.Field
 @Field final SV_SUM_1TIP_SUM2_POSL3M = "Сум2Посл3М"
 @Field final SV_SUM_1TIP_SUM3_POSL3M = "Сум3Посл3М"
 
-// Атрибуты узла УплСВПревТип
+// Атрибуты типа УплСВПревТип
 @Field final UPL_SV_PREV_PRIZNAK = "Признак"
 @Field final UPL_SV_PREV_SUMMA = "Сумма"
+
+// Атрибуты типа РасхОССТип
+@Field final RASH_OSS_TIP_CHISL_SLUCH = "ЧислСлуч"
+@Field final RASH_OSS_TIP_KOL_VYPL = "КолВыпл"
+@Field final RASH_OSS_TIP_RASH_VSEGO = "РасхВсего"
+@Field final RASH_OSS_TIP_RASH_FIN_FB = "РасхФинФБ"
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -441,6 +442,30 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
 
             raschsvOssVnm.raschsvUplSvPrevList = raschsvUplSvPrevList
             raschsvOssVnm.raschsvOssVnmKolList = raschsvOssVnmKolList
+
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_RASH_OSS_ZAK) {
+            //----------------------------------------------------------------------------------------------------------
+            // Разбор узла РасхОССЗак
+            //----------------------------------------------------------------------------------------------------------
+            RaschsvRashOssZak raschsvRashOssZak = new RaschsvRashOssZak()
+            raschsvRashOssZak.raschsvObyazPlatSvId = raschsvObyazPlatSvId
+
+            // Набор данных о расходах
+            def raschsvRashOssZakRashList = []
+
+            obyazPlatSvChildNode.childNodes().each { raschOssZakChildNode ->
+
+                RaschsvRashOssZakRash raschsvRashOssZakRash = new RaschsvRashOssZakRash()
+                raschsvRashOssZakRash.nodeName = raschOssZakChildNode.name
+                raschsvRashOssZakRash.chislSluch = getInteger(raschOssZakChildNode.attributes()[RASH_OSS_TIP_CHISL_SLUCH])
+                raschsvRashOssZakRash.kolVypl = getInteger(raschOssZakChildNode.attributes()[RASH_OSS_TIP_KOL_VYPL])
+                raschsvRashOssZakRash.pashVsego = getDouble(raschOssZakChildNode.attributes()[RASH_OSS_TIP_RASH_VSEGO])
+                raschsvRashOssZakRash.rashFinFb = getDouble(raschOssZakChildNode.attributes()[RASH_OSS_TIP_RASH_FIN_FB])
+
+                raschsvRashOssZakRashList.add(raschsvRashOssZakRash)
+            }
+            raschsvRashOssZak.raschsvRashOssZakRashList = raschsvRashOssZakRashList
+            raschsvRashOssZakService.insertRaschsvRashOssZak(raschsvRashOssZak)
         }
     }
 
