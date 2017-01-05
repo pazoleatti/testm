@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -51,6 +52,9 @@ public class RaschsvDaoTest {
 
     @Autowired
     private RaschsvVyplFinFbDao raschsvVyplFinFbDao;
+
+    @Autowired
+    private RaschsvPravTarif31427Dao raschsvPravTarif31427Dao;
 
     /**
      * Добавление записи в таблицу ОбязПлатСВ
@@ -351,5 +355,26 @@ public class RaschsvDaoTest {
         raschsvVyplFinFb.setRaschsvVyplPrichinaList(raschsvVyplPrichinaList);
 
         assertNotNull(raschsvVyplFinFbDao.insertRaschsvVyplFinFb(raschsvVyplFinFb));
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 3 пункта 1 статьи 427"
+     */
+    @Test
+    public void testInsertRaschsvPravTarif31427() {
+        RaschsvPravTarif31427 raschsvPravTarif31427 = new RaschsvPravTarif31427();
+        raschsvPravTarif31427.setRaschsvObyazPlatSvId(createRaschsvObyazPlatSv());
+        raschsvPravTarif31427.setSrChisl9mpr(1);
+        raschsvPravTarif31427.setSrChislPer(1);
+        raschsvPravTarif31427.setDoh2489mpr(1L);
+        raschsvPravTarif31427.setDoh248Per(1L);
+        raschsvPravTarif31427.setDohKr54279mpr(1L);
+        raschsvPravTarif31427.setDohKr5427Per(1L);
+        raschsvPravTarif31427.setDohDoh54279mpr(1.1);
+        raschsvPravTarif31427.setDohDoh5427per(1.1);
+        raschsvPravTarif31427.setDataZapAkOrg(new Date());
+        raschsvPravTarif31427.setNomZapAkOrg("nom");
+
+        assertNotNull(raschsvPravTarif31427Dao.insertRaschsvPravTarif31427(raschsvPravTarif31427));
     }
 }

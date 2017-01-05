@@ -26,6 +26,7 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZakRash
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplFinFb
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplPrichina
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashVypl
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif31427
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -77,6 +78,8 @@ import groovy.transform.Field
 @Field final NODE_NAME_RASH_OSS_ZAK = "РасхОССЗак"
 
 @Field final NODE_NAME_VYPL_FIN_FB = "ВыплФинФБ"
+
+@Field final NODE_NAME_PRAV_TARIF3_1_427 = "ПравТариф3.1.427"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -156,6 +159,20 @@ import groovy.transform.Field
 
 // Атрибуты узла ВыплФинФБ
 @Field final VYPL_FIN_FB_SV_VNF_UHOD_INV = "СВВнФУходИнв"
+
+// Атрибуты узла ПравТариф3.1.427
+@Field final PRAV_TARIF3_1_427_SR_CHISL_9MPR = "СрЧисл_9МПр"
+@Field final PRAV_TARIF3_1_427_SR_CHISL_PER = "СрЧисл_Пер"
+@Field final PRAV_TARIF3_1_427_DOH248_9MPR = "Дох248_9МПр"
+@Field final PRAV_TARIF3_1_427_DOH248_PER = "Дох248_Пер"
+@Field final PRAV_TARIF3_1_427_DOH_KR5_427_9MPR = "ДохКр5.427_9МПр"
+@Field final PRAV_TARIF3_1_427_DOH_KR5_427_PER = "ДохКр5.427_Пер"
+@Field final PRAV_TARIF3_1_427_DOH_DOH5_427_9MPR = "ДолДох5.427_9МПр"
+@Field final PRAV_TARIF3_1_427_DOH_DOH5_427_PER = "ДолДох5.427_Пер"
+
+// Атрибуты узла СвРеестрАкОрг
+@Field final SV_REESTR_AK_ORG_DATA = "ДатаЗапАкОрг"
+@Field final SV_REESTR_AK_ORG_NOM = "НомЗапАкОрг"
 
 // Атрибуты типа КолЛицТип
 @Field final KOL_LIC_TIP_KOL_VSEGO_PER = "КолВсегоПер"
@@ -513,6 +530,30 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                 raschsvVyplPrichinaList.add(raschsvVyplPrichina)
             }
             raschsvVyplFinFbService.insertRaschsvVyplFinFb(raschsvVyplFinFb)
+
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_PRAV_TARIF3_1_427) {
+            //----------------------------------------------------------------------------------------------------------
+            // Разбор узла ПравТариф3.1.427
+            //----------------------------------------------------------------------------------------------------------
+            RaschsvPravTarif31427 raschsvPravTarif31427 = new RaschsvPravTarif31427()
+            raschsvPravTarif31427.raschsvObyazPlatSvId = raschsvObyazPlatSvId
+
+            raschsvPravTarif31427.srChisl9mpr = getInteger(obyazPlatSvChildNode.attributes()[PRAV_TARIF3_1_427_SR_CHISL_9MPR])
+            raschsvPravTarif31427.srChislPer = getInteger(obyazPlatSvChildNode.attributes()[PRAV_TARIF3_1_427_SR_CHISL_PER])
+            raschsvPravTarif31427.doh2489mpr = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF3_1_427_DOH248_9MPR])
+            raschsvPravTarif31427.doh248Per = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF3_1_427_DOH248_PER])
+            raschsvPravTarif31427.dohKr54279mpr = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF3_1_427_DOH_KR5_427_9MPR])
+            raschsvPravTarif31427.dohKr5427Per = getLong(obyazPlatSvChildNode.attributes()[PRAV_TARIF3_1_427_DOH_KR5_427_PER])
+            raschsvPravTarif31427.dohDoh54279mpr = getDouble(obyazPlatSvChildNode.attributes()[PRAV_TARIF3_1_427_DOH_DOH5_427_9MPR])
+            raschsvPravTarif31427.dohDoh5427per = getDouble(obyazPlatSvChildNode.attributes()[PRAV_TARIF3_1_427_DOH_DOH5_427_PER])
+
+            obyazPlatSvChildNode.childNodes().each { svReestrAkOrgNode ->
+                // Разбор узла СвРеестрАкОрг
+                raschsvPravTarif31427.dataZapAkOrg = getDate(svReestrAkOrgNode.attributes()[SV_REESTR_AK_ORG_DATA])
+                raschsvPravTarif31427.nomZapAkOrg = svReestrAkOrgNode.attributes()[SV_REESTR_AK_ORG_NOM]
+            }
+
+            raschsvPravTarif31427Service.insertRaschsvPravTarif31427(raschsvPravTarif31427)
         }
     }
 
@@ -686,6 +727,15 @@ Integer getInteger (String val) {
     if (val != null) {
         if (val != "") {
             return val.toInteger()
+        }
+    }
+    return null
+}
+
+Long getLong (String val) {
+    if (val != null) {
+        if (val != "") {
+            return val.toLong()
         }
     }
     return null
