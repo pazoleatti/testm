@@ -29,6 +29,9 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashVypl
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif31427
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif51427
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif71427
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif91427
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt427
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedPatent
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -86,6 +89,11 @@ import groovy.transform.Field
 @Field final NODE_NAME_PRAV_TARIF5_1_427 = "ПравТариф5.1.427"
 
 @Field final NODE_NAME_PRAV_TARIF7_1_427 = "ПравТариф7.1.427"
+
+@Field final NODE_NAME_SV_PRIM_TARIF9_1_427 = "СвПримТариф9.1.427"
+@Field final NODE_NAME_VYPLAT_IT = "ВыплатИт"
+@Field final NODE_NAME_SVED_PATENT = "СведПатент"
+@Field final NODE_NAME_SUM_VYPLAT = "СумВыплат"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -192,6 +200,12 @@ import groovy.transform.Field
 @Field final PRAV_TARIF7_1_427_DOH_EK_DEYAT_PER = "ДохЭкДеятПер"
 @Field final PRAV_TARIF7_1_427_DOL_DOH_PRED = "ДолДохПред"
 @Field final PRAV_TARIF7_1_427_DOL_DOH_PER = "ДолДохПер"
+
+// Атрибуты узла СведПатент
+@Field final SVED_PATENT_NOM_PATENT = "НомПатент"
+@Field final SVED_PATENT_VYD_DEYAT_PATENT = "ВидДеятПатент"
+@Field final SVED_PATENT_DATA_NACH_DEYST = "ДатаНачДейст"
+@Field final SVED_PATENT_DATA_KON_DEYST = "ДатаКонДейст"
 
 // Атрибуты узла СвРеестрАкОрг
 @Field final SV_REESTR_AK_ORG_DATA = "ДатаЗапАкОрг"
@@ -593,7 +607,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_PRAV_TARIF7_1_427) {
             //----------------------------------------------------------------------------------------------------------
-            // Разбор узла ПравТариф5.1.427
+            // Разбор узла ПравТариф7.1.427
             //----------------------------------------------------------------------------------------------------------
             RaschsvPravTarif71427 raschsvPravTarif71427 = new RaschsvPravTarif71427()
             raschsvPravTarif71427.raschsvObyazPlatSvId = raschsvObyazPlatSvId
@@ -610,6 +624,44 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             raschsvPravTarif71427.dolDohPer = getDouble(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOL_DOH_PER])
 
             raschsvPravTarif71427Service.insertRaschsvPravTarif71427(raschsvPravTarif71427)
+
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_SV_PRIM_TARIF9_1_427) {
+            //----------------------------------------------------------------------------------------------------------
+            // Разбор узла СвПримТариф9.1.427
+            //----------------------------------------------------------------------------------------------------------
+            RaschsvSvPrimTarif91427 raschsvSvPrimTarif91427 = new RaschsvSvPrimTarif91427()
+            raschsvSvPrimTarif91427.raschsvObyazPlatSvId = raschsvObyazPlatSvId
+
+            // Итого выплат
+            RaschsvVyplatIt427 raschsvVyplatIt427 = new RaschsvVyplatIt427()
+
+            // Набор сведений о патентах
+            def raschsvSvedPatentList = []
+
+            obyazPlatSvChildNode.childNodes().each { svPrimTarif91427ChildNode ->
+                if (svPrimTarif91427ChildNode.name == NODE_NAME_VYPLAT_IT) {
+                    // Разбор узла ВыплатИт
+                    raschsvVyplatIt427.raschsvSvSum1Tip = parseRaschsvSvSum1Tip(svPrimTarif91427ChildNode)
+
+                } else if (svPrimTarif91427ChildNode.name == NODE_NAME_SVED_PATENT) {
+                    // Разбор узла СведПатент
+                    RaschsvSvedPatent raschsvSvedPatent = new RaschsvSvedPatent()
+                    raschsvSvedPatent.nomPatent = svPrimTarif91427ChildNode.attributes()[SVED_PATENT_NOM_PATENT]
+                    raschsvSvedPatent.vydDeyatPatent = svPrimTarif91427ChildNode.attributes()[SVED_PATENT_VYD_DEYAT_PATENT]
+                    raschsvSvedPatent.dataNachDeyst = getDate(svPrimTarif91427ChildNode.attributes()[SVED_PATENT_DATA_NACH_DEYST])
+                    raschsvSvedPatent.dataKonDeyst = getDate(svPrimTarif91427ChildNode.attributes()[SVED_PATENT_DATA_KON_DEYST])
+
+                    svPrimTarif91427ChildNode.childNodes().each { sumVyplatNode ->
+                        // Разбор узла СумВыплат
+                        raschsvSvedPatent.raschsvSvSum1Tip = parseRaschsvSvSum1Tip(sumVyplatNode)
+                    }
+                    raschsvSvedPatentList.add(raschsvSvedPatent)
+                }
+            }
+            raschsvSvPrimTarif91427.raschsvVyplatIt427 = raschsvVyplatIt427
+            raschsvSvPrimTarif91427.raschsvSvedPatentList = raschsvSvedPatentList
+
+            raschsvSvPrimTarif91427Service.insertRaschsvSvPrimTarif91427(raschsvSvPrimTarif91427)
         }
     }
 

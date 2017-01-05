@@ -94,6 +94,8 @@ public class TestScriptHelper {
     private RaschsvPravTarif51427Service raschsvPravTarif51427Service;
     // Сервис "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 7 пункта 1 статьи 427"
     private RaschsvPravTarif71427Service raschsvPravTarif71427Service;
+    // Сервис "Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427"
+    private RaschsvSvPrimTarif91427Service raschsvSvPrimTarif91427Service;
 
     //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
@@ -179,6 +181,7 @@ public class TestScriptHelper {
         raschsvPravTarif31427Service = mockHelper.mockRaschsvPravTarif31427Service();
         raschsvPravTarif51427Service = mockHelper.mockRaschsvPravTarif51427Service();
         raschsvPravTarif71427Service = mockHelper.mockRaschsvPravTarif71427Service();
+        raschsvSvPrimTarif91427Service = mockHelper.mockRaschsvSvPrimTarif91427Service();
     }
 
     /**
@@ -321,6 +324,8 @@ public class TestScriptHelper {
         bindings.put("raschsvPravTarif51427Service", raschsvPravTarif51427Service);
         // Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 7 пункта 1 статьи 427
         bindings.put("raschsvPravTarif71427Service", raschsvPravTarif71427Service);
+        // Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427
+        bindings.put("raschsvSvPrimTarif91427Service", raschsvSvPrimTarif91427Service);
 
         //ndfl
         bindings.put("ndflPersonService", ndflPersonService);

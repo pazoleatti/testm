@@ -62,6 +62,9 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvPravTarif71427Dao raschsvPravTarif71427Dao;
 
+    @Autowired
+    private RaschsvSvPrimTarif91427Dao raschsvSvPrimTarif91427Dao;
+
     /**
      * Добавление записи в таблицу ОбязПлатСВ
      * @return
@@ -417,5 +420,36 @@ public class RaschsvDaoTest {
         raschsvPravTarif71427.setDolDohPer(1.1);
 
         assertNotNull(raschsvPravTarif71427Dao.insertRaschsvPravTarif71427(raschsvPravTarif71427));
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427"
+     */
+    @Test
+    public void testInsertRaschsvSvPrimTarif91427() {
+        // Сведения по суммам (тип 1)
+        RaschsvSvSum1Tip raschsvSvSum1Tip = createRaschsvSvSum1Tip();
+        RaschsvSvSum1Tip raschsvSvSum2Tip = createRaschsvSvSum1Tip();
+
+        // Итого выплат
+        RaschsvVyplatIt427 raschsvVyplatIt427 = new RaschsvVyplatIt427();
+        raschsvVyplatIt427.setRaschsvSvSum1Tip(raschsvSvSum1Tip);
+
+        // Сведения о патенте
+        List<RaschsvSvedPatent> raschsvSvedPatentList = new ArrayList<RaschsvSvedPatent>();
+        RaschsvSvedPatent raschsvSvedPatent1 = new RaschsvSvedPatent();
+        raschsvSvedPatent1.setRaschsvSvSum1Tip(raschsvSvSum2Tip);
+        raschsvSvedPatent1.setNomPatent("1");
+        raschsvSvedPatent1.setVydDeyatPatent("1");
+        raschsvSvedPatent1.setDataNachDeyst(new Date());
+        raschsvSvedPatent1.setDataKonDeyst(new Date());
+        raschsvSvedPatentList.add(raschsvSvedPatent1);
+
+        RaschsvSvPrimTarif91427 raschsvSvPrimTarif91427 = new RaschsvSvPrimTarif91427();
+        raschsvSvPrimTarif91427.setRaschsvObyazPlatSvId(createRaschsvObyazPlatSv());
+        raschsvSvPrimTarif91427.setRaschsvVyplatIt427(raschsvVyplatIt427);
+        raschsvSvPrimTarif91427.setRaschsvSvedPatentList(raschsvSvedPatentList);
+
+        assertNotNull(raschsvSvPrimTarif91427Dao.insertRaschsvSvPrimTarif91427(raschsvSvPrimTarif91427));
     }
 }

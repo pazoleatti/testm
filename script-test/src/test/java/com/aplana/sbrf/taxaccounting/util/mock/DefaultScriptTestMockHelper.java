@@ -388,6 +388,14 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         return raschsvPravTarif71427Service;
     }
 
+    // "Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427"
+    @Override
+    public RaschsvSvPrimTarif91427Service mockRaschsvSvPrimTarif91427Service() {
+        RaschsvSvPrimTarif91427Service raschsvSvPrimTarif91427Service = mock(RaschsvSvPrimTarif91427Service.class);
+        when(raschsvSvPrimTarif91427Service.insertRaschsvSvPrimTarif91427(any(RaschsvSvPrimTarif91427.class))).thenReturn(1L);
+        return raschsvSvPrimTarif91427Service;
+    }
+
     /**
      * Получение всех значений записи справочника по Id
      */
