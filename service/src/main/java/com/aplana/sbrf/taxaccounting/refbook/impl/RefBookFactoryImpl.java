@@ -163,6 +163,36 @@ public class RefBookFactoryImpl implements RefBookFactory {
             refBookSimple.setRefBookId(RefBookSimpleReadOnly.ASNU_REF_BOOK_ID);
             refBookSimple.setTableName(RefBookSimpleReadOnly.ASNU_TABLE_NAME);
             return refBookSimple;
+        } else if (RefBookSimpleReadOnly.FIAS_OPERSTAT_ID.equals(refBookId)){ //Справочники ФИАС
+            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_OPERSTAT_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_OPERSTAT_TABLE_NAME);
+            return refBookSimple;
+        } else if (RefBookSimpleReadOnly.FIAS_SOCRBASE_ID.equals(refBookId)){
+            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_SOCRBASE_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_SOCRBASE_TABLE_NAME);
+            return refBookSimple;
+        } else if (RefBookSimpleReadOnly.FIAS_ADDR_OBJECT_ID.equals(refBookId)){
+            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_ADDR_OBJECT_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_ADDR_OBJECT_TABLE_NAME);
+            return refBookSimple;
+        } else if (RefBookSimpleReadOnly.FIAS_HOUSE_ID.equals(refBookId)){
+            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_HOUSE_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_HOUSE_TABLE_NAME);
+            return refBookSimple;
+        } else if (RefBookSimpleReadOnly.FIAS_HOUSEINT_ID.equals(refBookId)){
+            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_HOUSEINT_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_HOUSEINT_TABLE_NAME);
+            return refBookSimple;
+        } else if (RefBookSimpleReadOnly.FIAS_ROOM_ID.equals(refBookId)){
+            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_ROOM_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_ROOM_TABLE_NAME);
+            return refBookSimple;
         } else {
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);

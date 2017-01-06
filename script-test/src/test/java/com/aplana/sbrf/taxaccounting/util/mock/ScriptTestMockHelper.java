@@ -33,6 +33,7 @@ public interface ScriptTestMockHelper {
     RefBookDataProvider getRefBookDataProvider();
     DeclarationService getDeclarationService();
     Map<Long, Map<String, RefBookValue>> getRefBookAllRecords(Long refBookId);
+    ImportFiasDataService mockImportFiasDataService();
 
     RaschsvPersSvStrahLicService mockRaschsvPersSvStrahLicService();
     RaschsvObyazPlatSvService mockRaschsvObyazPlatSvService();

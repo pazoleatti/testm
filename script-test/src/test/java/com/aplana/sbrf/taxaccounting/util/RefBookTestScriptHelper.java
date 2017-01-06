@@ -49,6 +49,7 @@ public class RefBookTestScriptHelper {
     private RefBookDataProvider refBookDataProvider;
     private FormTypeService formTypeService;
     private DeclarationService declarationService;
+    private ImportFiasDataService importFiasDataService;
 
     // Заданы константно
     private Logger logger = new Logger();
@@ -96,6 +97,7 @@ public class RefBookTestScriptHelper {
         refBookDataProvider = mockHelper.getRefBookDataProvider();
         formTypeService = mockHelper.mockFormTypeService();
         declarationService = mockHelper.mockDeclarationService();
+        importFiasDataService = mockHelper.mockImportFiasDataService();
     }
 
     public void setImportFileInputStream(InputStream importFileInputStream) {
@@ -122,6 +124,8 @@ public class RefBookTestScriptHelper {
         bindings.put("scriptStatusHolder", scriptStatusHolder);
         bindings.put("logger", logger);
         bindings.put("accountPeriodId", accountPeriodId);
+
+        bindings.put("importFiasDataService", importFiasDataService);
 
         if (formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE ||
                 formDataEvent == FormDataEvent.IMPORT ||
@@ -303,5 +307,9 @@ public class RefBookTestScriptHelper {
 
     public void setAccountPeriodId(Integer accountPeriodId) {
         this.accountPeriodId = accountPeriodId;
+    }
+
+    public ImportFiasDataService getImportFiasDataService() {
+        return importFiasDataService;
     }
 }

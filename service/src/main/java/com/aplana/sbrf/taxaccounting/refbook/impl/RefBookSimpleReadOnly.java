@@ -48,6 +48,30 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     public static final Long ASNU_REF_BOOK_ID = 900L;
     public static final String ASNU_TABLE_NAME = "REF_BOOK_ASNU";
 
+    //Справочник "Статус действия"
+    public static final Long FIAS_OPERSTAT_ID = 1010L;
+    public static final String FIAS_OPERSTAT_TABLE_NAME = "fias_operstat";
+
+    //Справочник "Типы адресных объектов"
+    public static final Long FIAS_SOCRBASE_ID = 1020L;
+    public static final String FIAS_SOCRBASE_TABLE_NAME = "fias_socrbase";
+
+    //Справочник ФИАС "Реестр адресообразующих объектов" (край -> область -> город -> район -> улица)
+    public static final Long FIAS_ADDR_OBJECT_ID = 1030L;
+    public static final String FIAS_ADDR_OBJECT_TABLE_NAME = "fias_addrobj";
+
+    //Справочник ФИАС "Реестр объектов адресации" (номера отдельных зданий, сооружений и их типы, интервалы домов, номера отдельных помещений и их типы)
+    public static final Long FIAS_HOUSE_ID = 1040L;
+    public static final String FIAS_HOUSE_TABLE_NAME = "fias_house";
+
+    //Справочник "Интервалы домов"
+    public static final Long FIAS_HOUSEINT_ID = 1050L;
+    public static final String FIAS_HOUSEINT_TABLE_NAME = "fias_houseint";
+
+    //Справочник "Сведения по отдельным помещениям"
+    public static final Long FIAS_ROOM_ID = 1060L;
+    public static final String FIAS_ROOM_TABLE_NAME = "fias_room";
+
 	/** Название таблицы для запроса данных*/
 	private String tableName;
 
@@ -57,6 +81,8 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 	@Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
 			RefBookAttribute sortAttribute, boolean isSortAscending) {
+
+
 		return refBookDao.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
     }
 

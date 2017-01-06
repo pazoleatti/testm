@@ -442,4 +442,9 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     public Map<Long, Map<String, RefBookValue>> getRefBookAllRecords(Long refBookId) {
         return refBookMap.get(refBookId);
     }
+
+    @Override
+    public ImportFiasDataService mockImportFiasDataService() {
+        return mock(ImportFiasDataService.class);
+    }
 }
