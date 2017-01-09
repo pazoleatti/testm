@@ -412,6 +412,13 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         return raschsvSvPrimTarif13422Service;
     }
 
+    // "Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ"
+    public RaschsvSvnpPodpisantService mockRaschsvSvnpPodpisantService() {
+        RaschsvSvnpPodpisantService raschsvSvnpPodpisantService = mock(RaschsvSvnpPodpisantService.class);
+        when(raschsvSvnpPodpisantService.insertRaschsvSvnpPodpisant(any(RaschsvSvnpPodpisant.class))).thenReturn(1L);
+        return raschsvSvnpPodpisantService;
+    }
+
     /**
      * Получение всех значений записи справочника по Id
      */

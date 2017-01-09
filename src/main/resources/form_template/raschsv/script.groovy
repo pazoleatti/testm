@@ -39,12 +39,25 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif13422
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt422
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedObuch
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvReestrMdo
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvnpPodpisant
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
 
+// Ограничение на число объектов в коллекциях
+@Field final MAX_COUNT_PERV_SV_STRAH_LIC = 1000
+@Field final MAX_COUNT_UPL_PER = 1000
+@Field final MAX_COUNT_SV_OPS_OMS = 1000
+
 // Узлы
 @Field final NODE_NAME_DOCUMENT = "Документ"
+
+@Field final NODE_NAME_SV_NP = "СвНП"
+@Field final NODE_NAME_NPYL = "НПЮЛ"
+@Field final NODE_NAME_SV_REORG_YL = "СвРеоргЮЛ"
+@Field final NODE_NAME_PODPISANT = "Подписант"
+@Field final NODE_NAME_SV_PRED = "СвПред"
+
 @Field final NODE_NAME_RASCHET_SV = "РасчетСВ"
 @Field final NODE_NAME_OBYAZ_PLAT_SV = "ОбязПлатСВ"
 @Field final NODE_NAME_PERV_SV_STRAH_LIC = "ПерсСвСтрахЛиц"
@@ -110,6 +123,27 @@ import groovy.transform.Field
 @Field final NODE_NAME_SV_REESTR_MDO = "СвРеестрМДО"
 @Field final NODE_NAME_SPRAV_STUD_OTRYAD = "СправСтудОтряд"
 @Field final NODE_NAME_SPRAV_FORM_OBUCH = "СправФормОбуч"
+
+// Атрибуты узла СвНП
+@Field final SV_NP_OKVED = "ОКВЭД"
+@Field final SV_NP_TLPH = "Тлф"
+
+// Атрибуты узла НПЮЛ
+@Field final NPYL_NAIM_ORG = "НаимОрг"
+@Field final NPYL_INNYL = "ИННЮЛ"
+@Field final NPYL_KPP = "КПП"
+
+// Атрибуты узла СвРеоргЮЛ
+@Field final SV_REORG_YL_FORM_REORG = "ФормРеорг"
+@Field final SV_REORG_YL_INNYL = "ИННЮЛ"
+@Field final SV_REORG_YL_KPP = "КПП"
+
+// Атрибуты узла Подписант
+@Field final PODPISANT_PR_PODP = "ПрПодп"
+
+// Атрибуты узла СвПред
+@Field final SV_PRED_NAIM_DOC = "НаимДок"
+@Field final SV_PRED_NAIM_ORG = "НаимОрг"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -298,28 +332,96 @@ void parseRaschsv() {
     // Идентификатор декларации для которой загружаются данные
     declarationDataId = declarationData.getId()
 
+    // Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ
+    RaschsvSvnpPodpisant raschsvSvnpPodpisant = new RaschsvSvnpPodpisant()
+
     fileNode.childNodes().each { documentNode ->
         if (documentNode.name == NODE_NAME_DOCUMENT) {
             documentNode.childNodes().each { raschetSvNode ->
                 if (raschetSvNode.name == NODE_NAME_RASCHET_SV) {
+                    // Разбор узла РасчетСВ
                     raschetSvNode.childNodes().each { raschetSvChildNode ->
                         if (raschetSvChildNode.name == NODE_NAME_OBYAZ_PLAT_SV) {
                             // Разбор узла ОбязПлатСВ
                             parseRaschsvObyazPlatSv(raschetSvChildNode, declarationDataId)
                         } else if (raschetSvChildNode.name == NODE_NAME_PERV_SV_STRAH_LIC) {
                             // Разбор узла ПерсСвСтрахЛиц
+                            if (raschsvPersSvStrahLicList.size() >= MAX_COUNT_PERV_SV_STRAH_LIC) {
+                                raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
+                                raschsvPersSvStrahLicList = []
+                            }
                             raschsvPersSvStrahLicList.add(parseRaschsvPersSvStrahLic(raschetSvChildNode, declarationDataId))
                         }
                     }
+                } else if (raschetSvNode.name == NODE_NAME_SV_NP) {
+                    // Разбор узла СвНП
+                    raschsvSvnpPodpisant = parseSvNP(raschetSvNode, raschsvSvnpPodpisant)
+                } else if (raschetSvNode.name == NODE_NAME_PODPISANT) {
+                    // Разбор узла Подписант
+                    raschsvSvnpPodpisant = parsePodpisant(raschetSvNode, raschsvSvnpPodpisant)
                 }
             }
         }
     }
 
     // Сохранение коллекции объектов ПерсСвСтрахЛиц
-    raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
+    if (raschsvPersSvStrahLicList.size() > 0) {
+        raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
+    }
+
+    // Сохранение Сведений о плательщике страховых взносов и Сведения о лице, подписавшем документ
+    raschsvSvnpPodpisantService.insertRaschsvSvnpPodpisant(raschsvSvnpPodpisant)
 
 //    logger.error("Запись не может быть добавлена!")
+}
+
+/**
+ * Разбор узла СвНП
+ * @param raschsvSvnpPodpisant
+ * @return
+ */
+RaschsvSvnpPodpisant parseSvNP(Object svNPNode, RaschsvSvnpPodpisant raschsvSvnpPodpisant) {
+    raschsvSvnpPodpisant.svnpOkved = svNPNode.attributes()[SV_NP_OKVED]
+    raschsvSvnpPodpisant.svnpTlph = svNPNode.attributes()[SV_NP_TLPH]
+    svNPNode.childNodes().each { NPYLNode ->
+        if (NPYLNode.name == NODE_NAME_NPYL) {
+            // Разбор узла НПЮЛ
+            raschsvSvnpPodpisant.svnpNaimOrg = NPYLNode.attributes()[NPYL_NAIM_ORG]
+            raschsvSvnpPodpisant.svnpInnyl = NPYLNode.attributes()[NPYL_INNYL]
+            raschsvSvnpPodpisant.svnpKpp = NPYLNode.attributes()[NPYL_KPP]
+            NPYLNode.childNodes().each { sVReorgYLNode ->
+                // Разбор узла СвРеоргЮЛ
+                raschsvSvnpPodpisant.svnpSvReorgForm = sVReorgYLNode.attributes()[SV_REORG_YL_FORM_REORG]
+                raschsvSvnpPodpisant.svnpSvReorgInnyl = sVReorgYLNode.attributes()[SV_REORG_YL_INNYL]
+                raschsvSvnpPodpisant.svnpSvReorgKpp = sVReorgYLNode.attributes()[SV_REORG_YL_KPP]
+            }
+        }
+    }
+
+    return raschsvSvnpPodpisant
+}
+
+/**
+ * Разбор узла Подписант
+ * @param raschsvSvnpPodpisant
+ * @return
+ */
+RaschsvSvnpPodpisant parsePodpisant(Object podpisantNode, RaschsvSvnpPodpisant raschsvSvnpPodpisant) {
+    raschsvSvnpPodpisant.podpisantPrPodp = podpisantNode.attributes()[PODPISANT_PR_PODP]
+    podpisantNode.childNodes().each { podpisantChildNode ->
+        if (podpisantChildNode.name == NODE_NAME_FIO) {
+            // Разбор узла ФИО
+            raschsvSvnpPodpisant.familia = podpisantChildNode.attributes()[FIO_FAMILIA]
+            raschsvSvnpPodpisant.imya = podpisantChildNode.attributes()[FIO_IMYA]
+            raschsvSvnpPodpisant.middleName = podpisantChildNode.attributes()[FIO_MIDDLE_NAME]
+        } else if (podpisantChildNode.name == NODE_NAME_SV_PRED) {
+            // Разбор узла СвПред
+            raschsvSvnpPodpisant.podpisantNaimDoc = podpisantChildNode.attributes()[SV_PRED_NAIM_DOC]
+            raschsvSvnpPodpisant.podpisantNaimOrg = podpisantChildNode.attributes()[SV_PRED_NAIM_ORG]
+        }
+    }
+
+    return raschsvSvnpPodpisant
 }
 
 /**
@@ -357,6 +459,11 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             raschsvUplPer.sumSbUpl1m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_1M])
             raschsvUplPer.sumSbUpl2m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_2M])
             raschsvUplPer.sumSbUpl3m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_3M])
+
+            if(raschsvUplPerList.size() >= MAX_COUNT_UPL_PER) {
+                raschsvUplPerService.insertUplPer(raschsvUplPerList)
+                raschsvUplPerList = []
+            }
 
             raschsvUplPerList.add(raschsvUplPer)
 
@@ -497,6 +604,12 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                 raschsvSvOpsOmsRaschList.add(raschsvSvOpsOmsRasch)
             }
             raschsvSvOpsOms.raschsvSvOpsOmsRaschList = raschsvSvOpsOmsRaschList
+
+            if (raschsvSvOpsOmsList.size() >= MAX_COUNT_SV_OPS_OMS) {
+                raschsvSvOpsOmsService.insertRaschsvSvOpsOms(raschsvSvOpsOmsList)
+                raschsvSvOpsOmsList = []
+            }
+
             raschsvSvOpsOmsList.add(raschsvSvOpsOms)
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_RASCH_SV_OSS_VNM) {
@@ -805,10 +918,14 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
     }
 
     // Сохранение УплПер
-    raschsvUplPerService.insertUplPer(raschsvUplPerList)
+    if (raschsvUplPerList.size() > 0) {
+        raschsvUplPerService.insertUplPer(raschsvUplPerList)
+    }
 
     // Сохранение РасчСВ_ОПС_ОМС
-    raschsvSvOpsOmsService.insertRaschsvSvOpsOms(raschsvSvOpsOmsList)
+    if (raschsvSvOpsOmsList.size() > 0) {
+        raschsvSvOpsOmsService.insertRaschsvSvOpsOms(raschsvSvOpsOmsList)
+    }
 
     return raschsvObyazPlatSvId
 }
