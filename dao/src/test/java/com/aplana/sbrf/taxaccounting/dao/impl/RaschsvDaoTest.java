@@ -65,6 +65,9 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvSvPrimTarif91427Dao raschsvSvPrimTarif91427Dao;
 
+    @Autowired
+    private RaschsvSvPrimTarif22425Dao raschsvSvPrimTarif22425Dao;
+
     /**
      * Добавление записи в таблицу ОбязПлатСВ
      * @return
@@ -451,5 +454,38 @@ public class RaschsvDaoTest {
         raschsvSvPrimTarif91427.setRaschsvSvedPatentList(raschsvSvedPatentList);
 
         assertNotNull(raschsvSvPrimTarif91427Dao.insertRaschsvSvPrimTarif91427(raschsvSvPrimTarif91427));
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426) Налогового кодекса Российской Федерации"
+     */
+    @Test
+    public void testInsertRaschsvSvPrimTarif22425() {
+        // Сведения по суммам (тип 1)
+        RaschsvSvSum1Tip raschsvSvSum1Tip = createRaschsvSvSum1Tip();
+        RaschsvSvSum1Tip raschsvSvSum2Tip = createRaschsvSvSum1Tip();
+
+        // Итого выплат
+        RaschsvVyplatIt425 raschsvVyplatIt425 = new RaschsvVyplatIt425();
+        raschsvVyplatIt425.setRaschsvSvSum1Tip(raschsvSvSum1Tip);
+
+        // Сведения об иностранных гражданах, лицах без гражданства
+        List<RaschsvSvInoGrazd> raschsvSvInoGrazdList = new ArrayList<RaschsvSvInoGrazd>();
+        RaschsvSvInoGrazd raschsvSvInoGrazd = new RaschsvSvInoGrazd();
+        raschsvSvInoGrazd.setRaschsvSvSum1Tip(raschsvSvSum2Tip);
+        raschsvSvInoGrazd.setInnfl("Innfl");
+        raschsvSvInoGrazd.setSnils("Snils");
+        raschsvSvInoGrazd.setGrazd("1");
+        raschsvSvInoGrazd.setFamilia("Familia");
+        raschsvSvInoGrazd.setImya("Imya");
+        raschsvSvInoGrazd.setMiddleName("MiddleName");
+        raschsvSvInoGrazdList.add(raschsvSvInoGrazd);
+
+        RaschsvSvPrimTarif22425 raschsvSvPrimTarif22425 = new RaschsvSvPrimTarif22425();
+        raschsvSvPrimTarif22425.setRaschsvObyazPlatSvId(createRaschsvObyazPlatSv());
+        raschsvSvPrimTarif22425.setRaschsvVyplatIt425(raschsvVyplatIt425);
+        raschsvSvPrimTarif22425.setRaschsvSvInoGrazdList(raschsvSvInoGrazdList);
+
+        assertNotNull(raschsvSvPrimTarif22425Dao.insertRaschsvSvPrimTarif22425(raschsvSvPrimTarif22425));
     }
 }

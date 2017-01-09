@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * Сведения о патенте
  */
-public class RaschsvSvedPatent extends IdentityObject<Long> {
+public class RaschsvSvedPatent {
 
     private Long raschsvSvPrimTarif91427Id;
     private String nomPatent;

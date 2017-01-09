@@ -75,6 +75,11 @@ public class RaschsvSvPrimTarif91427DaoImpl extends AbstractDao implements Rasch
         return raschsvSvPrimTarif91427.getId();
     }
 
+    /**
+     * Сохранение "Сведения о патенте"
+     * @param raschsvSvedPatentList
+     * @return
+     */
     private Integer insertRaschsvSvedPatent(List<RaschsvSvedPatent> raschsvSvedPatentList) {
         String sql = "INSERT INTO " + RaschsvSvedPatent.TABLE_NAME +
                 " (" + SVED_PATENT_COLS + ") VALUES (" + SVED_PATENT_FIELDS + ")";

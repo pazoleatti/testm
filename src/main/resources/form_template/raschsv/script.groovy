@@ -32,6 +32,9 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif71427
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif91427
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt427
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedPatent
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif22425
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt425
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvInoGrazd
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -93,6 +96,9 @@ import groovy.transform.Field
 @Field final NODE_NAME_SV_PRIM_TARIF9_1_427 = "СвПримТариф9.1.427"
 @Field final NODE_NAME_VYPLAT_IT = "ВыплатИт"
 @Field final NODE_NAME_SVED_PATENT = "СведПатент"
+
+@Field final NODE_NAME_SV_PRIM_TARIF2_2_425 = "СвПримТариф2.2.425"
+@Field final NODE_NAME_SV_INO_GRAZD = "СвИноГражд"
 @Field final NODE_NAME_SUM_VYPLAT = "СумВыплат"
 
 // Атрибуты узла ПерсСвСтрахЛиц
@@ -239,6 +245,11 @@ import groovy.transform.Field
 @Field final RASH_VYPL_TIP_CHISL_POLUCH = "ЧислПолуч"
 @Field final RASH_VYPL_TIP_KOL_VYPL = "КолВыпл"
 @Field final RASH_VYPL_TIP_RASHOD = "Расход"
+
+// Атрибуты узла СвИноГражд
+@Field final SV_INO_GRAZD_INNFL = "ИННФЛ"
+@Field final SV_INO_GRAZD_SNILS = "СНИЛС"
+@Field final SV_INO_GRAZD_GRAZD = "Гражд"
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -662,6 +673,50 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             raschsvSvPrimTarif91427.raschsvSvedPatentList = raschsvSvedPatentList
 
             raschsvSvPrimTarif91427Service.insertRaschsvSvPrimTarif91427(raschsvSvPrimTarif91427)
+
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_SV_PRIM_TARIF2_2_425) {
+            //----------------------------------------------------------------------------------------------------------
+            // Разбор узла СвПримТариф2.2.425
+            //----------------------------------------------------------------------------------------------------------
+
+            RaschsvSvPrimTarif22425 raschsvSvPrimTarif22425 = new RaschsvSvPrimTarif22425()
+
+            // Итого выплат
+            RaschsvVyplatIt425 raschsvVyplatIt425 = new RaschsvVyplatIt425()
+
+            // Сведения об иностранных гражданах, лицах без гражданства
+            def raschsvSvInoGrazdList = []
+
+            obyazPlatSvChildNode.childNodes().each { svPrimTarif22425ChildNode ->
+                if (svPrimTarif22425ChildNode.name == NODE_NAME_VYPLAT_IT) {
+                    // Разбор узла ВыплатИт
+                    raschsvVyplatIt425.raschsvSvSum1Tip = parseRaschsvSvSum1Tip(svPrimTarif22425ChildNode)
+
+                } else if (svPrimTarif22425ChildNode.name == NODE_NAME_SV_INO_GRAZD) {
+                    // Разбор узла СвИноГражд
+                    RaschsvSvInoGrazd raschsvSvInoGrazd = new RaschsvSvInoGrazd()
+                    raschsvSvInoGrazd.innfl = svPrimTarif22425ChildNode.attributes()[SV_INO_GRAZD_INNFL]
+                    raschsvSvInoGrazd.snils = svPrimTarif22425ChildNode.attributes()[SV_INO_GRAZD_SNILS]
+                    raschsvSvInoGrazd.grazd = svPrimTarif22425ChildNode.attributes()[SV_INO_GRAZD_GRAZD]
+
+                    svPrimTarif22425ChildNode.childNodes().each { svPrimTarif22425ChildChildNode ->
+                        if (svPrimTarif22425ChildChildNode.name == NODE_NAME_SUM_VYPLAT) {
+                            // Разбор узла СумВыплат
+                            raschsvSvInoGrazd.raschsvSvSum1Tip = parseRaschsvSvSum1Tip(svPrimTarif22425ChildChildNode)
+                        } else if (svPrimTarif22425ChildChildNode.name == NODE_NAME_FIO) {
+                            // Разбор узла ФИО
+                            raschsvSvInoGrazd.familia = svPrimTarif22425ChildChildNode.attributes()[FIO_FAMILIA]
+                            raschsvSvInoGrazd.imya = svPrimTarif22425ChildChildNode.attributes()[FIO_IMYA]
+                            raschsvSvInoGrazd.middleName = svPrimTarif22425ChildChildNode.attributes()[FIO_MIDDLE_NAME]
+                        }
+                    }
+                    raschsvSvInoGrazdList.add(raschsvSvInoGrazd)
+                }
+            }
+            raschsvSvPrimTarif22425.raschsvVyplatIt425 = raschsvVyplatIt425
+            raschsvSvPrimTarif22425.raschsvSvInoGrazdList = raschsvSvInoGrazdList
+
+            raschsvSvPrimTarif22425Service.insertRaschsvSvPrimTarif22425(raschsvSvPrimTarif22425)
         }
     }
 

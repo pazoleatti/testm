@@ -47,4 +47,5 @@ public interface ScriptTestMockHelper {
     RaschsvPravTarif51427Service mockRaschsvPravTarif51427Service();
     RaschsvPravTarif71427Service mockRaschsvPravTarif71427Service();
     RaschsvSvPrimTarif91427Service mockRaschsvSvPrimTarif91427Service();
+    RaschsvSvPrimTarif22425Service mockRaschsvSvPrimTarif22425Service();
 }
