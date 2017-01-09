@@ -923,7 +923,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
     }
 
     // Сохранение РасчСВ_ОПС_ОМС
-    if (raschsvSvOpsOmsList > 0) {
+    if (raschsvSvOpsOmsList.size() > 0) {
         raschsvSvOpsOmsService.insertRaschsvSvOpsOms(raschsvSvOpsOmsList)
     }
 
