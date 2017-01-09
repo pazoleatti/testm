@@ -44,6 +44,11 @@ import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
 
+// Ограничение на число объектов в коллекциях
+@Field final MAX_COUNT_PERV_SV_STRAH_LIC = 1000
+@Field final MAX_COUNT_UPL_PER = 1000
+@Field final MAX_COUNT_SV_OPS_OMS = 1000
+
 // Узлы
 @Field final NODE_NAME_DOCUMENT = "Документ"
 
@@ -341,6 +346,10 @@ void parseRaschsv() {
                             parseRaschsvObyazPlatSv(raschetSvChildNode, declarationDataId)
                         } else if (raschetSvChildNode.name == NODE_NAME_PERV_SV_STRAH_LIC) {
                             // Разбор узла ПерсСвСтрахЛиц
+                            if (raschsvPersSvStrahLicList.size() >= MAX_COUNT_PERV_SV_STRAH_LIC) {
+                                raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
+                                raschsvPersSvStrahLicList = []
+                            }
                             raschsvPersSvStrahLicList.add(parseRaschsvPersSvStrahLic(raschetSvChildNode, declarationDataId))
                         }
                     }
@@ -356,7 +365,9 @@ void parseRaschsv() {
     }
 
     // Сохранение коллекции объектов ПерсСвСтрахЛиц
-    raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
+    if (raschsvPersSvStrahLicList.size() > 0) {
+        raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
+    }
 
     // Сохранение Сведений о плательщике страховых взносов и Сведения о лице, подписавшем документ
     raschsvSvnpPodpisantService.insertRaschsvSvnpPodpisant(raschsvSvnpPodpisant)
@@ -448,6 +459,11 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             raschsvUplPer.sumSbUpl1m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_1M])
             raschsvUplPer.sumSbUpl2m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_2M])
             raschsvUplPer.sumSbUpl3m = getDouble(obyazPlatSvChildNode.attributes()[UPL_PER_SUM_SV_UPL_3M])
+
+            if(raschsvUplPerList.size() >= MAX_COUNT_UPL_PER) {
+                raschsvUplPerService.insertUplPer(raschsvUplPerList)
+                raschsvUplPerList = []
+            }
 
             raschsvUplPerList.add(raschsvUplPer)
 
@@ -588,6 +604,12 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                 raschsvSvOpsOmsRaschList.add(raschsvSvOpsOmsRasch)
             }
             raschsvSvOpsOms.raschsvSvOpsOmsRaschList = raschsvSvOpsOmsRaschList
+
+            if (raschsvSvOpsOmsList.size() >= MAX_COUNT_SV_OPS_OMS) {
+                raschsvSvOpsOmsService.insertRaschsvSvOpsOms(raschsvSvOpsOmsList)
+                raschsvSvOpsOmsList = []
+            }
+
             raschsvSvOpsOmsList.add(raschsvSvOpsOms)
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_RASCH_SV_OSS_VNM) {
@@ -896,10 +918,14 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
     }
 
     // Сохранение УплПер
-    raschsvUplPerService.insertUplPer(raschsvUplPerList)
+    if (raschsvUplPerList.size() > 0) {
+        raschsvUplPerService.insertUplPer(raschsvUplPerList)
+    }
 
     // Сохранение РасчСВ_ОПС_ОМС
-    raschsvSvOpsOmsService.insertRaschsvSvOpsOms(raschsvSvOpsOmsList)
+    if (raschsvSvOpsOmsList > 0) {
+        raschsvSvOpsOmsService.insertRaschsvSvOpsOms(raschsvSvOpsOmsList)
+    }
 
     return raschsvObyazPlatSvId
 }
