@@ -1,47 +1,32 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 
 
 /**
  * Параметр для спецю отчета декларации
- *
+ * 
  * @author lhaziev
  */
-public class DeclarationSubreportParam implements Ordered, Serializable {
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+public class DeclarationSubreportParamContent implements Ordered, Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private long id;
     private DeclarationSubreportParamType type;
 	private String name;
 	private String alias;
 	private int order;
     private String filter;
-    private long declarationSubreportId;
     private Long refBookAttributeId;
     /** Обязательность заполнения */
     private boolean required;
 
-	/**
-	 * Идентификатор столбца в БД
-	 * Если значение == null, то считается, что столбец новый и при его сохранении будет сгенерирован новый идентификатор
-	 * @return идентификатор столбца
-	 */
-    @XmlTransient
-	public long getId() {
-		return id;
-	}
-	
-	/**
-	 * Задать значение идентификатора параметра.
-	 * У новых параметров нужно задавать id = null
-	 * @param id значение идентификатора, для новых столбцов задавать не нужно, т.к. по умолчанию null.
-	 */
-	public void setId(long id) {
-		this.id = id;
-	}
-	
+
 	/**
 	 * Возвращает наименование параметра
 	 * @return наименование столбца
@@ -123,22 +108,6 @@ public class DeclarationSubreportParam implements Ordered, Serializable {
      */
     public void setFilter(String filter) {
         this.filter = filter;
-    }
-
-    /**
-     * Возвращает идентификатор спец. отчета
-     * @return
-     */
-    public long getDeclarationSubreportId() {
-        return declarationSubreportId;
-    }
-
-    /**
-     * Задает идентификатор спец. отчета
-     * @param declarationSubreportId
-     */
-    public void setDeclarationSubreportId(long declarationSubreportId) {
-        this.declarationSubreportId = declarationSubreportId;
     }
 
     public Long getRefBookAttributeId() {

@@ -29,6 +29,19 @@ public class DeclarationTemplateContent {
             declarationSubreportContent.setName(declarationSubreport.getName());
             declarationSubreportContent.setOrder(declarationSubreport.getOrder());
             declarationSubreportContent.setBlobDataId(declarationSubreport.getBlobDataId());
+            declarationSubreportContent.setSubreportParams(new ArrayList<DeclarationSubreportParamContent>());
+            for(DeclarationSubreportParam declarationSubreportParam: declarationSubreport.getDeclarationSubreportParams()) {
+                DeclarationSubreportParamContent declarationSubreportParamContent = new DeclarationSubreportParamContent();
+                declarationSubreportParamContent.setAlias(declarationSubreportParam.getAlias());
+                declarationSubreportParamContent.setName(declarationSubreportParam.getName());
+                declarationSubreportParamContent.setFilter(declarationSubreportParam.getFilter());
+                declarationSubreportParamContent.setRefBookAttributeId(declarationSubreportParam.getRefBookAttributeId());
+                declarationSubreportParamContent.setOrder(declarationSubreportParam.getOrder());
+                declarationSubreportParamContent.setType(declarationSubreportParam.getType());
+                declarationSubreportParamContent.setRequired(declarationSubreportParam.isRequired());
+                declarationSubreportContent.getSubreportParams().add(declarationSubreportParamContent);
+            }
+
             this.subreports.add(declarationSubreportContent);
         }
     }
@@ -42,6 +55,17 @@ public class DeclarationTemplateContent {
             declarationSubreport.setOrder(declarationSubreportContent.getOrder());
             declarationSubreport.setBlobDataId(declarationSubreportContent.getBlobDataId());
             declarationSubreport.setDeclarationSubreportParams(new ArrayList<DeclarationSubreportParam>());
+            for(DeclarationSubreportParamContent declarationSubreportParamContent: declarationSubreportContent.getSubreportParams()) {
+                DeclarationSubreportParam declarationSubreportParam = new DeclarationSubreportParam();
+                declarationSubreportParam.setAlias(declarationSubreportParamContent.getAlias());
+                declarationSubreportParam.setName(declarationSubreportParamContent.getName());
+                declarationSubreportParam.setFilter(declarationSubreportParamContent.getFilter());
+                declarationSubreportParam.setRefBookAttributeId(declarationSubreportParamContent.getRefBookAttributeId());
+                declarationSubreportParam.setOrder(declarationSubreportParamContent.getOrder());
+                declarationSubreportParam.setType(declarationSubreportParamContent.getType());
+                declarationSubreportParam.setRequired(declarationSubreportParamContent.isRequired());
+                declarationSubreport.getDeclarationSubreportParams().add(declarationSubreportParam);
+            }
             declarationTemplate.getSubreports().add(declarationSubreport);
         }
     }

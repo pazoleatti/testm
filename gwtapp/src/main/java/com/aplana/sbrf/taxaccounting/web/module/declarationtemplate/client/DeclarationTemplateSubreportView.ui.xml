@@ -55,6 +55,64 @@
                         <t:LinkButton text="Удалить файл" ui:field="deleteFile" img="resources/img/row-delete.png"
                                       addStyleNames="{style.marginLeft}" title="Удалить файл"/>
                     </g:HorizontalPanel>
+
+                    <g:HorizontalPanel width="100%" height="100%">
+                        <g:cell width="25%" >
+                            <g:VerticalPanel width="100%">
+                                <g:Label text="Параметры"/>
+                                <g:cell >
+                                    <g:ListBox width="100%" height="100%" visibleItemCount="20" ui:field="subreportParamListBox"/>
+                                </g:cell>
+                                <t:Bar>
+                                    <t:LeftBar>
+                                        <g:Button text="Вверх" ui:field="upParam"/>
+                                        <g:Button text="Вниз" ui:field="downParam"/>
+                                        <g:Button text="Добавить" ui:field="addParam"/>
+                                        <g:Button text="Удалить" ui:field="removeParam"/>
+                                    </t:LeftBar>
+                                </t:Bar>
+                            </g:VerticalPanel>
+                        </g:cell>
+                        <g:cell width="75%">
+                            <g:FlowPanel ui:field="paramPanel" addStyleNames="{style.marginLeft}">
+                                <g:HorizontalPanel height="30px" addStyleNames="{style.marginTop}">
+                                    <g:Label width="150px">Наименование</g:Label>
+                                    <g:TextBox width="450px" ui:field="nameParamBox"/>
+                                </g:HorizontalPanel>
+
+                                <g:HorizontalPanel height="30px">
+                                    <g:Label width="150px">Псевдоним</g:Label>
+                                    <g:TextBox width="450px"  ui:field="aliasParamBox"/>
+                                </g:HorizontalPanel>
+
+                                <g:HorizontalPanel height="30px">
+                                    <g:Label width="150px">Обязательность заполения</g:Label>
+                                    <g:CheckBox ui:field="requiredCheckBox" />
+                                </g:HorizontalPanel>
+
+                                <g:HorizontalPanel height="30px">
+                                    <g:Label width="150px">Тип столбца</g:Label>
+                                    <g:ValueListBox width="200px" ui:field="typeColumnDropBox"/>
+                                </g:HorizontalPanel>
+
+                                <g:HorizontalPanel height="30px" ui:field="refBookPanel">
+                                    <g:Label width="150px">Справочник</g:Label>
+                                    <g:ValueListBox width="450px" ui:field="refBookBox"/>
+                                </g:HorizontalPanel>
+
+                                <g:HorizontalPanel height="30px" ui:field="refBookAttrPanel">
+                                    <g:Label width="150px">Определяющий атрибут</g:Label>
+                                    <g:ValueListBox width="450px" ui:field="refBookAttrBox"/>
+                                </g:HorizontalPanel>
+
+                                <g:HorizontalPanel height="30px" ui:field="refBookAttrFilterPanel">
+                                    <g:Label width="150px">Фильтры</g:Label>
+                                    <g:TextArea width="450px" ui:field="refBookAttrFilterArea"/>
+                                </g:HorizontalPanel>
+
+                            </g:FlowPanel>
+                        </g:cell>
+                    </g:HorizontalPanel>
                 </g:FlowPanel>
             </g:cell>
         </g:HorizontalPanel>
