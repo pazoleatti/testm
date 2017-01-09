@@ -404,6 +404,14 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         return raschsvSvPrimTarif22425Service;
     }
 
+    // "Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422"
+    @Override
+    public RaschsvSvPrimTarif13422Service mockRaschsvSvPrimTarif13422Service() {
+        RaschsvSvPrimTarif13422Service raschsvSvPrimTarif13422Service = mock(RaschsvSvPrimTarif13422Service.class);
+        when(raschsvSvPrimTarif13422Service.insertRaschsvSvPrimTarif13422(any(RaschsvSvPrimTarif13422.class))).thenReturn(1L);
+        return raschsvSvPrimTarif13422Service;
+    }
+
     /**
      * Получение всех значений записи справочника по Id
      */

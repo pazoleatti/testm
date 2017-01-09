@@ -35,6 +35,10 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedPatent
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif22425
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt425
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvInoGrazd
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif13422
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt422
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedObuch
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvReestrMdo
 import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
@@ -100,6 +104,12 @@ import groovy.transform.Field
 @Field final NODE_NAME_SV_PRIM_TARIF2_2_425 = "СвПримТариф2.2.425"
 @Field final NODE_NAME_SV_INO_GRAZD = "СвИноГражд"
 @Field final NODE_NAME_SUM_VYPLAT = "СумВыплат"
+
+@Field final NODE_NAME_SV_PRIM_TARIF1_3_422 = "СвПримТариф1.3.422"
+@Field final NODE_NAME_SVED_OBUCH = "СведОбуч"
+@Field final NODE_NAME_SV_REESTR_MDO = "СвРеестрМДО"
+@Field final NODE_NAME_SPRAV_STUD_OTRYAD = "СправСтудОтряд"
+@Field final NODE_NAME_SPRAV_FORM_OBUCH = "СправФормОбуч"
 
 // Атрибуты узла ПерсСвСтрахЛиц
 @Field final PERV_SV_STRAH_LIC_NOM_KORR = 'НомКорр'
@@ -250,6 +260,18 @@ import groovy.transform.Field
 @Field final SV_INO_GRAZD_INNFL = "ИННФЛ"
 @Field final SV_INO_GRAZD_SNILS = "СНИЛС"
 @Field final SV_INO_GRAZD_GRAZD = "Гражд"
+
+// Атрибуты узла СведОбуч
+@Field final SVED_OBUCH_UNIK_NOMER = "УникНомер"
+
+// Атрибуты узла СвРеестрМДО
+@Field final SV_REESTR_MDO_NAIM_MDO = "НаимМДО"
+@Field final SV_REESTR_MDO_DATA_ZAPIS = "ДатаЗапис"
+@Field final SV_REESTR_MDO_NOMER_ZAPIS = "НомерЗапис"
+
+// Атрибуты узлов СправСтудОтряд и СправФормОбуч
+@Field final SPRAV_NOMER = "Номер"
+@Field final SPRAV_DATA = "Дата"
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -680,6 +702,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             //----------------------------------------------------------------------------------------------------------
 
             RaschsvSvPrimTarif22425 raschsvSvPrimTarif22425 = new RaschsvSvPrimTarif22425()
+            raschsvSvPrimTarif22425.raschsvObyazPlatSvId = raschsvObyazPlatSvId
 
             // Итого выплат
             RaschsvVyplatIt425 raschsvVyplatIt425 = new RaschsvVyplatIt425()
@@ -717,6 +740,67 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             raschsvSvPrimTarif22425.raschsvSvInoGrazdList = raschsvSvInoGrazdList
 
             raschsvSvPrimTarif22425Service.insertRaschsvSvPrimTarif22425(raschsvSvPrimTarif22425)
+
+        } else if (obyazPlatSvChildNode.name == NODE_NAME_SV_PRIM_TARIF1_3_422) {
+            //----------------------------------------------------------------------------------------------------------
+            // Разбор узла СвПримТариф1.3.422
+            //----------------------------------------------------------------------------------------------------------
+            RaschsvSvPrimTarif13422 raschsvSvPrimTarif13422 = new RaschsvSvPrimTarif13422()
+            raschsvSvPrimTarif13422.raschsvObyazPlatSvId = raschsvObyazPlatSvId
+
+            // Итого выплат
+            RaschsvVyplatIt422 raschsvVyplatIt422 = new RaschsvVyplatIt422()
+
+            // Сведения об обучающихся
+            def raschsvSvedObuchList = []
+
+            obyazPlatSvChildNode.childNodes().each { svPrimTarif13422ChildNode ->
+                if (svPrimTarif13422ChildNode.name == NODE_NAME_VYPLAT_IT) {
+                    // Разбор узла ВыплатИт
+                    raschsvVyplatIt422.raschsvSvSum1Tip = parseRaschsvSvSum1Tip(svPrimTarif13422ChildNode)
+
+                } else if (svPrimTarif13422ChildNode.name == NODE_NAME_SVED_OBUCH) {
+                    // Разбор узла СведОбуч
+                    RaschsvSvedObuch raschsvSvedObuch = new RaschsvSvedObuch()
+                    raschsvSvedObuch.unikNomer = svPrimTarif13422ChildNode.attributes()[SVED_OBUCH_UNIK_NOMER]
+
+                    // Сведения из реестра молодежных и детских объединений, пользующихся государственной поддержкой
+                    def raschsvSvReestrMdoList = []
+
+                    svPrimTarif13422ChildNode.childNodes().each { svPrimTarif13422ChildChildNode ->
+                        if (svPrimTarif13422ChildChildNode.name == NODE_NAME_SUM_VYPLAT) {
+                            // Разбор узла СумВыплат
+                            raschsvSvedObuch.raschsvSvSum1Tip = parseRaschsvSvSum1Tip(svPrimTarif13422ChildChildNode)
+                        } else if (svPrimTarif13422ChildChildNode.name == NODE_NAME_FIO) {
+                            // Разбор узла ФИО
+                            raschsvSvedObuch.familia = svPrimTarif13422ChildChildNode.attributes()[FIO_FAMILIA]
+                            raschsvSvedObuch.imya = svPrimTarif13422ChildChildNode.attributes()[FIO_IMYA]
+                            raschsvSvedObuch.middleName = svPrimTarif13422ChildChildNode.attributes()[FIO_MIDDLE_NAME]
+                        } else if (svPrimTarif13422ChildChildNode.name == NODE_NAME_SPRAV_STUD_OTRYAD ||
+                                svPrimTarif13422ChildChildNode.name == NODE_NAME_SPRAV_FORM_OBUCH) {
+                            // Разбор узлов СправСтудОтряд и СправФормОбуч
+                            raschsvSvedObuch.spravNomer = svPrimTarif13422ChildChildNode.attributes()[SPRAV_NOMER]
+                            raschsvSvedObuch.spravData = getDate(svPrimTarif13422ChildChildNode.attributes()[SPRAV_DATA])
+                            raschsvSvedObuch.spravNodeName = svPrimTarif13422ChildChildNode.name
+                        } else if (svPrimTarif13422ChildChildNode.name == NODE_NAME_SV_REESTR_MDO) {
+                            // Разбор узла СвРеестрМДО
+                            RaschsvSvReestrMdo raschsvSvReestrMdo = new RaschsvSvReestrMdo()
+                            raschsvSvReestrMdo.naimMdo = svPrimTarif13422ChildChildNode.attributes()[SV_REESTR_MDO_NAIM_MDO]
+                            raschsvSvReestrMdo.dataZapis = getDate(svPrimTarif13422ChildChildNode.attributes()[SV_REESTR_MDO_DATA_ZAPIS])
+                            raschsvSvReestrMdo.nomerZapis = svPrimTarif13422ChildChildNode.attributes()[SV_REESTR_MDO_NOMER_ZAPIS]
+
+                            raschsvSvReestrMdoList.add(raschsvSvReestrMdo)
+                        }
+                    }
+                    raschsvSvedObuch.raschsvSvReestrMdoList = raschsvSvReestrMdoList
+
+                    raschsvSvedObuchList.add(raschsvSvedObuch)
+                }
+            }
+            raschsvSvPrimTarif13422.raschsvVyplatIt422 = raschsvVyplatIt422
+            raschsvSvPrimTarif13422.raschsvSvedObuchList = raschsvSvedObuchList
+
+            raschsvSvPrimTarif13422Service.insertRaschsvSvPrimTarif13422(raschsvSvPrimTarif13422)
         }
     }
 

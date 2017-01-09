@@ -1656,6 +1656,7 @@ create table raschsv_sv_reestr_mdo
    id                 NUMBER(18)           not null,
    raschsv_sved_obuch_id NUMBER(18),
    naim_mdo           VARCHAR2(1000 CHAR),
+   data_zapis         DATE,
    nomer_zapis        VARCHAR2(28 CHAR)
 );
 create sequence seq_raschsv_sv_reestr_mdo start with 1;

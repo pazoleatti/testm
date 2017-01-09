@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

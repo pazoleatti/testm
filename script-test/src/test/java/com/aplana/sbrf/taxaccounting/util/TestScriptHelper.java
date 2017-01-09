@@ -98,6 +98,8 @@ public class TestScriptHelper {
     private RaschsvSvPrimTarif91427Service raschsvSvPrimTarif91427Service;
     // Сервис "Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426)"
     private RaschsvSvPrimTarif22425Service raschsvSvPrimTarif22425Service;
+    // Сервис "Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422"
+    private RaschsvSvPrimTarif13422Service raschsvSvPrimTarif13422Service;
 
     //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
@@ -185,6 +187,7 @@ public class TestScriptHelper {
         raschsvPravTarif71427Service = mockHelper.mockRaschsvPravTarif71427Service();
         raschsvSvPrimTarif91427Service = mockHelper.mockRaschsvSvPrimTarif91427Service();
         raschsvSvPrimTarif22425Service = mockHelper.mockRaschsvSvPrimTarif22425Service();
+        raschsvSvPrimTarif13422Service = mockHelper.mockRaschsvSvPrimTarif13422Service();
     }
 
     /**
@@ -331,6 +334,8 @@ public class TestScriptHelper {
         bindings.put("raschsvSvPrimTarif91427Service", raschsvSvPrimTarif91427Service);
         // Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426)
         bindings.put("raschsvSvPrimTarif22425Service", raschsvSvPrimTarif22425Service);
+        // Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422
+        bindings.put("raschsvSvPrimTarif13422Service", raschsvSvPrimTarif13422Service);
 
         //ndfl
         bindings.put("ndflPersonService", ndflPersonService);

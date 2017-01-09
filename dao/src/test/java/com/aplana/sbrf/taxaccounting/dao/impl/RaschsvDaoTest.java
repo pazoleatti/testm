@@ -68,6 +68,9 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvSvPrimTarif22425Dao raschsvSvPrimTarif22425Dao;
 
+    @Autowired
+    private RaschsvSvPrimTarif13422Dao raschsvSvPrimTarif13422Dao;
+
     /**
      * Добавление записи в таблицу ОбязПлатСВ
      * @return
@@ -487,5 +490,48 @@ public class RaschsvDaoTest {
         raschsvSvPrimTarif22425.setRaschsvSvInoGrazdList(raschsvSvInoGrazdList);
 
         assertNotNull(raschsvSvPrimTarif22425Dao.insertRaschsvSvPrimTarif22425(raschsvSvPrimTarif22425));
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422"
+     */
+    @Test
+    public void testInsertRaschsvSvPrimTarif13422() {
+        // Сведения по суммам (тип 1)
+        RaschsvSvSum1Tip raschsvSvSum1Tip = createRaschsvSvSum1Tip();
+        RaschsvSvSum1Tip raschsvSvSum2Tip = createRaschsvSvSum1Tip();
+
+        // Итого выплат
+        RaschsvVyplatIt422 raschsvVyplatIt422 = new RaschsvVyplatIt422();
+        raschsvVyplatIt422.setRaschsvSvSum1Tip(raschsvSvSum1Tip);
+
+        // Сведения из реестра молодежных и детских объединений, пользующихся государственной поддержкой
+        List<RaschsvSvReestrMdo> raschsvSvReestrMdoList = new ArrayList<RaschsvSvReestrMdo>();
+        RaschsvSvReestrMdo raschsvSvReestrMdo1 = new RaschsvSvReestrMdo();
+        raschsvSvReestrMdo1.setNaimMdo("NaimMdo");
+        raschsvSvReestrMdo1.setDataZapis(new Date());
+        raschsvSvReestrMdo1.setNomerZapis("NomerZapis");
+        raschsvSvReestrMdoList.add(raschsvSvReestrMdo1);
+
+        // Сведения об обучающихся
+        List<RaschsvSvedObuch> raschsvSvedObuchList = new ArrayList<RaschsvSvedObuch>();
+        RaschsvSvedObuch raschsvSvedObuch1 = new RaschsvSvedObuch();
+        raschsvSvedObuch1.setUnikNomer("Uni");
+        raschsvSvedObuch1.setFamilia("Familia");
+        raschsvSvedObuch1.setImya("Imya");
+        raschsvSvedObuch1.setMiddleName("MiddleName");
+        raschsvSvedObuch1.setSpravNomer("SpravNomer");
+        raschsvSvedObuch1.setSpravData(new Date());
+        raschsvSvedObuch1.setSpravNodeName("SpravNodeName");
+        raschsvSvedObuch1.setRaschsvSvReestrMdoList(raschsvSvReestrMdoList);
+        raschsvSvedObuch1.setRaschsvSvSum1Tip(raschsvSvSum2Tip);
+        raschsvSvedObuchList.add(raschsvSvedObuch1);
+
+        RaschsvSvPrimTarif13422 raschsvSvPrimTarif13422 = new RaschsvSvPrimTarif13422();
+        raschsvSvPrimTarif13422.setRaschsvObyazPlatSvId(createRaschsvObyazPlatSv());
+        raschsvSvPrimTarif13422.setRaschsvVyplatIt422(raschsvVyplatIt422);
+        raschsvSvPrimTarif13422.setRaschsvSvedObuchList(raschsvSvedObuchList);
+
+        assertNotNull(raschsvSvPrimTarif13422Dao.insertRaschsvSvPrimTarif13422(raschsvSvPrimTarif13422));
     }
 }
