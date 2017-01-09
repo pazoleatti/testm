@@ -71,6 +71,9 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvSvPrimTarif13422Dao raschsvSvPrimTarif13422Dao;
 
+    @Autowired
+    private RaschsvSvnpPodpisantDao raschsvSvnpPodpisantDao;
+
     /**
      * Добавление записи в таблицу ОбязПлатСВ
      * @return
@@ -533,5 +536,28 @@ public class RaschsvDaoTest {
         raschsvSvPrimTarif13422.setRaschsvSvedObuchList(raschsvSvedObuchList);
 
         assertNotNull(raschsvSvPrimTarif13422Dao.insertRaschsvSvPrimTarif13422(raschsvSvPrimTarif13422));
+    }
+
+    /**
+     * Тестирование сохранения данных в таблицу "Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ"
+     */
+    @Test
+    public void testInsertRaschsvSvnpPodpisant() {
+        RaschsvSvnpPodpisant raschsvSvnpPodpisant = new RaschsvSvnpPodpisant();
+        raschsvSvnpPodpisant.setDeclarationDataId(1L);
+        raschsvSvnpPodpisant.setSvnpOkved("1");
+        raschsvSvnpPodpisant.setSvnpTlph("1");
+        raschsvSvnpPodpisant.setSvnpNaimOrg("1");
+        raschsvSvnpPodpisant.setSvnpKpp("1");
+        raschsvSvnpPodpisant.setSvnpSvReorgForm("1");
+        raschsvSvnpPodpisant.setSvnpSvReorgInnyl("1");
+        raschsvSvnpPodpisant.setFamilia("1");
+        raschsvSvnpPodpisant.setImya("1");
+        raschsvSvnpPodpisant.setMiddleName("1");
+        raschsvSvnpPodpisant.setPodpisantPrPodp("1");
+        raschsvSvnpPodpisant.setPodpisantNaimDoc("1");
+        raschsvSvnpPodpisant.setPodpisantNaimOrg("1");
+
+        assertNotNull(raschsvSvnpPodpisantDao.insertRaschsvSvnpPodpisant(raschsvSvnpPodpisant));
     }
 }
