@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.gwtplatform.mvp.client.UiHandlers;
@@ -13,4 +15,6 @@ public interface DeclarationTemplateSubreportUiHandlers extends UiHandlers {
     void onEndLoad(EndLoadFileEvent event);
     void downloadFile();
     void onSubreportChanged();
+    RefBookAttribute getRefBookAttributeAttributeId(Long refBookAttributeId);
+    RefBook getRefBookByAttributeId(Long refBookAttributeId);
 }

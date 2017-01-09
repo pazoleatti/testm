@@ -5,6 +5,8 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -18,6 +20,8 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.UpdateTemplateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.InitTypeAction;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.InitTypeResult;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
@@ -37,7 +41,8 @@ import com.gwtplatform.mvp.client.*;
 import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.*;
 
-import java.util.Date;
+import java.util.*;
+
 import com.google.gwt.regexp.shared.RegExp;
 
 public class DeclarationTemplateMainPresenter extends TabContainerPresenter<DeclarationTemplateMainPresenter.MyView, DeclarationTemplateMainPresenter.MyProxy>
@@ -127,8 +132,12 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
 	private DeclarationTemplate declarationTemplate;
 	private HandlerRegistration closeDeclarationTemplateHandlerRegistration;
     protected DeclarationVersionHistoryPresenter versionHistoryPresenter;
+    private Map<Long, RefBook> refBookMap = new HashMap<Long, RefBook>();
+    private Map<Long, RefBookAttribute> refBookAttributeMap = new HashMap<Long, RefBookAttribute>();
+    private Map<Long, Long> refBookAttributeToRefBookMap = new HashMap<Long, Long>();
+    private List<RefBook> refBookList = new ArrayList<RefBook>();
 
-	@Inject
+    @Inject
     public DeclarationTemplateMainPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager,
                                             DeclarationVersionHistoryPresenter versionHistoryPresenter) {
         super(eventBus, view, proxy, TYPE_SetTabContent, TYPE_RequestTabs, TYPE_ChangeTab, RevealContentTypeHolder.getMainContent());
@@ -149,11 +158,41 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
     @Override
     protected void onReveal() {
         super.onReveal();
-        setDeclarationTemplate();
-        LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
+        InitTypeAction action = new InitTypeAction();
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<InitTypeResult>() {
+            @Override
+            public void onSuccess(InitTypeResult result) {
+                refBookList = result.getRefBookList();
+                refBookAttributeToRefBookMap.clear();
+                refBookAttributeMap.clear();
+                refBookMap.clear();
+
+                if (refBookList != null) {
+                    for (RefBook refBook : refBookList) {
+                        refBookMap.put(refBook.getId(), refBook);
+                        for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
+                            refBookAttributeMap.put(refBookAttribute.getId(), refBookAttribute);
+                            refBookAttributeToRefBookMap.put(refBookAttribute.getId(), refBook.getId());
+                        }
+                    }
+                }
+
+                setDeclarationTemplate();
+                LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
+            }
+        }, DeclarationTemplateMainPresenter.this));
     }
 
-	@Override
+    public RefBook getRefBookByAttributeId(Long refBookAttributeId) {
+        return refBookMap.get(refBookAttributeToRefBookMap.get(refBookAttributeId));
+    }
+
+
+    public RefBookAttribute getRefBookAttributeAttributeId(Long refBookAttributeId) {
+        return refBookAttributeMap.get(refBookAttributeId);
+    }
+
+    @Override
 	public void reset() {
         setOnLeaveConfirmation(null);
 		setDeclarationTemplate();
@@ -475,4 +514,9 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
             });
         }
     }
+
+    public List<RefBook> getRefBookList() {
+        return refBookList;
+    }
+
 }

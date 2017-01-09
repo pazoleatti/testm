@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
@@ -19,10 +21,14 @@ import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DeclarationTemplateSubreportPresenter
 		extends Presenter<DeclarationTemplateSubreportPresenter.MyView, DeclarationTemplateSubreportPresenter.MyProxy>
 		implements DeclarationTemplateSubreportUiHandlers, UpdateTemplateEvent.MyHandler, DeclarationTemplateFlushEvent.MyHandler {
 
+    private List<RefBook> refBookList = new ArrayList<RefBook>();
 
     @Title("Шаблоны")
 	@ProxyCodeSplit
@@ -37,6 +43,7 @@ public class DeclarationTemplateSubreportPresenter
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
         void flush();
         DeclarationSubreport getSelectedSubreport();
+        void setRefBookList(List<RefBook> refBookList);
 	}
 
     private DeclarationTemplateMainPresenter declarationTemplateMainPresenter;
@@ -60,6 +67,7 @@ public class DeclarationTemplateSubreportPresenter
     @ProxyEvent
     @Override
     public void onUpdateTemplate(UpdateTemplateEvent event) {
+        getView().setRefBookList(declarationTemplateMainPresenter.getRefBookList());
         getView().setDeclarationTemplate(declarationTemplateMainPresenter.getDeclarationTemplateExt());
     }
 
@@ -112,4 +120,14 @@ public class DeclarationTemplateSubreportPresenter
     public void onSubreportChanged(){
         declarationTemplateMainPresenter.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
     }
+
+    public RefBook getRefBookByAttributeId(Long refBookAttributeId) {
+        return declarationTemplateMainPresenter.getRefBookByAttributeId(refBookAttributeId);
+    }
+
+
+    public RefBookAttribute getRefBookAttributeAttributeId(Long refBookAttributeId) {
+        return declarationTemplateMainPresenter.getRefBookAttributeAttributeId(refBookAttributeId);
+    }
+
 }
