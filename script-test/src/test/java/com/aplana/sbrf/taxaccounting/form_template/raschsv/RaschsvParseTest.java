@@ -3,15 +3,18 @@ package com.aplana.sbrf.taxaccounting.form_template.raschsv;
 import com.aplana.sbrf.taxaccounting.form_template.ndfl.MapXmlToTableTest;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.apache.commons.collections4.map.HashedMap;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -90,23 +93,51 @@ public class RaschsvParseTest extends ScriptTestBase {
         testHelper.reset();
     }
 
+    /**
+     * Тестирование числа узлов, которые были перебраны
+     * @throws IOException
+     */
     @Test
     public void create() throws IOException {
 
         InputStream inputStream = MapXmlToTableTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/raschsv/raschsv.xml");
-        //String xml = IOUtils.toString(xmlInputStream, "windows-1251");
 
         Map<String, Object> param = new HashedMap<String, Object>();
+
+        // Проверка соответствия числа узлов по их имени
+        Map<String, Integer> countNodes = new HashedMap<String, Integer>();
+        countNodes.put("ПерсСвСтрахЛиц", 10);
+        countNodes.put("УплПерОПС", 1);
+        countNodes.put("УплПерОМС", 1);
+        countNodes.put("УплПерОПСДоп", 10);
+        countNodes.put("УплПерДСО", 10);
+        countNodes.put("УплПерОСС", 1);
+        countNodes.put("ПревРасхОСС", 1);
+        countNodes.put("РасчСВ_ОПС_ОМС", 10);
+        countNodes.put("РасчСВ_ОСС.ВНМ", 1);
+        countNodes.put("РасхОССЗак", 1);
+        countNodes.put("ВыплФинФБ", 1);
+
+        countNodes.put("ПравТариф3.1.427", 1);
+        countNodes.put("ПравТариф5.1.427", 1);
+        countNodes.put("ПравТариф7.1.427", 1);
+        countNodes.put("СвПримТариф9.1.427", 1);
+        countNodes.put("СвПримТариф2.2.425", 1);
+        countNodes.put("СвПримТариф1.3.422", 1);
+
+        countNodes.put("СведПатент", 10);
+        countNodes.put("СвИноГражд", 10);
+        countNodes.put("СведОбуч", 10);
 
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(1L);
 
         param.put("declarationData", declarationData);
+        param.put("countNodes", countNodes);
 
         testHelper.setImportFileInputStream(inputStream);
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE, param);
 
-        //Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
 }

@@ -1364,6 +1364,23 @@ create table raschsv_svnp_podpisant
    podpisant_naim_org VARCHAR2(1000 CHAR)
 );
 create sequence seq_raschsv_svnp_podpisant start with 1;
+comment on table raschsv_svnp_podpisant is 'Сведения о плательщике страховых взносов и лице, подписавшем документ';
+comment on column raschsv_svnp_podpisant.id is 'Идентификатор';
+comment on column raschsv_svnp_podpisant.declaration_data_id is 'Идентификатор декларации';
+comment on column raschsv_svnp_podpisant.svnp_okved is 'Код вида экономической деятельности по классификатору ОКВЭД2 (ОКВЭД)';
+comment on column raschsv_svnp_podpisant.svnp_tlph is 'Номер контактного телефона (Тлф)';
+comment on column raschsv_svnp_podpisant.svnp_naim_org is 'Наименование организации, обособленного подразделения (НаимОрг)';
+comment on column raschsv_svnp_podpisant.svnp_innyl is 'ИНН организации (ИННЮЛ)';
+comment on column raschsv_svnp_podpisant.svnp_kpp is 'КПП (КПП)';
+comment on column raschsv_svnp_podpisant.svnp_sv_reorg_form is 'Код формы реорганизации (ликвидация) (ФормРеорг)';
+comment on column raschsv_svnp_podpisant.svnp_sv_reorg_innyl is 'ИНН организации (ИННЮЛ)';
+comment on column raschsv_svnp_podpisant.svnp_sv_reorg_kpp is 'КПП (КПП)';
+comment on column raschsv_svnp_podpisant.familia is 'Фамилия (Фамилия)';
+comment on column raschsv_svnp_podpisant.imya is 'Имя (Имя)';
+comment on column raschsv_svnp_podpisant.middle_name is 'Отчество (Отчество)';
+comment on column raschsv_svnp_podpisant.podpisant_pr_podp is 'Признак лица, подписавшего документ (ПрПодп)';
+comment on column raschsv_svnp_podpisant.podpisant_naim_doc is 'Наименование документа, подтверждающего полномочия представителя (НаимДок)';
+comment on column raschsv_svnp_podpisant.podpisant_naim_org is 'Наименование организации - представителя плательщика (НаимОрг)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_kol_lic_tip
 (
@@ -1375,6 +1392,13 @@ create table raschsv_kol_lic_tip
    kol_3m_posl_3m     NUMBER(7)
 );
 create sequence seq_raschsv_kol_lic_tip start with 1;
+comment on table raschsv_kol_lic_tip is 'Сведения по количеству физических лиц (КолЛицТип)';
+comment on column raschsv_kol_lic_tip.id is 'Идентификатор';
+comment on column raschsv_kol_lic_tip.kol_vsego_per is 'Всего с начала расчетного периода (КолВсегоПер)';
+comment on column raschsv_kol_lic_tip.kol_vsego_posl_3m is 'В том числе за последние три месяца расчетного (отчетного) периода, всего (КолВсегоПосл3М)';
+comment on column raschsv_kol_lic_tip.kol_1m_posl_3m is 'В том числе 1 месяц из последних трех месяцев расчетного (отчетного) периода (Кол1Посл3М)';
+comment on column raschsv_kol_lic_tip.kol_2m_posl_3m is 'В том числе 2 месяц из последних трех месяцев расчетного (отчетного) периода (Кол2Посл3М)';
+comment on column raschsv_kol_lic_tip.kol_3m_posl_3m is 'В том числе 3 месяц из последних трех месяцев расчетного (отчетного) периода (Кол3Посл3М)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_sum_1tip
 (
@@ -1386,6 +1410,13 @@ create table raschsv_sv_sum_1tip
    sum_3m_posl_3m     NUMBER(17,2)
 );
 create sequence seq_raschsv_sv_sum_1tip start with 1;
+comment on table raschsv_sv_sum_1tip is 'Сведения по суммам (тип 1) (СвСум1Тип)';
+comment on column raschsv_sv_sum_1tip.id is 'Идентификатор';
+comment on column raschsv_sv_sum_1tip.sum_vsego_per is 'Всего с начала расчетного периода (СумВсегоПер)';
+comment on column raschsv_sv_sum_1tip.sum_vsego_posl_3m is 'Всего с начала расчетного периода (СумВсегоПосл3М)';
+comment on column raschsv_sv_sum_1tip.sum_1m_posl_3m is 'В том числе 1 месяц из последних трех месяцев расчетного (отчетного) периода (Сум1Посл3М)';
+comment on column raschsv_sv_sum_1tip.sum_2m_posl_3m is 'В том числе 2 месяц из последних трех месяцев расчетного (отчетного) периода (Сум2Посл3М)';
+comment on column raschsv_sv_sum_1tip.sum_3m_posl_3m is 'В том числе 3 месяц из последних трех месяцев расчетного (отчетного) периода (Сум3Посл3М)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_obyaz_plat_sv
 (
@@ -1394,6 +1425,10 @@ create table raschsv_obyaz_plat_sv
    oktmo              VARCHAR2(11 CHAR)
 );
 create sequence seq_raschsv_obyaz_plat_sv start with 1;
+comment on table raschsv_obyaz_plat_sv is 'Сводные данные об обязательствах плательщика страховых взносов (ОбязПлатСВ)';
+comment on column raschsv_obyaz_plat_sv.id is 'Идентификатор';
+comment on column raschsv_obyaz_plat_sv.declaration_data_id is 'Идентификатор декларации';
+comment on column raschsv_obyaz_plat_sv.oktmo is 'Код по ОКТМО (ОКТМО)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_upl_per
 (
@@ -1407,6 +1442,15 @@ create table raschsv_upl_per
    sum_sb_upl_3m      NUMBER(17, 2)
 );
 create sequence seq_raschsv_upl_per start with 1;
+comment on table raschsv_upl_per is 'Суммы страховых взносов, подлежащие уплате за расчетный (отчетный) период (УплПерОПС, УплПерОМС, УплПерОПСДоп, УплПерДСО)';
+comment on column raschsv_upl_per.id is 'Идентификатор';
+comment on column raschsv_upl_per.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
+comment on column raschsv_upl_per.node_name is 'Имя узла';
+comment on column raschsv_upl_per.kbk is 'Код бюджетной классификации (КБК)';
+comment on column raschsv_upl_per.sum_sb_upl_per is 'Сумма страховых взносов, подлежащая уплате за расчетный (отчетный) период (СумСВУплПер)';
+comment on column raschsv_upl_per.sum_sb_upl_1m is 'Сумма страховых взносов, подлежащая уплате за первый из последних трех месяцев расчетного (отчетного) периода (СумСВУпл1М)';
+comment on column raschsv_upl_per.sum_sb_upl_2m is 'Сумма страховых взносов, подлежащая уплате за второй из последних трех месяцев расчетного (отчетного) периода (СумСВУпл2М)';
+comment on column raschsv_upl_per.sum_sb_upl_3m is 'Сумма страховых взносов, подлежащая уплате за третий из последних трех месяцев расчетного (отчетного) периода (СумСВУпл3М)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_upl_prev_oss
 (
@@ -1423,6 +1467,18 @@ create table raschsv_upl_prev_oss
    prev_rash_sv_3m    NUMBER(17, 2)
 );
 create sequence seq_raschsv_upl_prev_oss start with 1;
+comment on table raschsv_upl_prev_oss is 'Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством, подлежащая уплате за расчетный и Сумма превышения произведенных плательщиком расходов на выплату страхового обеспечения (УплПерОСС, ПревРасхОСС)';
+comment on column raschsv_upl_prev_oss.id is 'Идентификатор';
+comment on column raschsv_upl_prev_oss.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
+comment on column raschsv_upl_prev_oss.kbk is 'Код бюджетной классификации (КБК)';
+comment on column raschsv_upl_prev_oss.sum_sb_upl_per is 'Сумма страховых взносов, подлежащая уплате за расчетный (отчетный) период (СумСВУплПер)';
+comment on column raschsv_upl_prev_oss.sum_sb_upl_1m is 'Сумма страховых взносов, подлежащая уплате за расчетный (отчетный) период, в том числе за первый из последних трех месяцев расчетного (отчетного) периода (СумСВУпл1М)';
+comment on column raschsv_upl_prev_oss.sum_sb_upl_2m is 'Сумма страховых взносов, подлежащая уплате за расчетный (отчетный) период, в том числе за второй из последних трех месяцев расчетного (отчетного) периода (СумСВУпл2М)';
+comment on column raschsv_upl_prev_oss.sum_sb_upl_3m is 'Сумма страховых взносов, подлежащая уплате за расчетный (отчетный) период, в том числе за третий из последних трех месяцев расчетного (отчетного) периода (СумСВУпл3М)';
+comment on column raschsv_upl_prev_oss.prev_rash_sv_per is 'Суммы превышения расходов над исчисленными страховыми взносами за расчетный (отчетный) период (ПревРасхСВПер)';
+comment on column raschsv_upl_prev_oss.prev_rash_sv_1m is 'Суммы превышения расходов над исчисленными страховыми взносами за первый из последних трех месяцев расчетного (отчетного) периода (ПревРасхСВ1М)';
+comment on column raschsv_upl_prev_oss.prev_rash_sv_2m is 'Суммы превышения расходов над исчисленными страховыми взносами за второй из последних трех месяцев расчетного (отчетного) периода (ПревРасхСВ2М)';
+comment on column raschsv_upl_prev_oss.prev_rash_sv_3m is 'Суммы превышения расходов над исчисленными страховыми взносами за третий из последних трех месяцев расчетного (отчетного) периода (ПревРасхСВ3М)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_ops_oms
 (
@@ -1431,6 +1487,10 @@ create table raschsv_sv_ops_oms
    tarif_plat         VARCHAR2(2 CHAR)
 );
 create sequence seq_raschsv_sv_ops_oms start with 1;
+comment on table raschsv_sv_ops_oms is 'Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование (РасчСВ_ОПС_ОМС)';
+comment on column raschsv_sv_ops_oms.id is 'Идентификатор';
+comment on column raschsv_sv_ops_oms.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
+comment on column raschsv_sv_ops_oms.tarif_plat is 'Код тарифа плательщика (ТарифПлат)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_ops_oms_rasch
 (
@@ -1444,6 +1504,15 @@ create table raschsv_sv_ops_oms_rasch
    pr_rasch_sum       VARCHAR2(1 CHAR)
 );
 create sequence seq_raschsv_sv_ops_oms_rasch start with 1;
+comment on table raschsv_sv_ops_oms_rasch is 'Дочерний узел для Расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование';
+comment on column raschsv_sv_ops_oms_rasch.id is 'Идентификатор';
+comment on column raschsv_sv_ops_oms_rasch.raschsv_sv_ops_oms_id is 'Внешний ключ на Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование';
+comment on column raschsv_sv_ops_oms_rasch.node_name is 'Имя узла';
+comment on column raschsv_sv_ops_oms_rasch.pr_osn_sv_dop is 'Признак основания исчисления сумм страховых взносов по дополнительному тарифу (ПрОснСВДоп)';
+comment on column raschsv_sv_ops_oms_rasch.kod_osnov is 'Код основания исчисления (КодОснов)';
+comment on column raschsv_sv_ops_oms_rasch.osnov_zap is 'Основание заполнения (ОсновЗап)';
+comment on column raschsv_sv_ops_oms_rasch.klas_usl_trud is 'Код класса условий труда (КласУслТруд)';
+comment on column raschsv_sv_ops_oms_rasch.pr_rasch_sum is 'Код основания исчисления страховых взносов на дополнительное социальное обеспечение (ПрРасчСум)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_ops_oms_rasch_sum
 (
@@ -1451,6 +1520,10 @@ create table raschsv_ops_oms_rasch_sum
    raschsv_sv_sum1_tip_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null
 );
+comment on table raschsv_ops_oms_rasch_sum is 'Связь записи дочернего узла для Расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование с записью Сведения по суммам (тип 1)';
+comment on column raschsv_ops_oms_rasch_sum.raschsv_ops_oms_rasch_sum_id is 'Внешний ключ на Дочерний узел расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование';
+comment on column raschsv_ops_oms_rasch_sum.raschsv_sv_sum1_tip_id is 'Внешний ключ на Сведения по суммам (тип 1)';
+comment on column raschsv_ops_oms_rasch_sum.node_name is 'Имя узла';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_ops_oms_rasch_kol
 (
@@ -1458,6 +1531,10 @@ create table raschsv_ops_oms_rasch_kol
    raschsv_kol_lic_tip_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null
 );
+comment on table raschsv_ops_oms_rasch_kol is 'Связь записи дочернего узла для Расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование с записью Сведения по количеству физических лиц';
+comment on column raschsv_ops_oms_rasch_kol.raschsv_ops_oms_rasch_kol_id is 'Внешний ключ на Дочерний узел расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование';
+comment on column raschsv_ops_oms_rasch_kol.raschsv_kol_lic_tip_id is 'Внешний ключ на Сведения по количеству физических лиц';
+comment on column raschsv_ops_oms_rasch_kol.node_name is 'Имя узла';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_oss_vnm
 (
@@ -1466,6 +1543,10 @@ create table raschsv_oss_vnm
    priz_vypl          VARCHAR2(1 CHAR)
 );
 create sequence seq_raschsv_oss_vnm start with 1;
+comment on table raschsv_oss_vnm is 'Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством (РасчСВ_ОСС.ВНМ)';
+comment on column raschsv_oss_vnm.id is 'Идентификатор';
+comment on column raschsv_oss_vnm.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
+comment on column raschsv_oss_vnm.priz_vypl is 'Признак выплат (ПризВыпл)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_upl_sv_prev
 (
@@ -1476,6 +1557,12 @@ create table raschsv_upl_sv_prev
    sv_sum             NUMBER(17, 2)
 );
 create sequence seq_raschsv_upl_sv_prev start with 1;
+comment on table raschsv_upl_sv_prev is 'Сумма страховых взносов, подлежащая уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами) (УплСВПрев)';
+comment on column raschsv_upl_sv_prev.id is 'Идентификатор';
+comment on column raschsv_upl_sv_prev.raschsv_oss_vnm_id is 'Внешний ключ на Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством';
+comment on column raschsv_upl_sv_prev.node_name is 'Имя узла';
+comment on column raschsv_upl_sv_prev.priznak is 'Признак (Признак)';
+comment on column raschsv_upl_sv_prev.sv_sum is 'Сумма (Сумма)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_oss_vnm_kol
 (
@@ -1483,6 +1570,10 @@ create table raschsv_oss_vnm_kol
    raschsv_kol_lic_tip_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null
 );
+comment on table raschsv_oss_vnm_kol is 'Связь записи Суммы страховых взносов, подлежащая уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами) с записью Сведения по количеству физических лиц';
+comment on column raschsv_oss_vnm_kol.raschsv_oss_vnm_id is 'Внешний ключ на Сумма страховых взносов, подлежащая уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами)';
+comment on column raschsv_oss_vnm_kol.raschsv_kol_lic_tip_id is 'Внешний ключ на Сведения по количеству физических лиц';
+comment on column raschsv_oss_vnm_kol.node_name is 'Имя узла';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_oss_vnm_sum
 (
@@ -1490,6 +1581,10 @@ create table raschsv_oss_vnm_sum
    raschsv_sv_sum1_tip_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null
 );
+comment on table raschsv_oss_vnm_sum is 'Связь записи Суммы страховых взносов, подлежащая уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами) с записью Сведения по суммам (тип 1)';
+comment on column raschsv_oss_vnm_sum.raschsv_oss_vnm_id is 'Внешний ключ на Сумма страховых взносов, подлежащая уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами)';
+comment on column raschsv_oss_vnm_sum.raschsv_sv_sum1_tip_id is 'Внешний ключ на Сведения по суммам (тип 1)';
+comment on column raschsv_oss_vnm_sum.node_name is 'Имя узла';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_rash_oss_zak
 (
@@ -1497,6 +1592,9 @@ create table raschsv_rash_oss_zak
    raschsv_obyaz_plat_sv_id NUMBER(18)           not null
 );
 create sequence seq_raschsv_rash_oss_zak start with 1;
+comment on table raschsv_rash_oss_zak is 'Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации (РасхОССЗак)';
+comment on column raschsv_rash_oss_zak.id is 'Идентификатор';
+comment on column raschsv_rash_oss_zak.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_rash_oss_zak_rash
 (
@@ -1509,6 +1607,13 @@ create table raschsv_rash_oss_zak_rash
    rash_fin_fb        NUMBER(17,2)
 );
 create sequence seq_raschsv_rash_oss_zak_rash start with 1;
+comment on table raschsv_rash_oss_zak_rash is 'Дочерний узел Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации';
+comment on column raschsv_rash_oss_zak_rash.id is 'Идентификатор';
+comment on column raschsv_rash_oss_zak_rash.node_name is 'Имя узла';
+comment on column raschsv_rash_oss_zak_rash.chisl_sluch is 'Число случаев (получателей) (ЧислСлуч)';
+comment on column raschsv_rash_oss_zak_rash.kol_vypl is 'Количество дней, выплат, пособий (КолВыпл)';
+comment on column raschsv_rash_oss_zak_rash.pash_vsego is 'Расходы, всего (РасхВсего)';
+comment on column raschsv_rash_oss_zak_rash.rash_fin_fb is 'Расходы за счет средств, финансируемых из федерального бюджета (РасхФинФБ)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_vypl_fin_fb
 (
@@ -1516,6 +1621,9 @@ create table raschsv_vypl_fin_fb
    raschsv_obyaz_plat_sv_id NUMBER(18)           not null
 );
 create sequence seq_raschsv_vypl_fin_fb start with 1;
+comment on table raschsv_vypl_fin_fb is 'Выплаты, произведенные за счет средств, финансируемых из федерального бюджета (ВыплФинФБ)';
+comment on column raschsv_vypl_fin_fb.id is 'Идентификатор';
+comment on column raschsv_vypl_fin_fb.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_vypl_prichina
 (
@@ -1525,6 +1633,11 @@ create table raschsv_vypl_prichina
    sv_vnf_uhod_inv    NUMBER(17, 2)
 );
 create sequence seq_raschsv_vypl_prichina start with 1;
+comment on table raschsv_vypl_prichina is 'Дочерний узел для Выплаты, произведенные за счет средств, финансируемых из федерального бюджета';
+comment on column raschsv_vypl_prichina.id is 'Идентификатор';
+comment on column raschsv_vypl_prichina.raschsv_vypl_fin_fb_id is 'Внешний ключ на Выплаты, произведенные за счет средств, финансируемых из федерального бюджета';
+comment on column raschsv_vypl_prichina.node_name is 'Имя узла';
+comment on column raschsv_vypl_prichina.sv_vnf_uhod_inv is 'Страховые взносы, исчисленные на оплату дополнительных выходных дней для ухода за детьми-инвалидами (СВВнФУходИнв)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_rash_vypl
 (
@@ -1536,6 +1649,13 @@ create table raschsv_rash_vypl
    rashod             NUMBER(17, 2)
 );
 create sequence seq_raschsv_rash_vypl start with 1;
+comment on table raschsv_rash_vypl is 'Данные по выплате, произведенной за счет средств, финансируемых из федерального бюджета';
+comment on column raschsv_rash_vypl.id is 'Идентификатор';
+comment on column raschsv_rash_vypl.raschsv_vypl_prichina_id is 'Внешний ключ на Выплаты, произведенные за счет средств, финансируемых из федерального бюджета';
+comment on column raschsv_rash_vypl.node_name is 'Имя узла';
+comment on column raschsv_rash_vypl.chisl_poluch is 'Число получателей (ЧислПолуч)';
+comment on column raschsv_rash_vypl.kol_vypl is 'Количество дней, выплат (КолВыпл)';
+comment on column raschsv_rash_vypl.rashod is 'Расходы, руб. (Расход)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_prav_tarif3_1_427
 (
@@ -1553,6 +1673,19 @@ create table raschsv_prav_tarif3_1_427
    nom_zap_ak_org     VARCHAR2(18 CHAR)
 );
 create sequence seq_raschsv_prav_tarif3_1_427 start with 1;
+comment on table raschsv_prav_tarif3_1_427 is 'Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 3 пункта 1 статьи 427 (ПравТариф3.1.427)';
+comment on column raschsv_prav_tarif3_1_427.id is 'Идентификатор';
+comment on column raschsv_prav_tarif3_1_427.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
+comment on column raschsv_prav_tarif3_1_427.sr_chisl_9mpr is 'Средняя численность работников / среднесписочная численность работников (чел.) по итогам 9-ти месяцев года, предшествующего текущему расчетному периоду (СрЧисл_9МПр)';
+comment on column raschsv_prav_tarif3_1_427.sr_chisl_per is 'Средняя численность работников / среднесписочная численность работников (чел.) по итогам текущего отчетного (расчетного) периода (СрЧисл_Пер)';
+comment on column raschsv_prav_tarif3_1_427.doh248_9mpr is 'Сумма доходов, определяемая в соответствии со статьей 248 Налогового кодекса Российской Федерации, всего (руб.) по итогам 9-ти месяцев года, предшествующего текущему расчетному периоду (Дох248_9МПр)';
+comment on column raschsv_prav_tarif3_1_427.doh248_per is 'Сумма доходов, определяемая в соответствии со статьей 248 Налогового кодекса Российской Федерации, всего (руб.) по итогам текущего отчетного (расчетного) периода (Дох248_Пер)';
+comment on column raschsv_prav_tarif3_1_427.doh_kr5_427_9mpr is 'Сумма доходов, определяемая исходя из критериев, указанных в пункте 5 статьи 427 Налогового кодекса Российской Федерации (руб.) по итогам 9-ти месяцев года, предшествующего текущему расчетному периоду (ДохКр5.427_9МПр)';
+comment on column raschsv_prav_tarif3_1_427.doh_kr5_427_per is 'Сумма доходов, определяемая исходя из критериев, указанных в пункте 5 статьи 427 Налогового кодекса Российской Федерации (руб.) по итогам текущего отчетного (расчетного) периода (ДохКр5.427_Пер)';
+comment on column raschsv_prav_tarif3_1_427.doh_doh5_427_9mpr is 'Доля доходов, определяемая в целях применения пункта 5 статьи 427 Налогового кодекса Российской Федерации (%) по итогам 9-ти месяцев года, предшествующего текущему расчетному периоду (ДолДох5.427_9МПр)';
+comment on column raschsv_prav_tarif3_1_427.doh_doh5_427_per is 'Доля доходов, определяемая в целях применения пункта 5 статьи 427 Налогового кодекса Российской Федерации (%) по итогам текущего отчетного (расчетного) периода (ДолДох5.427_Пер)';
+comment on column raschsv_prav_tarif3_1_427.data_zap_ak_org is 'Дата записи в реестре аккредитованных организаций (ДатаЗапАкОрг)';
+comment on column raschsv_prav_tarif3_1_427.nom_zap_ak_org is 'Номер записи в реестре аккредитованных организаций (НомЗапАкОрг)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_prav_tarif5_1_427
 (
@@ -1563,6 +1696,12 @@ create table raschsv_prav_tarif5_1_427
    dol_doh6_427       NUMBER(5, 2)
 );
 create sequence seq_raschsv_prav_tarif5_1_427 start with 1;
+comment on table raschsv_prav_tarif5_1_427 is 'Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 5 пункта 1 статьи 427 (ПравТариф5.1.427)';
+comment on column raschsv_prav_tarif5_1_427.id is 'Идентификатор';
+comment on column raschsv_prav_tarif5_1_427.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
+comment on column raschsv_prav_tarif5_1_427.doh346_15vs is 'Сумма доходов, определяемая в соответствии со статьей 346.15 Налогового кодекса Российской Федерации, всего (руб.) (Дох346.15Вс)';
+comment on column raschsv_prav_tarif5_1_427.doh6_427 is 'Сумма доходов, определяемая в целях применения пункта 6 статьи 427 Налогового кодекса Российской Федерации (руб.) (Дох6.427)';
+comment on column raschsv_prav_tarif5_1_427.dol_doh6_427 is 'Доля доходов, определяемая в целях применения пункта 6 статьи 427 Налогового кодекса Российской Федерации (%) (ДолДох6.427)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_prav_tarif7_1_427
 (
@@ -1580,6 +1719,19 @@ create table raschsv_prav_tarif7_1_427
    dol_doh_per        NUMBER(5, 2)
 );
 create sequence seq_raschsv_prav_tarif7_1_427 start with 1;
+comment on table raschsv_prav_tarif7_1_427 is 'Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 7 пункта 1 статьи 427 Налогового кодекса Российской Федерации (ПравТариф7.1.427)';
+comment on column raschsv_prav_tarif7_1_427.id is 'Идентификатор';
+comment on column raschsv_prav_tarif7_1_427.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
+comment on column raschsv_prav_tarif7_1_427.doh_vs_pred is 'Сумма доходов, всего (руб.) по итогам года, предшествующего текущему расчетному периоду (ДохВсПред)';
+comment on column raschsv_prav_tarif7_1_427.doh_vs_per is 'Сумма доходов, всего (руб.) по итогам текущего расчетного периода (ДохВсПер)';
+comment on column raschsv_prav_tarif7_1_427.doh_cel_post_pred is 'Сумма доходов в виде целевых поступлений на содержание некоммерческих организаций и ведение ими уставной деятельности, поименованной в пункте 7 статьи 427 Налогового кодекса Российской Федерации, определяемых в соответствии с пунктом 2 статьи 251 Налогового кодекса Российской Федерации (руб.) по итогам года, предшествующего текущему расчетному периоду (ДохЦелПостПред)';
+comment on column raschsv_prav_tarif7_1_427.doh_cel_post_per is 'Сумма доходов в виде целевых поступлений на содержание некоммерческих организаций и ведение ими уставной деятельности, поименованной в пункте 7 статьи 427 Налогового кодекса Российской Федерации, определяемых в соответствии с пунктом 2 статьи 251 Налогового кодекса Российской Федерации (руб.) по итогам текущего отчетного (расчетного) периода (ДохЦелПостПер)';
+comment on column raschsv_prav_tarif7_1_427.doh_grant_pred is 'Сумма доходов в виде грантов, получаемых для осуществления деятельности, поименованной в пункте 7 статьи 427 Налогового кодекса Российской Федерации, определяемых в соответствии с подпунктом 14 пункта 1 статьи 251 Налогового кодекса Российской Федерации (руб.) по итогам года, предшествующего текущему расчетному периоду (ДохГрантПред)';
+comment on column raschsv_prav_tarif7_1_427.doh_grant_per is 'Сумма доходов в виде грантов, получаемых для осуществления деятельности, поименованной в пункте 7 статьи 427 Налогового кодекса Российской Федерации, определяемых в соответствии с подпунктом 14 пункта 1 статьи 251 Налогового кодекса Российской Федерации (руб.) по итогам текущего отчетного (расчетного) периода (ДохГрантПер)';
+comment on column raschsv_prav_tarif7_1_427.doh_ek_deyat_pred is 'Сумма доходов от осуществления видов экономической деятельности, указанных в доходы от осуществления видов экономической деятельности, указанных в абзацах 17 – 21 и абзацах 34 - 36 подпункта 5 пункта 1 статьи 427 Налогового кодекса Российской Федерации (руб.) по итогам года, предшествующего текущему расчетному периоду (ДохЭкДеятПред)';
+comment on column raschsv_prav_tarif7_1_427.doh_ek_deyat_per is 'Сумма доходов от осуществления видов экономической деятельности, указанных в доходы от осуществления видов экономической деятельности, указанных в абзацах 17 – 21 и абзацах 34 – 36 подпункта 5 пункта 1 статьи 427 Налогового кодекса Российской Федерации (руб.) по итогам текущего отчетного (расчетного) периода (ДохЭкДеятПер)';
+comment on column raschsv_prav_tarif7_1_427.dol_doh_pred is 'Доля доходов, определяемая в целях применения пункта 7 статьи 427 Налогового кодекса Российской Федерации (%) по итогам года, предшествующего текущему расчетному периоду (ДолДохПред)';
+comment on column raschsv_prav_tarif7_1_427.dol_doh_per is 'Доля доходов, определяемая в целях применения пункта 7 статьи 427 Налогового кодекса Российской Федерации (%) по итогам текущего отчетного (расчетного) периода (ДолДохПер)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_prim_tarif9_1_427
 (
@@ -1587,12 +1739,18 @@ create table raschsv_sv_prim_tarif9_1_427
    raschsv_obyaz_plat_sv_id NUMBER(18)           not null
 );
 create sequence seq_raschsv_sv_prim_tarif9_427 start with 1;
+comment on table raschsv_sv_prim_tarif9_1_427 is 'Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427 Налогового кодекса Российской Федерации (СвПримТариф9.1.427)';
+comment on column raschsv_sv_prim_tarif9_1_427.id is 'Идентификатор';
+comment on column raschsv_sv_prim_tarif9_1_427.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_vyplat_it_427
 (
    raschsv_sv_prim_tarif9_427_id NUMBER(18)           not null,
    raschsv_sv_sum1_tip_id NUMBER(18)           not null
 );
+comment on table raschsv_vyplat_it_427 is 'Итого выплат для Сведений, необходимых для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427 (ВыплатИт)';
+comment on column raschsv_vyplat_it_427.raschsv_sv_prim_tarif9_427_id is 'Внешний ключ на Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427';
+comment on column raschsv_vyplat_it_427.raschsv_sv_sum1_tip_id is 'Внешний ключ на Сведения по суммам (тип 1)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sved_patent
 (
@@ -1603,6 +1761,13 @@ create table raschsv_sved_patent
    data_nach_deyst    DATE,
    data_kon_deyst     DATE
 );
+comment on table raschsv_sved_patent is 'Сведения о патенте (СведПатент)';
+comment on column raschsv_sved_patent.raschsv_sv_prim_tarif9_427_id is 'Внешний ключ на Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427';
+comment on column raschsv_sved_patent.raschsv_sv_sum1_tip_id is 'Внешний ключ на Сведения по суммам (тип 1)';
+comment on column raschsv_sved_patent.nom_patent is 'Номер патента (НомПатент)';
+comment on column raschsv_sved_patent.vyd_deyat_patent is 'Код вида предпринимательской деятельности, установленный законодательством субъекта Российской Федерации, указанный в заявлении на получение патента (ВидДеятПатент)';
+comment on column raschsv_sved_patent.data_nach_deyst is 'Дата начала действия (ДатаНачДейст)';
+comment on column raschsv_sved_patent.data_kon_deyst is 'Дата окончания действия (ДатаКонДейст)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_prim_tarif2_2_425
 (
@@ -1610,12 +1775,18 @@ create table raschsv_sv_prim_tarif2_2_425
    raschsv_obyaz_plat_sv_id NUMBER(18)           not null
 );
 create sequence seq_raschsv_sv_prim_tarif2_425 start with 1;
+comment on table raschsv_sv_prim_tarif2_2_425 is 'Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 (СвПримТариф2.2.425)';
+comment on column raschsv_sv_prim_tarif2_2_425.id is 'Идентификатор';
+comment on column raschsv_sv_prim_tarif2_2_425.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_vyplat_it_425
 (
    raschsv_sv_prim_tarif2_425_id NUMBER(18)           not null,
    raschsv_sv_sum1_tip_id NUMBER(18)           not null
 );
+comment on table raschsv_vyplat_it_425 is 'Итого выплат для Сведений, необходимых для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 (ВыплатИт)';
+comment on column raschsv_vyplat_it_425.raschsv_sv_prim_tarif2_425_id is 'Внешний ключ на Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425';
+comment on column raschsv_vyplat_it_425.raschsv_sv_sum1_tip_id is 'Внешний ключ на Сведения по суммам (тип 1)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_ino_grazd
 (
@@ -1628,6 +1799,15 @@ create table raschsv_sv_ino_grazd
    imya               VARCHAR2(60 CHAR),
    middle_name          VARCHAR2(60 CHAR)
 );
+comment on table raschsv_sv_ino_grazd is 'Сведения об иностранных гражданах, лицах без гражданства (СвИноГражд)';
+comment on column raschsv_sv_ino_grazd.raschsv_sv_prim_tarif2_425_id is 'Внешний ключ на Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425';
+comment on column raschsv_sv_ino_grazd.raschsv_sv_sum1_tip_id is 'Внешний ключ на Сведения по суммам (тип 1)';
+comment on column raschsv_sv_ino_grazd.innfl is 'ИННФЛ (ИННФЛ)';
+comment on column raschsv_sv_ino_grazd.snils is 'СНИЛС (СНИЛС)';
+comment on column raschsv_sv_ino_grazd.grazd is 'Гражданство (код страны) (Гражд)';
+comment on column raschsv_sv_ino_grazd.familia is 'Фамилия (Фамилия)';
+comment on column raschsv_sv_ino_grazd.imya is 'Имя (Имя)';
+comment on column raschsv_sv_ino_grazd.middle_name is 'Отчество (Отчество)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_prim_tarif1_3_422
 (
@@ -1635,6 +1815,9 @@ create table raschsv_sv_prim_tarif1_3_422
    raschsv_obyaz_plat_sv_id NUMBER(18)           not null
 );
 create sequence seq_raschsv_sv_prim_tarif1_422 start with 1;
+comment on table raschsv_sv_prim_tarif1_3_422 is 'Сведения, необходимые для применения положений подпункта 1 пункта 3 статьи 422 Налогового кодекса Российской Федерации (СвПримТариф1.3.422)';
+comment on column raschsv_sv_prim_tarif1_3_422.id is 'Идентификатор';
+comment on column raschsv_sv_prim_tarif1_3_422.raschsv_obyaz_plat_sv_id is 'Внешний ключ на Сводные данные об обязательствах плательщика страховых взносов';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sved_obuch
 (
@@ -1650,6 +1833,17 @@ create table raschsv_sved_obuch
    sprav_node_name    VARCHAR2(20 CHAR)
 );
 create sequence seq_raschsv_sved_obuch start with 1;
+comment on table raschsv_sved_obuch is 'Сведения об обучающихся (СведОбуч)';
+comment on column raschsv_sved_obuch.id is 'Идентификатор';
+comment on column raschsv_sved_obuch.raschsv_sv_prim_tarif1_422_id is 'Внешний ключ на Сведения, необходимые для применения положений подпункта 1 пункта 3 статьи 422';
+comment on column raschsv_sved_obuch.raschsv_sv_sum1_tip_id is 'Внешний ключ на Сведения по суммам (тип 1)';
+comment on column raschsv_sved_obuch.unik_nomer is 'Уникальный номер (УникНомер)';
+comment on column raschsv_sved_obuch.familia is 'Фамилия (Фамилия)';
+comment on column raschsv_sved_obuch.imya is 'Имя (Имя)';
+comment on column raschsv_sved_obuch.middle_name is 'Отчество (Отчество)';
+comment on column raschsv_sved_obuch.sprav_nomer is 'Номер (Номер)';
+comment on column raschsv_sved_obuch.sprav_data is 'Дата (Дата)';
+comment on column raschsv_sved_obuch.sprav_node_name is 'Имя узла (СправСтудОтряд или СправФормОбуч)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_reestr_mdo
 (
@@ -1660,12 +1854,21 @@ create table raschsv_sv_reestr_mdo
    nomer_zapis        VARCHAR2(28 CHAR)
 );
 create sequence seq_raschsv_sv_reestr_mdo start with 1;
+comment on table raschsv_sv_reestr_mdo is 'Сведения из реестра молодежных и детских объединений, пользующихся государственной поддержкой (СвРеестрМДО)';
+comment on column raschsv_sv_reestr_mdo.id is 'Идентификатор';
+comment on column raschsv_sv_reestr_mdo.raschsv_sved_obuch_id is 'Внешний ключ на Сведения об обучающихся';
+comment on column raschsv_sv_reestr_mdo.naim_mdo is 'Наименование молодежного и детского объединения, пользующегося государственной поддержкой (НаимМДО)';
+comment on column raschsv_sv_reestr_mdo.data_zapis is 'Дата записи в реестре (ДатаЗапис)';
+comment on column raschsv_sv_reestr_mdo.nomer_zapis is 'Номер записи в реестре (НомерЗапис)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_vyplat_it_422
 (
    raschsv_sv_prim_tarif1_422_id NUMBER(18)           not null,
    raschsv_sv_sum1_tip_id NUMBER(18)           not null
 );
+comment on table raschsv_vyplat_it_422 is 'Итого выплат для Сведений, необходимые для применения положений подпункта 1 пункта 3 статьи 422 (ВыплатИт)';
+comment on column raschsv_vyplat_it_422.raschsv_sv_prim_tarif1_422_id is 'Внешний ключ на Сведения, необходимые для применения положений подпункта 1 пункта 3 статьи 422';
+comment on column raschsv_vyplat_it_422.raschsv_sv_sum1_tip_id is 'Внешний ключ на Сведения по суммам (тип 1)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_pers_sv_strah_lic
 (
@@ -1691,6 +1894,27 @@ create table raschsv_pers_sv_strah_lic
    middle_name          VARCHAR2(60 CHAR)
 );
 create sequence seq_raschsv_pers_sv_strah_lic start with 1;
+comment on table raschsv_pers_sv_strah_lic is 'Персонифицированные сведения о застрахованных лицах (ПерсСвСтрахЛиц)';
+comment on column raschsv_pers_sv_strah_lic.id is 'Идентификатор';
+comment on column raschsv_pers_sv_strah_lic.declaration_data_id is 'Идентификатор декларации';
+comment on column raschsv_pers_sv_strah_lic.nom_korr is 'Номер корректировки (НомКорр)';
+comment on column raschsv_pers_sv_strah_lic.period is 'Расчетный (отчетный) период (код) (Период)';
+comment on column raschsv_pers_sv_strah_lic.otchet_god is 'Календарный год (ОтчетГод)';
+comment on column raschsv_pers_sv_strah_lic.nomer is 'Номер (Номер)';
+comment on column raschsv_pers_sv_strah_lic.sv_data is 'Дата (Дата)';
+comment on column raschsv_pers_sv_strah_lic.innfl is 'ИНН (ИННФЛ)';
+comment on column raschsv_pers_sv_strah_lic.snils is 'СНИЛС (СНИЛС)';
+comment on column raschsv_pers_sv_strah_lic.data_rozd is 'Дата рождения (ДатаРожд)';
+comment on column raschsv_pers_sv_strah_lic.grazd is 'Гражданство (код страны) (Гражд)';
+comment on column raschsv_pers_sv_strah_lic.pol is 'Пол (Пол)';
+comment on column raschsv_pers_sv_strah_lic.kod_vid_doc is 'Код вида документа, удостоверяющего личность (КодВидДок)';
+comment on column raschsv_pers_sv_strah_lic.ser_nom_doc is 'Серия и номер документа, удостоверяющего личность (СерНомДок)';
+comment on column raschsv_pers_sv_strah_lic.priz_ops is 'Признак застрахованного лица в системе обязательного пенсионного страхования (ПризОПС)';
+comment on column raschsv_pers_sv_strah_lic.priz_oms is 'Признак застрахованного лица в системе обязательного медицинского страхования (ПризОМС)';
+comment on column raschsv_pers_sv_strah_lic.priz_oss is 'Признак застрахованного лица в системе обязательного социального страхования (ПризОСС)';
+comment on column raschsv_pers_sv_strah_lic.familia is 'Фамилия (Фамилия)';
+comment on column raschsv_pers_sv_strah_lic.imya is 'Имя (Имя)';
+comment on column raschsv_pers_sv_strah_lic.middle_name is 'Отчество (Отчество)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_vypl
 (
@@ -1702,6 +1926,13 @@ create table raschsv_sv_vypl
    nachisl_sv_vs3     NUMBER(17,2)
 );
 create sequence seq_raschsv_sv_vypl start with 1;
+comment on table raschsv_sv_vypl is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица (СвВыпл)';
+comment on column raschsv_sv_vypl.id is 'Идентификатор';
+comment on column raschsv_sv_vypl.raschsv_pers_sv_strah_lic_id is 'Внешний ключ на Персонифицированные сведения о застрахованных лицах';
+comment on column raschsv_sv_vypl.sum_vypl_vs3 is 'Сумма выплат и иных вознаграждений всего за последние три месяца расчетного (отчетного) периода (СумВыплВс3)';
+comment on column raschsv_sv_vypl.vypl_ops_vs3 is 'База для исчисления страховых взносов на обязательное пенсионное страхование в пределах предельной величины всего за последние три месяца расчетного (отчетного) периода (ВыплОПСВс3)';
+comment on column raschsv_sv_vypl.vypl_ops_dog_vs3 is 'База для исчисления страховых взносов на обязательное пенсионное страхование в пределах предельной величины, в том числе по гражданско-правовым договорам, всего за последние три месяца расчетного (отчетного) периода (ВыплОПСДогВс3)';
+comment on column raschsv_sv_vypl.nachisl_sv_vs3 is 'Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину всего за последние три месяца расчетного (отчетного) периода (НачислСВВс3)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_vypl_mk
 (
@@ -1715,6 +1946,15 @@ create table raschsv_sv_vypl_mk
    nachisl_sv         NUMBER(17,2)
 );
 create sequence seq_raschsv_sv_vypl_mk start with 1;
+comment on table raschsv_sv_vypl_mk is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица (СвВыплМК)';
+comment on column raschsv_sv_vypl_mk.id is 'Идентификатор';
+comment on column raschsv_sv_vypl_mk.raschsv_sv_vypl_id is 'Внешний ключ на Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица';
+comment on column raschsv_sv_vypl_mk.mesyac is 'Месяц (Месяц)';
+comment on column raschsv_sv_vypl_mk.kod_kat_lic is 'Код категории застрахованного лица (КодКатЛиц)';
+comment on column raschsv_sv_vypl_mk.sum_vypl is 'Сумма выплат и иных вознаграждений (СумВыпл)';
+comment on column raschsv_sv_vypl_mk.vypl_ops is 'База для исчисления страховых взносов на обязательное пенсионное страхование в пределах предельной величины (ВыплОПС)';
+comment on column raschsv_sv_vypl_mk.vypl_ops_dog is 'База для исчисления страховых взносов на обязательное пенсионное страхование в пределах предельной величины, в том числе по гражданско-правовым договорам (ВыплОПСДог)';
+comment on column raschsv_sv_vypl_mk.nachisl_sv is 'Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину (НачислСВ)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_vypl_sv_dop
 (
@@ -1724,6 +1964,11 @@ create table raschsv_vypl_sv_dop
    nachisl_sv_vs3     NUMBER(17,2)
 );
 create sequence seq_raschsv_vypl_sv_dop start with 1;
+comment on table raschsv_vypl_sv_dop is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу (ВыплСВДоп)';
+comment on column raschsv_vypl_sv_dop.id is 'Идентификатор';
+comment on column raschsv_vypl_sv_dop.raschsv_pers_sv_strah_lic_id is 'Внешний ключ на Персонифицированные сведения о застрахованных лицах';
+comment on column raschsv_vypl_sv_dop.vypl_sv_vs3 is 'Сумма выплат и иных вознаграждений, на которые исчислены страховые взносы, всего за последние три месяца расчетного (отчетного) периода (ВыплСВВс3)';
+comment on column raschsv_vypl_sv_dop.nachisl_sv_vs3 is 'Сумма исчисленных страховых взносов всего за последние три месяца расчетного (отчетного) периода (НачислСВВс3)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_vypl_sv_dop_mt
 (
@@ -1735,6 +1980,13 @@ create table raschsv_vypl_sv_dop_mt
    nachisl_sv         NUMBER(17,2)
 );
 create sequence seq_raschsv_vypl_sv_dop_mt start with 1;
+comment on table raschsv_vypl_sv_dop_mt is 'Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа (ВыплСВДопМТ)';
+comment on column raschsv_vypl_sv_dop_mt.id is 'Идентификатор';
+comment on column raschsv_vypl_sv_dop_mt.raschsv_vypl_sv_dop_id is 'Внешний ключ на Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу';
+comment on column raschsv_vypl_sv_dop_mt.mesyac is 'Месяц (Месяц)';
+comment on column raschsv_vypl_sv_dop_mt.tarif is 'Тариф (Тариф)';
+comment on column raschsv_vypl_sv_dop_mt.vypl_sv is 'Сумма выплат и иных вознаграждений, на которые исчислены страховые взносы (ВыплСВ)';
+comment on column raschsv_vypl_sv_dop_mt.nachisl_sv is 'Сумма исчисленных страховых взносов (НачислСВ)';
 ------------------------------------------------------------------------------------------------------
 -- Параметры спец. отчетов деклараций
 create table declaration_subreport_params

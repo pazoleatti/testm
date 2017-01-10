@@ -44,6 +44,70 @@ import groovy.transform.Field
 
 @Field final PATTERN_DATE_FORMAT = "dd.mm.yyyy"
 
+@Field final ERROR_MESSAGE_NOT_MATCH_NODE_COUNT = "Не соответствие числа узлов для «%s»"
+//----------------------------------------------------------------------------------------------------------------------
+// Счетчик для проверки соответствия числа узлов
+// ПерсСвСтрахЛиц
+testCntNodePersSvStrahLic = 0
+
+// УплПерОПС
+testCntNodeUplPerOPS = 0
+
+// УплПерОМС
+testCntNodeUplPerOMS = 0
+
+// УплПерОПСДоп
+testCntNodeUplPerOPSDop = 0
+
+// УплПерДСО
+testCntNodeUplPerDso = 0
+
+// УплПерОСС
+testCntNodeUplPerOSS = 0
+
+// ПревРасхОСС
+testCntNodePrevRashOSS = 0
+
+// РасчСВ_ОПС_ОМС
+testCntNodeRaschSvOpsDms = 0
+
+// РасчСВ_ОСС.ВНМ
+testCntNodeRaschSvOSSVnm = 0
+
+// РасхОССЗак
+testCntNodeRaschOSSZak = 0
+
+// ВыплФинФБ
+testCntNodeVyplFinFB = 0
+
+// ПравТариф3.1.427
+testCntNodePravTarif31427 = 0
+
+// ПравТариф5.1.427
+testCntNodePravTarif51427 = 0
+
+// ПравТариф7.1.427
+testCntNodePravTarif71427 = 0
+
+// СвПримТариф9.1.427
+testCntNodePravTarif91427 = 0
+
+// СвПримТариф2.2.425
+testCntNodePravTarif22425 = 0
+
+// СвПримТариф1.3.422
+testCntNodePravTarif13422 = 0
+
+// СведПатент
+testCntNodeSvedPatent = 0
+
+// СвИноГражд
+testCntNodeSvInoGrazd = 0
+
+// СведОбуч
+testCntNodeSvObuch = 0
+//----------------------------------------------------------------------------------------------------------------------
+
 // Ограничение на число объектов в коллекциях
 @Field final MAX_COUNT_PERV_SV_STRAH_LIC = 1000
 @Field final MAX_COUNT_UPL_PER = 1000
@@ -60,7 +124,7 @@ import groovy.transform.Field
 
 @Field final NODE_NAME_RASCHET_SV = "РасчетСВ"
 @Field final NODE_NAME_OBYAZ_PLAT_SV = "ОбязПлатСВ"
-@Field final NODE_NAME_PERV_SV_STRAH_LIC = "ПерсСвСтрахЛиц"
+@Field final NODE_NAME_PERS_SV_STRAH_LIC = "ПерсСвСтрахЛиц"
 @Field final NODE_NAME_DAN_FL_POLUCH = "ДанФЛПолуч"
 @Field final NODE_NAME_FIO = "ФИО"
 @Field final NODE_NAME_SV_VYPL_SVOPS = "СвВыплСВОПС"
@@ -344,13 +408,14 @@ void parseRaschsv() {
                         if (raschetSvChildNode.name == NODE_NAME_OBYAZ_PLAT_SV) {
                             // Разбор узла ОбязПлатСВ
                             parseRaschsvObyazPlatSv(raschetSvChildNode, declarationDataId)
-                        } else if (raschetSvChildNode.name == NODE_NAME_PERV_SV_STRAH_LIC) {
+                        } else if (raschetSvChildNode.name == NODE_NAME_PERS_SV_STRAH_LIC) {
                             // Разбор узла ПерсСвСтрахЛиц
                             if (raschsvPersSvStrahLicList.size() >= MAX_COUNT_PERV_SV_STRAH_LIC) {
                                 raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
                                 raschsvPersSvStrahLicList = []
                             }
                             raschsvPersSvStrahLicList.add(parseRaschsvPersSvStrahLic(raschetSvChildNode, declarationDataId))
+                            testCntNodePersSvStrahLic++
                         }
                     }
                 } else if (raschetSvNode.name == NODE_NAME_SV_NP) {
@@ -372,7 +437,78 @@ void parseRaschsv() {
     // Сохранение Сведений о плательщике страховых взносов и Сведения о лице, подписавшем документ
     raschsvSvnpPodpisantService.insertRaschsvSvnpPodpisant(raschsvSvnpPodpisant)
 
-//    logger.error("Запись не может быть добавлена!")
+    // Тестирование соответствия числа узлов
+    if (binding.variables.containsKey("countNodes")) {
+        if (countNodes.get(NODE_NAME_PERS_SV_STRAH_LIC) != testCntNodePersSvStrahLic) {
+            // ПерсСвСтрахЛиц
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_PERS_SV_STRAH_LIC)
+
+        } else if (countNodes.get(NODE_NAME_UPL_PER_OPS) != testCntNodeUplPerOPS) {
+            // УплПерОПС
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_UPL_PER_OPS)
+        } else if (countNodes.get(NODE_NAME_UPL_PER_OPS) != testCntNodeUplPerOMS) {
+            // УплПерОМС
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_UPL_PER_OPS)
+        } else if (countNodes.get(NODE_NAME_UPL_PER_OPS_DOP) != testCntNodeUplPerOPSDop) {
+            // УплПерОПСДоп
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_UPL_PER_OPS_DOP)
+        } else if (countNodes.get(NODE_NAME_UPL_PER_DSO) != testCntNodeUplPerDso) {
+            // УплПерДСО
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_UPL_PER_OSS)
+        } else if (countNodes.get(NODE_NAME_UPL_PER_OSS) != testCntNodeUplPerOSS) {
+            // УплПерОСС
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_PREV_RASH_OSS)
+        } else if (countNodes.get(NODE_NAME_PREV_RASH_OSS) != testCntNodePrevRashOSS) {
+            // ПревРасхОСС
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_UPL_PER_DSO)
+        } else if (countNodes.get(NODE_NAME_RASCH_SV_OPS_OMS) != testCntNodeRaschSvOpsDms) {
+            // РасчСВ_ОПС_ОМС
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_RASCH_SV_OPS_OMS)
+
+        } else if (countNodes.get(NODE_NAME_RASCH_SV_OSS_VNM) != testCntNodeRaschSvOSSVnm) {
+            // РасчСВ_ОСС.ВНМ
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_RASCH_SV_OSS_VNM)
+
+        } else if (countNodes.get(NODE_NAME_RASH_OSS_ZAK) != testCntNodeRaschOSSZak) {
+            // РасхОССЗак
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_RASH_OSS_ZAK)
+
+        } else if (countNodes.get(NODE_NAME_VYPL_FIN_FB) != testCntNodeVyplFinFB) {
+            // ВыплФинФБ
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_VYPL_FIN_FB)
+
+        } else if (countNodes.get(NODE_NAME_PRAV_TARIF3_1_427) != testCntNodePravTarif31427) {
+            // ПравТариф3.1.427
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_PRAV_TARIF3_1_427)
+        } else if (countNodes.get(NODE_NAME_PRAV_TARIF5_1_427) != testCntNodePravTarif51427) {
+            // ПравТариф5.1.427
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_PRAV_TARIF5_1_427)
+        } else if (countNodes.get(NODE_NAME_PRAV_TARIF7_1_427) != testCntNodePravTarif71427) {
+            // ПравТариф7.1.427
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_PRAV_TARIF7_1_427)
+        } else if (countNodes.get(NODE_NAME_SV_PRIM_TARIF9_1_427) != testCntNodePravTarif91427) {
+            // СвПримТариф9.1.427
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_SV_PRIM_TARIF9_1_427)
+        } else if (countNodes.get(NODE_NAME_SV_PRIM_TARIF2_2_425) != testCntNodePravTarif22425) {
+            // СвПримТариф2.2.425
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_SV_PRIM_TARIF2_2_425)
+        } else if (countNodes.get(NODE_NAME_SV_PRIM_TARIF1_3_422) != testCntNodePravTarif13422) {
+            // СвПримТариф1.3.422
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_SV_PRIM_TARIF1_3_422)
+
+        } else if (countNodes.get(NODE_NAME_SVED_PATENT) != testCntNodeSvedPatent) {
+            // СведПатент
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_SVED_PATENT)
+
+        } else if (countNodes.get(NODE_NAME_SV_INO_GRAZD) != testCntNodeSvInoGrazd) {
+            // СвИноГражд
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_SV_INO_GRAZD)
+
+        } else if (countNodes.get(NODE_NAME_SVED_OBUCH) != testCntNodeSvObuch) {
+            // СведОбуч
+            logger.error(ERROR_MESSAGE_NOT_MATCH_NODE_COUNT, NODE_NAME_SVED_OBUCH)
+        }
+    }
 }
 
 /**
@@ -467,6 +603,16 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
 
             raschsvUplPerList.add(raschsvUplPer)
 
+            if (obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_OPS) {
+                testCntNodeUplPerOPS++;
+            } else if (obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_OMS) {
+                testCntNodeUplPerOMS++;
+            } else if (obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_OPS_DOP) {
+                testCntNodeUplPerOPSDop++;
+            } else if (obyazPlatSvChildNode.name == NODE_NAME_UPL_PER_DSO) {
+                testCntNodeUplPerDso++;
+            }
+
         } else if (obyazPlatSvChildNode.name == NODE_NAME_UPL_PREV_OSS) {
             //----------------------------------------------------------------------------------------------------------
             // Разбор узла УплПревОСС
@@ -482,12 +628,14 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                     raschsvUplPrevOss.sumSbUpl1m = getDouble(uplPrevOssChildNode.attributes()[UPL_PER_SUM_SV_UPL_1M])
                     raschsvUplPrevOss.sumSbUpl2m = getDouble(uplPrevOssChildNode.attributes()[UPL_PER_SUM_SV_UPL_2M])
                     raschsvUplPrevOss.sumSbUpl3m = getDouble(uplPrevOssChildNode.attributes()[UPL_PER_SUM_SV_UPL_3M])
+                    testCntNodeUplPerOSS++
                 } else if (uplPrevOssChildNode.name == NODE_NAME_PREV_RASH_OSS) {
                     // Разбор узла ПревРасхОСС
                     raschsvUplPrevOss.prevRashSvPer = getDouble(uplPrevOssChildNode.attributes()[PREV_RASH_PREV_RASH_SV_PER])
                     raschsvUplPrevOss.prevRashSv1m = getDouble(uplPrevOssChildNode.attributes()[PREV_RASH_PREV_RASH_SV_1M])
                     raschsvUplPrevOss.prevRashSv2m = getDouble(uplPrevOssChildNode.attributes()[PREV_RASH_PREV_RASH_SV_2M])
                     raschsvUplPrevOss.prevRashSv3m = getDouble(uplPrevOssChildNode.attributes()[PREV_RASH_PREV_RASH_SV_3M])
+                    testCntNodePrevRashOSS++
                 }
             }
 
@@ -611,6 +759,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             }
 
             raschsvSvOpsOmsList.add(raschsvSvOpsOms)
+            testCntNodeRaschSvOpsDms++
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_RASCH_SV_OSS_VNM) {
             //----------------------------------------------------------------------------------------------------------
@@ -655,6 +804,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
 
             raschsvOssVnm.raschsvUplSvPrevList = raschsvUplSvPrevList
             raschsvOssVnm.raschsvOssVnmKolList = raschsvOssVnmKolList
+            testCntNodeRaschSvOSSVnm++
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_RASH_OSS_ZAK) {
             //----------------------------------------------------------------------------------------------------------
@@ -679,6 +829,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             }
             raschsvRashOssZak.raschsvRashOssZakRashList = raschsvRashOssZakRashList
             raschsvRashOssZakService.insertRaschsvRashOssZak(raschsvRashOssZak)
+            testCntNodeRaschOSSZak++
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_VYPL_FIN_FB) {
             //----------------------------------------------------------------------------------------------------------
@@ -713,6 +864,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                 raschsvVyplPrichinaList.add(raschsvVyplPrichina)
             }
             raschsvVyplFinFbService.insertRaschsvVyplFinFb(raschsvVyplFinFb)
+            testCntNodeVyplFinFB++
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_PRAV_TARIF3_1_427) {
             //----------------------------------------------------------------------------------------------------------
@@ -737,6 +889,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             }
 
             raschsvPravTarif31427Service.insertRaschsvPravTarif31427(raschsvPravTarif31427)
+            testCntNodePravTarif31427++
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_PRAV_TARIF5_1_427) {
             //----------------------------------------------------------------------------------------------------------
@@ -750,6 +903,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             raschsvPravTarif51427.dolDoh6_427 = getDouble(obyazPlatSvChildNode.attributes()[PRAV_TARIF5_1_427_DOL_DOH6_427])
 
             raschsvPravTarif51427Service.insertRaschsvPravTarif51427(raschsvPravTarif51427)
+            testCntNodePravTarif51427++
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_PRAV_TARIF7_1_427) {
             //----------------------------------------------------------------------------------------------------------
@@ -770,6 +924,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
             raschsvPravTarif71427.dolDohPer = getDouble(obyazPlatSvChildNode.attributes()[PRAV_TARIF7_1_427_DOL_DOH_PER])
 
             raschsvPravTarif71427Service.insertRaschsvPravTarif71427(raschsvPravTarif71427)
+            testCntNodePravTarif71427++
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_SV_PRIM_TARIF9_1_427) {
             //----------------------------------------------------------------------------------------------------------
@@ -802,12 +957,14 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                         raschsvSvedPatent.raschsvSvSum1Tip = parseRaschsvSvSum1Tip(sumVyplatNode)
                     }
                     raschsvSvedPatentList.add(raschsvSvedPatent)
+                    testCntNodeSvedPatent++
                 }
             }
             raschsvSvPrimTarif91427.raschsvVyplatIt427 = raschsvVyplatIt427
             raschsvSvPrimTarif91427.raschsvSvedPatentList = raschsvSvedPatentList
 
             raschsvSvPrimTarif91427Service.insertRaschsvSvPrimTarif91427(raschsvSvPrimTarif91427)
+            testCntNodePravTarif91427++
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_SV_PRIM_TARIF2_2_425) {
             //----------------------------------------------------------------------------------------------------------
@@ -847,12 +1004,14 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                         }
                     }
                     raschsvSvInoGrazdList.add(raschsvSvInoGrazd)
+                    testCntNodeSvInoGrazd++
                 }
             }
             raschsvSvPrimTarif22425.raschsvVyplatIt425 = raschsvVyplatIt425
             raschsvSvPrimTarif22425.raschsvSvInoGrazdList = raschsvSvInoGrazdList
 
             raschsvSvPrimTarif22425Service.insertRaschsvSvPrimTarif22425(raschsvSvPrimTarif22425)
+            testCntNodePravTarif22425++
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_SV_PRIM_TARIF1_3_422) {
             //----------------------------------------------------------------------------------------------------------
@@ -908,12 +1067,14 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                     raschsvSvedObuch.raschsvSvReestrMdoList = raschsvSvReestrMdoList
 
                     raschsvSvedObuchList.add(raschsvSvedObuch)
+                    testCntNodeSvObuch++
                 }
             }
             raschsvSvPrimTarif13422.raschsvVyplatIt422 = raschsvVyplatIt422
             raschsvSvPrimTarif13422.raschsvSvedObuchList = raschsvSvedObuchList
 
             raschsvSvPrimTarif13422Service.insertRaschsvSvPrimTarif13422(raschsvSvPrimTarif13422)
+            testCntNodePravTarif13422++
         }
     }
 
