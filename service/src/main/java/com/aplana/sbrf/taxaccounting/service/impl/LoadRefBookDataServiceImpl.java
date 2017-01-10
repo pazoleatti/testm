@@ -69,7 +69,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private static final long REF_BOOK_EMITENT = 100L; // Эмитенты
     private static final long REF_BOOK_BOND = 84L; // Ценные бумаги
     // ФИАС
-    private static final long REF_BOOK_FIAS = 900L; // ФИАС
+    private static final long REF_BOOK_FIAS = 1010L; // ФИАС
 
     private static final String OKATO_NAME = "справочника ОКАТО";
     private static final String REGION_NAME = "справочника «Субъекты РФ»";
