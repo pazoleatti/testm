@@ -42,6 +42,17 @@ public interface LoadRefBookDataService {
     ImportCounter importRefBookDiasoft(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync);
 
     /**
+     * Загрузка ТФ справочника ФИАС
+     * @param userInfo
+     * @param loadedFileNameList
+     * @param logger
+     * @param lockId
+     * @param isAsync
+     * @return
+     */
+    ImportCounter importRefBookFias(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync);
+
+    /**
      * Проверка доступа к каталогам архива и ошибок
      * @param userInfo
      * @param logger

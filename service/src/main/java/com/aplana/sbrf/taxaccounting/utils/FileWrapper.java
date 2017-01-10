@@ -313,4 +313,10 @@ public class FileWrapper {
         }
         throw new ServiceException(ERROR_RESOURCE_INIT);
     }
+
+    public File getFile() {
+        if (file != null)
+            return file;
+        return null;
+    }
 }

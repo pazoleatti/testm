@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
+import com.github.junrar.Archive;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -67,11 +68,14 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     // Diasoft Custody
     private static final long REF_BOOK_EMITENT = 100L; // Эмитенты
     private static final long REF_BOOK_BOND = 84L; // Ценные бумаги
+    // ФИАС
+    private static final long REF_BOOK_FIAS = 900L; // ФИАС
 
     private static final String OKATO_NAME = "справочника ОКАТО";
     private static final String REGION_NAME = "справочника «Субъекты РФ»";
     private static final String ACCOUNT_PLAN_NAME = "справочника «План счетов»";
     private static final String DIASOFT_NAME = "справочников Diasoft";
+    private static final String FIAS_NAME = "справочника ФИАС";
     private static final String NSI_NAME = "справочников ЦАС НСИ";
     private static final String LOCK_MESSAGE = "Справочник «%s» заблокирован, попробуйте выполнить операцию позже!";
 
@@ -86,6 +90,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     //// Справочники АС Diasoft Custody
     // Ценные бумаги и Эмитенты
     private static final Map<String, List<Pair<Boolean, Long>>> diasoftMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+
+    //// Справочник ФИАС
+    private static final Map<String, List<Pair<Boolean, Long>>> fiasMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
 
     // Сообщения, которые не учтены в постановка
     private static final String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов %s. %s";
@@ -118,6 +125,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         nsiAccountPlanMappingMap.put("buh.{5}\\..{2}", asList(new Pair<Boolean, Long>(false, REF_BOOK_ACCOUNT_PLAN)));
         // Файл «План счетов»
         nsiAccountPlanMappingMap.put("bookkeeping\\.bookkeeping\\..{3}\\..{2}", asList(new Pair<Boolean, Long>(true, REF_BOOK_ACCOUNT_PLAN)));
+
+        // Файл «ФИАС»
+        fiasMappingMap.put("fias_xml\\.rar", asList(new Pair<Boolean, Long>(true, REF_BOOK_FIAS)));
     }
 
     /**
@@ -205,8 +215,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     fail++;
                     continue;
                 }
-                File dataFile = null;
+                //File dataFile = null;
                 try {
+
+                    /*
                     dataFile = File.createTempFile("dataFile", ".original");
                     OutputStream dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
                     InputStream currentFileInputStream = currentFile.getInputStream();
@@ -240,7 +252,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                             log(userInfo, LogData.L0_INFO, logger, lockId, msg);
                     } else {
                         log(userInfo, LogData.L15_1, logger, lockId, fileName);
-                    }
+                    }*/
 
                     // Один файл может соответствоваь нескольким справочникам
                     List<Pair<Boolean, Long>> matchList = mappingMap.get(mappingMatch(currentFile.getName(), mappingMap.keySet()));
@@ -260,21 +272,28 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         Long refBookId = refBookMapPair.getSecond();
                         localLoggerList.add(new Logger());
                         ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
+                        Archive archive = null;
                         try {
-                            is = new BufferedInputStream(new FileInputStream(dataFile));
-                            if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
-                                ZipInputStream zis = new ZipInputStream(is);
-                                ZipEntry zipFileName = zis.getNextEntry();
-                                if (zipFileName != null) { // в архиве есть файл
-                                    // дальше работаем с первым файлом архива вместо самого архива
-                                    is = zis;
-                                }
-                            }
                             // Обращение к скрипту
                             Map<String, Object> additionalParameters = new HashMap<String, Object>();
-                            additionalParameters.put("inputStream", is);
                             additionalParameters.put("fileName", fileName);
                             additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
+
+                            if (refBookMapPair.getSecond().equals(REF_BOOK_FIAS)) {
+                                archive = new Archive(currentFile.getFile());
+                                additionalParameters.put("archive", archive); // обьект для работы с RAR-архивом
+                            } else {
+                                is = currentFile.getInputStream();
+                                if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
+                                    ZipInputStream zis = new ZipInputStream(is);
+                                    ZipEntry zipFileName = zis.getNextEntry();
+                                    if (zipFileName != null) { // в архиве есть файл
+                                        // дальше работаем с первым файлом архива вместо самого архива
+                                        is = zis;
+                                    }
+                                }
+                                additionalParameters.put("inputStream", is);
+                            }
 
                             //Устанавливаем блокировку на справочник
                             List<String> lockedObjects = new ArrayList<String>();
@@ -310,6 +329,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                     refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
                                             localLoggerList.get(i), additionalParameters);
                                     IOUtils.closeQuietly(is);
+                                    try {
+                                        if (archive != null) {
+                                            archive.close();
+                                        }
+                                    } catch (IOException ioe) {
+                                        // ignore
+                                    }
                                     // Обработка результата выполнения скрипта
                                     switch (scriptStatusHolder.getScriptStatus()) {
                                         case SUCCESS:
@@ -354,6 +380,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                             // При ошибке второй раз не пытаемся загрузить
                             load = true;
                             IOUtils.closeQuietly(is);
+                            try {
+                                if (archive != null) {
+                                    archive.close();
+                                }
+                            } catch (IOException ioe) {
+                                // ignore
+                            }
                             fail++;
                             // Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
                             log(userInfo, LogData.L21, logger, lockId, e.getMessage());
@@ -362,6 +395,15 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                             if (move) {
                                 moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile,
                                         getEntries(localLoggerList), logger, lockId);
+                            }
+                        } finally {
+                            IOUtils.closeQuietly(is);
+                            try {
+                                if (archive != null) {
+                                    archive.close();
+                                }
+                            } catch (IOException ioe) {
+                                // ignore
                             }
                         }
                     }
@@ -376,14 +418,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         }
                         fail++;
                     }
-                } catch (IOException e) {
-                    throw new ServiceException(e.getLocalizedMessage(), e);
                 } finally {
                     //Снимаем блокировки
                     lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                    /*
                     if (dataFile != null) {
                         dataFile.delete();
-                    }
+                    }*/
                 }
             }
         }
@@ -530,6 +571,20 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         return importCounter;
     }
 
+    @Override
+    public ImportCounter importRefBookFias(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync) {
+        ImportCounter importCounter = new ImportCounter();
+        try {
+            importCounter = importRefBook(userInfo, logger, ConfigurationParam.FIAS_UPLOAD_DIRECTORY,
+                    fiasMappingMap, FIAS_NAME, true, loadedFileNameList, lockId, isAsync);
+        } catch (Exception e) {
+            // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
+            logger.error(IMPORT_REF_BOOK_ERROR, FIAS_NAME, e.getMessage());
+            return importCounter;
+        }
+        log(userInfo, LogData.L24, logger, lockId, importCounter.getSuccessCounter(), importCounter.getFailCounter());
+        return importCounter;
+    }
 
     public void getRefBookDiasoftFiles(List<TransportFileInfo> files, TAUserInfo userInfo, Logger logger, String lock) {
         try {
