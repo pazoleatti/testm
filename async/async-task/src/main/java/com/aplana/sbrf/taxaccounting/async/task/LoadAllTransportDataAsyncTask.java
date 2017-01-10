@@ -36,6 +36,9 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
     private LoadFormDataService loadFormDataService;
 
     @Autowired
+    private LoadRefBookDataService loadRefBookDataService;
+
+    @Autowired
     private LoadDeclarationDataService loadDeclarationDataService;
 
     @Override
@@ -61,6 +64,9 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
                 LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
         try {
             logger.info("Номер загрузки: %s", lock);
+            // Справочники
+            loadRefBookDataService.checkImportRefBookTransportData(userInfo, logger, lock, lockDate, true);
+
             loadDeclarationDataService.importDeclaration(userInfo, loadFormDataService.getTB(userInfo, logger), logger, lock, true);
         } finally {
             lockDataService.unlock(key, userInfo.getUser().getId());
