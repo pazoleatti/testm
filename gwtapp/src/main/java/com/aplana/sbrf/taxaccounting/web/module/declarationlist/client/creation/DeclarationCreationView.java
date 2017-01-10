@@ -28,11 +28,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public interface Binder extends UiBinder<PopupPanel, DeclarationCreationView> {
     }
 
-    public static final String DECLARATION_TITLE = "Создание декларации";
+    public static final String DECLARATION_TITLE = "Создание налоговой формы";
     public static final String DECLARATION_TITLE_D = "Создание уведомления";
-    public static final String DECLARATION_TYPE_TITLE = "Вид декларации:";
+    public static final String DECLARATION_TYPE_TITLE = "Вид налоговой формы:";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид:";
-    public static final String DECLARATION_CORRECTION = "Декларация будет создана в корректирующем периоде, дата сдачи корректировки: ";
+    public static final String DECLARATION_CORRECTION = "Налоговая форма будет создана в корректирующем периоде, дата сдачи корректировки: ";
     public static final String NOTIFICATION_CORRECTION = "Уведомление будет создано в корректирующем периоде, дата сдачи корректировки: ";
 
     @UiField

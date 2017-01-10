@@ -50,12 +50,12 @@ public class DeclarationDataPresenter
 	@NameToken(DeclarationDataTokens.declarationData)
     public interface MyProxy extends ProxyPlace<DeclarationDataPresenter>, Place {}
 
-    public static final String DECLARATION_UPDATE_MSG = "Область предварительного просмотра. Расчет декларации выполнен.";
+    public static final String DECLARATION_UPDATE_MSG = "Область предварительного просмотра. Расчет налоговой формы выполнен.";
     public static final String DECLARATION_UPDATE_MSG_D = "Область предварительного просмотра. Расчет уведомления выполнен.";
 
-    public static final String DECLARATION_DELETE_Q = "Вы уверены, что хотите удалить декларацию?";
+    public static final String DECLARATION_DELETE_Q = "Вы уверены, что хотите удалить налоговую форму?";
     public static final String DECLARATION_DELETE_Q_D = "Вы уверены, что хотите удалить уведомление?";
-    public static final String DECLARATION_DELETE_MSG = "Декларация удалена";
+    public static final String DECLARATION_DELETE_MSG = "Налоговая форма удалена";
     public static final String DECLARATION_DELETE_MSG_D = "Уведомление удалено";
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
@@ -173,7 +173,7 @@ public class DeclarationDataPresenter
                                 taxType = result.getTaxType();
                                 sourcesPresenter.setTaxType(taxType);
 								if (!taxType.equals(TaxType.DEAL)) {
-                                    getView().setType("Декларация");
+                                    getView().setType("Налоговая форма");
                                 } else {
                                     getView().setType("Уведомление");
                                 }
@@ -283,7 +283,7 @@ public class DeclarationDataPresenter
                             getView().updatePrintReportButtonName(type, false);
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
                             if (DeclarationDataReportType.XML_DEC.equals(type)) {
-                                getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение декларации данными":"Заполнение уведомления данными");
+                                getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение налоговой формы данными":"Заполнение уведомления данными");
                             } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
                                 getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
                                         " Идет формирование формы предварительного просмотра");
@@ -341,7 +341,7 @@ public class DeclarationDataPresenter
 	@Override
 	public void onRecalculateClicked(final Date docDate, final boolean force, final boolean cancelTask) {
 		LogCleanEvent.fire(this);
-        getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение декларации данными":"Заполнение уведомления данными");
+        getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение налоговой формы данными":"Заполнение уведомления данными");
         RecalculateDeclarationDataAction action = new RecalculateDeclarationDataAction();
 		action.setDeclarationId(declarationId);
 		action.setDocDate(docDate);
@@ -520,7 +520,7 @@ public class DeclarationDataPresenter
 	}
 
 	private void updateTitle(String declarationType) {
-		TitleUpdateEvent.fire(this, "Декларация", declarationType);
+		TitleUpdateEvent.fire(this, "Налоговая форма", declarationType);
 	}
 
     @Override

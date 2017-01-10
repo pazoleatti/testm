@@ -101,8 +101,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                         public void onSuccess(CreateDeclarationResult result) {
                             if (result.getDeclarationId() == null) {
                                 LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
-                                String title = (taxType.equals(TaxType.DEAL) ? "Создание уведомления" : "Создание декларации");
-                                String msg = (taxType.equals(TaxType.DEAL) ? "Уведомление не создано" : "Декларация не создана");
+                                String title = (taxType.equals(TaxType.DEAL) ? "Создание уведомления" : "Создание налоговой формы");
+                                String msg = (taxType.equals(TaxType.DEAL) ? "Уведомление не создано" : "Налоговоя форма не создана");
                                 Dialog.infoMessage(title, msg);
                             } else {
                                 onHide();
@@ -153,8 +153,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                 || ((taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.INCOME))
                 && (filter.getTaxOrganKpp() == null || filter.getTaxOrganKpp().isEmpty()))
         ){
-            String title = (taxType.equals(TaxType.DEAL) ? "Создание уведомления" : "Создание декларации");
-            String msg = (taxType.equals(TaxType.DEAL) ? "Заполнены не все параметры уведомления" : "Заполнены не все параметры декларации");
+            String title = (taxType.equals(TaxType.DEAL) ? "Создание уведомления" : "Создание налоговой формы");
+            String msg = (taxType.equals(TaxType.DEAL) ? "Заполнены не все параметры уведомления" : "Заполнены не все параметры налоговой формы");
             Dialog.errorMessage(title, msg);
             return false;
         }

@@ -93,14 +93,9 @@ public class GetMainMenuActionHandler extends
                     if (currentUser.hasRole(TARole.ROLE_CONTROL)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                        menu.getSubMenu().add(new MenuItem("Декларации", NUMBER_SIGN
+                        menu.getSubMenu().add(new MenuItem("Формы", NUMBER_SIGN
                                 + DeclarationListNameTokens.DECLARATION_LIST + ";"
                                 + TYPE + "=" + menu.getMeta()));
-                    }
-
-                    // отчетность МСФО
-                    if (menu.getMeta().equals(TaxType.INCOME.name()) && currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                        menu.getSubMenu().add(new MenuItem("Отчетность МСФО", NUMBER_SIGN + IfrsTokens.ifrs));
                     }
 
                     // ведение периодов
@@ -122,7 +117,7 @@ public class GetMainMenuActionHandler extends
                     if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                         menu.getSubMenu().add(
-                                new MenuItem("Назначение деклараций",
+                                new MenuItem("Назначение форм",
                                         NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
                                                 + TYPE + "=" + menu.getMeta() + ";"
                                                 + TaxFormNominationToken.isForm + "=" + true));

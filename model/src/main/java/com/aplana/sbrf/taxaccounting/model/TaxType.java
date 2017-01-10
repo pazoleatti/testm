@@ -43,7 +43,7 @@ public enum TaxType {
     /**
      * Фонды и Сборы
      */
-    PFR('F', "Фонды и Сборы", "NO_PFR");
+    PFR('F', "Страховые сборы, взносы", "NO_PFR");
 
 	private final char code;
 	private final String name;

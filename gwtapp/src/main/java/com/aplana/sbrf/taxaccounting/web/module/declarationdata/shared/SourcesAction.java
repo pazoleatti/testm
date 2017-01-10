@@ -20,6 +20,6 @@ public class SourcesAction extends UnsecuredActionImpl<SourcesResult> implements
 
     @Override
     public String getName() {
-        return "Обработка запроса на получение источников декларации";
+        return "Обработка запроса на получение источников налоговой формы";
     }
 }

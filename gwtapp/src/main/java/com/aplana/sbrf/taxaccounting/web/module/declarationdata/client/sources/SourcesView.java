@@ -251,7 +251,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     @Override
     public void setTaxType(TaxType taxType) {
         if (!taxType.equals(TaxType.DEAL)) {
-            modalWindow.setTitle("Источники декларации");
+            modalWindow.setTitle("Источники и приемники");
         } else {
             modalWindow.setTitle("Источники уведомления");
         }

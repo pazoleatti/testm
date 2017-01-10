@@ -108,7 +108,7 @@ public class DeclarationListPresenter extends
             getView().updatePageSize(taxType);
             ready = false;
 		} catch (Exception e) {
-			ErrorEvent.fire(this, "Не удалось открыть список деклараций", e);
+			ErrorEvent.fire(this, "Не удалось открыть список налоговых форм", e);
 		}
 	}
 
@@ -159,24 +159,15 @@ public class DeclarationListPresenter extends
     }
 
     private void updateTitle(TaxType taxType){
-		String description = "Список деклараций";
-        String title = "Список деклараций";
+		String description = "Список налоговых форм";
+        String title = "Список налоговых форм";
         if (taxType != null) {
             switch (taxType) {
-                case VAT:
-                    description = "Декларации по НДС";
+                case NDFL:
+                    description = "Налоговые формы по НДФЛ";
                     break;
-                case PROPERTY:
-                    description = "Декларации по налогу на имущество";
-                    break;
-                case TRANSPORT:
-                    description = "Декларации по транспортному налогу";
-                    break;
-                case INCOME:
-                    description = "Декларации по налогу на прибыль";
-                    break;
-                case DEAL:
-                    title = "Список уведомлений";
+                case PFR:
+                    title = "Список налоговых форм";
                     break;
             }
         }

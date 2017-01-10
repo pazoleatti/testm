@@ -28,7 +28,7 @@ import java.util.List;
 public class HistoryView extends PopupViewWithUiHandlers<AplanaUiHandlers> implements
         HistoryPresenter.MyView {
 
-    public static final String MODAL_WINDOW_TITLE = "Информация по налоговой форме/декларации";
+    public static final String MODAL_WINDOW_TITLE = "Информация по налоговой форме";
     public static final String MODAL_WINDOW_TITLE_D = "Информация по форме/уведомлению";
     public static final String MODAL_WINDOW_TITLE_E = "Информация по форме";
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");

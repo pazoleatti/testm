@@ -33,14 +33,14 @@ public class DeclarationListView extends
 		ViewWithUiHandlers<DeclarationListUiHandlers> implements
 		DeclarationListPresenter.MyView {
 
-    public static final String DECLARATION_HEADER = "Список деклараций";
+    public static final String DECLARATION_HEADER = "Список налоговых форм";
     public static final String DECLARATION_HEADER_D = "Список уведомлений";
-    public static final String DECLARATION_CREATE = "Создать декларацию...";
+    public static final String DECLARATION_CREATE = "Создать налоговую форму...";
     public static final String DECLARATION_CREATE_D = "Создать уведомление...";
-    public static final String DECLARATION_CREATE_TITLE = "Создание деклараций";
+    public static final String DECLARATION_CREATE_TITLE = "Создание налоговой формы";
     public static final String DECLARATION_CREATE_TITLE_D = "Создание уведомления";
 
-    public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
+    public static final String DECLARATION_TYPE_TITLE = "Вид налоговой формы";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
     public static final String DEPARTMENT_TITLE = "Подразделение";
     public static final String TAX_ORGAN_CODE_TITLE = "Налоговый орган";
@@ -58,9 +58,9 @@ public class DeclarationListView extends
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {}
 
     private GenericDataGrid.DataGridResizableHeader declarationTypeHeader;
-    private TextColumn<DeclarationDataSearchResultItem> declarationTypeColumn;
+    private Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> declarationTypeColumn;
     private GenericDataGrid.DataGridResizableHeader reportPeriodHeader;
-    private Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> reportPeriodColumn;
+    private TextColumn<DeclarationDataSearchResultItem> reportPeriodColumn;
 
 	private DeclarationDataSearchOrdering sortByColumn;
 
@@ -185,7 +185,14 @@ public class DeclarationListView extends
             };
         }
 
-        reportPeriodColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
+        reportPeriodColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return getReportPeriodName(object);
+            }
+        };
+
+        declarationTypeColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
                 new AbstractCell<DeclarationDataSearchResultItem>() {
 
                     @Override
@@ -200,20 +207,13 @@ public class DeclarationListView extends
                                 + DeclarationDataTokens.declarationData + ";"
                                 + DeclarationDataTokens.declarationId + "="
                                 + declaration.getDeclarationDataId() + "\">"
-                                + getReportPeriodName(declaration) + "</a>");
+                                + declaration.getDeclarationType() + "</a>");
                     }
                 }) {
             @Override
             public DeclarationDataSearchResultItem getValue(
                     DeclarationDataSearchResultItem object) {
                 return object;
-            }
-        };
-
-        declarationTypeColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-            @Override
-            public String getValue(DeclarationDataSearchResultItem object) {
-                return object.getDeclarationType();
             }
         };
 
@@ -234,7 +234,7 @@ public class DeclarationListView extends
         TextColumn<DeclarationDataSearchResultItem> declarationAsnuColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
-                return object.getAsnuId()!= null?asnuNames.get(object.getAsnuId()):null;
+                return object.getAsnuId() != null ? asnuNames.get(object.getAsnuId()) : null;
             }
         };
 

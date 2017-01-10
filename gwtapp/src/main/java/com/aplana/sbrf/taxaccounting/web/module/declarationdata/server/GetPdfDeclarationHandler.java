@@ -70,7 +70,7 @@ public class GetPdfDeclarationHandler extends AbstractActionHandler<GetPdfAction
                 .getType().getTaxType();
 
         Pdf pdf = new Pdf();
-        pdf.setTitle(!taxType.equals(TaxType.DEAL) ? "Список листов декларации" : "Список листов уведомления");
+        pdf.setTitle(!taxType.equals(TaxType.DEAL) ? "Список листов налоговой формы" : "Список листов уведомления");
         List<PdfPage> pdfPages = new ArrayList<PdfPage>();
         InputStream pdfData = declarationDataService.getPdfDataAsStream(declarationDataId, userInfo);
         if (pdfData != null) {

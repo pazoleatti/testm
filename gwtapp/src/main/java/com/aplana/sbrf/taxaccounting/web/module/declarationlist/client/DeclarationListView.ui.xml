@@ -43,7 +43,7 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <g:Label ui:field="titleDesc" addStyleNames="{style.titleText}, {style.marginRight5}" text="Cписок деклараций" />
+                            <g:Label ui:field="titleDesc" addStyleNames="{style.titleText}, {style.marginRight5}" text="Список налоговых форм" />
                             <g:Label text="—" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
                     </fm:Left>
@@ -51,8 +51,8 @@
                 <fm:right>
                     <fm:Right>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <style:LinkButton ui:field="create" text="Создать декларацию..."
-                                              img="resources/img/add.png" title="Создание декларации"/>
+                            <style:LinkButton ui:field="create" text="Создание налоговой формы..."
+                                              img="resources/img/add.png" title="Создать налоговую форму"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>

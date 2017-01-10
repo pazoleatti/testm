@@ -361,7 +361,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         horizontalPanel.add(label);
         horizontalPanel.add(departmentPicker);
 
-        label = getLabel("Вид декларации:");
+        label = getLabel("Вид налоговой формы:");
 
         horizontalPanel.add(label);
         horizontalPanel.add(declarationTypePicker);
@@ -414,7 +414,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel2.add(departmentPicker);
         verticalPanel3.add(correctionTag);
 
-        label = getLabel("Вид декларации:");
+        label = getLabel("Вид налоговой формы:");
         verticalPanel4.add(label);
 
         label = getLabel("Состояние:");
@@ -469,7 +469,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel2.add(departmentPicker);
         verticalPanel3.add(correctionTag);
 
-        label = getLabel("Вид декларации:");
+        label = getLabel("Вид налоговой формы:");
         verticalPanel4.add(label);
 
         label = getLabel("Состояние:");

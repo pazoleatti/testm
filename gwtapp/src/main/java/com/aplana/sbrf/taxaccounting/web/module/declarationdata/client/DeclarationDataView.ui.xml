@@ -77,7 +77,7 @@
         bottom: 0;
         right: 0;
         left: 0;
-        top: 119px;
+        top: 103px;
     }
 
     .title {
@@ -104,7 +104,7 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <style:LinkAnchor title="Перейти к списку деклараций" ui:field="returnAnchor" text="Cписок деклараций"
+                            <style:LinkAnchor title="Перейти к списку налоговых форм" ui:field="returnAnchor" text="Список налоговых форм"
                                               disableImage="true" addStyleNames="{style.titleText}"/>
                             <g:Label text="—" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
@@ -210,7 +210,7 @@
                         </style:LeftBar>
                         <g:HorizontalPanel>
                             <g:cell verticalAlignment="middle">
-                                <g:Label ui:field="dateBoxLabel" title="Дата формирования декларации" wordWrap="false" text="Дата формирования декларации:" />
+                                <g:Label ui:field="dateBoxLabel" title="Дата формирования налоговой формы" wordWrap="false" text="Дата формирования налоговой формы:" />
                             </g:cell>
                             <g:cell width="100%" verticalAlignment="middle">
                                 <d:DateMaskBoxPicker ui:field="dateBox" addStyleNames="{style.centerBlock}" />

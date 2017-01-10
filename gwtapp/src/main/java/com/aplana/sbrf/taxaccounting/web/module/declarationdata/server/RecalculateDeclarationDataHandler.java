@@ -60,7 +60,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
             } else {
                 uuid = logEntryService.save(logger.getEntries());
             }
-            throw new ServiceLoggerException("%s. Обнаружены фатальные ошибки", uuid, !TaxType.DEAL.equals(action.getTaxType()) ? "Декларация не может быть сформирована" : "Уведомление не может быть сформировано");
+            throw new ServiceLoggerException("%s. Обнаружены фатальные ошибки", uuid, !TaxType.DEAL.equals(action.getTaxType()) ? "Налоговая форма не может быть сформирована" : "Уведомление не может быть сформировано");
         }
         String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ddReportType);
         Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, action.isForce(), logger);

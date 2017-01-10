@@ -71,6 +71,6 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
 
     @Override
     public String getName() {
-        return "Создание декларации";
+        return "Создание налоговой формы";
     }
 }

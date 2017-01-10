@@ -29,7 +29,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	interface Binder extends UiBinder<Widget, DeclarationDataView> { }
 
-    public static final String DATE_BOX_TITLE = "Дата формирования декларации";
+    public static final String DATE_BOX_TITLE = "Дата формирования налоговой формы";
     public static final String DATE_BOX_TITLE_D = "Дата формирования уведомления";
 
 	@UiField
@@ -242,8 +242,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	public void setTitle(String title, boolean isTaxTypeDeal) {
 		this.title.setText(title);
 		this.title.setTitle(title);
-        type.setVisible(!isTaxTypeDeal);
-        typeLabel.setVisible(!isTaxTypeDeal);
+        type.setVisible(false);
+        typeLabel.setVisible(false);
         if (!isTaxTypeDeal) {
             dateBoxLabel.setText(DATE_BOX_TITLE + ":");
             dateBoxLabel.setTitle(DATE_BOX_TITLE);

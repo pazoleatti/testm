@@ -105,7 +105,7 @@ public class GetDeclarationDataHandler
             if (taxType.equals(taxType.DEAL)) {
                 logger.error("Уведомление выведено из действия!");
             } else {
-                logger.error("Декларация выведена из действия!");
+                logger.error("Налоговая форма выведена из действия!");
             }
             result.setUuid(logEntryService.save(logger.getEntries()));
         }
