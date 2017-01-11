@@ -2262,10 +2262,10 @@ comment on column ref_book_address.appartment is 'Номер квартиры';
 
 create table ref_book_id_tax_payer
 (
-  id        number(18),
-  person_id number(18),
-  inp       varchar2(14),
-  as_nu     number(18)
+  id        number(18) not null,
+  person_id number(18) not null,
+  inp       varchar2(14) not null,
+  as_nu     number(18) not null
 );
 comment on table ref_book_id_tax_payer is 'Идентификатор налогоплательщика';
 comment on column ref_book_id_tax_payer.id is 'Уникальный идентификатор';
