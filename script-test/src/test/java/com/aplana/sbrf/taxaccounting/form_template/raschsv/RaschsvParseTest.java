@@ -1,20 +1,17 @@
 package com.aplana.sbrf.taxaccounting.form_template.raschsv;
 
-import com.aplana.sbrf.taxaccounting.form_template.ndfl.MapXmlToTableTest;
+import com.aplana.sbrf.taxaccounting.form_template.ndfl.NdflPersonScriptTest;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.apache.commons.collections4.map.HashedMap;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -63,7 +60,7 @@ public class RaschsvParseTest extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(MapXmlToTableTest.class);
+        return getDefaultScriptTestMockHelper(NdflPersonScriptTest.class);
     }
 
 
@@ -100,7 +97,7 @@ public class RaschsvParseTest extends ScriptTestBase {
     @Test
     public void create() throws IOException {
 
-        InputStream inputStream = MapXmlToTableTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/raschsv/raschsv.xml");
+        InputStream inputStream = NdflPersonScriptTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/raschsv/raschsv.xml");
 
         Map<String, Object> param = new HashedMap<String, Object>();
 

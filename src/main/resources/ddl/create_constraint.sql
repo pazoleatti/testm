@@ -497,20 +497,20 @@ alter table declaration_subreport_params add constraint fk_decl_subrep_pars_subr
 -- ФИАС
 ------------------------------------------------------------------------------------------------------------------------------
 -- первичные ключи
-alter table fias_operstat add constraint pk_fias_operstat primary key (operstatid);
-alter table fias_socrbase add constraint pk_fias_sorcbase primary key (kod_t_st);
+alter table fias_operstat add constraint pk_fias_operstat primary key (id);
+alter table fias_socrbase add constraint pk_fias_sorcbase primary key (id);
  
-alter table fias_addrobj add constraint pk_fias_addrobj primary key (aoguid);
-alter table fias_house add constraint pk_fias_house primary key (houseguid);
-alter table fias_houseint add constraint pk_fias_houseint primary key (intguid);
-alter table fias_room add constraint pk_fias_room primary key (roomguid);
+alter table fias_addrobj add constraint pk_fias_addrobj primary key (id);
+alter table fias_house add constraint pk_fias_house primary key (id);
+alter table fias_houseint add constraint pk_fias_houseint primary key (id);
+alter table fias_room add constraint pk_fias_room primary key (id);
 
 -- внешние ключи
-alter table fias_addrobj add constraint fk_fias_addrobj_parentid foreign key (parentguid) references fias_addrobj (aoguid) on delete cascade;
-alter table fias_addrobj add constraint fk_fias_addrobj_operstatus foreign key (operstatus) references fias_operstat (operstatid);
-alter table fias_house add constraint fk_fias_house_aoguid foreign key (aoguid) references fias_addrobj (aoguid) on delete cascade;
-alter table fias_houseint add constraint fk_fias_houseint_aoguid foreign key (aoguid) references fias_addrobj (aoguid) on delete cascade;
-alter table fias_room add constraint fk_fias_room_houseguid foreign key (houseguid) references fias_house (houseguid) on delete cascade;
+alter table fias_addrobj add constraint fk_fias_addrobj_parentid foreign key (parentguid) references fias_addrobj (id) on delete cascade;
+alter table fias_addrobj add constraint fk_fias_addrobj_operstatus foreign key (operstatus) references fias_operstat (id);
+alter table fias_house add constraint fk_fias_house_aoguid foreign key (aoguid) references fias_addrobj (id) on delete cascade;
+alter table fias_houseint add constraint fk_fias_houseint_aoguid foreign key (aoguid) references fias_addrobj (id) on delete cascade;
+alter table fias_room add constraint fk_fias_room_houseguid foreign key (houseguid) references fias_house (id) on delete cascade;
 
 -- проверки
 alter table fias_addrobj add constraint chk_fias_addrobj_centstatus check (centstatus between 0 and 3);

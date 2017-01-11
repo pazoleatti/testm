@@ -2015,20 +2015,22 @@ comment on column declaration_subreport_params.required is 'Признак об�
 -- Справочники
 create table fias_operstat
 (
-    operstatid number(10) not null,
+    id number(10) not null,
     name       varchar2(100 char) not null
 );
 comment on table fias_operstat  is 'Справочник "Статус действия"';
-comment on column fias_operstat.operstatid  is 'Идентификатор статуса (ключ)';
+comment on column fias_operstat.id  is 'Идентификатор статуса (ключ)';
 comment on column fias_operstat.name  is 'Наименование';
 
 create table fias_socrbase
 (
+    id number(10) not null,
     scname   varchar2(10 char),
     socrname varchar2(60 char) not null,
     kod_t_st varchar2(4 char) not null
 );
 comment on table fias_socrbase  is 'Справочник "Типы адресных объектов"';
+comment on column fias_socrbase.id  is 'Суррогатный ключ';
 comment on column fias_socrbase.scname  is 'Краткое наименование типа объекта';
 comment on column fias_socrbase.socrname  is 'Полное наименование типа объекта';
 comment on column fias_socrbase.kod_t_st  is 'Ключевое поле';
@@ -2038,7 +2040,7 @@ comment on column fias_socrbase.kod_t_st  is 'Ключевое поле';
 -- Сведения
 create table fias_addrobj
 (
-    aoguid varchar2(36 char) not null,
+    id number(18) not null,
     formalname varchar2(120 char) not null,
     regioncode varchar2(2 char) not null,
     autocode varchar2(1 char) not null,
@@ -2057,10 +2059,10 @@ create table fias_addrobj
     divtype number(1) not null,
     offname varchar2(120 char),
     postalcode varchar2(6 char),
-    parentguid varchar2(36 char)
+    parentguid number(18),
 );
 
-comment on column fias_addrobj.aoguid is 'Глобальный уникальный идентификатор адресного объекта';
+comment on column fias_addrobj.id is 'Глобальный уникальный идентификатор адресного объекта';
 comment on column fias_addrobj.formalname is 'Формализованное наименование';
 comment on column fias_addrobj.regioncode is 'Код региона';
 comment on column fias_addrobj.autocode is 'Код автономии';
@@ -2083,8 +2085,8 @@ comment on column fias_addrobj.parentguid is 'Идентификатор объ�
 
 create table fias_house
 (
-    houseguid  varchar2(36 char) not null,
-    aoguid     varchar2(36 char) not null,
+    id number(18) not null,
+    aoguid     number(18) not null,
     eststatus  number(1) not null,
     strstatus  number(1) not null,
     statstatus number(2) not null,
@@ -2096,8 +2098,8 @@ create table fias_house
 
 );
 comment on table fias_house  is 'Сведения по отдельным зданиям, сооружениям';
-comment on column fias_house.houseguid is 'Глобальный уникальный идентификатор дома';
-comment on column fias_house.aoguid is 'Guid записи родительского объекта (улицы, города, населенного пункта и т.п.)';
+comment on column fias_house.id is 'Глобальный уникальный идентификатор дома';
+comment on column fias_house.aoguid is 'id записи родительского объекта (улицы, города, населенного пункта и т.п.)';
 comment on column fias_house.eststatus is 'Признак владения: 0 – Не определено, 1 – Владение, 2 – Дом, 3 – Домовладение';
 comment on column fias_house.strstatus is 'Признак строения: 0 – Не определено, 1 – Строение, 2 – Сооружение, 3 – Литер';
 comment on column fias_house.statstatus is 'Состояние дома';
@@ -2109,8 +2111,8 @@ comment on column fias_house.strucnum is 'Номер строения';
 
 create table fias_houseint
 (
-    intguid    varchar2(36 char) not null,
-    aoguid     varchar2(36 char) not null,
+    id     number(18) not null,
+    aoguid      number(18) not null,
     intstart   number(10) not null,
     intend     number(10) not null,
     intstatus  number(1) not null,
@@ -2120,7 +2122,7 @@ create table fias_houseint
 comment on table fias_houseint  is 'Интервалы домов';
 comment on column fias_houseint.intstart is 'Значение начала интервала';
 comment on column fias_houseint.intend is 'Значение окончания интервала';
-comment on column fias_houseint.intguid is 'Глобальный уникальный идентификатор интервала домов';
+comment on column fias_houseint.id is 'Глобальный уникальный идентификатор интервала домов';
 comment on column fias_houseint.aoguid is 'Идентификатор объекта родительского объекта (улицы, города, населенного пункта и т.п.)';
 comment on column fias_houseint.intstatus is 'Статус интервала: 0 – Не определено, 1 – Обычный, 2 – Четный, 3 – Нечетный';
 comment on column fias_houseint.counter is 'Счетчик записей по интервалам зданий, сооружений для формирования классификационного кода';
@@ -2129,8 +2131,8 @@ comment on column fias_houseint.postalcode is 'Почтовый индекс';
 
 create table fias_room
 (
-    roomguid   varchar2(36 char) not null,
-    houseguid  varchar2(36 char) not null,
+    id   number(18) not null,
+    houseguid   number(18) not null,
     regioncode varchar2(2 char) not null,
     flatnumber varchar2(50 char) not null,
     flattype   number(10) not null,
@@ -2140,7 +2142,7 @@ create table fias_room
     postalcode varchar2(6 char)
 );
 comment on table fias_room  is 'Сведения по помещениям';
-comment on column fias_room.roomguid is 'Глобальный уникальный идентификатор помещения';
+comment on column fias_room.id is 'Глобальный уникальный идентификатор помещения';
 comment on column fias_room.houseguid is 'Глобальный уникальный идентификатор родительского объекта (дома)';
 comment on column fias_room.regioncode is 'Код региона';
 comment on column fias_room.flatnumber is 'Номер квартиры, офиса и прочего';

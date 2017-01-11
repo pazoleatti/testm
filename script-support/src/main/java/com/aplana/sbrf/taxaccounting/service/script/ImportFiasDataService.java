@@ -11,9 +11,14 @@ import java.util.Map;
 public interface ImportFiasDataService {
 
     /**
-     *
+     * Пакетная вставка записей в справочник
      */
     void insertRecords(String table, List<Map<String, Object>> records);
+
+    /**
+     * Удаляет данные из всех справочников
+     */
+    void clearAll();
 
 
 }

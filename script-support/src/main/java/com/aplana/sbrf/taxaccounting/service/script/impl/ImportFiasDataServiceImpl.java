@@ -24,4 +24,9 @@ public class ImportFiasDataServiceImpl implements ImportFiasDataService {
         fiasRefBookDao.insertRecordsBatch(table, records);
     }
 
+    @Override
+    public void clearAll() {
+        fiasRefBookDao.clearAll();
+    }
+
 }
