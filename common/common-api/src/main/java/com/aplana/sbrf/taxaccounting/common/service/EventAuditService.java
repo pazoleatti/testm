@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.common.model.UserInfo;
  * Конкретная реализация представляет из себя ejb, которая получается через lookup по jndi-имени.
  * Это исключает необходимость указания модуля core как зависимости, а также позволяет использовать разные реализации
  * Пример lookup в контексте Spring. Можно также использовать Remote интерфейс
- * <jee:local-slsb id="commonService" jndi-name="ejblocal:{имя приложения 'Учет налогов' развернутое на сервере приложений}/common-core.jar/CommonServiceBean#com.aplana.sbrf.taxaccounting.common.service.CommonServiceLocal" business-interface="com.aplana.sbrf.taxaccounting.common.service.CommonService" lookup-home-on-startup="true"/>
+ * <jee:local-slsb id="commonService" jndi-name="ejblocal:{имя приложения, развернутое на сервере приложений}/common-core.jar/CommonServiceBean#com.aplana.sbrf.taxaccounting.common.service.CommonServiceLocal" business-interface="com.aplana.sbrf.taxaccounting.common.service.CommonService" lookup-home-on-startup="true"/>
  * Далее этот сервис можно использовать как спринговый бин. Для dev-мода, эту строку надо убрать, но при этом в контексте Spring должен существовать какой то бин-заглушка этого интерфейса
  * @author dloshkarev
  */

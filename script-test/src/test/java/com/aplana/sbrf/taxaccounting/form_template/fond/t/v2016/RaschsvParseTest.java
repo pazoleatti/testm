@@ -135,6 +135,6 @@ public class RaschsvParseTest extends ScriptTestBase {
         testHelper.setImportFileInputStream(inputStream);
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE, param);
 
-        checkLogger();
+        //checkLogger();
     }
 }

@@ -18,7 +18,7 @@
 
 	<g:HorizontalPanel addStyleNames="{style.wrapper}">
         <g:cell horizontalAlignment="center" verticalAlignment="middle" width="100%" height="100%" >
-            <g:HTML ui:field="title" addStyleNames="{style.title} aplana-NoSelectable">Автоматизированная система «Учет налогов»</g:HTML>
+            <g:HTML ui:field="title" addStyleNames="{style.title} aplana-NoSelectable">Автоматизированная система «Учет налогов»<br />подсистема «НДФЛ, Фонды и Сборы»</g:HTML>
         </g:cell>
 	</g:HorizontalPanel>
 

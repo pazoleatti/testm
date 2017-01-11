@@ -123,7 +123,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		b.put("logger", logger);
         b.put("userInfo", userInfo);
 		b.put("declarationData", declarationData);
-        String applicationVersion = "АС Учет налогов";
+        String applicationVersion = "ФП «НДФЛ, Фонды и Сборы»";
         if (versionInfoProperties != null) {
             applicationVersion += " " + versionInfoProperties.getProperty("version");
         }

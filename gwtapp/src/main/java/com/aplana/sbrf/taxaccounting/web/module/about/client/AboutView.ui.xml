@@ -11,7 +11,7 @@
 
     <g:HTMLPanel addStyleNames="{style.box}">
 		<h2>О программе</h2>
-        <p>Автоматизированная система "Учет Налогов"</p>
+        <p>Автоматизированная система "Учет Налогов"<br />подсистема "НДФЛ, Фонды и Сборы"</p>
         <g:FlowPanel ui:field="version" />
 	</g:HTMLPanel>
 </ui:UiBinder> 

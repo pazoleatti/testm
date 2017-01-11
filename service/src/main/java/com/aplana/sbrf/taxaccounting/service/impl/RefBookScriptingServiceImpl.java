@@ -150,7 +150,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         bindings.put("logger", scriptLogger);
         bindings.put("userInfo", userInfo);
         bindings.put("refBookFactory", refBookFactory);
-        String applicationVersion = "АС Учет налогов";
+        String applicationVersion = "ФП «НДФЛ, Фонды и Сборы»";
         if (versionInfoProperties != null) {
             applicationVersion += " " + versionInfoProperties.getProperty("version");
         }

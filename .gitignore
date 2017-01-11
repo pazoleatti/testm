@@ -14,3 +14,4 @@ bin
 *~
 .gradle
 libpeerconnection.log
+*.ipr
