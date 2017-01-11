@@ -179,7 +179,12 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (802,'Типы операций по сделкам',1,0,0,null);
 
 -- Фиас
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (1010,'Справочник ФИАС',0,0,1,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1010,'Статус действия',0,0,1,null, 'fias_operstat');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1020,'Типы адресных объектов',0,0,1,null, 'fias_socrbase');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1030,'Реестр адресообразующих объектов',0,0,1,null, 'fias_addrobj');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1040,'Реестр объектов адресации',0,0,1,null, 'fias_house');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1050,'Интервалы домов',0,0,1,null, 'fias_houseint');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1060,'Сведения по помещениям',0,0,1,null, 'fias_room');
 
 UPDATE ref_book SET is_versioned = 0 WHERE id IN (30, 93, 207, 95, 74, 103, 94, 105, 104, 108, 204, 205, 400, 401, 510, 511, 106);
 
