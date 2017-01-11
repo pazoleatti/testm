@@ -1,4 +1,4 @@
-package form_template.raschsv
+package form_template.fond.t.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException

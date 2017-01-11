@@ -57,13 +57,11 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public static final String COL_FAMILIA = "familia";
     public static final String COL_IMYA = "imya";
     public static final String COL_MIDDLE_NAME = "middle_name";
-    public static final String COL_RASCHSV_SV_VYPL_ID = "raschsv_sv_vypl_id";
-    public static final String COL_RASCHSV_VYPL_SV_DOP_ID = "raschsv_vypl_sv_dop_id";
 
     public static final String[] COLUMNS = {COL_ID, COL_DECLARATION_DATA_ID, COL_NOM_KORR, COL_PERIOD, COL_OTCHET_GOD,
             COL_NOMER, COL_SV_DATA, COL_INNFL, COL_SNILS, COL_DATA_ROZD, COL_GRAZD, COL_POL, COL_KOD_VID_DOC, COL_SER_NOM_DOC,
-            COL_PRIZ_OPS, COL_PRIZ_OMS, COL_PRIZ_OSS, COL_FAMILIA, COL_IMYA, COL_MIDDLE_NAME, COL_RASCHSV_SV_VYPL_ID,
-            COL_RASCHSV_VYPL_SV_DOP_ID};
+            COL_PRIZ_OPS, COL_PRIZ_OMS, COL_PRIZ_OSS, COL_FAMILIA, COL_IMYA, COL_MIDDLE_NAME
+    };
 
     public Long getDeclarationDataId() { return declarationDataId; }
     public void setDeclarationDataId(Long declarationDataId) { this.declarationDataId = declarationDataId; }

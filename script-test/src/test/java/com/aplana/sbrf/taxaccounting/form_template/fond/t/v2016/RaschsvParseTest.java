@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.raschsv;
+package com.aplana.sbrf.taxaccounting.form_template.fond.t.v2016;
 
 import com.aplana.sbrf.taxaccounting.form_template.ndfl.MapXmlToTableTest;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -100,7 +100,7 @@ public class RaschsvParseTest extends ScriptTestBase {
     @Test
     public void create() throws IOException {
 
-        InputStream inputStream = MapXmlToTableTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/raschsv/raschsv.xml");
+        InputStream inputStream = MapXmlToTableTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/fond/t/v2016/raschsv.xml");
 
         Map<String, Object> param = new HashedMap<String, Object>();
 
