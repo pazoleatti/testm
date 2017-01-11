@@ -527,6 +527,7 @@ alter table fias_houseint add constraint chk_fias_houseint_intstatus check (ints
 alter table fias_room add constraint chk_fias_room_livestatus check (livestatus in (0,1));
 --------------------------------------------------------------------------------------------------------------------------
 -- Справочники физических лиц и статусов налогоплательщиков
+-- с учетом изменений по задаче SBRFNDFL-132
 --------------------------------------------------------------------------------------------------------------------------
 alter table ref_book_taxpayer_state add constraint pk_ref_book_taxpayer_state primary key (id);
 alter table ref_book_person add constraint pk_ref_book_person primary key (id);
@@ -549,3 +550,12 @@ alter table ref_book_person add constraint chk_ref_book_person_status check (sta
 alter table ref_book_address add constraint chk_ref_book_address_type check (address_type in (0,1));
 alter table ref_book_address add constraint chk_ref_book_address_addr_n_rf check ((address_type=1 and region_code is null and country_id is not null) or (address_type=0));
 alter table ref_book_address add constraint chk_ref_book_address_addr_rf check ((address_type=0 and region_code is not null and country_id is null) or (address_type=1));
+
+alter table ref_book_person add constraint unq_ref_book_person_inn unique (inn);
+alter table ref_book_person add constraint unq_ref_book_person_inn_f unique (inn_foreign);
+alter table ref_book_person add constraint unq_ref_book_person_snils unique (snils);
+
+alter table ref_book_id_tax_payer add constraint pk_ref_book_id_tax_payer primary key (id);
+alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
+alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_record (id);
+alter table ref_book_id_tax_payer add constraint unq_ref_book_id_tax_payer_inp unique (inp);

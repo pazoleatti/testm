@@ -2151,6 +2151,7 @@ comment on column fias_room.roomtypeid is 'Тип комнаты';
 comment on column fias_room.postalcode is 'Почтовый индекс';
 --------------------------------------------------------------------------------------------------------------------------
 -- Справочники физических лиц и статусов налогоплательщиков
+-- с учетом изменений по задаче SBRFNDFL-132
 --------------------------------------------------------------------------------------------------------------------------
 create table ref_book_taxpayer_state
 (
@@ -2170,14 +2171,13 @@ create table ref_book_person
   last_name varchar2(60 char) not null,
   first_name varchar2(60 char) not null,
   middle_name varchar2(60 char),
-  sex number(1) not null,
+  sex number(1),
   inn varchar2(12 char),
   inn_foreign varchar2(50 char),
   snils varchar2(14 char),
   taxpayer_state number(18),
-  inp varchar2(14 char),
   birth_date date not null,
-  birth_place varchar2(255 char) not null,
+  birth_place varchar2(255 char),
   citizenship number(18),
   address number(18),
   pension number(1) default 2 not null,
@@ -2217,9 +2217,9 @@ create table ref_book_id_doc
   id number(18) not null,
   person_id number(18),
   doc_id number(18) not null,
-  doc_number varchar2(25 char),
+  doc_number varchar2(25 char) not null,
   issued_by varchar2(255 char),
-  issued_date date not null
+  issued_date date
 );
 
 comment on table ref_book_id_doc is 'Документ, удостоверяющий личность';
@@ -2259,5 +2259,19 @@ comment on column ref_book_address.street is 'Улица (проспект, пе
 comment on column ref_book_address.house is 'Номер дома (владения)';
 comment on column ref_book_address.build is 'Номер корпуса (строения)';
 comment on column ref_book_address.appartment is 'Номер квартиры';
+
+create table ref_book_id_tax_payer
+(
+  id        number(18),
+  person_id number(18),
+  inp       varchar2(14),
+  as_nu     number(18)
+);
+comment on table ref_book_id_tax_payer is 'Идентификатор налогоплательщика';
+comment on column ref_book_id_tax_payer.id is 'Уникальный идентификатор';
+comment on column ref_book_id_tax_payer.person_id is 'Ссылка на физическое лицо';
+comment on column ref_book_id_tax_payer.inp is 'Уникальный неизменяемый цифровой идентификатор налогоплательщика';
+comment on column ref_book_id_tax_payer.as_nu is 'Ссылка на запись справочника (100) Справочник АСНУ';
+
 --------------------------------------------------------------------------------------------------------------------------
 
