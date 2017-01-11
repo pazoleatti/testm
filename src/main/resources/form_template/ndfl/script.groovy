@@ -1,13 +1,17 @@
 package form_template.ndfl
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import groovy.util.slurpersupport.NodeChild
+
+import javax.xml.namespace.QName
+import javax.xml.stream.XMLInputFactory
+import javax.xml.stream.events.Characters
+import javax.xml.stream.events.XMLEvent
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -21,18 +25,43 @@ void importData() {
         return
     }
 
-    def root = new XmlSlurper().parse(ImportInputStream)
+    //Каждый элемент ИнфЧасть содержит данные об одном физ лице, максимальное число элементов в документе 15000
+    QName infoPartName = QName.valueOf('ИнфЧасть')
 
-    if (root == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
+    //Используем StAX парсер для импорта
+    def xmlFactory = XMLInputFactory.newInstance()
+    xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
+    xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
+    def reader = xmlFactory.createXMLEventReader(ImportInputStream)
 
-    def servicePart = root.'СлЧасть'
 
-    def infoParts = root.'ИнфЧасть'
+    def sb;
+    try {
+        while (reader.hasNext()) {
+            XMLEvent event = reader.nextEvent()
 
-    infoParts.each {
-        processInfoPart(it)
+            if (event.isCharacters() && ((Characters) event).isWhiteSpace()) {
+                continue;
+            }
+
+            if (!event.isStartElement() && !event.isEndElement()){
+                continue;
+            }
+
+            //Последовательно обрабатываем все элементы ИнфЧасть в документе
+            if (event.isStartElement() && event.getName().equals(infoPartName)) {
+                sb = new StringBuilder()
+            }
+
+            sb?.append(event.toString())
+
+            if (event.isEndElement() && event.getName().equals(infoPartName)) {
+                def infoPart = new XmlSlurper().parseText(sb.toString())
+                processInfoPart(infoPart)
+            }
+        }
+    } finally {
+        reader?.close()
     }
 }
 
