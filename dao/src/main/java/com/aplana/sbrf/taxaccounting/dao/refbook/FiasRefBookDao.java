@@ -12,6 +12,16 @@ import java.util.Map;
  */
 public interface FiasRefBookDao {
 
+    /**
+     * Пакетное добавление строк справочника ФИАС
+     * @param tableName имя таблицы справочника
+     * @param records пакет строк, количество строк в пакете определяется в скрипте загрузки
+     */
     void insertRecordsBatch(String tableName, List<Map<String, Object>> records);
+
+    /**
+     * Удалить данныее из всех таблиц ФИАС
+     */
+    void clearAll();
 
 }

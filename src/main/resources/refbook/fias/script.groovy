@@ -1,7 +1,9 @@
 package refbook.fias
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookSimpleReadOnly
+import com.github.junrar.rarfile.FileHeader
 import groovy.transform.Field
 
 import javax.xml.namespace.QName
@@ -19,27 +21,81 @@ switch (formDataEvent) {
 }
 
 @Field
-def BATCH_SIZE_MAX = 100
+def BATCH_SIZE_MAX = 1000
 
 void importData() {
+    List<FileHeader> fileHeaders = archive.getFileHeaders();
+
+    //Очистка данных перед импортом
+    importFiasDataService.clearAll()
+
+    //Строим карту Guid адресных объектов, заранее так как будет нужна иерархия
+    def addrObjInputStream = getInputStream(fileHeaders, "AS_ADDROBJ_")
+    def addressObjectGuidsMap = buildAddressObjectGuidsMap(addrObjInputStream);
+
+    def houseGuidsMap = [:]
+
+    //Начинаем заливать данные из таблиц справочника
+    startImport(getInputStream(fileHeaders, "AS_OPERSTAT_"),
+            QName.valueOf('OperationStatus'),
+            RefBookSimpleReadOnly.FIAS_OPERSTAT_TABLE_NAME,
+            { generatedId, attr ->
+                operationStatusRowMapper(generatedId, attr)
+            })
+
+    startImport(getInputStream(fileHeaders, "AS_SOCRBASE_"),
+            QName.valueOf('AddressObjectType'),
+            RefBookSimpleReadOnly.FIAS_SOCRBASE_TABLE_NAME,
+            { generatedId, attr ->
+                addressObjectTypeRowMapper(generatedId, attr)
+            })
+
+    startImport(getInputStream(fileHeaders, "AS_ADDROBJ_"),
+            QName.valueOf('Object'),
+            RefBookSimpleReadOnly.FIAS_ADDR_OBJECT_TABLE_NAME,
+            { generatedId, attr ->
+                addressObjectRowMapper(addressObjectGuidsMap, attr) //здесь для получения id используем подготовленную карту
+            })
+
+    startImport(getInputStream(fileHeaders, "AS_HOUSE_"),
+            QName.valueOf('House'),
+            RefBookSimpleReadOnly.FIAS_HOUSE_TABLE_NAME,
+            { generatedId, attr ->
+                houseRowMapper(generatedId, addressObjectGuidsMap, houseGuidsMap, attr)
+            })
+
+    startImport(getInputStream(fileHeaders, "AS_HOUSEINT_"),
+            QName.valueOf('HouseInterval'),
+            RefBookSimpleReadOnly.FIAS_HOUSEINT_TABLE_NAME,
+            { generatedId, attr ->
+                houseIntervalRowMapper(generatedId, addressObjectGuidsMap, attr)
+            })
+
+    startImport(getInputStream(fileHeaders, "AS_ROOM_"),
+            QName.valueOf('Room'),
+            RefBookSimpleReadOnly.FIAS_ROOM_TABLE_NAME,
+            { generatedId, attr ->
+                roomRowMapper(generatedId, houseGuidsMap, attr)
+            })
+
+}
+
+void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
 
     println "Fias data will be import now!"
 
     def time = System.currentTimeMillis()
     def rowBuffer = new ArrayList<Map<String, ?>>();
 
-    def tableName;
-    def importedElementName;
-    def rowMapper;
-
+    //Используем StAX парсер для импорта
     def xmlFactory = XMLInputFactory.newInstance()
     xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
     xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
 
-    def reader = xmlFactory.createXMLEventReader(inputStream)
-
+    def reader = xmlFactory.createXMLEventReader(fiasInputStream)
+    def i = 0;
     try {
-        def i = 0;
+
         while (reader.hasNext()) {
             XMLEvent event = reader.nextEvent()
 
@@ -48,53 +104,18 @@ void importData() {
                 if (event.getName().equals(importedElementName)) {
 
                     Map attributeMap = getAttributesMap(event)
-                    rowBuffer.add(rowMapper(attributeMap))
+                    Map rowMap = rowMapper(i.longValue(), attributeMap)
+
+                    rowBuffer.add(rowMap)
                     i++;
                     //Проверяем если обработали пакет строк размером BATCH_SIZE, то кидаем в сервис и очищаем список
                     if ((i % BATCH_SIZE_MAX) == 0) {
                         importFiasDataService.insertRecords(tableName, rowBuffer)
                         rowBuffer.clear();
                     }
-                    continue;
-                }
 
-                //В зависимости от корневого элемента определяем какие элементы будем разбирать и куда их загружать
-                if (event.getName().equals(QName.valueOf('OperationStatuses'))) {
-                    tableName = RefBookSimpleReadOnly.FIAS_OPERSTAT_TABLE_NAME
-                    importedElementName = QName.valueOf('OperationStatus')
-                    rowMapper = { attr ->
-                        operationStatusRowMapper(attr)
-                    }
-                } else if (event.getName().equals(QName.valueOf('AddressObjectTypes'))) {
-                    tableName = RefBookSimpleReadOnly.FIAS_SOCRBASE_TABLE_NAME
-                    importedElementName = QName.valueOf('AddressObjectType')
-                    rowMapper = { attr ->
-                        addressObjectTypeRowMapper(attr)
-                    }
-                } else if (event.getName().equals(QName.valueOf('AddressObjects'))) {
-                    tableName = RefBookSimpleReadOnly.FIAS_ADDR_OBJECT_TABLE_NAME
-                    importedElementName = QName.valueOf('Object')
-                    rowMapper = { attr ->
-                        addressObjectRowMapper(attr)
-                    }
-                } else if (event.getName().equals(QName.valueOf('Houses'))) {
-                    tableName = RefBookSimpleReadOnly.FIAS_HOUSE_TABLE_NAME
-                    importedElementName = QName.valueOf('House')
-                    rowMapper = { attr ->
-                        houseRowMapper(attr)
-                    }
-                } else if (event.getName().equals(QName.valueOf('HouseIntervals'))) {
-                    tableName = RefBookSimpleReadOnly.FIAS_HOUSEINT_TABLE_NAME
-                    importedElementName = QName.valueOf('HouseInterval')
-                    rowMapper = { attr ->
-                        houseIntervalRowMapper(attr)
-                    }
-                } else if (event.getName().equals(QName.valueOf('Rooms'))) {
-                    tableName = RefBookSimpleReadOnly.FIAS_ROOM_TABLE_NAME
-                    importedElementName = QName.valueOf('Room')
-                    rowMapper = { attr ->
-                        roomRowMapper(attr)
-                    }
+                    //if ((i % 500000) == 0) {println "${i} rows process..."}
+
                 }
             }
         }
@@ -105,8 +126,38 @@ void importData() {
         reader?.close()
     }
 
-    println "Fias ${importedElementName} import to ${tableName} end (" + (System.currentTimeMillis() - time) + " ms)";
+    println "Fias ${importedElementName} (${i} rows) import to ${tableName} end (" + (System.currentTimeMillis() - time) + " ms)";
+}
 
+/**
+ * Получаем поток для чтения файла из rar-архива
+ * @param fileHeaders заголовок файла в архиве
+ * @param prefix префикс имени файла
+ * @return Pipe streams
+ */
+def getInputStream(List<FileHeader> fileHeaders, prefix) {
+
+    def fileHeader = getFileHeader(fileHeaders, prefix)
+
+    if (fileHeader == null) {
+        throw new ServiceException("В архиве выбранном для загрузки данных ФИАС, отсутствует XML файл с префиксом ${prefix}")
+    }
+    return archive.getInputStream(fileHeader)
+}
+
+/**
+ * Получаем имя файла в архиве по префиксу
+ * @param fileHeaders заголовки файлов в архиве
+ * @param prefix префикс для выбора заголовка файла
+ * @return заголовок файла
+ */
+def getFileHeader(fileHeaders, prefix) {
+    for (FileHeader fileHeader : fileHeaders) {
+        if (fileHeader.getFileNameString().startsWith(prefix)) {
+            return fileHeader
+        }
+    }
+    return null
 }
 
 
@@ -117,6 +168,13 @@ Integer getInteger(String val) {
     return null
 }
 
+Integer getInteger(String val, defaultValue) {
+    if (val != null && !val.isEmpty()) {
+        return val.toInteger()
+    }
+    return defaultValue
+}
+
 Integer getLong(String val) {
     if (val != null && !val.isEmpty()) {
         return val.toLong()
@@ -124,38 +182,48 @@ Integer getLong(String val) {
     return null
 }
 
-
+/**
+ * Функция возвращает карту атрибут значение
+ */
 Map getAttributesMap(event) {
     def result = [:]
-    Iterator iterator = event.getAttributes();
+    Iterator iterator = event.getAttributes()
     while (iterator.hasNext()) {
-        Attribute attribute = (Attribute) iterator.next();
-        QName name = attribute.getName();
-        String value = attribute.getValue();
-        result.put(name, value);
+        Attribute attribute = (Attribute) iterator.next()
+        QName name = attribute.getName()
+        String value = attribute.getValue()
+        result.put(name, value)
     }
     return result;
 }
 
-//---fias_operstat---
-Map operationStatusRowMapper(attrMap) {
-    def Map recordsMap = new HashMap<String, ?>();
-    recordsMap.put('OPERSTATID', getLong(attrMap.get(QName.valueOf('OPERSTATID'))))
+Map operationStatusRowMapper(generatedId, attrMap) {
+    def Map recordsMap = new HashMap<String, Object>()
+    //меняем OPERSTATID на целочисленный идентификатор
+    recordsMap.put('ID', generatedId)
     recordsMap.put('NAME', attrMap.get(QName.valueOf('NAME')))
     return recordsMap;
 }
 
-Map addressObjectTypeRowMapper(attrMap) {
-    def Map recordsMap = new HashMap<String, ?>();
+
+Map addressObjectTypeRowMapper(generatedId, attrMap) {
+    def Map recordsMap = new HashMap<String, Object>()
+    recordsMap.put('ID', generatedId) //добавляем ID для использования в справочниках
     recordsMap.put('SCNAME', attrMap.get(QName.valueOf('SCNAME')))
     recordsMap.put('SOCRNAME', attrMap.get(QName.valueOf('SOCRNAME')))
     recordsMap.put('KOD_T_ST', attrMap.get(QName.valueOf('KOD_T_ST')))
     return recordsMap;
 }
 
-Map addressObjectRowMapper(attrMap) {
-    def Map recordsMap = new HashMap<String, ?>();
-    recordsMap.put('AOGUID', attrMap.get(QName.valueOf('AOGUID')))
+
+Map addressObjectRowMapper(addressObjectGuidsMap, attrMap) {
+    def Map recordsMap = new HashMap<String, Object>();
+    def addressObjectGuid = attrMap.get(QName.valueOf('AOGUID'))
+    def parentGuid = attrMap.get(QName.valueOf('PARENTGUID'))
+
+    //меняем AOGUID и PARENTGUID на целочисленный идентификатор
+    recordsMap.put('ID', addressObjectGuidsMap.get(addressObjectGuid))
+    recordsMap.put('PARENTGUID', addressObjectGuidsMap.get(parentGuid))
     recordsMap.put('FORMALNAME', attrMap.get(QName.valueOf('FORMALNAME')))
     recordsMap.put('REGIONCODE', attrMap.get(QName.valueOf('REGIONCODE')))
     recordsMap.put('AUTOCODE', attrMap.get(QName.valueOf('AUTOCODE')))
@@ -171,18 +239,27 @@ Map addressObjectRowMapper(attrMap) {
     recordsMap.put('CENTSTATUS', getInteger(attrMap.get(QName.valueOf('CENTSTATUS'))))
     recordsMap.put('OPERSTATUS', getInteger(attrMap.get(QName.valueOf('OPERSTATUS'))))
     recordsMap.put('CURRSTATUS', getInteger(attrMap.get(QName.valueOf('CURRSTATUS'))))
-    recordsMap.put('DIVTYPE', getInteger(attrMap.get(QName.valueOf('DIVTYPE'))))
+    //Поле тип адресации. Хотя поле обязательное в выгрузке его нет, ставим значение 0 - не определено
+    recordsMap.put('DIVTYPE', getInteger(attrMap.get(QName.valueOf('DIVTYPE')), 0))
     recordsMap.put('OFFNAME', attrMap.get(QName.valueOf('OFFNAME')))
     recordsMap.put('POSTALCODE', attrMap.get(QName.valueOf('POSTALCODE')))
-    recordsMap.put('PARENTGUID', attrMap.get(QName.valueOf('PARENTGUID')))
+
+
     return recordsMap;
 }
 
 
-Map houseRowMapper(attrMap) {
-    def Map recordsMap = new HashMap<String, ?>();
-    recordsMap.put('HOUSEGUID', attrMap.get(QName.valueOf('HOUSEGUID')))
-    recordsMap.put('AOGUID', attrMap.get(QName.valueOf('AOGUID')))
+Map houseRowMapper(generatedId, addressObjectGuidMap, houseGuidMap, attrMap) {
+    def Map recordsMap = new HashMap<String, Object>()
+    def houseGuid = attrMap.get(QName.valueOf('HOUSEGUID'))
+
+    //сохраняем HOUSEGUID и соответсвующий ему идентификатор в карту для использования в room
+    houseGuidMap.put(houseGuid, generatedId)
+
+    //меняем HOUSEGUID на целочисленный идентификатор
+    recordsMap.put('ID', generatedId)
+    recordsMap.put('AOGUID', addressObjectGuidMap.get(attrMap.get(QName.valueOf('AOGUID'))))
+
     recordsMap.put('ESTSTATUS', getInteger(attrMap.get(QName.valueOf('ESTSTATUS'))))
     recordsMap.put('STRSTATUS', getInteger(attrMap.get(QName.valueOf('STRSTATUS'))))
     recordsMap.put('STATSTATUS', getInteger(attrMap.get(QName.valueOf('STATSTATUS'))))
@@ -194,10 +271,13 @@ Map houseRowMapper(attrMap) {
     return recordsMap;
 }
 
-Map houseIntervalRowMapper(attrMap) {
-    def Map recordsMap = new HashMap<String, ?>();
-    recordsMap.put('INTGUID', attrMap.get(QName.valueOf('INTGUID')))
-    recordsMap.put('AOGUID', attrMap.get(QName.valueOf('AOGUID')))
+Map houseIntervalRowMapper(generatedId, addressObjectGuidMap, attrMap) {
+    def Map recordsMap = new HashMap<String, Object>();
+
+    //меняем INTGUID на целочисленный идентификатор
+    recordsMap.put('ID', generatedId)
+    recordsMap.put('AOGUID', addressObjectGuidMap.get(attrMap.get(QName.valueOf('AOGUID'))))
+
     recordsMap.put('INTSTART', getInteger(attrMap.get(QName.valueOf('INTSTART'))))
     recordsMap.put('INTEND', getInteger(attrMap.get(QName.valueOf('INTEND'))))
     recordsMap.put('INTSTATUS', getInteger(attrMap.get(QName.valueOf('INTSTATUS'))))
@@ -206,10 +286,13 @@ Map houseIntervalRowMapper(attrMap) {
     return recordsMap;
 }
 
-Map roomRowMapper(attrMap) {
-    def Map recordsMap = new HashMap<String, ?>();
-    recordsMap.put('ROOMGUID', attrMap.get(QName.valueOf('ROOMGUID')))
-    recordsMap.put('HOUSEGUID', attrMap.get(QName.valueOf('HOUSEGUID')))
+Map roomRowMapper(generatedId, houseGuidMap, attrMap) {
+    def Map recordsMap = new HashMap<String, Object>();
+
+    //меняем ROOMGUID на целочисленный идентификатор
+    recordsMap.put('ID', generatedId)
+    recordsMap.put('HOUSEGUID', houseGuidMap.get(attrMap.get(QName.valueOf('HOUSEGUID'))))
+
     recordsMap.put('REGIONCODE', attrMap.get(QName.valueOf('REGIONCODE')))
     recordsMap.put('FLATNUMBER', attrMap.get(QName.valueOf('FLATNUMBER')))
     recordsMap.put('FLATTYPE', getInteger(attrMap.get(QName.valueOf('FLATTYPE'))))
@@ -218,6 +301,47 @@ Map roomRowMapper(attrMap) {
     recordsMap.put('ROOMTYPEID', getInteger(attrMap.get(QName.valueOf('ROOMTYPEID'))))
     recordsMap.put('POSTALCODE', attrMap.get(QName.valueOf('POSTALCODE')))
     return recordsMap;
+}
+
+/**
+ * Построение карты с идентификаторами адресных объектов
+ * @param fiasInputStream xml-файл импорта
+ * @return карта соответствия guid из фиас к целочисленному идентификатору
+ */
+def buildAddressObjectGuidsMap(fiasInputStream) {
+
+    println "Start build address object guid's map!"
+
+    def result = [:]
+    def time = System.currentTimeMillis()
+    def objectName = QName.valueOf('Object')
+    def aoguidAttrName = QName.valueOf('AOGUID')
+
+    def xmlFactory = XMLInputFactory.newInstance()
+    xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
+    xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
+
+    def reader = xmlFactory.createXMLEventReader(fiasInputStream)
+
+    try {
+        def i = 0;
+        while (reader.hasNext()) {
+            XMLEvent event = reader.nextEvent()
+            if (event.isStartElement() && event.getName().equals(objectName)) {
+                Map attrMap = getAttributesMap(event)
+                def guid = attrMap.get(aoguidAttrName)
+                //if ((i % 500000) == 0) {println "${i} rows process..."}
+                result.put(guid, i.longValue())
+                i++;
+            }
+        }
+    } finally {
+        reader?.close()
+    }
+
+    println "Addres object guid's map buid end (" + (System.currentTimeMillis() - time) + " ms)";
+
+    return result
 }
 
 

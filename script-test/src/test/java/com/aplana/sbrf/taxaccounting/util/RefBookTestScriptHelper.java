@@ -11,10 +11,13 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
+import com.github.junrar.Archive;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,6 +68,7 @@ public class RefBookTestScriptHelper {
     private String fileName;
     private final ScriptTestMockHelper mockHelper;
     private Integer accountPeriodId; // необходим для БО: форма 101 и 102
+    private Archive fiasArchive;
 
     /**
      * Сервис работы со скриптами справочников в тестовом режиме
@@ -130,6 +134,7 @@ public class RefBookTestScriptHelper {
         if (formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE ||
                 formDataEvent == FormDataEvent.IMPORT ||
                 formDataEvent == FormDataEvent.PRE_CALCULATION_CHECK) {
+
             bindings.put("inputStream", importFileInputStream);
             String name;
             if (fileName == null || fileName.isEmpty()) {
@@ -138,6 +143,11 @@ public class RefBookTestScriptHelper {
                 name = fileName;
             }
             bindings.put("fileName", name);
+        }
+
+        //для тестов загрузки фиас
+        if (fiasArchive != null){
+            bindings.put("archive", fiasArchive);
         }
 
         if (formDataEvent == FormDataEvent.IMPORT || formDataEvent == FormDataEvent.PRE_CALCULATION_CHECK) {
@@ -161,6 +171,13 @@ public class RefBookTestScriptHelper {
                     // Ignore
                 }
             }
+
+            if (fiasArchive != null){
+                try {
+                    fiasArchive.close();
+                } catch (IOException e) {}
+            }
+
         }
     }
 
@@ -270,6 +287,14 @@ public class RefBookTestScriptHelper {
      */
     public RefBookDataProvider getRefBookDataProvider() {
         return refBookDataProvider;
+    }
+
+    public Archive getFiasArchive() {
+        return fiasArchive;
+    }
+
+    public void setFiasArchive(Archive fiasArchive) {
+        this.fiasArchive = fiasArchive;
     }
 
     /**
