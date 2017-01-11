@@ -3,9 +3,6 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 import java.util.Date;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Персонифицированные сведения о застрахованных лицах
@@ -33,15 +30,10 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     private String middleName;
 
     // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
-    private List<RaschsvSvVypl> raschsvSvVyplList;
+    private RaschsvSvVypl raschsvSvVypl;
 
     // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу
-    private List<RaschsvVyplSvDop> raschsvVyplSvDopList;
-
-    public RaschsvPersSvStrahLic() {
-        super();
-        raschsvSvVyplList = new ArrayList<RaschsvSvVypl>();
-    }
+    private RaschsvVyplSvDop raschsvVyplSvDop;
 
     public static final String SEQ = "seq_raschsv_pers_sv_strah_lic";
     public static final String TABLE_NAME = "raschsv_pers_sv_strah_lic";
@@ -65,11 +57,13 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public static final String COL_FAMILIA = "familia";
     public static final String COL_IMYA = "imya";
     public static final String COL_MIDDLE_NAME = "middle_name";
+    public static final String COL_RASCHSV_SV_VYPL_ID = "raschsv_sv_vypl_id";
+    public static final String COL_RASCHSV_VYPL_SV_DOP_ID = "raschsv_vypl_sv_dop_id";
 
     public static final String[] COLUMNS = {COL_ID, COL_DECLARATION_DATA_ID, COL_NOM_KORR, COL_PERIOD, COL_OTCHET_GOD,
             COL_NOMER, COL_SV_DATA, COL_INNFL, COL_SNILS, COL_DATA_ROZD, COL_GRAZD, COL_POL, COL_KOD_VID_DOC, COL_SER_NOM_DOC,
-            COL_PRIZ_OPS, COL_PRIZ_OMS, COL_PRIZ_OSS, COL_FAMILIA, COL_IMYA, COL_MIDDLE_NAME
-    };
+            COL_PRIZ_OPS, COL_PRIZ_OMS, COL_PRIZ_OSS, COL_FAMILIA, COL_IMYA, COL_MIDDLE_NAME, COL_RASCHSV_SV_VYPL_ID,
+            COL_RASCHSV_VYPL_SV_DOP_ID};
 
     public Long getDeclarationDataId() { return declarationDataId; }
     public void setDeclarationDataId(Long declarationDataId) { this.declarationDataId = declarationDataId; }
@@ -128,13 +122,17 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public String getMiddleName() { return middleName; }
     public void setMiddleName(String middleName) { this.middleName = middleName; }
 
-    public List<RaschsvSvVypl> getRaschsvSvVyplList() {
-        return raschsvSvVyplList != null ? raschsvSvVyplList : Collections.<RaschsvSvVypl>emptyList();
+    public RaschsvSvVypl getRaschsvSvVypl() {
+        return raschsvSvVypl;
     }
-    public void setRaschsvSvVyplList(List<RaschsvSvVypl> raschsvSvVyplList) { this.raschsvSvVyplList = raschsvSvVyplList; }
+    public void setRaschsvSvVypl(RaschsvSvVypl raschsvSvVypl) {
+        this.raschsvSvVypl = raschsvSvVypl;
+    }
 
-    public List<RaschsvVyplSvDop> getRaschsvVyplSvDopList() {
-        return raschsvVyplSvDopList != null ? raschsvVyplSvDopList : Collections.<RaschsvVyplSvDop>emptyList();
+    public RaschsvVyplSvDop getRaschsvVyplSvDop() {
+        return raschsvVyplSvDop;
     }
-    public void setRaschsvVyplSvDopList(List<RaschsvVyplSvDop> raschsvVyplSvDopList) { this.raschsvVyplSvDopList = raschsvVyplSvDopList; }
+    public void setRaschsvVyplSvDop(RaschsvVyplSvDop raschsvVyplSvDop) {
+        this.raschsvVyplSvDop = raschsvVyplSvDop;
+    }
 }

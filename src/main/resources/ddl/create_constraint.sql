@@ -468,17 +468,17 @@ alter table raschsv_vyplat_it_422 add constraint pk_raschsv_vyplat_it_422 primar
 alter table raschsv_vyplat_it_422 add constraint fk_raschsv_vyplat_it_422_sum foreign key (raschsv_sv_sum1_tip_id) references raschsv_sv_sum_1tip (id);
 alter table raschsv_vyplat_it_422 add constraint fk_raschsv_vyplat_tarif3_422 foreign key (raschsv_sv_prim_tarif1_422_id) references raschsv_sv_prim_tarif1_3_422 (id);
 
+alter table raschsv_sv_vypl add constraint pk_raschsv_sv_vypl primary key (id);
+
+alter table raschsv_vypl_sv_dop add constraint pk_raschv_vypl_sv_dop primary key (id);
+
 alter table raschsv_pers_sv_strah_lic add constraint pk_pers_sv_strah_face primary key (id);
 alter table raschsv_pers_sv_strah_lic add constraint fk_pers_sv_strah_face_declarat foreign key (declaration_data_id) references declaration_data (id);
-
-alter table raschsv_sv_vypl add constraint pk_raschsv_sv_vypl primary key (id);
-alter table raschsv_sv_vypl add constraint fk_raschsv_sv_vypl_strah_lic foreign key (raschsv_pers_sv_strah_lic_id) references raschsv_pers_sv_strah_lic (id);
+alter table raschsv_pers_sv_strah_lic add constraint fk_pers_sv_strah_lic_sv_vypl foreign key (raschsv_sv_vypl_id) references raschsv_sv_vypl (id);
+alter table raschsv_pers_sv_strah_lic add constraint fk_pers_sv_strah_lic_vyp_dop foreign key (raschsv_vypl_sv_dop_id) references raschsv_vypl_sv_dop (id);
 
 alter table raschsv_sv_vypl_mk add constraint pk_raschv_vypl_mk primary key (id);
 alter table raschsv_sv_vypl_mk add constraint fk_raschsv_sv_vypl_mk_sv_vypl foreign key (raschsv_sv_vypl_id) references raschsv_sv_vypl (id);
-
-alter table raschsv_vypl_sv_dop add constraint pk_raschv_vypl_sv_dop primary key (id);
-alter table raschsv_vypl_sv_dop add constraint fk_raschsv_vypl_sv_drop_lic foreign key (raschsv_pers_sv_strah_lic_id) references raschsv_pers_sv_strah_lic (id);
 
 alter table raschsv_vypl_sv_dop_mt add constraint pk_raschv_vypl_sv_dop_mt primary key (id);
 alter table raschsv_vypl_sv_dop_mt add constraint fk_raschsv_vsv_dop_mt_vsv_dop foreign key (raschsv_vypl_sv_dop_id) references raschsv_vypl_sv_dop (id);
