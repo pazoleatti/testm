@@ -612,9 +612,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     public void checkImportRefBookTransportData(TAUserInfo userInfo, Logger logger, String lockId, Date lockDate, boolean isAsync) {
         log(userInfo, LogData.L23, logger, lockId);
         if (checkPathArchiveError(userInfo, logger, lockId)){
-            // Diasoft
-            lockService.updateState(lockId, lockDate, "Импорт справочников \"Diasoft\"");
-            importRefBookDiasoft(userInfo, logger, lockId, isAsync);
+            // ФИАС
+            lockService.updateState(lockId, lockDate, "Импорт справочника ФИАС");
+            importRefBookFias(userInfo, null, logger, lockId, isAsync);
         }
     }
 

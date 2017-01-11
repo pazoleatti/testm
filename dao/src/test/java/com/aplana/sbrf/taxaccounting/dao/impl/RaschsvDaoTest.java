@@ -170,10 +170,8 @@ public class RaschsvDaoTest {
     @Test
     public void testInsertRaschsvPersSvStrahLic() {
         List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
-        List<RaschsvSvVypl> raschsvSvVyplList = new ArrayList<RaschsvSvVypl>();
         List<RaschsvSvVyplMt> raschsvSvVyplMtList = new ArrayList<RaschsvSvVyplMt>();
         List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList = new ArrayList<RaschsvVyplSvDopMt>();
-        List<RaschsvVyplSvDop> raschsvVyplSvDopList = new ArrayList<RaschsvVyplSvDop>();
 
         // Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа
         RaschsvVyplSvDopMt raschsvVyplSvDopMt = new RaschsvVyplSvDopMt();
@@ -188,7 +186,6 @@ public class RaschsvDaoTest {
         raschsvVyplSvDop.setVyplSvVs3(1.1);
         raschsvVyplSvDop.setNachislSvVs3(1.1);
         raschsvVyplSvDop.setRaschsvVyplSvDopMtList(raschsvVyplSvDopMtList);
-        raschsvVyplSvDopList.add(raschsvVyplSvDop);
 
         // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица
         RaschsvSvVyplMt raschsvSvVyplMt1 = new RaschsvSvVyplMt();
@@ -201,28 +198,19 @@ public class RaschsvDaoTest {
         raschsvSvVyplMtList.add(raschsvSvVyplMt1);
 
         // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
-        RaschsvSvVypl raschsvSvVypl1 = new RaschsvSvVypl();
-        raschsvSvVypl1.setSumVyplVs3(1.1);
-        raschsvSvVypl1.setVyplOpsVs3(1.1);
-        raschsvSvVypl1.setVyplOpsDogVs3(1.1);
-        raschsvSvVypl1.setNachislSvVs3(1.1);
-        raschsvSvVypl1.setRaschsvSvVyplMtList(raschsvSvVyplMtList);
-        raschsvSvVyplList.add(raschsvSvVypl1);
-
-        // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
-        RaschsvSvVypl raschsvSvVypl2 = new RaschsvSvVypl();
-        raschsvSvVypl2.setSumVyplVs3(2.1);
-        raschsvSvVypl2.setVyplOpsVs3(2.1);
-        raschsvSvVypl2.setVyplOpsDogVs3(2.1);
-        raschsvSvVypl2.setNachislSvVs3(2.1);
-        raschsvSvVyplList.add(raschsvSvVypl2);
+        RaschsvSvVypl raschsvSvVypl = new RaschsvSvVypl();
+        raschsvSvVypl.setSumVyplVs3(1.1);
+        raschsvSvVypl.setVyplOpsVs3(1.1);
+        raschsvSvVypl.setVyplOpsDogVs3(1.1);
+        raschsvSvVypl.setNachislSvVs3(1.1);
+        raschsvSvVypl.setRaschsvSvVyplMtList(raschsvSvVyplMtList);
 
         // Персонифицированные сведения о застрахованных лицах
         RaschsvPersSvStrahLic raschsvPersSvStrahLic1 = new RaschsvPersSvStrahLic();
         raschsvPersSvStrahLic1.setDeclarationDataId(1L);
         raschsvPersSvStrahLic1.setNomKorr(1);
-        raschsvPersSvStrahLic1.setRaschsvSvVyplList(raschsvSvVyplList);
-        raschsvPersSvStrahLic1.setRaschsvVyplSvDopList(raschsvVyplSvDopList);
+        raschsvPersSvStrahLic1.setRaschsvSvVypl(raschsvSvVypl);
+        raschsvPersSvStrahLic1.setRaschsvVyplSvDop(raschsvVyplSvDop);
 
         // Персонифицированные сведения о застрахованных лицах
         RaschsvPersSvStrahLic raschsvPersSvStrahLic2 = new RaschsvPersSvStrahLic();

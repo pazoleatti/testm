@@ -35,8 +35,7 @@ public class RaschsvSvVypl extends IdentityObject<Long> {
     public static final String COL_NACHISL_SV_VS3 = "nachisl_sv_vs3";
 
     public static final String[] COLUMNS = {COL_ID, COL_RASCHSV_PERS_SV_STRAH_LIC_ID, COL_SUM_VYPL_VS3, COL_VYPL_OPS_VS3,
-            COL_VYPL_OPS_DOG_VS3, COL_NACHISL_SV_VS3
-    };
+            COL_VYPL_OPS_DOG_VS3, COL_NACHISL_SV_VS3};
 
     public Long getRaschsvPersSvStrahLicId() { return raschsvPersSvStrahLicId; }
     public void setRaschsvPersSvStrahLicId(Long raschsvPersSvStrahLicId) { this.raschsvPersSvStrahLicId = raschsvPersSvStrahLicId; }

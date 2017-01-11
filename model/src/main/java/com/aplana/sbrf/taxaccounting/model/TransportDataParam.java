@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -25,8 +27,19 @@ public class TransportDataParam {
     private final String kpp;
     private final String asnuCode;
     private final String guid;
-    Integer declarationTypeId; //ToDщ потом нужно будет переделать на код формы???
+    private Integer declarationTypeId; //ToDщ потом нужно будет переделать на код формы???
 
+    /**
+     * Маппинг периодов для НДФЛ
+     */
+    private static final Map<String, String> periodNdflMap = new HashMap<String, String>();
+
+    static {
+        periodNdflMap.put("21", "21");
+        periodNdflMap.put("32", "31");
+        periodNdflMap.put("33", "33");
+        periodNdflMap.put("34", "34");
+    }
 
     /**
      * Параметры ТФ, получаемые из имени ТФ
@@ -118,6 +131,9 @@ public class TransportDataParam {
             declarationTypeId = 100;
             departmentCode = name.substring(0, 17).replaceFirst("_*", "").trim();
             reportPeriodCode = name.substring(21, 23).replaceAll("_", "").trim();
+            if (reportPeriodCode != null && !reportPeriodCode.isEmpty() && periodNdflMap.containsKey(reportPeriodCode)) {
+                reportPeriodCode = periodNdflMap.get(reportPeriodCode);
+            }
             asnuCode = name.substring(17, 21).replaceFirst("_", "").trim();
             guid = name.substring(27, 59).replaceAll("_", "").trim();
             try {

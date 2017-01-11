@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -358,7 +359,7 @@ public class ConfigurationServiceTest {
         archiveFolder.delete();
         errorFolder.delete();
 
-        Assert.assertEquals(12, logger.getEntries().size());
+        Assert.assertEquals(13, logger.getEntries().size());
         Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
         Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
     }
@@ -410,7 +411,7 @@ public class ConfigurationServiceTest {
         archiveFolder.delete();
         errorFolder.delete();
 
-        Assert.assertEquals(12, logger.getEntries().size());
+        Assert.assertEquals(13, logger.getEntries().size());
         Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
         Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
     }

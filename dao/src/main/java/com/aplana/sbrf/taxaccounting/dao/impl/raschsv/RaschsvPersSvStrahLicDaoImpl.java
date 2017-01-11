@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,19 +48,19 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
      * @param raschsvPersSvStrahLicId - идентификатор "Персонифицированные сведения о застрахованных лицах"
      * @return
      */
-    private List<RaschsvSvVypl> getRaschsvSvVypl(long raschsvPersSvStrahLicId){
-        return getJdbcTemplate().query(
-                "select " + SV_VYPL_COLS + " from " + RaschsvSvVypl.TABLE_NAME + " sV where sV." + RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + " = ?",
-                new Object[]{raschsvPersSvStrahLicId},
-                new RaschsvSvVyplRowMapper());
-    }
+//    private List<RaschsvSvVypl> getRaschsvSvVypl(long raschsvPersSvStrahLicId) {
+//        return getJdbcTemplate().query(
+//                "select " + SV_VYPL_COLS + " from " + RaschsvSvVypl.TABLE_NAME + " sV where sV." + RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + " = ?",
+//                new Object[]{raschsvPersSvStrahLicId},
+//                new RaschsvSvVyplRowMapper());
+//    }
 
     /**
      * Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица
      * @param raschsvSvVyplId - идентификатор "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
      * @return
      */
-    private List<RaschsvSvVyplMt> getRaschsvSvVyplMt(long raschsvSvVyplId){
+    private List<RaschsvSvVyplMt> getRaschsvSvVyplMt(long raschsvSvVyplId) {
         return getJdbcTemplate().query(
                 "select " + SV_VYPL_MK_COLS + " from " + RaschsvSvVyplMt.TABLE_NAME + " sVMt where sVMt." + RaschsvSvVyplMt.COL_RASCHSV_SV_VYPL_ID + " = ?",
                 new Object[]{raschsvSvVyplId},
@@ -110,21 +111,30 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 batchValues.toArray(new Map[raschsvPersSvStrahLicList.size()]));
 
         List<RaschsvSvVypl> raschsvSvVyplList = new ArrayList<RaschsvSvVypl>();
+        List<RaschsvSvVyplMt> raschsvSvVyplMtList = new ArrayList<RaschsvSvVyplMt>();
+
         List<RaschsvVyplSvDop> raschsvVyplSvDopList = new ArrayList<RaschsvVyplSvDop>();
+        List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList = new ArrayList<RaschsvVyplSvDopMt>();
 
         for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
+            RaschsvSvVypl raschsvSvVypl = new RaschsvSvVypl();
+            raschsvSvVypl.setId(generateId(RaschsvSvVypl.SEQ, Long.class));
+            raschsvSvVypl.setRaschsvPersSvStrahLicId(raschsvPersSvStrahLic.getId());
+            raschsvSvVyplList.add(raschsvSvVypl);
 
-            // Установка внешнего ключа для "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
-            for (RaschsvSvVypl raschsvSvVypl : raschsvPersSvStrahLic.getRaschsvSvVyplList()) {
-                raschsvSvVypl.setRaschsvPersSvStrahLicId(raschsvPersSvStrahLic.getId());
-                raschsvSvVyplList.add(raschsvSvVypl);
+            for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVypl.getRaschsvSvVyplMtList()) {
+                raschsvSvVyplMt.setRaschsvSvVyplId(raschsvSvVypl.getId());
+                raschsvSvVyplMtList.add(raschsvSvVyplMt);
             }
 
-            // Установка внешнего ключа для "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
-            // на которые исчислены страховые взносы по дополнительному тарифу"
-            for (RaschsvVyplSvDop raschsvVyplSvDop : raschsvPersSvStrahLic.getRaschsvVyplSvDopList()) {
-                raschsvVyplSvDop.setRaschsvPersSvStrahLicId(raschsvPersSvStrahLic.getId());
-                raschsvVyplSvDopList.add(raschsvVyplSvDop);
+            RaschsvVyplSvDop raschsvVyplSvDop = new RaschsvVyplSvDop();
+            raschsvVyplSvDop.setId(generateId(RaschsvVyplSvDop.SEQ, Long.class));
+            raschsvVyplSvDop.setRaschsvPersSvStrahLicId(raschsvPersSvStrahLic.getId());
+            raschsvVyplSvDopList.add(raschsvVyplSvDop);
+
+            for (RaschsvVyplSvDopMt raschsvVyplSvDopMt : raschsvVyplSvDop.getRaschsvVyplSvDopMtList()) {
+                raschsvVyplSvDopMt.setRaschsvVyplSvDopId(raschsvVyplSvDop.getId());
+                raschsvVyplSvDopMtList.add(raschsvVyplSvDopMt);
             }
         }
 
@@ -133,10 +143,19 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             insertRaschsvSvVypl(raschsvSvVyplList);
         }
 
-        // Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
-        // на которые исчислены страховые взносы по дополнительному тарифу"
+        // Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
         if (!raschsvVyplSvDopList.isEmpty()) {
             insertRaschsvVyplSvDop(raschsvVyplSvDopList);
+        }
+
+        // Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
+        if (!raschsvSvVyplMtList.isEmpty()) {
+            insertRaschsvSvVyplMt(raschsvSvVyplMtList);
+        }
+
+        // Сохранение "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+        if (!raschsvVyplSvDopMtList.isEmpty()) {
+            insertRaschsvVyplSvDopMt(raschsvVyplSvDopMtList);
         }
 
         return res.length;
@@ -151,11 +170,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
         String sql = "INSERT INTO " + RaschsvSvVypl.TABLE_NAME +
                 " (" + SV_VYPL_COLS + ") VALUES (" + SV_VYPL_FIELDS + ")";
 
-        // Генерация идентификаторов
-        for (RaschsvSvVypl raschsvSvVypl : raschsvSvVyplList) {
-            raschsvSvVypl.setId(generateId(RaschsvSvVypl.SEQ, Long.class));
-        }
-
         List<Map<String, Object>> batchValues = new ArrayList<Map<String, Object>>(raschsvSvVyplList.size());
         for (RaschsvSvVypl raschsvSvVypl : raschsvSvVyplList) {
             batchValues.add(
@@ -169,18 +183,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
         }
         int [] res = getNamedParameterJdbcTemplate().batchUpdate(sql,
                 batchValues.toArray(new Map[raschsvSvVyplList.size()]));
-
-        // Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
-        List<RaschsvSvVyplMt> raschsvSvVyplMtList = new ArrayList<RaschsvSvVyplMt>();
-        for (RaschsvSvVypl raschsvSvVypl : raschsvSvVyplList) {
-            for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVypl.getRaschsvSvVyplMtList()) {
-                raschsvSvVyplMt.setRaschsvSvVyplId(raschsvSvVypl.getId());
-                raschsvSvVyplMtList.add(raschsvSvVyplMt);
-            }
-        }
-        if (!raschsvSvVyplMtList.isEmpty()) {
-            insertRaschsvSvVyplMt(raschsvSvVyplMtList);
-        }
 
         return res.length;
     }
@@ -229,11 +231,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
         String sql = "INSERT INTO " + RaschsvVyplSvDop.TABLE_NAME +
                 " (" + VYPL_SV_DOP_COLS + ") VALUES (" + VYPL_SV_DOP_FIELDS + ")";
 
-        // Генерация идентификаторов
-        for (RaschsvVyplSvDop raschsvVyplSvDop : raschsvVyplSvDopList) {
-            raschsvVyplSvDop.setId(generateId(RaschsvVyplSvDop.SEQ, Long.class));
-        }
-
         List<Map<String, Object>> batchValues = new ArrayList<Map<String, Object>>(raschsvVyplSvDopList.size());
         for (RaschsvVyplSvDop raschsvVyplSvDop : raschsvVyplSvDopList) {
             batchValues.add(
@@ -245,18 +242,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
         }
         int [] res = getNamedParameterJdbcTemplate().batchUpdate(sql,
                 batchValues.toArray(new Map[raschsvVyplSvDopList.size()]));
-
-        // Сохранение "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
-        List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList = new ArrayList<RaschsvVyplSvDopMt>();
-        for (RaschsvVyplSvDop raschsvVyplSvDop : raschsvVyplSvDopList) {
-            for (RaschsvVyplSvDopMt raschsvVyplSvDopMt : raschsvVyplSvDop.getRaschsvVyplSvDopMtList()) {
-                raschsvVyplSvDopMt.setRaschsvVyplSvDopId(raschsvVyplSvDop.getId());
-                raschsvVyplSvDopMtList.add(raschsvVyplSvDopMt);
-            }
-        }
-        if (!raschsvVyplSvDopMtList.isEmpty()) {
-            insertRaschsvVyplSvDopMt(raschsvVyplSvDopMtList);
-        }
 
         return res.length;
     }

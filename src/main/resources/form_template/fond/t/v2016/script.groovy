@@ -1,4 +1,4 @@
-package form_template.raschsv
+package form_template.fond.t.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -1146,11 +1146,6 @@ RaschsvKolLicTip parseRaschsvKolLicTip(Object kolLicTip) {
 RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long declarationDataId) {
     RaschsvPersSvStrahLic raschsvPersSvStrahLic = new RaschsvPersSvStrahLic()
 
-    // Набор объектов СвВыпл
-    def raschsvSvVyplList = []
-    // Набор объектов ВыплСВДопМТ
-    def raschsvVyplSvDopList = []
-
     raschsvPersSvStrahLic.nomKorr = getInteger(persSvStrahLicNode.attributes()[PERV_SV_STRAH_LIC_NOM_KORR])
     raschsvPersSvStrahLic.period = persSvStrahLicNode.attributes()[PERV_SV_STRAH_LIC_PERIOD]
     raschsvPersSvStrahLic.otchetGod = persSvStrahLicNode.attributes()[PERV_SV_STRAH_LIC_OTCHET_GOD]
@@ -1206,7 +1201,8 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
                         }
                     }
                     raschsvSvVypl.raschsvSvVyplMtList = raschsvSvVyplMtList
-                    raschsvSvVyplList.add(raschsvSvVypl)
+                    raschsvPersSvStrahLic.raschsvSvVypl = raschsvSvVypl
+
                 } else if (svVyplSvopsChildNode.name == NODE_NAME_VYPL_SV_DOP) {
                     // Разбор узла ВыплСВДоп
                     RaschsvVyplSvDop raschsvVyplSvDop = new RaschsvVyplSvDop()
@@ -1228,13 +1224,11 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
                         }
                     }
                     raschsvVyplSvDop.raschsvVyplSvDopMtList = raschsvVyplSvDopMtList
-                    raschsvVyplSvDopList.add(raschsvVyplSvDop)
+                    raschsvPersSvStrahLic.raschsvVyplSvDop = raschsvVyplSvDop
                 }
             }
         }
     }
-    raschsvPersSvStrahLic.raschsvSvVyplList = raschsvSvVyplList
-    raschsvPersSvStrahLic.raschsvVyplSvDopList = raschsvVyplSvDopList
 
     return raschsvPersSvStrahLic
 }

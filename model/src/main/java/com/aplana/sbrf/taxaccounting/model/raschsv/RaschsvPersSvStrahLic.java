@@ -3,9 +3,6 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 import java.util.Date;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Персонифицированные сведения о застрахованных лицах
@@ -33,15 +30,10 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     private String middleName;
 
     // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
-    private List<RaschsvSvVypl> raschsvSvVyplList;
+    private RaschsvSvVypl raschsvSvVypl;
 
     // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу
-    private List<RaschsvVyplSvDop> raschsvVyplSvDopList;
-
-    public RaschsvPersSvStrahLic() {
-        super();
-        raschsvSvVyplList = new ArrayList<RaschsvSvVypl>();
-    }
+    private RaschsvVyplSvDop raschsvVyplSvDop;
 
     public static final String SEQ = "seq_raschsv_pers_sv_strah_lic";
     public static final String TABLE_NAME = "raschsv_pers_sv_strah_lic";
@@ -128,13 +120,17 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public String getMiddleName() { return middleName; }
     public void setMiddleName(String middleName) { this.middleName = middleName; }
 
-    public List<RaschsvSvVypl> getRaschsvSvVyplList() {
-        return raschsvSvVyplList != null ? raschsvSvVyplList : Collections.<RaschsvSvVypl>emptyList();
+    public RaschsvSvVypl getRaschsvSvVypl() {
+        return raschsvSvVypl;
     }
-    public void setRaschsvSvVyplList(List<RaschsvSvVypl> raschsvSvVyplList) { this.raschsvSvVyplList = raschsvSvVyplList; }
+    public void setRaschsvSvVypl(RaschsvSvVypl raschsvSvVypl) {
+        this.raschsvSvVypl = raschsvSvVypl;
+    }
 
-    public List<RaschsvVyplSvDop> getRaschsvVyplSvDopList() {
-        return raschsvVyplSvDopList != null ? raschsvVyplSvDopList : Collections.<RaschsvVyplSvDop>emptyList();
+    public RaschsvVyplSvDop getRaschsvVyplSvDop() {
+        return raschsvVyplSvDop;
     }
-    public void setRaschsvVyplSvDopList(List<RaschsvVyplSvDop> raschsvVyplSvDopList) { this.raschsvVyplSvDopList = raschsvVyplSvDopList; }
+    public void setRaschsvVyplSvDop(RaschsvVyplSvDop raschsvVyplSvDop) {
+        this.raschsvVyplSvDop = raschsvVyplSvDop;
+    }
 }
