@@ -22,27 +22,51 @@ import java.util.Map;
 public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements RaschsvPersSvStrahLicDao {
 
     // Перечень столбцов таблицы "Персонифицированные сведения о застрахованных лицах"
-    private static final StringBuilder PERS_SV_STRAH_LIC_COLS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, null));
-    private static final StringBuilder PERS_SV_STRAH_LIC_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, ":"));
+    private static final String PERS_SV_STRAH_LIC_COLS = SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, null);
+    private static final String PERS_SV_STRAH_LIC_FIELDS = SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, ":");
 
     // Перечень столбцов таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
-    private static final StringBuilder SV_VYPL_COLS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvSvVypl.COLUMNS, null));
-    private static final StringBuilder SV_VYPL_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvSvVypl.COLUMNS, ":"));
+    private static final String SV_VYPL_COLS = SqlUtils.getColumnsToString(RaschsvSvVypl.COLUMNS, null);
+    private static final String SV_VYPL_FIELDS = SqlUtils.getColumnsToString(RaschsvSvVypl.COLUMNS, ":");
 
     // Перечень столбцов таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
     // по месяцу и коду категории застрахованного лица"
-    private static final StringBuilder SV_VYPL_MK_COLS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvSvVyplMt.COLUMNS, null));
-    private static final StringBuilder SV_VYPL_MK_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvSvVyplMt.COLUMNS, ":"));
+    private static final String SV_VYPL_MK_COLS = SqlUtils.getColumnsToString(RaschsvSvVyplMt.COLUMNS, null);
+    private static final String SV_VYPL_MK_FIELDS = SqlUtils.getColumnsToString(RaschsvSvVyplMt.COLUMNS, ":");
 
     // Перечень столбцов таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
     // на которые исчислены страховые взносы по дополнительному тарифу"
-    private static final StringBuilder VYPL_SV_DOP_COLS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvVyplSvDop.COLUMNS, null));
-    private static final StringBuilder VYPL_SV_DOP_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvVyplSvDop.COLUMNS, ":"));
+    private static final String VYPL_SV_DOP_COLS = SqlUtils.getColumnsToString(RaschsvVyplSvDop.COLUMNS, null);
+    private static final String VYPL_SV_DOP_FIELDS = SqlUtils.getColumnsToString(RaschsvVyplSvDop.COLUMNS, ":");
 
-    // Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица,
+    // Перечень столбцов таблицы "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица,
     // на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
-    private static final StringBuilder VYPL_SV_DOP_MT_COLS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvVyplSvDopMt.COLUMNS, null));
-    private static final StringBuilder VYPL_SV_DOP_MT_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvVyplSvDopMt.COLUMNS, ":"));
+    private static final String VYPL_SV_DOP_MT_COLS = SqlUtils.getColumnsToString(RaschsvVyplSvDopMt.COLUMNS, null);
+    private static final String VYPL_SV_DOP_MT_FIELDS = SqlUtils.getColumnsToString(RaschsvVyplSvDopMt.COLUMNS, ":");
+
+    // sql запрос для сохранения в "Персонифицированные сведения о застрахованных лицах"
+    private static final String SQL_INSERT_PERS_SV_STRAH_LIC = "INSERT INTO " + RaschsvPersSvStrahLic.TABLE_NAME +
+            " (" + PERS_SV_STRAH_LIC_COLS + ") VALUES (" + PERS_SV_STRAH_LIC_FIELDS + ")";
+
+    // sql запрос для сохранения в "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+    private static final String SQL_INSERT_SV_VYPL = "INSERT INTO " + RaschsvSvVypl.TABLE_NAME +
+            " (" + SV_VYPL_COLS + ") VALUES (" + SV_VYPL_FIELDS + ")";
+
+    // sql запрос для сохранения в "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
+    // по месяцу и коду категории застрахованного лица"
+    private static final String SQL_INSERT_SV_VYPL_MT = "INSERT INTO " + RaschsvSvVyplMt.TABLE_NAME +
+            " (" + SV_VYPL_MK_COLS + ") VALUES (" + SV_VYPL_MK_FIELDS + ")";
+
+    // sql запрос для сохранения в "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
+    // на которые исчислены страховые взносы по дополнительному тарифу"
+    private static final String SQL_INSERT_VYPL_SV_DOP = "INSERT INTO " + RaschsvVyplSvDop.TABLE_NAME +
+            " (" + VYPL_SV_DOP_COLS + ") VALUES (" + VYPL_SV_DOP_FIELDS + ")";
+
+    // sql запрос для сохранения в "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица,
+    // на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+    private static final String SQL_INSERT_VYPL_SV_DOP_MT = "INSERT INTO " + RaschsvVyplSvDopMt.TABLE_NAME +
+            " (" + VYPL_SV_DOP_MT_COLS + ") VALUES (" + VYPL_SV_DOP_MT_FIELDS + ")";
+
 
     // sql запрос для выборки из "Персонифицированные сведения о застрахованных лицах" по ИНН ФЛ и идентификатору декларации
     private static final String SQL_SELECT_PERSONS_BY_INN = "SELECT " + PERS_SV_STRAH_LIC_COLS + " FROM " + RaschsvPersSvStrahLic.TABLE_NAME +
@@ -54,19 +78,19 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             " WHERE " + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID + " = :" + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID;
 
     // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
-    String SQL_SELECT_SV_VYPL_BY_PERSON_IDS = "SELECT " + SV_VYPL_COLS + " FROM " + RaschsvSvVypl.TABLE_NAME +
+    private static final String SQL_SELECT_SV_VYPL_BY_PERSON_IDS = "SELECT " + SV_VYPL_COLS + " FROM " + RaschsvSvVypl.TABLE_NAME +
             " WHERE " + RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + " IN (:" + RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + ")";
 
     // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
-    String SQL_SELECT_SV_VYPL_MT_BY_SV_VYPL_IDS = "SELECT " + SV_VYPL_MK_COLS + " FROM " + RaschsvSvVyplMt.TABLE_NAME +
+    private static final String SQL_SELECT_SV_VYPL_MT_BY_SV_VYPL_IDS = "SELECT " + SV_VYPL_MK_COLS + " FROM " + RaschsvSvVyplMt.TABLE_NAME +
             " WHERE " + RaschsvSvVyplMt.COL_RASCHSV_SV_VYPL_ID + " IN (:" + RaschsvSvVyplMt.COL_RASCHSV_SV_VYPL_ID + ")";
 
     // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
-    String SQL_SELECT_VYPL_SV_DOP_BY_PERSON_IDS = "SELECT " + VYPL_SV_DOP_COLS + " FROM " + RaschsvVyplSvDop.TABLE_NAME +
+    private static final String SQL_SELECT_VYPL_SV_DOP_BY_PERSON_IDS = "SELECT " + VYPL_SV_DOP_COLS + " FROM " + RaschsvVyplSvDop.TABLE_NAME +
             " WHERE " + RaschsvVyplSvDop.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + " IN (:" + RaschsvVyplSvDop.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + ")";
 
     // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
-    String SQL_SELECT_VYPL_SV_DOP_MT_BY_VYPL_SV_DOP_IDS = "SELECT " + VYPL_SV_DOP_MT_COLS + " FROM " + RaschsvVyplSvDopMt.TABLE_NAME +
+    private static final String SQL_SELECT_VYPL_SV_DOP_MT_BY_VYPL_SV_DOP_IDS = "SELECT " + VYPL_SV_DOP_MT_COLS + " FROM " + RaschsvVyplSvDopMt.TABLE_NAME +
             " WHERE " + RaschsvVyplSvDopMt.COL_RASCHSV_VYPL_SV_DOP_ID + " IN (:" + RaschsvVyplSvDopMt.COL_RASCHSV_VYPL_SV_DOP_ID + ")";
 
     @Override
@@ -104,7 +128,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
      * @param raschsvPersSvStrahLicList
      * @return
      */
-    public List<RaschsvPersSvStrahLic> findSvVyplAndVyplSvDop(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList) {
+    private List<RaschsvPersSvStrahLic> findSvVyplAndVyplSvDop(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList) {
         // Массив идентификаторов "Персонифицированные сведения о застрахованных лицах"
         Long[] raschsvPersSvStrahLicIds = new Long[raschsvPersSvStrahLicList.size()];
         for (int i = 0; i < raschsvPersSvStrahLicList.size(); i++) {
@@ -135,9 +159,9 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             }
 
             for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
-                for (RaschsvSvVypl raschsvSvVypl : raschsvSvVyplList) {
-                    if (raschsvSvVypl.getRaschsvPersSvStrahLicId().equals(raschsvPersSvStrahLic.getId())) {
-                        raschsvPersSvStrahLic.setRaschsvSvVypl(raschsvSvVypl);
+                for (int i = 0; i < raschsvSvVyplList.size() && raschsvPersSvStrahLic.getRaschsvSvVypl() == null; i++) {
+                    if (raschsvPersSvStrahLic.getId().equals(raschsvSvVyplList.get(i).getRaschsvPersSvStrahLicId())) {
+                        raschsvPersSvStrahLic.setRaschsvSvVypl(raschsvSvVyplList.get(i));
                     }
                 }
             }
@@ -167,9 +191,9 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             }
 
             for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
-                for (RaschsvVyplSvDop raschsvVyplSvDop : raschsvVyplSvDopList) {
-                    if (raschsvVyplSvDop.getRaschsvPersSvStrahLicId().equals(raschsvPersSvStrahLic.getId())) {
-                        raschsvPersSvStrahLic.setRaschsvVyplSvDop(raschsvVyplSvDop);
+                for (int i = 0; i < raschsvVyplSvDopList.size() && raschsvPersSvStrahLic.getRaschsvVyplSvDop() == null; i++) {
+                    if (raschsvPersSvStrahLic.getId().equals(raschsvVyplSvDopList.get(i).getRaschsvPersSvStrahLicId())) {
+                        raschsvPersSvStrahLic.setRaschsvVyplSvDop(raschsvVyplSvDopList.get(i));
                     }
                 }
             }
@@ -229,9 +253,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
      */
     @Override
     public Integer insertPersSvStrahLic(final List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList) {
-        String sql = "INSERT INTO " + RaschsvPersSvStrahLic.TABLE_NAME +
-                " (" + PERS_SV_STRAH_LIC_COLS + ") VALUES (" + PERS_SV_STRAH_LIC_FIELDS + ")";
-
         // Генерация идентификаторов
         for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
             raschsvPersSvStrahLic.setId(generateId(RaschsvPersSvStrahLic.SEQ, Long.class));
@@ -262,7 +283,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                             .addValue(RaschsvPersSvStrahLic.COL_MIDDLE_NAME, raschsvPersSvStrahLic.getMiddleName())
                             .getValues());
         }
-        int [] res = getNamedParameterJdbcTemplate().batchUpdate(sql,
+        int [] res = getNamedParameterJdbcTemplate().batchUpdate(SQL_INSERT_PERS_SV_STRAH_LIC,
                 batchValues.toArray(new Map[raschsvPersSvStrahLicList.size()]));
 
         List<RaschsvSvVypl> raschsvSvVyplList = new ArrayList<RaschsvSvVypl>();
@@ -279,6 +300,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
 
             for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVypl.getRaschsvSvVyplMtList()) {
                 raschsvSvVyplMt.setRaschsvSvVyplId(raschsvSvVypl.getId());
+                raschsvSvVyplMt.setId(generateId(RaschsvSvVyplMt.SEQ, Long.class));
                 raschsvSvVyplMtList.add(raschsvSvVyplMt);
             }
 
@@ -289,6 +311,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
 
             for (RaschsvVyplSvDopMt raschsvVyplSvDopMt : raschsvVyplSvDop.getRaschsvVyplSvDopMtList()) {
                 raschsvVyplSvDopMt.setRaschsvVyplSvDopId(raschsvVyplSvDop.getId());
+                raschsvVyplSvDopMt.setId(generateId(RaschsvVyplSvDopMt.SEQ, Long.class));
                 raschsvVyplSvDopMtList.add(raschsvVyplSvDopMt);
             }
         }
@@ -298,7 +321,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             insertRaschsvSvVypl(raschsvSvVyplList);
         }
 
-        // Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
+        // Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
         if (!raschsvVyplSvDopList.isEmpty()) {
             insertRaschsvVyplSvDop(raschsvVyplSvDopList);
         }
@@ -322,9 +345,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
      * @return
      */
     private Integer insertRaschsvSvVypl(final List<RaschsvSvVypl> raschsvSvVyplList) {
-        String sql = "INSERT INTO " + RaschsvSvVypl.TABLE_NAME +
-                " (" + SV_VYPL_COLS + ") VALUES (" + SV_VYPL_FIELDS + ")";
-
         List<Map<String, Object>> batchValues = new ArrayList<Map<String, Object>>(raschsvSvVyplList.size());
         for (RaschsvSvVypl raschsvSvVypl : raschsvSvVyplList) {
             batchValues.add(
@@ -336,7 +356,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                             .addValue(RaschsvSvVypl.COL_NACHISL_SV_VS3, raschsvSvVypl.getNachislSvVs3())
                             .getValues());
         }
-        int [] res = getNamedParameterJdbcTemplate().batchUpdate(sql,
+        int [] res = getNamedParameterJdbcTemplate().batchUpdate(SQL_INSERT_SV_VYPL,
                 batchValues.toArray(new Map[raschsvSvVyplList.size()]));
 
         return res.length;
@@ -349,14 +369,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
      * @return
      */
     private Integer insertRaschsvSvVyplMt(final List<RaschsvSvVyplMt> raschsvSvVyplMtList) {
-        String sql = "INSERT INTO " + RaschsvSvVyplMt.TABLE_NAME +
-                " (" + SV_VYPL_MK_COLS + ") VALUES (" + SV_VYPL_MK_FIELDS + ")";
-
-        // Генерация идентификаторов
-        for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVyplMtList) {
-            raschsvSvVyplMt.setId(generateId(RaschsvSvVyplMt.SEQ, Long.class));
-        }
-
         List<Map<String, Object>> batchValues = new ArrayList<Map<String, Object>>(raschsvSvVyplMtList.size());
         for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVyplMtList) {
             batchValues.add(
@@ -370,7 +382,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                             .addValue(RaschsvSvVyplMt.COL_NACHISL_SV, raschsvSvVyplMt.getNachislSv())
                             .getValues());
         }
-        int [] res = getNamedParameterJdbcTemplate().batchUpdate(sql,
+        int [] res = getNamedParameterJdbcTemplate().batchUpdate(SQL_INSERT_SV_VYPL_MT,
                 batchValues.toArray(new Map[raschsvSvVyplMtList.size()]));
 
         return res.length;
@@ -383,9 +395,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
      * @return
      */
     private Integer insertRaschsvVyplSvDop(final List<RaschsvVyplSvDop> raschsvVyplSvDopList) {
-        String sql = "INSERT INTO " + RaschsvVyplSvDop.TABLE_NAME +
-                " (" + VYPL_SV_DOP_COLS + ") VALUES (" + VYPL_SV_DOP_FIELDS + ")";
-
         List<Map<String, Object>> batchValues = new ArrayList<Map<String, Object>>(raschsvVyplSvDopList.size());
         for (RaschsvVyplSvDop raschsvVyplSvDop : raschsvVyplSvDopList) {
             batchValues.add(
@@ -395,7 +404,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                             .addValue(RaschsvVyplSvDop.COL_NACHISL_SV_VS3, raschsvVyplSvDop.getNachislSvVs3())
                             .getValues());
         }
-        int [] res = getNamedParameterJdbcTemplate().batchUpdate(sql,
+        int [] res = getNamedParameterJdbcTemplate().batchUpdate(SQL_INSERT_VYPL_SV_DOP,
                 batchValues.toArray(new Map[raschsvVyplSvDopList.size()]));
 
         return res.length;
@@ -408,14 +417,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
      * @return
      */
     private Integer insertRaschsvVyplSvDopMt(final List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList) {
-        String sql = "INSERT INTO " + RaschsvVyplSvDopMt.TABLE_NAME +
-                " (" + VYPL_SV_DOP_MT_COLS + ") VALUES (" + VYPL_SV_DOP_MT_FIELDS + ")";
-
-        // Генерация идентификаторов
-        for (RaschsvVyplSvDopMt raschsvVyplSvDopMt : raschsvVyplSvDopMtList) {
-            raschsvVyplSvDopMt.setId(generateId(RaschsvVyplSvDopMt.SEQ, Long.class));
-        }
-
         List<Map<String, Object>> batchValues = new ArrayList<Map<String, Object>>(raschsvVyplSvDopMtList.size());
         for (RaschsvVyplSvDopMt raschsvVyplSvDopMt : raschsvVyplSvDopMtList) {
             batchValues.add(
@@ -427,7 +428,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                             .addValue(RaschsvVyplSvDopMt.COL_NACHISL_SV, raschsvVyplSvDopMt.getNachislSv())
                             .getValues());
         }
-        int [] res = getNamedParameterJdbcTemplate().batchUpdate(sql,
+        int [] res = getNamedParameterJdbcTemplate().batchUpdate(SQL_INSERT_VYPL_SV_DOP_MT,
                 batchValues.toArray(new Map[raschsvVyplSvDopMtList.size()]));
 
         return res.length;
