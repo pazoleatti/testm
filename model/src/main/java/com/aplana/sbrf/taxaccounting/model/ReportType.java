@@ -17,6 +17,7 @@ public enum ReportType {
     JASPER_DEC(3, "JASPER", "", 8L, 108L),
     SPECIFIC_REPORT_DEC(4, "SPECIFIC", "Формирование отчета \"%s\" %s", 26L, 126L),
     UPDATE_TEMPLATE_DEC(5, "UPDATE_TEMPLATE_DEC", "Обновление макета", 0L, 0L), //формально является задачей
+    EDIT_FILE_COMMENT_DEC(6, "EDIT_FILE_COMMENT", "Добавление файлов и комментариев", 0L, 0L), //формально является задачей, нужна для работы с модальным окном "Файлы и комментарии"
 
     CHECK_DEC(0, "CHECK_DECLARATION", "Проверка %s", 14L, 114L),
     ACCEPT_DEC(1, "ACCEPT_DECLARATION", "Принятие %s", 15L, 115L),

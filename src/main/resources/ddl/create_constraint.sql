@@ -317,6 +317,10 @@ alter table department_change add constraint dep_change_chk_is_active check (is_
 alter table department_change add constraint dep_change_chk_garant_use check (garant_use in (0, 1));
 alter table department_change add constraint dep_change_chk_sunr_use check (sunr_use in (0, 1));
 
+alter table declaration_data_file add constraint decl_data_file_pk primary key (blob_data_id, declaration_data_id);
+alter table declaration_data_file add constraint decl_data_file_fk_decl_data foreign key (declaration_data_id) references declaration_data(id);
+alter table declaration_data_file add constraint decl_data_file_fk_blob_data foreign key (blob_data_id) references blob_data(id);
+
 --------------------------------------------------------------------------------------------------------
 --                                      ФП "НДФЛ"
 --------------------------------------------------------------------------------------------------------
