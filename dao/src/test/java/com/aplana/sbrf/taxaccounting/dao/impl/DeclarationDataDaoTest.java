@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationDataDaoTest.xml"})
@@ -299,5 +300,14 @@ public class DeclarationDataDaoTest {
     public void findFormDataIdsByIntersectionInReportPeriodTest() throws ParseException {
         Assert.assertEquals(6, declarationDataDao.findDDIdsByRangeInReportPeriod(1,
                 SIMPLE_DATE_FORMAT.parse("01.01.2012"), SIMPLE_DATE_FORMAT.parse("31.12.2012")).size());
+    }
+
+    @Test
+    public void testNote() {
+        assertEquals(declarationDataDao.getNote(1), "Первичка по");
+        assertNull(declarationDataDao.getNote(7));
+
+        declarationDataDao.updateNote(7, "Проверка комментария к НФ(decl)");
+        assertEquals(declarationDataDao.getNote(7), "Проверка комментария к НФ(decl)");
     }
 }

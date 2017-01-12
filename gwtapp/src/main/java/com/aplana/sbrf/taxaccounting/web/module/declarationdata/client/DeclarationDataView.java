@@ -52,6 +52,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Anchor returnAnchor;
 	@UiField
     LinkButton infoAnchor;
+    @UiField
+    LinkButton filesComments;
 
     @UiField
     Label typeLabel;
@@ -517,5 +519,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @Override
     public boolean isVisiblePDF() {
         return isVisiblePDF;
+    }
+
+    @UiHandler("filesComments")
+    public void onFilesCommentsClicked(ClickEvent event){
+        getUiHandlers().onFilesCommentsDialog();
     }
 }

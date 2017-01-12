@@ -100,10 +100,25 @@ public interface DeclarationDataDao {
 
     /**
      * Находим декларации, относящиеся к отчетным периодам, с которыми новый период актуальности версии макета не пересекается
-     * @param formTemplateId идентификатор версии макета НФ
+     * @param decTemplateId идентификатор версии макета НФ
      * @param startDate дата, начиная с которой искать пересечения
      * @param endDate дата, до которой искать
      * @return идентификаторы
      */
     List<Integer> findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate);
+
+    /**
+     * Обновления комментария НФ
+     * @param declarationDataId
+     * @param note
+     */
+    void updateNote(long declarationDataId, String note);
+
+    /**
+     * Получение комментария НФ
+     * @param declarationDataId
+     * @return
+     */
+    String getNote(long declarationDataId);
+
 }
