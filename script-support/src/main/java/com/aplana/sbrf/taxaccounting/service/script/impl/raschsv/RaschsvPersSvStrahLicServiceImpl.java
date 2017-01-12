@@ -20,8 +20,8 @@ public class RaschsvPersSvStrahLicServiceImpl implements RaschsvPersSvStrahLicSe
     }
 
     @Override
-    public List<RaschsvPersSvStrahLic> findPersonsByInn(Long declarationDataId, String innfl) {
-        return raschsvPersSvStrahLicDao.findPersonsByInn(declarationDataId, innfl);
+    public RaschsvPersSvStrahLic findPersonByInn(Long declarationDataId, String innfl) {
+        return raschsvPersSvStrahLicDao.findPersonByInn(declarationDataId, innfl);
     }
 
     @Override
