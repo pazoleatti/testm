@@ -450,3 +450,4 @@ class TestDataHolder {
         VYPL_DOP.raschsvVyplSvDopMtList = [VYPL_DOP_MT1, VYPL_DOP_MT2, VYPL_DOP_MT3]
         FL_DATA.raschsvVyplSvDop = VYPL_DOP
     }
+}
