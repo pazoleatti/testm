@@ -20,9 +20,9 @@ comment on column ref_book_income_type.status is 'Статус записи (0 -
 comment on column ref_book_income_type.code is 'Код';
 comment on column ref_book_income_type.name is 'Наименование дохода';
 
-alter table ref_book_income_type add constraint pk_ref_book_income_type primary key (id);
+--alter table ref_book_income_type add constraint pk_ref_book_income_type primary key (id);
 
-alter table ref_book_income_type add constraint chk_ref_book_income_type_ST check (status in (-1,0,1,2));
+--alter table ref_book_income_type add constraint chk_ref_book_income_type_ST check (status in (-1,0,1,2));
 
 --create sequence seq_ref_book_income_type start with 21 increment by 1;
 -----------------------------------------------------------------------------------------------------------------------------
