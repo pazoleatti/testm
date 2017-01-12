@@ -96,11 +96,15 @@
             <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.junrar</groupId>
-            <artifactId>junrar</artifactId>
+            <groupId>net.sf.sevenzipjbinding</groupId>
+            <artifactId>sevenzipjbinding</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.sevenzipjbinding</groupId>
+            <artifactId>sevenzipjbinding-all-platforms</artifactId>
         </dependency>
 
-		<!-- Test -->
+        <!-- Test -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>test-utils</artifactId>
