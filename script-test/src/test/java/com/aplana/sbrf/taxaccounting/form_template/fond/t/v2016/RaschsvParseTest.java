@@ -97,7 +97,7 @@ public class RaschsvParseTest extends ScriptTestBase {
     @Test
     public void create() throws IOException {
 
-        InputStream inputStream = RaschsvParseTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/raschsv/raschsv.xml");
+        InputStream inputStream = RaschsvParseTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/fond/t/v2016/raschsv.xml");
 
         Map<String, Object> param = new HashedMap<String, Object>();
 
