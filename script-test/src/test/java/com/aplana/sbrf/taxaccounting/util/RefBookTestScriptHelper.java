@@ -11,13 +11,11 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
-import com.github.junrar.Archive;
+import net.sf.sevenzipjbinding.IInArchive;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -68,7 +66,7 @@ public class RefBookTestScriptHelper {
     private String fileName;
     private final ScriptTestMockHelper mockHelper;
     private Integer accountPeriodId; // необходим для БО: форма 101 и 102
-    private Archive fiasArchive;
+    private IInArchive fiasArchive;
 
     /**
      * Сервис работы со скриптами справочников в тестовом режиме
@@ -146,7 +144,7 @@ public class RefBookTestScriptHelper {
         }
 
         //для тестов загрузки фиас
-        if (fiasArchive != null){
+        if (fiasArchive != null) {
             bindings.put("archive", fiasArchive);
         }
 
@@ -172,10 +170,11 @@ public class RefBookTestScriptHelper {
                 }
             }
 
-            if (fiasArchive != null){
+            if (fiasArchive != null) {
                 try {
                     fiasArchive.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             }
 
         }
@@ -289,11 +288,11 @@ public class RefBookTestScriptHelper {
         return refBookDataProvider;
     }
 
-    public Archive getFiasArchive() {
+    public IInArchive getFiasArchive() {
         return fiasArchive;
     }
 
-    public void setFiasArchive(Archive fiasArchive) {
+    public void setFiasArchive(IInArchive fiasArchive) {
         this.fiasArchive = fiasArchive;
     }
 

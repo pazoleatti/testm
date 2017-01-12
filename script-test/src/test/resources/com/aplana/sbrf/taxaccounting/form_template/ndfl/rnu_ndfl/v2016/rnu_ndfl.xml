@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1251"?>
-<Файл xsi:noNamespaceSchemaLocation="." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Файл xsi:noNamespaceSchemaLocation="../../" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <СлЧасть ТипИнф="РНУ НДФЛ" ВрВыгр="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ИдФайл="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ДатаОтч="31.12.2000" КодПодр="aaaaaaaaaaaaaaaaa" КодАС="aaaa"/>
     <ИнфЧасть ПериодОтч="0101" ОтчетГод="2001">
         <ПолучДох КодСтрИно="999" Кварт="123" Улица="Тверская" ИННИно="777" Корпус="A" СНИЛС="123-456-000" ДопИнф="Комментарии" Гражд="РФ" Дом="123Б" УдЛичнФЛНом="1234 654321" НаселПункт="Москва" ИННФЛ="aaaaaaaaaaaa" АдресИно="Foo" ФамФЛ="Иванов" СтатусФЛ="С0" Район="РайонСтрока" ИмяФЛ="Иван" Город="Москва" УдЛичнФЛКод="ПП" ДатаРожд="31.12.2000" ИНП="123-123-123" ОтчФЛ="Иванович" Индекс="000000" КодРегион="77"/>
