@@ -559,9 +559,3 @@ alter table ref_book_id_tax_payer add constraint pk_ref_book_id_tax_payer primar
 alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
 alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_record (id);
 alter table ref_book_id_tax_payer add constraint unq_ref_book_id_tax_payer_inp unique (inp);
-
---------------------------------------------------------------------------------------------------------------------------
-alter table ref_book_income_type add constraint pk_ref_book_income_type primary key (id);
-alter table ref_book_income_type add constraint chk_ref_book_income_type_ST check (status in (-1,0,1,2));
---------------------------------------------------------------------------------------------------------------------------
-
