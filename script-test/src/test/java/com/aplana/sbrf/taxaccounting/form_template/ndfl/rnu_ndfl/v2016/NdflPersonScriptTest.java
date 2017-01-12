@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.ndfl;
+package com.aplana.sbrf.taxaccounting.form_template.ndfl.rnu_ndfl.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -93,7 +93,7 @@ public class NdflPersonScriptTest extends ScriptTestBase {
     @Test
     public void create() throws IOException {
 
-        InputStream inputStream = NdflPersonScriptTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/rnu_ndfl.xml");
+        InputStream inputStream = NdflPersonScriptTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/rnu_ndfl/v2016/rnu_ndfl.xml");
         //String xml = IOUtils.toString(xmlInputStream, "windows-1251");
 
         Map<String, Object> param = new HashedMap<String, Object>();

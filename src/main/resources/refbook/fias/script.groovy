@@ -3,7 +3,8 @@ package refbook.fias
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookSimpleReadOnly
-import com.github.junrar.rarfile.FileHeader
+import java.io.*;
+import net.sf.sevenzipjbinding.*;
 import groovy.transform.Field
 
 import javax.xml.namespace.QName
@@ -23,55 +24,57 @@ switch (formDataEvent) {
 @Field
 def BATCH_SIZE_MAX = 1000
 
+
 void importData() {
-    List<FileHeader> fileHeaders = archive.getFileHeaders();
 
     //Очистка данных перед импортом
     importFiasDataService.clearAll()
 
+    def itemsMap = createItemsMap(archive);
+
     //Строим карту Guid адресных объектов, заранее так как будет нужна иерархия
-    def addrObjInputStream = getInputStream(fileHeaders, "AS_ADDROBJ_")
+    def addrObjInputStream = getInputStream(archive, itemsMap, "AS_ADDROBJ_")
     def addressObjectGuidsMap = buildAddressObjectGuidsMap(addrObjInputStream);
 
     def houseGuidsMap = [:]
 
     //Начинаем заливать данные из таблиц справочника
-    startImport(getInputStream(fileHeaders, "AS_OPERSTAT_"),
+    startImport(getInputStream(archive, itemsMap, "AS_OPERSTAT_"),
             QName.valueOf('OperationStatus'),
             RefBookSimpleReadOnly.FIAS_OPERSTAT_TABLE_NAME,
             { generatedId, attr ->
                 operationStatusRowMapper(generatedId, attr)
             })
 
-    startImport(getInputStream(fileHeaders, "AS_SOCRBASE_"),
+    startImport(getInputStream(archive, itemsMap, "AS_SOCRBASE_"),
             QName.valueOf('AddressObjectType'),
             RefBookSimpleReadOnly.FIAS_SOCRBASE_TABLE_NAME,
             { generatedId, attr ->
                 addressObjectTypeRowMapper(generatedId, attr)
             })
 
-    startImport(getInputStream(fileHeaders, "AS_ADDROBJ_"),
+    startImport(getInputStream(archive, itemsMap, "AS_ADDROBJ_"),
             QName.valueOf('Object'),
             RefBookSimpleReadOnly.FIAS_ADDR_OBJECT_TABLE_NAME,
             { generatedId, attr ->
                 addressObjectRowMapper(addressObjectGuidsMap, attr) //здесь для получения id используем подготовленную карту
             })
 
-    startImport(getInputStream(fileHeaders, "AS_HOUSE_"),
+    startImport(getInputStream(archive, itemsMap, "AS_HOUSE_"),
             QName.valueOf('House'),
             RefBookSimpleReadOnly.FIAS_HOUSE_TABLE_NAME,
             { generatedId, attr ->
                 houseRowMapper(generatedId, addressObjectGuidsMap, houseGuidsMap, attr)
             })
 
-    startImport(getInputStream(fileHeaders, "AS_HOUSEINT_"),
+    startImport(getInputStream(archive, itemsMap, "AS_HOUSEINT_"),
             QName.valueOf('HouseInterval'),
             RefBookSimpleReadOnly.FIAS_HOUSEINT_TABLE_NAME,
             { generatedId, attr ->
                 houseIntervalRowMapper(generatedId, addressObjectGuidsMap, attr)
             })
 
-    startImport(getInputStream(fileHeaders, "AS_ROOM_"),
+    startImport(getInputStream(archive, itemsMap, "AS_ROOM_"),
             QName.valueOf('Room'),
             RefBookSimpleReadOnly.FIAS_ROOM_TABLE_NAME,
             { generatedId, attr ->
@@ -82,7 +85,7 @@ void importData() {
 
 void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
 
-    println "Fias data will be import now!"
+    logger.info("Fias data will be import now!");
 
     def time = System.currentTimeMillis()
     def rowBuffer = new ArrayList<Map<String, ?>>();
@@ -100,23 +103,23 @@ void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
             XMLEvent event = reader.nextEvent()
 
             //Обрабатываем все элементы импорта
-            if (event.isStartElement()) {
-                if (event.getName().equals(importedElementName)) {
+            if (event.isStartElement() && event.getName().equals(importedElementName)) {
 
-                    Map attributeMap = getAttributesMap(event)
-                    Map rowMap = rowMapper(i.longValue(), attributeMap)
+                Map attributeMap = getAttributesMap(event)
+                Map rowMap = rowMapper(i.longValue(), attributeMap)
 
-                    rowBuffer.add(rowMap)
-                    i++;
-                    //Проверяем если обработали пакет строк размером BATCH_SIZE, то кидаем в сервис и очищаем список
-                    if ((i % BATCH_SIZE_MAX) == 0) {
-                        importFiasDataService.insertRecords(tableName, rowBuffer)
-                        rowBuffer.clear();
-                    }
-
-                    //if ((i % 500000) == 0) {println "${i} rows process..."}
-
+                rowBuffer.add(rowMap)
+                i++;
+                //Проверяем если обработали пакет строк размером BATCH_SIZE, то кидаем в сервис и очищаем список
+                if ((i % BATCH_SIZE_MAX) == 0) {
+                    importFiasDataService.insertRecords(tableName, rowBuffer)
+                    rowBuffer.clear();
                 }
+
+                if ((i % 500000) == 0) {
+                    println "${i} rows process..."
+                }
+
             }
         }
         //Добавляем оставшиеся в списке записи
@@ -126,40 +129,57 @@ void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
         reader?.close()
     }
 
-    println "Fias ${importedElementName} (${i} rows) import to ${tableName} end (" + (System.currentTimeMillis() - time) + " ms)";
+    logger.info("Fias ${importedElementName} (${i} rows) import to ${tableName} end (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
-/**
- * Получаем поток для чтения файла из rar-архива
- * @param fileHeaders заголовок файла в архиве
- * @param prefix префикс имени файла
- * @return Pipe streams
- */
-def getInputStream(List<FileHeader> fileHeaders, prefix) {
+def createItemsMap(inArchive) {
+    def result = [:]
+    for (int i = 0; i < inArchive.getNumberOfItems(); i++) {
+        result.put(inArchive.getProperty(i, PropID.PATH).toString(), i)
+    }
+    return result;
+}
 
-    def fileHeader = getFileHeader(fileHeaders, prefix)
+InputStream getInputStream(final IInArchive inArchive, itemsMap, prefix) throws IOException {
 
-    if (fileHeader == null) {
+    def path = itemsMap.keySet().find { it.startsWith(prefix) }
+
+    if (path == null) {
         throw new ServiceException("В архиве выбранном для загрузки данных ФИАС, отсутствует XML файл с префиксом ${prefix}")
     }
-    return archive.getInputStream(fileHeader)
-}
 
-/**
- * Получаем имя файла в архиве по префиксу
- * @param fileHeaders заголовки файлов в архиве
- * @param prefix префикс для выбора заголовка файла
- * @return заголовок файла
- */
-def getFileHeader(fileHeaders, prefix) {
-    for (FileHeader fileHeader : fileHeaders) {
-        if (fileHeader.getFileNameString().startsWith(prefix)) {
-            return fileHeader
+
+    def i = itemsMap.get(path);
+
+    final PipedInputStream is = new PipedInputStream(320 * 1024);
+    final PipedOutputStream out = new PipedOutputStream(is);
+    new Thread(new Runnable() {
+        public void run() {
+            try {
+                inArchive.extractSlow(i, new ISequentialOutStream() {
+                    @Override
+                    public int write(byte[] bytes) throws SevenZipException {
+                        try {
+                            out.write(bytes);
+                        } catch (IOException e) {
+                            throw new SevenZipException(e);
+                        }
+                        return bytes.length;
+                    }
+                });
+            } catch (SevenZipException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                }
+            }
         }
-    }
-    return null
-}
+    }).start();
 
+    return is;
+}
 
 Integer getInteger(String val) {
     if (val != null && !val.isEmpty()) {
@@ -310,7 +330,7 @@ Map roomRowMapper(generatedId, houseGuidMap, attrMap) {
  */
 def buildAddressObjectGuidsMap(fiasInputStream) {
 
-    println "Start build address object guid's map!"
+    logger.info("Start build address object guid's map!")
 
     def result = [:]
     def time = System.currentTimeMillis()
@@ -330,7 +350,11 @@ def buildAddressObjectGuidsMap(fiasInputStream) {
             if (event.isStartElement() && event.getName().equals(objectName)) {
                 Map attrMap = getAttributesMap(event)
                 def guid = attrMap.get(aoguidAttrName)
-                //if ((i % 500000) == 0) {println "${i} rows process..."}
+
+                if ((i % 500000) == 0) {
+                    println "${i} rows process..."
+                }
+
                 result.put(guid, i.longValue())
                 i++;
             }
@@ -339,7 +363,7 @@ def buildAddressObjectGuidsMap(fiasInputStream) {
         reader?.close()
     }
 
-    println "Addres object guid's map buid end (" + (System.currentTimeMillis() - time) + " ms)";
+    logger.info("Addres object guid's map buid end (" + (System.currentTimeMillis() - time) + " ms)")
 
     return result
 }

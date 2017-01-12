@@ -2,29 +2,25 @@ package com.aplana.sbrf.taxaccounting.refbook.fias;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.script.ImportFiasDataService;
 import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
-import com.github.junrar.Archive;
-import com.github.junrar.exception.RarException;
-import com.github.junrar.rarfile.BaseBlock;
-import com.github.junrar.rarfile.FileHeader;
+import net.sf.sevenzipjbinding.ArchiveFormat;
+import net.sf.sevenzipjbinding.IInArchive;
+import net.sf.sevenzipjbinding.PropID;
+import net.sf.sevenzipjbinding.SevenZip;
+import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import javax.script.ScriptException;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,36 +49,43 @@ public class FiasTest extends RefBookScriptTestBase {
                 Object[] args = invocation.getArguments();
                 String tableName = (String) args[0];
                 List<Map<String, Object>> rowsList = (List<Map<String, Object>>) args[1];
-                //System.out.println("Test " + rowsList.size() + " rows insert to " + tableName);
+                System.out.println("Test " + rowsList.size() + " rows insert to " + tableName);
                 //createInserts(tableName, rowsList);
                 return null;
             }
         }).when(importFiasDataService).insertRecords(anyString(), anyList());
     }
 
-    public Archive getFiasArchive(String name) throws Exception {
-        try {
-            return new Archive(new File(FiasTest.class.getResource(name).toURI()));
-        } catch (Exception e){
-            throw new Exception("Ошибка чтения файла fias_xml.rar", e);
-        }
+    public IInArchive getFiasArchive(String name) throws Exception {
+        return getFiasArchive(new File(FiasTest.class.getResource(name).toURI()));
     }
 
-    private FileHeader getFileHeader(List<FileHeader> fileHeaders, String prefix) {
-        for (FileHeader fileHeader : fileHeaders) {
-            if (fileHeader.getFileNameString().startsWith(prefix)) {
-                return fileHeader;
-            }
+    public IInArchive getFiasArchive(File file) throws Exception {
+        IInArchive archive = null;
+        try {
+            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
+            archive = SevenZip.openInArchive(ArchiveFormat.RAR, // null - autodetect
+                    new RandomAccessFileInStream(
+                            randomAccessFile));
+        } catch (Exception e) {
+            throw new Exception("Ошибка чтения файла fias_xml.rar", e);
         }
-        return null;
+        return archive;
     }
+
 
     @Test
     public void importFiasXmlRar() throws Exception {
 
-        //testHelper.setFiasArchive(new Archive(new File("D:\\sbrf1\\fias_xml.rar")));
-        testHelper.setFiasArchive(getFiasArchive("fias_xml.rar"));
+        //Tecт с архивом с сайта ФНС
+        //IInArchive archive = getFiasArchive(new File("D:\\sbrf1\\fias_xml.rar"));
+
+        IInArchive archive = getFiasArchive("fias_xml.rar");
+
+        testHelper.setFiasArchive(archive);
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+
+        printLog();
 
         //Проверка логгера на наличие ошибок
         checkLogger();
@@ -109,9 +112,9 @@ public class FiasTest extends RefBookScriptTestBase {
     }
 
 
-    private void createInserts(String tableName, List<Map<String, Object>> rowsList){
-        for (Map<String, Object> row: rowsList){
-           //вставка в БД
+    private void createInserts(String tableName, List<Map<String, Object>> rowsList) {
+        for (Map<String, Object> row : rowsList) {
+            //вставка в БД
             System.out.println(createInsert(tableName, row));
         }
     }

@@ -19,7 +19,10 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
-import com.github.junrar.Archive;
+import net.sf.sevenzipjbinding.ArchiveFormat;
+import net.sf.sevenzipjbinding.IInArchive;
+import net.sf.sevenzipjbinding.SevenZip;
+import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -272,28 +275,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         Long refBookId = refBookMapPair.getSecond();
                         localLoggerList.add(new Logger());
                         ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
-                        Archive archive = null;
+                        IInArchive archive = null;
+                        RandomAccessFile randomAccessFile = null;
                         try {
                             // Обращение к скрипту
                             Map<String, Object> additionalParameters = new HashMap<String, Object>();
                             additionalParameters.put("fileName", fileName);
                             additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
-
-                            if (refBookMapPair.getSecond().equals(REF_BOOK_FIAS)) {
-                                archive = new Archive(currentFile.getFile());
-                                additionalParameters.put("archive", archive); // обьект для работы с RAR-архивом
-                            } else {
-                                is = currentFile.getInputStream();
-                                if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
-                                    ZipInputStream zis = new ZipInputStream(is);
-                                    ZipEntry zipFileName = zis.getNextEntry();
-                                    if (zipFileName != null) { // в архиве есть файл
-                                        // дальше работаем с первым файлом архива вместо самого архива
-                                        is = zis;
-                                    }
-                                }
-                                additionalParameters.put("inputStream", is);
-                            }
 
                             //Устанавливаем блокировку на справочник
                             List<String> lockedObjects = new ArrayList<String>();
@@ -325,6 +313,27 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                         }
                                     }
 
+                                    if (refBookMapPair.getSecond().equals(REF_BOOK_FIAS)) {
+                                        randomAccessFile = new RandomAccessFile(currentFile.getFile(), "r");
+
+                                        archive = SevenZip.openInArchive(ArchiveFormat.RAR, // null - autodetect
+                                                new RandomAccessFileInStream(
+                                                        randomAccessFile));
+
+                                        additionalParameters.put("archive", archive); // обьект для работы с RAR-архивом
+                                    } else {
+                                        is = currentFile.getInputStream();
+                                        if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
+                                            ZipInputStream zis = new ZipInputStream(is);
+                                            ZipEntry zipFileName = zis.getNextEntry();
+                                            if (zipFileName != null) { // в архиве есть файл
+                                                // дальше работаем с первым файлом архива вместо самого архива
+                                                is = zis;
+                                            }
+                                        }
+                                        additionalParameters.put("inputStream", is);
+                                    }
+
                                     //Выполняем логику скрипта
                                     refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
                                             localLoggerList.get(i), additionalParameters);
@@ -336,6 +345,14 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                     } catch (IOException ioe) {
                                         // ignore
                                     }
+                                    if (randomAccessFile != null) {
+                                        try {
+                                            randomAccessFile.close();
+                                        } catch (IOException e) {
+                                            // ignore
+                                        }
+                                    }
+
                                     // Обработка результата выполнения скрипта
                                     switch (scriptStatusHolder.getScriptStatus()) {
                                         case SUCCESS:
@@ -387,6 +404,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                             } catch (IOException ioe) {
                                 // ignore
                             }
+                            if (randomAccessFile != null) {
+                                try {
+                                    randomAccessFile.close();
+                                } catch (IOException ioe) {
+                                    // ignore
+                                }
+                            }
                             fail++;
                             // Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
                             log(userInfo, LogData.L21, logger, lockId, e.getMessage());
@@ -398,13 +422,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                             }
                         } finally {
                             IOUtils.closeQuietly(is);
-                            try {
-                                if (archive != null) {
-                                    archive.close();
-                                }
-                            } catch (IOException ioe) {
-                                // ignore
-                            }
                         }
                     }
                     if (skip == matchList.size()) {

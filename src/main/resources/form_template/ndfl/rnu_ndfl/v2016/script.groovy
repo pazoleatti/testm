@@ -1,4 +1,4 @@
-package form_template.ndfl
+package form_template.ndfl.rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
