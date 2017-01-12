@@ -117,7 +117,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (210,'Параметры представления деклараций по транспортному налогу',1,0,0,2100);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (207, 'Виды форм', 1, 0, 1, null, 'DECLARATION_TYPE');
 
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (350,'Коды вычетов',1,0,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) VALUES (350,'Коды видов вычетов',1,0,0,null,'REF_BOOK_DEDUCTION_TYPE');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (360,'Коды документов',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) VALUES (370,'Коды видов доходов',1,0,0,null,'REF_BOOK_INCOME_TYPE');
 
@@ -704,7 +704,7 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2071, 207,'Наименование','NAME',1,1,null,null,1,null,50,1,0,0,null,0,2000);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2072, 207,'Вид налога','TAX_TYPE',1,2,null,null,1,null,10,1,0,null,null,0,2000);
 
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3501, 350,'Код','CODE',1,1,null,null,1,null,6,1,1,null,null,0,3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3501, 350,'Код вычета','CODE',1,1,null,null,1,null,6,1,1,null,null,0,3);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3502, 350,'Наименование вычета','NAME',1,2,null,null,1,null,50,1,0,null,null,0,2000);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3601, 360,'Код','CODE',1,1,null,null,1,null,6,1,1,null,null,0,2);
