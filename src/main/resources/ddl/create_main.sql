@@ -2061,7 +2061,7 @@ create table fias_addrobj
     divtype number(1) not null,
     offname varchar2(120 char),
     postalcode varchar2(6 char),
-    parentguid number(18),
+    parentguid number(18)
 );
 
 comment on column fias_addrobj.id is 'Глобальный уникальный идентификатор адресного объекта';
