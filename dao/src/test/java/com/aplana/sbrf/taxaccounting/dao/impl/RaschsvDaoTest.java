@@ -14,10 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"RaschsvDaoTest.xml"})
@@ -77,7 +74,8 @@ public class RaschsvDaoTest {
     private RaschsvSvnpPodpisantDao raschsvSvnpPodpisantDao;
 
     // Идентификатор декларации
-    private static final Long DECLARATION_ID = 1L;
+    private static final Long DECLARATION_ID_EXIST = 1L;
+    private static final Long DECLARATION_ID_NOT_EXIST = 999L;
 
     /**
      * Добавление записи в таблицу ОбязПлатСВ
@@ -85,7 +83,7 @@ public class RaschsvDaoTest {
      */
     private Long createRaschsvObyazPlatSv() {
         RaschsvObyazPlatSv raschsvObyazPlatSv = new RaschsvObyazPlatSv();
-        raschsvObyazPlatSv.setDeclarationDataId(DECLARATION_ID);
+        raschsvObyazPlatSv.setDeclarationDataId(DECLARATION_ID_EXIST);
         raschsvObyazPlatSv.setOktmo("1");
         return raschsvObyazPlatSvDao.insertObyazPlatSv(raschsvObyazPlatSv).longValue();
     }
@@ -212,14 +210,14 @@ public class RaschsvDaoTest {
 
         // Персонифицированные сведения о застрахованных лицах
         RaschsvPersSvStrahLic raschsvPersSvStrahLic1 = new RaschsvPersSvStrahLic();
-        raschsvPersSvStrahLic1.setDeclarationDataId(DECLARATION_ID);
+        raschsvPersSvStrahLic1.setDeclarationDataId(DECLARATION_ID_EXIST);
         raschsvPersSvStrahLic1.setNomKorr(1);
         raschsvPersSvStrahLic1.setRaschsvSvVypl(raschsvSvVypl);
         raschsvPersSvStrahLic1.setRaschsvVyplSvDop(raschsvVyplSvDop);
 
         // Персонифицированные сведения о застрахованных лицах
         RaschsvPersSvStrahLic raschsvPersSvStrahLic2 = new RaschsvPersSvStrahLic();
-        raschsvPersSvStrahLic2.setDeclarationDataId(DECLARATION_ID);
+        raschsvPersSvStrahLic2.setDeclarationDataId(DECLARATION_ID_EXIST);
         raschsvPersSvStrahLic2.setNomKorr(2);
 
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic1);
@@ -232,8 +230,9 @@ public class RaschsvDaoTest {
      */
     @Test
     public void testFindPersonsByInn() {
-        assertFalse(raschsvPersSvStrahLicDao.findPersonsByInn(DECLARATION_ID, "111111111111").isEmpty());
-        assertTrue(raschsvPersSvStrahLicDao.findPersonsByInn(DECLARATION_ID, "222222222222").isEmpty());
+        assertNotNull(raschsvPersSvStrahLicDao.findPersonByInn(DECLARATION_ID_EXIST, "111111111111"));
+        assertNull(raschsvPersSvStrahLicDao.findPersonByInn(DECLARATION_ID_EXIST, "222222222222"));
+        assertNull(raschsvPersSvStrahLicDao.findPersonByInn(DECLARATION_ID_NOT_EXIST, "111111111111"));
     }
 
     /**
@@ -241,7 +240,8 @@ public class RaschsvDaoTest {
      */
     @Test
     public void testFindPersons() {
-        assertFalse(raschsvPersSvStrahLicDao.findPersons(DECLARATION_ID).isEmpty());
+        assertFalse(raschsvPersSvStrahLicDao.findPersons(DECLARATION_ID_EXIST).isEmpty());
+        assertTrue(raschsvPersSvStrahLicDao.findPersons(DECLARATION_ID_NOT_EXIST).isEmpty());
     }
 
     /**
@@ -554,7 +554,7 @@ public class RaschsvDaoTest {
     @Test
     public void testInsertRaschsvSvnpPodpisant() {
         RaschsvSvnpPodpisant raschsvSvnpPodpisant = new RaschsvSvnpPodpisant();
-        raschsvSvnpPodpisant.setDeclarationDataId(DECLARATION_ID);
+        raschsvSvnpPodpisant.setDeclarationDataId(DECLARATION_ID_EXIST);
         raschsvSvnpPodpisant.setSvnpOkved("1");
         raschsvSvnpPodpisant.setSvnpTlph("1");
         raschsvSvnpPodpisant.setSvnpNaimOrg("1");
