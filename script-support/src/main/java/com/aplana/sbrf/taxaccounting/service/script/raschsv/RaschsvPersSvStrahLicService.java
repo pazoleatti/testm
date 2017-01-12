@@ -15,4 +15,19 @@ public interface RaschsvPersSvStrahLicService {
      * @return
      */
     Integer insertPersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList);
+
+    /**
+     * Выборка "Персонифицированных сведений о застрахованных лицах"
+     * @param declarationDataId - идентификатор декларации
+     * @param innfl - ИНН ФЛ
+     * @return
+     */
+    List<RaschsvPersSvStrahLic> findPersonsByInn(Long declarationDataId, String innfl);
+
+    /**
+     * Выборка "Персонифицированных сведений о застрахованных лицах"
+     * @param declarationDataId - идентификатор декларации
+     * @return
+     */
+    List<RaschsvPersSvStrahLic> findPersons(Long declarationDataId);
 }

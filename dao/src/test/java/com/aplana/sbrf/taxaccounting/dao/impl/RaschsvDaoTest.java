@@ -16,6 +16,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"RaschsvDaoTest.xml"})
@@ -74,13 +76,16 @@ public class RaschsvDaoTest {
     @Autowired
     private RaschsvSvnpPodpisantDao raschsvSvnpPodpisantDao;
 
+    // Идентификатор декларации
+    private static final Long DECLARATION_ID = 1L;
+
     /**
      * Добавление записи в таблицу ОбязПлатСВ
      * @return
      */
     private Long createRaschsvObyazPlatSv() {
         RaschsvObyazPlatSv raschsvObyazPlatSv = new RaschsvObyazPlatSv();
-        raschsvObyazPlatSv.setDeclarationDataId(1L);
+        raschsvObyazPlatSv.setDeclarationDataId(DECLARATION_ID);
         raschsvObyazPlatSv.setOktmo("1");
         return raschsvObyazPlatSvDao.insertObyazPlatSv(raschsvObyazPlatSv).longValue();
     }
@@ -207,19 +212,36 @@ public class RaschsvDaoTest {
 
         // Персонифицированные сведения о застрахованных лицах
         RaschsvPersSvStrahLic raschsvPersSvStrahLic1 = new RaschsvPersSvStrahLic();
-        raschsvPersSvStrahLic1.setDeclarationDataId(1L);
+        raschsvPersSvStrahLic1.setDeclarationDataId(DECLARATION_ID);
         raschsvPersSvStrahLic1.setNomKorr(1);
         raschsvPersSvStrahLic1.setRaschsvSvVypl(raschsvSvVypl);
         raschsvPersSvStrahLic1.setRaschsvVyplSvDop(raschsvVyplSvDop);
 
         // Персонифицированные сведения о застрахованных лицах
         RaschsvPersSvStrahLic raschsvPersSvStrahLic2 = new RaschsvPersSvStrahLic();
-        raschsvPersSvStrahLic2.setDeclarationDataId(1L);
+        raschsvPersSvStrahLic2.setDeclarationDataId(DECLARATION_ID);
         raschsvPersSvStrahLic2.setNomKorr(2);
 
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic1);
         raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic2);
         assertEquals(raschsvPersSvStrahLicDao.insertPersSvStrahLic(raschsvPersSvStrahLicList).intValue(), raschsvPersSvStrahLicList.size());
+    }
+
+    /**
+     * Тестирование выборки данных из таблицы "Персонифицированные сведения о застрахованных лицах" по ИНН ФЛ и идентификатору декларации
+     */
+    @Test
+    public void testFindPersonsByInn() {
+        assertFalse(raschsvPersSvStrahLicDao.findPersonsByInn(DECLARATION_ID, "111111111111").isEmpty());
+        assertTrue(raschsvPersSvStrahLicDao.findPersonsByInn(DECLARATION_ID, "222222222222").isEmpty());
+    }
+
+    /**
+     * Тестирование выборки данных из таблицы "Персонифицированные сведения о застрахованных лицах" по идентификатору декларации
+     */
+    @Test
+    public void testFindPersons() {
+        assertFalse(raschsvPersSvStrahLicDao.findPersons(DECLARATION_ID).isEmpty());
     }
 
     /**
@@ -532,7 +554,7 @@ public class RaschsvDaoTest {
     @Test
     public void testInsertRaschsvSvnpPodpisant() {
         RaschsvSvnpPodpisant raschsvSvnpPodpisant = new RaschsvSvnpPodpisant();
-        raschsvSvnpPodpisant.setDeclarationDataId(1L);
+        raschsvSvnpPodpisant.setDeclarationDataId(DECLARATION_ID);
         raschsvSvnpPodpisant.setSvnpOkved("1");
         raschsvSvnpPodpisant.setSvnpTlph("1");
         raschsvSvnpPodpisant.setSvnpNaimOrg("1");

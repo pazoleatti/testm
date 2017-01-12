@@ -46,4 +46,7 @@ public class RaschsvVyplSvDop extends IdentityObject<Long> {
         return raschsvVyplSvDopMtList != null ? raschsvVyplSvDopMtList : Collections.<RaschsvVyplSvDopMt>emptyList();
     }
     public void setRaschsvVyplSvDopMtList(List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList) { this.raschsvVyplSvDopMtList = raschsvVyplSvDopMtList; }
+    public void addRaschsvVyplSvDopMt(RaschsvVyplSvDopMt raschsvVyplSvDopMt) {
+        raschsvVyplSvDopMtList.add(raschsvVyplSvDopMt);
+    }
 }

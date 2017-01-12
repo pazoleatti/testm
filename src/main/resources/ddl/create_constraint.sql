@@ -478,7 +478,7 @@ alter table raschsv_sv_vypl_mk add constraint pk_raschv_vypl_mk primary key (id)
 alter table raschsv_sv_vypl_mk add constraint fk_raschsv_sv_vypl_mk_sv_vypl foreign key (raschsv_sv_vypl_id) references raschsv_sv_vypl (id);
 
 alter table raschsv_vypl_sv_dop add constraint pk_raschv_vypl_sv_dop primary key (id);
-alter table raschsv_vypl_sv_dop add constraint fk_raschsv_vypl_sv_drop_lic foreign key (raschsv_pers_sv_strah_lic_id) references raschsv_pers_sv_strah_lic (id);
+alter table raschsv_vypl_sv_dop add constraint fk_raschsv_vypl_sv_dop_lic foreign key (raschsv_pers_sv_strah_lic_id) references raschsv_pers_sv_strah_lic (id);
 
 alter table raschsv_vypl_sv_dop_mt add constraint pk_raschv_vypl_sv_dop_mt primary key (id);
 alter table raschsv_vypl_sv_dop_mt add constraint fk_raschsv_vsv_dop_mt_vsv_dop foreign key (raschsv_vypl_sv_dop_id) references raschsv_vypl_sv_dop (id);

@@ -14,7 +14,18 @@ public class RaschsvPersSvStrahLicServiceImpl implements RaschsvPersSvStrahLicSe
     @Autowired
     private RaschsvPersSvStrahLicDao raschsvPersSvStrahLicDao;
 
+    @Override
     public Integer insertPersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLic) {
         return raschsvPersSvStrahLicDao.insertPersSvStrahLic(raschsvPersSvStrahLic);
+    }
+
+    @Override
+    public List<RaschsvPersSvStrahLic> findPersonsByInn(Long declarationDataId, String innfl) {
+        return raschsvPersSvStrahLicDao.findPersonsByInn(declarationDataId, innfl);
+    }
+
+    @Override
+    public List<RaschsvPersSvStrahLic> findPersons(Long declarationDataId) {
+        return raschsvPersSvStrahLicDao.findPersons(declarationDataId);
     }
 }

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.*;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -43,28 +44,182 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     private static final StringBuilder VYPL_SV_DOP_MT_COLS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvVyplSvDopMt.COLUMNS, null));
     private static final StringBuilder VYPL_SV_DOP_MT_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvVyplSvDopMt.COLUMNS, ":"));
 
-    /**
-     * Выгрузка из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
-     * @param raschsvPersSvStrahLicId - идентификатор "Персонифицированные сведения о застрахованных лицах"
-     * @return
-     */
-//    private List<RaschsvSvVypl> getRaschsvSvVypl(long raschsvPersSvStrahLicId) {
-//        return getJdbcTemplate().query(
-//                "select " + SV_VYPL_COLS + " from " + RaschsvSvVypl.TABLE_NAME + " sV where sV." + RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + " = ?",
-//                new Object[]{raschsvPersSvStrahLicId},
-//                new RaschsvSvVyplRowMapper());
-//    }
+    // sql запрос для выборки из "Персонифицированные сведения о застрахованных лицах" по ИНН ФЛ и идентификатору декларации
+    private static final String SQL_SELECT_PERSONS_BY_INN = "SELECT " + PERS_SV_STRAH_LIC_COLS + " FROM " + RaschsvPersSvStrahLic.TABLE_NAME +
+            " WHERE " + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID + " = :" + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID + " AND "
+    + RaschsvPersSvStrahLic.COL_INNFL + " = :" + RaschsvPersSvStrahLic.COL_INNFL;
+
+    // sql запрос для выборки из "Персонифицированные сведения о застрахованных лицах" по идентификатору декларации
+    private static final String SQL_SELECT_PERSONS = "SELECT " + PERS_SV_STRAH_LIC_COLS + " FROM " + RaschsvPersSvStrahLic.TABLE_NAME +
+            " WHERE " + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID + " = :" + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID;
+
+    // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+    String SQL_SELECT_SV_VYPL_BY_PERSON_IDS = "SELECT " + SV_VYPL_COLS + " FROM " + RaschsvSvVypl.TABLE_NAME +
+            " WHERE " + RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + " IN (:" + RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + ")";
+
+    // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
+    String SQL_SELECT_SV_VYPL_MT_BY_SV_VYPL_IDS = "SELECT " + SV_VYPL_MK_COLS + " FROM " + RaschsvSvVyplMt.TABLE_NAME +
+            " WHERE " + RaschsvSvVyplMt.COL_RASCHSV_SV_VYPL_ID + " IN (:" + RaschsvSvVyplMt.COL_RASCHSV_SV_VYPL_ID + ")";
+
+    // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+    String SQL_SELECT_VYPL_SV_DOP_BY_PERSON_IDS = "SELECT " + VYPL_SV_DOP_COLS + " FROM " + RaschsvVyplSvDop.TABLE_NAME +
+            " WHERE " + RaschsvVyplSvDop.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + " IN (:" + RaschsvVyplSvDop.COL_RASCHSV_PERS_SV_STRAH_LIC_ID + ")";
+
+    // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+    String SQL_SELECT_VYPL_SV_DOP_MT_BY_VYPL_SV_DOP_IDS = "SELECT " + VYPL_SV_DOP_MT_COLS + " FROM " + RaschsvVyplSvDopMt.TABLE_NAME +
+            " WHERE " + RaschsvVyplSvDopMt.COL_RASCHSV_VYPL_SV_DOP_ID + " IN (:" + RaschsvVyplSvDopMt.COL_RASCHSV_VYPL_SV_DOP_ID + ")";
+
+    @Override
+    public List<RaschsvPersSvStrahLic> findPersonsByInn(Long declarationDataId, String innfl) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue(RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID, declarationDataId)
+                .addValue(RaschsvPersSvStrahLic.COL_INNFL, innfl);
+        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList =
+                getNamedParameterJdbcTemplate().query(SQL_SELECT_PERSONS_BY_INN, params, new RaschsvPersSvStrahLicRowMapper());
+
+        if (!raschsvPersSvStrahLicList.isEmpty()) {
+            raschsvPersSvStrahLicList = findSvVyplAndVyplSvDop(raschsvPersSvStrahLicList);
+        }
+
+        return raschsvPersSvStrahLicList;
+    }
+
+    @Override
+    public List<RaschsvPersSvStrahLic> findPersons(Long declarationDataId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue(RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID, declarationDataId);
+        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList =
+                getNamedParameterJdbcTemplate().query(SQL_SELECT_PERSONS, params, new RaschsvPersSvStrahLicRowMapper());
+
+        if (!raschsvPersSvStrahLicList.isEmpty()) {
+            raschsvPersSvStrahLicList = findSvVyplAndVyplSvDop(raschsvPersSvStrahLicList);
+        }
+
+        return raschsvPersSvStrahLicList;
+    }
 
     /**
-     * Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица
-     * @param raschsvSvVyplId - идентификатор "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+     * Получение значений полей "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица" и
+     * "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+     * @param raschsvPersSvStrahLicList
      * @return
      */
-    private List<RaschsvSvVyplMt> getRaschsvSvVyplMt(long raschsvSvVyplId) {
-        return getJdbcTemplate().query(
-                "select " + SV_VYPL_MK_COLS + " from " + RaschsvSvVyplMt.TABLE_NAME + " sVMt where sVMt." + RaschsvSvVyplMt.COL_RASCHSV_SV_VYPL_ID + " = ?",
-                new Object[]{raschsvSvVyplId},
-                new RaschsvSvVyplMtRowMapper());
+    public List<RaschsvPersSvStrahLic> findSvVyplAndVyplSvDop(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList) {
+        // Массив идентификаторов "Персонифицированные сведения о застрахованных лицах"
+        Long[] raschsvPersSvStrahLicIds = new Long[raschsvPersSvStrahLicList.size()];
+        for (int i = 0; i < raschsvPersSvStrahLicList.size(); i++) {
+            raschsvPersSvStrahLicIds[i] = raschsvPersSvStrahLicList.get(i).getId();
+        }
+
+        // Получим "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+        List<RaschsvSvVypl> raschsvSvVyplList = findSvVyplByPersSvStrahLicIds(raschsvPersSvStrahLicIds);
+
+        if (!raschsvSvVyplList.isEmpty()) {
+            // Массив идентификаторов "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+            Long[] raschsvSvVyplIds = new Long[raschsvSvVyplList.size()];
+            for (int i = 0; i < raschsvSvVyplList.size(); i++) {
+                raschsvSvVyplIds[i] = raschsvSvVyplList.get(i).getId();
+            }
+
+            // Получим "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
+            List<RaschsvSvVyplMt> raschsvSvVyplMtList = findSvVyplMtBySvVyplIds(raschsvSvVyplIds);
+
+            if (!raschsvSvVyplMtList.isEmpty()) {
+                for (RaschsvSvVypl raschsvSvVypl : raschsvSvVyplList) {
+                    for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVyplMtList) {
+                        if (raschsvSvVyplMt.getRaschsvSvVyplId().equals(raschsvSvVypl.getId())) {
+                            raschsvSvVypl.addRaschsvSvVyplMt(raschsvSvVyplMt);
+                        }
+                    }
+                }
+            }
+
+            for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
+                for (RaschsvSvVypl raschsvSvVypl : raschsvSvVyplList) {
+                    if (raschsvSvVypl.getRaschsvPersSvStrahLicId().equals(raschsvPersSvStrahLic.getId())) {
+                        raschsvPersSvStrahLic.setRaschsvSvVypl(raschsvSvVypl);
+                    }
+                }
+            }
+        }
+
+        // Получим "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+        List<RaschsvVyplSvDop> raschsvVyplSvDopList = findVyplSvDopByPersSvStrahLicIds(raschsvPersSvStrahLicIds);
+
+        if (!raschsvVyplSvDopList.isEmpty()) {
+            // Массив идентификаторов "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+            Long[] raschsvVyplSvDopIds = new Long[raschsvVyplSvDopList.size()];
+            for (int i = 0; i < raschsvVyplSvDopList.size(); i++) {
+                raschsvVyplSvDopIds[i] = raschsvVyplSvDopList.get(i).getId();
+            }
+
+            // Получим "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+            List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList = findVyplSvDopMtByVyplSvDopIds(raschsvVyplSvDopIds);
+
+            if (!raschsvVyplSvDopMtList.isEmpty()) {
+                for (RaschsvVyplSvDop raschsvVyplSvDop : raschsvVyplSvDopList) {
+                    for (RaschsvVyplSvDopMt raschsvVyplSvDopMt : raschsvVyplSvDopMtList) {
+                        if (raschsvVyplSvDopMt.getRaschsvVyplSvDopId().equals(raschsvVyplSvDop.getId())) {
+                            raschsvVyplSvDop.addRaschsvVyplSvDopMt(raschsvVyplSvDopMt);
+                        }
+                    }
+                }
+            }
+
+            for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
+                for (RaschsvVyplSvDop raschsvVyplSvDop : raschsvVyplSvDopList) {
+                    if (raschsvVyplSvDop.getRaschsvPersSvStrahLicId().equals(raschsvPersSvStrahLic.getId())) {
+                        raschsvPersSvStrahLic.setRaschsvVyplSvDop(raschsvVyplSvDop);
+                    }
+                }
+            }
+        }
+
+        return raschsvPersSvStrahLicList;
+    }
+
+    /**
+     * Выборка из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+     * @param ids
+     * @return
+     */
+    private List<RaschsvSvVypl> findSvVyplByPersSvStrahLicIds(Long[] ids) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue(RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID, StringUtils.join(ids, ','));
+        return getNamedParameterJdbcTemplate().query(SQL_SELECT_SV_VYPL_BY_PERSON_IDS, params, new RaschsvSvVyplRowMapper());
+    }
+
+    /**
+     * Выборка из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
+     * @param ids
+     * @return
+     */
+    private List<RaschsvSvVyplMt> findSvVyplMtBySvVyplIds(Long[] ids) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue(RaschsvSvVyplMt.COL_RASCHSV_SV_VYPL_ID, StringUtils.join(ids, ','));
+        return getNamedParameterJdbcTemplate().query(SQL_SELECT_SV_VYPL_MT_BY_SV_VYPL_IDS, params, new RaschsvSvVyplMtRowMapper());
+    }
+
+    /**
+     * Выборка из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+     * @param ids
+     * @return
+     */
+    private List<RaschsvVyplSvDop> findVyplSvDopByPersSvStrahLicIds(Long[] ids) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue(RaschsvVyplSvDop.COL_RASCHSV_PERS_SV_STRAH_LIC_ID, StringUtils.join(ids, ','));
+        return getNamedParameterJdbcTemplate().query(SQL_SELECT_VYPL_SV_DOP_BY_PERSON_IDS, params, new RaschsvVyplSvDopRowMapper());
+    }
+
+    /**
+     * Выборка из "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+     * @param ids
+     * @return
+     */
+    private List<RaschsvVyplSvDopMt> findVyplSvDopMtByVyplSvDopIds(Long[] ids) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue(RaschsvVyplSvDopMt.COL_RASCHSV_VYPL_SV_DOP_ID, StringUtils.join(ids, ','));
+        return getNamedParameterJdbcTemplate().query(SQL_SELECT_VYPL_SV_DOP_MT_BY_VYPL_SV_DOP_IDS, params, new RaschsvVyplSvDopMtRowMapper());
     }
 
     /**
