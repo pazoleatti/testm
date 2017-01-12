@@ -3,15 +3,18 @@ package form_template.ndfl.rnu_ndfl.v2016
 import com.aplana.sbrf.taxaccounting.dao.impl.BlobDataDaoImpl
 import com.aplana.sbrf.taxaccounting.dao.impl.DeclarationSubreportDaoImpl
 import com.aplana.sbrf.taxaccounting.dao.impl.raschsv.RaschsvPersSvStrahLicDaoImpl
+import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvSvnpPodpisantDao
 import com.aplana.sbrf.taxaccounting.model.BlobData
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvnpPodpisant
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMt
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDop
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDopMt
+import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import org.apache.poi.ss.usermodel.Cell;
@@ -46,8 +49,8 @@ switch (formDataEvent) {
         def writer = scriptSpecificReportHolder.getFileOutputStream()
         def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
         def workbook = getSpecialReportTemplate(alias)
-        fillTestGeneralList(workbook)
-        if (alias.equalsIgnoreCase("person_rep")) {
+        fillGeneralList(workbook)
+        if (alias.equalsIgnoreCase("person_report")) {
             fillPersSvSheet(workbook)
         } else if (alias.equalsIgnoreCase("consolidated_report")) {
             fillPersSvConsSheet(workbook)
@@ -62,6 +65,7 @@ switch (formDataEvent) {
 // Находит в базе данных RaschsvPersSvStrahLic
 def getrRaschsvPersSvStrahLic() {
     TestDataHolder.getInstance().FL_DATA
+
 }
 
 
@@ -70,35 +74,46 @@ def getrRaschsvPersSvStrahLicList() {
     [TestDataHolder.getInstance().FL_DATA, TestDataHolder.getInstance().FL_DATA, TestDataHolder.getInstance().FL_DATA]
 }
 
+
+def getRaschsvSvnpPodpisant() {
+    def raschsvSvnpPodpisantDao = getBeanByClass(RaschsvSvnpPodpisantDao.class)
+    // TODO Нужен select в RaschsvSvnpPodpisantDao или брать из xml
+    TestDataHolder.getInstance().PODPISANT
+}
 /****************************************************************************
  *  Блок заполнения данными титульной страницы                              *
  *                                                                          *
  * **************************************************************************/
 
-def fillTestGeneralList(final workbook) {
-    def testDataHolder = TestDataHolder.getInstance()
+def fillGeneralList(final workbook) {
     def sheet = workbook.getSheet(Sheet.COMMON_SHEET.getName())
-    sheet.getRow(3).getCell(1).setCellValue(testDataHolder.FILE_NAME)
-    sheet.getRow(4).getCell(1).setCellValue(testDataHolder.VERS_PROG)
-    sheet.getRow(5).getCell(1).setCellValue(testDataHolder.VERS_FORMAT)
-    sheet.getRow(8).getCell(1).setCellValue(testDataHolder.KND)
-    sheet.getRow(9).getCell(1).setCellValue(testDataHolder.FORM_DATE)
-    sheet.getRow(10).getCell(1).setCellValue(testDataHolder.CORRECT_NUMBER)
-    sheet.getRow(11).getCell(1).setCellValue(testDataHolder.REPORT_PERIOD)
-    sheet.getRow(12).getCell(1).setCellValue(testDataHolder.REPORT_YEAR)
-    sheet.getRow(13).getCell(1).setCellValue(testDataHolder.CODE_NO)
-    sheet.getRow(14).getCell(1).setCellValue(testDataHolder.PLACE)
-    sheet.getRow(18).getCell(1).setCellValue(testDataHolder.OKVED)
-    sheet.getRow(19).getCell(1).setCellValue(testDataHolder.PHONE_NUMBER)
-    sheet.getRow(21).getCell(1).setCellValue(testDataHolder.ORG_NAME)
-    sheet.getRow(22).getCell(1).setCellValue(testDataHolder.INN_ORG)
-    sheet.getRow(23).getCell(1).setCellValue(testDataHolder.KPP_ORG)
-    sheet.getRow(25).getCell(1).setCellValue(testDataHolder.CODE_REORG)
-    sheet.getRow(26).getCell(1).setCellValue(testDataHolder.INN_REORG)
-    sheet.getRow(27).getCell(1).setCellValue(testDataHolder.SIGNER)
-    sheet.getRow(30).getCell(1).setCellValue(testDataHolder.SIGNER_FIO)
-    sheet.getRow(31).getCell(1).setCellValue(testDataHolder.REPRESENTER)
-    sheet.getRow(33).getCell(1).setCellValue(testDataHolder.REPRESENTER_ORG)
+    def declarationService = getBeanByClass(DeclarationService.class)
+    def podpisant = getRaschsvSvnpPodpisant()
+    def xmlStream = declarationService.getXmlStream(declarationData.getId())
+    def slurper = new XmlSlurper()
+    def Файл = slurper.parse(xmlStream)
+    sheet.getRow(3).getCell(1).setCellValue(Файл.@ИдФайл.toString())
+    sheet.getRow(4).getCell(1).setCellValue(Файл.@ВерсПрог.toString())
+    sheet.getRow(5).getCell(1).setCellValue(Файл.@ВерсФорм.toString())
+    sheet.getRow(8).getCell(1).setCellValue(Файл.Документ.@КНД.toString())
+    sheet.getRow(9).getCell(1).setCellValue(Файл.Документ.@ДатаДок.toString())
+    sheet.getRow(10).getCell(1).setCellValue(Файл.Документ.@НомКорр.toString())
+    sheet.getRow(11).getCell(1).setCellValue(Файл.Документ.@Период.toString())
+    sheet.getRow(12).getCell(1).setCellValue(Файл.Документ.@ОтчетГод.toString())
+    sheet.getRow(13).getCell(1).setCellValue(Файл.Документ.@КодНО.toString())
+    sheet.getRow(14).getCell(1).setCellValue(Файл.Документ.@ПоМесту.toString())
+    sheet.getRow(18).getCell(1).setCellValue podpisant.svnpOkved
+    sheet.getRow(19).getCell(1).setCellValue podpisant.svnpTlph
+    sheet.getRow(21).getCell(1).setCellValue podpisant.svnpNaimOrg
+    sheet.getRow(22).getCell(1).setCellValue podpisant.svnpInnyl
+    sheet.getRow(23).getCell(1).setCellValue podpisant.svnpKpp
+    sheet.getRow(25).getCell(1).setCellValue podpisant.svnpSvReorgForm
+    sheet.getRow(26).getCell(1).setCellValue podpisant.svnpSvReorgInnyl
+    sheet.getRow(27).getCell(1).setCellValue podpisant.svnpSvReorgKpp
+    sheet.getRow(30).getCell(1).setCellValue podpisant.familia + " " + podpisant.imya + " " + podpisant.middleName
+    sheet.getRow(31).getCell(1).setCellValue podpisant.podpisantPrPodp
+    sheet.getRow(33).getCell(1).setCellValue podpisant.podpisantNaimDoc
+    sheet.getRow(34).getCell(1).setCellValue podpisant.podpisantNaimOrg
 }
 
 /****************************************************************************
@@ -347,31 +362,7 @@ def formatDate(final date, final pattern) {
 class TestDataHolder {
     final static testDataHolder = new TestDataHolder()
 
-    final FILE_NAME = "test1"
-    final VERS_PROG = "test2"
-    final VERS_FORMAT = "test3"
-    final KND = "test4"
-    final FORM_DATE = "test5"
-    final CORRECT_NUMBER = "test6"
-    final REPORT_PERIOD = "test7"
-    final REPORT_YEAR = "test8"
-    final CODE_NO = "test9"
-    final PLACE = "test10"
-    final OKVED = "test11"
-    final PHONE_NUMBER = "test12"
-    final ORG_NAME = "test13"
-    final INN_ORG = "test14"
-    final KPP_ORG = "test15"
-    final CODE_REORG = "test16"
-    final INN_REORG = "test17"
-    final KPP_REORG = "test18"
-
-    final SIGNER = "test19"
-    final SIGNER_FIO = "test20"
-
-    final REPRESENTER = "test21"
-    final REPRESENTER_ORG = "test22"
-
+    final PODPISANT
     final FL_DATA
 
     static getInstance() {
@@ -379,6 +370,7 @@ class TestDataHolder {
     }
 
     private TestDataHolder() {
+        // Инициализация RaschsvPersSvStrahLic
         FL_DATA = new RaschsvPersSvStrahLic()
         FL_DATA.nomer = 1
         FL_DATA.svData = new Date()
@@ -449,5 +441,22 @@ class TestDataHolder {
         VYPL_DOP_MT3.vyplSv = 200
         VYPL_DOP.raschsvVyplSvDopMtList = [VYPL_DOP_MT1, VYPL_DOP_MT2, VYPL_DOP_MT3]
         FL_DATA.raschsvVyplSvDop = VYPL_DOP
+
+        // Инициализация RaschsvSvnpPodpisant
+        PODPISANT = new RaschsvSvnpPodpisant()
+        raschsvSvnpPodpisant.setSvnpOkved("okved_test")
+        raschsvSvnpPodpisant.setSvnpTlph("phone_test")
+        raschsvSvnpPodpisant.setSvnpNaimOrg("nazvanie_test")
+        raschsvSvnpPodpisant.setSvnpInnyl("innYl_test")
+        raschsvSvnpPodpisant.setSvnpKpp("kpp_test")
+        raschsvSvnpPodpisant.setSvnpSvReorgForm("reorgForm_test")
+        raschsvSvnpPodpisant.setSvnpSvReorgInnyl("reorgInn_test")
+        raschsvSvnpPodpisant.setSvnpSvReorgKpp("reorgKpp_test")
+        raschsvSvnpPodpisant.setFamilia("familia_test")
+        raschsvSvnpPodpisant.setImya("imya_test")
+        raschsvSvnpPodpisant.setMiddleName("otchestvo_test")
+        raschsvSvnpPodpisant.setPodpisantPrPodp("pravoPodpis_test")
+        raschsvSvnpPodpisant.setPodpisantNaimDoc("docName_test")
+        raschsvSvnpPodpisant.setPodpisantNaimOrg("orgName_test")
     }
 }
