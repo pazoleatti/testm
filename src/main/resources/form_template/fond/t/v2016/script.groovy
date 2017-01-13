@@ -240,63 +240,40 @@ def fillRaschsvPersSvStrahLicTable(final startIndex, final raschsvPersSvStrahLic
  * застрахованных лицах
  **/
 def fillCellsOfRaschsvPersSvStrahLicRow(final raschsvPersSvStrahLic, final row, final workbook) {
-    def leftStyle = normalWithBorderStyleLeftAligned(workbook)
+    /*def leftStyle = normalWithBorderStyleLeftAligned(workbook)
     def centerStyle = normalWithBorderStyleCenterAligned(workbook)
-    def defaultStyle = normalWithBorderStyle(workbook)
-    def cell0 = row.createCell(0)
-    cell0.setCellStyle(leftStyle)
-    cell0.setCellValue(raschsvPersSvStrahLic.getNomer())
-    def cell1 = row.createCell(1)
-    cell1.setCellStyle(leftStyle)
-    cell1.setCellValue(formatDate(raschsvPersSvStrahLic.getSvData(), "dd.MM.yyyy"))
-    def cell2 = row.createCell(2)
-    cell2.setCellStyle(centerStyle)
-    cell2.setCellValue(raschsvPersSvStrahLic.getNomKorr())
-    def cell3 = row.createCell(3)
-    cell3.setCellStyle(centerStyle)
-    cell3.setCellValue(raschsvPersSvStrahLic.getPeriod())
-    def cell4 = row.createCell(4)
-    cell4.setCellStyle(defaultStyle)
-    cell4.setCellValue(raschsvPersSvStrahLic.getOtchetGod())
-    def cell5 = row.createCell(5)
-    cell5.setCellStyle(defaultStyle)
-    cell5.setCellValue(raschsvPersSvStrahLic.getFamilia())
-    def cell6 = row.createCell(6)
-    cell6.setCellStyle(defaultStyle)
-    cell6.setCellValue(raschsvPersSvStrahLic.getImya())
-    def cell7 = row.createCell(7)
-    cell7.setCellStyle(defaultStyle)
-    cell7.setCellValue(raschsvPersSvStrahLic.getMiddleName())
-    def cell8 = row.createCell(8)
-    cell8.setCellStyle(defaultStyle)
-    cell8.setCellValue(raschsvPersSvStrahLic.getInnfl())
-    def cell9 = row.createCell(9)
-    cell9.setCellStyle(defaultStyle)
-    cell9.setCellValue(raschsvPersSvStrahLic.getSnils())
-    def cell10 = row.createCell(10)
-    cell10.setCellStyle(defaultStyle)
-    cell10.setCellValue(raschsvPersSvStrahLic.getDataRozd())
-    def cell11 = row.createCell(11)
-    cell11.setCellStyle(defaultStyle)
-    cell11.setCellValue(raschsvPersSvStrahLic.getGrazd())
-    def cell12 = row.createCell(12)
-    cell12.setCellStyle(defaultStyle)
-    cell12.setCellValue(raschsvPersSvStrahLic.getPol())
-    def cell13 = row.createCell(13)
-    cell13.setCellStyle(defaultStyle)
-    cell13.setCellValue(raschsvPersSvStrahLic.getKodVidDoc())
-    def cell14 = row.createCell(14)
-    cell14.setCellStyle(defaultStyle)
-    cell14.setCellValue(raschsvPersSvStrahLic.getSerNomDoc())
-    def cell15 = row.createCell(15)
-    cell15.setCellStyle(defaultStyle)
-    cell15.setCellValue(raschsvPersSvStrahLic.getPrizOps())
-    def cell16 = row.createCell(16)
-    cell16.setCellStyle(defaultStyle)
-    cell16.setCellValue(raschsvPersSvStrahLic.getPrizOms())
-    def cell17 = row.createCell(17)
-    cell17.setCellStyle(defaultStyle)
-    cell17.setCellValue(raschsvPersSvStrahLic.getPrizOss())
+    def defaultStyle = normalWithBorderStyle(workbook)*/
+    def style = workbook.createCellStyle()
+    def bordersProps = thinBorderStyle()
+    def cells = [row.createCell(0), row.createCell(1), row.createCell(2), row.createCell(3), row.createCell(4),
+                 row.createCell(5), row.createCell(6), row.createCell(7), row.createCell(8), row.createCell(9),
+                 row.createCell(10), row.createCell(11), row.createCell(12), row.createCell(13), row.createCell(14),
+                 row.createCell(15), row.createCell(16), row.createCell(17)]
+    cells.each {it.setCellStyle(style)}
+    cells.each {CellUtil.setCellStyleProperties it, bordersProps}
+    CellUtil.setAlignment(cells[0], HorizontalAlignment.LEFT)
+    CellUtil.setAlignment(cells[1], HorizontalAlignment.LEFT)
+    CellUtil.setAlignment(cells[2], HorizontalAlignment.CENTER)
+    CellUtil.setAlignment(cells[3], HorizontalAlignment.CENTER)
+
+    cells[0].setCellValue(raschsvPersSvStrahLic.getNomer())
+    cells[1].setCellValue(formatDate(raschsvPersSvStrahLic.getSvData(), "dd.MM.yyyy"))
+    cells[2].setCellValue(raschsvPersSvStrahLic.getNomKorr())
+    cells[3].setCellValue(raschsvPersSvStrahLic.getPeriod())
+    cells[4].setCellValue(raschsvPersSvStrahLic.getOtchetGod())
+    cells[5].setCellValue(raschsvPersSvStrahLic.getFamilia())
+    cells[6].setCellValue(raschsvPersSvStrahLic.getImya())
+    cells[7].setCellValue(raschsvPersSvStrahLic.getMiddleName())
+    cells[8].setCellValue(raschsvPersSvStrahLic.getInnfl())
+    cells[9].setCellValue(raschsvPersSvStrahLic.getSnils())
+    cells[10].setCellValue(raschsvPersSvStrahLic.getDataRozd())
+    cells[11].setCellValue(raschsvPersSvStrahLic.getGrazd())
+    cells[12].setCellValue(raschsvPersSvStrahLic.getPol())
+    cells[13].setCellValue(raschsvPersSvStrahLic.getKodVidDoc())
+    cells[14].setCellValue(raschsvPersSvStrahLic.getSerNomDoc())
+    cells[15].setCellValue(raschsvPersSvStrahLic.getPrizOps())
+    cells[16].setCellValue(raschsvPersSvStrahLic.getPrizOms())
+    cells[17].setCellValue(raschsvPersSvStrahLic.getPrizOss())
 }
 
 //  Создает строки для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
@@ -387,35 +364,36 @@ def fillPersSvConsSheet(final workbook) {
  * **************************************************************************/
 
 // Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем слева
-def normalWithBorderStyleLeftAligned(workbook) {
+/*def normalWithBorderStyleLeftAligned(workbook) {
     def style = workbook.createCellStyle()
     style.setAlignment(CellStyle.ALIGN_LEFT)
     thinBorderStyle(style)
     return style
-}
+}*/
 
 // Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
-def normalWithBorderStyleCenterAligned(workbook) {
+/*def normalWithBorderStyleCenterAligned(workbook) {
     def style = workbook.createCellStyle()
     style.setAlignment(CellStyle.ALIGN_CENTER)
     thinBorderStyle(style)
     return style
-}
+}*/
 
 // Создать стиль ячейки с нормальным шрифтом с тонкими границами
-def normalWithBorderStyle(workbook) {
+/*def normalWithBorderStyle(workbook) {
     def style = workbook.createCellStyle()
     thinBorderStyle(style)
     return style
-}
+}*/
 
 // Добавляет к стилю ячейки тонкие границы
-def thinBorderStyle(style) {
-    style.setBorderTop(CellStyle.BORDER_THIN)
-    style.setBorderBottom(CellStyle.BORDER_THIN)
-    style.setBorderLeft(CellStyle.BORDER_THIN)
-    style.setBorderRight(CellStyle.BORDER_THIN)
-    return style
+def thinBorderStyle() {
+    def propMap = new HashMap<String, Object>();
+    propMap.put(CellUtil.BORDER_TOP, CellStyle.BORDER_THIN);
+    propMap.put(CellUtil.BORDER_BOTTOM, CellStyle.BORDER_THIN);
+    propMap.put(CellUtil.BORDER_LEFT, CellStyle.BORDER_THIN);
+    propMap.put(CellUtil.BORDER_RIGHT, CellStyle.BORDER_THIN);
+    return propMap
 }
 /****************************************************************************
  *  Вспомогательные методы                                                  *
