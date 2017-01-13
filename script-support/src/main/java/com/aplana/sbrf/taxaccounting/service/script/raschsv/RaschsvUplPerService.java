@@ -1,12 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.script.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPer;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.List;
 
 /**
  * Сервис для работы с "Сумма страховых взносов на пенсионное, медицинское, социальное страхование"
  */
+@ScriptExposed
 public interface RaschsvUplPerService {
 
     /**

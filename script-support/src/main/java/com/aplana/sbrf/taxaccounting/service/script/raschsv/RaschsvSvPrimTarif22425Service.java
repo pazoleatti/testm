@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.script.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif22425;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
  * Сервис для работы с "Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426)"
  */
+@ScriptExposed
 public interface RaschsvSvPrimTarif22425Service {
 
     /**

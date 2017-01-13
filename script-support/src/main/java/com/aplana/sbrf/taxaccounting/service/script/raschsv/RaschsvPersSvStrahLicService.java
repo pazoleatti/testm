@@ -1,12 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.script.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.List;
 
 /**
  * Сервис для работы с "Персонифицированные сведения о застрахованных лицах"
  */
+@ScriptExposed
 public interface RaschsvPersSvStrahLicService {
 
     /**
