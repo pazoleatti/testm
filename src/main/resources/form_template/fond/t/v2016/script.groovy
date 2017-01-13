@@ -251,7 +251,9 @@ def fillCellsOfRaschsvPersSvStrahLicRow(final raschsvPersSvStrahLic, final row, 
                  row.createCell(10), row.createCell(11), row.createCell(12), row.createCell(13), row.createCell(14),
                  row.createCell(15), row.createCell(16), row.createCell(17)]
     cells.each {it.setCellStyle(style)}
-    cells.each {CellUtil.setCellStyleProperties it, bordersProps}
+    for (cell in cells) {
+        CellUtil.setCellStyleProperties(cell, bordersProps)
+    }
     CellUtil.setAlignment(cells[0], HorizontalAlignment.LEFT)
     CellUtil.setAlignment(cells[1], HorizontalAlignment.LEFT)
     CellUtil.setAlignment(cells[2], HorizontalAlignment.CENTER)
