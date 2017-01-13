@@ -161,9 +161,22 @@ def fillRaschsvPersSvStrahLicTable(final startIndex, final raschsvPersSvStrahLic
  * застрахованных лицах
  **/
 def fillCellsOfRaschsvPersSvStrahLicRow(final raschsvPersSvStrahLic, final row, final workbook) {
-    def leftStyle = normalWithBorderStyleLeftAligned(workbook)
+    /*def leftStyle = normalWithBorderStyleLeftAligned(workbook)
     def centerStyle = normalWithBorderStyleCenterAligned(workbook)
-    def defaultStyle = normalWithBorderStyle(workbook)
+    def defaultStyle = normalWithBorderStyle(workbook)*/
+    def style = workbook.createCellStyle()
+    def bordersProps = thinBorderStyle()
+    def cells = [row.createCell(0), row.createCell(1), row.createCell(2), row.createCell(3), row.createCell(4),
+                 row.createCell(5), row.createCell(6), row.createCell(7), row.createCell(8), row.createCell(9),
+                 row.createCell(10), row.createCell(11), row.createCell(12), row.createCell(13), row.createCell(14),
+                 row.createCell(15), row.createCell(16), row.createCell(17)]
+    cells.each {it.setCellStyle(style)}
+    cells.each {CellUtil.setCellStyleProperties it, bordersProps}
+    CellUtil.setAlignment(cells[0], HorizontalAlignment.LEFT)
+    CellUtil.setAlignment(cells[1], HorizontalAlignment.LEFT)
+    CellUtil.setAlignment(cells[2], HorizontalAlignment.CENTER)
+    CellUtil.setAlignment(cells[3], HorizontalAlignment.CENTER)
+
     def cell0 = row.createCell(0)
     cell0.setCellStyle(leftStyle)
     cell0.setCellValue(raschsvPersSvStrahLic.getNomer())
@@ -308,35 +321,36 @@ def fillPersSvConsSheet(final workbook) {
  * **************************************************************************/
 
 // Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем слева
-def normalWithBorderStyleLeftAligned(workbook) {
+/*def normalWithBorderStyleLeftAligned(workbook) {
     def style = workbook.createCellStyle()
     style.setAlignment(CellStyle.ALIGN_LEFT)
     thinBorderStyle(style)
     return style
-}
+}*/
 
 // Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
-def normalWithBorderStyleCenterAligned(workbook) {
+/*def normalWithBorderStyleCenterAligned(workbook) {
     def style = workbook.createCellStyle()
     style.setAlignment(CellStyle.ALIGN_CENTER)
     thinBorderStyle(style)
     return style
-}
+}*/
 
 // Создать стиль ячейки с нормальным шрифтом с тонкими границами
-def normalWithBorderStyle(workbook) {
+/*def normalWithBorderStyle(workbook) {
     def style = workbook.createCellStyle()
     thinBorderStyle(style)
     return style
-}
+}*/
 
 // Добавляет к стилю ячейки тонкие границы
-def thinBorderStyle(style) {
-    style.setBorderTop(CellStyle.BORDER_THIN)
-    style.setBorderBottom(CellStyle.BORDER_THIN)
-    style.setBorderLeft(CellStyle.BORDER_THIN)
-    style.setBorderRight(CellStyle.BORDER_THIN)
-    return style
+def thinBorderStyle() {
+    def propMap = new HashMap<String, Object>();
+    propMap.put(CellUtil.BORDER_TOP, CellStyle.BORDER_THIN);
+    propMap.put(CellUtil.BORDER_BOTTOM, CellStyle.BORDER_THIN);
+    propMap.put(CellUtil.BORDER_LEFT, CellStyle.BORDER_THIN);
+    propMap.put(CellUtil.BORDER_RIGHT, CellStyle.BORDER_THIN);
+    return propMap
 }
 /****************************************************************************
  *  Вспомогательные методы                                                  *
