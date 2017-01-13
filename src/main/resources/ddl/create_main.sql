@@ -1148,19 +1148,6 @@ comment on column department_change.code is 'Код подразделения';
 comment on column department_change.garant_use is 'Признак, что используется в модуле Гарантий (0 - не используется, 1 - используется)';
 comment on column department_change.sunr_use is 'Признак, что используется в АС СУНР (0 - не используется, 1 - используется)';
 --------------------------------------------------------------------------------------------------------
-create table ref_book_asnu (
-  id       number(9) primary key,
-  code     varchar2(4) not null,
-  name     varchar2(100) not null,
-  type     varchar2(255) not null
-);
-
-comment on table ref_book_asnu is 'Справочник АСНУ';
-comment on column ref_book_asnu.id is 'Идентификатор';
-comment on column ref_book_asnu.code is 'Код АСНУ';
-comment on column ref_book_asnu.name is 'Наименование АСНУ';
-comment on column ref_book_asnu.type is 'Тип дохода';
---------------------------------------------------------------------------------------------------------
 --                                      ФП "НДФЛ"
 --------------------------------------------------------------------------------------------------------
 create table ndfl_person (
