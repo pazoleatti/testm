@@ -71,4 +71,29 @@ comment on column ref_book_region.oktmo is 'Ссылка на код ОКТМО'
 comment on column ref_book_region.oktmo_definition is 'Определяющая часть кода ОКТМО';
 
 create sequence seq_ref_book_region start with 101 increment by 1;
+
+-- Коды места представления расчета
+create table ref_book_present_place
+(
+  id        number(18) not null,
+  record_id number(9) not null,
+  version   date not null,
+  status    number(1) default 0 not null,
+  code      varchar2(3 char) not null,
+  name      varchar2(255) not null,
+  for_ndfl  number(1) default 1 not null,
+  for_fond  number(1) default 1 not null
+);
+
+comment on table ref_book_present_place is 'Коды места представления расчета';
+comment on column ref_book_present_place.id is 'Уникальный идентификатор';
+comment on column ref_book_present_place.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_present_place.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_present_place.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_present_place.code is 'Код';
+comment on column ref_book_present_place.name is 'Наименование';
+comment on column ref_book_present_place.for_ndfl is 'Используется для НДФЛ';
+comment on column ref_book_present_place.for_fond is 'Используется для Страховых сборов взносов';
+
+create sequence seq_ref_book_present_place start with 21 increment by 1;
 -----------------------------------------------------------------------------------------------------------------------------
