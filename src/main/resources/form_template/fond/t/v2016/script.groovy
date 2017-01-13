@@ -16,7 +16,6 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
-//import org.springframework.web.context.ContextLoader
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -111,13 +110,13 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         def writer = scriptSpecificReportHolder.getFileOutputStream()
         def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
-        def workbook = getSpecialReportTemplate(alias)
-        fillGeneralList(workbook)
+        def workbook = getSpecialReportTemplate()
+        /*fillGeneralList(workbook)
         if (alias.equalsIgnoreCase("person_report")) {
             fillPersSvSheet(workbook)
         } else if (alias.equalsIgnoreCase("consolidated_report")) {
             fillPersSvConsSheet(workbook)
-        }
+        }*/
         workbook.write(writer)
         writer.close()
         scriptSpecificReportHolder
@@ -426,18 +425,9 @@ def thinBorderStyle(style) {
  * **************************************************************************/
 
 // Находит в базе данных шаблон спецотчета по физическому лицу и возвращает его
-def getSpecialReportTemplate(alias) {
-    def declarationSubreportDao = getBeanByClass(DeclarationSubreportDaoImpl.class)
-    def subreport = declarationSubreportDao.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias)
-    def blobDataDao = getBeanByClass(BlobDataDaoImpl.class)
-    def blobData = blobDataDao.get(subreport.getBlobDataId())
+def getSpecialReportTemplate() {
+    def blobData = blobDataService.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
     new XSSFWorkbook(blobData.getInputStream())
-}
-
-// Находит бин в Spring контексте по объекту класса бина
-def getBeanByClass(final clazz) {
-    def applicationContext = ContextLoader.getCurrentWebApplicationContext()
-    applicationContext.getBean(clazz)
 }
 
 // Создает отформатироованную строку из объекта даты на основе передаваемого шаблона
