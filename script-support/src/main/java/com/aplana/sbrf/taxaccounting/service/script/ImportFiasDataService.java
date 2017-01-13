@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +10,7 @@ import java.util.Map;
  *
  * @author Andrey Drunk
  */
+@ScriptExposed
 public interface ImportFiasDataService {
 
     /**

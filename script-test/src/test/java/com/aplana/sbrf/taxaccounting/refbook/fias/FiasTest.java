@@ -49,7 +49,7 @@ public class FiasTest extends RefBookScriptTestBase {
                 Object[] args = invocation.getArguments();
                 String tableName = (String) args[0];
                 List<Map<String, Object>> rowsList = (List<Map<String, Object>>) args[1];
-                System.out.println("Test " + rowsList.size() + " rows insert to " + tableName);
+                //System.out.println("Test " + rowsList.size() + " rows insert to " + tableName);
                 //createInserts(tableName, rowsList);
                 return null;
             }
@@ -81,7 +81,6 @@ public class FiasTest extends RefBookScriptTestBase {
         //IInArchive archive = getFiasArchive(new File("D:\\sbrf1\\fias_xml.rar"));
 
         IInArchive archive = getFiasArchive("fias_xml.rar");
-
         testHelper.setFiasArchive(archive);
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
 

@@ -24,7 +24,6 @@ switch (formDataEvent) {
 @Field
 def BATCH_SIZE_MAX = 1000
 
-
 void importData() {
 
     //Очистка данных перед импортом
@@ -33,10 +32,10 @@ void importData() {
     def itemsMap = createItemsMap(archive);
 
     //Строим карту Guid адресных объектов, заранее так как будет нужна иерархия
-    def addrObjInputStream = getInputStream(archive, itemsMap, "AS_ADDROBJ_")
-    def addressObjectGuidsMap = buildAddressObjectGuidsMap(addrObjInputStream);
+    def addressObjectGuidsMap = buidGuidsMap(getInputStream(archive, itemsMap, "AS_ADDROBJ_"), QName.valueOf('Object'), QName.valueOf('AOGUID'));
 
-    def houseGuidsMap = [:]
+    //Карта содержит guid из таблицы house которые используются в таблице room, сгенерированный id проставляется при импорте таблицы house
+    def houseGuidsMap = buidGuidsMap(getInputStream(archive, itemsMap, "AS_ROOM_"), QName.valueOf('Room'), QName.valueOf('HOUSEGUID'))
 
     //Начинаем заливать данные из таблиц справочника
     startImport(getInputStream(archive, itemsMap, "AS_OPERSTAT_"),
@@ -85,7 +84,7 @@ void importData() {
 
 void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
 
-    logger.info("Fias data will be import now!");
+    logger.info("Start import ${importedElementName} to ${tableName}!");
 
     def time = System.currentTimeMillis()
     def rowBuffer = new ArrayList<Map<String, ?>>();
@@ -96,7 +95,7 @@ void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
     xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
 
     def reader = xmlFactory.createXMLEventReader(fiasInputStream)
-    def i = 0;
+    int i = 1;
     try {
 
         while (reader.hasNext()) {
@@ -106,7 +105,7 @@ void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
             if (event.isStartElement() && event.getName().equals(importedElementName)) {
 
                 Map attributeMap = getAttributesMap(event)
-                Map rowMap = rowMapper(i.longValue(), attributeMap)
+                Map rowMap = rowMapper(i, attributeMap)
 
                 rowBuffer.add(rowMap)
                 i++;
@@ -116,9 +115,7 @@ void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
                     rowBuffer.clear();
                 }
 
-                if ((i % 500000) == 0) {
-                    println "${i} rows process..."
-                }
+                //if ((i % 100000) == 0) {println "${i} rows of ${importedElementName} process..."}
 
             }
         }
@@ -274,7 +271,9 @@ Map houseRowMapper(generatedId, addressObjectGuidMap, houseGuidMap, attrMap) {
     def houseGuid = attrMap.get(QName.valueOf('HOUSEGUID'))
 
     //сохраняем HOUSEGUID и соответсвующий ему идентификатор в карту для использования в room
-    houseGuidMap.put(houseGuid, generatedId)
+    if (houseGuidMap.containsKey(houseGuid)){
+        houseGuidMap.put(houseGuid, generatedId)
+    }
 
     //меняем HOUSEGUID на целочисленный идентификатор
     recordsMap.put('ID', generatedId)
@@ -324,50 +323,51 @@ Map roomRowMapper(generatedId, houseGuidMap, attrMap) {
 }
 
 /**
- * Построение карты с идентификаторами адресных объектов
- * @param fiasInputStream xml-файл импорта
- * @return карта соответствия guid из фиас к целочисленному идентификатору
+ * Построить карту соответсвия Guid к идентификатору
+ * @param fiasInputStream
+ * @param elementName
+ * @param attrName
+ * @param attrMapper
+ * @return
  */
-def buildAddressObjectGuidsMap(fiasInputStream) {
+def buidGuidsMap(fiasInputStream, elementName, attrName) {
 
-    logger.info("Start build address object guid's map!")
+    logger.info("Start build guids from ${elementName} by ${attrName}")
 
-    def result = [:]
+    def result = new HashMap();
     def time = System.currentTimeMillis()
-    def objectName = QName.valueOf('Object')
-    def aoguidAttrName = QName.valueOf('AOGUID')
 
     def xmlFactory = XMLInputFactory.newInstance()
     xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
     xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
 
     def reader = xmlFactory.createXMLEventReader(fiasInputStream)
-
+    int i = 1;
     try {
-        def i = 0;
         while (reader.hasNext()) {
             XMLEvent event = reader.nextEvent()
-            if (event.isStartElement() && event.getName().equals(objectName)) {
-                Map attrMap = getAttributesMap(event)
-                def guid = attrMap.get(aoguidAttrName)
-
-                if ((i % 500000) == 0) {
-                    println "${i} rows process..."
+            if (event.isStartElement() && event.getName().equals(elementName)) {
+                Iterator iterator = event.getAttributes()
+                while (iterator.hasNext()) {
+                    Attribute attribute = (Attribute) iterator.next()
+                    if (attribute.getName().equals(attrName)){
+                        String guid = attribute.getValue()
+                        result.put(guid, i);
+                        i++;
+                        break;
+                    }
                 }
-
-                result.put(guid, i.longValue())
-                i++;
+                //if ((i % 100000) == 0) {println "${i} rows of ${elementName} (" + (System.currentTimeMillis() - time) + " ms) process..."}
             }
         }
     } finally {
         reader?.close()
     }
 
-    logger.info("Addres object guid's map buid end (" + (System.currentTimeMillis() - time) + " ms)")
+    logger.info("Build guids end ("+result.size()+ " rows) process ("+(System.currentTimeMillis() - time) + " ms)")
 
     return result
 }
-
 
 
 
