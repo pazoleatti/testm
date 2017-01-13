@@ -111,12 +111,12 @@ switch (formDataEvent) {
         def writer = scriptSpecificReportHolder.getFileOutputStream()
         def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
         def workbook = getSpecialReportTemplate()
-        /*fillGeneralList(workbook)
+        fillGeneralList(workbook)
         if (alias.equalsIgnoreCase("person_report")) {
             fillPersSvSheet(workbook)
         } else if (alias.equalsIgnoreCase("consolidated_report")) {
             fillPersSvConsSheet(workbook)
-        }*/
+        }
         workbook.write(writer)
         writer.close()
         scriptSpecificReportHolder
@@ -166,7 +166,6 @@ def getrRaschsvPersSvStrahLicList() {
 
 
 def getRaschsvSvnpPodpisant() {
-    def raschsvSvnpPodpisantDao = getBeanByClass(RaschsvSvnpPodpisantDao.class)
     // TODO Нужен select в RaschsvSvnpPodpisantDao или брать из xml
     TestDataHolder.getInstance().PODPISANT
 }
@@ -177,7 +176,6 @@ def getRaschsvSvnpPodpisant() {
 
 def fillGeneralList(final workbook) {
     def sheet = workbook.getSheet(Sheet.COMMON_SHEET.getName())
-    def declarationService = getBeanByClass(DeclarationService.class)
     def podpisant = getRaschsvSvnpPodpisant()
     def xmlStream = declarationService.getXmlStream(declarationData.getId())
     def slurper = new XmlSlurper()
