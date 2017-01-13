@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.script.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif13422;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
  * Сервис для работы с "Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422"
  */
+@ScriptExposed
 public interface RaschsvSvPrimTarif13422Service {
 
     /**

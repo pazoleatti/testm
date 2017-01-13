@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.script.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif51427;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
  * Сервис для работы с "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 5 пункта 1 статьи 427"
  */
+@ScriptExposed
 public interface RaschsvPravTarif51427Service {
 
     /**
