@@ -426,7 +426,8 @@ def thinBorderStyle(style) {
 
 // Находит в базе данных шаблон спецотчета по физическому лицу и возвращает его
 def getSpecialReportTemplate() {
-    def blobData = blobDataService.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
+    //def blobData = blobDataService.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
+    println raschsvPersSvStrahLicService
     new XSSFWorkbook(blobData.getInputStream())
 }
 
