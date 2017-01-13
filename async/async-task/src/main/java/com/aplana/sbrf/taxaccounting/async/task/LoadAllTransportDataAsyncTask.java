@@ -86,6 +86,6 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
-        return "Произошла непредвиденная ошибка при загрузке ТФ из каталога загрузкиа";
+        return "Произошла непредвиденная ошибка при загрузке ТФ из каталога загрузки";
     }
 }
