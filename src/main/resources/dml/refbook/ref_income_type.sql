@@ -1,4 +1,4 @@
-alter session set current_schema=ndfl_1_0;
+--alter session set current_schema=ndfl_1_0;
 ---- прежние данные из универсального справочника
 --insert into ref_book_income_type (id,record_id,version,status,code,name) values (1,1,to_date('01.01.2012','DD.MM.YYYY'),0,'1010','Дивиденды');
 --insert into ref_book_income_type (id,record_id,version,status,code,name) values (2,2,to_date('01.01.2012','DD.MM.YYYY'),0,'1011','Проценты (за исключением процентов по облигациям с ипотечным покрытием, эмитированным до 01.01.2007, доходов в виде процентов, получаемых по вкладам в банках, и доходов, получаемых при погашении векселя), включая дисконт, полученный по долговому обязательству любого вида');

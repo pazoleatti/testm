@@ -1,4 +1,4 @@
-alter session set current_schema=ndfl_1_0;
+--alter session set current_schema=ndfl_1_0;
 
 insert into ref_book_deduction_type (id,record_id,version,status,code,name) values (1,1,to_date('01.01.2016','dd.mm.yyyy'),0,'104','500 рублей на налогоплательщика, относящегося к категориям, перечисленным в подпункте 2 пункта 1 статьи 218 Налогового кодекса Российской Федерации');
 insert into ref_book_deduction_type (id,record_id,version,status,code,name) values (2,2,to_date('01.01.2016','dd.mm.yyyy'),0,'105','3000 рублей на налогоплательщика, относящегося к категориям, перечисленным в подпункте 1 пункта 1 статьи 218 Налогового кодекса Российской Федерации');
