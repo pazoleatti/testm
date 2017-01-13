@@ -2,18 +2,10 @@ package form_template.ndfl.rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.dao.impl.BlobDataDaoImpl
 import com.aplana.sbrf.taxaccounting.dao.impl.DeclarationSubreportDaoImpl
-import com.aplana.sbrf.taxaccounting.dao.impl.raschsv.RaschsvPersSvStrahLicDaoImpl
+import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvSvnpPodpisantDao
 import com.aplana.sbrf.taxaccounting.model.BlobData
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvnpPodpisant
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMt
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDop
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDopMt
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -25,21 +17,15 @@ import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.web.context.ContextLoader
 
-def enum Sheet {
-    COMMON_SHEET("Общее"),
-    PERSONAL_DATA("Сведения о ФЛ"),
-    CONS_PERSONAL_DATA("3.Персониф. Сведения")
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvnpPodpisant
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMt
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDop
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDopMt
 
-    def name
-
-    Sheet(def n) {
-        name = n;
-    }
-
-    def getName() {
-        return name
-    }
-}
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -62,10 +48,29 @@ switch (formDataEvent) {
         break
 }
 
+def enum Sheet {
+    COMMON_SHEET("Общее"),
+    PERSONAL_DATA("Сведения о ФЛ"),
+    CONS_PERSONAL_DATA("3.Персониф. Сведения")
+
+    def name
+
+    Sheet(def n) {
+        name = n;
+    }
+
+    def getName() {
+        return name
+    }
+}
+
 // Находит в базе данных RaschsvPersSvStrahLic
 def getrRaschsvPersSvStrahLic() {
-    TestDataHolder.getInstance().FL_DATA
+    def raschsvPersSvStrahLicDao = getBeanByClass(RaschsvSvnpPodpisantDao.class)
+    def inn = getInnFl()
+    raschsvPersSvStrahLic = raschsvPersSvStrahLicDao.findPersonByInn(declarationData.geetId(), inn)
 
+    TestDataHolder.getInstance().FL_DATA
 }
 
 
@@ -79,6 +84,10 @@ def getRaschsvSvnpPodpisant() {
     def raschsvSvnpPodpisantDao = getBeanByClass(RaschsvSvnpPodpisantDao.class)
     // TODO Нужен select в RaschsvSvnpPodpisantDao или брать из xml
     TestDataHolder.getInstance().PODPISANT
+}
+
+def getInnFl() {
+    // TODO: определить как будет находится инн для передачи в аргумент raschsvPersSvStrahLicDao.findPersonByInn
 }
 /****************************************************************************
  *  Блок заполнения данными титульной страницы                              *
@@ -379,7 +388,7 @@ class TestDataHolder {
         FL_DATA.otchetGod = "2016"
         FL_DATA.familia = "Иванов"
         FL_DATA.imya = "Егор"
-        FL_DATA.imya = "Семенович"
+        FL_DATA.middleName = "Семенович"
         FL_DATA.innfl = "111222333444"
         FL_DATA.snils = "123-456"
         FL_DATA.dataRozd = new Date(1970, Calendar.JANUARY, 1)
