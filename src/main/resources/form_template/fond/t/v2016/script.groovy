@@ -8,11 +8,14 @@ import com.aplana.sbrf.taxaccounting.model.BlobData
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
+import java.awt.Color
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFColor
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -144,6 +147,9 @@ switch (formDataEvent) {
 // Имена псевдонима спецотчета
 @Field PERSON_REPORT = "person_report"
 @Field CONSOLIDATED_REPORT = "consolidated_report"
+
+@Field ROWS_FILL_COLOR = new Color(255, 243, 203)
+@Field TOTAL_ROW_FILL_COLOR = new Color(186, 208, 80)
 
 // Находит в базе данных RaschsvPersSvStrahLic
 def getrRaschsvPersSvStrahLic() {
@@ -298,16 +304,20 @@ def fillRaschSvVyplat(final startIndex, final raschsvPersSvStrahLic, final workb
     sheet.shiftRows(startIndex, sheet.getLastRowNum(), raschsvSvVyplMtListSize + 1)
     for (int i = 0; i < raschsvSvVyplMtListSize; i++) {
         def row = sheet.createRow(i + startIndex)
-        fillCellsOfRaschSvVyplatMt(raschsvPersSvStrahLic, raschsvSvVyplMtList[i], row)
+        fillCellsOfRaschSvVyplatMt(raschsvPersSvStrahLic, raschsvSvVyplMtList[i], row, workbook)
     }
     fillCellsOfRaschSvVyplat(raschsvSvVypl, sheet.createRow(raschsvSvVyplMtListSize + startIndex))
     return raschsvSvVyplMtListSize
 }
 
 // Заполняет данными строку для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
-def fillCellsOfRaschSvVyplatMt(final raschsvPersSvStrahLic, final raschsvSvVyplMt, final row) {
-    row.createCell(0).setCellValue(raschsvPersSvStrahLic.getNomer())
-    row.createCell(1).setCellValue(raschsvSvVyplMt.mesyac)
+def fillCellsOfRaschSvVyplatMt(final raschsvPersSvStrahLic, final raschsvSvVyplMt, final row, final workbook) {
+    def style = normalWithBorderStyle(workbook)
+    style.setFillForegroundColor(new XSSFColor(ROWS_FILL_COLOR))
+    def cell0 = row.createCell(0)
+    cell0.setCellStyle(style)
+    cell0.setCellValue(raschsvSvVyplMt.mesyac)
+    row.createCell(1).setCellValue(raschsvPersSvStrahLic.getNomer())
     row.createCell(2).setCellValue(raschsvSvVyplMt.kodKatLic)
     row.createCell(3).setCellValue(raschsvSvVyplMt.sumVypl)
     row.createCell(4).setCellValue(raschsvSvVyplMt.vyplOps)
@@ -400,14 +410,16 @@ def normalWithBorderStyle(workbook) {
 }
 
 // Добавляет к стилю ячейки тонкие границы
-def thinBorderStyle(style) {
+def thinBorderStyle(final style) {
     style.setBorderTop(CellStyle.BORDER_THIN)
     style.setBorderBottom(CellStyle.BORDER_THIN)
     style.setBorderLeft(CellStyle.BORDER_THIN)
     style.setBorderRight(CellStyle.BORDER_THIN)
     return style
 }
+
 /****************************************************************************
+ *
  *  Вспомогательные методы                                                  *
  *                                                                          *
  * **************************************************************************/
