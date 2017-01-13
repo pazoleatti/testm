@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("blobDataServiceImpl")
+@Service("blobDataServiceDaoImpl")
 public class BlobDataServiceImpl implements BlobDataService {
 
     @Autowired
