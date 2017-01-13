@@ -17,6 +17,7 @@ public class DeclarationDataReportType implements Serializable {
     public static final DeclarationDataReportType ACCEPT_DEC = new DeclarationDataReportType(ReportType.ACCEPT_DEC, null);
     public static final DeclarationDataReportType CHECK_DEC = new DeclarationDataReportType(ReportType.CHECK_DEC, null);
     public static final DeclarationDataReportType IMPORT_TF_DEC = new DeclarationDataReportType(ReportType.IMPORT_TF_DEC, null);
+    public static final DeclarationDataReportType EDIT_FILE_COMMENT_DEC = new DeclarationDataReportType(ReportType.EDIT_FILE_COMMENT_DEC, null);
 
     /**
      * Тип задачи
@@ -34,6 +35,7 @@ public class DeclarationDataReportType implements Serializable {
                 !ReportType.JASPER_DEC.equals(reportType) && subreport != null && ReportType.JASPER_DEC.getName().equals(subreport.getAlias()) ||
                 !ReportType.ACCEPT_DEC.equals(reportType) && subreport != null && ReportType.ACCEPT_DEC.getName().equals(subreport.getAlias()) ||
                 !ReportType.CHECK_DEC.equals(reportType) && subreport != null && ReportType.CHECK_DEC.getName().equals(subreport.getAlias()) ||
+                !ReportType.EDIT_FILE_COMMENT_DEC.equals(reportType) && subreport != null && ReportType.EDIT_FILE_COMMENT_DEC.getName().equals(subreport.getAlias()) ||
                 !ReportType.IMPORT_TF_DEC.equals(reportType) && subreport != null && ReportType.IMPORT_TF_DEC.getName().equals(subreport.getAlias())) {
             throw new IllegalArgumentException("Некорректное тип отчета: " + subreport.getAlias());
         }
@@ -83,6 +85,8 @@ public class DeclarationDataReportType implements Serializable {
             return CHECK_DEC;
         } else if (IMPORT_TF_DEC.getReportType().getName().equals(name)) {
             return IMPORT_TF_DEC;
+        } else if (EDIT_FILE_COMMENT_DEC.getReportType().getName().equals(name)) {
+            return EDIT_FILE_COMMENT_DEC;
         } else {
             return new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, null);
         }
@@ -103,6 +107,8 @@ public class DeclarationDataReportType implements Serializable {
             return CHECK_DEC;
         } else if (IMPORT_TF_DEC.getReportType().equals(reportType)) {
             return IMPORT_TF_DEC;
+        } else if (EDIT_FILE_COMMENT_DEC.getReportType().equals(reportType)) {
+            return EDIT_FILE_COMMENT_DEC;
         } else {
             throw new IllegalArgumentException("Некорректный тип отчета: " + reportType.getName());
         }

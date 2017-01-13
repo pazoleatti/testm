@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -121,6 +122,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
     private RefBookFactory rbFactory;
+    @Autowired
+    private DeclarationDataFileDao declarationDataFileDao;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -1452,4 +1455,21 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
     }
+
+    @Override
+    public List<DeclarationDataFile> getFiles(long formDataId) {
+        return declarationDataFileDao.getFiles(formDataId);
+    }
+
+    @Override
+    public String getNote(long declarationDataId) {
+        return declarationDataDao.getNote(declarationDataId);
+    }
+
+    @Override
+    public void saveFilesComments(long declarationDataId, String note, List<DeclarationDataFile> files) {
+        declarationDataDao.updateNote(declarationDataId, note);
+        declarationDataFileDao.saveFiles(declarationDataId, files);
+    }
+
 }

@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.comments.DeclarationDeclarationFilesCommentsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.sources.SourcesPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subreportParams.SubreportParamsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.workflowdialog.DialogPresenter;
@@ -124,8 +125,10 @@ public class DeclarationDataPresenter
 	private final DialogPresenter dialogPresenter;
 	private final HistoryPresenter historyPresenter;
     private final SubreportParamsPresenter subreportParamsPresenter;
+    private final DeclarationDeclarationFilesCommentsPresenter declarationFilesCommentsPresenter;
 	private long declarationId;
-	private String taxName;
+    private DeclarationData declarationData;
+    private String taxName;
     private TaxType taxType;
     private final SourcesPresenter sourcesPresenter;
     private List<DeclarationSubreport> subreports = new ArrayList<DeclarationSubreport>();
@@ -135,7 +138,7 @@ public class DeclarationDataPresenter
 									final MyProxy proxy, DispatchAsync dispatcher,
 									PlaceManager placeManager, DialogPresenter dialogPresenter,
 									HistoryPresenter historyPresenter, SubreportParamsPresenter subreportParamsPresenter,
-                                    SourcesPresenter sourcesPresenter) {
+                                    SourcesPresenter sourcesPresenter, DeclarationDeclarationFilesCommentsPresenter declarationFilesCommentsPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.historyPresenter = historyPresenter;
@@ -143,6 +146,7 @@ public class DeclarationDataPresenter
 		this.dialogPresenter = dialogPresenter;
         this.sourcesPresenter = sourcesPresenter;
         this.subreportParamsPresenter = subreportParamsPresenter;
+        this.declarationFilesCommentsPresenter = declarationFilesCommentsPresenter;
 		getView().setUiHandlers(this);
 	}
 
@@ -169,6 +173,7 @@ public class DeclarationDataPresenter
 									GetDeclarationDataResult result) {
                                 LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
 								declarationId = id;
+                                declarationData = result.getDeclarationData();
 								taxName = result.getTaxType().name();
                                 taxType = result.getTaxType();
                                 sourcesPresenter.setTaxType(taxType);
@@ -614,4 +619,11 @@ public class DeclarationDataPresenter
                     }
                 }, this));
     }
+
+    @Override
+    public void onFilesCommentsDialog() {
+        declarationFilesCommentsPresenter.setFormData(declarationData);
+        addToPopupSlot(declarationFilesCommentsPresenter);
+    }
+
 }

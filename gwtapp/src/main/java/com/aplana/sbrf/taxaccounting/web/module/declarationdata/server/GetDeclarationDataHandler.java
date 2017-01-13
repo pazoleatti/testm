@@ -64,6 +64,7 @@ public class GetDeclarationDataHandler
         DeclarationData declaration = declarationDataService.get(
                 action.getId(), userInfo);
         Date docDate = declarationDataService.getXmlDataDocDate(action.getId(), userInfo);
+        result.setDeclarationData(declaration);
         result.setDocDate(docDate != null ? docDate : new Date());
 
         result.setAccepted(declaration.isAccepted());

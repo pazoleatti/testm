@@ -22,7 +22,7 @@ public interface RaschsvPersSvStrahLicService {
      * @param innfl - ИНН ФЛ
      * @return
      */
-    List<RaschsvPersSvStrahLic> findPersonsByInn(Long declarationDataId, String innfl);
+    RaschsvPersSvStrahLic findPersonByInn(Long declarationDataId, String innfl);
 
     /**
      * Выборка "Персонифицированных сведений о застрахованных лицах"

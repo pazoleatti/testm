@@ -300,4 +300,19 @@ public interface DeclarationDataService {
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream is,
                         String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, String lock);
+
+    /**
+     * Получение данных по файлам для формы "Файлы и комментарии"
+     */
+    List<DeclarationDataFile> getFiles(long declarationDataId);
+
+    /**
+     * Получения комментария для формы "Файлы и комментарии"
+     */
+    String getNote(long declarationDataId);
+
+    /**
+     * Сохранение данных формы "Файлы и комментарии"
+     */
+    void saveFilesComments(long declarationDataId, String note, List<DeclarationDataFile> files);
 }

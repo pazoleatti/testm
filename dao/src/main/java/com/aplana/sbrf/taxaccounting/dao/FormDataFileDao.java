@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataFile;
 import java.util.List;
 
 /**
- * DAO-Интерфейс для работы с типами асинхронных задач
+ * Реализация DAO для работы с информацией о {@link com.aplana.sbrf.taxaccounting.model.FormDataFile файлах НФ}
  */
 public interface FormDataFileDao {
 

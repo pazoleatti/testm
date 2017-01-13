@@ -188,6 +188,8 @@
                         <g:VerticalPanel width="150px" spacing="2">
                             <style:LinkButton ui:field="infoAnchor" text="История изменений" img="resources/img/exclamation_mark.png"
                                               title="Отобразить историю налоговой формы"/>
+                            <style:LinkButton ui:field="filesComments" text="Файлы и комментарии" img="resources/img/exclamation_mark.png"
+                                              title="Файлы и комментарии"/>
                             <style:LinkButton ui:field="sources" text="Источники" img="resources/img/source-target.png"
                                               title="Источники"/>
                         </g:VerticalPanel>

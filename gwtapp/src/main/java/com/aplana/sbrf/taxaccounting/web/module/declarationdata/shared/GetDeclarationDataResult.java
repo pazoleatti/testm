@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.Result;
@@ -22,6 +23,7 @@ public class GetDeclarationDataResult implements Result {
     private String uuid;
     private List<DeclarationSubreport> subreports;
     private boolean isVisiblePDF;
+    private DeclarationData declarationData;
 
 	private boolean accepted;
 	private boolean canAccept;
@@ -169,5 +171,13 @@ public class GetDeclarationDataResult implements Result {
 
     public void setVisiblePDF(boolean isVisiblePDF) {
         this.isVisiblePDF = isVisiblePDF;
+    }
+
+    public DeclarationData getDeclarationData() {
+        return declarationData;
+    }
+
+    public void setDeclarationData(DeclarationData declarationData) {
+        this.declarationData = declarationData;
     }
 }

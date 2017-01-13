@@ -502,4 +502,19 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return new ArrayList<Integer>(0);
         }
     }
+
+    public void updateNote(long declarationDataId, String note) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("declarationDataId", declarationDataId);
+        values.put("note", note);
+        getNamedParameterJdbcTemplate().update("UPDATE declaration_data SET note = :note WHERE id = :declarationDataId", values);
+    }
+
+    @Override
+    public String getNote(long declarationDataId) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("declarationDataId", declarationDataId);
+        return getNamedParameterJdbcTemplate().queryForObject("SELECT note FROM declaration_data WHERE id = :declarationDataId", values, String.class);
+    }
+
 }
