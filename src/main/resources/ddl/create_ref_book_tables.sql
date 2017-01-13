@@ -96,4 +96,44 @@ comment on column ref_book_present_place.for_ndfl is 'Используется �
 comment on column ref_book_present_place.for_fond is 'Используется для Страховых сборов взносов';
 
 create sequence seq_ref_book_present_place start with 21 increment by 1;
+
+-- Справочник АСНУ
+create table ref_book_asnu (
+  id       number(9) not null,
+  code     varchar2(4) not null,
+  name     varchar2(100) not null,
+  type     varchar2(255) not null
+);
+
+comment on table ref_book_asnu is 'Справочник АСНУ';
+comment on column ref_book_asnu.id is 'Идентификатор';
+comment on column ref_book_asnu.code is 'Код АСНУ';
+comment on column ref_book_asnu.name is 'Наименование АСНУ';
+comment on column ref_book_asnu.type is 'Тип дохода';
+
+-- Виды налоговых форм
+create table ref_book_form_type
+(
+  id number(18) not null,
+  code varchar2(14 char) not null,
+  name varchar2(255) not null,
+  tax_kind varchar2(1 char) not null
+);
+
+comment on table ref_book_form_type is 'Виды налоговых форм';
+comment on column ref_book_form_type.id is 'Идентификатор';
+comment on column ref_book_form_type.code is 'Код';
+comment on column ref_book_form_type.name is 'Наименование';
+comment on column ref_book_form_type.tax_kind is 'Вид налога';
+
+-- Типы налоговых форм
+create table declaration_kind 
+(
+  id number(18) not null,
+  name varchar2(255 char) not null
+);
+comment on table declaration_kind is 'Типы налоговых форм';
+comment on column declaration_kind.id is 'Уникальный идентификатор';
+comment on column declaration_kind.name is 'Наименование';
+
 -----------------------------------------------------------------------------------------------------------------------------

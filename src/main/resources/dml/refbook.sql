@@ -909,12 +909,13 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (8021, 802, 'Тип операции', 'TYPE',1,1,null,null,1,null,30,1,1,null,null,0,256);
 	
--- АСНУ (Еремеева М.: взято с NDFL_1_0)
+-- АСНУ
 insert into ref_book (id,name,visible,type,read_only,region_attribute_id,table_name,is_versioned) values (900,'АСНУ',1,0,1,null,'REF_BOOK_ASNU',0);
-insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9001,900,'Идентификатор','ID',2,1,null,null,0,0,10,1,0,null,null,0,9);
-insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9002,900,'Код АСНУ','CODE',1,2,null,null,1,null,5,1,0,null,null,0,4);
-insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9003,900,'Наименование АСНУ','NAME',1,3,null,null,1,null,25,0,0,null,null,0,100);
-insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9004,900,'Тип дохода','TYPE',1,4,null,null,1,null,50,0,0,null,null,0,255);
+
+--insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9001,900,'Идентификатор','ID',2,0,null,null,0,0,10,1,0,null,null,0,9);
+insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9002,900,'Код АСНУ','CODE',1,1,null,null,1,null,5,1,0,null,null,0,4);
+insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9003,900,'Наименование АСНУ','NAME',1,2,null,null,1,null,25,0,0,null,null,0,100);
+insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9004,900,'Тип дохода','TYPE',1,3,null,null,1,null,50,0,0,null,null,0,255);
 --end АСНУ
 
 -- Физические лица и статусы налогоплательщиков
@@ -968,17 +969,14 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 -- Новые табличные справочники
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (921,'Коды видов вычетов',1,0,0,null,'REF_BOOK_DEDUCTION_TYPE');
-insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (922,'Коды видов доходов',1,0,0,null,'REF_BOOK_INCOME_TYPE');
-insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (923,'Коды субъектов РФ',1,0,0,null,'REF_BOOK_REGION');
-insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (924,'Коды места представления расчета',1,0,0,null,'REF_BOOK_PRESENT_PLACE');
-
-
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9211, 921,'Код вычета','CODE',1,1,null,null,1,null,6,1,1,null,null,0,3);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9212, 921,'Наименование вычета','NAME',1,2,null,null,1,null,50,1,0,null,null,0,2000);
 
+insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (922,'Коды видов доходов',1,0,0,null,'REF_BOOK_INCOME_TYPE');
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9221, 922,'Код дохода','CODE',1,1,null,null,1,null,6,1,1,null,null,0,4);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9222, 922,'Наименование дохода','NAME',1,2,null,null,1,null,50,1,0,null,null,0,2000);
 
+insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (923,'Коды субъектов РФ',1,0,0,null,'REF_BOOK_REGION');
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9231,923,'Код','CODE',1,0,null,null,1,null,10,1,1,null,null,0,2);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9232,923,'Наименование','NAME',1,1,null,null,1,null,50,1,0,null,null,0,255);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9233,923,'Код ОКАТО','OKATO',4,2,3,7,1,null,11,0,0,null,null,0,null);
@@ -986,11 +984,19 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9235,923,'Код ОКТМО','OKTMO',4,4,96,840,1,null,11,0,0,null,null,0,null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9236,923,'Определяющая часть кода ОКТМО','OKTMO_DEFINITION',1,5,null,null,1,null,11,0,0,null,null,0,11);
 
+insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (924,'Коды места представления расчета',1,0,0,null,'REF_BOOK_PRESENT_PLACE');
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9241, 924,'Код','CODE',1,1,null,null,1,null,6,1,1,null,null,0,3);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9242, 924,'Наименование','NAME',1,2,null,null,1,null,15,1,0,null,null,0,255);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9243, 924,'Используется для НДФЛ','FOR_NDFL',2,3,null,null,1,0,6,1,0,null,null,0,1);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9244, 924,'Используется для Страховых сборов взносов','FOR_FOND',2,4,null,null,1,0,6,1,0,null,null,0,1);
 
+insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (931,'Виды налоговых форм',1,0,1,null,'REF_BOOK_FORM_TYPE',0);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9311, 931,'Код','CODE',1,1,null,null,1,null,9,1,1,null,null,0,14);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9312, 931,'Наименование','NAME',1,2,null,null,1,null,15,1,0,null,null,0,255);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9313, 931,'Вид налога','TAX_KIND',1,3,null,null,1,null,9,1,0,null,null,0,1);
+
+insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (932,'Типы налоговых форм',1,0,1,null,'DECLARATION_KIND',0);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9321, 932,'Наименование','NAME',1,1,null,null,1,null,15,1,1,null,null,0,255);
 ---------------------------------
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_attribute_id;
