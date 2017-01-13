@@ -2028,7 +2028,7 @@ create table fias_socrbase
 (
     id number(10) not null,
     scname   varchar2(10 char),
-    socrname varchar2(60 char) not null,
+    socrname varchar2(60 char),
     kod_t_st varchar2(4 char) not null
 );
 comment on table fias_socrbase  is 'Справочник "Типы адресных объектов"';
