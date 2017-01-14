@@ -1096,16 +1096,17 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
 
             obyazPlatSvChildNode.childNodes().each { raschSvOpsOmsChildNode ->
 
-                RaschsvSvOpsOmsRasch raschsvSvOpsOmsRasch = new RaschsvSvOpsOmsRasch()
-                raschsvSvOpsOmsRasch.nodeName = raschSvOpsOmsChildNode.name
-
-                // Набор сведений о сумме
-                def raschsvSvOpsOmsRaschSumList = []
-                // Набор сведений о количестве
-                def raschsvSvOpsOmsRaschKolList = []
-
                 if (raschSvOpsOmsChildNode.name == NODE_NAME_RASCH_SV_OPS ||
                         raschSvOpsOmsChildNode.name == NODE_NAME_RASCH_SV_OMS) {
+
+                    RaschsvSvOpsOmsRasch raschsvSvOpsOmsRasch = new RaschsvSvOpsOmsRasch()
+                    raschsvSvOpsOmsRasch.nodeName = raschSvOpsOmsChildNode.name
+
+                    // Набор сведений о сумме
+                    def raschsvSvOpsOmsRaschSumList = []
+                    // Набор сведений о количестве
+                    def raschsvSvOpsOmsRaschKolList = []
+
                     // Разбор узлов РасчСВ_ОПС и РасчСВ_ОМС
                     raschSvOpsOmsChildNode.childNodes().each { raschSvOpsOmsChildChildNode ->
                         if (raschSvOpsOmsChildChildNode.name == NODE_NAME_KOL_STRAH_LIC_VS ||
@@ -1132,14 +1133,27 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                             raschsvSvOpsOmsRaschSumList.add(raschsvSvOpsOmsRaschSum)
                         }
                     }
+
+                    raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList = raschsvSvOpsOmsRaschSumList
+                    raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList = raschsvSvOpsOmsRaschKolList
+                    raschsvSvOpsOmsRaschList.add(raschsvSvOpsOmsRasch)
+
                 } else if (raschSvOpsOmsChildNode.name == NODE_NAME_RASCH_SV_OPS428) {
                     // Разбор узла РасчСВ_ОПС428
                     raschSvOpsOmsChildNode.childNodes().each { raschSvOps428ChildNode ->
                         // Разбор узлов РасчСВ_428.1-2, РасчСВ_428.3
-                        raschsvSvOpsOmsRasch.prOsnSvDop = raschSvOpsOmsChildNode.attributes()[RASCH_SV_OPS428_12_PR_OSN_SV_DOP]
-                        raschsvSvOpsOmsRasch.kodOsnov = raschSvOpsOmsChildNode.attributes()[RASCH_SV_OPS428_3_KOD_OSNOV]
-                        raschsvSvOpsOmsRasch.osnovZap = raschSvOpsOmsChildNode.attributes()[RASCH_SV_OPS428_3_OSNOV_ZAP]
-                        raschsvSvOpsOmsRasch.klasUslTrud = raschSvOpsOmsChildNode.attributes()[RASCH_SV_OPS428_3_KLAS_USL_TRUD]
+                        RaschsvSvOpsOmsRasch raschsvSvOpsOmsRasch = new RaschsvSvOpsOmsRasch()
+                        raschsvSvOpsOmsRasch.nodeName = raschSvOps428ChildNode.name
+
+                        // Набор сведений о сумме
+                        def raschsvSvOpsOmsRaschSumList = []
+                        // Набор сведений о количестве
+                        def raschsvSvOpsOmsRaschKolList = []
+
+                        raschsvSvOpsOmsRasch.prOsnSvDop = raschSvOps428ChildNode.attributes()[RASCH_SV_OPS428_12_PR_OSN_SV_DOP]
+                        raschsvSvOpsOmsRasch.kodOsnov = raschSvOps428ChildNode.attributes()[RASCH_SV_OPS428_3_KOD_OSNOV]
+                        raschsvSvOpsOmsRasch.osnovZap = raschSvOps428ChildNode.attributes()[RASCH_SV_OPS428_3_OSNOV_ZAP]
+                        raschsvSvOpsOmsRasch.klasUslTrud = raschSvOps428ChildNode.attributes()[RASCH_SV_OPS428_3_KLAS_USL_TRUD]
 
                         raschSvOps428ChildNode.childNodes().each { raschSvOps428ChildChildNode ->
                             if (raschSvOps428ChildChildNode.name == NODE_NAME_KOL_LIC_NACH_SV) {
@@ -1162,8 +1176,21 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                                 raschsvSvOpsOmsRaschSumList.add(raschsvSvOpsOmsRaschSum)
                             }
                         }
+
+                        raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList = raschsvSvOpsOmsRaschSumList
+                        raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList = raschsvSvOpsOmsRaschKolList
+                        raschsvSvOpsOmsRaschList.add(raschsvSvOpsOmsRasch)
                     }
                 } else if (raschSvOpsOmsChildNode.name == NODE_NAME_RASCH_SV_DSO) {
+
+                    RaschsvSvOpsOmsRasch raschsvSvOpsOmsRasch = new RaschsvSvOpsOmsRasch()
+                    raschsvSvOpsOmsRasch.nodeName = raschSvOpsOmsChildNode.name
+
+                    // Набор сведений о сумме
+                    def raschsvSvOpsOmsRaschSumList = []
+                    // Набор сведений о количестве
+                    def raschsvSvOpsOmsRaschKolList = []
+
                     // Разбор узла РасчСВ_ДСО
                     raschsvSvOpsOmsRasch.prRaschSum = raschSvOpsOmsChildNode.attributes()[RASCH_SV_DSO_PR_RASCH_SUM]
 
@@ -1187,10 +1214,11 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                             raschsvSvOpsOmsRaschSumList.add(raschsvSvOpsOmsRaschSum)
                         }
                     }
+
+                    raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList = raschsvSvOpsOmsRaschSumList
+                    raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList = raschsvSvOpsOmsRaschKolList
+                    raschsvSvOpsOmsRaschList.add(raschsvSvOpsOmsRasch)
                 }
-                raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList = raschsvSvOpsOmsRaschSumList
-                raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList = raschsvSvOpsOmsRaschKolList
-                raschsvSvOpsOmsRaschList.add(raschsvSvOpsOmsRasch)
             }
             raschsvSvOpsOms.raschsvSvOpsOmsRaschList = raschsvSvOpsOmsRaschList
 
@@ -1242,9 +1270,11 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                     }
                 }
             }
-
             raschsvOssVnm.raschsvUplSvPrevList = raschsvUplSvPrevList
             raschsvOssVnm.raschsvOssVnmKolList = raschsvOssVnmKolList
+            raschsvOssVnm.raschsvOssVnmSumList = raschsvOssVnmSumList
+
+            raschsvOssVnmService.insertRaschsvOssVnm(raschsvOssVnm)
             testCntNodeRaschSvOSSVnm++
 
         } else if (obyazPlatSvChildNode.name == NODE_NAME_RASH_OSS_ZAK) {
@@ -1304,6 +1334,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
 
                 raschsvVyplPrichinaList.add(raschsvVyplPrichina)
             }
+            raschsvVyplFinFb.raschsvVyplPrichinaList = raschsvVyplPrichinaList
             raschsvVyplFinFbService.insertRaschsvVyplFinFb(raschsvVyplFinFb)
             testCntNodeVyplFinFB++
 

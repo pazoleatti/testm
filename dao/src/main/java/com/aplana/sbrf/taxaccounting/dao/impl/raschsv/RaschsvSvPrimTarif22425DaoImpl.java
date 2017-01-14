@@ -48,18 +48,18 @@ public class RaschsvSvPrimTarif22425DaoImpl extends AbstractDao implements Rasch
         getNamedParameterJdbcTemplate().update(sql.toString(), params);
 
         // Сохранение "Сведения о патенте"
-        List<RaschsvSvInoGrazd> raschsvSvedPatentList = new ArrayList<RaschsvSvInoGrazd>();
-        for (RaschsvSvInoGrazd raschsvSvedPatent : raschsvSvPrimTarif22425.getRaschsvSvInoGrazdList()) {
+        List<RaschsvSvInoGrazd> raschsvSvInoGrazdList = new ArrayList<RaschsvSvInoGrazd>();
+        for (RaschsvSvInoGrazd raschsvSvInoGrazd : raschsvSvPrimTarif22425.getRaschsvSvInoGrazdList()) {
             // Установка внешнего ключа
-            raschsvSvedPatent.setRaschsvSvPrimTarif2425Id(raschsvSvPrimTarif22425.getId());
+            raschsvSvInoGrazd.setRaschsvSvPrimTarif2425Id(raschsvSvPrimTarif22425.getId());
 
             // Сохранение "Сведения по суммам (тип 1)"
-            Long raschsvSvSum1TipId = raschsvSvSum1TipDao.insertRaschsvSvSum1Tip(raschsvSvedPatent.getRaschsvSvSum1Tip());
-            raschsvSvedPatent.getRaschsvSvSum1Tip().setId(raschsvSvSum1TipId);
+            Long raschsvSvSum1TipId = raschsvSvSum1TipDao.insertRaschsvSvSum1Tip(raschsvSvInoGrazd.getRaschsvSvSum1Tip());
+            raschsvSvInoGrazd.getRaschsvSvSum1Tip().setId(raschsvSvSum1TipId);
 
-            raschsvSvedPatentList.add(raschsvSvedPatent);
+            raschsvSvInoGrazdList.add(raschsvSvInoGrazd);
         }
-        insertRaschsvSvInoGrazd(raschsvSvedPatentList);
+        insertRaschsvSvInoGrazd(raschsvSvInoGrazdList);
 
         // Установка внешнего ключа
         RaschsvVyplatIt425 raschsvVyplatIt425 = raschsvSvPrimTarif22425.getRaschsvVyplatIt425();

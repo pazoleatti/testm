@@ -79,6 +79,7 @@ public class RaschsvSvPrimTarif13422DaoImpl extends AbstractDao implements Rasch
         insertRaschsvSvedObuch(raschsvSvedObuchList);
 
         // Сохранение "Сведения из реестра молодежных и детских объединений, пользующихся государственной поддержкой"
+        insertRaschsvSvReestrMdo(raschsvSvReestrMdoList);
 
         // Установка внешнего ключа
         RaschsvVyplatIt422 raschsvVyplatIt422 = raschsvSvPrimTarif13422.getRaschsvVyplatIt422();

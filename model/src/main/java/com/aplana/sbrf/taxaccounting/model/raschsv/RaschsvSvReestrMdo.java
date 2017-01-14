@@ -14,8 +14,8 @@ public class RaschsvSvReestrMdo extends IdentityObject<Long> {
     private Date dataZapis;
     private String nomerZapis;
 
-    public static final String SEQ = "seq_raschsv_sved_obuch";
-    public static final String TABLE_NAME = "raschsv_sved_obuch";
+    public static final String SEQ = "seq_raschsv_sv_reestr_mdo";
+    public static final String TABLE_NAME = "raschsv_sv_reestr_mdo";
     public static final String COL_ID = "id";
     public static final String COL_RASCHSV_SVED_OBUCH_ID = "raschsv_sved_obuch_id";
     public static final String COL_NAIM_MDO = "naim_mdo";

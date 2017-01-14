@@ -364,26 +364,30 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
         List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList = new ArrayList<RaschsvVyplSvDopMt>();
 
         for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
-            RaschsvSvVypl raschsvSvVypl = new RaschsvSvVypl();
-            raschsvSvVypl.setId(generateId(RaschsvSvVypl.SEQ, Long.class));
-            raschsvSvVypl.setRaschsvPersSvStrahLicId(raschsvPersSvStrahLic.getId());
-            raschsvSvVyplList.add(raschsvSvVypl);
+            RaschsvSvVypl raschsvSvVypl = raschsvPersSvStrahLic.getRaschsvSvVypl();
+            if (raschsvSvVypl != null) {
+                raschsvSvVypl.setId(generateId(RaschsvSvVypl.SEQ, Long.class));
+                raschsvSvVypl.setRaschsvPersSvStrahLicId(raschsvPersSvStrahLic.getId());
+                raschsvSvVyplList.add(raschsvSvVypl);
 
-            for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVypl.getRaschsvSvVyplMtList()) {
-                raschsvSvVyplMt.setRaschsvSvVyplId(raschsvSvVypl.getId());
-                raschsvSvVyplMt.setId(generateId(RaschsvSvVyplMt.SEQ, Long.class));
-                raschsvSvVyplMtList.add(raschsvSvVyplMt);
+                for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVypl.getRaschsvSvVyplMtList()) {
+                    raschsvSvVyplMt.setRaschsvSvVyplId(raschsvSvVypl.getId());
+                    raschsvSvVyplMt.setId(generateId(RaschsvSvVyplMt.SEQ, Long.class));
+                    raschsvSvVyplMtList.add(raschsvSvVyplMt);
+                }
             }
 
-            RaschsvVyplSvDop raschsvVyplSvDop = new RaschsvVyplSvDop();
-            raschsvVyplSvDop.setId(generateId(RaschsvVyplSvDop.SEQ, Long.class));
-            raschsvVyplSvDop.setRaschsvPersSvStrahLicId(raschsvPersSvStrahLic.getId());
-            raschsvVyplSvDopList.add(raschsvVyplSvDop);
+            RaschsvVyplSvDop raschsvVyplSvDop = raschsvPersSvStrahLic.getRaschsvVyplSvDop();
+            if (raschsvVyplSvDop != null) {
+                raschsvVyplSvDop.setId(generateId(RaschsvVyplSvDop.SEQ, Long.class));
+                raschsvVyplSvDop.setRaschsvPersSvStrahLicId(raschsvPersSvStrahLic.getId());
+                raschsvVyplSvDopList.add(raschsvVyplSvDop);
 
-            for (RaschsvVyplSvDopMt raschsvVyplSvDopMt : raschsvVyplSvDop.getRaschsvVyplSvDopMtList()) {
-                raschsvVyplSvDopMt.setRaschsvVyplSvDopId(raschsvVyplSvDop.getId());
-                raschsvVyplSvDopMt.setId(generateId(RaschsvVyplSvDopMt.SEQ, Long.class));
-                raschsvVyplSvDopMtList.add(raschsvVyplSvDopMt);
+                for (RaschsvVyplSvDopMt raschsvVyplSvDopMt : raschsvVyplSvDop.getRaschsvVyplSvDopMtList()) {
+                    raschsvVyplSvDopMt.setRaschsvVyplSvDopId(raschsvVyplSvDop.getId());
+                    raschsvVyplSvDopMt.setId(generateId(RaschsvVyplSvDopMt.SEQ, Long.class));
+                    raschsvVyplSvDopMtList.add(raschsvVyplSvDopMt);
+                }
             }
         }
 
