@@ -22,7 +22,9 @@ import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import net.sf.sevenzipjbinding.ArchiveFormat;
 import net.sf.sevenzipjbinding.IInArchive;
 import net.sf.sevenzipjbinding.SevenZip;
+import net.sf.sevenzipjbinding.SevenZipNativeInitializationException;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -32,7 +34,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.management.MBeanServer;
 import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -63,6 +69,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private LogEntryService logEntryService;
     @Autowired
     private RefBookFactory refBookFactory;
+
+    /** Максимальное количество попыток создания временной директории */
+    private static final int TEMP_DIR_ATTEMPT_MAX_COUNT = 9;
 
     // ЦАС НСИ
     private static final long REF_BOOK_OKATO = 3L; // Коды ОКАТО
@@ -131,6 +140,46 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
         // Файл «ФИАС»
         fiasMappingMap.put("fias_xml\\.rar", asList(new Pair<Boolean, Long>(true, REF_BOOK_FIAS)));
+
+        // Инициализации библиотеки
+        try {
+            final File tmpDirectory = createTempDir("SevenZipLib");
+            try {
+                SevenZip.initSevenZipFromPlatformJAR(tmpDirectory);
+            } catch (SevenZipNativeInitializationException e) {
+                LOG.error("", e);
+            }
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        FileUtils.deleteDirectory(tmpDirectory);
+                    } catch (IOException e) {
+                        LOG.error("", e);
+                    }
+                }
+            });
+        } catch (IOException e) {
+            LOG.error("", e);
+        }
+    }
+
+    private static File createTempDir(String prefix) throws IOException {
+        final File sysTempDir = new File(System.getProperty("java.io.tmpdir"));
+        File newTempDir;
+        int attemptCount = 0;
+        do {
+            attemptCount++;
+            if(attemptCount > TEMP_DIR_ATTEMPT_MAX_COUNT) {
+                throw new IOException("Не удалось создать уникальный временный каталог после " + TEMP_DIR_ATTEMPT_MAX_COUNT + " попыток.");
+            }
+            String dirName = prefix + System.nanoTime();
+            newTempDir = new File(sysTempDir, dirName);
+        } while(newTempDir.exists());
+        if (newTempDir.mkdirs()) {
+            return newTempDir;
+        }
+        throw new IOException("Не удалось создать временный каталог с именем " + newTempDir.getAbsolutePath());
     }
 
     /**
@@ -315,7 +364,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
                                     if (refBookMapPair.getSecond().equals(REF_BOOK_FIAS)) {
                                         randomAccessFile = new RandomAccessFile(currentFile.getFile(), "r");
-
                                         archive = SevenZip.openInArchive(ArchiveFormat.RAR, // null - autodetect
                                                 new RandomAccessFileInStream(
                                                         randomAccessFile));
