@@ -19,7 +19,6 @@ import java.util.Map;
 @Transactional
 public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
 
-
     public static final Long OPERSTAT_ID = 1010L;
     public static final Long SOCRBASE_ID = 1020L;
     public static final Long ADDR_OBJECT_ID = 1030L;
@@ -48,17 +47,15 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
             sqlStatement.append("(").append(SqlUtils.getColumnsToString(columns, ":")).append(")");
             getNamedParameterJdbcTemplate().batchUpdate(sqlStatement.toString(), records.toArray(new Map[records.size()]));
         }
-
     }
 
-    //@Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void clearAll() {
-        getJdbcTemplate().execute("TRUNCATE TABLE fias_room");
-        getJdbcTemplate().execute("TRUNCATE TABLE fias_houseint");
-        getJdbcTemplate().execute("TRUNCATE TABLE fias_house");
-        getJdbcTemplate().execute("TRUNCATE TABLE fias_addrobj");
-        getJdbcTemplate().execute("TRUNCATE TABLE fias_socrbase");
-        getJdbcTemplate().execute("TRUNCATE TABLE fias_operstat");
+        getJdbcTemplate().update("delete from fias_room");
+        getJdbcTemplate().update("delete from fias_houseint");
+        getJdbcTemplate().update("delete from fias_house");
+        getJdbcTemplate().update("delete from fias_addrobj");
+        getJdbcTemplate().update("delete from fias_socrbase");
+        getJdbcTemplate().update("delete from fias_operstat");
     }
 
 }
