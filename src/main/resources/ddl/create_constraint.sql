@@ -148,7 +148,8 @@ alter table declaration_data add constraint declaration_data_fk_decl_t_id foreig
 alter table declaration_data add constraint decl_data_fk_dep_rep_per_id foreign key (department_report_period_id) references department_report_period (id);
 alter table declaration_data add constraint declaration_data_chk_is_accptd check (is_accepted in (0,1));
 alter table declaration_data add constraint declaration_data_uniq_template unique (department_report_period_id, declaration_template_id, tax_organ_code, kpp);
-alter table declaration_data add constraint declaration_data_fk_asnu_id foreign key (asnu_id) references ref_book_asnu(id);
+--alter table declaration_data add constraint declaration_data_fk_asnu_id foreign key (asnu_id) references ref_book_asnu(id);
+
 
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
@@ -563,3 +564,12 @@ alter table ref_book_id_tax_payer add constraint pk_ref_book_id_tax_payer primar
 alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
 alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_record (id);
 alter table ref_book_id_tax_payer add constraint unq_ref_book_id_tax_payer_inp unique (inp);
+
+--------------------------------------------------------------------------------------------------------------------------
+alter table state add constraint pk_state primary key(id);
+alter table state_change add constraint pk_state_change primary key(id);
+
+alter table state_change add constraint fk_state_change_from foreign key(from_id) references state(id);
+alter table state_change add constraint fk_state_change_to foreign key(to_id) references state(id);
+alter table declaration_data add constraint fk_declaration_data_state foreign key(state) references state(id);
+--------------------------------------------------------------------------------------------------------------------------

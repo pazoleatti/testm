@@ -425,7 +425,8 @@ create table declaration_data (
   department_report_period_id number(18)  not null,
   asnu_id                     number(9),
   guid                        varchar2(32),
-  note                        varchar2(512)
+  note                        varchar2(512),
+  state                       number(1)   default 1 not null
 );
 
 comment on table declaration_data is 'Налоговые декларации';
@@ -438,6 +439,7 @@ comment on column declaration_data.department_report_period_id is 'Иденти�
 comment on column declaration_data.asnu_id is 'Идентификатор АСНУ';
 comment on column declaration_data.guid is 'GUID';
 comment on column declaration_data.note is 'Комментарий к НФ, вводимый в модальном окне "Файлы и комментарии"';
+comment on column declaration_data.state is 'Состояние формы';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
@@ -2280,4 +2282,25 @@ comment on column declaration_data_file.user_name is 'Полное имя пол
 comment on column declaration_data_file.user_department_name is 'Наименование подразделения пользователя, прикрепившего файл';
 comment on column declaration_data_file.note is 'Комментарий к файлу';
 --------------------------------------------------------------------------------------------------------------------------
+create table state
+(
+  id number(1),
+  name varchar2(20 char)
+);
 
+comment on table state is 'Статус формы';
+comment on column state.id is 'Уникальный идентификатор';
+comment on column state.name is 'Наименование';
+
+create table state_change
+(
+ id number(18) not null,
+ from_id number(1),
+ to_id number(1) not null
+);
+
+comment on table state_change is 'Возможные переходы между статусами';
+comment on column state_change.id is 'Уникальный идентификатор';
+comment on column state_change.from_id is 'Из какого статуса переход';
+comment on column state_change.to_id is 'В какой статус переходим';
+--------------------------------------------------------------------------------------------------------------------------
