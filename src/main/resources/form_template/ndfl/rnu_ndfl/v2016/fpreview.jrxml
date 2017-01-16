@@ -4,6 +4,7 @@
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="declarationId" class="java.lang.Integer">
+		<parameterDescription><![CDATA[Идентификатор формы]]></parameterDescription>
 		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
 	<queryString>
