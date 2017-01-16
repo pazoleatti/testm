@@ -186,6 +186,7 @@ List<RaschsvUplPer> getRaschsvUplPer() {
 
 RaschsvUplPrevOss getRaschsvUplPrevOss() {
     // TODO Нужен select в RaschsvUplPrevOssDao по obyazPlatSvId
+    TestDataHolder.getInstance().RASCHSV_UPL_PREV_OSS
 }
 
 /****************************************************************************
@@ -472,13 +473,13 @@ def fillSumStrahVzn(final XSSFWorkbook workbook) {
     fillRaschsvObyazPlatSv(pointer, raschsvObyazPlatSv, workbook)
     pointer += 4
     pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOps, workbook)
-    pointer += 3
+    pointer += 4
     pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOms, workbook)
-    pointer += 3
+    pointer += 4
     pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOpsDop, workbook)
-    pointer += 3
+    pointer += 4
     pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOssDop, workbook)
-    pointer += 3
+    pointer += 5
     fillSumStrahVznNetrud(pointer, raschsvUplPrevOss, workbook)
 }
 
@@ -513,7 +514,7 @@ int fillSumStrahVznOPSTable(final int startIndex, final List<RaschsvUplPer> rasc
  * обеспечение, подлежащая уплате за расчетный (отчетный) период"
  **/
 def fillCellsOfRaschsvUplPerRow(final RaschsvUplPer raschsvUplPer, final XSSFRow row) {
-    def style = normalWithBorderStyle(row.getSheet().getWorkBook())
+    def style = normalWithBorderStyle(row.getSheet().getWorkbook())
     addFillingToStyle(style, ROWS_FILL_COLOR)
 
     def cell0 = row.createCell(0)
@@ -547,8 +548,8 @@ def fillSumStrahVznNetrud(final int startIndex, final RaschsvUplPrevOss raschsvU
  *  нетрудоспособности и в связи с материнством, подлежащая уплате за расчетный (отчетный) период / Сумма превышения
  *  произведенных плательщиком расходов"
  */
-def fillCellsOfRaschsvUplPrevOss(final RaschsvUplPrevOss raschsvUplPrevOss, final XSSFWorkbook workbook) {
-    def style = normalWithBorderStyle(workbook)
+def fillCellsOfRaschsvUplPrevOss(final RaschsvUplPrevOss raschsvUplPrevOss, final XSSFRow row) {
+    def style = normalWithBorderStyle(row.getSheet().getWorkbook())
     addFillingToStyle(style, ROWS_FILL_COLOR)
 
     def cell0 = row.createCell(0)
