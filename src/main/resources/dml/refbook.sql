@@ -990,6 +990,10 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9243, 924,'Используется для НДФЛ','FOR_NDFL',2,3,null,null,1,0,6,1,0,null,null,0,1);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9244, 924,'Используется для Страховых сборов взносов','FOR_FOND',2,4,null,null,1,0,6,1,0,null,null,0,1);
 
+insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (925,'Общероссийский классификатор видов экономической деятельности',1,0,0,null,'REF_BOOK_OKVED');
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9251, 925,'Код ОКВЭД','CODE',1,1,null,null,1,null,10,1,1,null,null,0,8);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9252, 925,'Наименование','NAME',1,2,null,null,1,null,50,1,0,null,null,0,500);
+
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (931,'Виды налоговых форм',1,0,1,null,'REF_BOOK_FORM_TYPE',0);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9311, 931,'Код','CODE',1,1,null,null,1,null,9,1,1,null,null,0,14);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9312, 931,'Наименование','NAME',1,2,null,null,1,null,15,1,0,null,null,0,255);
