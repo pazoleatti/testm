@@ -32,3 +32,4 @@ alter table ref_book_form_type add constraint chk_ref_book_form_type_taxkind che
 alter table declaration_kind add constraint pk_declaration_kind primary key(id);
 
 -----------------------------------------------------------------------------------------------------------------------------
+alter table declaration_data add constraint declaration_data_fk_asnu_id foreign key (asnu_id) references ref_book_asnu(id);

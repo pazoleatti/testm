@@ -563,3 +563,12 @@ alter table ref_book_id_tax_payer add constraint pk_ref_book_id_tax_payer primar
 alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
 alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_record (id);
 alter table ref_book_id_tax_payer add constraint unq_ref_book_id_tax_payer_inp unique (inp);
+
+--------------------------------------------------------------------------------------------------------------------------
+alter table state add constraint pk_state primary key(id);
+alter table state_change add constraint pk_state_change primary key(id);
+
+alter table state_change add constraint fk_state_change_from foreign key(from_id) references state(id);
+alter table state_change add constraint fk_state_change_to foreign key(to_id) references state(id);
+alter table declaration_data add constraint fk_declaration_data_state foreign key(state) references state(id);
+--------------------------------------------------------------------------------------------------------------------------
