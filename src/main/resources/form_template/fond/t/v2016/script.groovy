@@ -120,6 +120,7 @@ switch (formDataEvent) {
             fillPersSvSheet(workbook)
         } else if (alias.equalsIgnoreCase(CONSOLIDATED_REPORT)) {
             fillPersSvConsSheet(workbook)
+            fillSumStrahVzn(workbook)
         }
         workbook.write(writer)
         writer.close()
