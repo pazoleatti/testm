@@ -3,9 +3,14 @@ package refbook.fias
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookSimpleReadOnly
+import com.aplana.sbrf.taxaccounting.model.ScriptStatus
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+
 import java.io.*;
 import net.sf.sevenzipjbinding.*;
 import groovy.transform.Field
+
+
 
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLInputFactory
@@ -80,11 +85,16 @@ void importData() {
                 roomRowMapper(generatedId, houseGuidsMap, attr)
             })
 
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
+    } else {
+        scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
+    }
 }
 
 void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
 
-    logger.info("Start import ${importedElementName} to ${tableName}!");
+    println "Start import ${importedElementName} to ${tableName}!"
 
     def time = System.currentTimeMillis()
     def rowBuffer = new ArrayList<Map<String, ?>>();
@@ -115,7 +125,9 @@ void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
                     rowBuffer.clear();
                 }
 
-                //if ((i % 100000) == 0) {println "${i} rows of ${importedElementName} process..."}
+                if ((i % 100000) == 0) {
+                    println "${i} rows of ${importedElementName} process... (" + (System.currentTimeMillis() - time) + " ms)"
+                }
 
             }
         }
@@ -126,7 +138,8 @@ void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
         reader?.close()
     }
 
-    logger.info("Fias ${importedElementName} (${i} rows) import to ${tableName} end (" + (System.currentTimeMillis() - time) + " ms)");
+
+    println "Fias ${importedElementName} (${i} rows) import to ${tableName} end (" + (System.currentTimeMillis() - time) + " ms)"
 }
 
 def createItemsMap(inArchive) {
@@ -332,7 +345,7 @@ Map roomRowMapper(generatedId, houseGuidMap, attrMap) {
  */
 def buidGuidsMap(fiasInputStream, elementName, attrName) {
 
-    logger.info("Start build guids from ${elementName} by ${attrName}")
+    println "Start build guids from ${elementName} by ${attrName}"
 
     def result = new HashMap();
     def time = System.currentTimeMillis()
@@ -357,14 +370,17 @@ def buidGuidsMap(fiasInputStream, elementName, attrName) {
                         break;
                     }
                 }
-                //if ((i % 100000) == 0) {println "${i} rows of ${elementName} (" + (System.currentTimeMillis() - time) + " ms) process..."}
+
+                if ((i % 100000) == 0) {
+                    println "${i} rows of ${elementName} (" + (System.currentTimeMillis() - time) + " ms) process..."
+                }
             }
         }
     } finally {
         reader?.close()
     }
 
-    logger.info("Build guids end ("+result.size()+ " rows) process ("+(System.currentTimeMillis() - time) + " ms)")
+    println "Build guids end ("+result.size()+ " rows) process ("+(System.currentTimeMillis() - time) + " ms)"
 
     return result
 }
