@@ -1001,6 +1001,39 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (932,'Типы налоговых форм',1,0,1,null,'DECLARATION_KIND',0);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9321, 932,'Наименование','NAME',1,1,null,null,1,null,15,1,1,null,null,0,255);
+
+insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (950,'Параметры подразделения по НДФЛ',0,0,0,null,'REF_BOOK_NDFL');
+insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (951,'Параметры подразделения по НДФЛ (таблица)',0,0,0,null,'REF_BOOK_NDFL_DETAIL');
+
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length) values (9501,950,1,'Подразделение','DEPARTMENT_ID',1,4,30,161,10,0,0,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length) values (9502,950,2,'ИНН','INN',1,1,null,null,10,0,0,10);
+
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9511,951,1,'Ссылка на родительскую запись','REF_BOOK_NDFL_ID',0,4,950,9501,10,1,0,null,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9512,951,2,'Порядок следования','ROW_ORD',0,2,null,null,10,1,0,4,0);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9513,951,3,'Код обособленного подразделения','DEPARTMENT_ID',1,4,30,161,10,0,0,null,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9514,951,4,'Код налогового органа (кон.)','TAX_ORGAN_CODE',1,1,null,null,5,0,1,4,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9515,951,5,'КПП','KPP',1,1,null,null,5,0,1,9,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9516,951,6,'Код налогового органа (пром.)','TAX_ORGAN_CODE_PROM',1,1,null,null,10,0,0,4,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9517,951,7,'Код места, по которому представляется документ','PRESENT_PLACE',1,4,924,9241,10,0,0,null,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9518,951,8,'Наименование для титульного листа','NAME',1,1,null,null,20,0,0,1000,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9519,951,9,'Наименование для Приложения № 5','ADDITIONAL_NAME',1,1,null,null,20,0,0,1000,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9520,951,10,'Код вида экономической деятельности и по классификатору ОКВЭД','OKVED',1,4,925,9251,10,0,0,null,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9521,951,11,'Субъект Российской Федерации (код)','REGION',1,4,923,9231,10,0,0,null,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9522,951,12,'ОКТМО','OKTMO',1,4,96,840,11,0,0,null,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9523,951,13,'Номер контактного телефона','PHONE',1,1,null,null,20,0,0,20,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9524,951,14,'Обязанность по уплате налога','OBLIGATION',1,4,25,110,10,0,0,null,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9525,951,15,'Признак расчёта','TYPE',1,4,26,120,10,0,0,null,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9526,951,16,'Код формы реорганизации и ликвидации','REORG_FORM_CODE',1,4,5,13,10,0,0,null,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9527,951,17,'ИНН реорганизованного обособленного подразделения','REORG_INN',1,1,null,null,10,0,0,10,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9528,951,18,'КПП реорганизованного обособленного подразделения','REORG_KPP',1,1,null,null,10,0,0,9,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9529,951,19,'Признак лица подписавшего документ','SIGNATORY_ID',1,4,35,212,10,0,0,null,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9530,951,20,'Фамилия подписанта','SIGNATORY_SURNAME',1,1,null,null,20,0,0,60,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9531,951,21,'Имя подписанта','SIGNATORY_FIRSTNAME',1,1,null,null,20,0,0,60,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9532,951,22,'Отчество подписанта','SIGNATORY_LASTNAME',1,1,null,null,20,0,0,60,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9533,951,23,'Наименование документа, подтверждающего полномочия представителя','APPROVE_DOC_NAME',1,1,null,null,20,0,0,120,null);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9534,951,24,'Наименование организации-представителя налогоплательщика','APPROVE_ORG_NAME',1,1,null,null,20,0,0,1000,null);
+
+
 ---------------------------------
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_attribute_id;
