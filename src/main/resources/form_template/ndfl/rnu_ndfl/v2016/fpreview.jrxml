@@ -3,7 +3,7 @@
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<parameter name="p_form" class="java.lang.Integer">
+	<parameter name="declarationId" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
 	<queryString>
@@ -11,7 +11,7 @@
        count(distinct inc.ndfl_person_id) pers_cnt,
        sum(inc.income_accrued_summ) inc_accured,sum(nvl(inc.calculated_tax,0)) inc_calctax
   from ndfl_person p left join ndfl_person_income inc on (inc.ndfl_person_id=p.id)
- where p.declaration_data_id=$P{p_form}
+ where p.declaration_data_id=$P{declarationId}
  group by inc.oktmo,inc.kpp]]>
 	</queryString>
 	<field name="R" class="java.math.BigDecimal"/>
