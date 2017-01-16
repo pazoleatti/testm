@@ -31,5 +31,8 @@ alter table ref_book_form_type add constraint chk_ref_book_form_type_taxkind che
 -- Типы налоговых форм
 alter table declaration_kind add constraint pk_declaration_kind primary key(id);
 
+-- Общероссийский классификатор видов экономической деятельности
+alter table ref_book_okved add constraint pk_ref_book_okved primary key(id);
+alter table ref_book_okved add constraint chk_ref_book_okved_status check (status between -1 and 2);
 -----------------------------------------------------------------------------------------------------------------------------
 alter table declaration_data add constraint declaration_data_fk_asnu_id foreign key (asnu_id) references ref_book_asnu(id);
