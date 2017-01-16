@@ -1865,7 +1865,7 @@ create table raschsv_pers_sv_strah_lic
 (
    id                 NUMBER(18)           not null,
    declaration_data_id NUMBER(18)           not null,
-   nom_korr           NUMBER(3)            not null,
+   nom_korr           NUMBER(3),
    period             VARCHAR2(2 CHAR),
    otchet_god         VARCHAR2(4 CHAR),
    nomer              NUMBER(7),
