@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.FiasRefBookDao;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -17,7 +18,6 @@ import java.util.Map;
 @Repository
 @Transactional
 public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
-
 
     public static final Long OPERSTAT_ID = 1010L;
     public static final Long SOCRBASE_ID = 1020L;
@@ -34,6 +34,7 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
     public static final String HOUSEINT_TABLE_NAME = "fias_houseint";
     public static final String ROOM_TABLE_NAME = "fias_room";
 
+
     @Override
     public void insertRecordsBatch(String tableName, List<Map<String, Object>> records) {
         if (records != null && !records.isEmpty()) {
@@ -49,12 +50,12 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
     }
 
     public void clearAll() {
-        getJdbcTemplate().update("TRUNCATE TABLE fias_room");
-        getJdbcTemplate().update("TRUNCATE TABLE fias_houseint");
-        getJdbcTemplate().update("TRUNCATE TABLE fias_house");
-        getJdbcTemplate().update("TRUNCATE TABLE fias_addrobj");
-        getJdbcTemplate().update("TRUNCATE TABLE fias_socrbase");
-        getJdbcTemplate().update("TRUNCATE TABLE fias_operstat");
+        getJdbcTemplate().update("delete from fias_room");
+        getJdbcTemplate().update("delete from fias_houseint");
+        getJdbcTemplate().update("delete from fias_house");
+        getJdbcTemplate().update("delete from fias_addrobj");
+        getJdbcTemplate().update("delete from fias_socrbase");
+        getJdbcTemplate().update("delete from fias_operstat");
     }
 
 }

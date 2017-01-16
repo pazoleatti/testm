@@ -136,4 +136,24 @@ comment on table declaration_kind is 'Типы налоговых форм';
 comment on column declaration_kind.id is 'Уникальный идентификатор';
 comment on column declaration_kind.name is 'Наименование';
 
+-- Общероссийский классификатор видов экономической деятельности
+create table ref_book_okved
+(
+  id        number(18) not null,
+  record_id number(9) not null,
+  version   date not null,
+  status    number(1) default 0 not null,
+  code      varchar2(8 char) not null,
+  name      varchar2(500 char) not null
+
+);
+
+comment on table ref_book_okved is 'Общероссийский классификатор видов экономической деятельности';
+comment on column ref_book_okved.id is 'Уникальный идентификатор';
+comment on column ref_book_okved.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_okved.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_okved.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_okved.code is 'Код ОКВЭД';
+comment on column ref_book_okved.name is 'Наименование';
+
 -----------------------------------------------------------------------------------------------------------------------------
