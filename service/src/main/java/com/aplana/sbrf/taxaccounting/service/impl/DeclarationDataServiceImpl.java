@@ -128,7 +128,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private DeclarationDataFileDao declarationDataFileDao;
     @Autowired
-    private static ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -575,8 +575,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 try {
                     zipXmlIn.getNextEntry();
                     Map<String, Object> params = new HashMap<String, Object>();
-                    params.put("declarationID", declarationData.getId());
-                    return createJasperReport(zipXmlIn, declarationTemplateService.getJrxml(declarationData.getDeclarationTemplateId()), jrSwapFile, null);
+                    params.put("declarationId", declarationData.getId());
+                    return createJasperReport(zipXmlIn, declarationTemplateService.getJrxml(declarationData.getDeclarationTemplateId()), jrSwapFile, params);
                 } catch (IOException e) {
                     throw new ServiceException(e.getLocalizedMessage(), e);
                 } finally {
@@ -833,7 +833,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private static JasperPrint fillReport(InputStream xml, InputStream jasperTemplate, JRSwapFile jrSwapFile, Map<String, Object> params) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private JasperPrint fillReport(InputStream xml, InputStream jasperTemplate, JRSwapFile jrSwapFile, Map<String, Object> params) {
         try {
             if (params == null) {
                 params = new HashMap<String, Object>();
