@@ -30,6 +30,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,10 +38,12 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
+import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -124,6 +127,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private RefBookFactory rbFactory;
     @Autowired
     private DeclarationDataFileDao declarationDataFileDao;
+    @Autowired
+    private static ApplicationContext applicationContext;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -569,6 +574,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ZipInputStream zipXmlIn = new ZipInputStream(zipXml);
                 try {
                     zipXmlIn.getNextEntry();
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("declarationID", declarationData.getId());
                     return createJasperReport(zipXmlIn, declarationTemplateService.getJrxml(declarationData.getDeclarationTemplateId()), jrSwapFile, null);
                 } catch (IOException e) {
                     throw new ServiceException(e.getLocalizedMessage(), e);
@@ -841,8 +848,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             });
             virtualizer.setReadOnly(false);
             params.put(JRParameter.REPORT_VIRTUALIZER, virtualizer);
-
-            return JasperFillManager.fillReport(jasperTemplate, params);
+            Connection connection = ((DataSource) applicationContext.getBean("dataSource")).getConnection();
+            try {
+                return JasperFillManager.fillReport(jasperTemplate, params, connection);
+            } finally {
+                connection.close();
+            }
         } catch (Exception e) {
             throw new ServiceException("Невозможно заполнить отчет", e);
         }
