@@ -29,6 +29,8 @@
 
     <jdbc:initialize-database ignore-failures="DROPS">
 		<jdbc:script location="file:../src/main/resources/ddl/create_main.sql" encoding="UTF-8"/>
+        <jdbc:script location="file:../src/main/resources/ddl/create_ref_book_tables.sql" encoding="UTF-8"/>
+        <jdbc:script location="file:../src/main/resources/ddl/create_ref_book_constraints.sql" encoding="UTF-8"/>
         <jdbc:script location="file:../src/main/resources/ddl/create_constraint.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
     
