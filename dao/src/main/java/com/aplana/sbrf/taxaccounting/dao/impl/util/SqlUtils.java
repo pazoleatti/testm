@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  * Вспомогательные методы для работы с SQL в DAO
- * 
+ *
  * @author srybakov
  */
 // TODO (Marat Fayzullin 10.03.2013) оптимизировать бы операции работы со
@@ -28,7 +28,7 @@ public final class SqlUtils {
 	private SqlUtils() {
 	}
 
-    public static final int IN_CAUSE_LIMIT = 1000;
+	public static final int IN_CAUSE_LIMIT = 1000;
 
 	static void checkListSize(Collection<?> collection) {
 		if (collection == null) {
@@ -40,46 +40,46 @@ public final class SqlUtils {
 	}
 
 	/**
-     * <p>
+	 * <p>
 	 * Метод возвращает строку вида prefix in (...) or prefix in (...) разбивая
-     * параметры в условии in по size штук.
+	 * параметры в условии in по size штук.
 	 * </p>
 	 * Пример вызова:
 	 * <p>
 	 * 	 transformToSqlInStatement("form_data.id", [309, 376, 410], 1000)
 	 * </p>
 	 *
-     * @param prefix название поля в бд
-     * @param collection коллекция идентификаторо
-     * @param size размер идентификаторов в условии in
+	 * @param prefix название поля в бд
+	 * @param collection коллекция идентификаторо
+	 * @param size размер идентификаторов в условии in
 	 */
-    public static String transformToSqlInStatement(String prefix, Collection<?> collection, int size) {
-        HashSet<Object> set = new HashSet<Object>(collection);
-        checkListSize(set);
+	public static String transformToSqlInStatement(String prefix, Collection<?> collection, int size) {
+		HashSet<Object> set = new HashSet<Object>(collection);
+		checkListSize(set);
 
-        List<String> strings = new ArrayList<String>();
-        List<List<?>> lists = new ArrayList<List<?>>(splitCollection(set, size));
+		List<String> strings = new ArrayList<String>();
+		List<List<?>> lists = new ArrayList<List<?>>(splitCollection(set, size));
 
-        for (List<?> list : lists) {
-            StringBuffer buffer = new StringBuffer();
-            buffer
-                    .append(prefix)
-                    .append(" IN ")
-                    .append("(")
-                    .append(StringUtils.join(list.toArray(), ','))
-                    .append(")");
+		for (List<?> list : lists) {
+			StringBuffer buffer = new StringBuffer();
+			buffer
+					.append(prefix)
+					.append(" IN ")
+					.append("(")
+					.append(StringUtils.join(list.toArray(), ','))
+					.append(")");
 
-            strings.add(buffer.toString());
-        }
+			strings.add(buffer.toString());
+		}
 
-        StringBuffer buffer = new StringBuffer();
-        buffer
-                .append("(")
-                .append(StringUtils.join(strings.toArray(), " OR ", ""))
-                .append(")");
+		StringBuffer buffer = new StringBuffer();
+		buffer
+				.append("(")
+				.append(StringUtils.join(strings.toArray(), " OR ", ""))
+				.append(")");
 
-        return buffer.toString();
-    }
+		return buffer.toString();
+	}
 
 	/**
 	 * <p>
@@ -90,47 +90,47 @@ public final class SqlUtils {
 	 * 	 transformToSqlInStatement("form_data.id", [309, 376, 410], 1000)
 	 * </p>
 	 */
-    public static String transformToSqlInStatement(String prefix, Collection<?> collection) {
-        return transformToSqlInStatement(prefix, collection, IN_CAUSE_LIMIT);
+	public static String transformToSqlInStatement(String prefix, Collection<?> collection) {
+		return transformToSqlInStatement(prefix, collection, IN_CAUSE_LIMIT);
 	}
 
-    public static String transformToSqlInStatementForString(String prefix, Collection<String> collection) {
-        List<String> strings = new ArrayList<String>();
-        for (String s : collection) {
-            strings.add("'" + s + "'");
-        }
+	public static String transformToSqlInStatementForString(String prefix, Collection<String> collection) {
+		List<String> strings = new ArrayList<String>();
+		for (String s : collection) {
+			strings.add("'" + s + "'");
+		}
 
-        return transformToSqlInStatement(prefix, strings, IN_CAUSE_LIMIT);
-    }
+		return transformToSqlInStatement(prefix, strings, IN_CAUSE_LIMIT);
+	}
 
-    /**
-     * Метод разбивает коллекцию на коллекции определенного размера
-     * @param data
-     * @param size
-     * @param <T>
-     * @return
-     */
-    public static <T> Collection<List<T>> splitCollection(Collection<T> data, int size){
-        Collection<List<T>> result = new ArrayList<List<T>>();
-        int c = 0;
-        List<T> list =  new ArrayList<T>();
-        Iterator<T> iterator = data.iterator();
-        while(iterator.hasNext()){
-            if (c == size){
-                c = 0;
-            }
-            if (c == 0 && !list.isEmpty()){
-                result.add(list);
-                list = new ArrayList<T>();
-            }
-            list.add(iterator.next());
-            c = c == size ? 0 : c + 1;
-        }
-        if (!list.isEmpty()){
-            result.add(list);
-        }
-        return result;
-    }
+	/**
+	 * Метод разбивает коллекцию на коллекции определенного размера
+	 * @param data
+	 * @param size
+	 * @param <T>
+	 * @return
+	 */
+	public static <T> Collection<List<T>> splitCollection(Collection<T> data, int size){
+		Collection<List<T>> result = new ArrayList<List<T>>();
+		int c = 0;
+		List<T> list =  new ArrayList<T>();
+		Iterator<T> iterator = data.iterator();
+		while(iterator.hasNext()){
+			if (c == size){
+				c = 0;
+			}
+			if (c == 0 && !list.isEmpty()){
+				result.add(list);
+				list = new ArrayList<T>();
+			}
+			list.add(iterator.next());
+			c = c == size ? 0 : c + 1;
+		}
+		if (!list.isEmpty()){
+			result.add(list);
+		}
+		return result;
+	}
 
 
 
@@ -165,33 +165,33 @@ public final class SqlUtils {
 		return result.deleteCharAt(result.length() - 1).append(')').toString();
 	}
 
-    /**
-     * Подготовка строки вида "?,?,?,..."
-     */
-    public static String preparePlaceHolders(int length) {
+	/**
+	 * Подготовка строки вида "?,?,?,..."
+	 */
+	public static String preparePlaceHolders(int length) {
 		if (length <= 0) {
 			throw new IllegalArgumentException("Parameter 'length' must be positive integer number");
 		}
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < length;) {
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < length;) {
 			result.append('?');
 			if (++i == length) {
 				return result.toString();
 			}
 			result.append(',');
-        }
-	    return null; // недостижимый код
-    }
+		}
+		return null; // недостижимый код
+	}
 
-    public static Long getLong(ResultSet resultSet, String columnLabel) throws SQLException {
-        Long ret = resultSet.getLong(columnLabel);
-        return resultSet.wasNull()?null:ret;
-    }
+	public static Long getLong(ResultSet resultSet, String columnLabel) throws SQLException {
+		Long ret = resultSet.getLong(columnLabel);
+		return resultSet.wasNull()?null:ret;
+	}
 
-    public static Long getLong(ResultSet resultSet, int columnIndex) throws SQLException {
-        Long ret = resultSet.getLong(columnIndex);
-        return resultSet.wasNull()?null:ret;
-    }
+	public static Long getLong(ResultSet resultSet, int columnIndex) throws SQLException {
+		Long ret = resultSet.getLong(columnIndex);
+		return resultSet.wasNull()?null:ret;
+	}
 
 	/**
 	 * Возвращает значение целочисленного столбца. Если значения нет, то вернет null
@@ -200,10 +200,10 @@ public final class SqlUtils {
 	 * @return целое число, либо null
 	 * @throws SQLException
 	 */
-    public static Integer getInteger(ResultSet resultSet, String columnLabel) throws SQLException {
-        Integer ret = resultSet.getInt(columnLabel);
-        return resultSet.wasNull()?null:ret;
-    }
+	public static Integer getInteger(ResultSet resultSet, String columnLabel) throws SQLException {
+		Integer ret = resultSet.getInt(columnLabel);
+		return resultSet.wasNull()?null:ret;
+	}
 
 	/**
 	 * Возвращает значение целочисленного столбца. Если значения нет, то вернет null
@@ -212,17 +212,17 @@ public final class SqlUtils {
 	 * @return целое число, либо null
 	 * @throws SQLException
 	 */
-    public static Integer getInteger(ResultSet resultSet, int columnIndex) throws SQLException{
-        Integer ret = resultSet.getInt(columnIndex);
-        return resultSet.wasNull()?null:ret;
-    }
+	public static Integer getInteger(ResultSet resultSet, int columnIndex) throws SQLException{
+		Integer ret = resultSet.getInt(columnIndex);
+		return resultSet.wasNull()?null:ret;
+	}
 
 	/**
 	 * Возвращает строку наименований столбцов на основании их массива
 	 * @param columnNames - массив наименований столбцов
 	 * @param prefix - символ, который необходимо вставить перед именем столбца
 	 * @return
-     */
+	 */
 	public static String getColumnsToString(String [] columnNames, String prefix) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < columnNames.length; i++) {

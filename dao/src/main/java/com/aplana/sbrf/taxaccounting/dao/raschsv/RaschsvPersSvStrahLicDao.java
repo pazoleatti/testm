@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.raschsv;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreportParam;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 
 import java.util.List;
@@ -30,4 +31,12 @@ public interface RaschsvPersSvStrahLicDao {
      * @return
      */
     List<RaschsvPersSvStrahLic> findPersons(Long declarationDataId);
+
+    /**
+     * Выборка "Персонифицированных сведений о застрахованных лицах" с использоанием параметров Спецотчета
+     * @param declarationDataId
+     * @param params
+     * @return
+     */
+    RaschsvPersSvStrahLic findPersonBySubreportParams(Long declarationDataId, List<DeclarationSubreportParam> params);
 }
