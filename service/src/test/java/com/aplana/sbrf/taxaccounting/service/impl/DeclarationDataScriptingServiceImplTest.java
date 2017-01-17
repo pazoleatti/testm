@@ -111,7 +111,7 @@ public class DeclarationDataScriptingServiceImplTest {
 	@Test
 	public void executeScriptSuccess() throws IOException, SAXException {
 		Logger logger = new Logger();
-		DeclarationData declarationData = mockDeclarationData(1l, DEPARTMENT_ID, false, REPORT_TEMPLATE_ID1, REPORT_PERIOD_ID);
+		DeclarationData declarationData = mockDeclarationData(1l, DEPARTMENT_ID, State.CREATED, REPORT_TEMPLATE_ID1, REPORT_PERIOD_ID);
 		//String xml = service.create(logger, declarationData, new Date());
 
 		Map<String, Object> exchangeParams = new HashMap<String, Object>();
@@ -137,7 +137,7 @@ public class DeclarationDataScriptingServiceImplTest {
 	@Test
 	public void executeScriptError() {
 		Logger logger = new Logger();
-		DeclarationData declarationData = mockDeclarationData(1l, DEPARTMENT_ID, false, REPORT_TEMPLATE_ID2, REPORT_PERIOD_ID);
+		DeclarationData declarationData = mockDeclarationData(1l, DEPARTMENT_ID, State.CREATED, REPORT_TEMPLATE_ID2, REPORT_PERIOD_ID);
 		
 		Map<String, Object> exchangeParams = new HashMap<String, Object>();
 		exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, new Date());

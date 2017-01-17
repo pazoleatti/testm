@@ -16,7 +16,7 @@ public class DeclarationDataFilter implements Serializable {
 
 	private Integer declarationTypeId;
 
-    private WorkflowState formState;
+    private State formState;
 
     private Boolean correctionTag;
 
@@ -107,11 +107,11 @@ public class DeclarationDataFilter implements Serializable {
 		this.declarationTypeId = declarationTypeId;
 	}
 
-    public WorkflowState getFormState() {
+    public State getFormState() {
         return formState;
     }
 
-    public void setFormState(WorkflowState formState) {
+    public void setFormState(State formState) {
         this.formState = formState;
     }
 

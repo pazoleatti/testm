@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
@@ -193,15 +190,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
     @Override
-    public void showState(boolean accepted) {
-        String status;
-        boolean isDeal = getUiHandlers().getTaxType().equals(TaxType.DEAL);
-        if (accepted) {
-            status = isDeal ? "Принято" : "Принята";
-        }else{
-            status =  isDeal ? "Создано" : "Создана";
-        }
-        stateLabel.setText(status);
+    public void showState(State state) {
+        stateLabel.setText(state.getTitle());
     }
 
     @Override

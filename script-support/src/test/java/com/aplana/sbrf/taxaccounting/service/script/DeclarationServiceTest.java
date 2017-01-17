@@ -56,7 +56,7 @@ public class DeclarationServiceTest {
         declarationTemplate.setId(1);
 
         declarationData.setId(1L);
-        declarationData.setAccepted(true);
+        declarationData.setState(State.ACCEPTED);
         declarationData.setDeclarationTemplateId(1);
         declarationData.setDepartmentId(1);
         declarationData.setReportPeriodId(101);

@@ -28,14 +28,13 @@ public interface DeclarationDataDao {
 	 */
 	long saveNew(DeclarationData declarationData);
 	
-	/**
-	 * Установить флаг принятия декларации
-	 * @param declarationDataId идентификатор декларации
-	 * @param accepted признак принятия
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой декларации не существует
-	 */
-	void setAccepted(long declarationDataId, boolean accepted);
-
+    /**
+     * Установить статус налоговой формы
+     * @param declarationDataId идентификатор налоговой формы
+     * @param state статус налоговой формы
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
+     */
+    void setStatus(long declarationDataId, State state);
 	/**
 	 * Удалить декларацию
 	 * @param declarationDataId идентификатор декларации

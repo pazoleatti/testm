@@ -39,7 +39,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private RefBookPickerWidget declarationTypePicker;
 
-    private ValueListBox<WorkflowState> formStatePicker;
+    private ValueListBox<State> formStatePicker;
 
     private TextBox taxOrganisationPicker;
 
@@ -62,9 +62,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         departmentPicker = new DepartmentPickerPopupWidget(true);
         departmentPicker.setSetDefaultValue(true);
 
-        formStatePicker = new ValueListBox<WorkflowState>(new AbstractRenderer<WorkflowState>() {
+        formStatePicker = new ValueListBox<State>(new AbstractRenderer<State>() {
             @Override
-            public String render(WorkflowState object) {
+            public String render(State object) {
                 if (object == null) {
                     return "";
                 }
@@ -125,7 +125,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	}
 
     @Override
-    public void setFormStateList(List<WorkflowState> list){
+    public void setFormStateList(List<State> list){
         formStatePicker.setValue(null);
         formStatePicker.setAcceptableValues(list);
     }

@@ -107,7 +107,7 @@ public class DeclarationDataPresenter
 
         void setPdfPage(int page);
 
-        void showState(boolean accepted);
+        void showState(State state);
 
         void showNoPdf(String text);
 
@@ -220,7 +220,7 @@ public class DeclarationDataPresenter
 								updateTitle(result.getDeclarationType());
 
                                 getView().setPdfPage(0);
-                                getView().showState(result.isAccepted());
+                                getView().showState(declarationData.getState());
 								getView().showAccept(result.isCanAccept());
 								getView().showReject(result.isCanReject());
 								getView().showDelete(result.isCanDelete());

@@ -248,7 +248,7 @@ public class DeclarationListView extends
         TextColumn<DeclarationDataSearchResultItem> stateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
-                return object.isAccepted() ? "Принята" : "Создана";
+                return object.getState().getTitle();
             }
         };
 
@@ -419,7 +419,7 @@ public class DeclarationListView extends
 		} else if(DECLARATION_TYPE_TITLE.equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME;
         } else if(STATE_TITLE.equals(sortByColumn)){
-            this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_ACCEPTED;
+            this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_STATE;
         } else {
 			this.sortByColumn = DeclarationDataSearchOrdering.ID;
 		}

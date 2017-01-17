@@ -76,7 +76,7 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
         DeclarationDataFilter filter = new DeclarationDataFilter();
         filter.setDepartmentIds(departments);
         filter.setReportPeriodIds(Arrays.asList(action.getReportPeriodId()));
-        filter.setFormState(WorkflowState.CREATED);
+        filter.setFormState(State.CREATED);
         if (action.getCorrectPeriod() != null) {
             filter.setCorrectionTag(true);
             filter.setCorrectionDate(action.getCorrectPeriod());

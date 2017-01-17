@@ -159,7 +159,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
             logger.warn(String.format(WARN_MSG, periodName, correctionDate,
                     declarationTemplateService.get(item.getDeclarationTemplateId()).getType().getName(),
                     taxOrgan + kpp,
-                    item.isAccepted() ? "Принята" : "Создана"));
+                    item.getState().getTitle()));
             result.setDeclarationFormFound(true);
         }
 

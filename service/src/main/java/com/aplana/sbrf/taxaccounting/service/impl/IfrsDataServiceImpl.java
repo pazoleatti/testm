@@ -100,7 +100,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         }
 
         for(DeclarationData declarationData: declarationDataList) {
-            if (!declarationData.isAccepted()) {
+            if (!declarationData.getState().equals(State.ACCEPTED)) {
                 notAcceptedDeclarationDataList.add(declarationData);
             } else {
                 DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());

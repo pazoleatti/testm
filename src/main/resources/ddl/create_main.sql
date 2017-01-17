@@ -421,7 +421,7 @@ create table declaration_data (
   declaration_template_id     number(9)   not null,
   tax_organ_code              varchar2(4),
   kpp                         varchar2(9),
-  is_accepted                 number(1)   not null,
+  is_accepted                 number(1)   default 0 not null,
   department_report_period_id number(18)  not null,
   asnu_id                     number(9),
   guid                        varchar2(32),

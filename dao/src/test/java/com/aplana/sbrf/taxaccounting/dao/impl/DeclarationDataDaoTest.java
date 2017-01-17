@@ -52,7 +52,7 @@ public class DeclarationDataDaoTest {
 		assertEquals(1, d1.getDepartmentId());
         assertEquals("CD12", d1.getTaxOrganCode());
         assertEquals("123456789", d1.getKpp());
-		assertTrue(d1.isAccepted());
+        assertEquals(State.ACCEPTED, d1.getState());
 
 		DeclarationData d2 = declarationDataDao.get(2);
 		assertEquals(2, d2.getId().intValue());
@@ -60,7 +60,7 @@ public class DeclarationDataDaoTest {
         assertEquals(204 , d2.getDepartmentReportPeriodId().intValue());
 		assertEquals(4, d2.getReportPeriodId());
 		assertEquals(2, d2.getDepartmentId());
-		assertFalse(d2.isAccepted());
+        assertEquals(State.CREATED, d2.getState());
 	}
 	
 	@Test(expected=DaoException.class)
@@ -88,18 +88,18 @@ public class DeclarationDataDaoTest {
 
 	@Test
 	public void testSetAccepted() {
-		declarationDataDao.setAccepted(3l, false);
+		declarationDataDao.setStatus(3l, State.CREATED);
 		DeclarationData d3 = declarationDataDao.get(3l);
-		assertFalse(d3.isAccepted());
+        assertEquals(State.CREATED, d3.getState());
 
-		declarationDataDao.setAccepted(4l, true);
+		declarationDataDao.setStatus(4l, State.ACCEPTED);
 		DeclarationData d4 = declarationDataDao.get(4l);
-		assertTrue(d4.isAccepted());
+        assertEquals(State.ACCEPTED, d4.getState());
 	}
 
 	@Test(expected=DaoException.class)
 	public void testSetAcceptedNotExistsed() {
-		declarationDataDao.setAccepted(1000l, true);
+		declarationDataDao.setStatus(1000l, State.ACCEPTED);
 	}
 
 	@Test
@@ -123,7 +123,7 @@ public class DeclarationDataDaoTest {
         String taxOrganCode = "G55";
         String kpp = "567898678";
 		DeclarationData d = new DeclarationData();
-		d.setAccepted(true);
+        d.setState(State.ACCEPTED);
 		d.setDeclarationTemplateId(1);
         d.setDepartmentReportPeriodId(220);
         d.setTaxOrganCode(taxOrganCode);
@@ -136,16 +136,16 @@ public class DeclarationDataDaoTest {
         assertEquals(220, d2.getDepartmentReportPeriodId().intValue());
 		assertEquals(2, d2.getDepartmentId());
 		assertEquals(20, d2.getReportPeriodId());
+        assertEquals(State.ACCEPTED, d2.getState());
         Assert.assertEquals(taxOrganCode, d2.getTaxOrganCode());
         Assert.assertEquals(kpp, d2.getKpp());
-		assertTrue(d2.isAccepted());
 	}
 
 	@Test(expected=DaoException.class)
 	public void testSaveNewWithId() {
 		DeclarationData d = new DeclarationData();
 		d.setId(1000l);
-		d.setAccepted(true);
+        d.setState(State.ACCEPTED);
 		d.setDeclarationTemplateId(1);
         d.setDepartmentReportPeriodId(111);
 		declarationDataDao.saveNew(d);
@@ -210,6 +210,7 @@ public class DeclarationDataDaoTest {
         declarationData.setDeclarationTemplateId(1);
         declarationData.setKpp("123456789");
         declarationData.setTaxOrganCode("CD11");
+        declarationData.setState(State.CREATED);
         declarationDataDao.saveNew(declarationData);
 
         DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", null, null, null);
@@ -224,6 +225,7 @@ public class DeclarationDataDaoTest {
         declarationData.setDeclarationTemplateId(1);
         declarationData.setKpp("123456789");
         declarationData.setTaxOrganCode("CD11");
+        declarationData.setState(State.CREATED);
         declarationDataDao.saveNew(declarationData);
 
         DeclarationData declaration = declarationDataDao.find(1, 102, null, null, null, null);
@@ -238,6 +240,7 @@ public class DeclarationDataDaoTest {
         declarationData.setDeclarationTemplateId(1);
         declarationData.setKpp("123456789");
         declarationData.setTaxOrganCode("CD11");
+        declarationData.setState(State.CREATED);
         declarationDataDao.saveNew(declarationData);
 
         DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", "CD12", null, null);

@@ -121,7 +121,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             declaration.setDepartmentReportPeriodId(1);
             declaration.setReportPeriodId(1);
             declaration.setDepartmentId(1);
-            declaration.setAccepted(false);
+            declaration.setState(State.CREATED);
 
             declarationDataScriptingService.executeScriptInNewReadOnlyTransaction(userService.getSystemUserInfo(), declarationTemplate, declaration, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
             if (tempLogger.containsLevel(LogLevel.ERROR)) {

@@ -15,7 +15,6 @@ public class DeclarationData extends IdentityObject<Long> {
 	private int departmentId;
     private Integer departmentReportPeriodId;
 
-	private boolean accepted;
     private String taxOrganCode;
     private String kpp;
     /**
@@ -26,6 +25,11 @@ public class DeclarationData extends IdentityObject<Long> {
      * Уникальный идентификатор файла обмена РНУ НДФЛ
      */
     private String guid;
+
+    /**
+     * Статус налоговой формы
+     */
+    private State state;
 
     /**
 	 * Получить идентификатор {@link DeclarationTemplate шаблона декларации}, по которому создана данная декларация
@@ -84,22 +88,6 @@ public class DeclarationData extends IdentityObject<Long> {
     }
 
     /**
-	 * Возвращает признак того, что декларация принята
-	 * @return true - декларация принята, false - не принята
-	 */
-	public boolean isAccepted() {
-		return accepted;
-	}
-
-	/**
-	 * Задать признак того, что декларация принята
-	 * @param accepted true - декларация принята, false - не принята
-	 */
-	public void setAccepted(boolean accepted) {
-		this.accepted = accepted;
-	}
-
-    /**
      * КПП
      */
     public String getKpp() {
@@ -141,5 +129,13 @@ public class DeclarationData extends IdentityObject<Long> {
 
     public void setGuid(String guid) {
         this.guid = guid;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 }

@@ -33,7 +33,7 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDataDao {
 
 	private static final Log LOG = LogFactory.getLog(DeclarationDataDaoImpl.class);
-    private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
+    private static final String DECLARATION_NOT_FOUND_MESSAGE = "Налоговая форма с id = %d не найдена в БД";
     private final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -52,9 +52,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setKpp(rs.getString("kpp"));
             d.setReportPeriodId(SqlUtils.getInteger(rs, "report_period_id"));
             d.setDepartmentReportPeriodId(SqlUtils.getInteger(rs, "department_report_period_id"));
-            d.setAccepted(rs.getBoolean("is_accepted"));
             d.setAsnuId(SqlUtils.getLong(rs, "asnu_id"));
             d.setGuid(rs.getString("guid"));
+            d.setState(State.fromId(SqlUtils.getInteger(rs, "state")));
             return d;
         }
     }
@@ -63,7 +63,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public DeclarationData get(long declarationDataId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
+                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.state, " +
                             "dd.department_report_period_id, dd.asnu_id, dd.guid," +
                             "drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
@@ -88,7 +88,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode, Long asnuId, String guid) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
+                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.state, " +
                             "dd.department_report_period_id, dd.asnu_id, dd.guid, " +
                             "drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
@@ -121,7 +121,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
         try {
             return getJdbcTemplate().query(
-                "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
+                "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.state, " +
                         "dd.department_report_period_id, dd.asnu_id, dd.guid, " +
                         "drp.report_period_id, drp.department_id " +
                         "from declaration_data dd, department_report_period drp " +
@@ -225,11 +225,11 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         id = generateId("seq_declaration_data", Long.class);
         jt.update(
-                "insert into declaration_data (id, declaration_template_id, department_report_period_id, is_accepted, tax_organ_code, kpp, asnu_id, guid) values (?, ?, ?, ?, ?, ?, ?, ?)",
+                "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, asnu_id, guid) values (?, ?, ?, ?, ?, ?, ?, ?)",
                 id,
                 declarationData.getDeclarationTemplateId(),
                 declarationData.getDepartmentReportPeriodId(),
-                declarationData.isAccepted() ? 1 : 0,
+                declarationData.getState().getId(),
                 declarationData.getTaxOrganCode(),
                 declarationData.getKpp(),
                 declarationData.getAsnuId(),
@@ -240,14 +240,16 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public void setAccepted(long declarationDataId, boolean accepted) {
-        int count = getJdbcTemplate().update(
-                "update declaration_data set is_accepted = ? where id = ?",
-                accepted,
-                declarationDataId
+    public void setStatus(long declarationDataId, State state) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("state", state.getId());
+        values.put("declarationDataId", declarationDataId);
+        int count = getNamedParameterJdbcTemplate().update(
+                "update declaration_data set state = :state where id = :declarationDataId",
+                values
         );
         if (count == 0) {
-            throw new DaoException("Не удалось изменить статус декларации с id = %d, так как она не существует.", declarationDataId);
+            throw new DaoException("Не удалось изменить статус налоговой формы с id = %d, так как она не существует.", declarationDataId);
         }
     }
 
@@ -284,11 +286,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
 
         if (filter.getFormState() != null) {
-            if (filter.getFormState() == WorkflowState.CREATED) {
-                sql.append(" AND dec.is_accepted = 0");
-            } else if (filter.getFormState() == WorkflowState.ACCEPTED) {
-                sql.append(" AND dec.is_accepted = 1");
-            }
+            sql.append(" AND dec.state = ").append(filter.getFormState().getId());
         }
 
         if (filter.getCorrectionTag() != null) {
@@ -339,7 +337,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     private void appendSelectClause(StringBuilder sql) {
-        sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.is_accepted, dec.tax_organ_code, dec.kpp,")
+        sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.state, dec.tax_organ_code, dec.kpp,")
                 .append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
                 .append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
                 .append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year, drp.correction_date," +
@@ -363,8 +361,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             case DECLARATION_TYPE_NAME:
                 column = "dectype.name";
                 break;
-            case DECLARATION_ACCEPTED:
-                column = "dec.is_accepted";
+            case DECLARATION_STATE:
+                column = "dec.state";
                 break;
             case REPORT_PERIOD_YEAR:
                 column = "rp.calendar_start_date";
@@ -438,7 +436,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         try {
             return getJdbcTemplate().queryForObject(
                     "select * from " +
-                            "(select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
+                            "(select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.state, " +
                             "dd.department_report_period_id, dd.asnu_id, dd.guid, " +
                             "drp.report_period_id, drp.department_id, rownum " +
                             "from declaration_data dd, department_report_period drp, declaration_template dt " +
@@ -461,7 +459,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public List<DeclarationData> getIfrs(int reportPeriodId) {
         try {
             return getJdbcTemplate().query(
-                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
+                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.state, " +
                             "dd.department_report_period_id, dd.asnu_id, dd.guid, " +
                             "drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp, declaration_template dt, declaration_type t " +

@@ -67,8 +67,6 @@ public class GetDeclarationDataHandler
         result.setDeclarationData(declaration);
         result.setDocDate(docDate != null ? docDate : new Date());
 
-        result.setAccepted(declaration.isAccepted());
-
         result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_CREATED_TO_ACCEPTED));
         result.setCanReject(permittedEvents.contains(FormDataEvent.MOVE_ACCEPTED_TO_CREATED));
         result.setCanDelete(permittedEvents.contains(FormDataEvent.DELETE));

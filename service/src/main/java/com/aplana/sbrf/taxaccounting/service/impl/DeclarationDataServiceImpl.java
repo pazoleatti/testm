@@ -232,7 +232,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setDepartmentReportPeriodId(departmentReportPeriod.getId());
                 newDeclaration.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
                 newDeclaration.setDepartmentId(departmentReportPeriod.getDepartmentId());
-                newDeclaration.setAccepted(false);
+                newDeclaration.setState(State.CREATED);
                 newDeclaration.setDeclarationTemplateId(declarationTemplateId);
                 newDeclaration.setTaxOrganCode(taxOrganCode);
                 newDeclaration.setKpp(taxOrganKpp);
@@ -390,13 +390,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceException();
         }
 
-        declarationData.setAccepted(true);
+        declarationData.setState(State.ACCEPTED);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
         auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED, userInfo, declarationData, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null);
 
         lockStateLogger.updateState("Изменение состояния декларации");
-        declarationDataDao.setAccepted(id, true);
+
+        declarationDataDao.setStatus(id, declarationData.getState());
     }
 
     @Override
@@ -406,8 +407,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         /*checkSources(declarationData, logger);*/
 
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
-
-        declarationData.setAccepted(false);
 
         Map<String, Object> exchangeParams = new HashMap<String, Object>();
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
@@ -425,10 +424,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
 
+        declarationData.setState(State.CREATED);
+
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
         auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
 
-        declarationDataDao.setAccepted(id, false);
+        declarationDataDao.setStatus(id, declarationData.getState());
     }
 
 
@@ -1172,7 +1173,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
                             sdf.get().format(drp.getCorrectionDate())) : "",
                     dt.getName(),
-                    dd.isAccepted()?"принята":"не принята");
+                    dd.getState().getTitle());
         }
     }
 

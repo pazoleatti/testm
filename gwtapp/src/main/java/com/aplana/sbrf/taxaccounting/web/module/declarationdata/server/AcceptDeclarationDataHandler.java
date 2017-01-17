@@ -56,7 +56,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
             String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), DeclarationDataReportType.XML_DEC);
             if (uuidXml != null) {
                 DeclarationData declarationData = declarationDataService.get(action.getDeclarationId(), userInfo);
-                if (!declarationData.isAccepted()) {
+                if (!declarationData.getState().equals(State.ACCEPTED)) {
                     String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ddReportType);
                     Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, action.isForce(), logger);
                     if (restartStatus != null && restartStatus.getFirst()) {

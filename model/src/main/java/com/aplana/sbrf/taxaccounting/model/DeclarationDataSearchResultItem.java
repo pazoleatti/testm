@@ -19,8 +19,8 @@ public class DeclarationDataSearchResultItem implements Serializable {
 	private Long declarationDataId;
 	// Идентификатор шаблона декларации
 	private Integer declarationTemplateId;
-	// True - декларация принята, False - нет
-	private boolean isAccepted;
+	// Статус налоговой формы
+	private State state;
 	// Вид налога
 	private TaxType taxType;
 	// Идентификатор подразделения
@@ -116,15 +116,15 @@ public class DeclarationDataSearchResultItem implements Serializable {
 		this.reportPeriodName = reportPeriodName;
 	}
 
-	public boolean isAccepted() {
-		return isAccepted;
-	}
+    public State getState() {
+        return state;
+    }
 
-	public void setAccepted(boolean accepted) {
-		isAccepted = accepted;
-	}
+    public void setState(State state) {
+        this.state = state;
+    }
 
-	public String getDeclarationType() {
+    public String getDeclarationType() {
 		return declarationType;
 	}
 

@@ -26,9 +26,9 @@ insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_da
 insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (1, 1, 1, 1, 0);
 insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (2, 2, 2, 1, 0);
 
-insert into declaration_data(id, declaration_template_id, department_report_period_id, is_accepted) values (1, 1, 1, 0);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, is_accepted) values (2, 1, 2, 0);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, is_accepted) values (3, 2, 2, 0);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (1, 1, 1, 1);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (2, 1, 2, 1);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (3, 2, 2, 1);
 
 insert into blob_data (id, name, data, creation_date) values ('uuid_1', 'file_1', 'b1', sysdate);
 insert into blob_data (id, name, data, creation_date) values ('uuid_2', 'file_2', 'b2', sysdate);

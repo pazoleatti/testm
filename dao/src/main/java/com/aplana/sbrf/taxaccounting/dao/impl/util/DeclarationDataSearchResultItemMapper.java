@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.State;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -22,7 +23,7 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
 		result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
 		result.setReportPeriodName(rs.getString("report_period_name"));
 		result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
-		result.setAccepted(rs.getBoolean("is_accepted"));
+        result.setState(State.fromId(rs.getInt("state")));
         result.setReportPeriodYear(SqlUtils.getInteger(rs,"year"));
 		result.setDeclarationType(rs.getString("declaration_type_name"));
         result.setCorrectionDate(rs.getDate("correction_date"));

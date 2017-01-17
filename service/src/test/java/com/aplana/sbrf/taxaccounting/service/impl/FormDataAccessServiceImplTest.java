@@ -404,7 +404,7 @@ public class FormDataAccessServiceImplTest {
 
         DeclarationDataDao declarationDataDao = mock(DeclarationDataDao.class);
         DeclarationData declarationData = new DeclarationData();
-        declarationData.setAccepted(false);
+        declarationData.setState(State.CREATED);
         declarationData.setDepartmentId(TB1_ID);
         //when(declarationDataDao.find(DECLARATION_TYPE_1_ID, ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID)).thenReturn(declarationData);
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);

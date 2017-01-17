@@ -24,7 +24,7 @@ public enum DeclarationDataSearchOrdering {
     /**
      * По состоянию декларации
      */
-    DECLARATION_ACCEPTED,
+    DECLARATION_STATE,
     /**
      * По году периода
      */

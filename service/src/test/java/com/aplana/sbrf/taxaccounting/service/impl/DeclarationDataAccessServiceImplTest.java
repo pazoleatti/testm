@@ -178,12 +178,12 @@ public class DeclarationDataAccessServiceImplTest {
         periods.put(TB1_REPORT_PERIOD_ID, mockDepartmentReportPeriodData(TB1_REPORT_PERIOD_ID, DEPARTMENT_TB1_ID, reportPeriod, true, false, null));
         periods.put(TB2_REPORT_PERIOD_ID, mockDepartmentReportPeriodData(TB2_REPORT_PERIOD_ID, DEPARTMENT_TB2_ID, reportPeriod, true, false, null));
 
-        DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, false, DECLARATION_TEMPLATE_1_ID, periods.get(BANK_REPORT_PERIOD_ID));
-        DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, true, DECLARATION_TEMPLATE_1_ID, periods.get(BANK_REPORT_PERIOD_ID));
-        DeclarationData declarationCreatedTB1 = mockDeclarationData(DECLARATION_CREATED_TB1_ID, false, DECLARATION_TEMPLATE_1_ID, periods.get(TB1_REPORT_PERIOD_ID));
-        DeclarationData declarationAcceptedTB1 = mockDeclarationData(DECLARATION_ACCEPTED_TB1_ID, true, DECLARATION_TEMPLATE_1_ID, periods.get(TB1_REPORT_PERIOD_ID));
-        DeclarationData declarationCreatedTB2 = mockDeclarationData(DECLARATION_CREATED_TB2_ID, false, DECLARATION_TEMPLATE_2_ID, periods.get(TB2_REPORT_PERIOD_ID));
-        DeclarationData declarationAcceptedTB2 = mockDeclarationData(DECLARATION_ACCEPTED_TB2_ID, true, DECLARATION_TEMPLATE_2_ID, periods.get(TB2_REPORT_PERIOD_ID));
+        DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, State.CREATED, DECLARATION_TEMPLATE_1_ID, periods.get(BANK_REPORT_PERIOD_ID));
+        DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, State.ACCEPTED, DECLARATION_TEMPLATE_1_ID, periods.get(BANK_REPORT_PERIOD_ID));
+        DeclarationData declarationCreatedTB1 = mockDeclarationData(DECLARATION_CREATED_TB1_ID, State.CREATED, DECLARATION_TEMPLATE_1_ID, periods.get(TB1_REPORT_PERIOD_ID));
+        DeclarationData declarationAcceptedTB1 = mockDeclarationData(DECLARATION_ACCEPTED_TB1_ID, State.ACCEPTED, DECLARATION_TEMPLATE_1_ID, periods.get(TB1_REPORT_PERIOD_ID));
+        DeclarationData declarationCreatedTB2 = mockDeclarationData(DECLARATION_CREATED_TB2_ID, State.CREATED, DECLARATION_TEMPLATE_2_ID, periods.get(TB2_REPORT_PERIOD_ID));
+        DeclarationData declarationAcceptedTB2 = mockDeclarationData(DECLARATION_ACCEPTED_TB2_ID, State.ACCEPTED, DECLARATION_TEMPLATE_2_ID, periods.get(TB2_REPORT_PERIOD_ID));
         DeclarationDataDao declarationDataDao = mock(DeclarationDataDao.class);
         when(declarationDataDao.get(DECLARATION_CREATED_BANK_ID)).thenReturn(declarationCreatedBank);
         when(declarationDataDao.get(DECLARATION_ACCEPTED_BANK_ID)).thenReturn(declarationAcceptedBank);
