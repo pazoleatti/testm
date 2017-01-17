@@ -56,11 +56,14 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     LinkButton filesComments;
 
     @UiField
-    Label typeLabel;
-
-	@UiField
-	Label type;
-	@UiField
+    Label formKindLabel;
+    @UiField
+    Label formKind;
+    /*@UiField
+    Label formTypeLabel;
+    @UiField
+    Label formType;*/
+    @UiField
 	Label reportPeriod;
 	@UiField
 	Label department;
@@ -237,15 +240,20 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@Override
 	public void setType(String type) {
-		this.type.setText(type);
+//		this.formType.setText(type);
 	}
 
-	@Override
+    @Override
+    public void setFormKind(String formKind) {
+        this.formKind.setText(formKind);
+    }
+
+    @Override
 	public void setTitle(String title, boolean isTaxTypeDeal) {
 		this.title.setText(title);
 		this.title.setTitle(title);
-        type.setVisible(false);
-        typeLabel.setVisible(false);
+//        formType.setVisible(false);
+//        formTypeLabel.setVisible(false);
         if (!isTaxTypeDeal) {
             dateBoxLabel.setText(DATE_BOX_TITLE + ":");
             dateBoxLabel.setTitle(DATE_BOX_TITLE);

@@ -24,6 +24,11 @@ public class GetDeclarationDataResult implements Result {
     private List<DeclarationSubreport> subreports;
     private boolean isVisiblePDF;
     private DeclarationData declarationData;
+    private String declarationFormKind;
+    /**
+     * Тип формы, пока не используем
+     */
+    private String declarationFormType;
 
 	private boolean accepted;
 	private boolean canAccept;
@@ -179,5 +184,21 @@ public class GetDeclarationDataResult implements Result {
 
     public void setDeclarationData(DeclarationData declarationData) {
         this.declarationData = declarationData;
+    }
+
+    public String getDeclarationFormType() {
+        return declarationFormType;
+    }
+
+    public void setDeclarationFormType(String declarationFormType) {
+        this.declarationFormType = declarationFormType;
+    }
+
+    public String getDeclarationFormKind() {
+        return declarationFormKind;
+    }
+
+    public void setDeclarationFormKind(String declarationFormKind) {
+        this.declarationFormKind = declarationFormKind;
     }
 }

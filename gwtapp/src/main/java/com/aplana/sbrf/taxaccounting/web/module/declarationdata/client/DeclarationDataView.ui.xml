@@ -145,15 +145,15 @@
                     <g:cell horizontalAlignment="left" width="45%">
                         <g:HorizontalPanel ui:field="centerBlock" height="58px" addStyleNames="{style.centerBlock}" >
                             <g:cell>
-                                <g:VerticalPanel spacing="2" horizontalAlignment="right" width="80px">
-                                    <g:Label ui:field="typeLabel" text="Тип:" addStyleNames="{style.headerAttrName}"/>
+                                <g:VerticalPanel spacing="2" horizontalAlignment="right" width="140px">
+                                    <g:Label ui:field="formKindLabel" text="Тип налоговой формы:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label text="Период:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label text="Состояние:" addStyleNames="{style.headerAttrName}"/>
                                 </g:VerticalPanel>
                             </g:cell>
                             <g:cell>
                                 <g:VerticalPanel spacing="2" addStyleNames="{style.infoValuesBlock}">
-                                    <g:Label ui:field="type" addStyleNames="{style.headerAttr}, {style.depAttr} "/>
+                                    <g:Label ui:field="formKind" addStyleNames="{style.headerAttr}, {style.depAttr} "/>
                                     <g:Label ui:field="reportPeriod" addStyleNames="{style.reportPeriodLabel}, {style.depAttr}"/>
                                     <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
                                 </g:VerticalPanel>

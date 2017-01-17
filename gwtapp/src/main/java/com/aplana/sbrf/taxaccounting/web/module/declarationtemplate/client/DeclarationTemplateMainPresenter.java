@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
@@ -75,6 +76,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                 declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
                 declarationTemplate.setVersion(new Date());
                 declarationTemplate.setType(result.getDeclarationType());
+                declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
                 getView().setTemplateId(0);
                 getView().setDeclarationTemplate(declarationTemplateExt);
                 UpdateTemplateEvent.fire(DeclarationTemplateMainPresenter.this);
@@ -99,6 +101,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
         declarationType.setStatus(VersionedObjectStatus.DRAFT);
         declarationType.setTaxType(event.getTaxType());
         declarationTemplate.setType(declarationType);
+        declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
         getView().setTemplateId(0);
         getView().setDeclarationTemplate(declarationTemplateExt);
         UpdateTemplateEvent.fire(DeclarationTemplateMainPresenter.this);

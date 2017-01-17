@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
 import java.util.ArrayList;
@@ -22,6 +21,14 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
     private String createScript;
     private VersionedObjectStatus status;
     private List<DeclarationSubreport> subreports = new ArrayList<DeclarationSubreport>();
+    /**
+     * Типы налоговых форм(declaration)
+     */
+    private DeclarationFormKind declarationFormKind;
+    /**
+     * Вид наловой формы(declaration)
+     */
+    private DeclarationFormType declarationFormType;
 
     public String getName() {
         return name;
@@ -148,5 +155,21 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
      */
     public void removeSubreport(DeclarationSubreport subreport) {
         subreports.remove(subreport);
+    }
+
+    public DeclarationFormKind getDeclarationFormKind() {
+        return declarationFormKind;
+    }
+
+    public void setDeclarationFormKind(DeclarationFormKind declarationFormKind) {
+        this.declarationFormKind = declarationFormKind;
+    }
+
+    public DeclarationFormType getDeclarationFormType() {
+        return declarationFormType;
+    }
+
+    public void setDeclarationFormType(DeclarationFormType declarationFormType) {
+        this.declarationFormType = declarationFormType;
     }
 }

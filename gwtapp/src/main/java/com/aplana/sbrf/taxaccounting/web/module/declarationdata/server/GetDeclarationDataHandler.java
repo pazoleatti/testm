@@ -78,6 +78,8 @@ public class GetDeclarationDataHandler
         result.setTaxType(taxType);
 
         result.setDeclarationType(declarationTemplate.getType().getName());
+        result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());
+        //result.setDeclarationFormType(declarationTemplate.getDeclarationFormType().getName());
         result.setSubreports(declarationTemplate.getSubreports());
         result.setDepartment(departmentService.getParentsHierarchy(
                 declaration.getDepartmentId()));

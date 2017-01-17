@@ -75,6 +75,8 @@ public class DeclarationDataPresenter
 
 		void setType(String type);
 
+        void setFormKind(String formKype);
+
 		void setTitle(String title, boolean isTaxTypeDeal);
 
 		void setDepartment(String department);
@@ -177,11 +179,8 @@ public class DeclarationDataPresenter
 								taxName = result.getTaxType().name();
                                 taxType = result.getTaxType();
                                 sourcesPresenter.setTaxType(taxType);
-								if (!taxType.equals(TaxType.DEAL)) {
-                                    getView().setType("Налоговая форма");
-                                } else {
-                                    getView().setType("Уведомление");
-                                }
+                                getView().setType(result.getDeclarationFormType());
+                                getView().setFormKind(result.getDeclarationFormKind());
                                 String periodStr = result.getReportPeriodYear() + ", " + result.getReportPeriod();
                                 if (result.getCorrectionDate() != null) {
                                     periodStr += ", корр. (" + DATE_TIME_FORMAT.format(result.getCorrectionDate()) + ")";
