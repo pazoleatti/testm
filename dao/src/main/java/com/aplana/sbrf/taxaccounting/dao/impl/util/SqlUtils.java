@@ -94,19 +94,6 @@ public final class SqlUtils {
         return transformToSqlInStatement(prefix, collection, IN_CAUSE_LIMIT);
 	}
 
-	/**
-	 * <p>
-	 * Метод возвращает строку вида prefix in (...) or prefix in (...) разбивая параметры в условии in по IN_CAUSE_LIMIT штук.
-	 * </p>
-	 * Пример вызова:
-	 * <p>
-	 * 	 transformToSqlInStatement([309, 376, 410])
-	 * </p>
-	 */
-	public static String transformToSqlInStatement(Collection<?> collection) {
-		return transformToSqlInStatement("", collection, IN_CAUSE_LIMIT);
-	}
-
     public static String transformToSqlInStatementForString(String prefix, Collection<String> collection) {
         List<String> strings = new ArrayList<String>();
         for (String s : collection) {
