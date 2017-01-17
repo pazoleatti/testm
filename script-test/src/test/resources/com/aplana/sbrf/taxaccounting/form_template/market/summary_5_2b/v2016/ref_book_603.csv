@@ -1,4 +1,0 @@
-record_id(N);CREDIT_QUALITY_CLASS(R);CREDIT_RATING(S);INTERNATIONAL_CREDIT_RATING(R)
-1;1;рейтинг 1;4
-2;2;рейтинг 2;3
-3;3;рейтинг 3;2

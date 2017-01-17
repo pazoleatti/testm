@@ -1,5 +1,0 @@
-record_id(N);NAME(S);TYPE(R);ORG_CODE(R);TAX_STATUS(R)
-1;A;1;2;1
-2;B;2;2;1
-3;C;3;1;1
-4;D;4;2;1
