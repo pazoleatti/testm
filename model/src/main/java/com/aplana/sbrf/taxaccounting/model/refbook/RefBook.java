@@ -100,6 +100,35 @@ public class RefBook implements Serializable {
         }
     }
 
+	/**	Индентификаторы таблиц, используются датапровайдерами */
+	public enum Id {
+		ASNU(900L);
+
+		private final long id;
+
+		Id(long refBookId) {
+			this.id = refBookId;
+		}
+
+		public long getId() {
+			return id;
+		}
+	}
+
+	public enum Table {
+		ASNU("REF_BOOK_ASNU");
+
+		private final String table;
+
+		Table(String table) {
+			this.table = table;
+		}
+
+		public String getTable() {
+			return table;
+		}
+	}
+
 	/** Код справочника */
 	private Long id;
 
