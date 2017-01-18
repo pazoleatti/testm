@@ -4,13 +4,13 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplFinFb;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
- * Сервис для работы с "Выплаты, произведенные за счет средств, финансируемых из федерального бюджета"
+ * Сервис для работы с ВыплФинФБ
  */
 @ScriptExposed
 public interface RaschsvVyplFinFbService {
 
     /**
-     * Сохранение "Выплаты, произведенные за счет средств, финансируемых из федерального бюджета"
+     * Сохранение ВыплФинФБ
      * @param raschsvVyplFinFb
      * @return
      */

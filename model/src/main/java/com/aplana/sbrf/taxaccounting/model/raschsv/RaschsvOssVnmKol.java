@@ -1,14 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 /**
- * Количество для расчета сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
+ * Связь РасчСВ_ОСС.ВНМ и КолЛицТип
  */
 public class RaschsvOssVnmKol {
 
     private Long raschsvOssVnmId;
+    private Long raschsvKolLicTipId;
     private String nodeName;
 
-    // Сведения по количеству физических лиц
+    // КолЛицТип
     private RaschsvKolLicTip raschsvKolLicTip;
 
     public static final String TABLE_NAME = "raschsv_oss_vnm_kol";
@@ -30,6 +31,13 @@ public class RaschsvOssVnmKol {
     }
     public void setNodeName(String nodeName) {
         this.nodeName = nodeName;
+    }
+
+    public Long getRaschsvKolLicTipId() {
+        return raschsvKolLicTipId;
+    }
+    public void setRaschsvKolLicTipId(Long raschsvKolLicTipId) {
+        this.raschsvKolLicTipId = raschsvKolLicTipId;
     }
 
     public RaschsvKolLicTip getRaschsvKolLicTip() {

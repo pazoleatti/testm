@@ -1,14 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 /**
- * Сумма для расчета сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
+ * Связь РасчСВ_ОСС.ВНМ и СвСум1Тип
  */
 public class RaschsvOssVnmSum {
 
     private Long raschsvOssVnmId;
+    private Long raschsvSvSum1TipId;
     private String nodeName;
 
-    // Сведения по суммам (тип 1)
+    // СвСум1Тип
     private RaschsvSvSum1Tip raschsvSvSum1Tip;
 
     public static final String TABLE_NAME = "raschsv_oss_vnm_sum";
@@ -30,6 +31,13 @@ public class RaschsvOssVnmSum {
     }
     public void setNodeName(String nodeName) {
         this.nodeName = nodeName;
+    }
+
+    public Long getRaschsvSvSum1TipId() {
+        return raschsvSvSum1TipId;
+    }
+    public void setRaschsvSvSum1TipId(Long raschsvSvSum1TipId) {
+        this.raschsvSvSum1TipId = raschsvSvSum1TipId;
     }
 
     public RaschsvSvSum1Tip getRaschsvSvSum1Tip() {

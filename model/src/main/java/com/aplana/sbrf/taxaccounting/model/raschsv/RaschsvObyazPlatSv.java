@@ -22,6 +22,24 @@ public class RaschsvObyazPlatSv extends IdentityObject<Long> {
     // РасчСВ_ОПС_ОМС
     private List<RaschsvSvOpsOms> raschsvSvOpsOmsList;
 
+    // РасчСВ_ОСС.ВНМ
+    private RaschsvOssVnm raschsvOssVnm;
+
+    // РасхОССЗак
+    private RaschsvRashOssZak raschsvRashOssZak;
+
+    // ВыплФинФБ
+    private RaschsvVyplFinFb raschsvVyplFinFb;
+
+    // ПравТариф3.1.427
+    private RaschsvPravTarif31427 raschsvPravTarif31427;
+
+    // ПравТариф5.1.427
+    private RaschsvPravTarif51427 raschsvPravTarif51427;
+
+    // ПравТариф7.1.427
+    private RaschsvPravTarif71427 raschsvPravTarif71427;
+
     public RaschsvObyazPlatSv() {
         super();
         raschsvUplPerList = new ArrayList<RaschsvUplPer>();
@@ -61,5 +79,47 @@ public class RaschsvObyazPlatSv extends IdentityObject<Long> {
     }
     public void setRaschsvSvOpsOmsList(List<RaschsvSvOpsOms> raschsvSvOpsOmsList) {
         this.raschsvSvOpsOmsList = raschsvSvOpsOmsList;
+    }
+
+    public RaschsvOssVnm getRaschsvOssVnm() {
+        return raschsvOssVnm;
+    }
+    public void setRaschsvOssVnm(RaschsvOssVnm raschsvOssVnm) {
+        this.raschsvOssVnm = raschsvOssVnm;
+    }
+
+    public RaschsvRashOssZak getRaschsvRashOssZak() {
+        return raschsvRashOssZak;
+    }
+    public void setRaschsvRashOssZak(RaschsvRashOssZak raschsvRashOssZak) {
+        this.raschsvRashOssZak = raschsvRashOssZak;
+    }
+
+    public RaschsvVyplFinFb getRaschsvVyplFinFb() {
+        return raschsvVyplFinFb;
+    }
+    public void setRaschsvVyplFinFb(RaschsvVyplFinFb raschsvVyplFinFb) {
+        this.raschsvVyplFinFb = raschsvVyplFinFb;
+    }
+
+    public RaschsvPravTarif31427 getRaschsvPravTarif31427() {
+        return raschsvPravTarif31427;
+    }
+    public void setRaschsvPravTarif31427(RaschsvPravTarif31427 raschsvPravTarif31427) {
+        this.raschsvPravTarif31427 = raschsvPravTarif31427;
+    }
+
+    public RaschsvPravTarif51427 getRaschsvPravTarif51427() {
+        return raschsvPravTarif51427;
+    }
+    public void setRaschsvPravTarif51427(RaschsvPravTarif51427 raschsvPravTarif51427) {
+        this.raschsvPravTarif51427 = raschsvPravTarif51427;
+    }
+
+    public RaschsvPravTarif71427 getRaschsvPravTarif71427() {
+        return raschsvPravTarif71427;
+    }
+    public void setRaschsvPravTarif71427(RaschsvPravTarif71427 raschsvPravTarif71427) {
+        this.raschsvPravTarif71427 = raschsvPravTarif71427;
     }
 }

@@ -421,7 +421,6 @@ create table declaration_data (
   declaration_template_id     number(9)   not null,
   tax_organ_code              varchar2(4),
   kpp                         varchar2(9),
-  is_accepted                 number(1)   default 0 not null,
   department_report_period_id number(18)  not null,
   asnu_id                     number(9),
   guid                        varchar2(32),
@@ -429,12 +428,12 @@ create table declaration_data (
   state                       number(1)   default 1 not null
 );
 
+
 comment on table declaration_data is 'Налоговые декларации';
 comment on column declaration_data.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
 comment on column declaration_data.tax_organ_code is 'Налоговый орган';
 comment on column declaration_data.kpp is 'КПП';
-comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
 comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
 comment on column declaration_data.asnu_id is 'Идентификатор АСНУ';
 comment on column declaration_data.guid is 'GUID';

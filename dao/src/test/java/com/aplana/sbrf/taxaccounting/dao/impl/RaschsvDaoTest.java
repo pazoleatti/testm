@@ -226,7 +226,7 @@ public class RaschsvDaoTest {
     }
 
     /**
-     * Тестирование выборки данных из таблицы "Персонифицированные сведения о застрахованных лицах" по ИНН ФЛ и идентификатору декларации
+     * Тестирование выборки данных из таблицы ПерсСвСтрахЛиц по ИНН ФЛ и идентификатору декларации
      */
     @Test
     public void testFindPersonsByInn() {
@@ -236,7 +236,7 @@ public class RaschsvDaoTest {
     }
 
     /**
-     * Тестирование выборки данных из таблицы "Персонифицированные сведения о застрахованных лицах" по идентификатору декларации
+     * Тестирование выборки данных из таблицы ПерсСвСтрахЛиц по идентификатору декларации
      */
     @Test
     public void testFindPersons() {
@@ -267,10 +267,13 @@ public class RaschsvDaoTest {
     }
 
     /**
-     * Тестирование выборки данных из таблицы "Сводные данные об обязательствах плательщика страховых взносов" по идентификатору декларации
+     * Тестирование выборки данных из таблицы ОбязПлатСВ
      */
     @Test
     public void testFindObyazPlatSv() {
+
+        assertNull(raschsvObyazPlatSvDao.findObyazPlatSv(DECLARATION_ID_NOT_EXIST));
+
         RaschsvObyazPlatSv raschsvObyazPlatSv = raschsvObyazPlatSvDao.findObyazPlatSv(DECLARATION_ID_EXIST);
         assertNotNull(raschsvObyazPlatSv);
 
@@ -304,7 +307,40 @@ public class RaschsvDaoTest {
             }
         }
 
-        assertNull(raschsvObyazPlatSvDao.findObyazPlatSv(DECLARATION_ID_NOT_EXIST));
+        // РасчСВ_ОСС.ВНМ
+        RaschsvOssVnm raschsvOssVnm = raschsvObyazPlatSv.getRaschsvOssVnm();
+        assertNotNull(raschsvOssVnm);
+        assertFalse(raschsvOssVnm.getRaschsvUplSvPrevList().isEmpty());
+        assertFalse(raschsvOssVnm.getRaschsvOssVnmSumList().isEmpty());
+        for (RaschsvOssVnmSum raschsvOssVnmSum : raschsvOssVnm.getRaschsvOssVnmSumList()) {
+            assertNotNull(raschsvOssVnmSum.getRaschsvSvSum1Tip());
+        }
+        assertFalse(raschsvOssVnm.getRaschsvOssVnmKolList().isEmpty());
+        for (RaschsvOssVnmKol raschsvOssVnmKol : raschsvOssVnm.getRaschsvOssVnmKolList()) {
+            assertNotNull(raschsvOssVnmKol.getRaschsvKolLicTip());
+        }
+
+        // РасхОССЗак
+        RaschsvRashOssZak raschsvRashOssZak = raschsvObyazPlatSv.getRaschsvRashOssZak();
+        assertNotNull(raschsvRashOssZak);
+        assertFalse(raschsvRashOssZak.getRaschsvRashOssZakRashList().isEmpty());
+
+        // ВыплФинФБ
+        RaschsvVyplFinFb raschsvVyplFinFb = raschsvObyazPlatSv.getRaschsvVyplFinFb();
+        assertNotNull(raschsvVyplFinFb);
+        assertFalse(raschsvVyplFinFb.getRaschsvVyplPrichinaList().isEmpty());
+        for (RaschsvVyplPrichina raschsvVyplPrichina : raschsvVyplFinFb.getRaschsvVyplPrichinaList()) {
+            assertFalse(raschsvVyplPrichina.getRaschsvRashVyplList().isEmpty());
+        }
+
+        // ПравТариф3.1.427
+        assertNotNull(raschsvObyazPlatSv.getRaschsvPravTarif31427());
+
+        // ПравТариф5.1.427
+        assertNotNull(raschsvObyazPlatSv.getRaschsvPravTarif51427());
+
+        // ПравТариф7.1.427
+        assertNotNull(raschsvObyazPlatSv.getRaschsvPravTarif71427());
     }
 
     /**
