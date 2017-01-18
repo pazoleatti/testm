@@ -31,6 +31,9 @@ public class RaschsvObyazPlatSv extends IdentityObject<Long> {
     // ВыплФинФБ
     private RaschsvVyplFinFb raschsvVyplFinFb;
 
+    // ПравТариф3.1.427
+    private RaschsvPravTarif31427 raschsvPravTarif31427;
+
     public RaschsvObyazPlatSv() {
         super();
         raschsvUplPerList = new ArrayList<RaschsvUplPer>();
@@ -91,5 +94,12 @@ public class RaschsvObyazPlatSv extends IdentityObject<Long> {
     }
     public void setRaschsvVyplFinFb(RaschsvVyplFinFb raschsvVyplFinFb) {
         this.raschsvVyplFinFb = raschsvVyplFinFb;
+    }
+
+    public RaschsvPravTarif31427 getRaschsvPravTarif31427() {
+        return raschsvPravTarif31427;
+    }
+    public void setRaschsvPravTarif31427(RaschsvPravTarif31427 raschsvPravTarif31427) {
+        this.raschsvPravTarif31427 = raschsvPravTarif31427;
     }
 }

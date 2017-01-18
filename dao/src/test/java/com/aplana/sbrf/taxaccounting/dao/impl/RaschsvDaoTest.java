@@ -332,6 +332,13 @@ public class RaschsvDaoTest {
         for (RaschsvVyplPrichina raschsvVyplPrichina : raschsvVyplFinFb.getRaschsvVyplPrichinaList()) {
             assertFalse(raschsvVyplPrichina.getRaschsvRashVyplList().isEmpty());
         }
+
+        // ПравТариф3.1.427
+        assertNotNull(raschsvObyazPlatSv.getRaschsvPravTarif31427());
+
+        // ПравТариф5.1.427
+
+        // ПравТариф7.1.427
     }
 
     /**
