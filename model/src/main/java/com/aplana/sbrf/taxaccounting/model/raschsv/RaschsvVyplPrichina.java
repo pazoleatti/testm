@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Основание выплат, произведенных за счет средств, финансируемых из федерального бюджета
+ * Причина ВыплФинФБ
  */
 public class RaschsvVyplPrichina extends IdentityObject<Long> {
 
@@ -14,7 +14,7 @@ public class RaschsvVyplPrichina extends IdentityObject<Long> {
     private String nodeName;
     private Double svVnfUhodInv;
 
-    // Выплаты, произведенные за счет средств, финансируемых из Федерального бюджета
+    // Информация по конкретной ВыплФинФБ
     private List<RaschsvRashVypl> raschsvRashVyplList;
 
     public RaschsvVyplPrichina() {
@@ -58,4 +58,5 @@ public class RaschsvVyplPrichina extends IdentityObject<Long> {
     public void setRaschsvRashVyplList(List<RaschsvRashVypl> raschsvRashVyplList) {
         this.raschsvRashVyplList = raschsvRashVyplList;
     }
+    public void addRaschsvRashVypl(RaschsvRashVypl raschsvRashVypl) {raschsvRashVyplList.add(raschsvRashVypl);}
 }
