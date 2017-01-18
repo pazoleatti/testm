@@ -1,4 +1,0 @@
-record_id(N);NAME(S);COUNTRY(R);ORGANIZATION(R);INN_KIO(S);KPP(S);REG_NUM(S);TAXPAYER_CODE(S);ADDRESS(S);OFFSHORE(R);SKOLKOVO(R)
-1;nameA;1;1;innKioA;kppA;regNumA;paxpayerCodeA;addressA;1;1
-2;nameB;2;2;innKioB;kppB;regNumB;paxpayerCodeB;addressB;2;2
-3;nameC;3;3;innKioC;kppC;regNumC;paxpayerCodeC;addressC;3;3
