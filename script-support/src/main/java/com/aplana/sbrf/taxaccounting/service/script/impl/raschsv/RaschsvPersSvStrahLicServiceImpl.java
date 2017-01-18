@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service("raschsvPersSvStrahLicService")
 public class RaschsvPersSvStrahLicServiceImpl implements RaschsvPersSvStrahLicService {
@@ -27,5 +28,10 @@ public class RaschsvPersSvStrahLicServiceImpl implements RaschsvPersSvStrahLicSe
     @Override
     public List<RaschsvPersSvStrahLic> findPersons(Long declarationDataId) {
         return raschsvPersSvStrahLicDao.findPersons(declarationDataId);
+    }
+
+    @Override
+    public RaschsvPersSvStrahLic findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params) {
+        return raschsvPersSvStrahLicDao.findPersonBySubreportParams(declarationDataId, params);
     }
 }

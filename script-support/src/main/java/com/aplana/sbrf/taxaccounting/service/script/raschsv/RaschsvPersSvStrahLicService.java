@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с ПерсСвСтрахЛиц
@@ -32,4 +33,14 @@ public interface RaschsvPersSvStrahLicService {
      * @return
      */
     List<RaschsvPersSvStrahLic> findPersons(Long declarationDataId);
+
+    /**
+     * Выборка "Персонифицированных сведений о застрахованных лицах"
+     * @param declarationDataId - идентификатор декларации
+     * @param params - параметры спецотчета
+     * @return
+     */
+    RaschsvPersSvStrahLic findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params);
+
+
 }

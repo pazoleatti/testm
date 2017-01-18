@@ -1,7 +1,5 @@
 package form_template.fond.primary_1151111.v2016
 
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-
 import java.awt.Color
 import java.text.SimpleDateFormat
 
@@ -147,23 +145,18 @@ switch (formDataEvent) {
 
 @Field final String PERSONAL_DATA_TOTAL_ROW_LABEL = "Всего за последние три месяца расчетного (отчетного) периода"
 
+// Идентификатор декларации
+@Field final declarationId = declarationData.getId()
+
 // Находит в базе данных RaschsvPersSvStrahLic
 RaschsvPersSvStrahLic getrRaschsvPersSvStrahLic() {
     def params = scriptSpecificReportHolder.getSubreportParamValues()
-    println declarationData.getId()
-    raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationData.getId(), params)
-    // TestDataHolder.getInstance().FL_DATA
+    raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params)
 }
 
 // Находит в базе данных список List RaschsvPersSvStrahLic
 List<RaschsvPersSvStrahLic> getrRaschsvPersSvStrahLicList() {
     [TestDataHolder.getInstance().FL_DATA, TestDataHolder.getInstance().FL_DATA, TestDataHolder.getInstance().FL_DATA]
-}
-
-// Находит в базе данных RaschsvSvnpPodpisant
-RaschsvSvnpPodpisant getRaschsvSvnpPodpisant() {
-    // TODO Нужен select в RaschsvSvnpPodpisantDao или брать из xml
-    TestDataHolder.getInstance().PODPISANT
 }
 
 // Находит в БД RaschsvObyazPlatSv
@@ -189,8 +182,8 @@ RaschsvUplPrevOss getRaschsvUplPrevOss() {
  * **************************************************************************/
 
 def fillGeneralList(final XSSFWorkbook workbook) {
-    def sheet = workbook.getSheet(COMMON_SHEET)
-    def podpisant = getRaschsvSvnpPodpisant()
+    // TODO необходимо реализовать классы соответствующие данным и dao
+    /*def sheet = workbook.getSheet(COMMON_SHEET)
     def xmlStream = declarationService.getXmlStream(declarationData.getId())
     def slurper = new XmlSlurper()
     def Файл = slurper.parse(xmlStream)
@@ -204,18 +197,19 @@ def fillGeneralList(final XSSFWorkbook workbook) {
     sheet.getRow(12).getCell(1).setCellValue(Файл.Документ.@ОтчетГод.toString())
     sheet.getRow(13).getCell(1).setCellValue(Файл.Документ.@КодНО.toString())
     sheet.getRow(14).getCell(1).setCellValue(Файл.Документ.@ПоМесту.toString())
-    sheet.getRow(18).getCell(1).setCellValue podpisant.svnpOkved
-    sheet.getRow(19).getCell(1).setCellValue podpisant.svnpTlph
-    sheet.getRow(21).getCell(1).setCellValue podpisant.svnpNaimOrg
-    sheet.getRow(22).getCell(1).setCellValue podpisant.svnpInnyl
-    sheet.getRow(23).getCell(1).setCellValue podpisant.svnpKpp
-    sheet.getRow(25).getCell(1).setCellValue podpisant.svnpSvReorgForm
-    sheet.getRow(26).getCell(1).setCellValue podpisant.svnpSvReorgInnyl
-    sheet.getRow(27).getCell(1).setCellValue podpisant.svnpSvReorgKpp
-    sheet.getRow(30).getCell(1).setCellValue podpisant.familia + " " + podpisant.imya + " " + podpisant.middleName
-    sheet.getRow(31).getCell(1).setCellValue podpisant.podpisantPrPodp
-    sheet.getRow(33).getCell(1).setCellValue podpisant.podpisantNaimDoc
-    sheet.getRow(34).getCell(1).setCellValue podpisant.podpisantNaimOrg
+    // TODO заменить на выгрузку из БД
+    sheet.getRow(18).getCell(1).setCellValue(Файл.Документ.СвНП.@ОКВЭД.toString())
+    sheet.getRow(19).getCell(1).setCellValue(Файл.Документ.СвНП.@Тлф.toString())
+    sheet.getRow(21).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.@НаимОрг.toString())
+    sheet.getRow(22).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.@ИННЮЛ.toString())
+    sheet.getRow(23).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.@КПП.toString())
+    sheet.getRow(25).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.@ФормРеорг.toString())
+    sheet.getRow(26).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.@ИННЮЛ.toString())
+    sheet.getRow(27).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.@КПП.toString())
+    sheet.getRow(30).getCell(1).setCellValue(Файл.Документ.Подписант.@ПрПодп.toString())
+    sheet.getRow(31).getCell(1).setCellValue(Файл.Документ.Подписант.@Фамилия.toString() + " " + Файл.Документ.Подписант.@Имя.toString() + " " + Файл.Документ.Подписант.@Отчество.toString())
+    sheet.getRow(33).getCell(1).setCellValue(Файл.Документ.Подписант.СвПред.@НаимДок.toString())
+    sheet.getRow(34).getCell(1).setCellValue(Файл.Документ.Подписант.СвПред.@НаимОрг.toString())*/
 }
 
 /****************************************************************************
