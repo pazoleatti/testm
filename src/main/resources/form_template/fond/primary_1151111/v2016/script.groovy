@@ -139,7 +139,7 @@ switch (formDataEvent) {
 @Field final String SUM_STRAH_VZN = "Суммы страховых взносов"
 
 // Имена псевдонима спецотчета
-@Field final String PERSON_REPORT = "person_report"
+@Field final String PERSON_REPORT = "person_rep_param"
 @Field final String CONSOLIDATED_REPORT = "consolidated_report"
 
 @Field final Color ROWS_FILL_COLOR = new Color(255, 243, 203)
@@ -149,7 +149,10 @@ switch (formDataEvent) {
 
 // Находит в базе данных RaschsvPersSvStrahLic
 RaschsvPersSvStrahLic getrRaschsvPersSvStrahLic() {
-    TestDataHolder.getInstance().FL_DATA
+    def params = scriptSpecificReportHolder.getSubreportParamValues()
+    println declarationData.getId()
+    raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationData.getId(), params)
+    // TestDataHolder.getInstance().FL_DATA
 }
 
 // Находит в базе данных список List RaschsvPersSvStrahLic
