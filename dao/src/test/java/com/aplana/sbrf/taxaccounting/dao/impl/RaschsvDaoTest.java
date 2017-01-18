@@ -226,7 +226,7 @@ public class RaschsvDaoTest {
     }
 
     /**
-     * Тестирование выборки данных из таблицы "Персонифицированные сведения о застрахованных лицах" по ИНН ФЛ и идентификатору декларации
+     * Тестирование выборки данных из таблицы ПерсСвСтрахЛиц по ИНН ФЛ и идентификатору декларации
      */
     @Test
     public void testFindPersonsByInn() {
@@ -236,7 +236,7 @@ public class RaschsvDaoTest {
     }
 
     /**
-     * Тестирование выборки данных из таблицы "Персонифицированные сведения о застрахованных лицах" по идентификатору декларации
+     * Тестирование выборки данных из таблицы ПерсСвСтрахЛиц по идентификатору декларации
      */
     @Test
     public void testFindPersons() {
@@ -267,7 +267,7 @@ public class RaschsvDaoTest {
     }
 
     /**
-     * Тестирование выборки данных из таблицы "Сводные данные об обязательствах плательщика страховых взносов" по идентификатору декларации
+     * Тестирование выборки данных из таблицы ОбязПлатСВ
      */
     @Test
     public void testFindObyazPlatSv() {
@@ -302,6 +302,19 @@ public class RaschsvDaoTest {
                     assertNotNull(raschsvSvOpsOmsRaschKol.getRaschsvKolLicTip());
                 }
             }
+        }
+
+        // РасчСВ_ОСС.ВНМ
+        RaschsvOssVnm raschsvOssVnm = raschsvObyazPlatSv.getRaschsvOssVnm();
+        assertNotNull(raschsvOssVnm);
+        assertFalse(raschsvOssVnm.getRaschsvUplSvPrevList().isEmpty());
+        assertFalse(raschsvOssVnm.getRaschsvOssVnmSumList().isEmpty());
+        for (RaschsvOssVnmSum raschsvOssVnmSum : raschsvOssVnm.getRaschsvOssVnmSumList()) {
+            assertNotNull(raschsvOssVnmSum.getRaschsvSvSum1Tip());
+        }
+        assertFalse(raschsvOssVnm.getRaschsvOssVnmKolList().isEmpty());
+        for (RaschsvOssVnmKol raschsvOssVnmKol : raschsvOssVnm.getRaschsvOssVnmKolList()) {
+            assertNotNull(raschsvOssVnmKol.getRaschsvKolLicTip());
         }
 
         assertNull(raschsvObyazPlatSvDao.findObyazPlatSv(DECLARATION_ID_NOT_EXIST));

@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvObyazPlatSvDao;
-import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvSvOpsOmsDao;
-import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvUplPerDao;
-import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvUplPrevOssDao;
+import com.aplana.sbrf.taxaccounting.dao.raschsv.*;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -30,6 +27,9 @@ public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvOby
 
     @Autowired
     private RaschsvSvOpsOmsDao raschsvSvOpsOmsDao;
+
+    @Autowired
+    private RaschsvOssVnmDao raschsvOssVnmDao;
 
     // Перечень столбцов таблицы ОбязПлатСВ
     private static final String OBYAZ_PLAT_SV_COLS = SqlUtils.getColumnsToString(RaschsvObyazPlatSv.COLUMNS, null);
@@ -63,6 +63,7 @@ public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvOby
             raschsvObyazPlatSv.setRaschsvUplPerList(raschsvUplPerDao.findUplPer(raschsvObyazPlatSv.getId()));
             raschsvObyazPlatSv.setRaschsvUplPrevOss(raschsvUplPrevOssDao.findUplPrevOss(raschsvObyazPlatSv.getId()));
             raschsvObyazPlatSv.setRaschsvSvOpsOmsList(raschsvSvOpsOmsDao.findSvOpsOms(raschsvObyazPlatSv.getId()));
+            raschsvObyazPlatSv.setRaschsvOssVnm(raschsvOssVnmDao.findOssVnm(raschsvObyazPlatSv.getId()));
 
             return raschsvObyazPlatSv;
         } catch (EmptyResultDataAccessException e) {

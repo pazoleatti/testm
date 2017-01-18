@@ -4,13 +4,13 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnm;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
- * Сервис для работы с "Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
+ * Сервис для работы с РасчСВ_ОСС.ВНМ
  */
 @ScriptExposed
 public interface RaschsvOssVnmService {
 
     /**
-     * Сохранение "Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
+     * Сохранение РасчСВ_ОСС.ВНМ
      * @param raschsvOssVnm
      * @return
      */

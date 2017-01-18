@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 /**
- * Сумма страховых взносов, подлежащая к уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами)
+ * Сумма страховых взносов, подлежащая к уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами) (УплСВПрев)
  */
 public class RaschsvUplSvPrev extends IdentityObject<Long> {
 

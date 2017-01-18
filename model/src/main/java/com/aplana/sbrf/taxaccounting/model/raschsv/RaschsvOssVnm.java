@@ -6,20 +6,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
+ * Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством (РасчСВ_ОСС.ВНМ)
  */
 public class RaschsvOssVnm extends IdentityObject<Long> {
 
     private Long raschsvObyazPlatSvId;
     private String prizVypl;
 
-    // Сумма для расчета сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
+    // Связь РасчСВ_ОСС.ВНМ и СвСум1Тип
     List<RaschsvOssVnmSum> raschsvOssVnmSumList;
 
-    // Количество для расчета сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
+    // Связь РасчСВ_ОСС.ВНМ и КолЛицТип
     List<RaschsvOssVnmKol> raschsvOssVnmKolList;
 
-    // Сумма страховых взносов, подлежащая к уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами)
+    // УплСВПрев
     List<RaschsvUplSvPrev> raschsvUplSvPrevList;
 
     public RaschsvOssVnm() {
@@ -53,6 +53,7 @@ public class RaschsvOssVnm extends IdentityObject<Long> {
     public void setRaschsvOssVnmSumList(List<RaschsvOssVnmSum> raschsvOssVnmSumList) {
         this.raschsvOssVnmSumList = raschsvOssVnmSumList;
     }
+    public void addRaschsvOssVnmSum(RaschsvOssVnmSum raschsvOssVnmSum) {raschsvOssVnmSumList.add(raschsvOssVnmSum);}
 
     public List<RaschsvOssVnmKol> getRaschsvOssVnmKolList() {
         return raschsvOssVnmKolList;
@@ -60,6 +61,7 @@ public class RaschsvOssVnm extends IdentityObject<Long> {
     public void setRaschsvOssVnmKolList(List<RaschsvOssVnmKol> raschsvOssVnmKolList) {
         this.raschsvOssVnmKolList = raschsvOssVnmKolList;
     }
+    public void addRaschsvOssVnmKol(RaschsvOssVnmKol raschsvOssVnmKol) {raschsvOssVnmKolList.add(raschsvOssVnmKol);}
 
     public List<RaschsvUplSvPrev> getRaschsvUplSvPrevList() {
         return raschsvUplSvPrevList;
