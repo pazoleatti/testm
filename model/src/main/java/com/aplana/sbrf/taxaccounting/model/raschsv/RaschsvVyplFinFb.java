@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Выплаты, произведенные за счет средств, финансируемых из федерального бюджета
+ * Выплаты, произведенные за счет средств, финансируемых из федерального бюджета (ВыплФинФБ)
  */
 public class RaschsvVyplFinFb extends IdentityObject<Long> {
 
     private Long raschsvObyazPlatSvId;
 
-    // Основание выплат, произведенных за счет средств, финансируемых из федерального бюджета
+    // Причина ВыплФинФБ
     private List<RaschsvVyplPrichina> raschsvVyplPrichinaList;
 
     public RaschsvVyplFinFb() {

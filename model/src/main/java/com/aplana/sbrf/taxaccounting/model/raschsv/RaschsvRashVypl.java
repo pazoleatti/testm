@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 /**
- * Информация о выплате, произведенной за счет средств, финансируемых из Федерального бюджета
+ * Информация по конкретной ВыплФинФБ
  */
 public class RaschsvRashVypl extends IdentityObject<Long> {
 

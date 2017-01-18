@@ -3,14 +3,21 @@ package com.aplana.sbrf.taxaccounting.dao.raschsv;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplFinFb;
 
 /**
- * DAO-интерфейс для работы с таблицей "Выплаты, произведенные за счет средств, финансируемых из федерального бюджета"
+ * DAO-интерфейс для работы с ВыплФинФБ
  */
 public interface RaschsvVyplFinFbDao {
 
     /**
-     * Сохранение "Выплаты, произведенные за счет средств, финансируемых из федерального бюджета"
+     * Сохранение ВыплФинФБ
      * @param raschsvVyplFinFb
      * @return
      */
     Long insertRaschsvVyplFinFb(RaschsvVyplFinFb raschsvVyplFinFb);
+
+    /**
+     * Выборка из ВыплФинФБ
+     * @param obyazPlatSvId
+     * @return
+     */
+    RaschsvVyplFinFb findRaschsvVyplFinFb(Long obyazPlatSvId);
 }

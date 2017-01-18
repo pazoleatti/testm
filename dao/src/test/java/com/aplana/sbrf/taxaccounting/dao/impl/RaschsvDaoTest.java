@@ -271,6 +271,9 @@ public class RaschsvDaoTest {
      */
     @Test
     public void testFindObyazPlatSv() {
+
+        assertNull(raschsvObyazPlatSvDao.findObyazPlatSv(DECLARATION_ID_NOT_EXIST));
+
         RaschsvObyazPlatSv raschsvObyazPlatSv = raschsvObyazPlatSvDao.findObyazPlatSv(DECLARATION_ID_EXIST);
         assertNotNull(raschsvObyazPlatSv);
 
@@ -322,7 +325,13 @@ public class RaschsvDaoTest {
         assertNotNull(raschsvRashOssZak);
         assertFalse(raschsvRashOssZak.getRaschsvRashOssZakRashList().isEmpty());
 
-        assertNull(raschsvObyazPlatSvDao.findObyazPlatSv(DECLARATION_ID_NOT_EXIST));
+        // ВыплФинФБ
+        RaschsvVyplFinFb raschsvVyplFinFb = raschsvObyazPlatSv.getRaschsvVyplFinFb();
+        assertNotNull(raschsvVyplFinFb);
+        assertFalse(raschsvVyplFinFb.getRaschsvVyplPrichinaList().isEmpty());
+        for (RaschsvVyplPrichina raschsvVyplPrichina : raschsvVyplFinFb.getRaschsvVyplPrichinaList()) {
+            assertFalse(raschsvVyplPrichina.getRaschsvRashVyplList().isEmpty());
+        }
     }
 
     /**
