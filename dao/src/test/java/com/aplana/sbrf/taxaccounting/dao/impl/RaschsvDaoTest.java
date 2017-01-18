@@ -337,8 +337,10 @@ public class RaschsvDaoTest {
         assertNotNull(raschsvObyazPlatSv.getRaschsvPravTarif31427());
 
         // ПравТариф5.1.427
+        assertNotNull(raschsvObyazPlatSv.getRaschsvPravTarif51427());
 
         // ПравТариф7.1.427
+        assertNotNull(raschsvObyazPlatSv.getRaschsvPravTarif71427());
     }
 
     /**

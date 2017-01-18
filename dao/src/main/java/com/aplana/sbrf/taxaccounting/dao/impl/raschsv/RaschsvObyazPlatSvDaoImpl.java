@@ -40,6 +40,12 @@ public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvOby
     @Autowired
     private RaschsvPravTarif31427Dao raschsvPravTarif31427Dao;
 
+    @Autowired
+    private RaschsvPravTarif51427Dao raschsvPravTarif51427Dao;
+
+    @Autowired
+    private RaschsvPravTarif71427Dao raschsvPravTarif71427Dao;
+
     // Перечень столбцов таблицы ОбязПлатСВ
     private static final String OBYAZ_PLAT_SV_COLS = SqlUtils.getColumnsToString(RaschsvObyazPlatSv.COLUMNS, null);
     private static final String OBYAZ_PLAT_SV_FIELDS = SqlUtils.getColumnsToString(RaschsvObyazPlatSv.COLUMNS, ":");
@@ -76,6 +82,9 @@ public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvOby
             raschsvObyazPlatSv.setRaschsvRashOssZak(raschsvRashOssZakDao.findRaschsvRashOssZak(raschsvObyazPlatSv.getId()));
             raschsvObyazPlatSv.setRaschsvVyplFinFb(raschsvVyplFinFbDao.findRaschsvVyplFinFb(raschsvObyazPlatSv.getId()));
             raschsvObyazPlatSv.setRaschsvPravTarif31427(raschsvPravTarif31427Dao.findRaschsvPravTarif31427(raschsvObyazPlatSv.getId()));
+            raschsvObyazPlatSv.setRaschsvPravTarif51427(raschsvPravTarif51427Dao.findRaschsvPravTarif51427(raschsvObyazPlatSv.getId()));
+            raschsvObyazPlatSv.setRaschsvPravTarif71427(raschsvPravTarif71427Dao.findRaschsvPravTarif71427(raschsvObyazPlatSv.getId()));
+
 
             return raschsvObyazPlatSv;
         } catch (EmptyResultDataAccessException e) {
