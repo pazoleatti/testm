@@ -102,7 +102,7 @@ public class RefBook implements Serializable {
 
 	/**	Индентификаторы таблиц, используются датапровайдерами */
 	public enum Id {
-		ASNU(900L);
+		ASNU(900L), PERSON(904L), REGION(932L);
 
 		private final long id;
 
@@ -116,7 +116,7 @@ public class RefBook implements Serializable {
 	}
 
 	public enum Table {
-		ASNU("REF_BOOK_ASNU");
+		ASNU("REF_BOOK_ASNU"), PERSON("REF_BOOK_PERSON"), REGION("REF_BOOK_REGION");
 
 		private final String table;
 
