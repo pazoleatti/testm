@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.State;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -30,7 +27,8 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
         result.setTaxOrganCode(rs.getString("tax_organ_code"));
         result.setTaxOrganKpp(rs.getString("kpp"));
         result.setAsnuId(SqlUtils.getLong(rs,"asnu_id"));
-        result.setGuid(rs.getString("guid"));
+        result.setFileName(rs.getString("file_name"));
+        result.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
         return result;
 	}
 }

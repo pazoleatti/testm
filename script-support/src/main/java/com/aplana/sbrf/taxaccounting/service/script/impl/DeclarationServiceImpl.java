@@ -194,7 +194,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         DeclarationTemplate template = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
         DeclarationData existingDeclarationData = declarationDataDao.find(template.getType().getId(),
                 declarationData.getDepartmentReportPeriodId(), declarationData.getKpp(), declarationData.getTaxOrganCode(),
-                declarationData.getAsnuId(), declarationData.getGuid());
+                declarationData.getAsnuId(), declarationData.getFileName());
         // форма найдена
         if (existingDeclarationData != null) {
             logger.error(template.getType().getTaxType() == TaxType.DEAL ? CHECK_UNIQUE_NOTIFICATION_ERROR : CHECK_UNIQUE_ERROR);

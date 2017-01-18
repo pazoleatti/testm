@@ -38,7 +38,7 @@ public class DeclarationDataFilter implements Serializable {
 
     private Long asnuId;
 
-    private String guid;
+    private String fileName;
 
     /*true, если сортируем по возрастанию, false - по убыванию*/
 	private boolean ascSorting;
@@ -167,11 +167,11 @@ public class DeclarationDataFilter implements Serializable {
         this.asnuId = asnuId;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

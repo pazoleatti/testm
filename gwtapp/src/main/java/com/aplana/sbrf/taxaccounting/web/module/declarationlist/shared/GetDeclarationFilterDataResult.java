@@ -14,6 +14,7 @@ public class GetDeclarationFilterDataResult implements Result {
 	private DeclarationDataFilterAvailableValues filterValues;
     private DeclarationDataFilter defaultDecFilterData;
     private Integer userDepartmentId;
+    private List<DeclarationFormKind> dataKinds;
 
 	public List<Department> getDepartments() {
 		return departments;
@@ -53,5 +54,13 @@ public class GetDeclarationFilterDataResult implements Result {
 
     public void setUserDepartmentId(Integer userDepartmentId) {
         this.userDepartmentId = userDepartmentId;
+    }
+
+    public List<DeclarationFormKind> getDataKinds() {
+        return dataKinds;
+    }
+
+    public void setDataKinds(List<DeclarationFormKind> dataKinds) {
+        this.dataKinds = dataKinds;
     }
 }

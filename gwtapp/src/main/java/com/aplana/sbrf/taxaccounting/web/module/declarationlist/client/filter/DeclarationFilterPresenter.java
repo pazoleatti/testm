@@ -33,6 +33,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 		void setDepartmentsList(List<Department> list, Set<Integer> availableDepartments);
 
+        void setKindFilter(List<DeclarationFormKind> dataKinds);
+
 		void setDeclarationTypeMap(Map<Integer, String> declarationTypeMap);
 
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
@@ -84,7 +86,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 						public void onSuccess(GetDeclarationFilterDataResult result) {
                             DeclarationDataFilterAvailableValues filterValues = result.getFilterValues();
 
-							getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
+							getView().setKindFilter(result.getDataKinds());
+                            getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
 							getView().setReportPeriods(result.getPeriods());
 							getView().setDeclarationTypeMap(fillDeclarationTypesMap(filterValues));
                             getView().setFormStateList(asList(null, State.CREATED, State.ACCEPTED));

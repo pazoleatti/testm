@@ -272,7 +272,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void setGUID(String guid) {
+    public void setFileName(String guid) {
         this.guid.setText(guid);
         this.guid.setTitle(guid);
     }
