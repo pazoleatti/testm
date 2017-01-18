@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование
+ * Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование (РасчСВ_ОПС_ОМС)
  */
 public class RaschsvSvOpsOms extends IdentityObject<Long> {
 
     private Long raschsvObyazPlatSvId;
     private String tarifPlat;
 
-    // Вид расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование
+    // РасчСВ_ОПС, РасчСВ_ОМС, РасчСВ_428.1-2, РасчСВ_428.3, РасчСВ_ДСО
     private List<RaschsvSvOpsOmsRasch> raschsvSvOpsOmsRaschList;
 
     public RaschsvSvOpsOms() {
@@ -39,4 +39,5 @@ public class RaschsvSvOpsOms extends IdentityObject<Long> {
     public void setRaschsvSvOpsOmsRaschList(List<RaschsvSvOpsOmsRasch> raschsvSvOpsOmsRaschList) {
         this.raschsvSvOpsOmsRaschList = raschsvSvOpsOmsRaschList;
     }
+    public void addRaschsvSvOpsOmsRasch(RaschsvSvOpsOmsRasch raschsvSvOpsOmsRasch) {raschsvSvOpsOmsRaschList.add(raschsvSvOpsOmsRasch);}
 }

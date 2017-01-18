@@ -6,20 +6,20 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import java.util.List;
 
 /**
- * Сервис для работы с "Персонифицированные сведения о застрахованных лицах"
+ * Сервис для работы с ПерсСвСтрахЛиц
  */
 @ScriptExposed
 public interface RaschsvPersSvStrahLicService {
 
     /**
-     * Сохраняет перечень записей "Персонифицированные сведения о застрахованных лицах"
+     * Сохраняет перечень записей ПерсСвСтрахЛиц
      * @param raschsvPersSvStrahLicList
      * @return
      */
     Integer insertPersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList);
 
     /**
-     * Выборка "Персонифицированных сведений о застрахованных лицах"
+     * Выборка ПерсСвСтрахЛиц
      * @param declarationDataId - идентификатор декларации
      * @param innfl - ИНН ФЛ
      * @return
@@ -27,7 +27,7 @@ public interface RaschsvPersSvStrahLicService {
     RaschsvPersSvStrahLic findPersonByInn(Long declarationDataId, String innfl);
 
     /**
-     * Выборка "Персонифицированных сведений о застрахованных лицах"
+     * Выборка ПерсСвСтрахЛиц
      * @param declarationDataId - идентификатор декларации
      * @return
      */

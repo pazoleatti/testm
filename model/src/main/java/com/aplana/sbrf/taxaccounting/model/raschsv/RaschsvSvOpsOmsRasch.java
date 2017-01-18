@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Вид расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование
+ * Вид расчета (РасчСВ_ОПС, РасчСВ_ОМС, РасчСВ_428.1-2, РасчСВ_428.3, РасчСВ_ДСО)
  */
 public class RaschsvSvOpsOmsRasch extends IdentityObject<Long> {
 
@@ -18,10 +18,10 @@ public class RaschsvSvOpsOmsRasch extends IdentityObject<Long> {
     private String klasUslTrud;
     private String prRaschSum;
 
-    // Сумма для расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование
+    // Связь РасчСВ_ОПС, РасчСВ_ОМС, РасчСВ_428.1-2, РасчСВ_428.3, РасчСВ_ДСО и СвСум1Тип
     private List<RaschsvSvOpsOmsRaschSum> raschsvSvOpsOmsRaschSumList;
 
-    // Количество для расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование
+    // Связь РасчСВ_ОПС, РасчСВ_ОМС, РасчСВ_428.1-2, РасчСВ_428.3, РасчСВ_ДСО и КолЛицТип
     private List<RaschsvSvOpsOmsRaschKol> raschsvSvOpsOmsRaschKolList;
 
     public RaschsvSvOpsOmsRasch() {
@@ -96,6 +96,7 @@ public class RaschsvSvOpsOmsRasch extends IdentityObject<Long> {
     public void setRaschsvSvOpsOmsRaschSumList(List<RaschsvSvOpsOmsRaschSum> raschsvSvOpsOmsRaschSumList) {
         this.raschsvSvOpsOmsRaschSumList = raschsvSvOpsOmsRaschSumList;
     }
+    public void addRaschsvSvOpsOmsRaschSum(RaschsvSvOpsOmsRaschSum raschsvSvOpsOmsRaschSum) {raschsvSvOpsOmsRaschSumList.add(raschsvSvOpsOmsRaschSum);}
 
     public List<RaschsvSvOpsOmsRaschKol> getRaschsvSvOpsOmsRaschKolList() {
         return raschsvSvOpsOmsRaschKolList;
@@ -103,4 +104,5 @@ public class RaschsvSvOpsOmsRasch extends IdentityObject<Long> {
     public void setRaschsvSvOpsOmsRaschKolList(List<RaschsvSvOpsOmsRaschKol> raschsvSvOpsOmsRaschKolList) {
         this.raschsvSvOpsOmsRaschKolList = raschsvSvOpsOmsRaschKolList;
     }
+    public void addRaschsvSvOpsOmsRaschKol(RaschsvSvOpsOmsRaschKol raschsvSvOpsOmsRaschKol) {raschsvSvOpsOmsRaschKolList.add(raschsvSvOpsOmsRaschKol);}
 }

@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 /**
- * Сумма страховых взносов на пенсионное, медицинское, социальное страхование
+ * Сумма страховых взносов на пенсионное, медицинское, социальное страхование (УплПерОПС, УплПерОМС, УплПерОПСДоп, УплПерДСО)
  */
 public class RaschsvUplPer extends IdentityObject<Long> {
 

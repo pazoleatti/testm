@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу
+ * Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу (ВыплСВДоп)
  */
 public class RaschsvVyplSvDop extends IdentityObject<Long> {
 
@@ -15,8 +15,7 @@ public class RaschsvVyplSvDop extends IdentityObject<Long> {
     private Double vyplSvVs3;
     private Double nachislSvVs3;
 
-    // Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу,
-    // по месяцу и коду тарифа
+    // ВыплСВДопМТ
     private List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList;
 
     public RaschsvVyplSvDop() {

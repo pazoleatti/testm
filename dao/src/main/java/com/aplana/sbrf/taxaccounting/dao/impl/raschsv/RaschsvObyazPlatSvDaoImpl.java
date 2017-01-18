@@ -3,7 +3,12 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvObyazPlatSvDao;
+import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvSvOpsOmsDao;
+import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvUplPerDao;
+import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvUplPrevOssDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -12,37 +17,61 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 @Repository
 @Transactional
 public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvObyazPlatSvDao {
 
-    // Перечень столбцов таблицы "Сводные данные об обязательствах плательщика страховых взносов"
-    private static final StringBuilder OBYAZ_PLAT_SV_COLS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvObyazPlatSv.COLUMNS, null));
-    private static final StringBuilder OBYAZ_PLAT_SV_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvObyazPlatSv.COLUMNS, ":"));
+    @Autowired
+    private RaschsvUplPerDao raschsvUplPerDao;
 
-    /**
-     * Сохранение "Сводные данные об обязательствах плательщика страховых взносов"
-     * @return
-     */
+    @Autowired
+    private RaschsvUplPrevOssDao raschsvUplPrevOssDao;
+
+    @Autowired
+    private RaschsvSvOpsOmsDao raschsvSvOpsOmsDao;
+
+    // Перечень столбцов таблицы ОбязПлатСВ
+    private static final String OBYAZ_PLAT_SV_COLS = SqlUtils.getColumnsToString(RaschsvObyazPlatSv.COLUMNS, null);
+    private static final String OBYAZ_PLAT_SV_FIELDS = SqlUtils.getColumnsToString(RaschsvObyazPlatSv.COLUMNS, ":");
+
+    private static final String SQL_INSERT = "INSERT INTO " + RaschsvObyazPlatSv.TABLE_NAME +
+            " (" + OBYAZ_PLAT_SV_COLS + ") VALUES (" + OBYAZ_PLAT_SV_FIELDS + ")";
+
+    private static final String SQL_SELECT = "SELECT " + OBYAZ_PLAT_SV_COLS + " FROM " + RaschsvObyazPlatSv.TABLE_NAME +
+            " WHERE " + RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID + " = :" + RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID;
+
     public Long insertObyazPlatSv(RaschsvObyazPlatSv raschsvObyazPlatSv) {
-        String sql = "INSERT INTO " + RaschsvObyazPlatSv.TABLE_NAME +
-                " (" + OBYAZ_PLAT_SV_COLS + ") VALUES (" + OBYAZ_PLAT_SV_FIELDS + ")";
-
         raschsvObyazPlatSv.setId(generateId(RaschsvObyazPlatSv.SEQ, Long.class));
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue(RaschsvObyazPlatSv.COL_ID, raschsvObyazPlatSv.getId())
                 .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, raschsvObyazPlatSv.getDeclarationDataId())
                 .addValue(RaschsvObyazPlatSv.COL_OKTMO, raschsvObyazPlatSv.getOktmo());
-        getNamedParameterJdbcTemplate().update(sql.toString(), params);
+        getNamedParameterJdbcTemplate().update(SQL_INSERT.toString(), params);
 
         return raschsvObyazPlatSv.getId();
     }
 
+    public RaschsvObyazPlatSv findObyazPlatSv(Long declarationDataId) {
+        try {
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
+            RaschsvObyazPlatSv raschsvObyazPlatSv =
+                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvObyazPlatSvRowMapper());
+
+            raschsvObyazPlatSv.setRaschsvUplPerList(raschsvUplPerDao.findUplPer(raschsvObyazPlatSv.getId()));
+            raschsvObyazPlatSv.setRaschsvUplPrevOss(raschsvUplPrevOssDao.findUplPrevOss(raschsvObyazPlatSv.getId()));
+            raschsvObyazPlatSv.setRaschsvSvOpsOmsList(raschsvSvOpsOmsDao.findSvOpsOms(raschsvObyazPlatSv.getId()));
+
+            return raschsvObyazPlatSv;
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
     /**
-     * Маппинг для "Сводные данные об обязательствах плательщика страховых взносов"
+     * Маппинг для ОбязПлатСВ
      */
     private static final class RaschsvObyazPlatSvRowMapper implements RowMapper<RaschsvObyazPlatSv> {
         @Override

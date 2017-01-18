@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
+ * Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица (СвВыпл)
  */
 public class RaschsvSvVypl extends IdentityObject<Long> {
 
@@ -17,7 +17,7 @@ public class RaschsvSvVypl extends IdentityObject<Long> {
     private Double vyplOpsDogVs3;
     private Double nachislSvVs3;
 
-    // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица
+    // СвВыплМК
     private List<RaschsvSvVyplMt> raschsvSvVyplMtList;
 
     public RaschsvSvVypl() {

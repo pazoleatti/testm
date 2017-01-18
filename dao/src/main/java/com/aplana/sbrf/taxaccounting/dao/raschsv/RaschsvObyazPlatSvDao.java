@@ -5,14 +5,21 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
 import java.util.List;
 
 /**
- * DAO-интерфейс для работы с таблицей "Сводные данные об обязательствах плательщика страховых взносов"
+ * DAO-интерфейс для работы c ОбязПлатСВ
  */
 public interface RaschsvObyazPlatSvDao {
 
     /**
-     * Сохранение "Сводные данные об обязательствах плательщика страховых взносов"
-     * @param raschsvObyazPlatSv - Сводные данные об обязательствах плательщика страховых взносов
+     * Сохранение ОбязПлатСВ
+     * @param raschsvObyazPlatSv - ОбязПлатСВ
      * @return
      */
     Long insertObyazPlatSv(RaschsvObyazPlatSv raschsvObyazPlatSv);
+
+    /**
+     * Выборка из ОбязПлатСВ
+     * @param declarationDataId - идентификатор декларации
+     * @return
+     */
+    RaschsvObyazPlatSv findObyazPlatSv(Long declarationDataId);
 }

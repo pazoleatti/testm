@@ -4,13 +4,13 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
- * Сервис для работы с "Сводные данные об обязательствах плательщика страховых взносов"
+ * Сервис для работы с ОбязПлатСВ
  */
 @ScriptExposed
 public interface RaschsvObyazPlatSvService {
 
     /**
-     * Сохранение "Сводные данные об обязательствах плательщика страховых взносов"
+     * Сохранение ОбязПлатСВ
      * @param raschsvObyazPlatSv - Сводные данные об обязательствах плательщика страховых взносов
      * @return
      */

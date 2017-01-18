@@ -1,14 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 /**
- * Количество для расчета сумм страховых взносов на обязательное пенсионное и медицинское страхование
+ * Связь РасчСВ_ОПС, РасчСВ_ОМС, РасчСВ_428.1-2, РасчСВ_428.3, РасчСВ_ДСО и КолЛицТип
  */
 public class RaschsvSvOpsOmsRaschKol {
 
     private Long raschsvOpsOmsRaschKolId;
+    private Long raschsvKolLicTipId;
     private String nodeName;
 
-    // Сведения по количеству физических лиц
+    // КолЛицТип
     private RaschsvKolLicTip raschsvKolLicTip;
 
     public static final String TABLE_NAME = "raschsv_ops_oms_rasch_kol";
@@ -23,6 +24,13 @@ public class RaschsvSvOpsOmsRaschKol {
     }
     public void setRaschsvOpsOmsRaschKolId(Long raschsvOpsOmsRaschKolId) {
         this.raschsvOpsOmsRaschKolId = raschsvOpsOmsRaschKolId;
+    }
+
+    public Long getRaschsvKolLicTipId() {
+        return raschsvKolLicTipId;
+    }
+    public void setRaschsvKolLicTipId(Long raschsvKolLicTipId) {
+        this.raschsvKolLicTipId = raschsvKolLicTipId;
     }
 
     public String getNodeName() {
