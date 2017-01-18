@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 /**
- * Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
+ * Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством (УплПревОСС)
  */
 public class RaschsvUplPrevOss extends IdentityObject<Long> {
 

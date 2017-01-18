@@ -6,19 +6,19 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 import java.util.List;
 
 /**
- * DAO-интерфейс для работы с таблицей "Персонифицированные сведения о застрахованных лицах"
+ * DAO-интерфейс для работы с ПерсСвСтрахЛиц
  */
 public interface RaschsvPersSvStrahLicDao {
 
     /**
-     * Сохранение "Персонифицированные сведения о застрахованных лицах"
+     * Сохранение ПерсСвСтрахЛиц
      * @param raschsvPersSvStrahLicList
      * @return
      */
     Integer insertPersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList);
 
     /**
-     * Выборка "Персонифицированных сведений о застрахованных лицах"
+     * Выборка ПерсСвСтрахЛиц
      * @param declarationDataId - идентификатор декларации
      * @param innfl - ИНН ФЛ
      * @return
@@ -26,7 +26,7 @@ public interface RaschsvPersSvStrahLicDao {
     RaschsvPersSvStrahLic findPersonByInn(Long declarationDataId, String innfl);
 
     /**
-     * Выборка "Персонифицированных сведений о застрахованных лицах"
+     * Выборка ПерсСвСтрахЛиц
      * @param declarationDataId - идентификатор декларации
      * @return
      */

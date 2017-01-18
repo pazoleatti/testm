@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 /**
- * Сведения по количеству физических лиц
+ * Сведения по количеству физических лиц (КолЛицТип)
  */
 public class RaschsvKolLicTip extends IdentityObject<Long> {
 

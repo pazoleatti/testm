@@ -24,80 +24,73 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     private static final String VYPL_SV_DOP_ALIAS = "svd";
     private static final String VYPL_SV_DOP_MT_ALIAS = "svdm";
 
-    // Перечень столбцов таблицы "Персонифицированные сведения о застрахованных лицах"
+    // Перечень столбцов таблицы ПерсСвСтрахЛиц
     private static final String PERS_SV_STRAH_LIC_COLS = SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, null);
     private static final String PERS_SV_STRAH_LIC_FIELDS = SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, ":");
 
-    // Перечень столбцов таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+    // Перечень столбцов таблицы СвВыпл
     private static final String SV_VYPL_COLS = SqlUtils.getColumnsToString(RaschsvSvVypl.COLUMNS, null);
     private static final String SV_VYPL_FIELDS = SqlUtils.getColumnsToString(RaschsvSvVypl.COLUMNS, ":");
 
-    // Перечень столбцов таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
-    // по месяцу и коду категории застрахованного лица"
+    // Перечень столбцов таблицы СвВыплМК
     private static final String SV_VYPL_MK_COLS = SqlUtils.getColumnsToString(RaschsvSvVyplMt.COLUMNS, null);
     private static final String SV_VYPL_MK_COLS_WITH_ALIAS = SqlUtils.getColumnsToString(RaschsvSvVyplMt.COLUMNS, SV_VYPL_MT_ALIAS + ".");
     private static final String SV_VYPL_MK_FIELDS = SqlUtils.getColumnsToString(RaschsvSvVyplMt.COLUMNS, ":");
 
-    // Перечень столбцов таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
-    // на которые исчислены страховые взносы по дополнительному тарифу"
+    // Перечень столбцов таблицы ВыплСВДоп
     private static final String VYPL_SV_DOP_COLS = SqlUtils.getColumnsToString(RaschsvVyplSvDop.COLUMNS, null);
     private static final String VYPL_SV_DOP_FIELDS = SqlUtils.getColumnsToString(RaschsvVyplSvDop.COLUMNS, ":");
 
-    // Перечень столбцов таблицы "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица,
-    // на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+    // Перечень столбцов таблицы ВыплСВДопМТ
     private static final String VYPL_SV_DOP_MT_COLS = SqlUtils.getColumnsToString(RaschsvVyplSvDopMt.COLUMNS, null);
     private static final String VYPL_SV_DOP_MT_COLS_WITH_ALIAS = SqlUtils.getColumnsToString(RaschsvVyplSvDopMt.COLUMNS, VYPL_SV_DOP_MT_ALIAS + ".");
     private static final String VYPL_SV_DOP_MT_FIELDS = SqlUtils.getColumnsToString(RaschsvVyplSvDopMt.COLUMNS, ":");
 
-    // sql запрос для сохранения в "Персонифицированные сведения о застрахованных лицах"
+    // sql запрос для сохранения в ПерсСвСтрахЛиц
     private static final String SQL_INSERT_PERS_SV_STRAH_LIC = "INSERT INTO " + RaschsvPersSvStrahLic.TABLE_NAME +
             " (" + PERS_SV_STRAH_LIC_COLS + ") VALUES (" + PERS_SV_STRAH_LIC_FIELDS + ")";
 
-    // sql запрос для сохранения в "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+    // sql запрос для сохранения в СвВыпл
     private static final String SQL_INSERT_SV_VYPL = "INSERT INTO " + RaschsvSvVypl.TABLE_NAME +
             " (" + SV_VYPL_COLS + ") VALUES (" + SV_VYPL_FIELDS + ")";
 
-    // sql запрос для сохранения в "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
-    // по месяцу и коду категории застрахованного лица"
+    // sql запрос для сохранения в СвВыплМК
     private static final String SQL_INSERT_SV_VYPL_MT = "INSERT INTO " + RaschsvSvVyplMt.TABLE_NAME +
             " (" + SV_VYPL_MK_COLS + ") VALUES (" + SV_VYPL_MK_FIELDS + ")";
 
-    // sql запрос для сохранения в "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
-    // на которые исчислены страховые взносы по дополнительному тарифу"
+    // sql запрос для сохранения в ВыплСВДоп
     private static final String SQL_INSERT_VYPL_SV_DOP = "INSERT INTO " + RaschsvVyplSvDop.TABLE_NAME +
             " (" + VYPL_SV_DOP_COLS + ") VALUES (" + VYPL_SV_DOP_FIELDS + ")";
 
-    // sql запрос для сохранения в "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица,
-    // на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+    // sql запрос для сохранения в ВыплСВДопМТ
     private static final String SQL_INSERT_VYPL_SV_DOP_MT = "INSERT INTO " + RaschsvVyplSvDopMt.TABLE_NAME +
             " (" + VYPL_SV_DOP_MT_COLS + ") VALUES (" + VYPL_SV_DOP_MT_FIELDS + ")";
 
-
-    // sql запрос для выборки из "Персонифицированные сведения о застрахованных лицах" по ИНН ФЛ и идентификатору декларации
+    // sql запрос для выборки из ПерсСвСтрахЛиц по ИНН ФЛ и идентификатору декларации
     private static final String SQL_SELECT_PERSONS_BY_INNFL = "SELECT " + PERS_SV_STRAH_LIC_COLS + " FROM " + RaschsvPersSvStrahLic.TABLE_NAME +
             " WHERE " + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID + " = :" + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID + " AND " +
             RaschsvPersSvStrahLic.COL_INNFL + " = :" + RaschsvPersSvStrahLic.COL_INNFL;
 
-    // sql запрос для выборки из "Персонифицированные сведения о застрахованных лицах" по идентификатору декларации
+    // sql запрос для выборки из ПерсСвСтрахЛиц по идентификатору декларации
     private static final String SQL_SELECT_PERSONS = "SELECT " + PERS_SV_STRAH_LIC_COLS + " FROM " + RaschsvPersSvStrahLic.TABLE_NAME +
             " WHERE " + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID + " = :" + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID;
 
-    // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+    // sql запрос для выборки из СвВыпл
     private static final String SQL_SELECT_SV_VYPL_BY_PERSON_IDS = "SELECT " + SV_VYPL_COLS + " FROM " + RaschsvSvVypl.TABLE_NAME +
             " WHERE ";
 
-    // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
+    // sql запрос для выборки из СвВыплМК
     private static final StringBuilder SQL_SELECT_SV_VYPL_MT_BY_PERSON_IDS = new StringBuilder()
             .append("SELECT " + SV_VYPL_MK_COLS_WITH_ALIAS + " FROM " + RaschsvSvVyplMt.TABLE_NAME + " " + SV_VYPL_MT_ALIAS)
             .append(" INNER JOIN " + RaschsvSvVypl.TABLE_NAME + " " + SV_VYPL_ALIAS +
                     " ON " + SV_VYPL_MT_ALIAS + "." + RaschsvSvVyplMt.COL_RASCHSV_SV_VYPL_ID + " = " + SV_VYPL_ALIAS + "." + RaschsvSvVypl.COL_ID)
             .append( " WHERE ");
 
-    // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+    // sql запрос для выборки из ВыплСВДоп
     private static final String SQL_SELECT_VYPL_SV_DOP_BY_PERSON_IDS = "SELECT " + VYPL_SV_DOP_COLS + " FROM " + RaschsvVyplSvDop.TABLE_NAME +
             " WHERE ";
 
-    // sql запрос для выборки из "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+    // sql запрос для выборки из ВыплСВДопМТ
     private static final StringBuilder SQL_SELECT_VYPL_SV_DOP_MT_BY_PERSON_IDS = new StringBuilder()
             .append("SELECT " + VYPL_SV_DOP_MT_COLS_WITH_ALIAS + " FROM " + RaschsvVyplSvDopMt.TABLE_NAME + " " + VYPL_SV_DOP_MT_ALIAS)
             .append(" INNER JOIN " + RaschsvVyplSvDop.TABLE_NAME + " " + VYPL_SV_DOP_ALIAS +
@@ -146,7 +139,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 persSvStrahLicIds.add(raschsvPersSvStrahLic.getId());
             }
 
-            // Получим "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+            // Получим СвВыпл
             List<RaschsvSvVypl> raschsvSvVyplList = findSvVyplListByPersonIds(persSvStrahLicIds);
             Map<Long, RaschsvSvVypl> mapSvVypl = new HashMap<Long, RaschsvSvVypl>();
             for (RaschsvSvVypl raschsvSvVypl : raschsvSvVyplList) {
@@ -156,14 +149,14 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 mapSvVypl.put(raschsvSvVypl.getId(), raschsvSvVypl);
             }
 
-            // Получим "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
+            // Получим СвВыплМК
             List<RaschsvSvVyplMt> raschsvSvVyplMtList = findSvVyplMtListByPersonIds(persSvStrahLicIds);
             for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVyplMtList) {
                 RaschsvSvVypl raschsvSvVypl = mapSvVypl.get(raschsvSvVyplMt.getRaschsvSvVyplId());
                 raschsvSvVypl.addRaschsvSvVyplMt(raschsvSvVyplMt);
             }
 
-            // Получим "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+            // Получим ВыплСВДоп
             List<RaschsvVyplSvDop> raschsvVyplSvDopList = findVyplSvDopListByPersonIds(persSvStrahLicIds);
             Map<Long, RaschsvVyplSvDop> mapVyplSvDop = new HashMap<Long, RaschsvVyplSvDop>();
             for (RaschsvVyplSvDop raschsvVyplSvDop : raschsvVyplSvDopList) {
@@ -173,7 +166,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 mapVyplSvDop.put(raschsvVyplSvDop.getId(), raschsvVyplSvDop);
             }
 
-            // Получим "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+            // Получим ВыплСВДопМТ
             List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList = findVyplSvDopMtListByPersonIds(persSvStrahLicIds);
             for (RaschsvVyplSvDopMt raschsvVyplSvDopMt : raschsvVyplSvDopMtList) {
                 RaschsvVyplSvDop raschsvVyplSvDop = mapVyplSvDop.get(raschsvVyplSvDopMt.getRaschsvVyplSvDopId());
@@ -184,7 +177,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Выборка из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+     * Выборка из СвВыпл
      * @param persSvStrahLicIds - перечень идентификаторов застрахованных лиц
      * @return
      */
@@ -194,7 +187,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Выборка из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
+     * Выборка из СвВыплМК
      * @param persSvStrahLicIds - перечень идентификаторов застрахованных лиц
      * @return
      */
@@ -204,7 +197,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Выборка из "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+     * Выборка из ВыплСВДоп
      * @param persSvStrahLicIds - перечень идентификаторов застрахованных лиц
      * @return
      */
@@ -214,7 +207,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Выборка из "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+     * Выборка из ВыплСВДопМТ
      * @param persSvStrahLicIds - перечень идентификаторов застрахованных лиц
      * @return
      */
@@ -224,7 +217,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Сохранение "Персонифицированные сведения о застрахованных лицах"
+     * Сохранение ПерсСвСтрахЛиц
      * @param raschsvPersSvStrahLicList - перечень сведений о застрахованных лицах
      * @return
      */
@@ -297,12 +290,12 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             }
         }
 
-        // Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+        // Сохранение СвВыпл
         if (!raschsvSvVyplList.isEmpty()) {
             insertRaschsvSvVypl(raschsvSvVyplList);
         }
 
-        // Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+        // Сохранение ВыплСВДоп
         if (!raschsvVyplSvDopList.isEmpty()) {
             insertRaschsvVyplSvDop(raschsvVyplSvDopList);
         }
@@ -312,7 +305,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             insertRaschsvSvVyplMt(raschsvSvVyplMtList);
         }
 
-        // Сохранение "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+        // Сохранение ВыплСВДопМТ
         if (!raschsvVyplSvDopMtList.isEmpty()) {
             insertRaschsvVyplSvDopMt(raschsvVyplSvDopMtList);
         }
@@ -321,7 +314,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+     * Сохранение СвВыпл
      * @param raschsvSvVyplList - перечень сведений о сумме выплат
      * @return
      */
@@ -344,8 +337,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
-     * по месяцу и коду категории застрахованного лица"
+     * Сохранение СвВыплМК
      * @param raschsvSvVyplMtList - перечень сведений о сумме выплат по месяцу и коду категории застрахованного лица
      * @return
      */
@@ -370,8 +362,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица,
-     * на которые исчислены страховые взносы по дополнительному тарифу"
+     * Сохранение ВыплСВДоп
      * @param raschsvVyplSvDopList - перечень сведений о сумме выплат по дополнительному тарифу
      * @return
      */
@@ -392,8 +383,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Сохранение "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица,
-     * на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+     * Сохранение ВыплСВДопМТ
      * @param raschsvVyplSvDopMtList - перечень сведений о сумме выплат по дополнительному тарифу по месяцу и коду
      * @return
      */
@@ -416,7 +406,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Маппинг для "Персонифицированные сведения о застрахованных лицах"
+     * Маппинг для ПерсСвСтрахЛиц
      */
     private static final class RaschsvPersSvStrahLicRowMapper implements RowMapper<RaschsvPersSvStrahLic> {
         @Override
@@ -448,7 +438,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Маппинг для "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+     * Маппинг для СвВыпл
      */
     private static final class RaschsvSvVyplRowMapper implements RowMapper<RaschsvSvVypl> {
         @Override
@@ -466,7 +456,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Маппинг для "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
+     * Маппинг для СвВыплМК
      */
     private static final class RaschsvSvVyplMtRowMapper implements RowMapper<RaschsvSvVyplMt> {
         @Override
@@ -486,7 +476,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Маппинг для "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+     * Маппинг для ВыплСВДоп
      */
     private static final class RaschsvVyplSvDopRowMapper implements RowMapper<RaschsvVyplSvDop> {
         @Override
@@ -502,7 +492,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     /**
-     * Маппинг для "Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа"
+     * Маппинг для ВыплСВДопМТ
      */
     private static final class RaschsvVyplSvDopMtRowMapper implements RowMapper<RaschsvVyplSvDopMt> {
         @Override

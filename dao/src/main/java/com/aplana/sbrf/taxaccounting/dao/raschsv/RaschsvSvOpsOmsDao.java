@@ -5,14 +5,21 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOms;
 import java.util.List;
 
 /**
- * DAO-интерфейс для работы с таблицей "Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование"
+ * DAO-интерфейс для работы с РасчСВ_ОПС_ОМС
  */
 public interface RaschsvSvOpsOmsDao {
 
     /**
-     * Сохранение "Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование"
+     * Сохранение РасчСВ_ОПС_ОМС
      * @param raschsvSvOpsOmsList
      * @return
      */
     Integer insertRaschsvSvOpsOms(List<RaschsvSvOpsOms> raschsvSvOpsOmsList);
+
+    /**
+     * Выборка из РасчСВ_ОПС_ОМС
+     * @param obyazPlatSvId
+     * @return
+     */
+    List<RaschsvSvOpsOms> findSvOpsOms(Long obyazPlatSvId);
 }

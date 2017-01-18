@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import java.util.Date;
 
 /**
- * Персонифицированные сведения о застрахованных лицах
+ * Персонифицированные сведения о застрахованных лицах (ПерсСвСтрахЛиц)
  */
 public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
 
@@ -29,10 +29,10 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     private String imya;
     private String middleName;
 
-    // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
+    // СвВыпл
     private RaschsvSvVypl raschsvSvVypl;
 
-    // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу
+    // ВыплСВДоп
     private RaschsvVyplSvDop raschsvVyplSvDop;
 
     public static final String SEQ = "seq_raschsv_pers_sv_strah_lic";

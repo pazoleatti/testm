@@ -2,13 +2,15 @@ package com.aplana.sbrf.taxaccounting.dao.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvSum1Tip;
 
+import java.util.List;
+
 /**
- * DAO-интерфейс для работы с таблицей "Сведения по суммам (тип 1)"
+ * DAO-интерфейс для работы с СвСум1Тип
  */
 public interface RaschsvSvSum1TipDao {
 
     /**
-     * Сохранение "Сведения по суммам (тип 1)"
+     * Сохранение СвСум1Тип
      * @param raschsvSvSum1Tip
      * @return
      */

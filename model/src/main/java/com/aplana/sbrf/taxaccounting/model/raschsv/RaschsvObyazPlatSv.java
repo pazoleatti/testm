@@ -2,16 +2,30 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Сводные данные об обязательствах плательщика страховых взносов
+ * Сводные данные об обязательствах плательщика страховых взносов (ОбязПлатСВ)
  */
 public class RaschsvObyazPlatSv extends IdentityObject<Long> {
 
     private Long declarationDataId;
     private String oktmo;
 
+    // УплПерОПС, УплПерОМС, УплПерОПСДоп, УплПерДСО
+    private List<RaschsvUplPer> raschsvUplPerList;
+
+    // УплПревОСС
+    private RaschsvUplPrevOss raschsvUplPrevOss;
+
+    // РасчСВ_ОПС_ОМС
+    private List<RaschsvSvOpsOms> raschsvSvOpsOmsList;
+
     public RaschsvObyazPlatSv() {
         super();
+        raschsvUplPerList = new ArrayList<RaschsvUplPer>();
+        raschsvSvOpsOmsList = new ArrayList<RaschsvSvOpsOms>();
     }
 
     public static final String SEQ = "seq_raschsv_obyaz_plat_sv";
@@ -27,4 +41,25 @@ public class RaschsvObyazPlatSv extends IdentityObject<Long> {
 
     public String getOktmo() { return oktmo; }
     public void setOktmo(String oktmo) { this.oktmo = oktmo; }
+
+    public List<RaschsvUplPer> getRaschsvUplPerList() {
+        return raschsvUplPerList;
+    }
+    public void setRaschsvUplPerList(List<RaschsvUplPer> raschsvUplPerList) {
+        this.raschsvUplPerList = raschsvUplPerList;
+    }
+
+    public RaschsvUplPrevOss getRaschsvUplPrevOss() {
+        return raschsvUplPrevOss;
+    }
+    public void setRaschsvUplPrevOss(RaschsvUplPrevOss raschsvUplPrevOss) {
+        this.raschsvUplPrevOss = raschsvUplPrevOss;
+    }
+
+    public List<RaschsvSvOpsOms> getRaschsvSvOpsOmsList() {
+        return raschsvSvOpsOmsList;
+    }
+    public void setRaschsvSvOpsOmsList(List<RaschsvSvOpsOms> raschsvSvOpsOmsList) {
+        this.raschsvSvOpsOmsList = raschsvSvOpsOmsList;
+    }
 }

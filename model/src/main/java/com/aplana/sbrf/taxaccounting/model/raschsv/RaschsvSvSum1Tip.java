@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 /**
- * Сведения по суммам (тип 1)
+ * Сведения по суммам (тип 1) (СвСум1Тип)
  */
 public class RaschsvSvSum1Tip extends IdentityObject<Long> {
 

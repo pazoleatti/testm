@@ -13,14 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class RaschsvSvSum1TipDaoImpl extends AbstractDao implements RaschsvSvSum1TipDao {
 
-    // Перечень столбцов таблицы "Сведения по суммам (тип 1)"
-    private static final StringBuilder SV_SUM_1TIP_COLS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvSvSum1Tip.COLUMNS, null));
-    private static final StringBuilder SV_SUM_1TIP_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvSvSum1Tip.COLUMNS, ":"));
+    // Перечень столбцов таблицы СвСум1Тип
+    public static final String SUM_COLS = SqlUtils.getColumnsToString(RaschsvSvSum1Tip.COLUMNS, null);
+    public static final String SUM_FIELDS = SqlUtils.getColumnsToString(RaschsvSvSum1Tip.COLUMNS, ":");
+
+    private static final String SQL_INSERT = "INSERT INTO " + RaschsvSvSum1Tip.TABLE_NAME +
+            " (" + SUM_COLS + ") VALUES (" + SUM_FIELDS + ")";
 
     public Long insertRaschsvSvSum1Tip(RaschsvSvSum1Tip raschsvSvSum1Tip) {
-        String sql = "INSERT INTO " + RaschsvSvSum1Tip.TABLE_NAME +
-                " (" + SV_SUM_1TIP_COLS + ") VALUES (" + SV_SUM_1TIP_FIELDS + ")";
-
         raschsvSvSum1Tip.setId(generateId(RaschsvSvSum1Tip.SEQ, Long.class));
 
         SqlParameterSource params = new MapSqlParameterSource()
@@ -30,7 +30,7 @@ public class RaschsvSvSum1TipDaoImpl extends AbstractDao implements RaschsvSvSum
                 .addValue(RaschsvSvSum1Tip.COL_SUM_1M_POSL_3M, raschsvSvSum1Tip.getSum1mPosl3m())
                 .addValue(RaschsvSvSum1Tip.COL_SUM_2M_POSL_3M, raschsvSvSum1Tip.getSum2mPosl3m())
                 .addValue(RaschsvSvSum1Tip.COL_SUM_3M_POSL_3M, raschsvSvSum1Tip.getSum3mPosl3m());
-        getNamedParameterJdbcTemplate().update(sql.toString(), params);
+        getNamedParameterJdbcTemplate().update(SQL_INSERT.toString(), params);
 
         return raschsvSvSum1Tip.getId();
     }

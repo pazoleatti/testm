@@ -6,13 +6,13 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import java.util.List;
 
 /**
- * Сервис для работы с "Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование"
+ * Сервис для работы с РасчСВ_ОПС_ОМС
  */
 @ScriptExposed
 public interface RaschsvSvOpsOmsService {
 
     /**
-     * Сохраняет перечень записей "Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование"
+     * Сохраняет перечень записей РасчСВ_ОПС_ОМС
      * @param raschsvSvOpsOmsList
      * @return
      */

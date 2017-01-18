@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class RaschsvKolLicTipDaoImpl extends AbstractDao implements RaschsvKolLicTipDao {
 
-    // Перечень столбцов таблицы "Сведения по количеству физических лиц"
+    // Перечень столбцов таблицы КолЛицТип
     private static final StringBuilder KOL_LIC_TIP_COLS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvKolLicTip.COLUMNS, null));
     private static final StringBuilder KOL_LIC_TIP_FIELDS = new StringBuilder(SqlUtils.getColumnsToString(RaschsvKolLicTip.COLUMNS, ":"));
 
