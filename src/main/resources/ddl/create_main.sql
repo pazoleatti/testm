@@ -428,6 +428,7 @@ create table declaration_data (
   state                       number(1)   default 1 not null
 );
 
+
 comment on table declaration_data is 'Налоговые декларации';
 comment on column declaration_data.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
