@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 /**
- * Данные по расходам по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации
+ * Расходы РасхОССЗак
  */
 public class RaschsvRashOssZakRash extends IdentityObject<Long> {
 

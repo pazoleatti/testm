@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreportParam;
 import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -311,6 +312,12 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
         }
 
         return res.length;
+    }
+
+    @Override
+    public RaschsvPersSvStrahLic findPersonBySubreportParams(Long declarationDataId, List<DeclarationSubreportParam> params) {
+        // todo заглушка
+        return new RaschsvPersSvStrahLic();
     }
 
     /**

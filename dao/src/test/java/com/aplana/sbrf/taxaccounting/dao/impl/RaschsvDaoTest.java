@@ -317,6 +317,11 @@ public class RaschsvDaoTest {
             assertNotNull(raschsvOssVnmKol.getRaschsvKolLicTip());
         }
 
+        // РасхОССЗак
+        RaschsvRashOssZak raschsvRashOssZak = raschsvObyazPlatSv.getRaschsvRashOssZak();
+        assertNotNull(raschsvRashOssZak);
+        assertFalse(raschsvRashOssZak.getRaschsvRashOssZakRashList().isEmpty());
+
         assertNull(raschsvObyazPlatSvDao.findObyazPlatSv(DECLARATION_ID_NOT_EXIST));
     }
 

@@ -31,6 +31,9 @@ public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvOby
     @Autowired
     private RaschsvOssVnmDao raschsvOssVnmDao;
 
+    @Autowired
+    private RaschsvRashOssZakDao raschsvRashOssZakDao;
+
     // Перечень столбцов таблицы ОбязПлатСВ
     private static final String OBYAZ_PLAT_SV_COLS = SqlUtils.getColumnsToString(RaschsvObyazPlatSv.COLUMNS, null);
     private static final String OBYAZ_PLAT_SV_FIELDS = SqlUtils.getColumnsToString(RaschsvObyazPlatSv.COLUMNS, ":");
@@ -64,6 +67,7 @@ public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvOby
             raschsvObyazPlatSv.setRaschsvUplPrevOss(raschsvUplPrevOssDao.findUplPrevOss(raschsvObyazPlatSv.getId()));
             raschsvObyazPlatSv.setRaschsvSvOpsOmsList(raschsvSvOpsOmsDao.findSvOpsOms(raschsvObyazPlatSv.getId()));
             raschsvObyazPlatSv.setRaschsvOssVnm(raschsvOssVnmDao.findOssVnm(raschsvObyazPlatSv.getId()));
+            raschsvObyazPlatSv.setRaschsvRashOssZak(raschsvRashOssZakDao.findRaschsvRashOssZak(raschsvObyazPlatSv.getId()));
 
             return raschsvObyazPlatSv;
         } catch (EmptyResultDataAccessException e) {
