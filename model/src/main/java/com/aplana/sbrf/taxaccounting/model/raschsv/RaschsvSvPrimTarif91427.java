@@ -6,16 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427
+ * Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427 (СвПримТариф9.1.427)
  */
 public class RaschsvSvPrimTarif91427 extends IdentityObject<Long> {
 
     private Long raschsvObyazPlatSvId;
 
-    // Итого выплат
+    // ВыплатИт
     private RaschsvVyplatIt427 raschsvVyplatIt427;
 
-    // Сведения о патенте
+    // СведПатент
     private List<RaschsvSvedPatent> raschsvSvedPatentList;
 
     public RaschsvSvPrimTarif91427() {
@@ -49,4 +49,5 @@ public class RaschsvSvPrimTarif91427 extends IdentityObject<Long> {
     public void setRaschsvSvedPatentList(List<RaschsvSvedPatent> raschsvSvedPatentList) {
         this.raschsvSvedPatentList = raschsvSvedPatentList;
     }
+    public void addRaschsvSvedPatent(RaschsvSvedPatent raschsvSvedPatent) {raschsvSvedPatentList.add(raschsvSvedPatent);}
 }

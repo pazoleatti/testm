@@ -40,6 +40,7 @@ public class DeclarationListView extends
     public static final String DECLARATION_CREATE_TITLE = "Создание налоговой формы";
     public static final String DECLARATION_CREATE_TITLE_D = "Создание уведомления";
 
+    public static final String DECLARATION_KIND_TITLE = "Тид налоговой формы";
     public static final String DECLARATION_TYPE_TITLE = "Вид налоговой формы";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
     public static final String DEPARTMENT_TITLE = "Подразделение";
@@ -50,10 +51,11 @@ public class DeclarationListView extends
     public static final String ASNU_TITLE = "Наименование АСНУ";
     public static final String GUID_TITLE = "GUID";
     public static final String STATE_TITLE = "Состояние";
+    public static final String FILE_NAME_TITLE = "Файл ТФ";
     public static final String PERIOD_TITLE = "Период";
 
     private static final int TABLE_TOP1 = 41;
-    private static final int TABLE_TOP2 = 75;
+    private static final int TABLE_TOP2 = 100;
 
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {}
 
@@ -138,10 +140,17 @@ public class DeclarationListView extends
     @Override
     public void initTable(TaxType taxType) {
         Style tableStyle = tableWrapper.getElement().getStyle();
-        tableStyle.setProperty("top", (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY || taxType == TaxType.INCOME || taxType == TaxType.LAND || taxType == TaxType.NDFL) ?
+        tableStyle.setProperty("top", (taxType == TaxType.PFR || taxType == TaxType.NDFL) ?
                 TABLE_TOP2 : TABLE_TOP1, Style.Unit.PX);
 
         clearTable();
+
+        TextColumn<DeclarationDataSearchResultItem> declarationKindColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.getDeclarationFormKind().getTitle();
+            }
+        };
 
         TextColumn<DeclarationDataSearchResultItem> departmentColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
@@ -252,6 +261,30 @@ public class DeclarationListView extends
             }
         };
 
+        Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> fileNameColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
+                new AbstractCell<DeclarationDataSearchResultItem>() {
+
+                    @Override
+                    public void render(Context context,
+                                       DeclarationDataSearchResultItem declaration,
+                                       SafeHtmlBuilder sb) {
+                        if (declaration == null || declaration.getFileName() == null || declaration.getFileName().isEmpty()) {
+                            return;
+                        }
+
+                        sb.appendHtmlConstant("<a href=\""
+                                + "download/declarationData/xml/"+
+                                + declaration.getDeclarationDataId()+"\">"
+                                + declaration.getFileName() + "</a>");
+                    }
+                }) {
+            @Override
+            public DeclarationDataSearchResultItem getValue(
+                    DeclarationDataSearchResultItem object) {
+                return object;
+            }
+        };
+        declarationKindColumn.setSortable(false);
         departmentColumn.setSortable(true);
         reportPeriodYearColumn.setSortable(true);
         reportPeriodColumn.setSortable(true);
@@ -261,38 +294,33 @@ public class DeclarationListView extends
         declarationAsnuColumn.setSortable(true);
         declarationGuidColumn.setSortable(true);
         stateColumn.setSortable(true);
+        fileNameColumn.setSortable(false);
 
         reportPeriodHeader = declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodColumn);
 
-        if (taxType == TaxType.DEAL) {
-            declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE_D, declarationTypeColumn);
-            declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
-            declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
-            declarationTable.addColumn(reportPeriodYearColumn, declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodYearColumn));
-            declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
-        } else {
-            declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
-            declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
-            declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
-            if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT || taxType == TaxType.LAND) {
-                declarationTable.addColumn(declarationTaxOrganColumn,
-                        declarationTable.createResizableHeader(
-                                (taxType == TaxType.TRANSPORT) ? TAX_ORGAN_CODE_TITLE_F :
-                                        (taxType == TaxType.LAND) ? TAX_ORGAN_CODE_TITLE_FF :
-                                                TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
-                declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
-            } else if (taxType == TaxType.INCOME){
-                declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
-            }
-
-            if (taxType == TaxType.NDFL) {
-                declarationTable.addColumn(declarationAsnuColumn, declarationTable.createResizableHeader(ASNU_TITLE, declarationAsnuColumn));
-                declarationTable.addColumn(declarationGuidColumn, declarationTable.createResizableHeader(GUID_TITLE, declarationGuidColumn));
-            }
-
-            declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
-            declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
+        declarationTable.addColumn(declarationKindColumn, declarationTable.createResizableHeader(DECLARATION_KIND_TITLE, declarationKindColumn));
+        declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
+        declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
+        declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
+        if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT || taxType == TaxType.LAND) {
+            declarationTable.addColumn(declarationTaxOrganColumn,
+                    declarationTable.createResizableHeader(
+                            (taxType == TaxType.TRANSPORT) ? TAX_ORGAN_CODE_TITLE_F :
+                                    (taxType == TaxType.LAND) ? TAX_ORGAN_CODE_TITLE_FF :
+                                            TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
+            declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
+        } else if (taxType == TaxType.INCOME){
+            declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
         }
+
+        if (taxType == TaxType.NDFL || taxType == TaxType.PFR) {
+            declarationTable.addColumn(declarationAsnuColumn, declarationTable.createResizableHeader(ASNU_TITLE, declarationAsnuColumn));
+            //declarationTable.addColumn(declarationGuidColumn, declarationTable.createResizableHeader(GUID_TITLE, declarationGuidColumn));
+        }
+
+        declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
+        declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
+        declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
     }
 
     @Override

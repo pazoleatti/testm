@@ -28,5 +28,17 @@ public enum DeclarationDataSearchOrdering {
     /**
      * По году периода
      */
-    REPORT_PERIOD_YEAR
+    REPORT_PERIOD_YEAR,
+    /**
+     * АСНУ
+     */
+    ASNU,
+    /**
+     * По наименованию вида налоговой формы
+     */
+    DECLARATION_KIND_NAME,
+    /**
+     * Файл
+     */
+    FILE_NAME
 }

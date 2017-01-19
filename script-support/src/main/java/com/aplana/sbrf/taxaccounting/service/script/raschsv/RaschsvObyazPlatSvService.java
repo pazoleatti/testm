@@ -15,4 +15,11 @@ public interface RaschsvObyazPlatSvService {
      * @return
      */
     Long insertObyazPlatSv(RaschsvObyazPlatSv raschsvObyazPlatSv);
+
+    /**
+     * Выборка из ОбязПлатСВ
+     * @param declarationDataId - идентификатор декларации
+     * @return
+     */
+    RaschsvObyazPlatSv findObyazPlatSv(Long declarationDataId);
 }

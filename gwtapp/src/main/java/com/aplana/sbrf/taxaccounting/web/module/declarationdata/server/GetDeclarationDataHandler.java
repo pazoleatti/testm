@@ -93,7 +93,7 @@ public class GetDeclarationDataHandler
         result.setTaxOrganCode(declaration.getTaxOrganCode());
         result.setKpp(declaration.getKpp());
 
-        result.setGuid(declaration.getGuid());
+        result.setFileName(declaration.getFileName());
 
         if (declaration.getAsnuId() != null) {
             RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);

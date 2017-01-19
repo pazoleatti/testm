@@ -423,7 +423,6 @@ create table declaration_data (
   kpp                         varchar2(9),
   department_report_period_id number(18)  not null,
   asnu_id                     number(9),
-  guid                        varchar2(32),
   note                        varchar2(512),
   state                       number(1)   default 1 not null,
   file_name                   varchar2(255 char)
@@ -437,7 +436,6 @@ comment on column declaration_data.tax_organ_code is 'Налоговый орг�
 comment on column declaration_data.kpp is 'КПП';
 comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
 comment on column declaration_data.asnu_id is 'Идентификатор АСНУ';
-comment on column declaration_data.guid is 'GUID';
 comment on column declaration_data.note is 'Комментарий к НФ, вводимый в модальном окне "Файлы и комментарии"';
 comment on column declaration_data.state is 'Состояние формы';
 comment on column declaration_data.file_name is 'Имя файла';

@@ -51,6 +51,14 @@ public class DeclarationDataSearchResultItem implements Serializable {
      * GUID
      */
     private String guid;
+    /**
+     * Файл
+     */
+    private String fileName;
+    /**
+     * Тип формы
+     */
+    private DeclarationFormKind declarationFormKind;
 
 	public Long getDeclarationDataId() {
 		return declarationDataId;
@@ -178,5 +186,21 @@ public class DeclarationDataSearchResultItem implements Serializable {
 
     public void setGuid(String guid) {
         this.guid = guid;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public DeclarationFormKind getDeclarationFormKind() {
+        return declarationFormKind;
+    }
+
+    public void setDeclarationFormKind(DeclarationFormKind declarationFormKind) {
+        this.declarationFormKind = declarationFormKind;
     }
 }

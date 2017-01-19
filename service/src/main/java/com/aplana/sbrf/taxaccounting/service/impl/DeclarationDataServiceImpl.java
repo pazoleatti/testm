@@ -183,7 +183,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, Long asunId, String guid) {
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, Long asunId, String fileName) {
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode;
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -206,17 +206,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         asunId != null
                                 ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(asunId).get("NAME").getStringValue() + "\""
                                 : "",
-                        guid != null
-                                ? ", GUID: \"" + guid + "\""
+                        fileName != null
+                                ? ", Имя файла: \"" + fileName + "\""
                                 : "")
                 ) == null) {
             //Если блокировка успешно установлена
             try {
-                DeclarationData declarationData = find(declarationTemplate.getType().getId(), departmentReportPeriod.getId(), taxOrganKpp, taxOrganCode, null, null);
+                DeclarationData declarationData = find(declarationTemplate.getType().getId(), departmentReportPeriod.getId(), taxOrganKpp, taxOrganCode, asunId, fileName);
                 if (declarationData != null) {
                     String msg = (declarationTemplate.getType().getTaxType().equals(TaxType.DEAL) ?
                             "Уведомление с заданными параметрами уже существует" :
-                            "Декларация с заданными параметрами уже существует");
+                            "Налоговая форма с заданными параметрами уже существует");
                     throw new ServiceLoggerException(msg, null);
                 }
 
@@ -237,7 +237,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setTaxOrganCode(taxOrganCode);
                 newDeclaration.setKpp(taxOrganKpp);
                 newDeclaration.setAsnuId(asunId);
-                newDeclaration.setGuid(guid);
+                newDeclaration.setFileName(fileName);
 
                 // Вызываем событие скрипта CREATE
                 declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
@@ -962,8 +962,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode, Long asnuId, String guid) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, taxOrganCode, asnuId, guid);
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode, Long asnuId, String fileName) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, taxOrganCode, asnuId, fileName);
     }
 
     @Override
@@ -1373,9 +1373,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private static String getFileExtension(String filename){
-        int dotPos = filename.lastIndexOf('.') + 1;
-        return filename.substring(dotPos);
+    private static String getFileName(String filename){
+        int dotPos = filename.lastIndexOf('.');
+        if (dotPos < 0) {
+            return filename;
+        }
+        return filename.substring(0, dotPos);
     }
 
     @Override
@@ -1395,8 +1398,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             } finally {
                 IOUtils.closeQuietly(dataFileOutputStream);
             }
-
-            String ext = getFileExtension(fileName);
 
             DeclarationData declarationData = get(declarationDataId, userInfo);
 
@@ -1425,7 +1426,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
                 reportService.deleteDec(declarationData.getId());
                 reportService.createDec(declarationData.getId(),
-                        blobDataService.create(zipOutFile, ext + ".zip", new Date()),
+                        blobDataService.create(zipOutFile, getFileName(fileName) + ".zip", new Date()),
                         DeclarationDataReportType.XML_DEC);
             } finally {
                 if (zipOutFile != null && !zipOutFile.delete()) {

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvUplPrevOssDao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPrevOss;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -47,9 +48,13 @@ public class RaschsvUplPrevOssDaoImpl extends AbstractDao implements RaschsvUplP
     }
 
     public RaschsvUplPrevOss findUplPrevOss(Long obyazPlatSvId) {
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvUplPrevOss.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
-        return getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvUplPrevOssRowMapper());
+        try {
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue(RaschsvUplPrevOss.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+            return getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvUplPrevOssRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     /**

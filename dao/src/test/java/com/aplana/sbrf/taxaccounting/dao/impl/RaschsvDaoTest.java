@@ -236,6 +236,16 @@ public class RaschsvDaoTest {
     }
 
     /**
+     * Тестирование выборки данных "СвНП и Подписант"
+     */
+    @Test
+    public void testFindSvnpPodpisant() {
+        RaschsvSvnpPodpisant raschsvSvnpPodpisant = raschsvSvnpPodpisantDao.findRaschsvSvnpPodpisant(DECLARATION_ID_EXIST);
+        assertNotNull(raschsvSvnpPodpisant);
+        assertNull(raschsvSvnpPodpisantDao.findRaschsvSvnpPodpisant(DECLARATION_ID_NOT_EXIST));
+    }
+
+    /**
      * Тестирование выборки данных из таблицы ПерсСвСтрахЛиц по идентификатору декларации
      */
     @Test
@@ -267,7 +277,7 @@ public class RaschsvDaoTest {
     }
 
     /**
-     * Тестирование выборки данных из таблицы ОбязПлатСВ
+     * Тестирование выборки данных ОбязПлатСВ
      */
     @Test
     public void testFindObyazPlatSv() {
@@ -341,6 +351,37 @@ public class RaschsvDaoTest {
 
         // ПравТариф7.1.427
         assertNotNull(raschsvObyazPlatSv.getRaschsvPravTarif71427());
+
+        // СвПримТариф9.1.427
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif91427());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif91427().getRaschsvVyplatIt427());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif91427().getRaschsvVyplatIt427().getRaschsvSvSum1Tip());
+        List<RaschsvSvedPatent> raschsvSvedPatentList = raschsvObyazPlatSv.getRaschsvSvPrimTarif91427().getRaschsvSvedPatentList();
+        assertFalse(raschsvSvedPatentList.isEmpty());
+        for (RaschsvSvedPatent raschsvSvedPatent : raschsvSvedPatentList) {
+            assertNotNull(raschsvSvedPatent.getRaschsvSvSum1Tip());
+        }
+
+        // СвПримТариф2.2.425
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif22425());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif22425().getRaschsvVyplatIt425());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif22425().getRaschsvVyplatIt425().getRaschsvSvSum1Tip());
+        List<RaschsvSvInoGrazd> raschsvSvInoGrazdList = raschsvObyazPlatSv.getRaschsvSvPrimTarif22425().getRaschsvSvInoGrazdList();
+        assertFalse(raschsvSvInoGrazdList.isEmpty());
+        for (RaschsvSvInoGrazd raschsvSvInoGrazd : raschsvSvInoGrazdList) {
+            assertNotNull(raschsvSvInoGrazd.getRaschsvSvSum1Tip());
+        }
+
+        // СвПримТариф1.3.422
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif13422());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif13422().getRaschsvVyplatIt422());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif13422().getRaschsvVyplatIt422().getRaschsvSvSum1Tip());
+        List<RaschsvSvedObuch> raschsvSvedObuchList = raschsvObyazPlatSv.getRaschsvSvPrimTarif13422().getRaschsvSvedObuchList();
+        assertFalse(raschsvSvedObuchList.isEmpty());
+        for (RaschsvSvedObuch raschsvSvedObuch : raschsvSvedObuchList) {
+            assertNotNull(raschsvSvedObuch.getRaschsvSvSum1Tip());
+            assertFalse(raschsvSvedObuch.getRaschsvSvReestrMdoList().isEmpty());
+        }
     }
 
     /**
@@ -660,6 +701,7 @@ public class RaschsvDaoTest {
         raschsvSvnpPodpisant.setSvnpKpp("1");
         raschsvSvnpPodpisant.setSvnpSvReorgForm("1");
         raschsvSvnpPodpisant.setSvnpSvReorgInnyl("1");
+        raschsvSvnpPodpisant.setSvnpSvReorgKpp("1");
         raschsvSvnpPodpisant.setFamilia("1");
         raschsvSvnpPodpisant.setImya("1");
         raschsvSvnpPodpisant.setMiddleName("1");

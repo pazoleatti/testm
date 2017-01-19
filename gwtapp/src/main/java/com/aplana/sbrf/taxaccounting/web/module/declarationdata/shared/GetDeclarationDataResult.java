@@ -19,7 +19,7 @@ public class GetDeclarationDataResult implements Result {
     private String taxOrganCode;
     private String kpp;
     private String asnuName;
-    private String guid;
+    private String fileName;
     private String uuid;
     private List<DeclarationSubreport> subreports;
     private boolean isVisiblePDF;
@@ -30,7 +30,6 @@ public class GetDeclarationDataResult implements Result {
      */
     private String declarationFormType;
 
-	private boolean accepted;
 	private boolean canAccept;
 	private boolean canReject;
     private boolean canDelete;
@@ -123,12 +122,12 @@ public class GetDeclarationDataResult implements Result {
         this.kpp = kpp;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getAsnuName() {

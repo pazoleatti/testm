@@ -48,6 +48,8 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
         DeclarationDataFilterAvailableValues declarationFilterValues =
                 declarationDataSearchService.getFilterAvailableValues(currentUser, action.getTaxType());
 
+        res.setDataKinds(Arrays.asList(DeclarationFormKind.PRIMARY, DeclarationFormKind.CONSOLIDATED, DeclarationFormKind.REPORTS));
+
         // Доступные подразделения
 		res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(
                 declarationFilterValues.getDepartmentIds()).values()));

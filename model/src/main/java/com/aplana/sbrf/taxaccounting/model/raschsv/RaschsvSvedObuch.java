@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Сведения об обучающихся
+ * Сведения об обучающихся (СведОбуч)
  */
 public class RaschsvSvedObuch extends IdentityObject<Long> {
 
@@ -19,11 +19,12 @@ public class RaschsvSvedObuch extends IdentityObject<Long> {
     private String spravNomer;
     private Date spravData;
     private String spravNodeName;
+    private Long raschsvSvSum1TipId;
 
-    // Сведения по суммам (тип 1)
+    // СвСум1Тип
     private RaschsvSvSum1Tip raschsvSvSum1Tip;
 
-    // Сведения из реестра молодежных и детских объединений, пользующихся государственной поддержкой
+    // СвРеестрМДО
     private List<RaschsvSvReestrMdo> raschsvSvReestrMdoList;
 
     public RaschsvSvedObuch() {
@@ -115,5 +116,13 @@ public class RaschsvSvedObuch extends IdentityObject<Long> {
     }
     public void setRaschsvSvReestrMdoList(List<RaschsvSvReestrMdo> raschsvSvReestrMdoList) {
         this.raschsvSvReestrMdoList = raschsvSvReestrMdoList;
+    }
+    public void addRaschsvSvReestrMdo(RaschsvSvReestrMdo raschsvSvReestrMdo) {raschsvSvReestrMdoList.add(raschsvSvReestrMdo);}
+
+    public Long getRaschsvSvSum1TipId() {
+        return raschsvSvSum1TipId;
+    }
+    public void setRaschsvSvSum1TipId(Long raschsvSvSum1TipId) {
+        this.raschsvSvSum1TipId = raschsvSvSum1TipId;
     }
 }

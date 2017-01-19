@@ -4,6 +4,7 @@ import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.gwt.client.TextBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
@@ -41,11 +42,13 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private ValueListBox<State> formStatePicker;
 
+    private RefBookPickerWidget declarationKindPicker;
+
     private TextBox taxOrganisationPicker;
 
     private TextBox kppPicker;
 
-    private TextBox guidPicker;
+    private TextBox fileNamePicker;
 
     private ValueListBox<Boolean> correctionTag;
 
@@ -72,6 +75,13 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
             }
         });
         formStatePicker.setWidth("100%");
+
+        declarationKindPicker = new RefBookPickerWidget(false, false);
+        declarationKindPicker.setVersionEnabled(false);
+        declarationKindPicker.setAttributeId(9321L);
+        declarationKindPicker.setWidth("100%");
+        declarationKindPicker.setPeriodDates(new Date(), new Date());
+        declarationKindPicker.setManualUpdate(true);
 
         declarationTypePicker = new RefBookPickerWidget(false, false);
         declarationTypePicker.setVersionEnabled(false);
@@ -112,9 +122,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         kppPicker.setMaxLength(9);
         kppPicker.setTitle("Выбор КПП");
 
-        guidPicker = new TextBox();
-        guidPicker.setMaxLength(32);
-        guidPicker.setTitle("Выбор GUID");
+        fileNamePicker = new TextBox();
+        fileNamePicker.setMaxLength(255);
+        fileNamePicker.setTitle("Файл");
 
         initWidget(binder.createAndBindUi(this));
     }
@@ -164,7 +174,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         } else {
             formDataFilter.setAsnuId(null);
         }
-        formDataFilter.setGuid(guidPicker.getValue());
+        formDataFilter.setFileName(fileNamePicker.getValue());
 		return formDataFilter;
 	}
 
@@ -193,7 +203,17 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         declarationTypePicker.setFilter(str.toString());
 	}
 
-	@UiHandler("apply")
+    @Override
+    public void setKindFilter(List<DeclarationFormKind> dataKinds) {
+        List<String> list = new ArrayList<String>(dataKinds.size());
+
+        for (DeclarationFormKind kind : dataKinds) {
+            list.add("record_id = "+kind.getId());
+        }
+        declarationKindPicker.setFilter(StringUtils.join(list.toArray(), " or ", null));
+    }
+
+    @UiHandler("apply")
 	void onApplyButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onApplyFilter();
@@ -210,8 +230,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         }
 
         Style style = separator.getElement().getStyle();
-        style.setProperty("height", (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY ||
-                taxType == TaxType.INCOME || taxType == TaxType.LAND || taxType == TaxType.NDFL) ? 65 : 22, Style.Unit.PX);
+        style.setProperty("height", (taxType == TaxType.PFR || taxType == TaxType.NDFL) ? (65 + 22) : 22, Style.Unit.PX);
 
         switch (taxType) {
             case DEAL:
@@ -226,6 +245,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
                 fillIncome();
                 break;
             case NDFL:
+            case PFR:
                 fillNdfl();
                 break;
             default:
@@ -469,12 +489,17 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel2.add(departmentPicker);
         verticalPanel3.add(correctionTag);
 
-        label = getLabel("Вид налоговой формы:");
+        label = getLabel("Тид налоговой формы:");
+        //label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel4.add(label);
-
+        label = getLabel("Вид налоговой формы:");
+        //label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        verticalPanel4.add(label);
         label = getLabel("Состояние:");
         label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel4.add(label);
+
+        verticalPanel5.add(declarationKindPicker);
         verticalPanel5.add(declarationTypePicker);
         verticalPanel5.add(formStatePicker);
 
@@ -483,10 +508,10 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel6.add(label);
         verticalPanel7.add(asnuPicker);
 
-        label = getLabel("GUID:");
+        label = getLabel("Файл:");
         label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel6.add(label);
-        verticalPanel7.add(guidPicker);
+        verticalPanel7.add(fileNamePicker);
 
         panel.add(horizontalPanel);
     }
@@ -507,7 +532,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     public void clearFilter() {
         kppPicker.setValue("");
         taxOrganisationPicker.setValue("");
-        guidPicker.setValue("");
+        fileNamePicker.setValue("");
     }
 
     @Override

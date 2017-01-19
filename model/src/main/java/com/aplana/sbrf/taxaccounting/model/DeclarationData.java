@@ -22,9 +22,9 @@ public class DeclarationData extends IdentityObject<Long> {
      */
     private Long asnuId;
     /**
-     * Уникальный идентификатор файла обмена РНУ НДФЛ
+     * Имя файла
      */
-    private String guid;
+    private String fileName;
 
     /**
      * Статус налоговой формы
@@ -123,12 +123,12 @@ public class DeclarationData extends IdentityObject<Long> {
         this.asnuId = asnuId;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public State getState() {

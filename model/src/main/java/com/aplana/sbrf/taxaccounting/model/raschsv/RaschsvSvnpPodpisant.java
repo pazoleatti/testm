@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 /**
- * Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ
+ * Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ (СвНП и Подписант)
  */
 public class RaschsvSvnpPodpisant extends IdentityObject<Long> {
 

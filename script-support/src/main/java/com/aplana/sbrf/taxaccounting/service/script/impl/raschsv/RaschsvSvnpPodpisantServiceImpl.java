@@ -15,4 +15,8 @@ public class RaschsvSvnpPodpisantServiceImpl implements RaschsvSvnpPodpisantServ
     public Long insertRaschsvSvnpPodpisant(RaschsvSvnpPodpisant raschsvSvnpPodpisant) {
         return raschsvSvnpPodpisantDao.insertRaschsvSvnpPodpisant(raschsvSvnpPodpisant);
     }
+
+    public RaschsvSvnpPodpisant findRaschsvSvnpPodpisant(Long declarationDataId) {
+        return raschsvSvnpPodpisantDao.findRaschsvSvnpPodpisant(declarationDataId);
+    }
 }

@@ -40,6 +40,15 @@ public class RaschsvObyazPlatSv extends IdentityObject<Long> {
     // ПравТариф7.1.427
     private RaschsvPravTarif71427 raschsvPravTarif71427;
 
+    // СвПримТариф9.1.427
+    private RaschsvSvPrimTarif91427 raschsvSvPrimTarif91427;
+
+    // СвПримТариф2.2.425
+    private RaschsvSvPrimTarif22425 raschsvSvPrimTarif22425;
+
+    // СвПримТариф1.3.422
+    private RaschsvSvPrimTarif13422 raschsvSvPrimTarif13422;
+
     public RaschsvObyazPlatSv() {
         super();
         raschsvUplPerList = new ArrayList<RaschsvUplPer>();
@@ -121,5 +130,26 @@ public class RaschsvObyazPlatSv extends IdentityObject<Long> {
     }
     public void setRaschsvPravTarif71427(RaschsvPravTarif71427 raschsvPravTarif71427) {
         this.raschsvPravTarif71427 = raschsvPravTarif71427;
+    }
+
+    public RaschsvSvPrimTarif91427 getRaschsvSvPrimTarif91427() {
+        return raschsvSvPrimTarif91427;
+    }
+    public void setRaschsvSvPrimTarif91427(RaschsvSvPrimTarif91427 raschsvSvPrimTarif91427) {
+        this.raschsvSvPrimTarif91427 = raschsvSvPrimTarif91427;
+    }
+
+    public RaschsvSvPrimTarif22425 getRaschsvSvPrimTarif22425() {
+        return raschsvSvPrimTarif22425;
+    }
+    public void setRaschsvSvPrimTarif22425(RaschsvSvPrimTarif22425 raschsvSvPrimTarif22425) {
+        this.raschsvSvPrimTarif22425 = raschsvSvPrimTarif22425;
+    }
+
+    public RaschsvSvPrimTarif13422 getRaschsvSvPrimTarif13422() {
+        return raschsvSvPrimTarif13422;
+    }
+    public void setRaschsvSvPrimTarif13422(RaschsvSvPrimTarif13422 raschsvSvPrimTarif13422) {
+        this.raschsvSvPrimTarif13422 = raschsvSvPrimTarif13422;
     }
 }

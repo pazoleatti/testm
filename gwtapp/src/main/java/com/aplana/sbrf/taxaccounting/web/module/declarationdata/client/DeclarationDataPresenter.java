@@ -95,7 +95,7 @@ public class DeclarationDataPresenter
 
         void setAsnuName(String asnuName);
 
-        void setGUID(String guid);
+        void setFileName(String guid);
 
         void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp, boolean isVisibleAsnu, TaxType taxType);
 
@@ -202,7 +202,7 @@ public class DeclarationDataPresenter
                                     if (result.getAsnuName() != null && !result.getAsnuName().isEmpty()) {
                                         getView().setPropertyBlockVisible(false, false, true, taxType);
                                         getView().setAsnuName(result.getAsnuName());
-                                        getView().setGUID(result.getGuid());
+                                        getView().setFileName(result.getFileName());
                                     } else {
                                         getView().setPropertyBlockVisible(false, false, false, taxType);
                                     }
@@ -230,8 +230,8 @@ public class DeclarationDataPresenter
                                 onTimerReport(DeclarationDataReportType.EXCEL_DEC, false);
 							}
 						}, DeclarationDataPresenter.this).addCallback(
-						TaManualRevealCallback.create(
-								DeclarationDataPresenter.this, placeManager)));
+                        TaManualRevealCallback.create(
+                                DeclarationDataPresenter.this, placeManager)));
 
 	}
 

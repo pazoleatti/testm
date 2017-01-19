@@ -130,33 +130,37 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
 
     @Override
     public RaschsvPersSvStrahLic findPersonBySubreportParams(Long declarationDataId, Map<String, Object> subreportParams) {
-        MapSqlParameterSource sqlParams = new MapSqlParameterSource();
-        String query = new String(SQL_SELECT_PERSONS);
-        sqlParams.addValue(RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID, declarationDataId);
-        for (String alias : subreportParams.keySet()) {
-            Object paramValue = subreportParams.get(alias);
-            if (paramValue != null) {
-                if (alias.equalsIgnoreCase(SUBREPORT_PARAM_FAMILIA_ALIAS)) {
-                    query += " AND " + RaschsvPersSvStrahLic.COL_FAMILIA + " = :" + RaschsvPersSvStrahLic.COL_FAMILIA;
-                    sqlParams.addValue(RaschsvPersSvStrahLic.COL_FAMILIA, (String) paramValue);
-                } else if(alias.equalsIgnoreCase(SUBREPORT_PARAM_IMYA_ALIAS)) {
-                    query += " AND " + RaschsvPersSvStrahLic.COL_IMYA + " = :" + RaschsvPersSvStrahLic.COL_IMYA;
-                    sqlParams.addValue(RaschsvPersSvStrahLic.COL_IMYA, (String) paramValue);
-                } else if(alias.equalsIgnoreCase(SUBREPORT_PARAM_OTCHESTVO_ALIAS)) {
-                    query += " AND " + RaschsvPersSvStrahLic.COL_MIDDLE_NAME + " = :" + RaschsvPersSvStrahLic.COL_MIDDLE_NAME;
-                    sqlParams.addValue(RaschsvPersSvStrahLic.COL_MIDDLE_NAME, (String) paramValue);
-                } else if(alias.equalsIgnoreCase(SUBREPORT_PARAM_SNILS_ALIAS)) {
-                    query += " AND " + RaschsvPersSvStrahLic.COL_SNILS + " = :" + RaschsvPersSvStrahLic.COL_SNILS;
-                    sqlParams.addValue(RaschsvPersSvStrahLic.COL_SNILS, (String) paramValue);
-                } else if(alias.equalsIgnoreCase(SUBREPORT_PARAM_INN_ALIAS)) {
-                    query += " AND " + RaschsvPersSvStrahLic.COL_INNFL + " = :" + RaschsvPersSvStrahLic.COL_INNFL;
-                    sqlParams.addValue(RaschsvPersSvStrahLic.COL_INNFL, (String) paramValue);
+        try {
+            MapSqlParameterSource sqlParams = new MapSqlParameterSource();
+            String query = new String(SQL_SELECT_PERSONS);
+            sqlParams.addValue(RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID, declarationDataId);
+            for (String alias : subreportParams.keySet()) {
+                Object paramValue = subreportParams.get(alias);
+                if (paramValue != null) {
+                    if (alias.equalsIgnoreCase(SUBREPORT_PARAM_FAMILIA_ALIAS)) {
+                        query += " AND " + RaschsvPersSvStrahLic.COL_FAMILIA + " = :" + RaschsvPersSvStrahLic.COL_FAMILIA;
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_FAMILIA, (String) paramValue);
+                    } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_IMYA_ALIAS)) {
+                        query += " AND " + RaschsvPersSvStrahLic.COL_IMYA + " = :" + RaschsvPersSvStrahLic.COL_IMYA;
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_IMYA, (String) paramValue);
+                    } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_OTCHESTVO_ALIAS)) {
+                        query += " AND " + RaschsvPersSvStrahLic.COL_MIDDLE_NAME + " = :" + RaschsvPersSvStrahLic.COL_MIDDLE_NAME;
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_MIDDLE_NAME, (String) paramValue);
+                    } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_SNILS_ALIAS)) {
+                        query += " AND " + RaschsvPersSvStrahLic.COL_SNILS + " = :" + RaschsvPersSvStrahLic.COL_SNILS;
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_SNILS, (String) paramValue);
+                    } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_INN_ALIAS)) {
+                        query += " AND " + RaschsvPersSvStrahLic.COL_INNFL + " = :" + RaschsvPersSvStrahLic.COL_INNFL;
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_INNFL, (String) paramValue);
+                    }
                 }
             }
+            List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
+            raschsvPersSvStrahLicList.add(getNamedParameterJdbcTemplate().queryForObject(query, sqlParams, new RaschsvPersSvStrahLicRowMapper()));
+            return findSvVyplAndVyplSvDopByPersons(raschsvPersSvStrahLicList).get(0);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
-        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
-        raschsvPersSvStrahLicList.add(getNamedParameterJdbcTemplate().queryForObject(query, sqlParams, new RaschsvPersSvStrahLicRowMapper()));
-        return findSvVyplAndVyplSvDopByPersons(raschsvPersSvStrahLicList).get(0);
     }
 
     /**
@@ -450,10 +454,10 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             RaschsvPersSvStrahLic raschsvPersSvStrahLic = new RaschsvPersSvStrahLic();
             raschsvPersSvStrahLic.setId(SqlUtils.getLong(rs, RaschsvPersSvStrahLic.COL_ID));
             raschsvPersSvStrahLic.setDeclarationDataId(SqlUtils.getLong(rs, RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID));
-            raschsvPersSvStrahLic.setNomKorr(SqlUtils.getInteger(rs, RaschsvPersSvStrahLic.COL_NOM_KORR));
+            raschsvPersSvStrahLic.setNomKorr(rs.getInt(RaschsvPersSvStrahLic.COL_NOM_KORR));
             raschsvPersSvStrahLic.setPeriod(rs.getString(RaschsvPersSvStrahLic.COL_PERIOD));
             raschsvPersSvStrahLic.setOtchetGod(rs.getString(RaschsvPersSvStrahLic.COL_OTCHET_GOD));
-            raschsvPersSvStrahLic.setNomer(SqlUtils.getInteger(rs, RaschsvPersSvStrahLic.COL_NOMER));
+            raschsvPersSvStrahLic.setNomer(rs.getInt(RaschsvPersSvStrahLic.COL_NOMER));
             raschsvPersSvStrahLic.setSvData(rs.getDate(RaschsvPersSvStrahLic.COL_SV_DATA));
             raschsvPersSvStrahLic.setInnfl(rs.getString(RaschsvPersSvStrahLic.COL_INNFL));
             raschsvPersSvStrahLic.setSnils(rs.getString(RaschsvPersSvStrahLic.COL_SNILS));
