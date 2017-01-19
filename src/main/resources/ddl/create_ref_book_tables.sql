@@ -162,12 +162,18 @@ create sequence seq_ref_book_okved start with 301 increment by 1;
 create table ref_book_ndfl
 (
  id            number(18) not null,
+ record_id     number(9) not null,
+ version       date not null,
+ status        number(1) default 0 not null,
  department_id number(18),
  inn           varchar2(12 char)
 );
 
 comment on table ref_book_ndfl is 'Параметры подразделения по НДФЛ';
 comment on column ref_book_ndfl.id is 'Уникальный идентификатор';
+comment on column ref_book_ndfl.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_ndfl.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_ndfl.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_ndfl.department_id is 'Подразделение';
 comment on column ref_book_ndfl.inn is 'ИНН';
 
@@ -177,6 +183,9 @@ create sequence seq_ref_book_ndfl start with 1 increment by 1;
 create table ref_book_ndfl_detail
 (
  id                 number(18)       not null,
+ record_id          number(9) not null,
+ version            date not null,
+ status             number(1) default 0 not null,
  ref_book_ndfl_id   number(18)       not null,
  row_ord            number(4)        not null,
  department_id      number(18),
@@ -207,6 +216,9 @@ create table ref_book_ndfl_detail
 
 comment on table ref_book_ndfl_detail is 'Параметры подразделения по НДФЛ (таблица)';
 comment on column ref_book_ndfl_detail.id is 'Уникальный идентификатор';
+comment on column ref_book_ndfl_detail.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_ndfl_detail.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_ndfl_detail.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_ndfl_detail.ref_book_ndfl_id is 'Ссылка на родительскую запись';
 comment on column ref_book_ndfl_detail.row_ord is 'Порядок следования';
 comment on column ref_book_ndfl_detail.department_id is 'Код обособленного подразделения';
