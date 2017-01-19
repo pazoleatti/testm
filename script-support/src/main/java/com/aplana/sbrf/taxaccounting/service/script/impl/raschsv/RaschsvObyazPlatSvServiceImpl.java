@@ -15,4 +15,8 @@ public class RaschsvObyazPlatSvServiceImpl implements RaschsvObyazPlatSvService 
     public Long insertObyazPlatSv(RaschsvObyazPlatSv raschsvObyazPlatSv) {
         return raschsvObyazPlatSvDao.insertObyazPlatSv(raschsvObyazPlatSv);
     }
+
+    public RaschsvObyazPlatSv findObyazPlatSv(Long declarationDataId) {
+        return raschsvObyazPlatSvDao.findObyazPlatSv(declarationDataId);
+    }
 }

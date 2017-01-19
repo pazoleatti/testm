@@ -236,6 +236,16 @@ public class RaschsvDaoTest {
     }
 
     /**
+     * Тестирование выборки данных "СвНП и Подписант"
+     */
+    @Test
+    public void testFindSvnpPodpisant() {
+        RaschsvSvnpPodpisant raschsvSvnpPodpisant = raschsvSvnpPodpisantDao.findRaschsvSvnpPodpisant(DECLARATION_ID_EXIST);
+        assertNotNull(raschsvSvnpPodpisant);
+        assertNull(raschsvSvnpPodpisantDao.findRaschsvSvnpPodpisant(DECLARATION_ID_NOT_EXIST));
+    }
+
+    /**
      * Тестирование выборки данных из таблицы ПерсСвСтрахЛиц по идентификатору декларации
      */
     @Test
@@ -267,7 +277,7 @@ public class RaschsvDaoTest {
     }
 
     /**
-     * Тестирование выборки данных из таблицы ОбязПлатСВ
+     * Тестирование выборки данных ОбязПлатСВ
      */
     @Test
     public void testFindObyazPlatSv() {
@@ -691,6 +701,7 @@ public class RaschsvDaoTest {
         raschsvSvnpPodpisant.setSvnpKpp("1");
         raschsvSvnpPodpisant.setSvnpSvReorgForm("1");
         raschsvSvnpPodpisant.setSvnpSvReorgInnyl("1");
+        raschsvSvnpPodpisant.setSvnpSvReorgKpp("1");
         raschsvSvnpPodpisant.setFamilia("1");
         raschsvSvnpPodpisant.setImya("1");
         raschsvSvnpPodpisant.setMiddleName("1");
