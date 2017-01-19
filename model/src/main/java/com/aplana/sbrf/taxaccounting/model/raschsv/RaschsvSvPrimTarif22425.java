@@ -1,21 +1,22 @@
 package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426) Налогового кодекса Российской Федерации
+ * Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426) Налогового кодекса Российской Федерации (СвПримТариф2.2.425)
  */
 public class RaschsvSvPrimTarif22425 extends IdentityObject<Long> {
 
     private Long raschsvObyazPlatSvId;
 
-    // Итого выплат
+    // ВыплатИт
     private RaschsvVyplatIt425 raschsvVyplatIt425;
 
-    // Сведения об иностранных гражданах, лицах без гражданства
+    // СвИноГражд
     private List<RaschsvSvInoGrazd> raschsvSvInoGrazdList;
 
     public RaschsvSvPrimTarif22425() {
@@ -49,4 +50,5 @@ public class RaschsvSvPrimTarif22425 extends IdentityObject<Long> {
     public void setRaschsvSvInoGrazdList(List<RaschsvSvInoGrazd> raschsvSvInoGrazdList) {
         this.raschsvSvInoGrazdList = raschsvSvInoGrazdList;
     }
+    public void addRaschsvSvInoGrazd(RaschsvSvInoGrazd raschsvSvInoGrazd) {raschsvSvInoGrazdList.add(raschsvSvInoGrazd);}
 }

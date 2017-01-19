@@ -1,13 +1,14 @@
 package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 /**
- * Итого выплат
+ * Итого выплат (ВыплатИт)
  */
 public class RaschsvVyplatIt425 {
 
     private Long raschsvSvPrimTarif22425Id;
+    private Long raschsvSvSum1TipId;
 
-    // Сведения по суммам (тип 1)
+    // СвСум1Тип
     private RaschsvSvSum1Tip raschsvSvSum1Tip;
 
     public static final String TABLE_NAME = "raschsv_vyplat_it_425";
@@ -28,5 +29,12 @@ public class RaschsvVyplatIt425 {
     }
     public void setRaschsvSvSum1Tip(RaschsvSvSum1Tip raschsvSvSum1Tip) {
         this.raschsvSvSum1Tip = raschsvSvSum1Tip;
+    }
+
+    public Long getRaschsvSvSum1TipId() {
+        return raschsvSvSum1TipId;
+    }
+    public void setRaschsvSvSum1TipId(Long raschsvSvSum1TipId) {
+        this.raschsvSvSum1TipId = raschsvSvSum1TipId;
     }
 }

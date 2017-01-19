@@ -6,16 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422
+ * Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422 (СвПримТариф1.3.422)
  */
 public class RaschsvSvPrimTarif13422 extends IdentityObject<Long> {
 
     private Long raschsvObyazPlatSvId;
 
-    // Итого выплат
+    // ВыплатИт
     private RaschsvVyplatIt422 raschsvVyplatIt422;
 
-    // Сведения об обучающихся
+    // СведОбуч
     private List<RaschsvSvedObuch> raschsvSvedObuchList;
 
     public RaschsvSvPrimTarif13422() {

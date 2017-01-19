@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPravTarif51427Dao;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif51427;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -41,9 +42,13 @@ public class RaschsvPravTarif51427DaoImpl extends AbstractDao implements Raschsv
     }
 
     public RaschsvPravTarif51427 findRaschsvPravTarif51427(Long obyazPlatSvId) {
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvPravTarif51427.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
-        return getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvPravTarif51427RowMapper());
+        try {
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue(RaschsvPravTarif51427.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+            return getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvPravTarif51427RowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     /**

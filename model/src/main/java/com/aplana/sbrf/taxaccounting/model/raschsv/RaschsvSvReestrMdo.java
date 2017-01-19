@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import java.util.Date;
 
 /**
- * Сведения из реестра молодежных и детских объединений, пользующихся государственной поддержкой
+ * Сведения из реестра молодежных и детских объединений, пользующихся государственной поддержкой (СвРеестрМДО)
  */
 public class RaschsvSvReestrMdo extends IdentityObject<Long> {
 

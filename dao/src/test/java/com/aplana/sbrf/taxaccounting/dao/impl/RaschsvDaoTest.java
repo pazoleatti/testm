@@ -341,6 +341,37 @@ public class RaschsvDaoTest {
 
         // ПравТариф7.1.427
         assertNotNull(raschsvObyazPlatSv.getRaschsvPravTarif71427());
+
+        // СвПримТариф9.1.427
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif91427());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif91427().getRaschsvVyplatIt427());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif91427().getRaschsvVyplatIt427().getRaschsvSvSum1Tip());
+        List<RaschsvSvedPatent> raschsvSvedPatentList = raschsvObyazPlatSv.getRaschsvSvPrimTarif91427().getRaschsvSvedPatentList();
+        assertFalse(raschsvSvedPatentList.isEmpty());
+        for (RaschsvSvedPatent raschsvSvedPatent : raschsvSvedPatentList) {
+            assertNotNull(raschsvSvedPatent.getRaschsvSvSum1Tip());
+        }
+
+        // СвПримТариф2.2.425
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif22425());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif22425().getRaschsvVyplatIt425());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif22425().getRaschsvVyplatIt425().getRaschsvSvSum1Tip());
+        List<RaschsvSvInoGrazd> raschsvSvInoGrazdList = raschsvObyazPlatSv.getRaschsvSvPrimTarif22425().getRaschsvSvInoGrazdList();
+        assertFalse(raschsvSvInoGrazdList.isEmpty());
+        for (RaschsvSvInoGrazd raschsvSvInoGrazd : raschsvSvInoGrazdList) {
+            assertNotNull(raschsvSvInoGrazd.getRaschsvSvSum1Tip());
+        }
+
+        // СвПримТариф1.3.422
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif13422());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif13422().getRaschsvVyplatIt422());
+        assertNotNull(raschsvObyazPlatSv.getRaschsvSvPrimTarif13422().getRaschsvVyplatIt422().getRaschsvSvSum1Tip());
+        List<RaschsvSvedObuch> raschsvSvedObuchList = raschsvObyazPlatSv.getRaschsvSvPrimTarif13422().getRaschsvSvedObuchList();
+        assertFalse(raschsvSvedObuchList.isEmpty());
+        for (RaschsvSvedObuch raschsvSvedObuch : raschsvSvedObuchList) {
+            assertNotNull(raschsvSvedObuch.getRaschsvSvSum1Tip());
+            assertFalse(raschsvSvedObuch.getRaschsvSvReestrMdoList().isEmpty());
+        }
     }
 
     /**

@@ -3,14 +3,21 @@ package com.aplana.sbrf.taxaccounting.dao.raschsv;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif13422;
 
 /**
- * DAO-интерфейс для работы с таблицей "Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422"
+ * DAO-интерфейс для работы с СвПримТариф1.3.422
  */
 public interface RaschsvSvPrimTarif13422Dao {
 
     /**
-     * Сохранение "Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422"
+     * Сохранение СвПримТариф1.3.422
      * @param raschsvSvPrimTarif13422
      * @return
      */
     Long insertRaschsvSvPrimTarif13422(RaschsvSvPrimTarif13422 raschsvSvPrimTarif13422);
+
+    /**
+     * Выборка из СвПримТариф1.3.422
+     * @param obyazPlatSvId
+     * @return
+     */
+    RaschsvSvPrimTarif13422 findRaschsvSvPrimTarif13422(Long obyazPlatSvId);
 }

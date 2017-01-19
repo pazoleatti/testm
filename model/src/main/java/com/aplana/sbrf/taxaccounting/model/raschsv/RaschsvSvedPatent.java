@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import java.util.Date;
 
 /**
- * Сведения о патенте
+ * Сведения о патенте (СведПатент)
  */
 public class RaschsvSvedPatent {
 
@@ -14,8 +14,9 @@ public class RaschsvSvedPatent {
     private String vydDeyatPatent;
     private Date dataNachDeyst;
     private Date dataKonDeyst;
+    private Long raschsvSvSum1TipId;
 
-    // Сведения по суммам (тип 1)
+    // СвСум1Тип
     private RaschsvSvSum1Tip raschsvSvSum1Tip;
 
     public static final String TABLE_NAME = "raschsv_sved_patent";
@@ -69,5 +70,12 @@ public class RaschsvSvedPatent {
     }
     public void setRaschsvSvSum1Tip(RaschsvSvSum1Tip raschsvSvSum1Tip) {
         this.raschsvSvSum1Tip = raschsvSvSum1Tip;
+    }
+
+    public Long getRaschsvSvSum1TipId() {
+        return raschsvSvSum1TipId;
+    }
+    public void setRaschsvSvSum1TipId(Long raschsvSvSum1TipId) {
+        this.raschsvSvSum1TipId = raschsvSvSum1TipId;
     }
 }
