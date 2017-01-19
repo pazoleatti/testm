@@ -146,10 +146,11 @@ switch (formDataEvent) {
 @Field final String PERSONAL_DATA_TOTAL_ROW_LABEL = "Всего за последние три месяца расчетного (отчетного) периода"
 
 // Идентификатор декларации
-@Field final declarationId = declarationData.getId()
+//@Field final declarationId = declarationData.getId()
 
 // Находит в базе данных RaschsvPersSvStrahLic
 RaschsvPersSvStrahLic getrRaschsvPersSvStrahLic() {
+    def declarationId = declarationData.getId()
     def params = scriptSpecificReportHolder.getSubreportParamValues()
     raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params)
 }
