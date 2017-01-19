@@ -35,20 +35,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private List<Column> columns;
 
-    private static final long TABLE_PROPERTY_REFBOOK_ID = RefBook.WithTable.PROPERTY.getTableRefBookId();
-    private static final long PROPERTY_REFBOOK_ID = RefBook.WithTable.PROPERTY.getRefBookId();
-
-    private static final long TABLE_TRANSPORT_REFBOOK_ID = RefBook.WithTable.TRANSPORT.getTableRefBookId();
-    private static final long TRANSPORT_REFBOOK_ID = RefBook.WithTable.TRANSPORT.getRefBookId();
-/*
-    private static final long TABLE_INCOME_REFBOOK_ID = RefBook.WithTable.INCOME.getTableRefBookId();
-    private static final long INCOME_REFBOOK_ID = RefBook.WithTable.INCOME.getRefBookId();
-*/
-    private static final long TABLE_INCOME_REFBOOK_ID = 330L;
-    private static final long INCOME_REFBOOK_ID = 33L;
-
-    private static final long TABLE_LAND_REFBOOK_ID = RefBook.WithTable.LAND.getTableRefBookId();
-    private static final long LAND_REFBOOK_ID = RefBook.WithTable.LAND.getRefBookId();
+    private static final long TABLE_NDFL_REFBOOK_ID = RefBook.WithTable.NDFL.getTableRefBookId();
+    private static final long NDFL_REFBOOK_ID = RefBook.WithTable.NDFL.getRefBookId();
 
     private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм/деклараций, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
@@ -226,28 +214,16 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
 
     private Long getCurrentRefBookId() {
-        if (getView().getTaxType() == TaxType.PROPERTY) {
-            return PROPERTY_REFBOOK_ID;
-        } else if (getView().getTaxType() == TaxType.TRANSPORT) {
-            return TRANSPORT_REFBOOK_ID;
-        } else if (getView().getTaxType() == TaxType.INCOME) {
-            return INCOME_REFBOOK_ID;
-        } else if (getView().getTaxType() == TaxType.LAND) {
-            return LAND_REFBOOK_ID;
+        if (getView().getTaxType() == TaxType.NDFL) {
+            return NDFL_REFBOOK_ID;
         }
 
         return null;
     }
 
     private Long getCurrentTableRefBookId() {
-        if (getView().getTaxType() == TaxType.PROPERTY) {
-            return TABLE_PROPERTY_REFBOOK_ID;
-        } else if (getView().getTaxType() == TaxType.TRANSPORT) {
-            return TABLE_TRANSPORT_REFBOOK_ID;
-        } else if (getView().getTaxType() == TaxType.INCOME) {
-            return TABLE_INCOME_REFBOOK_ID;
-        } else if (getView().getTaxType() == TaxType.LAND) {
-            return TABLE_LAND_REFBOOK_ID;
+        if (getView().getTaxType() == TaxType.NDFL) {
+            return TABLE_NDFL_REFBOOK_ID;
         }
 
         return null;

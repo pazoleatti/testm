@@ -67,57 +67,19 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     public void setSortByColumn(String dataStoreName) {
     }
 
-    private TableHeader[] tableHeaderProperty = new TableHeader[]{
+    private TableHeader[] tableHeaderNdfl = new TableHeader[]{
             new TableHeader("TAX_ORGAN_CODE"),
             new TableHeader("KPP"),
-            new TableHeader("TAX_PLACE_TYPE_CODE"),
+            new TableHeader("TAX_ORGAN_CODE_MID"),
+            new TableHeader("PRESENT_PLACE"),
             new TableHeader("NAME"),
-            new TableHeader("OKVED_CODE"),
-            new TableHeader("PHONE"),
-            new TableHeader("REORG_FORM_CODE"),
-            new TableHeader("REORG_INN"),
-            new TableHeader("REORG_KPP"),
-            new TableHeader("SIGNATORY_ID"),
-            new TableHeader("SIGNATORY_SURNAME"),
-            new TableHeader("SIGNATORY_FIRSTNAME"),
-            new TableHeader("SIGNATORY_LASTNAME"),
-            new TableHeader("APPROVE_DOC_NAME"),
-            new TableHeader("APPROVE_ORG_NAME")
-    };
-
-    private TableHeader[] tableHeaderTransport = new TableHeader[]{
-            new TableHeader("TAX_ORGAN_CODE"),
-            new TableHeader("TAX_ORGAN_CODE_PROM"),
-            new TableHeader("KPP"),
-            new TableHeader("TAX_PLACE_TYPE_CODE"),
-            new TableHeader("NAME"),
-            new TableHeader("OKVED_CODE"),
-            new TableHeader("PHONE"),
-            new TableHeader("PREPAYMENT"),
-            new TableHeader("REORG_FORM_CODE"),
-            new TableHeader("REORG_INN"),
-            new TableHeader("REORG_KPP"),
-            new TableHeader("SIGNATORY_ID"),
-            new TableHeader("SIGNATORY_SURNAME"),
-            new TableHeader("SIGNATORY_FIRSTNAME"),
-            new TableHeader("SIGNATORY_LASTNAME"),
-            new TableHeader("APPROVE_DOC_NAME"),
-            new TableHeader("APPROVE_ORG_NAME")
-    };
-
-    private TableHeader[] tableHeaderIncome = new TableHeader[]{
-            new TableHeader("TAX_ORGAN_CODE"),
-            new TableHeader("KPP"),
-            new TableHeader("TAX_ORGAN_CODE_PROM"),
-            new TableHeader("TAX_PLACE_TYPE_CODE"),
-            new TableHeader("NAME"),
-            new TableHeader("ADDITIONAL_NAME"),
-            new TableHeader("OKVED_CODE"),
-            new TableHeader("DICT_REGION_ID"),
+            //new TableHeader("ADDITIONAL_NAME"),
+            new TableHeader("OKVED"),
+            new TableHeader("REGION"),
             new TableHeader("OKTMO"),
             new TableHeader("PHONE"),
             new TableHeader("OBLIGATION"),
-            new TableHeader("TYPE"),
+            //new TableHeader("TYPE"),
             new TableHeader("REORG_FORM_CODE"),
             new TableHeader("REORG_INN"),
             new TableHeader("REORG_KPP"),
@@ -129,26 +91,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             new TableHeader("APPROVE_ORG_NAME")
     };
 
-    private TableHeader[] tableHeaderLand = new TableHeader[]{
-            new TableHeader("TAX_ORGAN_CODE"),
-            new TableHeader("TAX_ORGAN_CODE_PROM"),
-            new TableHeader("KPP"),
-            new TableHeader("TAX_PLACE_TYPE_CODE"),
-            new TableHeader("NAME"),
-            new TableHeader("OKVED_CODE"),
-            new TableHeader("PHONE"),
-            new TableHeader("PREPAYMENT"),
-            new TableHeader("REORG_FORM_CODE"),
-            new TableHeader("REORG_INN"),
-            new TableHeader("REORG_KPP"),
-            new TableHeader("SIGNATORY_ID"),
-            new TableHeader("SIGNATORY_SURNAME"),
-            new TableHeader("SIGNATORY_FIRSTNAME"),
-            new TableHeader("SIGNATORY_LASTNAME"),
-            new TableHeader("APPROVE_DOC_NAME"),
-            new TableHeader("APPROVE_ORG_NAME"),
-            new TableHeader("PRODUCT_AGREEMENT_NAME")
-    };
 
     public final class TableHeader {
         String name;
@@ -328,20 +270,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     private void initTable(TaxType taxType) {
 
-        if (taxType == TaxType.PROPERTY) {
-            ConstPropertyHeaderBuilder hb = new ConstPropertyHeaderBuilder(table);
-            hb.setNeedCheckedRow(false);
-            table.setHeaderBuilder(hb);
-        } else if (taxType == TaxType.TRANSPORT) {
-            ConstTransportHeaderBuilder hb = new ConstTransportHeaderBuilder(table);
-            hb.setNeedCheckedRow(false);
-            table.setHeaderBuilder(hb);
-        } else if (taxType == TaxType.INCOME) {
-            ConstIncomeHeaderBuilder hb = new ConstIncomeHeaderBuilder(table);
-            hb.setNeedCheckedRow(false);
-            table.setHeaderBuilder(hb);
-        } else if (taxType == TaxType.LAND) {
-            ConstLandHeaderBuilder hb = new ConstLandHeaderBuilder(table);
+        if (taxType == TaxType.NDFL) {
+            ConstNdflHeaderBuilder hb = new ConstNdflHeaderBuilder(table);
             hb.setNeedCheckedRow(false);
             table.setHeaderBuilder(hb);
         }
@@ -385,14 +315,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @Override
     public TableHeader[] getCurrentTableHeaders() {
-        if (taxType == TaxType.PROPERTY) {
-            return tableHeaderProperty;
-        } else if (taxType == TaxType.TRANSPORT) {
-            return tableHeaderTransport;
-        } else if (taxType == TaxType.INCOME) {
-            return tableHeaderIncome;
-        } else if (taxType == TaxType.LAND) {
-            return tableHeaderLand;
+        if (taxType == TaxType.NDFL) {
+            return tableHeaderNdfl;
         }
         return new TableHeader[0];
     }
@@ -501,7 +425,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             versionCell.setType(RefBookAttributeType.STRING);
             versionCell.setStringValue(version.getValue());
             params.put("PREPAYMENT_VERSION", versionCell);
-        } else if (taxType == TaxType.INCOME) {
+        } else if (taxType == TaxType.NDFL) {
             TableCell taxRateCell = new TableCell();
             taxRateCell.setType(RefBookAttributeType.NUMBER);
             taxRateCell.setNumberValue(taxRate.getValue());
@@ -525,9 +449,11 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         } else if (taxType == TaxType.PROPERTY) {
             versionBlock.setVisible(true);
             taxTypeLbl.setText("Налог на имущество");
-        } else if (taxType == TaxType.INCOME) {
-            taxRateBlock.setVisible(true);
-            taxTypeLbl.setText("Налог на прибыль");
+        } else if (taxType == TaxType.NDFL) {
+            otherDetails.setVisible(false);
+            taxRateBlock.setVisible(false);
+            formatVersionBlock.setVisible(false);
+            taxTypeLbl.setText("НДФЛ");
         } else if (taxType == TaxType.LAND) {
             taxRateBlock.setVisible(false);
             formatVersionBlock.setVisible(false);
@@ -551,16 +477,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @Override
     public void fillNotTableData(Map<String, TableCell> itemList) {
         inn.setText(itemList.get("INN").getStringValue());
-        if (taxType != TaxType.LAND) {
-            formatVersion.setText(itemList.get("FORMAT_VERSION").getStringValue());
-        }
-        if (taxType == TaxType.PROPERTY) {
-            version.setText(itemList.get("PREPAYMENT_VERSION").getStringValue());
-        } else if (taxType == TaxType.INCOME) {
-            taxRate.setValue(itemList.get("TAX_RATE").getNumberValue() == null
-                    ? null
-                    : itemList.get("TAX_RATE").getNumberValue().doubleValue());
-        }
     }
 
     @Override

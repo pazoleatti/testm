@@ -76,6 +76,14 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     public static final Long FIAS_ROOM_ID = FiasRefBookDaoImpl.ROOM_ID;
     public static final String FIAS_ROOM_TABLE_NAME = FiasRefBookDaoImpl.ROOM_TABLE_NAME;
 
+    //Справочник "Настройки подразделений"
+    public static final Long NDFL_REFBOOK_ID = RefBook.WithTable.NDFL.getRefBookId();
+    public static final String NDFL_REFBOOK_TABLE_NAME = "REF_BOOK_NDFL";
+
+    public static final Long TABLE_NDFL_REFBOOK_ID = RefBook.WithTable.NDFL.getTableRefBookId();
+    public static final String TABLE_NDFL_TABLE_NAME = "REF_BOOK_NDFL_DETAIL";
+
+
 	/** Название таблицы для запроса данных*/
 	private String tableName;
 
