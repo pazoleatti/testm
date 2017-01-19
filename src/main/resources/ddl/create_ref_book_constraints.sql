@@ -41,6 +41,7 @@ alter table ref_book_ndfl add constraint pk_ref_book_ndfl primary key(id);
 alter table ref_book_ndfl_detail add constraint pk_ref_book_ndfl_detail primary key(id);
 
 alter table ref_book_ndfl add constraint fk_ref_book_ndfl_depart foreign key(department_id) references department(id);
+alter table ref_book_ndfl add constraint chk_ref_book_ndfl_status check (status in (-1,0,1,2));
 
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_parent foreign key(ref_book_ndfl_id) references ref_book_ndfl(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_pres_pl foreign key(present_place) references ref_book_present_place(id);
@@ -50,6 +51,7 @@ alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_oblig forei
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_type foreign key(type) references ref_book_record(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_re_code foreign key(reorg_form_code) references ref_book_record(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_signatory foreign key(signatory_id) references ref_book_record(id);
+alter table ref_book_ndfl_detail add constraint chk_ref_book_ndfl_det_status check (status in (-1,0,1,2));
 
 -----------------------------------------------------------------------------------------------------------------------------
 alter table declaration_data add constraint declaration_data_fk_asnu_id foreign key (asnu_id) references ref_book_asnu(id);
