@@ -119,7 +119,7 @@ public class NdflPersonDaoTest {
     @Test(expected = DaoException.class)
     public void testBadSave() {
         NdflPerson person = createGoodNdflPerson();
-        person.setInp(null);
+        person.setDeclarationDataId(null);
         Long id = ndflPersonDao.save(person);
     }
 
