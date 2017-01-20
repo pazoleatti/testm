@@ -1154,18 +1154,18 @@ comment on column department_change.sunr_use is 'Признак, что испо
 create table ndfl_person (
   id                  number(18)        not null,
   declaration_data_id number(18)        not null,
-  inp                 varchar2(30 char) not null,
+  inp                 varchar2(30 char),
   snils               varchar2(30 char),
-  last_name           varchar2(60 char) not null,
-  first_name          varchar2(60 char) not null,
+  last_name           varchar2(60 char),
+  first_name          varchar2(60 char),
   middle_name         varchar2(60 char),
-  birth_day           date              not null,
-  citizenship         varchar2(60 char) not null,
+  birth_day           date,
+  citizenship         varchar2(60 char),
   inn_np              varchar2(12 char),
   inn_foreign         varchar2(12 char),
-  id_doc_type         varchar2(60 char) not null,
-  id_doc_number       varchar2(60 char) not null,
-  status              varchar2(60 char) not null,
+  id_doc_type         varchar2(60 char),
+  id_doc_number       varchar2(60 char),
+  status              varchar2(60 char),
   post_index          varchar2(6 char),
   region_code         varchar2(30 char),
   area                varchar2(60 char),
@@ -1214,10 +1214,10 @@ create table ndfl_person_income
 (
   id                    number(18) not null,
   ndfl_person_id        number(18) not null,
-  row_num               number(10) not null,
+  row_num               number(10),
   income_code           varchar2(100 char),
   income_type           varchar2(100 char),
-  operation_id          number(18) not null,
+  operation_id          number(18),
   oktmo                 varchar2(20 char),
   kpp                   varchar2(20 char),
   income_accrued_date   date,
@@ -1271,21 +1271,21 @@ create table ndfl_person_deduction
 (
   id               number(18)        not null,
   ndfl_person_id   number(18)        not null,
-  row_num          number(10)        not null,
-  operation_id     number(18)        not null,
-  type_code        varchar2(3 char)  not null,
-  notif_type       varchar2(2 char)  not null,
-  notif_date       date              not null,
-  notif_num        varchar2(20 char) not null,
-  notif_source     varchar2(20 char) not null,
+  row_num          number(10),
+  operation_id     number(18),
+  type_code        varchar2(3 char),
+  notif_type       varchar2(2 char),
+  notif_date       date,
+  notif_num        varchar2(20 char),
+  notif_source     varchar2(20 char),
   notif_summ       number(20, 2),
-  income_accrued   date              not null,
-  income_code      varchar2(4 char)  not null,
-  income_summ      number(20, 2)     not null,
+  income_accrued   date,
+  income_code      varchar2(4 char),
+  income_summ      number(20, 2),
   period_prev_date date,
   period_prev_summ number(20, 2),
-  period_curr_date date              not null,
-  period_curr_summ number(20, 2)     not null
+  period_curr_date date,
+  period_curr_summ number(20, 2)
 );
 
 comment on table ndfl_person_deduction is 'Стандартные, социальные и имущественные налоговые вычеты';
@@ -1314,12 +1314,12 @@ create table ndfl_person_prepayment
 (
   id             number(18)        not null,
   ndfl_person_id number(18)        not null,
-  row_num        number(10)        not null,
-  operation_id   number(18)        not null,
+  row_num        number(10),
+  operation_id   number(18),
   summ           number(18),
-  notif_num      varchar2(20 char) not null,
-  notif_date     date              not null,
-  notif_source   varchar2(20 char) not null
+  notif_num      varchar2(20 char),
+  notif_date     date,
+  notif_source   varchar2(20 char)
 );
 
 comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';
