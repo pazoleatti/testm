@@ -260,9 +260,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     private void appendFromAndWhereClause(StringBuilder sql, Map<String, Object> values, DeclarationDataFilter filter) {
-        sql.append(" FROM declaration_data dec, department_report_period drp, declaration_type dectype, department dp, report_period rp, tax_period tp")
+        sql.append(" FROM declaration_data dec, department_report_period drp, declaration_type dectype, department dp, report_period rp, tax_period tp, declaration_template dectemplate")
                 .append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
-                .append(" AND drp.id = dec.department_report_period_id AND dp.id = drp.department_id AND rp.id = drp.report_period_id AND tp.id=rp.tax_period_id");
+                .append(" AND drp.id = dec.department_report_period_id AND dp.id = drp.department_id AND rp.id = drp.report_period_id AND tp.id=rp.tax_period_id and dec.declaration_template_id = dectemplate.id");
 
         if (filter.getTaxType() != null) {
             sql.append(" AND dectype.tax_type = ").append("\'").append(filter.getTaxType().getCode()).append("\'");
@@ -366,6 +366,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 break;
             case DECLARATION_KIND_NAME:
                 // ToDo добавить после добавления типа в макет формы
+                //column = "dectemplate.form_kind";
                 break;
             case FILE_NAME:
                 column = "dec.file_name";

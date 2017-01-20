@@ -133,7 +133,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
     }
 
 	@Override
-	public List<DeclarationType> getTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType) {
+	public List<DeclarationType> getTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType, List<DeclarationFormKind> declarationFormKinds) {
 		return getJdbcTemplate().query(
 				"with templatesByVersion as (select id, declaration_type_id, status, version, row_number() " +
                         (isSupportOver() ? "over(partition by declaration_type_id order by version)" : "over()") +

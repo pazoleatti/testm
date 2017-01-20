@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
@@ -73,8 +74,8 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
     }
 
 	@Override
-	public List<DeclarationType> getTypes(int departmentId, int reportPeriod, TaxType taxType) {
-		return declarationTypeDao.getTypes(departmentId, reportPeriodDao.get(reportPeriod), taxType);
+	public List<DeclarationType> getTypes(int departmentId, int reportPeriod, TaxType taxType, List<DeclarationFormKind> declarationFormKinds) {
+		return declarationTypeDao.getTypes(departmentId, reportPeriodDao.get(reportPeriod), taxType, declarationFormKinds);
 	}
 
     @Override
