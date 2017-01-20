@@ -1541,7 +1541,7 @@ comment on column raschsv_oss_vnm.priz_vypl is 'Признак выплат (П�
 create table raschsv_upl_sv_prev
 (
    id                 NUMBER(18)           not null,
-   raschsv_oss_vnm_id NUMBER(18),
+   raschsv_oss_vnm_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null,
    priznak            VARCHAR2(1 CHAR),
    sv_sum             NUMBER(17, 2)
@@ -1589,7 +1589,7 @@ comment on column raschsv_rash_oss_zak.raschsv_obyaz_plat_sv_id is 'Внешни
 create table raschsv_rash_oss_zak_rash
 (
    id                 NUMBER(18)           not null,
-   raschsv_rash_oss_zak_id NUMBER(18),
+   raschsv_rash_oss_zak_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null,
    chisl_sluch        NUMBER(7),
    kol_vypl           NUMBER(7),
@@ -1838,7 +1838,7 @@ comment on column raschsv_sved_obuch.sprav_node_name is 'Имя узла (Спр
 create table raschsv_sv_reestr_mdo
 (
    id                 NUMBER(18)           not null,
-   raschsv_sved_obuch_id NUMBER(18),
+   raschsv_sved_obuch_id NUMBER(18)           not null,
    naim_mdo           VARCHAR2(1000 CHAR),
    data_zapis         DATE,
    nomer_zapis        VARCHAR2(28 CHAR)
@@ -1927,7 +1927,7 @@ comment on column raschsv_sv_vypl.nachisl_sv_vs3 is 'Сумма исчислен
 create table raschsv_sv_vypl_mk
 (
    id                 NUMBER(18)           not null,
-   raschsv_sv_vypl_id NUMBER(18),
+   raschsv_sv_vypl_id NUMBER(18)           not null,
    mesyac             VARCHAR2(2 CHAR),
    kod_kat_lic        VARCHAR2(4 CHAR),
    sum_vypl           NUMBER(17,2),
@@ -1963,7 +1963,7 @@ comment on column raschsv_vypl_sv_dop.nachisl_sv_vs3 is 'Сумма исчисл
 create table raschsv_vypl_sv_dop_mt
 (
    id                 NUMBER(18)           not null,
-   raschsv_vypl_sv_dop_id NUMBER(18),
+   raschsv_vypl_sv_dop_id NUMBER(18)           not null,
    mesyac             VARCHAR2(2 CHAR),
    tarif             VARCHAR2(2 CHAR),
    vypl_sv            NUMBER(17,2),
