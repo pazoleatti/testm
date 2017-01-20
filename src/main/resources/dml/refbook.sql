@@ -538,6 +538,7 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (921,'Коды видов вычетов',1,0,0,null,'REF_BOOK_DEDUCTION_TYPE');
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9211, 921,'Код вычета','CODE',1,1,null,null,1,null,6,1,1,null,null,0,3);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9212, 921,'Наименование вычета','NAME',1,2,null,null,1,null,50,1,0,null,null,0,2000);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9213, 921,'Код признака','DEDUCTION_MARK',2,3,null,null,1,0,6,1,0,null,null,0,1);
 
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (922,'Коды видов доходов',1,0,0,null,'REF_BOOK_INCOME_TYPE');
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9221, 922,'Код дохода','CODE',1,1,null,null,1,null,6,1,1,null,null,0,4);
