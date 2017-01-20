@@ -35,6 +35,14 @@ alter table declaration_kind add constraint pk_declaration_kind primary key(id);
 alter table ref_book_okved add constraint pk_ref_book_okved primary key(id);
 alter table ref_book_okved add constraint chk_ref_book_okved_status check (status between -1 and 2);
 
+-- ОКАТО
+alter table ref_book_okato add constraint pk_ref_book_okato primary key(id);
+alter table ref_book_okato add constraint chk_ref_book_okato_status check (status between -1 and 2);
+
+-- Признак кода вычета
+alter table ref_book_deduction_mark add constraint pk_ref_book_deduction_mark primary key(id);
+alter table ref_book_deduction_mark add constraint chk_ref_book_ded_mark_status check (status between -1 and 2);
+
 -- Параметры подразделения по НДФЛ
 
 alter table ref_book_ndfl add constraint pk_ref_book_ndfl primary key(id);
