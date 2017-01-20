@@ -101,6 +101,44 @@ public class RefBook implements Serializable {
         }
     }
 
+	/**	Индентификаторы таблиц, используются датапровайдерами */
+	public enum Id {
+		ASNU(900L), PERSON(904L), REGION(923L), NDFL(950L), NDFL_DETAIL(951L);
+
+		private final long id;
+
+		Id(long refBookId) {
+			this.id = refBookId;
+		}
+		public long getId() {
+			return id;
+		}
+
+		public static Id getById(long id){
+			for (Id idValue : Id.values()) {
+				if (idValue.getId() == id) {
+					return idValue;
+				}
+			}
+			throw new IllegalArgumentException("Справочник с id="+id+" не найден");
+		}
+	}
+
+	public enum Table {
+		ASNU("REF_BOOK_ASNU"), PERSON("REF_BOOK_PERSON"), REGION("REF_BOOK_REGION"), NDFL("REF_BOOK_NDFL"),
+		NDFL_DETAIL("REF_BOOK_NDFL_DETAIL");
+
+		private final String table;
+
+		Table(String table) {
+			this.table = table;
+		}
+
+		public String getTable() {
+			return table;
+		}
+	}
+
 	/** Код справочника */
 	private Long id;
 
