@@ -75,7 +75,7 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         }
 
         RefBookDataProvider providerSlave = rbFactory.getDataProvider(getRefBookValuesAction.getSlaveRefBookId());
-        String filterSlave = "LINK = " + result.getRecordId();
+        String filterSlave = "REF_BOOK_NDFL_ID = " + result.getRecordId();
         RefBookAttribute sortAttr = rbFactory.get(getRefBookValuesAction.getSlaveRefBookId()).getAttribute("ROW_ORD");
         PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(
                 addDayToDate(reportPeriod.getEndDate(), -1), null, filterSlave, sortAttr);

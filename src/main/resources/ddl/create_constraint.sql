@@ -56,7 +56,7 @@ alter table ref_book add constraint ref_book_chk_versioned check (is_versioned i
 alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
 alter table ref_book_attribute add constraint ref_book_attr_chk_visible check (visible in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attr_chk_type check (type in (1, 2, 3, 4));
-alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (not lower(alias) in ('record_id', 'row_number_over', 'record_version_from', 'record_version_to'));
+alter table ref_book_attribute add constraint ref_book_attr_chk_alias check ((not lower(alias) in ('row_number_over', 'record_version_from', 'record_version_to')) or (lower(alias)='record_id' and read_only=1));
 alter table ref_book_attribute add constraint ref_book_attr_chk_precision check (precision >= 0 and precision <=19);
 alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
 alter table ref_book_attribute add constraint ref_book_attr_chk_ref check ((type <> 4 and reference_id is null) or (type = 4 and not (reference_id is null)));
@@ -551,6 +551,7 @@ alter table ref_book_person add constraint chk_ref_book_person_status check (sta
 alter table ref_book_address add constraint chk_ref_book_address_type check (address_type in (0,1));
 alter table ref_book_address add constraint chk_ref_book_address_addr_n_rf check ((address_type=1 and region_code is null and country_id is not null) or (address_type=0));
 alter table ref_book_address add constraint chk_ref_book_address_addr_rf check ((address_type=0 and region_code is not null and country_id is null) or (address_type=1));
+alter table ref_book_id_doc add constraint chk_ref_book_id_doc_rep check(inc_rep in (0,1));
 
 alter table ref_book_person add constraint unq_ref_book_person_inn unique (inn);
 alter table ref_book_person add constraint unq_ref_book_person_inn_f unique (inn_foreign);
