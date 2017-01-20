@@ -198,6 +198,16 @@ public class RefBookFactoryImpl implements RefBookFactory {
             refBookSimple.setRefBookId(RefBookSimpleReadOnly.DECLARATION_DATA_KIND_REF_BOOK_ID);
             refBookSimple.setTableName(RefBookSimpleReadOnly.DECLARATION_DATA_KIND_TABLE_NAME);
             return refBookSimple;
+        } else if (RefBookSimpleReadOnly.NDFL_REFBOOK_ID.equals(refBookId)){
+            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.NDFL_REFBOOK_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.NDFL_REFBOOK_TABLE_NAME);
+            return refBookSimple;
+        } else if (RefBookSimpleReadOnly.TABLE_NDFL_REFBOOK_ID.equals(refBookId)){
+            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.TABLE_NDFL_REFBOOK_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.TABLE_NDFL_TABLE_NAME);
+            return refBookSimple;
         } else {
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);

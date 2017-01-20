@@ -70,7 +70,7 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
             deleteList.add(recordVersion.getRecordId());
 
             RefBookDataProvider providerSlave = rbFactory.getDataProvider(action.getSlaveRefBookId());
-            String filterSlave = "LINK = " + recordVersion.getRecordId();
+            String filterSlave = "REF_BOOK_NDFL_ID = " + recordVersion.getRecordId();
             PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(period.getCalendarStartDate(), null, filterSlave, null);
 
             for (Map<String, RefBookValue> r : paramsSlave) {

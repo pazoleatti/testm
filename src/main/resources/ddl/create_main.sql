@@ -2210,7 +2210,8 @@ create table ref_book_id_doc
   doc_id number(18) not null,
   doc_number varchar2(25 char) not null,
   issued_by varchar2(255 char),
-  issued_date date
+  issued_date date,
+  inc_rep number(1)
 );
 
 comment on table ref_book_id_doc is 'Документ, удостоверяющий личность';
@@ -2220,6 +2221,7 @@ comment on column ref_book_id_doc.doc_id is 'Вид документа';
 comment on column ref_book_id_doc.doc_number is 'Серия и номер документа';
 comment on column ref_book_id_doc.issued_by is 'Кем выдан документ';
 comment on column ref_book_id_doc.issued_date is 'Дата выдачи';
+comment on column ref_book_id_doc.inc_rep is 'Включается в отчетность';
 
 create table ref_book_address
 (

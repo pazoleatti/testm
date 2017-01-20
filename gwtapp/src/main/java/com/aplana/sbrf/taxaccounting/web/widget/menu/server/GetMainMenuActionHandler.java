@@ -110,7 +110,7 @@ public class GetMainMenuActionHandler extends
                             || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                         menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
-                            + DepartmentConfigTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
+                            + DepartmentConfigPropertyTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
                     }
 
                     // настройки форм и подразделений, назначение источников-приемников

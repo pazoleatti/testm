@@ -57,7 +57,8 @@ public class RefBook implements Serializable {
         TRANSPORT(TaxType.TRANSPORT, 31L, 310L),
         PROPERTY(TaxType.PROPERTY, 99L, 206L),
         INCOME(TaxType.INCOME, 33L, 330L),
-        LAND(TaxType.LAND, 700L, 710L);
+        LAND(TaxType.LAND, 700L, 710L),
+        NDFL(TaxType.NDFL, 950L, 951L);
 
         private TaxType taxType;
         private Long refBookId;
