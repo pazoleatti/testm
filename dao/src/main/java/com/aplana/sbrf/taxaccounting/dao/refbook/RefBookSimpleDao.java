@@ -2,9 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -17,7 +16,6 @@ import java.util.Map;
 public interface RefBookSimpleDao {
     /**
      * Загружает данные справочника из отдельной таблицы на определенную дату актуальности
-     * @param tableName название таблицы
      * @param refBookId код справочника
      * @param version дата актуальности
      * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
@@ -26,7 +24,8 @@ public interface RefBookSimpleDao {
      * @param isSortAscending признак сортировки по возрастанию
      * @return список записей
      */
-    PagingResult<Map<String, RefBookValue>> getRecords(String tableName, Long refBookId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+    PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
+                                                       String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
     /**
      * Загружает данные иерархического справочника на определенную дату актуальности
@@ -38,7 +37,8 @@ public interface RefBookSimpleDao {
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @return список записей
      */
-    PagingResult<Map<String, RefBookValue>> getChildrenRecords(String tableName, Long refBookId, Date version, Long parentRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+    PagingResult<Map<String, RefBookValue>> getChildrenRecords(String tableName, Long refBookId, Date version, Long parentRecordId,
+                                                               PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**
      * Получение row_num записи по заданным параметрам
@@ -90,4 +90,37 @@ public interface RefBookSimpleDao {
      * @return количество версий
      */
     int getRecordVersionsCount(String tableName, Long uniqueRecordId);
+
+    /**
+     * Возвращает идентификатор записи справочника без учета версий
+     * @param uniqueRecordId уникальный идентификатор версии записи
+     * @return
+     */
+    Long getRecordId(String tableName, @NotNull Long uniqueRecordId);
+
+    /**
+     * Возвращает все версии из указанной группы версий записи справочника
+     * @param refBookId идентификатор справочника
+     * @param recordId идентификатор группы версий записи справочника
+     * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @return
+     */
+    PagingResult<Map<String,RefBookValue>> getRecordVersionsByRecordId(Long refBookId, Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+
+    /**
+     *
+     * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми
+     * Обеспечение соблюдения уникальности атрибутов в пределах справочника
+     *
+     * @param refBook справочник
+     * @param uniqueRecordId уникальный идентификатор записи справочника. Может быть null (при создании нового элемента). Используется для исключения из проверки указанного элемента справочника
+     * @param attributes атрибуты справочника
+     * @param records новые значения полей элемента справочника
+     * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
+     */
+    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull RefBook refBook, Long uniqueRecordId,
+                                                                @NotNull List<RefBookAttribute> attributes,
+                                                                @NotNull List<RefBookRecord> records);
 }

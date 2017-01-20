@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -13,5 +14,16 @@ public class RefBookTest {
 	public void test() {
 		// поленился написать тест. есть логика в модельном классе, ее нужно протестить. один раз уже нашел ошибку,
 		// в связи с этим и возникло желание написать юнит-тесты :(
+	}
+
+	@Test
+	public void idEnumGetByIdReturnsEnum() throws Exception {
+		RefBook.Id actualId = RefBook.Id.getById(923L);
+		Assert.assertEquals(RefBook.Id.REGION, actualId);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void idEnumGetByIdThrowsExceptionOnWrongId() throws Exception {
+		RefBook.Id.getById(-1983L);
 	}
 }

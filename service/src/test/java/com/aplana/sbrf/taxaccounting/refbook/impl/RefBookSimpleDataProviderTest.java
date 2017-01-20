@@ -5,12 +5,14 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -66,7 +68,7 @@ public class RefBookSimpleDataProviderTest {
         provider.getRecords(version, null, null, null);
 
         verify(daoMock, atLeastOnce()).getRecords(
-                eq(RFB_TABLE_NAME), eq(RFB_ID), eq(version), any(PagingParams.class),
+                eq(RFB_ID), eq(version), any(PagingParams.class),
                 anyString(), any(RefBookAttribute.class), eq(true));
     }
 
@@ -129,38 +131,12 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void getRecordVersionInfoNotInvokesDaoOnNotVersionedRefBook() throws Exception {
-        provider.setRefBook(getRefBookNotVersionedStub());
-        provider.getRecordVersionInfo(3L);
-
-        verify(daoMock, never()).getRecordVersionInfo(anyString(), anyLong());
-    }
-
-    @Test
-    public void getRecordVersionInfoNotInvokesFromReadOnly() throws Exception {
-        provider.setRefBook(getRefBookNotVersionedStub());
-        provider.getRecordVersionInfo(3L);
-
-        verify(SimpleReadOnlyMock).getRecordVersionInfo(3L);
-    }
-
-    @Test
     public void getVersionsInvokesDao() throws Exception {
         Date versionStart = new Date(0);
         Date versionEnd = new Date();
         provider.getVersions(versionStart, versionEnd);
 
         verify(daoMock).getVersions(RFB_TABLE_NAME, versionStart, versionEnd);
-    }
-
-    @Test
-    public void getVersionsNotInvokesDaoOnNotVersionedRefBook() throws Exception {
-        provider.setRefBook(getRefBookNotVersionedStub());
-        Date versionStart = new Date(0);
-        Date versionEnd = new Date();
-        provider.getVersions(versionStart, versionEnd);
-
-        verify(daoMock, never()).getVersions(anyString(), any(Date.class), any(Date.class));
     }
 
     @Test
@@ -171,10 +147,47 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void getRecordVersionsCountNotInvokesDaoOnNotVersionedRefBook() throws Exception {
-        provider.setRefBook(getRefBookNotVersionedStub());
-        provider.getRecordVersionsCount(4L);
+    public void isRefBookSupportedReturnsTrueIfEditableAndVersioned() throws Exception {
+        RefBook refBook = new RefBook();
+        refBook.setReadOnly(false);
+        refBook.setVersioned(true);
 
-        verify(daoMock, never()).getRecordVersionsCount(RFB_TABLE_NAME, 4L);
+        assertEquals(true, provider.isRefBookSupported(refBook));
+    }
+
+    @Test
+    public void isRefBookSupportedReturnsFalseIfNotEditableOrNotVersioned() throws Exception {
+        RefBook refBook = new RefBook();
+        refBook.setReadOnly(true);
+        refBook.setVersioned(true);
+
+        RefBook refBook2 = new RefBook();
+        refBook2.setReadOnly(false);
+        refBook2.setVersioned(false);
+
+        assertEquals(false, provider.isRefBookSupported(refBook));
+        assertEquals(false, provider.isRefBookSupported(refBook2));
+    }
+
+    @Test
+    public void isRefBookSupportedByIdReturnsTrue() throws Exception {
+        assertEquals(true, provider.isRefBookSupported(99L));
+    }
+
+    @Test
+    public void isRefBookSupportedByIdReturnsFalse() throws Exception {
+        assertEquals(false, provider.isRefBookSupported(RFB_NOT_VERSIONED_ID));
+    }
+
+    @Test
+    public void getRecordIdInvokesDao() throws Exception {
+        provider.getRecordId(5L);
+        verify(daoMock).getRecordId(RFB_TABLE_NAME, 5L);
+    }
+
+    @Test
+    public void getRecordVersionsByRecordIdInvokesDao() throws Exception {
+        provider.getRecordVersionsByRecordId(4L, null, null, null);
+        verify(daoMock).getRecordVersionsByRecordId(RFB_ID, 4L, null, null, null);
     }
 }

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookDaoImpl;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -22,27 +23,35 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Универсальный провайдер данных для справочников, хранящихся в отдельных таблицах.
+ * Универсальный провайдер данных для редактируемых версионированных справочников, хранящихся в отдельных таблицах.
  */
 @Service("refBookSimpleDataProvider")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
+    private static final String MSG_REFBOOK_NOT_EDITABLE_AND_VERSIONED = "Справочник %s (ID=%d) не поддерживает версионирование и редактирование";
+
+
+    @Autowired
+    private LockDataService lockService;
+    @Autowired
+    private LogEntryService logEntryService;
     @Autowired
     private RefBookSimpleDao dao;
     @Autowired
     private RefBookDao refBookDao;
     @Autowired
     private RefBookSimpleReadOnly readOnlyProvider;
-
+    @Autowired
+    private RefBookSimpleDataProviderHelper helper;
 
     private RefBook refBook;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Date version, PagingParams pagingParams, String filter,
                                                               RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return dao.getRecords(getRefBook().getTableName(), getRefBook().getId(), version, pagingParams, filter, sortAttribute, isSortAscending);
+        return dao.getRecords(getRefBook().getId(), version, pagingParams, filter, sortAttribute, isSortAscending);
     }
 
     @Override
@@ -53,10 +62,11 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
     @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version,
                                                                       PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        if (!getRefBook().isHierarchic()) {
+        throw new UnsupportedOperationException();
+        /*if (!getRefBook().isHierarchic()) {
             throw new IllegalArgumentException(String.format(RefBookDaoImpl.NOT_HIERARCHICAL_REF_BOOK_ERROR, getRefBook().getName(), getRefBook().getId()));
         }
-        return dao.getChildrenRecords(getRefBook().getTableName(), getRefBook().getId(), version, parentRecordId, pagingParams, filter, sortAttribute);
+        return dao.getChildrenRecords(getRefBook().getTableName(), getRefBook().getId(), version, parentRecordId, pagingParams, filter, sortAttribute);*/
     }
 
     @Override
@@ -135,16 +145,12 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        throw new UnsupportedOperationException();
+        return dao.getRecordVersionsByRecordId(getRefBook().getId(), recordId, pagingParams, filter, sortAttribute);
     }
 
     @Override
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
-        if (getRefBook().isVersioned()) {
-            return dao.getRecordVersionInfo(getRefBook().getTableName(), uniqueRecordId);
-        } else {
-            return readOnlyProvider.getRecordVersionInfo(uniqueRecordId);
-        }
+        return dao.getRecordVersionInfo(getRefBook().getTableName(), uniqueRecordId);
     }
 
     @Override
@@ -154,21 +160,125 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public int getRecordVersionsCount(Long uniqueRecordId) {
-        if (getRefBook().isVersioned()) {
-            return dao.getRecordVersionsCount(getRefBook().getTableName(), uniqueRecordId);
-        } else {
-            return readOnlyProvider.getRecordVersionsCount(uniqueRecordId);
-        }
+        return dao.getRecordVersionsCount(getRefBook().getTableName(), uniqueRecordId);
     }
 
     @Override
-    public List<Long> createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+    public List<Long> createRecordVersion(@NotNull Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
         throw new UnsupportedOperationException();
+        /*if (logger.getTaUserInfo() == null) {
+            throw new ServiceException("Текущий пользователь не установлен!");
+        }
+        //Устанавливаем блокировку на тевущий справочник
+        List<String> lockedObjects = new ArrayList<String>();
+        int userId = logger.getTaUserInfo().getUser().getId();
+        String lockKey = refBookFactory.generateTaskKey(getRefBook().getId(), ReportType.EDIT_REF_BOOK);
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(getRefBook().getId());
+        if (lockType == null && lockService.lock(lockKey, userId,
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), getRefBook().getName())) == null) {
+            try {
+                //Блокировка установлена
+                lockedObjects.add(lockKey);
+                //Блокируем связанные справочники
+                List<RefBookAttribute> attributes = getRefBook().getAttributes();
+                for (RefBookAttribute attribute : attributes) {
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                        RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
+                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
+                        if (!lockedObjects.contains(referenceLockKey)) {
+                            if (refBookFactory.getLockTaskType(attribute.getRefBookId()) == null &&
+                                    lockService.lock(referenceLockKey, userId, String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName())) == null) {
+                                //Блокировка установлена
+                                lockedObjects.add(referenceLockKey);
+                            } else {
+                                throw new ServiceLoggerException(String.format(LOCK_MESSAGE, attributeRefBook.getName()),
+                                        logEntryService.save(logger.getEntries()));
+                            }
+                        }
+                    }
+                }
+                //Выполняем создание записей
+                try {
+                    return createRecordVersionWithoutLock(logger, versionFrom, versionTo, records);
+                } catch (Exception e) {
+                    throw new ServiceLoggerException(e.getLocalizedMessage(),
+                            logEntryService.save(logger.getEntries()));
+                }
+            } finally {
+                for (String lock : lockedObjects) {
+                    lockService.unlock(lock, userId);
+                }
+            }
+        } else {
+            throw new ServiceLoggerException(String.format(LOCK_MESSAGE, getRefBook().getName()),
+                    logEntryService.save(logger.getEntries()));
+        }*/
     }
 
     @Override
     public List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
         throw new UnsupportedOperationException();
+        /*
+        try {
+            List<Long> excludedVersionEndRecords = new ArrayList<Long>();
+            //Признак того, что для проверок дата окончания была изменена (была использована дата начала следующей версии)
+            boolean dateToChangedForChecks = false;
+
+            if (!refBook.isVersioned()) {
+                //Устанавливаем минимальную дату
+                versionFrom = new Date(0L);
+            }
+
+            long countIds = 0;
+            for (RefBookRecord record : records) {
+                if (record.getRecordId() == null) {
+                    countIds++;
+                }
+                record.setVersionTo(versionTo);
+            }
+
+            //Проверка корректности
+            helper.checkCorrectness(logger, refBook, null, versionFrom, records);
+
+            if (!getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
+                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
+                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_DEAL) &&
+                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
+                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) &&
+                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_LAND) &&
+                    !getRefBookId().equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) &&
+                    !getRefBookId().equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) &&
+                    !getRefBookId().equals(RefBook.WithTable.INCOME.getTableRefBookId()) &&
+                    !getRefBookId().equals(RefBook.WithTable.LAND.getTableRefBookId())
+                    ) {
+
+                if (refBook.isVersioned()) {
+                    for (RefBookRecord record : records) {
+                        //Проверка пересечения версий
+                        if (record.getRecordId() != null) {
+                            boolean needToCreateFakeVersion = helper.crossVersionsProcessing(refBookDao.checkCrossVersions(getRefBookId(), record.getRecordId(), versionFrom, record.getVersionTo(), null),
+                                    refBook, versionFrom, record.getVersionTo(), logger);
+                            if (!needToCreateFakeVersion) {
+                                //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
+                                excludedVersionEndRecords.add(record.getRecordId());
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Создание настоящей и фиктивной версии
+            for (RefBookRecord record : records) {
+                if (dateToChangedForChecks) {
+                    //Возвращаем обратно пустую дату начала, т.к была установлена дата начала следующей версии для проверок
+                    record.setVersionTo(null);
+                    versionTo = null;
+                }
+            }
+            return helper.createVersions(refBook, versionFrom, versionTo, records, countIds, excludedVersionEndRecords, logger);
+        } catch (DataAccessException e) {
+            throw new ServiceException("Запись не сохранена. Обнаружены фатальные ошибки!", e);
+        }*/
     }
 
     @Override
@@ -227,8 +337,8 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
     }
 
     @Override
-    public Long getRecordId(Long uniqueRecordId) {
-        throw new UnsupportedOperationException();
+    public Long getRecordId(@NotNull Long uniqueRecordId) {
+        return dao.getRecordId(getRefBook().getTableName(), uniqueRecordId);
     }
 
     @Override
@@ -279,18 +389,34 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
     }
 
     public void setRefBook(RefBook refBook) {
+        if (!isRefBookSupported(refBook)) {
+            throw new IllegalArgumentException(String.format(MSG_REFBOOK_NOT_EDITABLE_AND_VERSIONED, refBook.getName(), refBook.getId()));
+        }
         this.refBook = refBook;
     }
 
-    public long getRefBookId() {
+    public Long getRefBookId() {
         return getRefBook().getId();
     }
 
     public void setRefBookId(long refBookId) {
-        refBook = refBookDao.get(refBookId);
+        RefBook probableRefBook = refBookDao.get(refBookId);
+        if (!isRefBookSupported(probableRefBook)) {
+            throw new IllegalArgumentException(String.format(MSG_REFBOOK_NOT_EDITABLE_AND_VERSIONED, probableRefBook.getName(), probableRefBook.getId()));
+        }
+        this.refBook = probableRefBook;
     }
 
     public void setRefBookId(RefBook.Id id) {
         setRefBookId(id.getId());
+    }
+
+    public boolean isRefBookSupported(RefBook refBook) {
+        return refBook.isVersioned() && !refBook.isReadOnly();
+    }
+
+    public boolean isRefBookSupported(long refBookId) {
+        RefBook refBook = refBookDao.get(refBookId);
+        return isRefBookSupported(refBook);
     }
 }
