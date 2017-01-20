@@ -553,14 +553,9 @@ alter table ref_book_address add constraint chk_ref_book_address_addr_n_rf check
 alter table ref_book_address add constraint chk_ref_book_address_addr_rf check ((address_type=0 and region_code is not null and country_id is null) or (address_type=1));
 alter table ref_book_id_doc add constraint chk_ref_book_id_doc_rep check(inc_rep in (0,1));
 
-alter table ref_book_person add constraint unq_ref_book_person_inn unique (inn);
-alter table ref_book_person add constraint unq_ref_book_person_inn_f unique (inn_foreign);
-alter table ref_book_person add constraint unq_ref_book_person_snils unique (snils);
-
 alter table ref_book_id_tax_payer add constraint pk_ref_book_id_tax_payer primary key (id);
 alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
 alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_record (id);
-alter table ref_book_id_tax_payer add constraint unq_ref_book_id_tax_payer_inp unique (inp);
 
 --------------------------------------------------------------------------------------------------------------------------
 alter table state add constraint pk_state primary key(id);
