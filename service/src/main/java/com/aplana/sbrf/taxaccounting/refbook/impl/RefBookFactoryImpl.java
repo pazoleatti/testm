@@ -78,7 +78,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     @Override
     public RefBookDataProvider getDataProvider(Long refBookId) {
-//        RefBook.Id refBookEnumId = RefBook.Id.getById(refBookId);
+        RefBook.Id refBookEnumId = RefBook.Id.getById(refBookId);
 
         if (RefBookDepartment.REF_BOOK_ID.equals(refBookId)) {
             return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
@@ -165,10 +165,9 @@ public class RefBookFactoryImpl implements RefBookFactory {
             refBookSimple.setRefBookId(RefBookSimpleReadOnly.ASNU_REF_BOOK_ID);
             refBookSimple.setTableName(RefBookSimpleReadOnly.ASNU_TABLE_NAME);
             return refBookSimple;
-        } else if (refBookId.equals(RefBook.Id.REGION.getId())){
-//                ||
-//                RefBook.Id.NDFL.equals(refBookEnumId) ||
-//                RefBook.Id.NDFL_DETAIL.equals(refBookEnumId)) {
+        } else if (RefBook.Id.REGION.equals(refBookEnumId) ||
+                RefBook.Id.NDFL.equals(refBookEnumId) ||
+                RefBook.Id.NDFL_DETAIL.equals(refBookEnumId)) {
             RefBookSimpleDataProvider provider = (RefBookSimpleDataProvider) applicationContext.getBean("refBookSimpleDataProvider", RefBookDataProvider.class);
             provider.setRefBookId(refBookId);
             return provider;
