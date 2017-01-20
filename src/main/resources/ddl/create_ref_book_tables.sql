@@ -158,6 +158,46 @@ comment on column ref_book_okved.name is 'Наименование';
 
 create sequence seq_ref_book_okved start with 301 increment by 1;
 
+-- ОКАТО
+create table ref_book_okato 
+(
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
+  status    number(1) default 0 not null,
+  okato     varchar2(11 char)   not null,
+  name      varchar2(255)       not null
+);
+comment on table ref_book_okato is 'Коды ОКАТО';
+comment on column ref_book_okato.id is 'Уникальный идентификатор';
+comment on column ref_book_okato.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_okato.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_okato.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_okato.okato is 'Код ОКАТО';
+comment on column ref_book_okato.name is 'Наименование';
+
+create sequence seq_ref_book_okato start with 243278745 increment by 1;
+
+-- Признак кода вычета
+create table ref_book_deduction_mark
+(
+  id        number(18) not null,
+  record_id number(9) not null,
+  version   date not null,
+  status    number(1) default 0 not null,
+  code      number(1) not null,
+  name      varchar2(30 char) not null
+);
+comment on table ref_book_deduction_mark is 'Признак кода вычета';
+comment on column ref_book_deduction_mark.id is 'Уникальный идентификатор';
+comment on column ref_book_deduction_mark.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_deduction_mark.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_deduction_mark.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_deduction_mark.code is 'Код признака вычета';
+comment on column ref_book_deduction_mark.name is 'Наименование признака кода вычета';
+
+create sequence seq_ref_book_deduction_mark start with 11 increment by 1;
+
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
 (
