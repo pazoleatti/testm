@@ -88,7 +88,10 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setType(declarationType);
         declarationTemplate.setJrxmlBlobId("1");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
-
+        declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
+        declarationTemplate.setDeclarationFormType(new DeclarationFormType(){{
+            setId(1);}
+        });
 		int id = declarationTemplateDao.create(declarationTemplate);
 
 		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(id);

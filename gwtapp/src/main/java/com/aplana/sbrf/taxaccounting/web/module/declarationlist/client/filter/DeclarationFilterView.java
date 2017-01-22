@@ -174,6 +174,12 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         } else {
             formDataFilter.setAsnuId(null);
         }
+        List<Long> kindPickerValues = declarationKindPicker.getValue();
+        if (kindPickerValues != null && !kindPickerValues.isEmpty()) {
+            formDataFilter.setFormKind(kindPickerValues.get(0));
+        } else {
+            formDataFilter.setFormKind(null);
+        }
         formDataFilter.setFileName(fileNamePicker.getValue());
 		return formDataFilter;
 	}

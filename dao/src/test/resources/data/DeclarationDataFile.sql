@@ -10,10 +10,10 @@ insert into tax_type (id, name) values ('I', 'Прибыль');
 insert into declaration_type (id, name, tax_type, status) values (1, 'Вид декларации 1', 'T', 1);
 insert into declaration_type (id, name, tax_type) values (2, 'Вид декларации 2', 'I');
 
-insert into declaration_template(id, name, version, jrxml, declaration_type_id, status)
-  values (1, 'Декларация 1', date '2013-01-01', null, 1, 0);
-insert into declaration_template(id, name, version, jrxml, declaration_type_id, status)
-  values (2, 'Декларация 2', date '2013-01-01', null, 2, 0);
+insert into declaration_template(id, name, version, jrxml, declaration_type_id, status, form_kind, form_type)
+  values (1, 'Декларация 1', date '2013-01-01', null, 1, 0, 3, 1);
+insert into declaration_template(id, name, version, jrxml, declaration_type_id, status, form_kind, form_type)
+  values (2, 'Декларация 2', date '2013-01-01', null, 2, 0, 3, 1);
 
 insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
 insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');
