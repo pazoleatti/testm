@@ -22,8 +22,9 @@ public class RefBookTest {
 		Assert.assertEquals(RefBook.Id.REGION, actualId);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void idEnumGetByIdThrowsExceptionOnWrongId() throws Exception {
-		RefBook.Id.getById(-1983L);
+	@Test
+	public void idEnumGetByIdReturnsNullOnWrongId() throws Exception {
+		RefBook.Id id = RefBook.Id.getById(-1983L);
+		Assert.assertNull(id);
 	}
 }
