@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * @author Andrey Drunk
  */
-public class NdflPersonScriptTest extends ScriptTestBase {
+public class PrimaryRnuNdflScriptTest extends ScriptTestBase {
 
     /**
      * Тип формы НДФЛ
@@ -59,7 +59,7 @@ public class NdflPersonScriptTest extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(NdflPersonScriptTest.class);
+        return getDefaultScriptTestMockHelper(PrimaryRnuNdflScriptTest.class);
     }
 
 
@@ -93,7 +93,7 @@ public class NdflPersonScriptTest extends ScriptTestBase {
     @Test
     public void create() throws IOException {
 
-        InputStream inputStream = NdflPersonScriptTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl.xml");
+        InputStream inputStream = PrimaryRnuNdflScriptTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl.xml");
         //String xml = IOUtils.toString(xmlInputStream, "windows-1251");
 
         Map<String, Object> param = new HashedMap<String, Object>();

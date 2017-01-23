@@ -17,6 +17,7 @@ public class Relation implements Serializable {
     private DepartmentReportPeriod departmentReportPeriod;
     /** Статус ЖЦ */
     private WorkflowState state;
+
     /** форма/декларация создана/не создана */
     private boolean created;
     /** является ли форма источников, в противном случае приемник*/
@@ -56,6 +57,18 @@ public class Relation implements Serializable {
     /** КПП */
     private String kpp;
 
+    /**
+     * Статус НФ
+     */
+    private State declarationState;
+
+    /**
+     * Идентификатор АСНУ
+     */
+    private Long asnuId;
+
+
+
     /**************  Параметры для легкой версии ***************/
 
     /** Идентификатор подразделения */
@@ -80,6 +93,22 @@ public class Relation implements Serializable {
     private Integer comparativePeriodYear;
     /** название подразделения-исполнителя */
     private List<String> performerNames;
+
+    public State getDeclarationState() {
+        return declarationState;
+    }
+
+    public void setDeclarationState(State declarationState) {
+        this.declarationState = declarationState;
+    }
+
+    public Long getAsnuId() {
+        return asnuId;
+    }
+
+    public void setAsnuId(Long asnuId) {
+        this.asnuId = asnuId;
+    }
 
     public Department getDepartment() {
         return department;

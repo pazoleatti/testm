@@ -83,15 +83,15 @@ void processInfoPart(infoPart) {
 
 void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOperationsNode) {
 
-    ndflPerson.ndflPersonIncomes = ndflPersonOperationsNode.'СведДохНал'.collect {
+    ndflPerson.incomes = ndflPersonOperationsNode.'СведДохНал'.collect {
         transformNdflPersonIncome(it)
     }
 
-    ndflPerson.ndflPersonDeductions = ndflPersonOperationsNode.'СведВыч'.collect {
+    ndflPerson.deductions = ndflPersonOperationsNode.'СведВыч'.collect {
         transformNdflPersonDeduction(it)
     }
 
-    ndflPerson.ndflPersonPrepayments = ndflPersonOperationsNode.'СведАванс'.collect {
+    ndflPerson.prepayments = ndflPersonOperationsNode.'СведАванс'.collect {
         transformNdflPersonPrepayment(it)
     }
 

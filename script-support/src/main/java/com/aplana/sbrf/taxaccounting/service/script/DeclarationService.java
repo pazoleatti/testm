@@ -16,6 +16,12 @@ import java.util.zip.ZipInputStream;
 
 @ScriptExposed
 public interface DeclarationService {
+
+    /**
+     * Получить DeclarationData по id
+     */
+    DeclarationData getDeclarationData(long declarationDataId);
+
     /**
      * Поиск декларации в отчетном периоде подразделения
      */
@@ -32,6 +38,10 @@ public interface DeclarationService {
     @SuppressWarnings("unused")
     DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId);
 
+    /**
+     * Найти все декларации созданные в отчетном периоде
+     */
+    List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
 	/**
 	 * Возвращает список налоговых форм, являющихся источником для указанной декларации и находящихся в статусе
 	 * "Принята"

@@ -120,4 +120,8 @@ public interface DeclarationDataDao {
      */
     String getNote(long declarationDataId);
 
+	/**
+	 * Найти все формы созданные в отчетном периоде
+     */
+	List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
 }

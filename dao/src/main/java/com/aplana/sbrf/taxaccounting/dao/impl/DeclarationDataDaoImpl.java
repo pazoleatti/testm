@@ -523,4 +523,24 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         return getNamedParameterJdbcTemplate().queryForObject("SELECT note FROM declaration_data WHERE id = :declarationDataId", values, String.class);
     }
 
+    @Override
+    public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("SELECT dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.state, dd.department_report_period_id, dd.asnu_id, dd.file_name, drp.report_period_id, drp.department_id, rownum \n");
+            sb.append("FROM declaration_data dd, department_report_period drp, declaration_template dt \n");
+            sb.append("WHERE dd.department_report_period_id = drp.id \n");
+            sb.append("AND dt.id                            = dd.declaration_template_id \n");
+            sb.append("AND dt.declaration_type_id           = ? \n");
+            sb.append("AND drp.department_id                = ? \n");
+            sb.append("AND drp.report_period_id             = ? \n");
+            sb.append("ORDER BY drp.correction_date DESC nulls last");
+            return getJdbcTemplate().query(sb.toString(),
+                    new Object[]{declarationTypeId, departmentId, reportPeriodId},
+                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
+                    new DeclarationDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }
