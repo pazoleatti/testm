@@ -351,6 +351,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
             DeclarationData declarationData = declarationDataDao.get(id);
 
+            Logger logger = new Logger();
+            declarationDataScriptingService.executeScript(userInfo,
+                    declarationData, FormDataEvent.DELETE, new Logger(), null);
+
+            // Проверяем ошибки
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException(
+                        "Найдены ошибки при выполнении удаления налоговой формы",
+                        logEntryService.save(logger.getEntries()));
+            }
+
             deleteReport(id, userInfo, false, TaskInterruptCause.DECLARATION_DELETE);
             declarationDataDao.delete(id);
 
