@@ -14,7 +14,7 @@ public class DeclarationDataFilter implements Serializable {
 
 	private List<Integer> departmentIds;
 
-	private Integer declarationTypeId;
+	private List<Long> declarationTypeIds;
 
     private State formState;
 
@@ -38,7 +38,7 @@ public class DeclarationDataFilter implements Serializable {
 
     private Long asnuId;
 
-    private Long formKind;
+    private List<Long> formKindIds;
 
     private String fileName;
 
@@ -101,13 +101,13 @@ public class DeclarationDataFilter implements Serializable {
 		this.ascSorting = ascSorting;
 	}
 
-	public Integer getDeclarationTypeId() {
-		return declarationTypeId;
-	}
+    public List<Long> getDeclarationTypeIds() {
+        return declarationTypeIds;
+    }
 
-	public void setDeclarationTypeId(Integer declarationTypeId) {
-		this.declarationTypeId = declarationTypeId;
-	}
+    public void setDeclarationTypeIds(List<Long> declarationTypeIds) {
+        this.declarationTypeIds = declarationTypeIds;
+    }
 
     public State getFormState() {
         return formState;
@@ -169,12 +169,12 @@ public class DeclarationDataFilter implements Serializable {
         this.asnuId = asnuId;
     }
 
-    public Long getFormKind() {
-        return formKind;
+    public List<Long> getFormKindIds() {
+        return formKindIds;
     }
 
-    public void setFormKind(Long formKind) {
-        this.formKind = formKind;
+    public void setFormKindIds(List<Long> formKindIds) {
+        this.formKindIds = formKindIds;
     }
 
     public String getFileName() {

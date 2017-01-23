@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -221,5 +222,19 @@ public class DeclarationTemplateInfoPresenter
         for (HandlerRegistration han : handlerRegistrations){
             han.removeHandler();
         }
+    }
+
+    @Override
+    public void setFormKind(Long formKindId) {
+        if (formKindId != null) {
+            declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().setDeclarationFormKind(DeclarationFormKind.fromId(formKindId));
+        } else {
+            declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().setDeclarationFormKind(null);
+        }
+    }
+
+    @Override
+    public void setFormType(Long formTypeId) {
+        declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().setDeclarationFormTypeId(formTypeId);
     }
 }

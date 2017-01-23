@@ -45,6 +45,9 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     // Справочник "Типы налоговых форм"(declaration)
     public static final Long DECLARATION_DATA_KIND_REF_BOOK_ID = 932L;
     public static final String DECLARATION_DATA_KIND_TABLE_NAME = "DECLARATION_KIND";
+    // Справочник "Випы налоговых форм"(declaration)
+    public static final Long DECLARATION_DATA_TYPE_REF_BOOK_ID = 931L;
+    public static final String DECLARATION_DATA_TYPE_TABLE_NAME = "REF_BOOK_FORM_TYPE";
     // Справочник "Цвета"
 	public static final Long COLOR_REF_BOOK_ID = 1L;
 	public static final String COLOR_TABLE_NAME = "COLOR";

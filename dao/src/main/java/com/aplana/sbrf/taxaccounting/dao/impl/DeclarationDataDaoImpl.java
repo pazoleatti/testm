@@ -280,8 +280,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     .append(transformToSqlInStatement("drp.department_id", filter.getDepartmentIds()));
         }
 
-        if (filter.getDeclarationTypeId() != null) {
-            sql.append(" AND dectype.id = ").append(filter.getDeclarationTypeId());
+        if (filter.getDeclarationTypeIds() != null && !filter.getDeclarationTypeIds().isEmpty()) {
+            sql.append(" AND ")
+                    .append(transformToSqlInStatement("dectype.id", filter.getDeclarationTypeIds()));
         }
 
         if (filter.getFormState() != null) {
@@ -301,8 +302,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             if (filter.getAsnuId() != null) {
                 sql.append(" AND dec.asnu_id = ").append(filter.getAsnuId());
             }
-            if (filter.getFormKind() != null) {
-                sql.append(" AND dectemplate.form_kind = ").append(filter.getFormKind());
+            if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
+                sql.append(" AND ")
+                .append(SqlUtils.transformToSqlInStatement("dectemplate.form_kind", filter.getFormKindIds()));
             }
             if (filter.getFileName() != null && !filter.getFileName().isEmpty()) {
                 sql.append(" AND lower(dec.file_name) like lower(:fileName)");

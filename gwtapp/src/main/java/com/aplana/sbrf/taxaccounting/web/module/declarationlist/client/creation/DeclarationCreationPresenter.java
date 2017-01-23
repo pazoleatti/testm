@@ -20,6 +20,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -80,7 +81,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     @Override
     public void onContinue() {
         final DeclarationDataFilter filter = new DeclarationDataFilter();
-        filter.setDeclarationTypeId(getView().getSelectedDeclarationType());
+        filter.setDeclarationTypeIds(Arrays.asList(getView().getSelectedDeclarationType().longValue()));
         filter.setDepartmentIds(getView().getSelectedDepartment());
         filter.setReportPeriodIds(getView().getSelectedReportPeriod());
         filter.setTaxOrganCode(getView().getTaxOrganCode());
@@ -89,7 +90,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
             LogCleanEvent.fire(this);
             LogShowEvent.fire(this, false);
             CreateDeclaration command = new CreateDeclaration();
-            command.setDeclarationTypeId(filter.getDeclarationTypeId());
+            command.setDeclarationTypeId(filter.getDeclarationTypeIds().get(0).intValue());
             command.setDepartmentId(filter.getDepartmentIds().iterator().next());
             command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
             command.setTaxOrganCode(filter.getTaxOrganCode());
@@ -147,7 +148,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     private boolean isFilterDataCorrect(DeclarationDataFilter filter){
         if ((filter.getReportPeriodIds() == null || filter.getReportPeriodIds().isEmpty())
                 || (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty())
-                || (filter.getDeclarationTypeId() == null)
+                || (filter.getDeclarationTypeIds() == null)
                 || ((taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT))
                 && (filter.getTaxOrganCode() == null || filter.getTaxOrganCode().isEmpty()))
                 || ((taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.INCOME))
