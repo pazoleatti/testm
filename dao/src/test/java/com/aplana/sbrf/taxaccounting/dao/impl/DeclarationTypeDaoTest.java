@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.aspectj.weaver.loadtime.definition.Definition;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -89,7 +91,7 @@ public class DeclarationTypeDaoTest {
         reportPeriod.setCalendarStartDate(calendar.getTime());
         calendar.set(2013, Calendar.DECEMBER, 31);
         reportPeriod.setEndDate(calendar.getTime());
-        Assert.assertEquals(0, declarationTypeDao.getTypes(1, reportPeriod, TaxType.INCOME).size());
+        Assert.assertEquals(0, declarationTypeDao.getTypes(1, reportPeriod, TaxType.INCOME, Arrays.asList(DeclarationFormKind.CONSOLIDATED)).size());
     }
 
     @Test

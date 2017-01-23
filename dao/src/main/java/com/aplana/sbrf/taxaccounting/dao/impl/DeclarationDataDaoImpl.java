@@ -260,9 +260,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     private void appendFromAndWhereClause(StringBuilder sql, Map<String, Object> values, DeclarationDataFilter filter) {
-        sql.append(" FROM declaration_data dec, department_report_period drp, declaration_type dectype, department dp, report_period rp, tax_period tp")
+        sql.append(" FROM declaration_data dec, department_report_period drp, declaration_type dectype, department dp, report_period rp, tax_period tp, declaration_template dectemplate")
                 .append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
-                .append(" AND drp.id = dec.department_report_period_id AND dp.id = drp.department_id AND rp.id = drp.report_period_id AND tp.id=rp.tax_period_id");
+                .append(" AND drp.id = dec.department_report_period_id AND dp.id = drp.department_id AND rp.id = drp.report_period_id AND tp.id=rp.tax_period_id and dec.declaration_template_id = dectemplate.id");
 
         if (filter.getTaxType() != null) {
             sql.append(" AND dectype.tax_type = ").append("\'").append(filter.getTaxType().getCode()).append("\'");
@@ -301,6 +301,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             if (filter.getAsnuId() != null) {
                 sql.append(" AND dec.asnu_id = ").append(filter.getAsnuId());
             }
+            if (filter.getFormKind() != null) {
+                sql.append(" AND dectemplate.form_kind = ").append(filter.getFormKind());
+            }
             if (filter.getFileName() != null && !filter.getFileName().isEmpty()) {
                 sql.append(" AND lower(dec.file_name) like lower(:fileName)");
                 values.put("fileName", "%"+filter.getFileName()+"%");
@@ -335,7 +338,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
                 .append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
                 .append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year, drp.correction_date," +
-                        " dec.asnu_id as asnu_id, dec.file_name as file_name");
+                        " dec.asnu_id as asnu_id, dec.file_name as file_name, dectemplate.form_kind as form_kind, dectemplate.form_type as form_type");
     }
 
     public void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
@@ -365,7 +368,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 column = "dec.asnu_id";
                 break;
             case DECLARATION_KIND_NAME:
-                // ToDo добавить после добавления типа в макет формы
+                column = "dectemplate.form_kind";
                 break;
             case FILE_NAME:
                 column = "dec.file_name";

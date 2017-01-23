@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
 
@@ -53,7 +50,7 @@ public interface DeclarationTypeDao {
 	 * @param taxType тип налога
 	 * @return список видов деклараций
 	 */
-	List<DeclarationType> getTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType);
+	List<DeclarationType> getTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType, List<DeclarationFormKind> declarationFormKinds);
 
     /**
      * Получить список налоговых форм для отчетности МСФО

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
@@ -164,6 +165,16 @@ public final class SqlUtils {
 		}
 		return result.deleteCharAt(result.length() - 1).append(')').toString();
 	}
+
+    public static String transformDeclarationFormKindsToSqlInStatement(List<DeclarationFormKind> source) {
+        checkListSize(source);
+        StringBuilder result = new StringBuilder();
+        result.append('(');
+        for (DeclarationFormKind declarationFormKind : source) {
+            result.append(declarationFormKind.getId()).append(',');
+        }
+        return result.deleteCharAt(result.length() - 1).append(')').toString();
+    }
 
 	/**
 	 * Подготовка строки вида "?,?,?,..."
