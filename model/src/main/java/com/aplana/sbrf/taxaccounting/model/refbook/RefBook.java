@@ -120,7 +120,7 @@ public class RefBook implements Serializable {
 					return idValue;
 				}
 			}
-			throw new IllegalArgumentException("Справочник с id="+id+" не найден");
+			return null;
 		}
 	}
 
