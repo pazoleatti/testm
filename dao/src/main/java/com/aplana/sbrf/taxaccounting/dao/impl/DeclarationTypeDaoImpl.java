@@ -132,27 +132,26 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
                 Integer.class);
     }
 
-	@Override
-	public List<DeclarationType> getTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType) {
-		return getJdbcTemplate().query(
-				"with templatesByVersion as (select id, declaration_type_id, status, version, row_number() " +
+    public List<DeclarationType> getTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType, List<DeclarationFormKind> declarationFormKinds) {
+        return getJdbcTemplate().query(
+                "with templatesByVersion as (select id, declaration_type_id, status, version, form_kind, row_number() " +
                         (isSupportOver() ? "over(partition by declaration_type_id order by version)" : "over()") +
-                        " rn from declaration_template where status != -1), " +
-						"allTemplates as (select tv.id, " +
-						"tv.declaration_type_id, " +
-						"tv.VERSION versionFrom,  " +
-						" tv2.version - interval '1' day as versionTo, tv.status" +
-						" from templatesByVersion tv left outer join templatesByVersion tv2 on tv.declaration_type_id = tv2.declaration_type_id and tv.rn+1 = tv2.rn)" +
-						" select distinct t.* from declaration_type t" +
-						" join department_declaration_type ddt on t.id = ddt.declaration_type_id" +
-						" join allTemplates all_t on ddt.declaration_type_id = all_t.declaration_type_id" +
-						" where ddt.department_id=? and t.tax_type=? and all_t.status = 0 and ((all_t.versionFrom <= ? and all_t.versionTo >= ?) or (all_t.versionFrom <= ? and all_t.versionTo is null))",
-				new Object[]{departmentId, String.valueOf(taxType.getCode()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), reportPeriod.getCalendarStartDate()},
-				new int[]{Types.NUMERIC, Types.CHAR, Types.DATE, Types.DATE, Types.DATE},
-				new DeclarationTypeRowMapper()
-		);
-	}
-
+                        " rn from declaration_template where status != -1)," +
+                        " allTemplates as (select tv.id," +
+                        " tv.declaration_type_id," +
+                        " tv.VERSION versionFrom," +
+                        " tv2.version - interval '1' day as versionTo, tv.status" +
+                        " from templatesByVersion tv left outer join templatesByVersion tv2 on tv.declaration_type_id = tv2.declaration_type_id and tv.rn+1 = tv2.rn" +
+                        " where tv.form_kind in " + SqlUtils.transformDeclarationFormKindsToSqlInStatement(declarationFormKinds) +")"+
+                        " select distinct t.* from declaration_type t" +
+                        " join department_declaration_type ddt on t.id = ddt.declaration_type_id" +
+                        " join allTemplates all_t on ddt.declaration_type_id = all_t.declaration_type_id" +
+                        " where ddt.department_id=? and t.tax_type=? and all_t.status = 0 and ((all_t.versionFrom <= ? and all_t.versionTo >= ?) or (all_t.versionFrom <= ? and all_t.versionTo is null))",
+                new Object[]{departmentId, String.valueOf(taxType.getCode()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), reportPeriod.getCalendarStartDate()},
+                new int[]{Types.NUMERIC, Types.CHAR, Types.DATE, Types.DATE, Types.DATE},
+                new DeclarationTypeRowMapper()
+        );
+    }
     @Override
     public List<Integer> getIfrsDeclarationTypes() {
         return getJdbcTemplate().queryForList("SELECT id FROM declaration_type where status = 0 and is_ifrs = 1", Integer.class);

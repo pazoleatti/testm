@@ -168,13 +168,13 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
                 case REFERENCE:
                     cell.setRefValue(data.get(a).getReferenceValue());
                     if (needDeref && data.get(a).getReferenceValue() != null) {
-                        if (refProviders.get(a).isRecordsExist(Arrays.asList(data.get(a).getReferenceValue())).isEmpty()) {
+                        //if (refProviders.get(a).isRecordsExist(Arrays.asList(data.get(a).getReferenceValue())).isEmpty()) {
                             Map<String, RefBookValue> refValue = refProviders.get(a).getRecordData(data.get(a).getReferenceValue());
                             cell.setDeRefValue(refValue.get(refAliases.get(a)).toString());
-                        } else {
+                        /*} else {
                             //Если ссылка на несуществующую запись, то отображаем пустое поле
                             cell.setDeRefValue("");
-                        }
+                        }*/
                     }
                     break;
                 default:

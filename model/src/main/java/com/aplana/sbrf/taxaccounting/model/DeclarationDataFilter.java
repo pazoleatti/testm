@@ -38,6 +38,8 @@ public class DeclarationDataFilter implements Serializable {
 
     private Long asnuId;
 
+    private Long formKind;
+
     private String fileName;
 
     /*true, если сортируем по возрастанию, false - по убыванию*/
@@ -165,6 +167,14 @@ public class DeclarationDataFilter implements Serializable {
 
     public void setAsnuId(Long asnuId) {
         this.asnuId = asnuId;
+    }
+
+    public Long getFormKind() {
+        return formKind;
+    }
+
+    public void setFormKind(Long formKind) {
+        this.formKind = formKind;
     }
 
     public String getFileName() {

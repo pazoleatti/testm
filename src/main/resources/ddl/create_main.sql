@@ -401,7 +401,9 @@ create table declaration_template (
   create_script       clob,
   jrxml               varchar2(36),
   declaration_type_id number(9) not null,
-  XSD varchar2(36) 
+  XSD varchar2(36), 
+  form_kind number(18),
+  form_type number(18)
 );
 comment on table declaration_template is 'Шаблоны налоговых деклараций';
 comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
@@ -412,6 +414,8 @@ comment on column declaration_template.jrxml is 'Макет JasperReports для
 comment on column declaration_template.declaration_type_id is 'Вид деклараций';
 comment on column declaration_template.XSD is 'XSD-схема';
 comment on column declaration_template.status is 'Статус версии (значения (-1, 0, 1, 2))';
+comment on column declaration_template.form_kind is 'Тип налоговой формы';
+comment on column declaration_template.form_kind is 'Вид налоговой формы';
 
 create sequence seq_declaration_template start with 10000;
 

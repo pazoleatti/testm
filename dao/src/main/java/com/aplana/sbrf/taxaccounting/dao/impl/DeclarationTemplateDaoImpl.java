@@ -59,15 +59,44 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			d.setId(SqlUtils.getInteger(rs,"id"));
             d.setName(rs.getString("name"));
 			d.setVersion(rs.getDate("version"));
-			d.setType(declarationTypeDao.get(SqlUtils.getInteger(rs,"declaration_type_id")));
-            d.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
+			d.setType(declarationTypeDao.get(SqlUtils.getInteger(rs, "declaration_type_id")));
             d.setXsdId(rs.getString("XSD"));
             d.setJrxmlBlobId(rs.getString("JRXML"));
-            d.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
+            d.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs, "status")));
             d.setSubreports(declarationSubreportDao.getDeclarationSubreports(d.getId()));
+            Integer formKind = SqlUtils.getInteger(rs, "form_kind");
+            if (formKind != null) {
+                d.setDeclarationFormKind(DeclarationFormKind.fromId(formKind));
+            }
+            Integer formType = SqlUtils.getInteger(rs, "form_type");
+            if (formType != null) {
+                d.setDeclarationFormType(getDeclarationFormType(SqlUtils.getInteger(rs, "form_type")));
+            }
             return d;
 		}
 	}
+
+    private DeclarationFormType getDeclarationFormType(int declarationFormTypeId) {
+        try {
+            Map<String, Object> valueMap =  new HashMap<String, Object>();
+            valueMap.put("declarationFormTypeId", declarationFormTypeId);
+            return getNamedParameterJdbcTemplate().queryForObject(
+                    "select ID, CODE, NAME, TAX_KIND from REF_BOOK_FORM_TYPE where id = :declarationFormTypeId",
+                    valueMap,
+                    new RowMapper<DeclarationFormType>() {
+                        @Override
+                        public DeclarationFormType mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            DeclarationFormType d = new DeclarationFormType();
+                            d.setId(SqlUtils.getInteger(rs,"id"));
+                            d.setName(rs.getString("name"));
+                            return d;
+                        }
+                    }
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Тип формы с id = %d не найден в БД", declarationFormTypeId);
+        }
+    }
 
 	@Override
 	public List<DeclarationTemplate> listAll() {
@@ -86,7 +115,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	public DeclarationTemplate get(int declarationTemplateId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-					"select id, name, version, declaration_type_id, xsd, jrxml, status from declaration_template where id = ?",
+					"select id, name, version, declaration_type_id, xsd, jrxml, status, form_kind, form_type from declaration_template where id = ?",
 					new Object[] { declarationTemplateId },
 					new DeclarationTemplateRowMapper()
 			);
@@ -171,7 +200,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         try {
             int declarationTemplateId = generateId("seq_declaration_template", Integer.class);
             getJdbcTemplate().update(
-                    "INSERT INTO declaration_template (id, name, version, create_script, declaration_type_id, xsd, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO declaration_template (id, name, version, create_script, declaration_type_id, xsd, status, form_kind, form_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     new Object[]{
                             declarationTemplateId,
                             declarationTemplate.getName(),
@@ -179,7 +208,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                             declarationTemplate.getCreateScript(),
                             declarationTemplate.getType().getId(),
                             declarationTemplate.getXsdId(),
-                            declarationTemplate.getStatus().getId()
+                            declarationTemplate.getStatus().getId(),
+                            declarationTemplate.getDeclarationFormKind() != null ? declarationTemplate.getDeclarationFormKind().getId() : null,
+                            declarationTemplate.getDeclarationFormType() != null ? declarationTemplate.getDeclarationFormType().getId() : null
                     },
                     new int[]{
                             Types.NUMERIC,
@@ -188,12 +219,13 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                             Types.VARCHAR,
                             Types.NUMERIC,
                             Types.VARCHAR,
+                            Types.NUMERIC,
+                            Types.NUMERIC,
                             Types.NUMERIC
                     }
             );
             declarationTemplate.setId(declarationTemplateId);
             declarationSubreportDao.updateDeclarationSubreports(declarationTemplate);
-            declarationSubreportParamDao.updateDeclarationSubreports(declarationTemplate);
             declarationSubreportParamDao.updateDeclarationSubreports(declarationTemplate);
 
             return declarationTemplateId;

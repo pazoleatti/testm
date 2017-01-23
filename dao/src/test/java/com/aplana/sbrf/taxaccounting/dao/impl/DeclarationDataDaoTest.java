@@ -288,7 +288,6 @@ public class DeclarationDataDaoTest {
 
 		if (failed) {
 			fail("Wrong list of ids: " + Arrays.toString(expected) + " expected but " + Arrays.toString(received) + " received");
-			fail("Wrong list of ids: " + Arrays.toString(expected) + " expected but " + Arrays.toString(received) + " received");
 		}
 	}
 
