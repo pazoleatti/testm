@@ -376,24 +376,7 @@ public class TestScriptHelper {
         }
     }
 
-    /**
-     * Чтение из файла в строку
-     */
-    public static String readFile(String path, String charset) throws IOException {
-        FileInputStream stream = new FileInputStream(new File(path));
-        try {
-            Reader reader = new BufferedReader(new InputStreamReader(stream, charset));
-            StringBuilder builder = new StringBuilder();
-            char[] buffer = new char[10240];
-            int read;
-            while ((read = reader.read(buffer, 0, buffer.length)) > 0) {
-                builder.append(buffer, 0, read);
-            }
-            return builder.toString();
-        } finally {
-            stream.close();
-        }
-    }
+
 
     /**
      * Вывод логов после работы скрипта
@@ -525,5 +508,24 @@ public class TestScriptHelper {
 
     public void setScriptStatusHolder(ScriptStatusHolder scriptStatusHolder) {
         this.scriptStatusHolder = scriptStatusHolder;
+    }
+
+    /**
+     * Чтение из файла в строку
+     */
+    public static String readFile(String path, String charset) throws IOException {
+        FileInputStream stream = new FileInputStream(new File(path));
+        try {
+            Reader reader = new BufferedReader(new InputStreamReader(stream, charset));
+            StringBuilder builder = new StringBuilder();
+            char[] buffer = new char[10240];
+            int read;
+            while ((read = reader.read(buffer, 0, buffer.length)) > 0) {
+                builder.append(buffer, 0, read);
+            }
+            return builder.toString();
+        } finally {
+            stream.close();
+        }
     }
 }

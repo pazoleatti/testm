@@ -9,8 +9,12 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.xml.sax.InputSource;
 
+import javax.xml.xpath.XPathFactory;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 /**
  * Базовый класс для тестов скриптов.
@@ -94,4 +98,23 @@ public abstract class DeclarationScriptTestBase {
             throw new ServiceException("Read reference book error!", e);
         }
     }
+
+
+    protected String xpath(String expression) throws Exception {
+        StringWriter xmlStringWriter = testHelper.getXmlStringWriter();
+        return xpath(xmlStringWriter.toString(), expression);
+    }
+
+    /**
+     * Метод возвращает результат выполнения XPath выражения, над xml документом
+     * @param xml документ xml
+     * @param expression выражение XPath
+     * @return результат выполнения XPath выражения
+     * @throws Exception ошибка выполнения XPath выражения
+     */
+    protected String xpath(String xml, String expression) throws Exception {
+        return XPathFactory.newInstance().newXPath().evaluate(expression, new InputSource(new StringReader(xml)));
+    }
+
+
 }

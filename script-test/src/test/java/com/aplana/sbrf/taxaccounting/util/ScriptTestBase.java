@@ -178,6 +178,9 @@ public abstract class ScriptTestBase {
         when(testHelper.getReportPeriodService().getEndDate(anyInt())).thenCallRealMethod();
         when(testHelper.getReportPeriodService().getReportDate(anyInt())).thenCallRealMethod();
         when(testHelper.getReportPeriodService().get(anyInt())).thenCallRealMethod();
+
+
+
         testHelper.execute(FormDataEvent.CHECK_SCRIPT);
         checkLogger();
     }

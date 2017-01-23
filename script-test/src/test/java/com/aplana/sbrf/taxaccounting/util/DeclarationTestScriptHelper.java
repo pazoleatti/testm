@@ -19,6 +19,8 @@ import java.io.*;
 import java.util.Calendar;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.util.TestScriptHelper.readFile;
+
 /**
  * Хэлпер для работы со скриптами декларации в тестовом режиме
  */
@@ -52,6 +54,9 @@ public class DeclarationTestScriptHelper {
     private RefBookDataProvider refBookDataProvider;
     private DeclarationService declarationService;
     private TransactionHelper transactionHelper;
+    //список источников получаемый из скрипта по событию com.aplana.sbrf.taxaccounting.model.FormDataEvent.GET_SOURCES.
+    private FormSources sources;
+
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
@@ -149,6 +154,17 @@ public class DeclarationTestScriptHelper {
             xmlStringWriter = null;
         }
 
+
+        if (formDataEvent == FormDataEvent.GET_SOURCES) {
+            sources = new FormSources();
+            bindings.put("sources", sources);
+            //bindings.put("light", false);
+            //bindings.put("excludeIfNotExist", false);
+            //bindings.put("stateRestriction", WorkflowState.ACCEPTED);
+            //bindings.put("needSources", true);
+            //bindings.put("form", true);
+        }
+
         try {
             scriptingService.getEngine().eval(script, bindings);
         } catch (ScriptException e) {
@@ -156,24 +172,7 @@ public class DeclarationTestScriptHelper {
         }
     }
 
-    /**
-     * Чтение из файла в строку
-     */
-    public static String readFile(String path, String charset) throws IOException {
-        FileInputStream stream = new FileInputStream(new File(path));
-        try {
-            Reader reader = new BufferedReader(new InputStreamReader(stream, charset));
-            StringBuilder builder = new StringBuilder();
-            char[] buffer = new char[10240];
-            int read;
-            while ((read = reader.read(buffer, 0, buffer.length)) > 0) {
-                builder.append(buffer, 0, read);
-            }
-            return builder.toString();
-        } finally {
-            stream.close();
-        }
-    }
+
 
     /**
      * Вывод логов после работы скрипта

@@ -282,12 +282,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, WorkflowState.ACCEPTED, userInfo, logger)){
             formDataIds.add(relation.getFormDataId());
         }
+
+        //TODO 19.01.2017 Доработать таблицу DECLARATION_DATA_CONSOLIDATION, добавить столбец для хранения идентификатора декларации источника
         //Обновление информации о консолидации.
-        sourceService.deleteDeclarationConsolidateInfo(id);
-        sourceService.addDeclarationConsolidationInfo(id, formDataIds);
+        //sourceService.deleteDeclarationConsolidateInfo(id);
+        //sourceService.addDeclarationConsolidationInfo(id, formDataIds);
+
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, null, "Декларация обновлена", null);
+
     }
 
     @Override
