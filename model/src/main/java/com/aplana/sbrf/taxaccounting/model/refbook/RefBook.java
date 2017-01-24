@@ -22,8 +22,8 @@ public class RefBook implements Serializable {
 	private static final Long serialVersionUID = 1L;
 
     public static final String RECORD_ID_ALIAS = "record_id";
-
 	public static final String RECORD_PARENT_ID_ALIAS = "PARENT_ID";
+	public static final String REF_BOOK_RECORD_TABLE_NAME = "REF_BOOK_RECORD";
 
     public static final String RECORD_VERSION_FROM_ALIAS = "record_version_from";
     public static final String REF_BOOK_VERSION_FROM_TITLE = "Дата начала актуальности";
@@ -34,32 +34,14 @@ public class RefBook implements Serializable {
     public static final int REF_BOOK_VERSION_TO_WIDTH = 6;
 
 	public static final String RECORD_HAS_CHILD_ALIAS = "HAS_CHILD";
-
 	public static final String RECORD_SORT_ALIAS = "row_number_over";
-
-    public static final Long DEPARTMENT_CONFIG_TRANSPORT = 31L;
-    public static final Long DEPARTMENT_CONFIG_INCOME = 33L;
-    public static final Long DEPARTMENT_CONFIG_DEAL = 37L;
-    public static final Long DEPARTMENT_CONFIG_VAT = 98L;
-    public static final Long DEPARTMENT_CONFIG_PROPERTY = 99L;
-    public static final Long DEPARTMENT_CONFIG_LAND = WithTable.LAND.getRefBookId();
-
-    public static final Long EMAIL_CONFIG = 400L;
-    public static final Long ASYNC_CONFIG = 401L;
-
-    //Участники ТЦО
-    public static final long TCO = 520L;
-	public static final String REF_BOOK_RECORD_TABLE_NAME = "REF_BOOK_RECORD";
 
     /**
      * Соотношение основной и табличной части настроек подразделений с типом налога
      */
     public enum WithTable {
-        TRANSPORT(TaxType.TRANSPORT, 31L, 310L),
-        PROPERTY(TaxType.PROPERTY, 99L, 206L),
-        INCOME(TaxType.INCOME, 33L, 330L),
-        LAND(TaxType.LAND, 700L, 710L),
-        NDFL(TaxType.NDFL, 950L, 951L);
+        NDFL(TaxType.NDFL, 950L, 951L),
+		FOND(TaxType.PFR, 960L, 961L);
 
         private TaxType taxType;
         private Long refBookId;
@@ -104,24 +86,42 @@ public class RefBook implements Serializable {
 
 	/**	Индентификаторы таблиц, используются датапровайдерами */
 	public enum Id {
-		ASNU(900L), 							// АСНУ
-		PERSON(904L), 							// Физ. лица
-		REGION(923L), 							// Субъекты РФ
-		NDFL(950L), 							// Настройки подразделений по НДФЛ
-		NDFL_DETAIL(951L), 						// Настройки подразделений по НДФЛ (таблица)
-		SEC_ROLE(95L), 							// Роли
-		DEPARTMENT(Department.REF_BOOK_ID),		// Подразделения
-		USER(74L); 								// Пользователи
+		ASNU(900), 									// АСНУ
+		PERSON(904), 								// Физ. лица
+		REGION(923), 								// Субъекты РФ
+		NDFL(950), 									// Настройки подразделений по НДФЛ
+		NDFL_DETAIL(951), 							// Настройки подразделений по НДФЛ (таблица)
+		FOND(960), 									// Настройки подразделений по Сборы, взносы
+		FOND_DETAIL(961), 							// Настройки подразделений по Сборы, взносы (таблица)
+		SEC_ROLE(95), 								// Роли
+		DEPARTMENT(30L),							// Подразделения
+		DEPARTMENT_TYPE(103),						// Типы подразделений
+		FIAS_OPERSTAT(1010), 						// < ФИАС
+		FIAS_SOCRBASE(1020),
+		FIAS_ADDR_OBJECT(1030),
+		FIAS_HOUSE(1040),
+		FIAS_HOUSEINT(1050),
+		FIAS_ROOM(1060), 							// ФИАС >
+		DECLARATION_DATA_KIND_REF_BOOK(932), 		// Типы форм (declaration)
+		DECLARATION_DATA_TYPE_REF_BOOK(931), 		// Випы налоговых форм (declaration)
+		CONFIGURATION_PARAM(105), 					// Конфигурационные параметры
+		AUDIT_FIELD(104), 							// Список полей для журнала аудита
+		EMAIL_CONFIG(400), 							// Настройки почтового клиента
+		ASYNC_CONFIG(401), 							// Настройки асинхронных задач
+		ID_DOC(902),                                // Документ, удостоверяющий личность
+		USER(74); 									// Пользователи
 
 		private final long id;
 
 		Id(long refBookId) {
 			this.id = refBookId;
 		}
+		Id(int refBookId) {
+			this.id = refBookId;
+		}
 		public long getId() {
 			return id;
 		}
-
 		public static Id getById(long id){
 			for (Id idValue : Id.values()) {
 				if (idValue.getId() == id) {

@@ -34,16 +34,11 @@ public class InitRefBookMultiHandler extends AbstractActionHandler<InitRefBookMu
         result.setRefBookId(refBook.getId());
         result.setAttributes(refBook.getAttributes());
         //Признак настроек подразделений
-        boolean isConfig = refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_INCOME) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_DEAL) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_VAT) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_LAND) ||
-                refBook.getId().equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.INCOME.getTableRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.LAND.getTableRefBookId());
+        boolean isConfig =
+				refBook.getId().equals(RefBook.WithTable.NDFL.getRefBookId()) ||
+				refBook.getId().equals(RefBook.WithTable.FOND.getRefBookId()) ||
+                refBook.getId().equals(RefBook.WithTable.NDFL.getTableRefBookId()) ||
+                refBook.getId().equals(RefBook.WithTable.FOND.getTableRefBookId());
         result.setVersioned(refBook.isVersioned() && !isConfig);
         return result;
     }

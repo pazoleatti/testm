@@ -101,12 +101,7 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        String str;
-        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
-            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
-        } else {
-            str = ".";
-        }
+        String str = ".";
         return String.format("Успешно выполнено принятие %s: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
                 declarationTemplate.getType().getTaxType().getDeclarationShortName(),
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(),

@@ -191,14 +191,7 @@ public class DeclarationDataPresenter
                                 getView().setVisiblePDF(result.isVisiblePDF());
                                 subreports = result.getSubreports();
                                 getView().setSubreports(result.getSubreports());
-                                if(taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.LAND)){
-                                    getView().setPropertyBlockVisible(true, true, false, taxType);
-                                    getView().setTaxOrganCode(result.getTaxOrganCode());
-                                    getView().setKpp(result.getKpp());
-                                } else if (taxType.equals(TaxType.INCOME)){
-                                    getView().setPropertyBlockVisible(false, true, false, taxType);
-                                    getView().setKpp(result.getKpp());
-                                } else if (taxType.equals(TaxType.NDFL)){
+                                if (taxType.equals(TaxType.NDFL)){
                                     if (result.getAsnuName() != null && !result.getAsnuName().isEmpty()) {
                                         getView().setPropertyBlockVisible(false, false, true, taxType);
                                         getView().setAsnuName(result.getAsnuName());

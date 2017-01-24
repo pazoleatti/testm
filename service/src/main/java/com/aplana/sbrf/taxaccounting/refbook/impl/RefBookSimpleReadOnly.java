@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.FiasRefBookDaoImpl;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -23,31 +21,6 @@ import java.util.Map;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
-
-	// Справочник "Виды деклараций"
-	public static final Long DECLARATION_TYPE_REF_BOOK_ID = 207L;
-    // Справочник "Типы подразделений банка"
-    public static final Long DEPARTMENT_TYPE_REF_BOOK_ID = 103L;
-    // Справочник "Типы налоговых форм"(declaration)
-    public static final Long DECLARATION_DATA_KIND_REF_BOOK_ID = 932L;
-    // Справочник "Випы налоговых форм"(declaration)
-    public static final Long DECLARATION_DATA_TYPE_REF_BOOK_ID = 931L;
-    //Справочник "Статус действия"
-    public static final Long FIAS_OPERSTAT_ID = FiasRefBookDaoImpl.OPERSTAT_ID;
-    //Справочник "Типы адресных объектов"
-    public static final Long FIAS_SOCRBASE_ID = FiasRefBookDaoImpl.SOCRBASE_ID;
-    //Справочник ФИАС "Реестр адресообразующих объектов" (край -> область -> город -> район -> улица)
-    public static final Long FIAS_ADDR_OBJECT_ID = FiasRefBookDaoImpl.ADDR_OBJECT_ID;
-    //Справочник ФИАС "Реестр объектов адресации" (номера отдельных зданий, сооружений и их типы, интервалы домов, номера отдельных помещений и их типы)
-    public static final Long FIAS_HOUSE_ID = FiasRefBookDaoImpl.HOUSE_ID;
-    //Справочник "Интервалы домов"
-    public static final Long FIAS_HOUSEINT_ID = FiasRefBookDaoImpl.HOUSEINT_ID;
-    //Справочник "Сведения по отдельным помещениям"
-    public static final Long FIAS_ROOM_ID = FiasRefBookDaoImpl.ROOM_ID;
-    //Справочник "Настройки подразделений"
-    public static final Long NDFL_REFBOOK_ID = RefBook.WithTable.NDFL.getRefBookId();
-    public static final Long TABLE_NDFL_REFBOOK_ID = RefBook.WithTable.NDFL.getTableRefBookId();
-
 
 	/** Название таблицы для запроса данных*/
 	private String tableName;

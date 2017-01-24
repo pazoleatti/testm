@@ -379,20 +379,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         return false;
     }
 
-    private boolean isProductAgreementNameFilled(List<Map<String, TableCell>> rows) {
-        if (TaxType.LAND.equals(getView().getTaxType())) {
-            for (Map<String, TableCell> row : rows) {
-                if (isProductAgreementNameRequired(row)) {
-                    String productAgreementName = row.get("PRODUCT_AGREEMENT_NAME").getStringValue();
-                    if (productAgreementName == null || productAgreementName.isEmpty()) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
     private boolean isKppTaxOrgCodeFiled(List<Map<String, TableCell>> rows) {
         for (Map<String, TableCell> row : rows) {
             String kpp = row.get("KPP").getStringValue();
@@ -502,10 +488,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private boolean checkBeforeSave(List<Map<String, TableCell>> rows) {
         if (!isKppTaxOrgCodeFiled(rows)) {
             Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнены обязательные поля \"" + getColumn("TAX_ORGAN_CODE").getName() + "\" и \"" + getColumn("KPP").getName() + "\"");
-            return false;
-        }
-        if (!isProductAgreementNameFilled(rows)) {
-            Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнено обязательное поле \"" + getColumn("PRODUCT_AGREEMENT_NAME").getName() + "\"");
             return false;
         }
         return true;

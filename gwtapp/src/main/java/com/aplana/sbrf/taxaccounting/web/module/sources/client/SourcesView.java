@@ -726,9 +726,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     public void init(TaxType taxType, List<AppointmentType> types, AppointmentType type, int year, List<PeriodInfo> periods,
                      boolean isForm, boolean isControlUNP) {
         this.isForm = isForm;
-        this.isTaxTypeDeal = taxType.equals(TaxType.DEAL);
-        this.isTaxTypeETRorMarket = taxType.equals(TaxType.ETR) || taxType.equals(TaxType.MARKET);
-
         taxTypeLabel.setText(taxType.getName());
 
         //настрока листбоксов

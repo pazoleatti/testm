@@ -47,7 +47,7 @@ public class GetDeclarationTypeForCreateHandler extends AbstractActionHandler<Ge
         result.setCorrectionDate(departmentReportPeriodService.getLast(action.getDepartmentId(), action.getReportPeriod()).getCorrectionDate());
         result.setTaxType(action.getTaxType());
 
-        if (action.getTaxType() == TaxType.PROPERTY || action.getTaxType() == TaxType.TRANSPORT || action.getTaxType() == TaxType.INCOME || action.getTaxType() == TaxType.LAND) {
+        if (action.getTaxType() == TaxType.NDFL || action.getTaxType() == TaxType.PFR) {
             RefBookDataProvider provider = rbFactory.getDataProvider(RefBook.WithTable.getByTaxType(action.getTaxType()).getRefBookId());
             ReportPeriod period = periodService.getReportPeriod(action.getReportPeriod());
             Date version = DateUtils.addDays(period.getEndDate(), -1);

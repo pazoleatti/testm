@@ -63,7 +63,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public List<Map<String, String>> getEmailConfig() {
-        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG);
+        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.EMAIL_CONFIG.getId());
         PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), null, null, null);
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
         for (Map<String, RefBookValue> value : values) {
@@ -78,7 +78,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public List<Map<String, String>> getAsyncConfig() {
-        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.ASYNC_CONFIG);
+        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ASYNC_CONFIG.getId());
         PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), null, null, null);
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
         for (Map<String, RefBookValue> value : values) {
@@ -206,7 +206,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             saveAndLog(model, emailConfigs, asyncConfigs, userInfo);
 
             //Сохранение настроек почты
-            RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG);
+            RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.EMAIL_CONFIG.getId());
 
             List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
             for (Map<String, String> param : emailConfigs) {
@@ -219,7 +219,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             provider.updateRecords(userInfo, new Date(), records);
 
             //Сохранение настроек асинхронных задач
-            provider = refBookFactory.getDataProvider(RefBook.ASYNC_CONFIG);
+            provider = refBookFactory.getDataProvider(RefBook.Id.ASYNC_CONFIG.getId());
 
             records = new ArrayList<Map<String, RefBookValue>>();
             for (Map<String, String> param : asyncConfigs) {
@@ -396,7 +396,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                         userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.EMAIL.getCaption() + ". Изменён параметр \"" +config.get("NAME") +"\":" + check, null);
             }
         }
-        RefBook refBookAsyncConfig = refBookFactory.get(RefBook.ASYNC_CONFIG);
+        RefBook refBookAsyncConfig = refBookFactory.get(RefBook.Id.ASYNC_CONFIG.getId());
         for (Map<String, String> config: asyncConfigs) {
             Map<String, String> oldConfig = oldAsyncConfigMap.get(config.get("ID"));
             for (String key: Arrays.asList("SHORT_QUEUE_LIMIT", "TASK_LIMIT")) {
