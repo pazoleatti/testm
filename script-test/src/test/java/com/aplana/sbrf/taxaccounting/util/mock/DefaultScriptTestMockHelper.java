@@ -455,6 +455,7 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         return refBookDataProvider;
     }
 
+
     @Override
     public DataRowHelper getDataRowHelper() {
         return currentDataRowHelper;

@@ -10,7 +10,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE: //формирование xml
         println "!CALCULATE!"
-        buildXml([])
+        buildXml()
         break
     case FormDataEvent.COMPOSE: // Консолидирование
         println "!COMPOSE!"
@@ -28,36 +28,43 @@ switch (formDataEvent) {
 def providerCache = [:]
 
 @Field
-def departmentParam = null
+def departmentParam = [:]
 
 // значение подразделения из справочника 310 (таблица)
 @Field
-def departmentParamTable = null
+def departmentParamTable = [:]
 
 // Дата окончания отчетного периода
 @Field
 def reportPeriodEndDate = null
 
+def buildXml() {
+    departmentParam = getDepartmentParam()
+    def departmentParamRow = departmentParam ? departmentParamTable(departmentParam?.record_id?.value) : null
 
-def buildXml(listKnf) {
+    // Данные для Файл.СвРекв
+    def oktmo = getOKTMO(departmentParamRow)
+    def kpp = getKPP()
+
+    def listKnf = []
     def nomSpr = 1
     def svSumDoh = []
     def builder = new MarkupBuilder(xml)
     builder.Файл(ИдФайл: generateXmlFileId(),
             ВерсПрог: applicationVersion,
             ВерсФорм: "5.04") {
-        СвРекв(ОКТМО: "",
-                ОтчетГод: "",
+        СвРекв(ОКТМО: oktmo,
+                ОтчетГод: "", //TODO ???создать объект taxPeriodService для TaxPeriodDao и получить год из TaxPeriod???
                 ПризнакФ: "") {
             СвЮЛ(ИННЮЛ: "7707083893",
-                    КПП: "")
+                    КПП: kpp)
             СвФЛ()
         }
         listKnf.collate(3000).each{
             Документ(КНД: "1151078",
                     ДатаДок: new Date().format("dd.MM.yyyy"),
                     НомСпр: nomSpr++,
-                    ОтчетГод: "", //TODO создать объект taxPeriodService для TaxPeriodDao и получить год из TaxPeriod
+                    ОтчетГод: "",
                     Признак: "",
                     НомКорр: "",
                     КодНО: "") {
@@ -99,9 +106,40 @@ def buildXml(listKnf) {
                 }
                 СведДох(Ставка: "") {
                     svSumDoh.each{ДохВыч(){
-                            СвСумДох() {
+                            СвСумДох(Месяц: "",
+                                    КодДоход: "",
+                                    СумДоход: "") {
+                                СвСумВыч(КодВычет: "",
+                                        СумВычет: "") {
 
+                                }
                             }
+                        }
+                    }
+                    НалВычССИ(){
+                        ПредВычССИ(КодВычет: "",
+                                СумВычет: "") {
+
+                        }
+                        УведСоцВыч(НомерУвед: "",
+                                ДатаУвед: "",
+                                ИФНСУвед: "")
+                        УведИмущВыч(УведИмущВыч: "",
+                                ДатаУвед: "",
+                                ИФНСУвед: "")
+                    }
+                    СумИтНалПер(СумДохОбщ: "",
+                            НалБаза: "",
+                            НалИсчисл: "",
+                            АвансПлатФикс: "",
+                            НалУдерж: "",
+                            НалПеречисл: "",
+                            НалУдержЛиш: "",
+                            НалНеУдерж: "") {
+                        УведФиксПлат(НомерУвед: "",
+                                ДатаУвед: "",
+                                ИФНСУвед: "") {
+
                         }
                     }
                 }
@@ -115,10 +153,10 @@ def generateXmlFileId() {
 
     def departmentParam = getDepartmentParam()
 
-    def departmentParamTransportRow = departmentParam ? getDepartmentParamTable(departmentParam?.record_id?.value) : null
+    def departmentParamRow = departmentParam ? getDepartmentParamTable(departmentParam?.record_id?.value) : null
         def r_t = "NO_NDFL2"
-        def a = departmentParamTransportRow?.TAX_ORGAN_CODE_PROM?.value // TODO из какого справочника брать?
-        def k = departmentParamTransportRow?.TAX_ORGAN_CODE?.value // TODO из какого справочника брать?
+        def a = departmentParamRow?.TAX_ORGAN_CODE_MID?.value
+        def k = departmentParamRow?.TAX_ORGAN_CODE?.value
         def o = "7707083893"
         def date = Calendar.getInstance().getTime()?.format("yyyyMMdd")
         def n = UUID.randomUUID().toString().toUpperCase()
@@ -131,6 +169,15 @@ def generateXmlFileId() {
                 n
         return fileId
 }
+
+def getOKTMO(def departmentParamRow) {
+    departmentParamRow?.OKTMO?.value
+}
+
+def getKPP(def departmentParamRow) {
+    departmentParamRow?.KPP?.value
+}
+
 
 // Получить параметры подразделения (из справочника 950)
 
@@ -149,7 +196,7 @@ def getDepartmentParam() {
 
 def getDepartmentParamTable(def departmentParamId) {
     if (departmentParamTable == null) {
-        def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='${declarationData.taxOrganCode}' and KPP ='${declarationData.kpp}'"
+        def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
         def departmentParamTableList = getProvider(951).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")

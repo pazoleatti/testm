@@ -6,9 +6,9 @@ import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.user.cellview.client.*;
 
-public class ConstNdflHeaderBuilder extends AbstractHeaderOrFooterBuilder implements TableWithCheckedColumn {
+public class ConstPfrHeaderBuilder extends AbstractHeaderOrFooterBuilder implements TableWithCheckedColumn {
 
-    public ConstNdflHeaderBuilder(DataGrid table) {
+    public ConstPfrHeaderBuilder(DataGrid table) {
         super(table, false);
     }
 
@@ -40,9 +40,9 @@ public class ConstNdflHeaderBuilder extends AbstractHeaderOrFooterBuilder implem
 
         tr = startRow();
 
-        buildHeader(tr, new TextHeader("Сведения о налогоплательщике"), 10, 0, true);
+        buildHeader(tr, new TextHeader("Параметры представления"), 2, 0, true);
 
-        //buildHeader(tr, new TextHeader("Реквизиты подразделения"), 7, 0, true);
+        buildHeader(tr, new TextHeader("Параметры подразделения"), 7, 0, true);
 
         //buildHeader(tr, new TextHeader("Условия расчетов для ОП"), 1, 0, true);
 
@@ -56,13 +56,13 @@ public class ConstNdflHeaderBuilder extends AbstractHeaderOrFooterBuilder implem
 
         buildHeader(tr, new TextHeader("Код НО конечного"), 0, 0, true);
 
-        buildHeader(tr, new TextHeader("КПП"), 0, 0, true);
-
         buildHeader(tr, new TextHeader("Код НО промежуточного"), 0, 0, true);
+
+        buildHeader(tr, new TextHeader("КПП"), 0, 0, true);
 
         buildHeader(tr, new TextHeader("Код места, по которому представляется документ"), 0, 0, true);
 
-        buildHeader(tr, new TextHeader("Наименование для титульного листа"), 0, 0, true);
+        buildHeader(tr, new TextHeader("Наименование подразделения для отчета"), 0, 0, true);
 
         //buildHeader(tr, new TextHeader("Наименование для Приложения № 5"), 0, 0, true);
 
@@ -73,10 +73,6 @@ public class ConstNdflHeaderBuilder extends AbstractHeaderOrFooterBuilder implem
         buildHeader(tr, new TextHeader("ОКТМО"), 0, 0, true);
 
         buildHeader(tr, new TextHeader("Номер контактного телефона"), 0, 0, true);
-
-        buildHeader(tr, new TextHeader("Обязанность по уплате налога"), 0, 0, true);
-
-        //buildHeader(tr, new TextHeader("Признак расчёта"), 0, 0, true);
 
         buildHeader(tr, new TextHeader("Код формы реорганизации и ликвидации"), 0, 0, true);
 

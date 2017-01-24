@@ -111,7 +111,7 @@ public class RefBook implements Serializable {
 		ID_DOC(902),                                // Документ, удостоверяющий личность
 		USER(74); 									// Пользователи
 
-		private final long id;
+        private final long id;
 
 		Id(long refBookId) {
 			this.id = refBookId;
@@ -133,8 +133,13 @@ public class RefBook implements Serializable {
 	}
 
 	public enum Table {
-		ASNU("REF_BOOK_ASNU"), PERSON("REF_BOOK_PERSON"), REGION("REF_BOOK_REGION"), NDFL("REF_BOOK_NDFL"),
-		NDFL_DETAIL("REF_BOOK_NDFL_DETAIL");
+		ASNU("REF_BOOK_ASNU"),
+        PERSON("REF_BOOK_PERSON"),
+        REGION("REF_BOOK_REGION"),
+        NDFL("REF_BOOK_NDFL"),
+		NDFL_DETAIL("REF_BOOK_NDFL_DETAIL"),
+        FOND("REF_BOOK_FOND"),
+        FOND_DETAIL("REF_BOOK_FOND_DETAIL");
 
 		private final String table;
 

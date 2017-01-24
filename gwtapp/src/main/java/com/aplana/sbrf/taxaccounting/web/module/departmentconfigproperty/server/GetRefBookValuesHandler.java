@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -40,13 +41,13 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
     LogEntryService logEntryService;
 
     @Override
-    public GetRefBookValuesResult execute(GetRefBookValuesAction getRefBookValuesAction, ExecutionContext executionContext) throws ActionException {
+    public GetRefBookValuesResult execute(GetRefBookValuesAction action, ExecutionContext executionContext) throws ActionException {
         Logger logger = new Logger();
 
         //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
         Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
         Map<String, String> refAliases = new HashMap<String, String>();
-        RefBook refBook = rbFactory.get(getRefBookValuesAction.getSlaveRefBookId());
+        RefBook refBook = rbFactory.get(action.getSlaveRefBookId());
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
                 refProviders.put(attribute.getAlias(), rbFactory.getDataProvider(attribute.getRefBookId()));
@@ -57,32 +58,37 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         }
 
         GetRefBookValuesResult result = new GetRefBookValuesResult();
-        RefBookDataProvider providerMaster = rbFactory.getDataProvider(getRefBookValuesAction.getRefBookId());
+        RefBookDataProvider providerMaster = rbFactory.getDataProvider(action.getRefBookId());
 
 
-        String filterMaster = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + getRefBookValuesAction.getDepartmentId();
+        String filterMaster = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
 
-        ReportPeriod reportPeriod = periodService.getReportPeriod(getRefBookValuesAction.getReportPeriodId());
+        ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
 
         PagingResult<Map<String, RefBookValue>> paramsMaster = providerMaster.getRecords(
                 addDayToDate(reportPeriod.getEndDate(), -1), null, filterMaster, null);
         if (paramsMaster.isEmpty()) {
             return result;
         }
-        result.setNotTableValues(convert(paramsMaster, getRefBookValuesAction.getRefBookId(), false, refProviders, refAliases).get(0));
+        result.setNotTableValues(convert(paramsMaster, action.getRefBookId(), false, refProviders, refAliases).get(0));
         if (paramsMaster.get(0).containsKey(RefBook.RECORD_ID_ALIAS)) {
             result.setRecordId(paramsMaster.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
         }
 
-        RefBookDataProvider providerSlave = rbFactory.getDataProvider(getRefBookValuesAction.getSlaveRefBookId());
-        String filterSlave = "REF_BOOK_NDFL_ID = " + result.getRecordId();
-        RefBookAttribute sortAttr = rbFactory.get(getRefBookValuesAction.getSlaveRefBookId()).getAttribute("ROW_ORD");
+        RefBookDataProvider providerSlave = rbFactory.getDataProvider(action.getSlaveRefBookId());
+        String filterSlave = "";
+        if (action.getTaxType() == TaxType.NDFL) {
+            filterSlave = "REF_BOOK_NDFL_ID = " + result.getRecordId();
+        } else if (action.getTaxType() == TaxType.PFR) {
+            filterSlave = "REF_BOOK_FOND_ID = " + result.getRecordId();
+        }
+        RefBookAttribute sortAttr = rbFactory.get(action.getSlaveRefBookId()).getAttribute("ROW_ORD");
         PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(
                 addDayToDate(reportPeriod.getEndDate(), -1), null, filterSlave, sortAttr);
-        result.setTableValues(convert(paramsSlave, getRefBookValuesAction.getSlaveRefBookId(), true, refProviders, refAliases));
+        result.setTableValues(convert(paramsSlave, action.getSlaveRefBookId(), true, refProviders, refAliases));
 
         //Проверяем справочные значения для полученной таблицы
-        if (getRefBookValuesAction.getOldUUID() == null) {
+        if (action.getOldUUID() == null) {
             checkReferenceValues(refBook, result.getTableValues(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
             if (logger.getMainMsg() != null) {
                 result.setUuid(logEntryService.save(logger.getEntries()));
