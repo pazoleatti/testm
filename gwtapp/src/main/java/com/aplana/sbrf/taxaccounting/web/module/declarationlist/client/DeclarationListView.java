@@ -49,13 +49,12 @@ public class DeclarationListView extends
     public static final String TAX_ORGAN_CODE_TITLE_FF = "Код налогового органа (кон.)";
     public static final String TAX_ORGAN_CODE_KPP_TITLE = "КПП";
     public static final String ASNU_TITLE = "Наименование АСНУ";
-    public static final String GUID_TITLE = "GUID";
     public static final String STATE_TITLE = "Состояние";
     public static final String FILE_NAME_TITLE = "Файл ТФ";
     public static final String PERIOD_TITLE = "Период";
 
     private static final int TABLE_TOP1 = 41;
-    private static final int TABLE_TOP2 = 100;
+    private static final int TABLE_TOP2 = 75;
 
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {}
 

@@ -254,7 +254,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
                 break;
             case NDFL:
             case PFR:
-                fillNdfl();
+                fillNdflPfr(taxType);
                 break;
             default:
                 fillDefault();
@@ -459,7 +459,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         panel.add(horizontalPanel);
     }
 
-    private void fillNdfl() {
+    private void fillNdflPfr(TaxType taxType) {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         horizontalPanel.setWidth("100%");
         VerticalPanel verticalPanel1 = new VerticalPanel();
@@ -503,24 +503,27 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         label = getLabel("Вид налоговой формы:");
         //label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel4.add(label);
-        label = getLabel("Состояние:");
-        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        verticalPanel4.add(label);
 
         verticalPanel5.add(declarationKindPicker);
         verticalPanel5.add(declarationTypePicker);
-        verticalPanel5.add(formStatePicker);
 
+        /*
         label = getLabel("АСНУ:");
         label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel6.add(label);
-        verticalPanel7.add(asnuPicker);
+        verticalPanel7.add(asnuPicker);*/
 
-        label = getLabel("Файл:");
+        label = getLabel("Состояние:");
         label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel6.add(label);
-        verticalPanel7.add(fileNamePicker);
+        verticalPanel7.add(formStatePicker);
 
+        if (taxType.equals(TaxType.PFR)) {
+            label = getLabel("Файл:");
+            label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel6.add(label);
+            verticalPanel7.add(fileNamePicker);
+        }
         panel.add(horizontalPanel);
     }
 
