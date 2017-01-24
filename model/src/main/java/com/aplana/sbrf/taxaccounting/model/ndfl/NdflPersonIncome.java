@@ -8,24 +8,33 @@ import java.util.Date;
  */
 public class NdflPersonIncome extends NdflPersonDetail {
 
+    // Код дохода
     private String incomeCode;
     private String incomeType;
     private String oktmo;
     private String kpp;
-
+    // Дата начисления дохода
     private Date incomeAccruedDate;
     private Date incomePayoutDate;
+    // Сумма начисленного дохода
     private BigDecimal incomeAccruedSumm;
+    // Сумма выплаченного дохода
     private BigDecimal incomePayoutSumm;
+    // Общая сумма вычетов
     private BigDecimal totalDeductionsSumm;
     private BigDecimal taxBase;
+    // Ставка
     private Integer taxRate;
+    // Дата налога
     private Date taxDate;
+    // Сумма налога исчисленная
     private Integer calculatedTax;
+    // Сумма налога удержанная
     private Integer withholdingTax;
     private Integer notHoldingTax;
     private Integer overholdingTax;
     private Integer refoundTax;
+    // Срок перечисления налога
     private Date taxTransferDate;
     private Date paymentDate;
     private String paymentNumber;
