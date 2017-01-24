@@ -151,9 +151,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
             return applicationContext.getBean("RefBookCreditRatingsClasses", RefBookCreditRatingsClasses.class);
         }  else if (RefBook.Id.ASNU.getId() == refBookId) {
 			return getSimpleReadOnly(refBook, null);
-        } else if (RefBook.Id.REGION.getId() == refBookId ||
-                RefBook.Id.NDFL.getId() == refBookId ||
-                RefBook.Id.NDFL_DETAIL.getId() == refBookId) {
+        } else if (RefBook.Id.getById(refBookId) != null) {
             RefBookSimpleDataProvider provider = (RefBookSimpleDataProvider) applicationContext.getBean("refBookSimpleDataProvider", RefBookDataProvider.class);
             provider.setRefBookId(refBookId);
             return provider;
@@ -178,9 +176,15 @@ public class RefBookFactoryImpl implements RefBookFactory {
         } else if (RefBookSimpleReadOnly.TABLE_NDFL_REFBOOK_ID.equals(refBookId)){
 			return getSimpleReadOnly(refBook, null);
         } else {
-			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
-			refBookUniversal.setRefBookId(refBookId);
-			return refBookUniversal;
+            if (refBook.getTableName() != null && !refBook.getTableName().isEmpty()) {
+                RefBookSimpleDataProvider provider = (RefBookSimpleDataProvider) applicationContext.getBean("refBookSimpleDataProvider", RefBookDataProvider.class);
+                provider.setRefBookId(refBookId);
+                return provider;
+            } else {
+                RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
+                refBookUniversal.setRefBookId(refBookId);
+                return refBookUniversal;
+            }
         }
     }
 

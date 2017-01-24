@@ -59,7 +59,8 @@ public class RefBook implements Serializable {
         PROPERTY(TaxType.PROPERTY, 99L, 206L),
         INCOME(TaxType.INCOME, 33L, 330L),
         LAND(TaxType.LAND, 700L, 710L),
-        NDFL(TaxType.NDFL, 950L, 951L);
+        NDFL(TaxType.NDFL, 950L, 951L),
+        FOND(TaxType.PFR, 960L, 961L);
 
         private TaxType taxType;
         private Long refBookId;
@@ -104,16 +105,18 @@ public class RefBook implements Serializable {
 
 	/**	Индентификаторы таблиц, используются датапровайдерами */
 	public enum Id {
-		ASNU(900L), 							// АСНУ
-		PERSON(904L), 							// Физ. лица
-		REGION(923L), 							// Субъекты РФ
-		NDFL(950L), 							// Настройки подразделений по НДФЛ
-		NDFL_DETAIL(951L), 						// Настройки подразделений по НДФЛ (таблица)
-		SEC_ROLE(95L), 							// Роли
-		DEPARTMENT(Department.REF_BOOK_ID),		// Подразделения
-		USER(74L); 								// Пользователи
+		ASNU(900L),                                         // АСНУ
+        PERSON(904L),                                       // Физ. лица
+        REGION(923L),                                       // Субъекты РФ
+        NDFL(WithTable.NDFL.getRefBookId()),                // Параметры подразделений по НДФЛ
+        NDFL_DETAIL(WithTable.NDFL.getTableRefBookId()),    // Параметры подразделений по НДФЛ (таблица)
+        FOND(WithTable.FOND.getRefBookId()),                // Параметры подразделения по сборам, взносам
+        FOND_DETAIL(WithTable.FOND.getTableRefBookId()),    // Параметры подразделений по сборам, взносам (таблица)
+        SEC_ROLE(95L), 							            // Роли
+        DEPARTMENT(Department.REF_BOOK_ID),		            // Подразделения
+        USER(74L); 								            // Пользователи
 
-		private final long id;
+        private final long id;
 
 		Id(long refBookId) {
 			this.id = refBookId;
@@ -133,8 +136,13 @@ public class RefBook implements Serializable {
 	}
 
 	public enum Table {
-		ASNU("REF_BOOK_ASNU"), PERSON("REF_BOOK_PERSON"), REGION("REF_BOOK_REGION"), NDFL("REF_BOOK_NDFL"),
-		NDFL_DETAIL("REF_BOOK_NDFL_DETAIL");
+		ASNU("REF_BOOK_ASNU"),
+        PERSON("REF_BOOK_PERSON"),
+        REGION("REF_BOOK_REGION"),
+        NDFL("REF_BOOK_NDFL"),
+		NDFL_DETAIL("REF_BOOK_NDFL_DETAIL"),
+        FOND("REF_BOOK_FOND"),
+        FOND_DETAIL("REF_BOOK_FOND_DETAIL");
 
 		private final String table;
 
