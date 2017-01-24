@@ -179,7 +179,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
         DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
         // фильтр
-        declarationFilter.setDeclarationTypeId(declarationTypeId);
+        declarationFilter.setDeclarationTypeIds(Arrays.asList((long)declarationTypeId));
         declarationFilter.setReportPeriodIds(Collections.singletonList(departmentReportPeriod.getReportPeriod().getId()));
         declarationFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
         declarationFilter.setCorrectionTag(departmentReportPeriod.getCorrectionDate() != null);
