@@ -284,7 +284,7 @@ public class DeclarationListView extends
                 return object;
             }
         };
-        declarationKindColumn.setSortable(false);
+        declarationKindColumn.setSortable(true);
         departmentColumn.setSortable(true);
         reportPeriodYearColumn.setSortable(true);
         reportPeriodColumn.setSortable(true);
@@ -294,7 +294,7 @@ public class DeclarationListView extends
         declarationAsnuColumn.setSortable(true);
         declarationGuidColumn.setSortable(true);
         stateColumn.setSortable(true);
-        fileNameColumn.setSortable(false);
+        fileNameColumn.setSortable(true);
 
         reportPeriodHeader = declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodColumn);
 
@@ -448,6 +448,12 @@ public class DeclarationListView extends
 			this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME;
         } else if(STATE_TITLE.equals(sortByColumn)){
             this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_STATE;
+        } else if(FILE_NAME_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.FILE_NAME;
+        } else if(DECLARATION_KIND_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_KIND_NAME;
+        } else if(ASNU_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.ASNU;
         } else {
 			this.sortByColumn = DeclarationDataSearchOrdering.ID;
 		}

@@ -30,7 +30,8 @@ create table ref_book_deduction_type
 	version date not null, 
 	status number(1) default 0 not null, 
 	code varchar2(3 char) not null, 
-	name varchar2(2000 char) not null
+	name varchar2(2000 char) not null,
+    deduction_mark number(9) not null
 );
 
 comment on table ref_book_deduction_type is 'Коды видов вычетов';
@@ -40,6 +41,7 @@ comment on column ref_book_deduction_type.version is 'Версия. Дата а�
 comment on column ref_book_deduction_type.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_deduction_type.code is 'Код';
 comment on column ref_book_deduction_type.name is 'Наименование вычета';
+comment on column ref_book_deduction_type.deduction_mark is 'Код признака вычета';
 
 create sequence seq_ref_book_deduction_type start with 106 increment by 1;
 

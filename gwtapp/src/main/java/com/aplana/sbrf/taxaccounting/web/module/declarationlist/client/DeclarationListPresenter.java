@@ -184,7 +184,7 @@ public class DeclarationListPresenter extends
         cloneFilter.setTaxType(filter.getTaxType());
         cloneFilter.setReportPeriodIds(filter.getReportPeriodIds());
         cloneFilter.setDepartmentIds(filter.getDepartmentIds());
-        cloneFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
+        cloneFilter.setDeclarationTypeIds(filter.getDeclarationTypeIds());
         cloneFilter.setFormState(filter.getFormState());
         cloneFilter.setCorrectionTag(filter.getCorrectionTag());
         // Если мы захотим чтобы для каждого налога запоминались другие параметры поиска (сортировка...),

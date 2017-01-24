@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.FormElement;
@@ -28,7 +29,9 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class DeclarationTemplateInfoView extends ViewWithUiHandlers<DeclarationTemplateInfoUiHandlers>
 		implements DeclarationTemplateInfoPresenter.MyView {
@@ -81,6 +84,9 @@ public class DeclarationTemplateInfoView extends ViewWithUiHandlers<DeclarationT
     @UiField
     LinkButton deleteXsd, deleteJrxml;
 
+    @UiField
+    RefBookPickerWidget formKindPicker, formTypePicker;
+
     @Inject
     @UiConstructor
     public DeclarationTemplateInfoView(final Binder uiBinder) {
@@ -88,6 +94,8 @@ public class DeclarationTemplateInfoView extends ViewWithUiHandlers<DeclarationT
         FormElement.as(uploadJrxmlFile.getElement()).setAcceptCharset("UTF-8");
         FormElement.as(uploadXsdFile.getElement()).setAcceptCharset("UTF-8");
         //driver.initialize(this);
+        formKindPicker.setPeriodDates(new Date(), new Date());
+        formTypePicker.setPeriodDates(new Date(), new Date());
     }
 
     @Override
@@ -109,6 +117,27 @@ public class DeclarationTemplateInfoView extends ViewWithUiHandlers<DeclarationT
         deleteJrxml.setEnabled(template.getJrxmlBlobId() != null);
         downloadXsd.setEnabled(template.getXsdId() != null);
         deleteXsd.setEnabled(template.getXsdId() != null);
+        formKindPicker.setSingleValue(declarationTemplateExt.getDeclarationTemplate().getDeclarationFormKind().getId());
+        formTypePicker.setFilter("TAX_KIND = '"+declarationTemplateExt.getDeclarationTemplate().getType().getTaxType().getCode()+"'");
+        formTypePicker.setSingleValue(declarationTemplateExt.getDeclarationTemplate().getDeclarationFormTypeId());
+    }
+
+    @UiHandler("formKindPicker")
+    public void onFormKindChange(ValueChangeEvent<List<Long>> event) {
+        if (event.getValue()!= null && !event.getValue().isEmpty()) {
+            getUiHandlers().setFormKind(event.getValue().get(0));
+        } else {
+            getUiHandlers().setFormKind(null);
+        }
+    }
+
+    @UiHandler("formTypePicker")
+    public void onFormTypeChange(ValueChangeEvent<List<Long>> event) {
+        if (event.getValue()!= null && !event.getValue().isEmpty()) {
+            getUiHandlers().setFormType(event.getValue().get(0));
+        } else {
+            getUiHandlers().setFormType(null);
+        }
     }
 
     @Override

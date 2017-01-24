@@ -56,7 +56,7 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testFindNdflPerson() {
-        List<NdflPerson> result = ndflPersonDao.findNdflPerson(1);
+        List<NdflPerson> result = ndflPersonDao.findPerson(1);
         Assert.assertEquals(2, result.size());
     }
 
@@ -70,9 +70,9 @@ public class NdflPersonDaoTest {
 
         NdflPerson ndflPerson = ndflPersonDao.get(id);
 
-        Assert.assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "ndflPersonIncomes", "ndflPersonDeductions", "ndflPersonPrepayments"));
+        Assert.assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "incomes", "deductions", "prepayments"));
 
-        boolean incomesEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getNdflPersonIncomes(), ndflPerson.getNdflPersonIncomes(), new Equator<NdflPersonIncome>() {
+        boolean incomesEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getIncomes(), ndflPerson.getIncomes(), new Equator<NdflPersonIncome>() {
             @Override
             public boolean equate(NdflPersonIncome o1, NdflPersonIncome o2) {
                 return EqualsBuilder.reflectionEquals(o1, o2);
@@ -87,7 +87,7 @@ public class NdflPersonDaoTest {
         Assert.assertTrue(incomesEquals);
 
 
-        boolean deductionsEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getNdflPersonDeductions(), ndflPerson.getNdflPersonDeductions(), new Equator<NdflPersonDeduction>() {
+        boolean deductionsEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getDeductions(), ndflPerson.getDeductions(), new Equator<NdflPersonDeduction>() {
             @Override
             public boolean equate(NdflPersonDeduction o1, NdflPersonDeduction o2) {
                 return EqualsBuilder.reflectionEquals(o1, o2);
@@ -101,7 +101,7 @@ public class NdflPersonDaoTest {
 
         Assert.assertTrue(deductionsEquals);
 
-        boolean prepaymentEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getNdflPersonPrepayments(), ndflPerson.getNdflPersonPrepayments(), new Equator<NdflPersonPrepayment>() {
+        boolean prepaymentEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getPrepayments(), ndflPerson.getPrepayments(), new Equator<NdflPersonPrepayment>() {
             @Override
             public boolean equate(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
                 return EqualsBuilder.reflectionEquals(o1, o2);
@@ -131,7 +131,7 @@ public class NdflPersonDaoTest {
         Assert.assertNotNull(id);
 
         NdflPerson ndflPerson = ndflPersonDao.get(id);
-        Assert.assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "ndflPersonIncomes", "ndflPersonDeductions", "ndflPersonPrepayments"));
+        Assert.assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "incomes", "deductions", "prepayments"));
 
         ndflPersonDao.delete(id);
         NdflPerson deleted = ndflPersonDao.get(id);
@@ -186,12 +186,12 @@ public class NdflPersonDaoTest {
         ndflPersonIncomes.add(createNdflPersonIncomes(1));
         ndflPersonIncomes.add(createNdflPersonIncomes(2));
         ndflPersonIncomes.add(createNdflPersonIncomes(3));
-        person.setNdflPersonIncomes(ndflPersonIncomes);
+        person.setIncomes(ndflPersonIncomes);
 
         List<NdflPersonDeduction> ndflPersonDeductions = new ArrayList<NdflPersonDeduction>();
         ndflPersonDeductions.add(createNdflPersonDeduction(1));
         ndflPersonDeductions.add(createNdflPersonDeduction(2));
-        person.setNdflPersonDeductions(ndflPersonDeductions);
+        person.setDeductions(ndflPersonDeductions);
 
         List<NdflPersonPrepayment> ndflPersonPrepayments = new ArrayList<NdflPersonPrepayment>();
         ndflPersonPrepayments.add(createNdflPersonPrepayment(1));
@@ -200,7 +200,7 @@ public class NdflPersonDaoTest {
         ndflPersonPrepayments.add(createNdflPersonPrepayment(5));
         ndflPersonPrepayments.add(createNdflPersonPrepayment(5));
 
-        person.setNdflPersonPrepayments(ndflPersonPrepayments);
+        person.setPrepayments(ndflPersonPrepayments);
 
 
         return person;
@@ -213,7 +213,6 @@ public class NdflPersonDaoTest {
         personIncome.setOperationId(11111L);
         personIncome.setOktmo("oktmo111");
         personIncome.setKpp("kpp111");
-        //TODO and add another field values...
         return personIncome;
     }
 

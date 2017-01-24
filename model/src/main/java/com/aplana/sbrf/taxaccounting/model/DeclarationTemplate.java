@@ -28,7 +28,7 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
     /**
      * Вид наловой формы(declaration)
      */
-    private DeclarationFormType declarationFormType;
+    private Long declarationFormTypeId;
 
     public String getName() {
         return name;
@@ -165,11 +165,11 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
         this.declarationFormKind = declarationFormKind;
     }
 
-    public DeclarationFormType getDeclarationFormType() {
-        return declarationFormType;
+    public Long getDeclarationFormTypeId() {
+        return declarationFormTypeId;
     }
 
-    public void setDeclarationFormType(DeclarationFormType declarationFormType) {
-        this.declarationFormType = declarationFormType;
+    public void setDeclarationFormTypeId(Long declarationFormTypeId) {
+        this.declarationFormTypeId = declarationFormTypeId;
     }
 }

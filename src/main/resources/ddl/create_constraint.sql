@@ -136,6 +136,8 @@ alter table declaration_template add constraint declaration_template_fk_dtype fo
 alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (XSD) references blob_data(id);
 alter table declaration_template add constraint dec_tem_fk_blob_data_jrxml foreign key (jrxml) references blob_data(id);
 alter table declaration_template add constraint dec_template_check_status check (status in (-1, 0, 1, 2));
+alter table declaration_template add constraint chk_declaration_template_fkind check ((status in (0,1) and form_kind is not null) or status not in (0,1));
+alter table declaration_template add constraint chk_declaration_template_ftype check ((status in (0,1) and form_type is not null) or status not in (0,1));
 
 alter table department_report_period add constraint department_report_period_pk primary key(id);
 alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));

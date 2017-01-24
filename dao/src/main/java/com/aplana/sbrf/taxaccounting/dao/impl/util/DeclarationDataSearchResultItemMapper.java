@@ -28,7 +28,7 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
         result.setTaxOrganKpp(rs.getString("kpp"));
         result.setAsnuId(SqlUtils.getLong(rs,"asnu_id"));
         result.setFileName(rs.getString("file_name"));
-        result.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
+        result.setDeclarationFormKind(DeclarationFormKind.fromId(SqlUtils.getLong(rs,"form_kind")));
         return result;
 	}
 }

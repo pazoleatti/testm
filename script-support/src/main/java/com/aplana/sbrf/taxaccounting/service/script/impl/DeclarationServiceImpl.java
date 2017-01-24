@@ -73,6 +73,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Override
+    public DeclarationData getDeclarationData(long declarationDataId) {
+        return declarationDataDao.get(declarationDataId);
+    }
+
+    @Override
     public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
         return declarationDataDao.find(declarationTypeId, departmentReportPeriodId);
     }
@@ -85,6 +90,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId) {
         return declarationDataDao.getLast(declarationTypeId, departmentId, reportPeriodId);
+    }
+
+    @Override
+    public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId){
+        return declarationDataDao.findAllDeclarationData(declarationTypeId, departmentId, reportPeriodId);
     }
 
     @Override

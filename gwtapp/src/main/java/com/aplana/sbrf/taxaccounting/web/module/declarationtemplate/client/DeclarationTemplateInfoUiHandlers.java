@@ -8,4 +8,6 @@ public interface DeclarationTemplateInfoUiHandlers extends UiHandlers {
     void downloadJrxml();
     void downloadXsd();
     void onInfoChanged();
+    void setFormKind(Long formKindId);
+    void setFormType(Long formTypeId);
 }

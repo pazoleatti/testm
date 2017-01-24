@@ -5,6 +5,9 @@ import java.util.List;
 
 /**
  * Источники-приемники нф, получаемые в скрипте
+ *
+ * (Andrey Drunk) кроме источников-форм, данный класс может использоваться для описания источников-деклараций
+ *
  * @author dloshkarev
  */
 public class FormSources implements Serializable {

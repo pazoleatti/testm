@@ -88,7 +88,8 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setType(declarationType);
         declarationTemplate.setJrxmlBlobId("1");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
-
+        declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
+        declarationTemplate.setDeclarationFormTypeId(1L);
 		int id = declarationTemplateDao.create(declarationTemplate);
 
 		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(id);
@@ -109,6 +110,8 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
 		declarationTemplate.setVersion(new Date());
 		declarationTemplate.setCreateScript("MyScript");
+        declarationTemplate.setDeclarationFormTypeId(1L);
+        declarationTemplate.setDeclarationFormKind(DeclarationFormKind.REPORTS);
         declarationTemplate.setSubreports(new ArrayList<DeclarationSubreport>());
 		DeclarationType declarationType = declarationTypeDao.get(1);
 		declarationTemplate.setType(declarationType);
@@ -188,10 +191,11 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setId(1);
         declarationTemplate.setName("Декларация");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
-        declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
         declarationTemplate.setSubreports(new ArrayList<DeclarationSubreport>());
+        declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
+        declarationTemplate.setDeclarationFormTypeId(1L);
         DeclarationType declarationType = declarationTypeDao.get(1);
         declarationTemplate.setType(declarationType);
 

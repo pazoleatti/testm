@@ -35,15 +35,15 @@ public enum DeclarationFormKind {
 	 */
 	REPORTS(7, "Отчетная");
 
-	private final int id;
+	private final long id;
 	private final String title;
 
-	private DeclarationFormKind(int id, String title) {
+	private DeclarationFormKind(long id, String title) {
 		this.id = id;
 		this.title = title;
 	}
 	
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 	
@@ -51,7 +51,7 @@ public enum DeclarationFormKind {
 		return title;
 	}
 	
-	public static DeclarationFormKind fromId(int kindId) {
+	public static DeclarationFormKind fromId(long kindId) {
 		for (DeclarationFormKind kind: values()) {
 			if (kind.id == kindId) {
 				return kind;

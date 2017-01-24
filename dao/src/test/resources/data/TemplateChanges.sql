@@ -15,12 +15,12 @@ insert into declaration_type (id, name, tax_type, status) values (1, 'Вид д�
 insert into declaration_type (id, name, tax_type) values (2, 'Вид декларации 2', 'T');
 insert into declaration_type (id, name, tax_type) values (3, 'Вид декларации 3', 'V');
 
-insert into declaration_template(id, name, version, jrxml, declaration_type_id, status)
-  values (1, 'Декларация 1', date '2013-01-01', null, 1, 0);
-insert into declaration_template(id, name, version, jrxml, declaration_type_id, status)
-  values (2, 'Декларация 2', date '2013-05-01', null, 1, 1);
-insert into declaration_template(id, name, version, jrxml, declaration_type_id, status)
-  values (3, 'Декларация 3', date '2013-01-01', null, 2, 1);
+insert into declaration_template(id, name, version, jrxml, declaration_type_id, status, form_kind, form_type)
+  values (1, 'Декларация 1', date '2013-01-01', null, 1, 0, 3, 1);
+insert into declaration_template(id, name, version, jrxml, declaration_type_id, status, form_kind, form_type)
+  values (2, 'Декларация 2', date '2013-05-01', null, 1, 1, 3, 1);
+insert into declaration_template(id, name, version, jrxml, declaration_type_id, status, form_kind, form_type)
+  values (3, 'Декларация 3', date '2013-01-01', null, 2, 1, 3, 1);
 
 insert into form_template (id, type_id, data_rows, version, fixed_rows, name, fullname, header, status)
   values (1, 1, null, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 1, 'name_1', 'fullname_1', 'header_1', 0);

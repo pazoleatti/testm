@@ -82,6 +82,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         declarationKindPicker.setWidth("100%");
         declarationKindPicker.setPeriodDates(new Date(), new Date());
         declarationKindPicker.setManualUpdate(true);
+        declarationKindPicker.setMultiSelect(true);
 
         declarationTypePicker = new RefBookPickerWidget(false, false);
         declarationTypePicker.setVersionEnabled(false);
@@ -89,6 +90,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         declarationTypePicker.setWidth("100%");
         declarationTypePicker.setPeriodDates(new Date(), new Date());
         declarationTypePicker.setManualUpdate(true);
+        declarationTypePicker.setMultiSelect(true);
 
         asnuPicker = new RefBookPickerWidget(false, false);
         asnuPicker.setVersionEnabled(false);
@@ -145,8 +147,8 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         this.formDataFilter = formDataFilter;
         departmentPicker.setValue(formDataFilter.getDepartmentIds());
         reportPeriodPicker.setValue(formDataFilter.getReportPeriodIds());
-        if (formDataFilter.getDeclarationTypeId() != null) {
-            declarationTypePicker.setValue(Arrays.asList(formDataFilter.getDeclarationTypeId().longValue()));
+        if (formDataFilter.getDeclarationTypeIds() != null) {
+            declarationTypePicker.setValue(formDataFilter.getDeclarationTypeIds());
         } else {
             declarationTypePicker.setValue(null);
         }
@@ -160,9 +162,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         formDataFilter.setReportPeriodIds(reportPeriodPicker.getValue());
         List<Long> values = declarationTypePicker.getValue();
         if (values != null && !values.isEmpty()) {
-            formDataFilter.setDeclarationTypeId(values.get(0).intValue());
+            formDataFilter.setDeclarationTypeIds(values);
         } else {
-            formDataFilter.setDeclarationTypeId(null);
+            formDataFilter.setDeclarationTypeIds(null);
         }
         formDataFilter.setFormState(formStatePicker.getValue());
         formDataFilter.setTaxOrganCode(taxOrganisationPicker.getValue());
@@ -173,6 +175,12 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
             formDataFilter.setAsnuId(asnuPickerValues.get(0));
         } else {
             formDataFilter.setAsnuId(null);
+        }
+        List<Long> kindPickerValues = declarationKindPicker.getValue();
+        if (kindPickerValues != null && !kindPickerValues.isEmpty()) {
+            formDataFilter.setFormKindIds(kindPickerValues);
+        } else {
+            formDataFilter.setFormKindIds(null);
         }
         formDataFilter.setFileName(fileNamePicker.getValue());
 		return formDataFilter;
