@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 import java.io.Serializable;
@@ -103,7 +104,14 @@ public class RefBook implements Serializable {
 
 	/**	Индентификаторы таблиц, используются датапровайдерами */
 	public enum Id {
-		ASNU(900L), PERSON(904L), REGION(923L), NDFL(950L), NDFL_DETAIL(951L);
+		ASNU(900L), 							// АСНУ
+		PERSON(904L), 							// Физ. лица
+		REGION(923L), 							// Субъекты РФ
+		NDFL(950L), 							// Настройки подразделений по НДФЛ
+		NDFL_DETAIL(951L), 						// Настройки подразделений по НДФЛ (таблица)
+		SEC_ROLE(95L), 							// Роли
+		DEPARTMENT(Department.REF_BOOK_ID),		// Подразделения
+		USER(74L); 								// Пользователи
 
 		private final long id;
 
