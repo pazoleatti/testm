@@ -131,6 +131,8 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
     private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
     private RefBookFactory rbFactory;
+    @Autowired
+    private DeclarationDataSearchService declarationDataSearchService;
 
     @Override
     public ImportCounter importDeclaration(TAUserInfo userInfo, Map<Integer, List<TaxType>> departmentTaxMap, Logger logger, String lockId, boolean isAsync) {
@@ -387,7 +389,6 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             }
         }
 
-
         // Не задан код подразделения/период/год
         if (departmentCode == null || reportPeriodCode == null || year == null) {
             return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.L4, logger, lockId, fileName, "path")));
@@ -484,6 +485,20 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
             return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.L9, logger, lockId, declarationType.getName(), reportPeriodName)));
         }
+
+        // Проверка GUID
+        if (guid != null && !guid.isEmpty()) {
+            DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
+            declarationFilter.setFileName(guid);
+            declarationFilter.setTaxType(declarationType.getTaxType());
+            declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
+            List<Long> declarationDataSearchResultItems = declarationDataSearchService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false);
+            if (!declarationDataSearchResultItems.isEmpty()) {
+                log(userInfo, LogData.Ln_3, logger, lockId, guid);
+                return Collections.singletonList(new LogEntry(LogLevel.ERROR, String.format(LogData.Ln_3.getText(), lockId, guid)));
+            }
+        }
+
 
         // Поиск экземпляра декларации
         DeclarationData declarationData = declarationDataService.find(declarationTemplateId, departmentReportPeriod.getId(), null, kpp, asnuId, guid);
@@ -605,7 +620,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             ));
 
         try {
-            // 15 Скрипт
+            // 15 Проверка по XSD + Скрипт
             try {
                 declarationDataService.importDeclarationData(localLogger, userInfo, declarationData.getId(), inputStream,
                         fileName, FormDataEvent.IMPORT_TRANSPORT_FILE, null, lock);

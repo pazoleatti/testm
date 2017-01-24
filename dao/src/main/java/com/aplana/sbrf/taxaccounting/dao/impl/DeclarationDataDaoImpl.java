@@ -298,18 +298,16 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             }
         }
 
-        if (TaxType.NDFL.equals(filter.getTaxType()) || TaxType.PFR.equals(filter.getTaxType())) {
-            if (filter.getAsnuId() != null) {
-                sql.append(" AND dec.asnu_id = ").append(filter.getAsnuId());
-            }
-            if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
-                sql.append(" AND ")
-                .append(SqlUtils.transformToSqlInStatement("dectemplate.form_kind", filter.getFormKindIds()));
-            }
-            if (filter.getFileName() != null && !filter.getFileName().isEmpty()) {
-                sql.append(" AND lower(dec.file_name) like lower(:fileName)");
-                values.put("fileName", "%"+filter.getFileName()+"%");
-            }
+        if (filter.getAsnuId() != null) {
+            sql.append(" AND dec.asnu_id = ").append(filter.getAsnuId());
+        }
+        if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
+            sql.append(" AND ")
+            .append(SqlUtils.transformToSqlInStatement("dectemplate.form_kind", filter.getFormKindIds()));
+        }
+        if (filter.getFileName() != null && !filter.getFileName().isEmpty()) {
+            sql.append(" AND lower(dec.file_name) like lower(:fileName)");
+            values.put("fileName", "%"+filter.getFileName()+"%");
         }
 
         if (filter.getTaxType() == TaxType.PROPERTY || filter.getTaxType() == TaxType.TRANSPORT || filter.getTaxType() == TaxType.INCOME || filter.getTaxType() == TaxType.LAND || filter.getTaxType() == TaxType.NDFL || filter.getTaxType() == TaxType.PFR) {
