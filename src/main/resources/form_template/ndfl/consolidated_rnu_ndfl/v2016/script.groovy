@@ -2,6 +2,8 @@ package form_template.ndfl.consolidated_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.ndfl.*
+import com.aplana.sbrf.taxaccounting.model.refbook.*
+import com.aplana.sbrf.taxaccounting.refbook.*
 import groovy.transform.Field
 import groovy.util.slurpersupport.NodeChild
 
@@ -12,6 +14,8 @@ import javax.xml.stream.events.XMLEvent
 
 import groovy.xml.MarkupBuilder
 
+//TODO удалить все println
+
 /**
  * Скрипт макета декларации РНУ-НДФЛ(консолидированная)
  */
@@ -20,6 +24,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.CALCULATE: //формирование xml
+        consolidation()
         generateXml()
         break
     case FormDataEvent.COMPOSE: // Консолидирование
@@ -33,11 +38,43 @@ switch (formDataEvent) {
         break
 }
 
-
-
-//Идентификатор вида деклараций из declaration_type
+/**
+ * Идентификатор вида деклараций из declaration_type
+ */
 @Field
 def declarationTypeId = 100
+
+//Идентификаторы справочников
+
+/**
+ * Адреса физических лиц
+ */
+@Field
+def REF_BOOK_ADDRESS_ID = 901L
+
+/**
+ * Документы, удостоверяющие личность
+ */
+@Field
+def REF_BOOK_ID_DOC_ID = 902L
+
+/**
+ * Статусы налогоплательщика
+ */
+@Field
+def REF_BOOK_TAXPAYER_STATE_ID = 903L
+
+/**
+ * Физические лица
+ */
+@Field
+def REF_BOOK_PERSON_ID = 904L
+
+/**
+ * Идентификаторы налогоплательщика
+ */
+@Field
+def REF_BOOK_ID_TAX_PAYER_ID = 905L
 
 /**
  * Консолидировать РНУ-НДФЛ, для получения источников используется метод getDeclarationSourcesInfo
@@ -45,67 +82,125 @@ def declarationTypeId = 100
  *
  */
 void consolidation() {
-    println "Консолидация РНУ-НДФЛ"
+    println "declaration consolidate start!"
+
+
+    RefBookDataProvider personProvider = refBookFactory.getDataProvider(REF_BOOK_PERSON_ID)
+
+    // RefBookDataProvider documentProvider = refBookFactory.getDataProvider(REF_BOOK_ID_DOC_ID)
 
     def declarationDataId = declarationData.getId()
 
-    //
+    //удаляем рассчитанные данные если есть
+    //ndflPersonService.deleteAll(declarationDataId)
+
     List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, false, false, null, userInfo, logger);
 
-    println "Список ПНФ: " + sourcesInfo
+    println "sourcesInfo: " + relationsToStr(sourcesInfo)
 
     //Формируем карту ID записи о ФЛ из справочника, объект модели для консолидации
     def map = collectNdflPerson(sourcesInfo);
 
-    println "получили map: " + map
+    println "collectNdflPerson: " + map
 
     //разделы в которых идет сплошная нумерация
+    def ndflPersonNum = 1;
     def incomesRowNum = 1;
     def deductionRowNum = 1;
     def prepaymentRowNum = 1;
 
-    map.each { personId, person ->
+    for (Map.Entry<Long, NdflPerson> entry : map.entrySet()) {
 
-        def incomes = person.incomes;
-        def deductions = person.deductions;
-        def prepayments = person.prepayments;
+        def personId = entry.getKey()
+        def ndflPerson = entry.getValue()
+
+        println "personId=" + personId + ", ndflPerson=" + ndflPerson
+
+        def incomes = ndflPerson.incomes;
+        def deductions = ndflPerson.deductions;
+        def prepayments = ndflPerson.prepayments;
 
         //Сортируем сначала по дате начисления, затем по дате выплаты
         incomes.sort { a, b -> (a.incomeAccruedDate <=> b.incomeAccruedDate) ?: a.incomePayoutDate <=> b.incomePayoutDate }
-        deductions.sort { a, b -> a.incomeAccrued <=> b.incomeAccrued}
-        prepayments.sort {a, b -> a.notifDate <=> b.notifDate}
+        deductions.sort { a, b -> a.incomeAccrued <=> b.incomeAccrued }
+        prepayments.sort { a, b -> a.notifDate <=> b.notifDate }
 
-        def consolidatePerson = createNdlPersonFromDictionary(personId, person);
+        Map<String, RefBookValue> recordData = personProvider.getRecordData(personId)
 
+        /*List<Long> documentsIds = documentProvider.getUniqueRecordIds(null, "PERSON_ID = " + personId + " AND INC_REP = 1");
+        if (documentsIds == null || documentsIds.isEmpty()) {
+            logger.error("В справочнике \"Документы, удостоверяющие личность\" отсутствуют данные о документах для физлица с id: \"%s\", и признаком включения в отчетность: 1", personId)
+            continue;
+        }*/
+        Map<String, RefBookValue> docRecordData// =  documentProvider.getRecordData(documentsIds.first());
+
+
+        def consolidatePerson = createNdlPersonFromRefBook(ndflPerson, recordData, docRecordData);
+
+        consolidatePerson.rowNum = ndflPersonNum;
         consolidatePerson.declarationDataId = declarationDataId
         consolidatePerson.incomes = incomes.withIndex().collect { detail, i -> consolidateDetail(detail, incomesRowNum) }
         consolidatePerson.deductions = deductions.withIndex().collect { detail, i -> consolidateDetail(detail, deductionRowNum) }
         consolidatePerson.prepayments = prepayments.withIndex().collect { detail, i -> consolidateDetail(detail, prepaymentRowNum) }
 
         ndflPersonService.save(consolidatePerson)
+        ndflPersonNum++
 
     }
+
+    println "declaration consolidate end!"
 
 }
 
 /**
  * Создает объект NdlPerson заполненный данными из справочника
  */
-def createNdlPersonFromDictionary(Long personId){
-    //NdflPerson ndflPerson = new NdflPerson()
-    //TODO Заполнить из справочника
-    ndflPerson.id = null
+def createNdlPersonFromRefBook(currentNdflPerson, Map<String, RefBookValue> personData, Map<String, RefBookValue> docData) {
+    def ndflPerson = new NdflPerson()
+
+    //Данные о физлице - заполняется на основе справочника физлиц
+    ndflPerson.personId = personData.get("RECORD_ID")?.getNumberValue() //Идентификатор ФЛ
+    ndflPerson.inp = personData.get("RECORD_ID")?.getNumberValue()
+    ndflPerson.snils = personData.get("SNILS")?.getStringValue()
+    ndflPerson.lastName = personData.get("LAST_NAME")?.getStringValue()
+    ndflPerson.firstName = personData.get("FIRST_NAME")?.getStringValue()
+    ndflPerson.middleName = personData.get("MIDDLE_NAME")?.getStringValue()
+    ndflPerson.birthDay = personData.get("BIRTH_DATE")?.getDateValue()
+
+    //TODO гражданство из справочника?
+    ndflPerson.citizenship = currentNdflPerson.citizenship//personData.get("CITIZENSHIP")?.getNumberValue()
+    ndflPerson.innNp = personData.get("INN")?.getStringValue()
+    ndflPerson.innForeign = personData.get("INN_FOREIGN")?.getStringValue()
+
+    //ДУЛ - заполняется на основе справочника Документы, удостоверяющие личность
+    ndflPerson.idDocType = currentNdflPerson.idDocType//docData.get("DOC_ID")?.getStringValue() //Вид документа
+    ndflPerson.idDocNumber = currentNdflPerson.idDocNumber
+//docData.get("DOC_NUMBER")?.getStringValue() //Серия и номер документа
+    ndflPerson.status = currentNdflPerson.status
+    ndflPerson.postIndex = currentNdflPerson.postIndex
+    ndflPerson.regionCode = currentNdflPerson.regionCode
+    ndflPerson.area = currentNdflPerson.area
+    ndflPerson.city = currentNdflPerson.city
+    ndflPerson.locality = currentNdflPerson.locality
+    ndflPerson.street = currentNdflPerson.street
+    ndflPerson.house = currentNdflPerson.house
+    ndflPerson.building = currentNdflPerson.building
+    ndflPerson.flat = currentNdflPerson.flat
+    ndflPerson.countryCode = currentNdflPerson.countryCode
+    ndflPerson.address = currentNdflPerson.address
+    ndflPerson.additionalData = currentNdflPerson.additionalData
     return ndflPerson
 }
 
-def consolidateDetail(ndflPersonDetail, i){
+def consolidateDetail(ndflPersonDetail, i) {
+    def sourceId = ndflPersonDetail.id;
     ndflPersonDetail.id = null
     ndflPersonDetail.ndflPersonId = null
     ndflPersonDetail.rowNum = i
+    ndflPersonDetail.sourceId = sourceId;
     i++;
     return ndflPersonDetail
 }
-
 
 /**
  * Функция сохраняет данные о доходаф ФЛ
@@ -119,8 +214,11 @@ Map collectNdflPerson(List<Relation> sourcesInfo) {
     // собрать данные из источников и собратьхраняем в БД
     for (Relation relation : sourcesInfo) {
 
-        if (!relation.declarationState.equals(State.ACCEPTED)){
+        println "consolidate from relation declarationDataId=" + relation.declarationDataId
+
+        if (!relation.declarationState.equals(State.ACCEPTED)) {
             logger.error("Декларация-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", подразделение: \"%s\"", relation.getDeclarationTypeName(), relation.getFullDepartmentName())
+            continue
         }
 
         //получаем все NdflPerson из ПНФ
@@ -129,8 +227,10 @@ Map collectNdflPerson(List<Relation> sourcesInfo) {
             //ndflPerson c заполненными данными о доходах
             def ndflPersonData = ndflPersonService.get(ndflPerson.id)
 
-            def personId = ndflPerson.id //TODO Ссылка на справочник должна выстовлятся при проверке, ndflPerson.refBookId
-            //Консолидируем данные о доходах ФЛ, в одном разделе
+            //Ссылка на справочник физлиц
+            def personId = ndflPerson.personId
+
+            //Консолидируем данные о доходах ФЛ, должны быть в одном разделе
             if (result.containsKey(personId)) {
                 def consolidatePersonData = result.get(personId)
                 consolidatePersonData.incomes.addAll(ndflPersonData.incomes)
@@ -139,11 +239,12 @@ Map collectNdflPerson(List<Relation> sourcesInfo) {
             } else {
                 result.put(personId, ndflPersonData)
             }
+
+            println "process ndflPerson=" + ndflPerson.id + ", result=" + result.keySet()
         }
     }
     return result;
 }
-
 
 /**
  * Получить набор деклараций  события FormDataEvent.GET_SOURCES.
@@ -156,13 +257,10 @@ Map collectNdflPerson(List<Relation> sourcesInfo) {
  */
 def getSourcesList() {
 
-    println "get source"
-
     //отчетный период в котором выполняется консолидация
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-    def reportPeriodId = reportPeriod?.id
 
-    //Идентификатор подразделения по которому формируется консолидированная
+    //Идентификатор подразделения по которому формируется консолидированная форма
     def parentDepartmentId = declarationData.departmentId
 
     def parentDepartment = departmentService.get(parentDepartmentId)
@@ -170,39 +268,61 @@ def getSourcesList() {
     //Подразделения которые является подчиненным по отношению к ТБ
     def departments = departmentService.getAllChildren(parentDepartmentId)
 
-    if (parentDepartment != null) {
-        departments.add(parentDepartment)
-    }
+    println "getSourceList: parentDepartmentId=" + parentDepartmentId + ", reportPeriod=" + reportPeriod.id
 
     //Список отчетных периодов которые должны быть включены в консолидированную форму (1 квартал, полугодие, 9 месяцев, год)
     List<ReportPeriod> reportPeriodList = reportPeriodService.getReportPeriodsByDate(TaxType.NDFL, reportPeriod.startDate, reportPeriod.endDate)
 
+    println "getReportPeriodsByDate: " + reportPeriodList.collect { p -> "id=" + p.id + ", start=" + p.startDate + ", end=" + p.endDate }
+
     for (Department department : departments) {
 
-        def departmentId = department.id
+        println "   process department: " + department.id
 
-        for (ReportPeriod primaryReportPeriod: reportPeriodList){
+        for (ReportPeriod primaryReportPeriod : reportPeriodList) {
 
-            List<DeclarationData> primaryDeclarationDataList = declarationService.findAllLastDeclarationData(departmentId, primaryReportPeriod)
+            println "       process primaryReportPeriod: " + primaryReportPeriod.id
 
-            for (DeclarationData primaryDeclarationData: primaryDeclarationDataList){
+            List<DeclarationData> primaryDeclarationDataList = findLastDeclarationData(department.id, primaryReportPeriod.id)
+
+            for (DeclarationData primaryDeclarationData : primaryDeclarationDataList) {
+                println "   process primaryDeclarationData: " + primaryDeclarationData.id
                 //Формируем связь источник-приемник
                 def relation = getRelation(primaryDeclarationData, department, reportPeriod)
-                println "Сформировали связь: ${relation}"
                 sources.sourceList.add(relation)
             }
         }
     }
 
+
+    def sourcesInfo = relationsToStr(sources.sourceList)
+
+    logger.info("getSourceList: " + sourcesInfo)
+    println "getSourceList: " + sourcesInfo
+
+
     sources.sourcesProcessedByScript = true
 }
 
-List<DeclarationData> findAllLastDeclarationData(departmentId, reportPeriodId){
+
+def relationsToStr(relations) {
+    return relations.collect { r ->
+        " {departmentId=" + r.departmentId +
+                ", declarationDataId=" + r.declarationDataId +
+                ", correctionDate=" + r.correctionDate +
+                ", asnuId=" + r.asnuId +
+                ", relation.departmentReportPeriod=" + r.departmentReportPeriod?.reportPeriod?.id +
+                "}"
+    }
+}
+
+
+List<DeclarationData> findLastDeclarationData(departmentId, reportPeriodId) {
     List<DeclarationData> result = new ArrayList<DeclarationData>()
     def declarationDataList = declarationService.findAllDeclarationData(declarationTypeId, departmentId, reportPeriodId)
     def periodId;
-    for (DeclarationData dd: declarationDataList){
-        if (periodId != null && periodId != dd.departmentReportPeriodId){
+    for (DeclarationData dd : declarationDataList) {
+        if (periodId != null && periodId != dd.departmentReportPeriodId) {
             return result;
         }
         periodId = dd.departmentReportPeriodId
@@ -309,7 +429,7 @@ def logicCheck() {
     println "logic check"
 }
 
-def generateXml(){
+def generateXml() {
     def declarationDataId = declarationData.getId()
     println "generateXml by ${declarationDataId}"
     def builder = new MarkupBuilder(xml)
@@ -317,11 +437,11 @@ def generateXml(){
 }
 
 
-def format(date){
+def format(date) {
     return date?.format('dd.MM.yyyy')
 }
 
-def createSpecificReport(){
+def createSpecificReport() {
     println "createSpecificReport"
     def writer = new PrintWriter(scriptSpecificReportHolder.getFileOutputStream());
     scriptSpecificReportHolder.getSubreportParamValues().each { k, v ->
@@ -330,11 +450,3 @@ def createSpecificReport(){
     writer.close()
     scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".txt")
 }
-
-
-
-
-
-
-
-
