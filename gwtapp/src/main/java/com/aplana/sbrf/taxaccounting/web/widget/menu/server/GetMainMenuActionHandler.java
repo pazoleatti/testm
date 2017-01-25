@@ -148,11 +148,6 @@ public class GetMainMenuActionHandler extends
             MenuItem nsiMenuItem = new MenuItem("НСИ");
             nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
 
-            if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                    || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN
-                        + BookerStatementsTokens.bookerStatements));
-            }
             menuItems.add(nsiMenuItem);
         }
 
