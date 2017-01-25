@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.util.DeclarationScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
+import org.custommonkey.xmlunit.Difference;
+import org.custommonkey.xmlunit.DifferenceListener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,26 +19,19 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.reset;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
@@ -153,10 +148,19 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         String correctXml = IOUtils.toString(getClass().getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/report_6ndfl/v2016/report_6ndfl.xml"), "UTF-8");
         XMLUnit.setIgnoreWhitespace(true);
         Diff xmlDiff = new Diff(correctXml, testHelper.getXmlStringWriter().toString());
-//        assertTrue(xmlDiff.similar());
-//        InputStream inputStream = NdflReport6ScriptTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/report_6ndfl/v2016/report_6ndfl.xml");
-//        StringWriter stringWriter = new StringWriter();
-//        IOUtils.copy(inputStream, stringWriter);
-//        assertEquals(stringWriter, testHelper.getXmlStringWriter().toString());
+        xmlDiff.overrideDifferenceListener(new DifferenceListener() {
+            @Override
+            public int differenceFound(Difference diff) {
+                if (diff.getControlNodeDetail().getNode().getNodeName() == "ИдФайл") {
+                    return RETURN_IGNORE_DIFFERENCE_NODES_IDENTICAL;
+                } else {
+                    System.err.println("called: " + diff);
+                    return RETURN_ACCEPT_DIFFERENCE;
+                }
+            }
+            @Override
+            public void skippedComparison(Node arg0, Node arg1) { }
+        });
+        assertTrue(xmlDiff.identical());
     }
 }
