@@ -89,31 +89,11 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
         ArrayList<Long> formTypeIds = new ArrayList<Long>();
         Long refBookId = null;
         switch (action.getTaxType()) {
-            case INCOME:
-                refBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
-                formTypeIds.add(372L); // приложение 5
-                formTypeIds.add(500L); // сводная 5
-                break;
             case NDFL:
                 refBookId = RefBook.WithTable.NDFL.getRefBookId();
                 break;
             case PFR:
-                refBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
-                break;
-            case TRANSPORT:
-                refBookId = RefBook.DEPARTMENT_CONFIG_TRANSPORT;
-                break;
-            case DEAL:
-                refBookId = RefBook.DEPARTMENT_CONFIG_DEAL;
-                break;
-            case VAT:
-                refBookId = RefBook.DEPARTMENT_CONFIG_VAT;
-                break;
-            case PROPERTY:
-                refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
-                break;
-            case LAND:
-                refBookId = RefBook.DEPARTMENT_CONFIG_LAND;
+                refBookId = RefBook.WithTable.FOND.getRefBookId();
                 break;
         }
         RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);

@@ -42,12 +42,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     // Тип налога -> ID справочника с параметрами подразделения
     private static final Map<TaxType, Long> TAX_TYPE_TO_REF_BOOK_MAP = new HashMap<TaxType, Long>() {
         {
-            put(TaxType.INCOME, RefBook.DEPARTMENT_CONFIG_INCOME);
-            put(TaxType.TRANSPORT, RefBook.DEPARTMENT_CONFIG_TRANSPORT);
-            put(TaxType.DEAL, RefBook.DEPARTMENT_CONFIG_DEAL);
-            put(TaxType.VAT, RefBook.DEPARTMENT_CONFIG_VAT);
-            put(TaxType.PROPERTY, RefBook.DEPARTMENT_CONFIG_PROPERTY);
-            put(TaxType.LAND, RefBook.DEPARTMENT_CONFIG_LAND);
+            put(TaxType.NDFL, RefBook.Id.NDFL.getId());
+            put(TaxType.PFR, RefBook.Id.FOND.getId());
         }
     };
 

@@ -324,24 +324,17 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	 * и применить изменения к представлению
 	 */
 	private void initView(boolean isForm) {
-		boolean isTaxTypeDeal = taxType.equals(TaxType.DEAL);
-        boolean isTaxTypeETR = taxType.equals(TaxType.ETR);
-		boolean isTaxTypeMarket = taxType.equals(TaxType.MARKET);
 		receiverSourcesKindTitle.setTitle(taxType.isTax() ? "Тип налоговой формы" : "Тип формы");
 		receiverSourcesTypeTitle.setTitle(taxType.isTax() ? "Вид налоговой формы" : "Вид формы");
-            declarationTypeHeader.setTitle(isTaxTypeDeal ? "Вид уведомления" : "Вид декларации");
+		declarationTypeHeader.setTitle("Вид декларации");
 		formGrid.redrawHeaders();
 		decGrid.redrawHeaders();
 
-		// леваяя ссылка
-        if (isTaxTypeETR || isTaxTypeMarket) {
-            switchMode.setVisible(false);
-        } else {
-            switchMode.setVisible(true);
-            switchMode.setText(getHeader(isForm, isTaxTypeDeal));
-        }
+		// левая ссылка
+		switchMode.setVisible(true);
+		switchMode.setText("Назначение налоговых форм");
 		// средний лейбл
-		formHeader.setText(getHeader(!isForm, isTaxTypeDeal || isTaxTypeETR || isTaxTypeMarket));
+		formHeader.setText("Назначение налоговых форм");
 
 		if (isForm) {
 			this.isForm = true;
@@ -376,13 +369,6 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 			declarationPager.setPageSize(PAGE_SIZE);
 		}
 	}
-
-	private String getHeader(boolean isForm, boolean isTaxTypeDeal){
-		return isForm ?
-				(isTaxTypeDeal ? "Назначение уведомлений" : "Назначение деклараций") :
-				(isTaxTypeDeal ? "Назначение форм" : "Назначение налоговых форм");
-	}
-
 
 	@Override
 	public List<FormTypeKind> getSelectedItemsOnDeclarationGrid() {

@@ -676,8 +676,8 @@ public class SourceServiceImpl implements SourceService {
      * @param taxType                 тип налога
      */
     private void checkSpecifics(Logger logger, List<SourcePair> sourcePairs, SourceMode mode, boolean declaration, TaxType taxType) {
-        for (SourcePair pair : sourcePairs) {
-            /** Для транспортного налога и имущества источник и приемник должен относиться к одному ТБ */
+        /*for (SourcePair pair : sourcePairs) {
+            *//** Для транспортного налога и имущества источник и приемник должен относиться к одному ТБ *//*
             if (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY || taxType == TaxType.LAND) {
                 Integer srcDepartmentId = sourceDao.getDepartmentIdByDepartmentFormType(pair.getSource());
                 Integer destDepartmentId = declaration ?
@@ -693,7 +693,7 @@ public class SourceServiceImpl implements SourceService {
                     }
                 }
             }
-        }
+        }*/
     }
 
     @Override

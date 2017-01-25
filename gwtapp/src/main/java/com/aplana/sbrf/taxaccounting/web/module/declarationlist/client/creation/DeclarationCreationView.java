@@ -109,23 +109,10 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         taxOrganCode.setMultiSelect(false);
         taxOrganKpp.setMultiSelect(false);
         taxOrganCode.setDistinct(true);
-        if (taxType == TaxType.TRANSPORT) {
-            taxOrganCode.setAttributeId(3102L);
-            taxOrganKpp.setAttributeId(3103L);
-        }
-        if (taxType == TaxType.PROPERTY) {
-            taxOrganCode.setAttributeId(951L);
-            taxOrganKpp.setAttributeId(952L);
-        }
-
+		//TODO для NDFL и PFR
         if (taxType == TaxType.INCOME) {
             taxOrganCode.setAttributeId(3304L);
             taxOrganKpp.setAttributeId(3305L);
-        }
-
-        if (taxType == TaxType.LAND) {
-            taxOrganCode.setAttributeId(7102L);
-            taxOrganKpp.setAttributeId(7103L);
         }
 
         if (filter != null && !filter.isEmpty()) {
@@ -138,13 +125,9 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             taxOrganCode.setFilter("0 = 1");
         }
 
-        if (taxType == TaxType.TRANSPORT || taxType == TaxType.LAND) {
-            taxOrganCode.setTitle("Код налогового органа (кон.)");
-            taxOrganCodeLabel.setText("Код налогового органа (кон.)");
-        } else {
-            taxOrganCode.setTitle("Код налогового органа");
-            taxOrganCodeLabel.setText("Код налогового органа");
-        }
+		taxOrganCode.setTitle("Код налогового органа");
+		taxOrganCodeLabel.setText("Код налогового органа");
+
         taxOrganCode.setSingleColumn("TAX_ORGAN_CODE");
         taxOrganKpp.setSingleColumn("KPP");
     }
@@ -307,8 +290,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             declarationTypeLabel.setText(DECLARATION_TYPE_TITLE_D);
         }
 
-        boolean isCodeKppVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.INCOME) || taxType.equals(TaxType.LAND);
-        boolean isCodeVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.LAND);
+        boolean isCodeKppVisible = taxType.equals(TaxType.NDFL) || taxType.equals(TaxType.PFR);
+        boolean isCodeVisible = taxType.equals(TaxType.NDFL) || taxType.equals(TaxType.PFR);
         codePanel.setVisible(isCodeVisible);
         kppPanel.setVisible(isCodeKppVisible);
 

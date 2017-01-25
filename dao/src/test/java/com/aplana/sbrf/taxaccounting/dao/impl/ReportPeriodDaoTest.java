@@ -43,14 +43,14 @@ public class ReportPeriodDaoTest {
 	@Before
 	public void init(){
 		taxPeriod = new TaxPeriod();
-		taxPeriod.setTaxType(TaxType.TRANSPORT);
+		taxPeriod.setTaxType(TaxType.NDFL);
 		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
 		taxPeriodDao.add(taxPeriod);
 	}
 
     @Test
     public void getCorrectPeriods() {
-        reportPeriodDao.getCorrectPeriods(TaxType.DEAL, 1);
+        reportPeriodDao.getCorrectPeriods(TaxType.PFR, 1);
     }
 	
 	@Test
@@ -123,14 +123,12 @@ public class ReportPeriodDaoTest {
     @Test
     public void getPeriodsByTaxTypeAndDepartmentsTest() {
         List<ReportPeriod> reportPeriods;
-        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.INCOME, asList(1, 2, 3));
-        Assert.assertEquals(0, reportPeriods.size());
-        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, asList(1, 2, 3));
+        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.PFR, asList(1, 2, 3));
+        Assert.assertEquals(1, reportPeriods.size());
+        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.NDFL, asList(1, 2, 3));
         Assert.assertEquals(2, reportPeriods.size());
         Assert.assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2)));
-        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, Collections.singletonList(3));
-        Assert.assertEquals(0, reportPeriods.size());
-    }
+            }
 
     private ReportPeriod getReportPeriod() {
         ReportPeriod newReportPeriod = new ReportPeriod();
@@ -179,8 +177,8 @@ public class ReportPeriodDaoTest {
 
     @Test
     public void getByTaxTypedCodeYearTest() {
-        ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxTypedCodeYear(TaxType.INCOME, "21", 2013);
-        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxTypedCodeYear(TaxType.VAT, "99", 2013);
+        ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxTypedCodeYear(TaxType.NDFL, "21", 2013);
+        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxTypedCodeYear(TaxType.PFR, "99", 2013);
         Assert.assertNull(reportPeriod1);
         Assert.assertNotNull(reportPeriod2);
         Assert.assertEquals(3, reportPeriod2.getId().intValue());
@@ -193,7 +191,7 @@ public class ReportPeriodDaoTest {
         periodList.add(reportPeriodDao.get(2));
         Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
         Date endDate = new GregorianCalendar(2014, Calendar.JANUARY, 10).getTime();
-        List<ReportPeriod> actualPeriods = reportPeriodDao.getReportPeriodsByDate(TaxType.TRANSPORT, startDate, endDate);
+        List<ReportPeriod> actualPeriods = reportPeriodDao.getReportPeriodsByDate(TaxType.NDFL, startDate, endDate);
         Assert.assertEquals(periodList.get(0).getId(), actualPeriods.get(0).getId());
         Assert.assertEquals(periodList.get(1).getId(), actualPeriods.get(1).getId());
     }
@@ -202,6 +200,6 @@ public class ReportPeriodDaoTest {
     public void getReportPeriodsByDateAndDepartmentTest() {
         Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
         Date endDate = new GregorianCalendar(2014, Calendar.JANUARY, 10).getTime();
-        assertEquals(0, reportPeriodDao.getReportPeriodsByDateAndDepartment(TaxType.ETR, 1, startDate, endDate).size());
+        assertEquals(2, reportPeriodDao.getReportPeriodsByDateAndDepartment(TaxType.NDFL, 1, startDate, endDate).size());
     }
 }

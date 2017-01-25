@@ -15,7 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMt
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMk
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDop
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDopMt
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv
@@ -311,20 +311,20 @@ def fillCellsOfRaschsvPersSvStrahLicRow(final RaschsvPersSvStrahLic raschsvPersS
 //  Создает строки для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
 int fillRaschSvVyplat(final int startIndex, final RaschsvPersSvStrahLic raschsvPersSvStrahLic, final XSSFWorkbook workbook) {
     def raschsvSvVypl = raschsvPersSvStrahLic.raschsvSvVypl
-    def raschsvSvVyplMtList = raschsvSvVypl.raschsvSvVyplMtList
-    def raschsvSvVyplMtListSize = raschsvSvVyplMtList.size()
+    def raschsvSvVyplMkList = raschsvSvVypl.raschsvSvVyplMkList
+    def raschsvSvVyplMkListSize = raschsvSvVyplMkList.size()
     def sheet = workbook.getSheet(PERSONAL_DATA)
-    sheet.shiftRows(startIndex, sheet.getLastRowNum(), raschsvSvVyplMtListSize + 1)
-    for (int i = 0; i < raschsvSvVyplMtListSize; i++) {
+    sheet.shiftRows(startIndex, sheet.getLastRowNum(), raschsvSvVyplMkListSize + 1)
+    for (int i = 0; i < raschsvSvVyplMkListSize; i++) {
         def row = sheet.createRow(i + startIndex)
-        fillCellsOfRaschSvVyplatMt(raschsvPersSvStrahLic, raschsvSvVyplMtList[i], row)
+        fillCellsOfRaschSvVyplatMt(raschsvPersSvStrahLic, raschsvSvVyplMkList[i], row)
     }
-    fillCellsOfRaschSvVyplat(raschsvSvVypl, sheet.createRow(raschsvSvVyplMtListSize + startIndex))
-    return raschsvSvVyplMtListSize
+    fillCellsOfRaschSvVyplat(raschsvSvVypl, sheet.createRow(raschsvSvVyplMkListSize + startIndex))
+    return raschsvSvVyplMkListSize
 }
 
 // Заполняет данными строку для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
-def fillCellsOfRaschSvVyplatMt(final RaschsvPersSvStrahLic raschsvPersSvStrahLic, final RaschsvSvVyplMt raschsvSvVyplMt, final XSSFRow row) {
+def fillCellsOfRaschSvVyplatMt(final RaschsvPersSvStrahLic raschsvPersSvStrahLic, final RaschsvSvVyplMk raschsvSvVyplMk, final XSSFRow row) {
     def styleCenter = normalWithBorderStyleCenterAligned(row.getSheet().getWorkbook())
     def styleLeft = normalWithBorderStyleLeftAligned(row.getSheet().getWorkbook())
 
@@ -336,22 +336,22 @@ def fillCellsOfRaschSvVyplatMt(final RaschsvPersSvStrahLic raschsvPersSvStrahLic
     cell0.setCellValue(raschsvPersSvStrahLic.getNomer())
     def cell1 = row.createCell(1)
     cell1.setCellStyle(styleCenter)
-    cell1.setCellValue(raschsvSvVyplMt.mesyac)
+    cell1.setCellValue(raschsvSvVyplMk.mesyac)
     def cell2 = row.createCell(2)
     cell2.setCellStyle(styleCenter)
-    cell2.setCellValue(raschsvSvVyplMt.kodKatLic)
+    cell2.setCellValue(raschsvSvVyplMk.kodKatLic)
     def cell3 = row.createCell(3)
     cell3.setCellStyle(styleLeft)
-    cell3.setCellValue(raschsvSvVyplMt.sumVypl)
+    cell3.setCellValue(raschsvSvVyplMk.sumVypl)
     def cell4 = row.createCell(4)
     cell4.setCellStyle(styleLeft)
-    cell4.setCellValue(raschsvSvVyplMt.vyplOps)
+    cell4.setCellValue(raschsvSvVyplMk.vyplOps)
     def cell5 = row.createCell(5)
     cell5.setCellStyle(styleLeft)
-    cell5.setCellValue(raschsvSvVyplMt.vyplOpsDog)
+    cell5.setCellValue(raschsvSvVyplMk.vyplOpsDog)
     def cell6 = row.createCell(6)
     cell6.setCellStyle(styleLeft)
-    cell6.setCellValue(raschsvSvVyplMt.nachislSv)
+    cell6.setCellValue(raschsvSvVyplMk.nachislSv)
 }
 
 // Заполняет данными итоговую строку для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
@@ -680,28 +680,28 @@ class TestDataHolder {
         VYPL.setVyplOpsVs3(300)
         VYPL.setVyplOpsDogVs3(300)
         VYPL.setNachislSvVs3(400)
-        final VYPL_MT1 = new RaschsvSvVyplMt();
+        final VYPL_MT1 = new RaschsvSvVyplMk();
         VYPL_MT1.setMesyac("Январь")
         VYPL_MT1.setKodKatLic("1")
         VYPL_MT1.setSumVypl(300)
         VYPL_MT1.setVyplOps(100)
         VYPL_MT1.setVyplOpsDog(100)
         VYPL_MT1.setNachislSv(150)
-        final VYPL_MT2 = new RaschsvSvVyplMt();
+        final VYPL_MT2 = new RaschsvSvVyplMk();
         VYPL_MT2.setMesyac("Февраль")
         VYPL_MT2.setKodKatLic("1")
         VYPL_MT2.setSumVypl(300)
         VYPL_MT2.setVyplOps(100)
         VYPL_MT2.setVyplOpsDog(100)
         VYPL_MT2.setNachislSv(100)
-        final VYPL_MT3 = new RaschsvSvVyplMt();
+        final VYPL_MT3 = new RaschsvSvVyplMk();
         VYPL_MT3.setMesyac("Март")
         VYPL_MT3.setKodKatLic("1")
         VYPL_MT3.setSumVypl(400)
         VYPL_MT3.setVyplOps(100)
         VYPL_MT3.setVyplOpsDog(100)
         VYPL_MT3.setNachislSv(150)
-        VYPL.raschsvSvVyplMtList = [VYPL_MT1, VYPL_MT2, VYPL_MT3]
+        VYPL.raschsvSvVyplMkList = [VYPL_MT1, VYPL_MT2, VYPL_MT3]
         FL_DATA.raschsvSvVypl = VYPL
 
         final VYPL_DOP = new RaschsvVyplSvDop()
@@ -802,7 +802,7 @@ class TestDataHolder {
 @Field final NODE_NAME_FIO = "ФИО"
 @Field final NODE_NAME_SV_VYPL_SVOPS = "СвВыплСВОПС"
 @Field final NODE_NAME_SV_VYPL = "СвВыпл"
-@Field final NODE_NAME_SV_VYPL_MT = "СвВыплМК"
+@Field final NODE_NAME_SV_VYPL_MK = "СвВыплМК"
 @Field final NODE_NAME_VYPL_SV_DOP = "ВыплСВДоп"
 @Field final NODE_NAME_VYPL_SV_DOP_MT = "ВыплСВДопМТ"
 @Field final NODE_NAME_UPL_PER_OPS = "УплПерОПС"
@@ -1884,22 +1884,22 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
                     raschsvSvVypl.nachislSvVs3 = getDouble(svVyplSvopsChildNode.attributes()[SV_VYPL_NACHISL_SV_VS3])
 
                     // Набор объектов СвВыплМК
-                    def raschsvSvVyplMtList = []
+                    def raschsvSvVyplMkList = []
                     svVyplSvopsChildNode.childNodes().each { svVyplMkNode ->
-                        if (svVyplMkNode.name == NODE_NAME_SV_VYPL_MT) {
+                        if (svVyplMkNode.name == NODE_NAME_SV_VYPL_MK) {
                             // Разбор узла СвВыплМК
-                            RaschsvSvVyplMt raschsvSvVyplMt = new RaschsvSvVyplMt()
-                            raschsvSvVyplMt.mesyac = svVyplMkNode.attributes()[SV_VYPL_MT_MESYAC]
-                            raschsvSvVyplMt.kodKatLic = svVyplMkNode.attributes()[SV_VYPL_MT_KOD_KAT_LIC]
-                            raschsvSvVyplMt.sumVypl = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_SUM_VYPL])
-                            raschsvSvVyplMt.vyplOps = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_VYPL_OPS])
-                            raschsvSvVyplMt.vyplOpsDog = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_VYPL_OPS_DOG])
-                            raschsvSvVyplMt.nachislSv = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_NACHISL_SV])
+                            RaschsvSvVyplMk raschsvSvVyplMk = new RaschsvSvVyplMk()
+                            raschsvSvVyplMk.mesyac = svVyplMkNode.attributes()[SV_VYPL_MT_MESYAC]
+                            raschsvSvVyplMk.kodKatLic = svVyplMkNode.attributes()[SV_VYPL_MT_KOD_KAT_LIC]
+                            raschsvSvVyplMk.sumVypl = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_SUM_VYPL])
+                            raschsvSvVyplMk.vyplOps = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_VYPL_OPS])
+                            raschsvSvVyplMk.vyplOpsDog = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_VYPL_OPS_DOG])
+                            raschsvSvVyplMk.nachislSv = getDouble(svVyplMkNode.attributes()[SV_VYPL_MT_NACHISL_SV])
 
-                            raschsvSvVyplMtList.add(raschsvSvVyplMt)
+                            raschsvSvVyplMkList.add(raschsvSvVyplMk)
                         }
                     }
-                    raschsvSvVypl.raschsvSvVyplMtList = raschsvSvVyplMtList
+                    raschsvSvVypl.raschsvSvVyplMkList = raschsvSvVyplMkList
                     raschsvPersSvStrahLic.raschsvSvVypl = raschsvSvVypl
 
                 } else if (svVyplSvopsChildNode.name == NODE_NAME_VYPL_SV_DOP) {

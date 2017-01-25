@@ -144,8 +144,8 @@ public class RaschsvRashOssZakDaoImpl extends AbstractDao implements RaschsvRash
             raschsvRashOssZakRash.setNodeName(rs.getString(RaschsvRashOssZakRash.COL_NODE_NAME));
             raschsvRashOssZakRash.setChislSluch(rs.getInt(RaschsvRashOssZakRash.COL_CHISL_SLUCH));
             raschsvRashOssZakRash.setKolVypl(rs.getInt(RaschsvRashOssZakRash.COL_KOL_VYPL));
-            raschsvRashOssZakRash.setPashVsego(rs.getDouble(RaschsvRashOssZakRash.COL_PASH_VSEGO));
-            raschsvRashOssZakRash.setRashFinFb(rs.getDouble(RaschsvRashOssZakRash.COL_RASH_FIN_FB));
+            raschsvRashOssZakRash.setPashVsego(rs.getBigDecimal(RaschsvRashOssZakRash.COL_PASH_VSEGO));
+            raschsvRashOssZakRash.setRashFinFb(rs.getBigDecimal(RaschsvRashOssZakRash.COL_RASH_FIN_FB));
 
             return raschsvRashOssZakRash;
         }

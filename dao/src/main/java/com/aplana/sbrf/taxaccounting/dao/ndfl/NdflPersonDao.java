@@ -42,6 +42,20 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> findIncomes(long ndflPersonId);
 
     /**
+     * Найти данные о доходах ФЛ по идентификатору декларации
+     * @param declarationDataId
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesByDeclarationDataId(long declarationDataId);
+
+    /**
+     * Данные об авансах ФЛ по идентификатору декларации
+     * @param declarationDataId
+     * @return
+     */
+    List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId);
+
+    /**
      * Найти данный о вычетах
      * @param ndflPersonId
      * @return

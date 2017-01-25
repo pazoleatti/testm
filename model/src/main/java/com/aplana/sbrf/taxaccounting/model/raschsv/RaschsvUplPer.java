@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.math.BigDecimal;
+
 /**
  * Сумма страховых взносов на пенсионное, медицинское, социальное страхование (УплПерОПС, УплПерОМС, УплПерОПСДоп, УплПерДСО)
  */
@@ -10,10 +12,10 @@ public class RaschsvUplPer extends IdentityObject<Long> {
     private Long raschsvObyazPlatSvId;
     private String nodeName;
     private String kbk;
-    private Double sumSbUplPer;
-    private Double sumSbUpl1m;
-    private Double sumSbUpl2m;
-    private Double sumSbUpl3m;
+    private BigDecimal sumSbUplPer;
+    private BigDecimal sumSbUpl1m;
+    private BigDecimal sumSbUpl2m;
+    private BigDecimal sumSbUpl3m;
 
     public static final String SEQ = "seq_raschsv_upl_per";
     public static final String TABLE_NAME = "raschsv_upl_per";
@@ -38,15 +40,15 @@ public class RaschsvUplPer extends IdentityObject<Long> {
     public String getKbk() { return kbk; }
     public void setKbk(String kbk) { this.kbk = kbk; }
 
-    public Double getSumSbUplPer() { return sumSbUplPer; }
-    public void setSumSbUplPer(Double sumSbUplPer) { this.sumSbUplPer = sumSbUplPer; }
+    public BigDecimal getSumSbUplPer() { return sumSbUplPer; }
+    public void setSumSbUplPer(BigDecimal sumSbUplPer) { this.sumSbUplPer = sumSbUplPer; }
 
-    public Double getSumSbUpl1m() { return sumSbUpl1m; }
-    public void setSumSbUpl1m(Double sumSbUpl1m) { this.sumSbUpl1m = sumSbUpl1m; }
+    public BigDecimal getSumSbUpl1m() { return sumSbUpl1m; }
+    public void setSumSbUpl1m(BigDecimal sumSbUpl1m) { this.sumSbUpl1m = sumSbUpl1m; }
 
-    public Double getSumSbUpl2m() { return sumSbUpl2m; }
-    public void setSumSbUpl2m(Double sumSbUpl2m) { this.sumSbUpl2m = sumSbUpl2m; }
+    public BigDecimal getSumSbUpl2m() { return sumSbUpl2m; }
+    public void setSumSbUpl2m(BigDecimal sumSbUpl2m) { this.sumSbUpl2m = sumSbUpl2m; }
 
-    public Double getSumSbUpl3m() { return sumSbUpl3m; }
-    public void setSumSbUpl3m(Double sumSbUpl3m) { this.sumSbUpl3m = sumSbUpl3m; }
+    public BigDecimal getSumSbUpl3m() { return sumSbUpl3m; }
+    public void setSumSbUpl3m(BigDecimal sumSbUpl3m) { this.sumSbUpl3m = sumSbUpl3m; }
 }

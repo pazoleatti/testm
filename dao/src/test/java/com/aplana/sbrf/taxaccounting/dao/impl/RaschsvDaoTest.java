@@ -10,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -94,11 +95,11 @@ public class RaschsvDaoTest {
      */
     private RaschsvSvSum1Tip createRaschsvSvSum1Tip() {
         RaschsvSvSum1Tip raschsvSvSum1Tip = new RaschsvSvSum1Tip();
-        raschsvSvSum1Tip.setSumVsegoPer(1.1);
-        raschsvSvSum1Tip.setSumVsegoPosl3m(1.1);
-        raschsvSvSum1Tip.setSum1mPosl3m(1.1);
-        raschsvSvSum1Tip.setSum2mPosl3m(1.1);
-        raschsvSvSum1Tip.setSum3mPosl3m(1.1);
+        raschsvSvSum1Tip.setSumVsegoPer(new BigDecimal(1.1));
+        raschsvSvSum1Tip.setSumVsegoPosl3m(new BigDecimal(1.1));
+        raschsvSvSum1Tip.setSum1mPosl3m(new BigDecimal(1.1));
+        raschsvSvSum1Tip.setSum2mPosl3m(new BigDecimal(1.1));
+        raschsvSvSum1Tip.setSum3mPosl3m(new BigDecimal(1.1));
         return raschsvSvSum1Tip;
     }
 
@@ -124,14 +125,14 @@ public class RaschsvDaoTest {
         RaschsvUplPrevOss raschsvUplPrevOss1 = new RaschsvUplPrevOss();
         raschsvUplPrevOss1.setRaschsvObyazPlatSvId(createRaschsvObyazPlatSv());
         raschsvUplPrevOss1.setKbk("1");
-        raschsvUplPrevOss1.setPrevRashSv1m(1.1);
-        raschsvUplPrevOss1.setPrevRashSv2m(1.1);
-        raschsvUplPrevOss1.setPrevRashSv3m(1.1);
-        raschsvUplPrevOss1.setPrevRashSvPer(1.1);
-        raschsvUplPrevOss1.setSumSbUpl1m(2.1);
-        raschsvUplPrevOss1.setSumSbUpl2m(2.1);
-        raschsvUplPrevOss1.setSumSbUpl3m(2.1);
-        raschsvUplPrevOss1.setSumSbUplPer(2.1);
+        raschsvUplPrevOss1.setPrevRashSv1m(new BigDecimal(1.1));
+        raschsvUplPrevOss1.setPrevRashSv2m(new BigDecimal(1.1));
+        raschsvUplPrevOss1.setPrevRashSv3m(new BigDecimal(1.1));
+        raschsvUplPrevOss1.setPrevRashSvPer(new BigDecimal(1.1));
+        raschsvUplPrevOss1.setSumSbUpl1m(new BigDecimal(2.1));
+        raschsvUplPrevOss1.setSumSbUpl2m(new BigDecimal(2.1));
+        raschsvUplPrevOss1.setSumSbUpl3m(new BigDecimal(2.1));
+        raschsvUplPrevOss1.setSumSbUplPer(new BigDecimal(2.1));
 
         assertNotNull(raschsvUplPrevOssDao.insertUplPrevOss(raschsvUplPrevOss1));
     }
@@ -148,20 +149,20 @@ public class RaschsvDaoTest {
         raschsvUplPer1.setRaschsvObyazPlatSvId(raschsvObyazPlatSvId);
         raschsvUplPer1.setNodeName("УплПерОПС");
         raschsvUplPer1.setKbk("1");
-        raschsvUplPer1.setSumSbUplPer(1.1);
-        raschsvUplPer1.setSumSbUpl1m(1.1);
-        raschsvUplPer1.setSumSbUpl2m(1.1);
-        raschsvUplPer1.setSumSbUpl3m(1.1);
+        raschsvUplPer1.setSumSbUplPer(new BigDecimal(1.1));
+        raschsvUplPer1.setSumSbUpl1m(new BigDecimal(1.1));
+        raschsvUplPer1.setSumSbUpl2m(new BigDecimal(1.1));
+        raschsvUplPer1.setSumSbUpl3m(new BigDecimal(1.1));
         raschsvUplPerList.add(raschsvUplPer1);
 
         RaschsvUplPer raschsvUplPer2 = new RaschsvUplPer();
         raschsvUplPer2.setRaschsvObyazPlatSvId(raschsvObyazPlatSvId);
         raschsvUplPer2.setNodeName("УплПерОМС");
         raschsvUplPer2.setKbk("2");
-        raschsvUplPer2.setSumSbUplPer(2.1);
-        raschsvUplPer2.setSumSbUpl1m(2.1);
-        raschsvUplPer2.setSumSbUpl2m(2.1);
-        raschsvUplPer2.setSumSbUpl3m(2.1);
+        raschsvUplPer2.setSumSbUplPer(new BigDecimal(2.1));
+        raschsvUplPer2.setSumSbUpl1m(new BigDecimal(2.1));
+        raschsvUplPer2.setSumSbUpl2m(new BigDecimal(2.1));
+        raschsvUplPer2.setSumSbUpl3m(new BigDecimal(2.1));
         raschsvUplPerList.add(raschsvUplPer2);
 
         assertEquals(raschsvUplPerDao.insertUplPer(raschsvUplPerList).intValue(), raschsvUplPerList.size());
@@ -173,40 +174,40 @@ public class RaschsvDaoTest {
     @Test
     public void testInsertRaschsvPersSvStrahLic() {
         List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
-        List<RaschsvSvVyplMt> raschsvSvVyplMtList = new ArrayList<RaschsvSvVyplMt>();
+        List<RaschsvSvVyplMk> raschsvSvVyplMkList = new ArrayList<RaschsvSvVyplMk>();
         List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList = new ArrayList<RaschsvVyplSvDopMt>();
 
         // Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа
         RaschsvVyplSvDopMt raschsvVyplSvDopMt = new RaschsvVyplSvDopMt();
         raschsvVyplSvDopMt.setMesyac("01");
         raschsvVyplSvDopMt.setTarif("1");
-        raschsvVyplSvDopMt.setVyplSv(1.1);
-        raschsvVyplSvDopMt.setNachislSv(1.1);
+        raschsvVyplSvDopMt.setVyplSv(new BigDecimal(1.1));
+        raschsvVyplSvDopMt.setNachislSv(new BigDecimal(1.1));
         raschsvVyplSvDopMtList.add(raschsvVyplSvDopMt);
 
         // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу
         RaschsvVyplSvDop raschsvVyplSvDop = new RaschsvVyplSvDop();
-        raschsvVyplSvDop.setVyplSvVs3(1.1);
-        raschsvVyplSvDop.setNachislSvVs3(1.1);
+        raschsvVyplSvDop.setVyplSvVs3(new BigDecimal(1.1));
+        raschsvVyplSvDop.setNachislSvVs3(new BigDecimal(1.1));
         raschsvVyplSvDop.setRaschsvVyplSvDopMtList(raschsvVyplSvDopMtList);
 
         // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица
-        RaschsvSvVyplMt raschsvSvVyplMt1 = new RaschsvSvVyplMt();
-        raschsvSvVyplMt1.setMesyac("01");
-        raschsvSvVyplMt1.setKodKatLic("1");
-        raschsvSvVyplMt1.setSumVypl(1.1);
-        raschsvSvVyplMt1.setVyplOps(1.1);
-        raschsvSvVyplMt1.setVyplOpsDog(1.1);
-        raschsvSvVyplMt1.setNachislSv(1.1);
-        raschsvSvVyplMtList.add(raschsvSvVyplMt1);
+        RaschsvSvVyplMk raschsvSvVyplMk1 = new RaschsvSvVyplMk();
+        raschsvSvVyplMk1.setMesyac("01");
+        raschsvSvVyplMk1.setKodKatLic("1");
+        raschsvSvVyplMk1.setSumVypl(new BigDecimal(1.1));
+        raschsvSvVyplMk1.setVyplOps(new BigDecimal(1.1));
+        raschsvSvVyplMk1.setVyplOpsDog(new BigDecimal(1.1));
+        raschsvSvVyplMk1.setNachislSv(new BigDecimal(1.1));
+        raschsvSvVyplMkList.add(raschsvSvVyplMk1);
 
         // Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица
         RaschsvSvVypl raschsvSvVypl = new RaschsvSvVypl();
-        raschsvSvVypl.setSumVyplVs3(1.1);
-        raschsvSvVypl.setVyplOpsVs3(1.1);
-        raschsvSvVypl.setVyplOpsDogVs3(1.1);
-        raschsvSvVypl.setNachislSvVs3(1.1);
-        raschsvSvVypl.setRaschsvSvVyplMtList(raschsvSvVyplMtList);
+        raschsvSvVypl.setSumVyplVs3(new BigDecimal(1.1));
+        raschsvSvVypl.setVyplOpsVs3(new BigDecimal(1.1));
+        raschsvSvVypl.setVyplOpsDogVs3(new BigDecimal(1.1));
+        raschsvSvVypl.setNachislSvVs3(new BigDecimal(1.1));
+        raschsvSvVypl.setRaschsvSvVyplMkList(raschsvSvVyplMkList);
 
         // Персонифицированные сведения о застрахованных лицах
         RaschsvPersSvStrahLic raschsvPersSvStrahLic1 = new RaschsvPersSvStrahLic();
@@ -257,10 +258,10 @@ public class RaschsvDaoTest {
             RaschsvSvVypl raschsvSvVypl = raschsvPersSvStrahLic.getRaschsvSvVypl();
             assertNotNull(raschsvSvVypl);
 
-            List<RaschsvSvVyplMt> raschsvSvVyplMtList = raschsvSvVypl.getRaschsvSvVyplMtList();
-            assertFalse(raschsvSvVyplMtList.isEmpty());
-            for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVyplMtList) {
-                assertNotNull(raschsvSvVyplMt);
+            List<RaschsvSvVyplMk> raschsvSvVyplMkList = raschsvSvVypl.getRaschsvSvVyplMkList();
+            assertFalse(raschsvSvVyplMkList.isEmpty());
+            for (RaschsvSvVyplMk raschsvSvVyplMk : raschsvSvVyplMkList) {
+                assertNotNull(raschsvSvVyplMk);
             }
 
             RaschsvVyplSvDop raschsvVyplSvDop = raschsvPersSvStrahLic.getRaschsvVyplSvDop();
@@ -448,7 +449,7 @@ public class RaschsvDaoTest {
         RaschsvUplSvPrev raschsvUplSvPrev1 = new RaschsvUplSvPrev();
         raschsvUplSvPrev1.setNodeName("NodeName");
         raschsvUplSvPrev1.setPriznak("1");
-        raschsvUplSvPrev1.setSvSum(1.1);
+        raschsvUplSvPrev1.setSvSum(new BigDecimal(1.1));
         raschsvUplSvPrevList.add(raschsvUplSvPrev1);
 
         // Сведения по количеству физических лиц
@@ -486,8 +487,8 @@ public class RaschsvDaoTest {
         raschsvRashOssZakRash1.setNodeName("NodeName");
         raschsvRashOssZakRash1.setChislSluch(1);
         raschsvRashOssZakRash1.setKolVypl(1);
-        raschsvRashOssZakRash1.setPashVsego(1.1);
-        raschsvRashOssZakRash1.setRashFinFb(1.1);
+        raschsvRashOssZakRash1.setPashVsego(new BigDecimal(1.1));
+        raschsvRashOssZakRash1.setRashFinFb(new BigDecimal(1.1));
         raschsvRashOssZakRashList.add(raschsvRashOssZakRash1);
 
         RaschsvRashOssZak raschsvRashOssZak = new RaschsvRashOssZak();
@@ -509,12 +510,12 @@ public class RaschsvDaoTest {
         raschsvRashVypl1.setNodeName("NodeName");
         raschsvRashVypl1.setKolVypl(1);
         raschsvRashVypl1.setChislPoluch(1);
-        raschsvRashVypl1.setRashod(1.1);
+        raschsvRashVypl1.setRashod(new BigDecimal(1.1));
         raschsvRashVyplList.add(raschsvRashVypl1);
 
         RaschsvVyplPrichina raschsvVyplPrichina1 = new RaschsvVyplPrichina();
         raschsvVyplPrichina1.setNodeName("NodeName");
-        raschsvVyplPrichina1.setSvVnfUhodInv(1.1);
+        raschsvVyplPrichina1.setSvVnfUhodInv(new BigDecimal(1.1));
         raschsvVyplPrichina1.setRaschsvRashVyplList(raschsvRashVyplList);
         raschsvVyplPrichinaList.add(raschsvVyplPrichina1);
 
@@ -538,8 +539,8 @@ public class RaschsvDaoTest {
         raschsvPravTarif31427.setDoh248Per(1L);
         raschsvPravTarif31427.setDohKr54279mpr(1L);
         raschsvPravTarif31427.setDohKr5427Per(1L);
-        raschsvPravTarif31427.setDohDoh54279mpr(1.1);
-        raschsvPravTarif31427.setDohDoh5427per(1.1);
+        raschsvPravTarif31427.setDohDoh54279mpr(new BigDecimal(1.1));
+        raschsvPravTarif31427.setDohDoh5427per(new BigDecimal(1.1));
         raschsvPravTarif31427.setDataZapAkOrg(new Date());
         raschsvPravTarif31427.setNomZapAkOrg("nom");
 
@@ -555,7 +556,7 @@ public class RaschsvDaoTest {
         raschsvPravTarif51427.setRaschsvObyazPlatSvId(createRaschsvObyazPlatSv());
         raschsvPravTarif51427.setDoh346_15vs(1L);
         raschsvPravTarif51427.setDoh6_427(1L);
-        raschsvPravTarif51427.setDolDoh6_427(1.1);
+        raschsvPravTarif51427.setDolDoh6_427(new BigDecimal(1.1));
 
         assertNotNull(raschsvPravTarif51427Dao.insertRaschsvPravTarif51427(raschsvPravTarif51427));
     }
@@ -575,8 +576,8 @@ public class RaschsvDaoTest {
         raschsvPravTarif71427.setDohGrantPer(1L);
         raschsvPravTarif71427.setDohEkDeyatPred(1L);
         raschsvPravTarif71427.setDohEkDeyatPer(1L);
-        raschsvPravTarif71427.setDolDohPred(1.1);
-        raschsvPravTarif71427.setDolDohPer(1.1);
+        raschsvPravTarif71427.setDolDohPred(new BigDecimal(1.1));
+        raschsvPravTarif71427.setDolDohPer(new BigDecimal(1.1));
 
         assertNotNull(raschsvPravTarif71427Dao.insertRaschsvPravTarif71427(raschsvPravTarif71427));
     }

@@ -48,38 +48,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
         if (userInfo.getUser().hasRole("ROLE_CONTROL_UNP")) {
 	        res.setCanEdit(true);
             switch (taxType) {
-                case PROPERTY:
-                case TRANSPORT:
-                case LAND:
-                    res.setCanChangeDepartment(true);
-	                departments.addAll(departmentService.getTBDepartments(userInfo.getUser()));
-	                Set<Integer> depIds = new HashSet<Integer>();
-	                for (Department dep : departments) {
-		                depIds.add(dep.getId());
-	                }
-	                res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
-
-
-                    Collections.sort(departments, new Comparator<Department>() {
-                        @Override
-                        public int compare(Department o1, Department o2) {
-                            return o1.getName().compareTo(o2.getName());
-                        }
-                    });
-                    for (Department dep : departments) {
-                        if (dep.getType() != DepartmentType.ROOT_BANK) {
-                            ad.add(dep.getId());
-                        }
-                    }
-                    res.setAvalDepartments(ad);
-                    Department userDepartmentTB = departmentService.getTBUserDepartments(userInfo.getUser()).get(0);
-                    res.setSelectedDepartment(new DepartmentPair(userDepartmentTB.getId(), userDepartmentTB.getParentId(), userDepartmentTB.getName()));
-                    break;
-                case INCOME:
-                case DEAL:
-                case VAT:
-				case MARKET:
-                case ETR:
                 case NDFL:
                 case PFR:
                     res.setCanChangeDepartment(false);
@@ -102,16 +70,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 					        res.getDepartments().get(0).getName())
 	        );
 	        switch (taxType) {
-		        case PROPERTY:
-		        case TRANSPORT:
-                case LAND:
-			        res.setCanEdit(true);
-			        break;
-		        case INCOME:
-		        case DEAL:
-		        case VAT:
-				case MARKET:
-                case ETR:
                 case NDFL:
                 case PFR:
 			        res.setCanEdit(false);

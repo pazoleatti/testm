@@ -2082,7 +2082,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     formLink.setMsg(String.format(
                             FORM_LINK_MSG,
                             (formTaxType != null && formTaxType.isTax()) ? "налоговой " : " ",
-                            (refBookId == RefBook.TCO && formLink.getState() != WorkflowState.CREATED) ? " в статусе отличном от \"Создана\"" : "",
                             FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getTitle(),
                             rs.getString("formType"),
                             (SqlUtils.getInteger(rs, "departmentType") != 1) ?

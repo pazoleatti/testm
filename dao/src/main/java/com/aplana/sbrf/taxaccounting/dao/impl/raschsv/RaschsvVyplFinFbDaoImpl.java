@@ -213,7 +213,7 @@ public class RaschsvVyplFinFbDaoImpl extends AbstractDao implements RaschsvVyplF
             raschsvVyplPrichina.setId(SqlUtils.getLong(rs, RaschsvVyplPrichina.COL_ID));
             raschsvVyplPrichina.setRaschsvVyplFinFbId(SqlUtils.getLong(rs, RaschsvVyplPrichina.COL_RASCHSV_VYPL_FIN_FB_ID));
             raschsvVyplPrichina.setNodeName(rs.getString(RaschsvVyplPrichina.COL_NODE_NAME));
-            raschsvVyplPrichina.setSvVnfUhodInv(rs.getDouble(RaschsvVyplPrichina.COL_SV_VNF_UHOD_INV));
+            raschsvVyplPrichina.setSvVnfUhodInv(rs.getBigDecimal(RaschsvVyplPrichina.COL_SV_VNF_UHOD_INV));
 
             return raschsvVyplPrichina;
         }
@@ -231,7 +231,7 @@ public class RaschsvVyplFinFbDaoImpl extends AbstractDao implements RaschsvVyplF
             raschsvRashVypl.setNodeName(rs.getString(RaschsvRashVypl.COL_NODE_NAME));
             raschsvRashVypl.setChislPoluch(rs.getInt(RaschsvRashVypl.COL_CHISL_POLUCH));
             raschsvRashVypl.setKolVypl(rs.getInt(RaschsvRashVypl.COL_KOL_VYPL));
-            raschsvRashVypl.setRashod(rs.getDouble(RaschsvRashVypl.COL_RASHOD));
+            raschsvRashVypl.setRashod(rs.getBigDecimal(RaschsvRashVypl.COL_RASHOD));
 
             return raschsvRashVypl;
         }

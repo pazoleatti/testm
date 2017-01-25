@@ -119,13 +119,8 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
 
     @Override
     public void updateLabel(TaxType taxType) {
-        if (!taxType.equals(TaxType.DEAL)) {
-            declarationTypeTitle.setText(DECLARATION_TYPE_TITLE);
-            modalWindowTitle.setTitle(MODAL_WINDOW_TITLE);
-        } else {
-            declarationTypeTitle.setText(DECLARATION_TYPE_TITLE_D);
-            modalWindowTitle.setTitle(MODAL_WINDOW_TITLE_D);
-        }
+		declarationTypeTitle.setText(DECLARATION_TYPE_TITLE);
+		modalWindowTitle.setTitle(MODAL_WINDOW_TITLE);
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.math.BigDecimal;
+
 /**
  * Сумма страховых взносов, подлежащая к уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами) (УплСВПрев)
  */
@@ -10,7 +12,7 @@ public class RaschsvUplSvPrev extends IdentityObject<Long> {
     private Long raschsvOssVnmId;
     private String nodeName;
     private String priznak;
-    private Double svSum;
+    private BigDecimal svSum;
 
     public static final String SEQ = "seq_raschsv_upl_sv_prev";
     public static final String TABLE_NAME = "raschsv_upl_sv_prev";
@@ -43,10 +45,10 @@ public class RaschsvUplSvPrev extends IdentityObject<Long> {
         this.priznak = priznak;
     }
 
-    public Double getSvSum() {
+    public BigDecimal getSvSum() {
         return svSum;
     }
-    public void setSvSum(Double svSum) {
+    public void setSvSum(BigDecimal svSum) {
         this.svSum = svSum;
     }
 }

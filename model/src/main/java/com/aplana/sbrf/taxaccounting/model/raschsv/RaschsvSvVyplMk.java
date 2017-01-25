@@ -2,18 +2,20 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.math.BigDecimal;
+
 /**
  * Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица (СвВыплМК)
  */
-public class RaschsvSvVyplMt extends IdentityObject<Long> {
+public class RaschsvSvVyplMk extends IdentityObject<Long> {
 
     private Long raschsvSvVyplId;
     private String mesyac;
     private String kodKatLic;
-    private Double sumVypl;
-    private Double vyplOps;
-    private Double vyplOpsDog;
-    private Double nachislSv;
+    private BigDecimal sumVypl;
+    private BigDecimal vyplOps;
+    private BigDecimal vyplOpsDog;
+    private BigDecimal nachislSv;
 
     public static final String SEQ = "seq_raschsv_sv_vypl_mk";
     public static final String TABLE_NAME = "raschsv_sv_vypl_mk";
@@ -39,15 +41,15 @@ public class RaschsvSvVyplMt extends IdentityObject<Long> {
     public String getKodKatLic() { return kodKatLic; }
     public void setKodKatLic(String kodKatLic) { this.kodKatLic = kodKatLic; }
 
-    public Double getSumVypl() { return sumVypl; }
-    public void setSumVypl(Double sumVypl) { this.sumVypl = sumVypl; }
+    public BigDecimal getSumVypl() { return sumVypl; }
+    public void setSumVypl(BigDecimal sumVypl) { this.sumVypl = sumVypl; }
 
-    public Double getVyplOps() { return vyplOps; }
-    public void setVyplOps(Double vyplOps) { this.vyplOps = vyplOps; }
+    public BigDecimal getVyplOps() { return vyplOps; }
+    public void setVyplOps(BigDecimal vyplOps) { this.vyplOps = vyplOps; }
 
-    public Double getVyplOpsDog() { return vyplOpsDog; }
-    public void setVyplOpsDog(Double vyplOpsDog) { this.vyplOpsDog = vyplOpsDog; }
+    public BigDecimal getVyplOpsDog() { return vyplOpsDog; }
+    public void setVyplOpsDog(BigDecimal vyplOpsDog) { this.vyplOpsDog = vyplOpsDog; }
 
-    public Double getNachislSv() { return nachislSv; }
-    public void setNachislSv(Double nachislSv) { this.nachislSv = nachislSv; }
+    public BigDecimal getNachislSv() { return nachislSv; }
+    public void setNachislSv(BigDecimal nachislSv) { this.nachislSv = nachislSv; }
 }

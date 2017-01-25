@@ -70,6 +70,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<NdflPersonIncome> findIncomesByDeclarationDataId(long declarationDataId) {
+        String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
+                " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
+                " WHERE np.declaration_data_id = ?";
+        try {
+            return getJdbcTemplate().query(sql, new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonIncome>();
+        }
+    }
+
+    @Override
     public List<NdflPersonDeduction> findDeductions(long ndflPersonId) {
         try {
             return getJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npi") + " from ndfl_person_deduction npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
@@ -82,6 +94,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     public List<NdflPersonPrepayment> findPrepayments(long ndflPersonId) {
         try {
             return getJdbcTemplate().query("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npi") + " from ndfl_person_prepayment npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonPrepayment>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId) {
+        String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npi") + " FROM ndfl_person_prepayment npi " +
+                " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
+                " WHERE np.declaration_data_id = ?";
+        try {
+            return getJdbcTemplate().query(sql, new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonPrepayment>();
         }
@@ -281,11 +305,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setTaxRate(SqlUtils.getInteger(rs, "tax_rate"));
             personIncome.setTaxDate(rs.getDate("tax_date"));
 
-            personIncome.setCalculatedTax(SqlUtils.getInteger(rs, "calculated_tax"));
-            personIncome.setWithholdingTax(SqlUtils.getInteger(rs, "withholding_tax"));
-            personIncome.setNotHoldingTax(SqlUtils.getInteger(rs, "not_holding_tax"));
-            personIncome.setOverholdingTax(SqlUtils.getInteger(rs, "overholding_tax"));
-            personIncome.setRefoundTax(SqlUtils.getInteger(rs, "refound_tax"));
+            personIncome.setCalculatedTax(SqlUtils.getLong(rs, "calculated_tax"));
+            personIncome.setWithholdingTax(SqlUtils.getLong(rs, "withholding_tax"));
+            personIncome.setNotHoldingTax(SqlUtils.getLong(rs, "not_holding_tax"));
+            personIncome.setOverholdingTax(SqlUtils.getLong(rs, "overholding_tax"));
+            personIncome.setRefoundTax(SqlUtils.getLong(rs, "refound_tax"));
 
             personIncome.setTaxTransferDate(rs.getDate("tax_transfer_date"));
             personIncome.setPaymentDate(rs.getDate("payment_date"));

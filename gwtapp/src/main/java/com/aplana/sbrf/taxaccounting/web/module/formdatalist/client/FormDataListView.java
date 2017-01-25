@@ -252,22 +252,13 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
             formKindHeader.setTitle(FormDataListUtils.FORM_DATA_KIND_TITLE_D);
             formTypeHeader.setTitle(FormDataListUtils.FORM_DATA_TYPE_TITLE_D);
         }
-        if (taxType.equals(TaxType.INCOME) || taxType.equals(TaxType.VAT) || taxType.equals(TaxType.PROPERTY)
-                || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.MARKET)) {
-            periodMonthHeader.setTitle(FormDataListUtils.PERIOD_MONTH_TITLE);
-            formDataTable.setColumnWidth(periodMonthColumn, 6, Style.Unit.EM);
-        } else {
-            periodMonthHeader.setTitle("");
-            formDataTable.setColumnWidth(periodMonthColumn, 0, Style.Unit.EM);
-        }
-        if (taxType.equals(TaxType.ETR)) {
-            comparativPeriodHeader.setTitle(FormDataListUtils.COMPARATIV_PERIOD_TITLE);
-            formDataTable.setColumnWidth(comparativPeriodColumn, 7, Style.Unit.EM);
-        } else {
-            comparativPeriodHeader.setTitle("");
-            formDataTable.setColumnWidth(comparativPeriodColumn, 0, Style.Unit.EM);
+		// Схлопываем столбец для "месяца"
+		periodMonthHeader.setTitle("");
+		formDataTable.setColumnWidth(periodMonthColumn, 0, Style.Unit.EM);
 
-        }
+		comparativPeriodHeader.setTitle("");
+		formDataTable.setColumnWidth(comparativPeriodColumn, 0, Style.Unit.EM);
+
         formDataTable.redrawHeaders();
 
     }

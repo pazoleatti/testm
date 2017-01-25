@@ -477,15 +477,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         taxRateBlock.setVisible(false);
         formatVersionBlock.setVisible(true);
         otherDetails.setVisible(true);
-        if (taxType == TaxType.TRANSPORT) {
-            taxTypeLbl.setText("Транспортный налог");
-        } else if (taxType == TaxType.PROPERTY) {
-            versionBlock.setVisible(true);
-            taxTypeLbl.setText("Налог на имущество");
-        } else if (taxType == TaxType.NDFL) {
-            otherDetails.setVisible(false);
-            taxRateBlock.setVisible(false);
-            formatVersionBlock.setVisible(false);
+        if (taxType == TaxType.NDFL) {
             taxTypeLbl.setText("НДФЛ");
         } else if (taxType == TaxType.PFR) {
             otherDetails.setVisible(false);

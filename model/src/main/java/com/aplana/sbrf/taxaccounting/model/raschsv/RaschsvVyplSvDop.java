@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,8 +13,8 @@ import java.util.List;
 public class RaschsvVyplSvDop extends IdentityObject<Long> {
 
     private Long raschsvPersSvStrahLicId;
-    private Double vyplSvVs3;
-    private Double nachislSvVs3;
+    private BigDecimal vyplSvVs3;
+    private BigDecimal nachislSvVs3;
 
     // ВыплСВДопМТ
     private List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList;
@@ -35,11 +36,11 @@ public class RaschsvVyplSvDop extends IdentityObject<Long> {
     public Long getRaschsvPersSvStrahLicId() { return raschsvPersSvStrahLicId; }
     public void setRaschsvPersSvStrahLicId(Long raschsvPersSvStrahLicId) { this.raschsvPersSvStrahLicId = raschsvPersSvStrahLicId; }
 
-    public Double getVyplSvVs3() { return vyplSvVs3; }
-    public void setVyplSvVs3(Double vyplSvVs3) { this.vyplSvVs3 = vyplSvVs3; }
+    public BigDecimal getVyplSvVs3() { return vyplSvVs3; }
+    public void setVyplSvVs3(BigDecimal vyplSvVs3) { this.vyplSvVs3 = vyplSvVs3; }
 
-    public Double getNachislSvVs3() { return nachislSvVs3; }
-    public void setNachislSvVs3(Double nachislSvVs3) { this.nachislSvVs3 = nachislSvVs3; }
+    public BigDecimal getNachislSvVs3() { return nachislSvVs3; }
+    public void setNachislSvVs3(BigDecimal nachislSvVs3) { this.nachislSvVs3 = nachislSvVs3; }
 
     public List<RaschsvVyplSvDopMt> getRaschsvVyplSvDopMtList() {
         return raschsvVyplSvDopMtList != null ? raschsvVyplSvDopMtList : Collections.<RaschsvVyplSvDopMt>emptyList();

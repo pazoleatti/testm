@@ -84,25 +84,11 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
             Long refBookId = null;
             switch (action.getTaxType()) {
-                case INCOME:
                 case NDFL:
+                    refBookId = RefBook.Id.NDFL.getId();
+                    break;
                 case PFR:
-                    refBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
-                    break;
-                case TRANSPORT:
-                    refBookId = RefBook.DEPARTMENT_CONFIG_TRANSPORT;
-                    break;
-                case DEAL:
-                    refBookId = RefBook.DEPARTMENT_CONFIG_DEAL;
-                    break;
-                case VAT:
-                    refBookId = RefBook.DEPARTMENT_CONFIG_VAT;
-                    break;
-                case PROPERTY:
-                    refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
-                    break;
-                case LAND:
-                    refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
+                    refBookId = RefBook.Id.FOND.getId();
                     break;
             }
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
@@ -148,21 +134,6 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 paramsMap.put(DepartmentParamAliases.TAX_RATE.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getTaxRate()));
                 paramsMap.put(DepartmentParamAliases.TYPE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getType())));
                 paramsMap.put(DepartmentParamAliases.ADDITIONAL_NAME.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getAdditionalName()));
-            }
-
-            // Транспортный налог
-            if (action.getTaxType() == TaxType.TRANSPORT) {
-                paramsMap.put(DepartmentParamAliases.PREPAYMENT.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getPrepayment() ? 1L : 0L));
-            }
-
-            // НДС
-            if (TaxType.VAT.equals(action.getTaxType())) {
-                paramsMap.put(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getTaxOrganCodeProm()));
-            }
-
-            // МУКС
-            if (TaxType.DEAL.equals(action.getTaxType())) {
-                paramsMap.put(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getTaxOrganCodeProm()));
             }
 
             Logger logger = new Logger();

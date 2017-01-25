@@ -48,7 +48,7 @@ public class DeclarationData extends IdentityObject<Long> {
 	}
 	
 	/**
-	 * Получить идентификатор отчётного перода
+	 * Получить идентификатор отчётного периода
 	 * @return идентификатор отчётного периода
 	 */
 	public int getReportPeriodId() {

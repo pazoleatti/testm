@@ -6,7 +6,6 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd">
     <import resource="classpath:testDaoContext.xml"/>
     <jdbc:initialize-database>
-        <jdbc:script location="classpath:data/TaxType.sql" encoding="UTF-8"/>
-        <jdbc:script location="classpath:data/TaxPeriod.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/TaxPeriodDaoTest.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 </beans>

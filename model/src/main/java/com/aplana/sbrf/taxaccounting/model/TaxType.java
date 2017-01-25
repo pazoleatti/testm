@@ -25,10 +25,6 @@ public enum TaxType {
 	 */
 	DEAL('D', "Учет контролируемых сделок", "UT_UVKNRSD"),
     /**
-     * Рыночные интервалы ТЦО
-     */
-    MARKET('M', "Рыночные интервалы ТЦО", ""),
-    /**
      * ЭНС
      */
     ETR('E', "Эффективная налоговая ставка", ""),
@@ -100,6 +96,7 @@ public enum TaxType {
     }
 
 	public boolean isTax() {
-		return this != DEAL && this != ETR && this != MARKET;
+		//TODO удалить метод
+		return true;
 	}
 }

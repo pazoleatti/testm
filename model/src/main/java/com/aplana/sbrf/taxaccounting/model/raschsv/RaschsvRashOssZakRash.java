@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.math.BigDecimal;
+
 /**
  * Расходы РасхОССЗак
  */
@@ -11,8 +13,8 @@ public class RaschsvRashOssZakRash extends IdentityObject<Long> {
     private String nodeName;
     private Integer chislSluch;
     private Integer kolVypl;
-    private Double pashVsego;
-    private Double rashFinFb;
+    private BigDecimal pashVsego;
+    private BigDecimal rashFinFb;
 
     public static final String SEQ = "seq_raschsv_rash_oss_zak_rash";
     public static final String TABLE_NAME = "raschsv_rash_oss_zak_rash";
@@ -55,17 +57,17 @@ public class RaschsvRashOssZakRash extends IdentityObject<Long> {
         this.kolVypl = kolVypl;
     }
 
-    public Double getPashVsego() {
+    public BigDecimal getPashVsego() {
         return pashVsego;
     }
-    public void setPashVsego(Double pashVsego) {
+    public void setPashVsego(BigDecimal pashVsego) {
         this.pashVsego = pashVsego;
     }
 
-    public Double getRashFinFb() {
+    public BigDecimal getRashFinFb() {
         return rashFinFb;
     }
-    public void setRashFinFb(Double rashFinFb) {
+    public void setRashFinFb(BigDecimal rashFinFb) {
         this.rashFinFb = rashFinFb;
     }
 }
