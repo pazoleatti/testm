@@ -30,6 +30,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.atLeastOnce;
@@ -107,6 +108,7 @@ public class AuditServiceImplTest {
         when(departmentService.getParentsHierarchy(1)).thenReturn("Центральный аппарат/Управление налогового планирования");
         when(serverInfo.getServerName()).thenReturn("server");
 
+        auditService.add(FormDataEvent.CALCULATE, userInfo, 0, null, null, null, null, "MIGRATION", null);
         auditService.add(FormDataEvent.LOGIN, userInfo, 1, null, null, null, null, "LOGIN", null);
 
         ArgumentCaptor<LogSystem> argument = ArgumentCaptor.forClass(LogSystem.class);
@@ -155,6 +157,8 @@ public class AuditServiceImplTest {
         type.setName("217");
         formData.setFormType(type);
 
+        auditService.add(FormDataEvent.CALCULATE, userInfo, null, formData, null, null);
+
         ArgumentCaptor<LogSystem> argument = ArgumentCaptor.forClass(LogSystem.class);
         verify(auditDao, atLeastOnce()).add(argument.capture());
 
@@ -195,6 +199,11 @@ public class AuditServiceImplTest {
         type.setName("217");
         formData.setFormType(type);
 
+		CALENDAR.set(2014, Calendar.JANUARY, 1);
+		Date startDate = CALENDAR.getTime();
+		CALENDAR.set(2015, Calendar.JANUARY, 1);
+		Date endDate = CALENDAR.getTime();
+		auditService.add(FormDataEvent.CALCULATE, userInfo, startDate, endDate, null, formData.getFormType().getName(), null, null);
         CALENDAR.clear();
 
         ArgumentCaptor<LogSystem> argument = ArgumentCaptor.forClass(LogSystem.class);
