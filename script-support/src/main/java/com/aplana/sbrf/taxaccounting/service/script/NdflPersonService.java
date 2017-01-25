@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflSumByDate;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflSumByRate;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByDate;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeCommonValue;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.List;
@@ -37,20 +37,18 @@ public interface NdflPersonService {
     List<NdflPerson> findNdflPerson(long declarationDataId);
 
     /**
-     * Найти все данные о доходах физ лица в разрезе ставок
-     *
+     * Найти обобщенные данные о доходах физ лиц и данные в разрезе ставок
      * @param declarationDataId - идентификатор декларации
      * @return
      */
-    List<NdflSumByRate> findNdflSumByRate(long declarationDataId);
+    NdflPersonIncomeCommonValue findNdflPersonIncomeByRate(long declarationDataId);
 
     /**
-     * Найти все данные о доходах физ лица в разрезе дат
-     *
+     * Найти данные о доходах физ лиц в разрезе дат
      * @param declarationDataId - идентификатор декларации
      * @return
      */
-    List<NdflSumByDate> findNdflSumByDate(long declarationDataId);
+    List<NdflPersonIncomeByDate> findNdflPersonIncomeByDate(long declarationDataId);
 
     /**
      * Удаляет все данные о физлицах из декларации

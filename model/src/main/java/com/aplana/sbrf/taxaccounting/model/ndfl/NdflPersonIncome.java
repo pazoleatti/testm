@@ -25,16 +25,18 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private BigDecimal taxBase;
     // Ставка
     private Integer taxRate;
-    // Дата налога
+    // Дата удержания налога
     private Date taxDate;
     // Сумма налога исчисленная
     private Long calculatedTax;
     // Сумма налога удержанная
     private Long withholdingTax;
+    // Сумма налога, не удержанная налоговым агентом
     private Long notHoldingTax;
     private Long overholdingTax;
+    // Сумма возвращенного налога
     private Long refoundTax;
-    // Срок перечисления налога
+    // Срок (дата) перечисления налога
     private Date taxTransferDate;
     private Date paymentDate;
     private String paymentNumber;

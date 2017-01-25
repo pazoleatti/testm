@@ -3,9 +3,9 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 import java.math.BigDecimal;
 
 /**
- * Модельный класс сумм по ставкам для формирования 6 НДФЛ
+ * Суммы по ставкам для формирования 6 НДФЛ
  */
-public class NdflSumByRate {
+public class NdflPersonIncomeByRate {
 
     // Код дохода, для которого вычисляются дивиденты
     public static final String INCOME_CODE_DIV = "1010";
@@ -25,13 +25,13 @@ public class NdflSumByRate {
     // АвансПлат
     private BigDecimal prepaymentSum;
 
-    public void addNdflSumByRate(NdflSumByRate ndflSumByRate) {
-        addIncomeAccruedSumm(ndflSumByRate.getIncomeAccruedSumm());
-        addIncomeAccruedSummDiv(ndflSumByRate.getIncomeAccruedSummDiv());
-        addTotalDeductionsSumm(ndflSumByRate.getTotalDeductionsSumm());
-        addCalculatedTax(ndflSumByRate.getCalculatedTax());
-        addCalculatedTaxDiv(ndflSumByRate.getCalculatedTaxDiv());
-        addPrepaymentSum(ndflSumByRate.getPrepaymentSum());
+    public void addNdflSumByRate(NdflPersonIncomeByRate ndflPersonIncomeByRate) {
+        addIncomeAccruedSumm(ndflPersonIncomeByRate.getIncomeAccruedSumm());
+        addIncomeAccruedSummDiv(ndflPersonIncomeByRate.getIncomeAccruedSummDiv());
+        addTotalDeductionsSumm(ndflPersonIncomeByRate.getTotalDeductionsSumm());
+        addCalculatedTax(ndflPersonIncomeByRate.getCalculatedTax());
+        addCalculatedTaxDiv(ndflPersonIncomeByRate.getCalculatedTaxDiv());
+        addPrepaymentSum(ndflPersonIncomeByRate.getPrepaymentSum());
     }
 
     public Integer getTaxRate() {
